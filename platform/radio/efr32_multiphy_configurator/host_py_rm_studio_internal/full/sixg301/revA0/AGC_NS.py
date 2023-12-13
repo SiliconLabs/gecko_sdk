@@ -10,7 +10,7 @@ class RM_Peripheral_AGC_NS(Base_RM_Peripheral):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_AGC_NS, self).__init__(rmio, label,
-            0xB800C000, 'AGC_NS',
+            0xB020C000, 'AGC_NS',
             u"",
             [])
         self.IPVERSION = RM_Register_AGC_NS_IPVERSION(self.zz_rmio, self.zz_label)
@@ -105,8 +105,6 @@ class RM_Peripheral_AGC_NS(Base_RM_Peripheral):
         self.zz_rdict['SEQIEN'] = self.SEQIEN
         self.RSSIABSTHR = RM_Register_AGC_NS_RSSIABSTHR(self.zz_rmio, self.zz_label)
         self.zz_rdict['RSSIABSTHR'] = self.RSSIABSTHR
-        self.LNABOOST = RM_Register_AGC_NS_LNABOOST(self.zz_rmio, self.zz_label)
-        self.zz_rdict['LNABOOST'] = self.LNABOOST
         self.ANTDIV = RM_Register_AGC_NS_ANTDIV(self.zz_rmio, self.zz_label)
         self.zz_rdict['ANTDIV'] = self.ANTDIV
         self.DUALRFPKDTHD0 = RM_Register_AGC_NS_DUALRFPKDTHD0(self.zz_rmio, self.zz_label)
@@ -127,6 +125,16 @@ class RM_Peripheral_AGC_NS(Base_RM_Peripheral):
         self.zz_rdict['TIACODE1'] = self.TIACODE1
         self.LNAMIXCODE2 = RM_Register_AGC_NS_LNAMIXCODE2(self.zz_rmio, self.zz_label)
         self.zz_rdict['LNAMIXCODE2'] = self.LNAMIXCODE2
+        self.FSWIF = RM_Register_AGC_NS_FSWIF(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FSWIF'] = self.FSWIF
+        self.FSWIEN = RM_Register_AGC_NS_FSWIEN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FSWIEN'] = self.FSWIEN
+        self.CCASUB = RM_Register_AGC_NS_CCASUB(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CCASUB'] = self.CCASUB
+        self.CTRL8 = RM_Register_AGC_NS_CTRL8(self.zz_rmio, self.zz_label)
+        self.zz_rdict['CTRL8'] = self.CTRL8
+        self.STATUS3 = RM_Register_AGC_NS_STATUS3(self.zz_rmio, self.zz_label)
+        self.zz_rdict['STATUS3'] = self.STATUS3
         self.COLLDETCTRL = RM_Register_AGC_NS_COLLDETCTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['COLLDETCTRL'] = self.COLLDETCTRL
         self.COLLDETTHD = RM_Register_AGC_NS_COLLDETTHD(self.zz_rmio, self.zz_label)

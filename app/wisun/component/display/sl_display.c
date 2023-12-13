@@ -477,7 +477,7 @@ __STATIC_INLINE void _display_mutex_release(void)
 static void _display_renderer_task(void *args)
 {
   osStatus_t stat;
-  sl_display_renderer_queue_t disp_ctrl;
+  static sl_display_renderer_queue_t disp_ctrl;
   uint8_t msg_prio = 0;
   (void) args;
   SL_WISUN_THREAD_LOOP {

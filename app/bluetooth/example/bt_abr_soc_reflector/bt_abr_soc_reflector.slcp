@@ -16,7 +16,7 @@ component:
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_extended_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: app_assert
@@ -28,6 +28,7 @@ component:
   - id: abr_reflector
   - id: mpu
   - id: in_place_ota_dfu
+  - id: rail_util_hadm_antenna_offset 
 
 source:
   - path: main.c
@@ -57,12 +58,22 @@ configuration:
     value: "2752"
   - name: SL_HEAP_SIZE
     value: "10000"
+  - name: SL_BT_CONFIG_BUFFER_SIZE
+    value: "50000"
+  - name: SL_BT_CONFIG_MAX_CS_PROCEDURES
+    value: 4
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:
       - psa_crypto
   - name: SL_DEVICE_INIT_HFXO_FREQ
     value: 40000000
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: ABR_REFLECTOR_ANTENNA_OFFSET
+    value: 0
 
 tag:
   - hardware:rf:band:2400

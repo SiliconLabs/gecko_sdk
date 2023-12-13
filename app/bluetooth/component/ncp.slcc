@@ -11,7 +11,6 @@ quality: production
 root_path: app/bluetooth/common/ncp
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_ncp_config.h
   - path: config/sl_ncp_freertos_config.h
@@ -47,7 +46,7 @@ requires:
 recommends:
   - id: app_timer
 define:
-  - name: "SL_BT_API_FULL"
+  - name: SL_BT_API_FULL
 template_contribution:
   - name: event_handler
     value:
@@ -72,3 +71,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: sl_ncp.h
       handler: sli_ncp_sleep_on_isr_exit
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp

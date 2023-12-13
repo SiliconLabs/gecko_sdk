@@ -30,6 +30,10 @@
 #ifndef __SL_WISUN_CONFIG_H__
 #define __SL_WISUN_CONFIG_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 #include "sl_wisun_types.h"
@@ -41,11 +45,11 @@
 #define WISUN_CONFIG_NETWORK_SIZE               SL_WISUN_NETWORK_SIZE_SMALL
 
 //! Wi-SUN allowed channels
-#define WISUN_CONFIG_ALLOWED_CHANNELS
+#define WISUN_CONFIG_ALLOWED_CHANNELS           "0-255"
 extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
 
 //! Wi-SUN default PHY - FAN1.1 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN11          1
+#define WISUN_CONFIG_DEFAULT_PHY_FAN11
 
 //! Wi-SUN default PHY - Regulatory domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          1
@@ -67,5 +71,9 @@ extern const uint8_t wisun_config_device_certificate[];
 
 //! Wi-SUN CA certificate
 extern const uint8_t wisun_config_ca_certificate[];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SL_WISUN_CONFIG_H__ */

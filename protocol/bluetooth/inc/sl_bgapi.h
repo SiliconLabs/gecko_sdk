@@ -18,6 +18,7 @@
 #define SL_BGAPI_H
 
 #include <stdint.h>
+#include "sl_status.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -140,8 +141,10 @@ typedef enum sl_bgapi_msg_types {
 } sl_bgapi_msg_types_t;
 
 enum sl_bgapi_dev_types {
+  sl_bgapi_dev_type_app = 0x00,
   sl_bgapi_dev_type_bt = 0x20,
   sl_bgapi_dev_type_btmesh = 0x28,
+  sl_bgapi_dev_type_bgapi_debug = 0x30,
 };
 
 /***************************************************************************//**
@@ -200,6 +203,105 @@ enum sl_bgapi_dev_types {
 void sli_bgapi_set_cmd_handler_delegate(void (*cmd_handler_delegate)(uint32_t,
                                                                      sl_bgapi_handler,
                                                                      const void*));
+
+/**
+ * @addtogroup sl_bgapi_functions BGAPI Functions
+ * @{
+ *
+ * @brief Functions provided by the BGAPI protocol
+ */
+
+/**
+ * @brief Lock the BGAPI for exclusive access.
+ *
+ * NOTE: This function is provided for NCP/CPC components that need to handle
+ * BGAPI commands and responses in their binary format in an application that
+ * uses an RTOS. Normal application code that issues BGAPI commands by calling
+ * API functions defined by protocol stacks must never call this function
+ * directly.
+ *
+ * See the documentation of @ref sl_bgapi_handle_command for the full sequence
+ * that must be followed when processing commands in their binary format.
+ *
+ * @return SL_STATUS_OK if the lock has been obtained, otherwise an error code
+ */
+sl_status_t sl_bgapi_lock(void);
+
+/**
+ * @brief Release the lock obtained by @ref sl_bgapi_lock
+ *
+ * NOTE: This function is provided for NCP/CPC components that need to handle
+ * BGAPI commands and responses in their binary format in an application that
+ * uses an RTOS. Normal application code that issues BGAPI commands by calling
+ * API functions defined by protocol stacks must never call this function
+ * directly.
+ *
+ * See the documentation of @ref sl_bgapi_handle_command for the full sequence
+ * that must be followed when processing commands in their binary format.
+ */
+void sl_bgapi_unlock(void);
+
+/**
+ * @brief Handle a BGAPI command in binary format.
+ *
+ * NOTE: This function is provided for NCP/CPC components that need to handle
+ * BGAPI commands and responses in their binary format. Normal application code
+ * that issues BGAPI commands by calling API functions defined by protocol
+ * stacks must never call this function directly.
+ *
+ * If the application uses an RTOS, the caller must protect the BGAPI handling
+ * by obtaining the BGAPI lock with @ref sl_bgapi_lock, handle the command with
+ * @ref sl_bgapi_handle_command, read the response from the buffer returned by
+ * @ref sl_bgapi_get_command_response, and then release the lock with @ref
+ * sl_bgapi_unlock. Here's an example of the full sequence that's required:
+ *
+ * @code
+ * // Lock BGAPI for exclusive access
+ * sl_status_t status = sl_bgapi_lock();
+ * if (status != SL_STATUS_OK) {
+ *   // Locking will only fail if there are fatal unrecoverable errors with the
+ *   // RTOS primitives, so caller may choose to just assert in case of errors.
+ * }
+ *
+ * // Process the command
+ * sl_bgapi_handle_command(hdr, data);
+ *
+ * // Read the response
+ * void *rsp = sl_bgapi_get_command_response();
+ * uint32_t rsp_header = *((uint32_t *)rsp);
+ * size_t rsp_len = SL_BGAPI_MSG_LEN(rsp_header) + SL_BGAPI_MSG_HEADER_LEN;
+ * // Send the `rsp_len` bytes of response starting from `rsp`
+ *
+ * // Finally unlock the BGAPI to allow other commands to proceed
+ * sl_bgapi_unlock();
+ * @endcode
+ *
+ * Empty stub implementations are provided for @ref sl_bgapi_lock and @ref
+ * sl_bgapi_unlock, so the same sequence can be used for all NCP/CPC
+ * implementations even if an RTOS is not present.
+ *
+ * @param[in] hdr The BGAPI command header
+ * @param[in] data The payload data associated with the command
+ */
+void sl_bgapi_handle_command(uint32_t hdr, const void* data);
+
+/**
+ * @brief Get the response of a handled BGAPI command.
+ *
+ * NOTE: This function is provided for NCP/CPC components that need to handle
+ * BGAPI commands and responses in their binary format. Normal application code
+ * that issues BGAPI commands by calling API functions defined by protocol
+ * stacks must never call this function directly.
+ *
+ * See the documentation of @ref sl_bgapi_handle_command for the full sequence
+ * that must be followed when processing commands in their binary format.
+ *
+ * @return Pointer to the BGAPI response structure that was filled when the
+ *   command was executed in @ref sl_bgapi_handle_command.
+ */
+void* sl_bgapi_get_command_response(void);
+
+/** @} */ // end addtogroup sl_bgapi_functions
 
 #ifdef __cplusplus
 }

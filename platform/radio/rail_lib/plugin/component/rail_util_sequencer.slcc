@@ -20,6 +20,17 @@ config_file:
   - path: platform/radio/rail_lib/plugin/rail_util_sequencer/config/efr32xg24/pa_20dbm/sl_rail_util_sequencer_config.h
     condition: [device_sdid_215, device_pa_20dbm]
     file_id: rail_util_sequencer_config
+  - path: platform/radio/rail_lib/plugin/rail_util_sequencer/config/efr32xg13/seq_1_zwave/sl_rail_util_sequencer_config.h
+    condition:
+      - device_sdid_89
+    unless:
+      - rail_util_ieee802154_high_speed_phy
+    file_id: rail_util_sequencer_config
+  - path: platform/radio/rail_lib/plugin/rail_util_sequencer/config/efr32xg13/seq_2_high_bw_phy/sl_rail_util_sequencer_config.h
+    condition: [device_sdid_89, rail_util_ieee802154_high_speed_phy]
+    file_id: rail_util_sequencer_config
 source:
   - path: platform/radio/rail_lib/plugin/rail_util_sequencer/sl_rail_util_sequencer.c
     condition: [device_sdid_215]
+  - path: platform/radio/rail_lib/plugin/rail_util_sequencer/sl_rail_util_sequencer.c
+    condition: [device_sdid_89]

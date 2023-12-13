@@ -211,7 +211,8 @@ void sl_wisun_nwm_stat_handler(sl_wisun_ping_stat_t *stat)
 }
 
 uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
-                               uint8_t max_storage_size)
+                               uint8_t max_storage_size,
+                               const bool print)
 {
   uint8_t neighbors_count = 0;
   sl_wisun_neighbor_info_t info = { 0 };
@@ -231,7 +232,7 @@ uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
 
   // Get Border Router
   sl_wisun_get_ip_address(SL_WISUN_IP_ADDRESS_TYPE_BORDER_ROUTER,
-                          (sl_wisun_ip_address_t *)&_nodes[0].addr.sin6_addr);
+                          (in6_addr_t *)&_nodes[0].addr.sin6_addr);
   _nodes[0].type = SL_WISUN_NWM_NODE_TYPE_BORDER_ROUTER;
   _nodes[0].name =  _node_type_to_str(_nodes[0].type);
   if (storage != NULL) {
@@ -244,7 +245,9 @@ uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
   memset(&_nodes[0].stat, 0, sizeof(sl_wisun_neighbor_stat_t));
   memset(&_nodes[0].ping_stat, 0, sizeof(sl_wisun_ping_stat_t));
 
-  _print_node_info(&_nodes[0]);
+  if (print) {
+    _print_node_info(&_nodes[0]);
+  }
 
   _current_child_cnt = 0;
 
@@ -253,8 +256,8 @@ uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
     if (sl_wisun_get_neighbor_info(&_mac_addr_storage[i], &info) == SL_STATUS_FAIL) {
       continue;
     }
-    _nodes[j].type =  _nb_type_to_node_type(info.type);
-    _nodes[j].name =  _node_type_to_str(_nodes[j].type);
+    _nodes[j].type = _nb_type_to_node_type(info.type);
+    _nodes[j].name = _node_type_to_str(_nodes[j].type);
 
     if (_nodes[j].type == SL_WISUN_NWM_NODE_TYPE_CHILD) {
       ++_current_child_cnt;
@@ -278,7 +281,9 @@ uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
     _nodes[j].stat.rsl_out                    = info.rsl_out;
     _nodes[j].stat.rsl_in                     = info.rsl_in;
 
-    _print_node_info(&_nodes[j]);
+    if (print) {
+      _print_node_info(&_nodes[j]);
+    }
     ++j;
   }
   _nwm_stat_mutex_release();

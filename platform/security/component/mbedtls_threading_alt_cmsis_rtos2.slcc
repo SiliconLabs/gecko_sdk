@@ -38,3 +38,11 @@ template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_THREADING_ALT
     condition: [trustzone_unaware]
+
+  - name: mbedtls_config
+    value: MBEDTLS_THREADING_C
+    condition: [device_si91x]
+
+  - name: mbedtls_config
+    value: MBEDTLS_THREADING_ALT
+    condition: [device_si91x]

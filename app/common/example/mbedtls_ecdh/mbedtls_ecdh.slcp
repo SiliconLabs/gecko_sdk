@@ -1,7 +1,7 @@
 project_name: mbedtls_ecdh
 package: platform
 quality: production
-label: Platform - mbedTLS ECDH
+label: Platform Security - SoC mbedTLS ECDH
 description: >
   This example uses hardware accelerators of the supported devices to perform ECDH key generation with mbedTLS.
 category: Example|Platform

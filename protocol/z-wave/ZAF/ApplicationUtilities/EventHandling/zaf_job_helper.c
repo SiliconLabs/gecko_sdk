@@ -11,7 +11,7 @@
 /**
  * Job queue
  */
-static StaticQueue_t jobQueue;
+static StaticQueue_t jobQueue = { 0 };
 
 /**
  * Job queue buffer

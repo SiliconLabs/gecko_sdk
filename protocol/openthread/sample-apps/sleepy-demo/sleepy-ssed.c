@@ -43,8 +43,8 @@
 #define MULTICAST_ADDR "ff03::1"
 #define MULTICAST_PORT 123
 #define RECV_PORT 234
-#define SSED_CSL_PERIOD_SYMBOLS 3125   // 500000 us. (units of 10 symbols = 160 us.)
-#define SSED_CSL_TIMEOUT_SEC    20     // 20 seconds.
+#define SSED_CSL_PERIOD_US   500000   // 500000 us.
+#define SSED_CSL_TIMEOUT_SEC 20       // 20 seconds.
 #define FTD_MESSAGE "ftd button"
 #define SSED_MESSAGE "ssed button"
 
@@ -66,10 +66,10 @@ void sleepyInit(void)
     otCliOutputFormat("sleepy-demo-ssed starting in EM1 (idle) mode\r\n");
     otCliOutputFormat("Press Button 0 to toggle between EM2 (sleep) and EM1 (idle) modes\r\n");
 
-    otCliOutputFormat("[csl period: %d us.] [csl timeout: %d sec.]\r\n", SSED_CSL_PERIOD_SYMBOLS * 160, SSED_CSL_TIMEOUT_SEC);
-    SuccessOrExit(error = otLinkCslSetChannel(otGetInstance(), 15));
-    SuccessOrExit(error = otLinkCslSetPeriod(otGetInstance(), SSED_CSL_PERIOD_SYMBOLS));
-    SuccessOrExit(error = otLinkCslSetTimeout(otGetInstance(), SSED_CSL_TIMEOUT_SEC));
+    otCliOutputFormat("[csl period: %d us.] [csl timeout: %d sec.]\r\n", SSED_CSL_PERIOD_US, SSED_CSL_TIMEOUT_SEC);
+    SuccessOrExit(error = otLinkSetCslChannel(otGetInstance(), 15));
+    SuccessOrExit(error = otLinkSetCslPeriod(otGetInstance(), SSED_CSL_PERIOD_US));
+    SuccessOrExit(error = otLinkSetCslTimeout(otGetInstance(), SSED_CSL_TIMEOUT_SEC));
 
     otLinkModeConfig config;
     config.mRxOnWhenIdle = 0;

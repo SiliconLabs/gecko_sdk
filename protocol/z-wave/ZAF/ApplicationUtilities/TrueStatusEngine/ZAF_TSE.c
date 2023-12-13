@@ -37,15 +37,15 @@ typedef struct _s_zaf_tse_resource_t_
 void ZAF_TSE_TimerCallback(SSwTimer* pTimer);
 
 /* Private variables */
-static s_zaf_tse_resource_t TSE_ResourceArray[ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS];
-SSwTimer zaf_tse_timer;
+static s_zaf_tse_resource_t TSE_ResourceArray[ZAF_TSE_MAXIMUM_SIMULTANEOUS_TRIGGERS] = {{ 0 }};
+SSwTimer zaf_tse_timer = { 0 };
 
 /*
  * Points to the current trigger in the resource array.
  */
 static s_zaf_tse_resource_t * pCurrentTrigger;
 
-bool ZAF_TSE_Init()
+bool ZAF_TSE_Init(void)
 {
   DPRINTF("%s()\r\n", __func__);
 
@@ -248,10 +248,8 @@ void ZAF_TSE_TimerCallback(SSwTimer* pTimer)
   }
 }
 
-void ZAF_TSE_TXCallback(transmission_result_t * pTransmissionResult)
+void ZAF_TSE_TXCallback(__attribute__((unused)) transmission_result_t * pTransmissionResult)
 {
-  UNUSED(pTransmissionResult);
-
   DPRINTF("%s():\r\n", __func__);
 
   RECEIVE_OPTIONS_TYPE_EX RxOptions;

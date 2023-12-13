@@ -418,4 +418,4 @@ typedef struct {
 /** @} End of group FGM23_SYSRTC */
 /** @} End of group Parts */
 
-#endif /* FGM23_SYSRTC_H */
+#endif // FGM23_SYSRTC_H

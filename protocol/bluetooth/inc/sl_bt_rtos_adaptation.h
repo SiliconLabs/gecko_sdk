@@ -40,7 +40,7 @@
  *    function. The callbacks always come from a processing loop in an event
  *    task created for this purpose.
  *
- * 2. The stack uses @ref sli_bgapi_lock() and @ref sli_bgapi_unlock() to
+ * 2. The stack uses @ref sl_bgapi_lock() and @ref sl_bgapi_unlock() to
  *    synchronize the handling of individual BGAPI commands, and the application
  *    must never directly call these. Individual BGAPI commands are safe to be
  *    called from multiple threads without additional locking. See @ref
@@ -64,31 +64,62 @@ void sli_bt_rtos_adaptation_kernel_start();
 
 /**
  * @brief Check if there any Bluetooth stack event waiting
+ *
+ * <b>Deprecated</b> and replaced by the @ref sl_bt_on_event callback to the
+ * application. Leave SL_BT_DISABLE_EVENT_TASK disabled in new application
+ * projects. Implement the callback function @ref sl_bt_on_event in the
+ * application to receive Bluetooth events from the event task created by the
+ * Bluetooth stack. Handle the event directly in @ref sl_bt_on_event without
+ * calling this function.
+ *
  * This API will not clear the event waiting flag.
+ *
  * @note This API is meant to be used in applications define own Bluetooth event handler,
  * it should be only used if SL_BT_DISABLE_EVENT_TASK is defined.
+ *
  * @return SL_STATUS_OK if event is waiting, otherwise SL_STATUS_FAIL or error
  */
-sl_status_t sl_bt_rtos_has_event_waiting();
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_rtos_has_event_waiting();
 
 /**
  * @brief Wait Bluetooth stack to generate an event
+ *
+ * <b>Deprecated</b> and replaced by the @ref sl_bt_on_event callback to the
+ * application. Leave SL_BT_DISABLE_EVENT_TASK disabled in new application
+ * projects. Implement the callback function @ref sl_bt_on_event in the
+ * application to receive Bluetooth events from the event task created by the
+ * Bluetooth stack. Handle the event directly in @ref sl_bt_on_event without
+ * calling this function.
+ *
  * This API will clear the event waiting flag.
+ *
  * @note This API is meant to be used in applications define own Bluetooth event handler,
  * it should be only used if SL_BT_DISABLE_EVENT_TASK is defined.
+ *
  * @param[in] blocking specifies if the function would block until event is generated
+ *
  * @return SL_STATUS_OK if the event is generated or some error
  */
-sl_status_t sl_bt_rtos_event_wait(bool blocking);
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_rtos_event_wait(bool blocking);
 
 /**
  * @brief Message Bluetooth stack that event is handled
+ *
+ * <b>Deprecated</b> and replaced by the @ref sl_bt_on_event callback to the
+ * application. Leave SL_BT_DISABLE_EVENT_TASK disabled in new application
+ * projects. Implement the callback function @ref sl_bt_on_event in the
+ * application to receive Bluetooth events from the event task created by the
+ * Bluetooth stack. Handle the event directly in @ref sl_bt_on_event without
+ * calling this function.
+ *
  * This will set event handled flag.
+ *
  * @note This API is meant to be used in applications define own Bluetooth event handler,
  * it should be only used if SL_BT_DISABLE_EVENT_TASK is defined.
+ *
  * @return SL_STATUS_OK if successful or some error
  */
-sl_status_t sl_bt_rtos_set_event_handled();
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_rtos_set_event_handled();
 
 /**
  * @brief Mutex functions for using Bluetooth from multiple tasks
@@ -132,36 +163,20 @@ sl_status_t sl_bt_rtos_init();
 /**
  * @brief Gets the pointer to current Bluetooth event.
  *
+ * <b>Deprecated</b> and replaced by the @ref sl_bt_on_event callback to the
+ * application. Leave SL_BT_DISABLE_EVENT_TASK disabled in new application
+ * projects. Implement the callback function @ref sl_bt_on_event in the
+ * application to receive Bluetooth events from the event task created by the
+ * Bluetooth stack. Handle the event directly in @ref sl_bt_on_event without
+ * calling this function.
+ *
  * Caller needs to make sure this is used for Bluetooth event processing
  * only when @ref sl_bt_rtos_event_wait indicates an event is waiting to be
  * processed. Otherwise the event may contain outdated data.
  *
  * @return pointer to the Bluetooth event
  */
-const sl_bt_msg_t* sl_bt_rtos_get_event();
-
-/**
- * @brief Lock the BGAPI for exclusive access.
- *
- * This function is used internally by the Bluetooth stack to lock the BGAPI
- * and obtain exclusive access when starting to handle a BGAPI command. If the
- * function is successful and returns SL_STATUS_OK, the stack will release the
- * lock by calling @ref sli_bgapi_unlock().
- *
- * To avoid the risk of deadlocks, this function must never be called directly
- * by the application.
- *
- * @return SL_STATUS_OK if the lock has been obtained, otherwise an error code
- */
-sl_status_t sli_bgapi_lock();
-
-/**
- * @brief Release the lock obtained by @ref sli_bgapi_lock
- *
- * To avoid the risk of deadlocks, this function must never be called directly
- * by the application.
- */
-void sli_bgapi_unlock();
+SL_BGAPI_DEPRECATED const sl_bt_msg_t* sl_bt_rtos_get_event();
 
 /** @} end bluetooth_rtos_adaptation */
 

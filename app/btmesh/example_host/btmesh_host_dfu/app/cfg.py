@@ -333,19 +333,27 @@ network_tx_interval_ms_default = 10
 # The SAR Receiver state is a composite state that controls the number and
 # timing of Segment Acknowledgment transmissions and the discarding of
 # reassembly of a segmented message.
-auto_conf_sar = true
+auto_conf_sar = false
+
+# If Local Segmentation and Reassembly Auto Configuration is true then the SAR
+# Transmitter and Receiver states are configured with specific sar_tx and sar_rx
+# default configuration options on the Provisioner when the network is created.
+# Note: If auto_conf_sar is false then this option can be used to configure local
+# SAR Transmitter and Receiver states. For example all nodes might configure their
+# own default SAR states to avoid remote SAR configuration after provisioning.
+auto_conf_sar_local = true
 
 # Default SAR Transmitter Segment Interval Step controls the interval between
 # transmissions of segments of a segmented message in milliseconds.
 # The value is the range of 10ms to 160ms in 10ms steps, intermediate values are
 # rounded down to the nearest multiple of 10.
-# Default value is 20ms in specification.
+# Default value is 20ms in BT Mesh stack.
 sar_tx_segment_interval_step_default = 20
 
 # Default SAR Transmitter Unicast Retransmission Count controls the maximum number
 # of transmissions of segments of segmented messages to a unicast destination.
 # Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 2 in specification, resulting in 3 transmissions total.
+# The default value is 7 in BT Mesh stack, resulting in 8 transmissions total.
 sar_tx_unicast_retrans_count_default = 7
 
 # Default SAR Transmitter Unicast Retransmissions Without Progress Count controls
@@ -353,7 +361,7 @@ sar_tx_unicast_retrans_count_default = 7
 # unicast destination without progress (without marking newly marking any
 # segments acknowledged).
 # Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 2 in specification, resulting in 3 transmissions.
+# The default value is 2 in BT Mesh stack, resulting in 3 transmissions.
 # Value of this state should be set to a value greater by two or more than the
 # value of the SAR Receiver Acknowledgement Retransmissions Count on a peer node.
 # This helps prevent the SAR Transmitter from abandoning the SAR prematurely.
@@ -363,7 +371,7 @@ sar_tx_unicast_retrans_wo_progress_count_default = 2
 # the minimum interval between retransmissions of segments of a segmented message
 # for a destination that is a unicast address in 25ms steps.
 # Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default value is 200ms in specification.
+# multiple of 25. Default value is 200ms in BT Mesh stack.
 sar_tx_unicast_retrans_interval_step_default = 200
 
 # Default SAR Transmitter Unicast Retransmissions Interval Increment state
@@ -371,14 +379,14 @@ sar_tx_unicast_retrans_interval_step_default = 200
 # of segments of a segmented message for a destination that is a unicast address
 # in 25ms steps.
 # Valid range is 25 - 400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default value is 50ms in specification.
+# multiple of 25. Default value is 50ms in BT Mesh stack.
 sar_tx_unicast_retrans_interval_increment_default = 50
 
 # Default SAR Transmitter Multicast Retransmissions Count state controls the
 # maximum number of transmissions of segments of segmented messages to a group
 # address or a virtual address.
 # Valid range is 0 - 15, where 0 represents a single transmission.
-# The default value is 1 in specification, resulting in 2 transmissions.
+# The default value is 1 in BT Mesh stack, resulting in 2 transmissions.
 # WARNING! The BLOB Transfer procedure has a high-level retransmission logic
 # which detects missing chunks and retransmits the missing ones.
 # It is recommended to disable multicast retransmissions in Lower Transport
@@ -388,19 +396,19 @@ sar_tx_unicast_retrans_interval_increment_default = 50
 # More multicast retransmissions can be beneficial during BLOB Transfer for
 # chunks with many segments in noisy environment because one missing chunk
 # segment leads to the loss of whole BLOB Chunk Transfer access message.
-sar_tx_multicast_retrans_count_default = 0
+sar_tx_multicast_retrans_count_default = 1
 
 # Default SAR Transmitter Multicast Retransmissions Interval Step state controls
 # the interval between retransmissions of segments of a segmented message for a
 # destination that is a group address or a virtual address in 25ms steps.
 # Valid range is 25-400ms, intermediate values are rounded down to the nearest
-# multiple of 25. Default values is 100ms in specification.
-sar_tx_multicast_retrans_interval_step_default = 100
+# multiple of 25. Default values is 100ms in BT Mesh stack.
+sar_tx_multicast_retrans_interval_step_default = 25
 
 # Default SAR Receiver Segments Threshold state represents the size of a
 # segmented message in number of segments above which the Segment Acknowledgment
 # messages are enabled.
-# Valid range is 0 - 31, the default value is 3 (segments) in specification.
+# Valid range is 0 - 31, the default value is 3 (segments) in BT Mesh stack.
 sar_rx_segments_threshold_default = 3
 
 # Default SAR Receiver Acknowledgment Delay Increment state control the interval
@@ -408,7 +416,7 @@ sar_rx_segments_threshold_default = 3
 # that is a unicast address and the transmission of the Segment Acknowledgment
 # for that message.
 # Formula: acknowledgment delay increment=SAR Acknowledgment Delay Increment+1.5
-# Valid range is 0 - 7, default is 2 in specification resulting in 3.5 segment
+# Valid range is 0 - 7, default is 2 in BT Mesh stack resulting in 3.5 segment
 # transmission interval steps.
 sar_rx_ack_delay_increment_default = 2
 
@@ -416,21 +424,21 @@ sar_rx_ack_delay_increment_default = 2
 # transport layer waits after receiving unique segments of a segmented message
 # before discarding that segmented message in 5s steps.
 # Valid range is 5000 - 80000ms, intermediate values are rounded down to the
-# nearest multiple of 5s. The default value is 10000ms in specification.
+# nearest multiple of 5s. The default value is 10000ms in BT Mesh stack.
 sar_rx_discard_timeout_default = 10000
 
 # Default SAR Receiver Segment Interval Step state indicates the interval between
 # received segments of a segmented message in milliseconds.
 # This is used to control rate of transmission of Segment Acknowledgment messages.
 # Valid range is 10 - 160, intermediate values are rounded down to the nearest
-# multiple of 10. The default value is 20ms in specification.
+# multiple of 10. The default value is 20ms in BT Mesh stack.
 sar_rx_segment_interval_step_default = 20
 
 # Default SAR Receiver Acknowledgment Retransmissions Count state controls the
 # maximum number of retransmissions of Segment Acknowledgment messages sent by
 # the lower transport layer.
-# Valid range is 0 - 3. The default value is 1 in specification, representing
-# 1 retransmissions or 2 in total.
+# Valid range is 0 - 3. The default value is 2 in BT Mesh stack, representing
+# 2 retransmissions or 3 in total.
 sar_rx_ack_retrans_count_default = 2
 
 
@@ -1172,6 +1180,8 @@ class BtmeshDfuAppConfCfg:
         )
         # auto_conf_sar
         self._auto_conf_sar = sect.getboolean("auto_conf_sar")
+        # auto_conf_sar_local
+        self._auto_conf_sar_local = sect.getboolean("auto_conf_sar_local")
         # sar_tx_segment_interval_step_default
         self._sar_tx_segment_interval_step_default = sect.getint(
             "sar_tx_segment_interval_step_default"
@@ -1284,6 +1294,7 @@ class BtmeshDfuAppConfCfg:
             f"{self.network_tx_interval_ms_default}"
         )
         logger.debug(f"{sectname}:auto_conf_sar: {self.auto_conf_sar}")
+        logger.debug(f"{sectname}:auto_conf_sar_local: {self.auto_conf_sar_local}")
         logger.debug(
             f"{sectname}:sar_tx_segment_interval_step_default: "
             f"{self.sar_tx_segment_interval_step_default}"
@@ -1416,6 +1427,10 @@ class BtmeshDfuAppConfCfg:
     @property
     def auto_conf_sar(self) -> bool:
         return self._auto_conf_sar
+
+    @property
+    def auto_conf_sar_local(self) -> bool:
+        return self._auto_conf_sar_local
 
     @property
     def sar_tx_segment_interval_step_default(self) -> int:

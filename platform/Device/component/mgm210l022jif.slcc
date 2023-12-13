@@ -73,6 +73,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_is_module
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: device_security_se
   - name: device_dcdc_notused
@@ -151,6 +152,7 @@
   - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
+  - id: silabs_core_sl_malloc
 - requires:
   - name: cmsis_core
   - name: MGM210L022JIF_config

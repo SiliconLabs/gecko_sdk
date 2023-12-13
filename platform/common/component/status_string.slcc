@@ -16,7 +16,7 @@ provides:
   - name: status_string
 documentation:
   docset: gecko-platform
-  document: common/api/group-status
+  document: platform-common/status
 template_contribution:
   - name: component_catalog
     value: status_string

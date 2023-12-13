@@ -25,6 +25,16 @@
     <properties key="module.clientModelURI" value="./modules/Common/emdrv/emdrvClient.slsproj"/>
     <properties key="module.category" value="efm32|Common"/>
   </descriptors>
+  <descriptors name="com.silabs.sdk.exx32.common.sleeptimer" label="Sleeptimer SW" propertyScope="module">
+    <description>Sleeptimer SW.</description>
+    <properties key="module.clientModelURI" value="./modules/Common/sleeptimer/sleeptimerClient.slsproj"/>
+    <properties key="module.category" value="efm32|Common"/>
+  </descriptors>
+  <descriptors name="com.silabs.sdk.exx32.common.device_init" label="device_init SW" propertyScope="module">
+    <description>device_init SW.</description>
+    <properties key="module.clientModelURI" value="./modules/Common/device_init/device_initClient.slsproj"/>
+    <properties key="module.category" value="efm32|Common"/>
+  </descriptors>
   <descriptors name="com.silabs.sdk.exx32.common.efp" label="EFP Drivers" propertyScope="module">
     <description>The EFP drivers provides a way for applications to access the EFP registers and perform some common functions.</description>
     <properties key="module.clientModelURI" value="./modules/Common/EFP/efpClient.slsproj"/>

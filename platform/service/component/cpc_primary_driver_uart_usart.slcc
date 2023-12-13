@@ -1,0 +1,53 @@
+id: cpc_primary_driver_uart_usart
+package: platform
+description: UART driver over USART peripheral for Co-Processor Communication (CPC) Primary Device.
+label: CPC Primary - UART (USART)
+category: Services|Co-Processor Communication|Primary Device|Driver
+quality: experimental
+instantiable:
+  prefix: inst
+root_path: platform/service/cpc
+config_file:
+  - path: config/s1/sl_cpc_drv_uart_usart_{{instance}}_config.h
+    file_id: cpc_drv_uart_usart_config
+    condition: [device_series_1]
+  - path: config/s2/sl_cpc_drv_uart_usart_{{instance}}_config.h
+    file_id: cpc_drv_uart_usart_config
+    condition: [device_series_2]
+source:
+  - path: src/sl_cpc_drv_uart.c
+  - path: src/sl_cpc_drv_xmodem.c
+include:
+  - path: inc
+    file_list:
+      - path: sli_cpc_xmodem.h
+provides:
+  - name: cpc_driver
+  - name: cpc_primary_driver_uart_usart_interface
+  - name: cpc_primary_driver
+    allow_multiple: false
+  - name: cpc_primary_driver_uart_usart
+    allow_multiple: false
+requires:
+  - name: cpc_primary
+  - name: status
+  - name: dmadrv
+  - name: emlib_gpio
+  - name: emlib_cmu
+  - name: emlib_usart
+  - name: slist
+  - name: udelay
+template_file:
+  - path: template/s1/sl_cpc_drv_uart_config.h.jinja
+    condition: [device_series_1]
+  - path: template/s2/sl_cpc_drv_uart_config.h.jinja
+    condition: [device_series_2]
+template_contribution:
+  - name: cpc_instance_name
+    value: "{{instance}}"
+  - name: cpc_interface_type
+    value: uart
+  - name: cpc_periph_type
+    value: usart
+  - name: component_catalog
+    value: cpc_driver_uart

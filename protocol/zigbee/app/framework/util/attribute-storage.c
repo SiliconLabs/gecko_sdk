@@ -98,6 +98,10 @@ const EmberAfAttributeMetadata generatedAttributes[] = GENERATED_ATTRIBUTES;
 const EmberAfCluster generatedClusters[]          = GENERATED_CLUSTERS;
 const EmberAfEndpointType generatedEmberAfEndpointTypes[]   = GENERATED_ENDPOINT_TYPES;
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] =
+{ { SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE, SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE } };
+#else
 #ifndef EMBER_SCRIPTED_TEST
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #if (EMBER_SUPPORTED_NETWORKS == 1)
@@ -114,7 +118,7 @@ const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] =
 #else
 const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[] = { EMBER_COORDINATOR, EMBER_AF_SECURITY_PROFILE_HA };
 #endif
-
+#endif
 const EmberAfManufacturerCodeEntry clusterManufacturerCodes[] = GENERATED_CLUSTER_MANUFACTURER_CODES;
 const uint16_t clusterManufacturerCodeCount = GENERATED_CLUSTER_MANUFACTURER_CODE_COUNT;
 const EmberAfManufacturerCodeEntry attributeManufacturerCodes[] = GENERATED_ATTRIBUTE_MANUFACTURER_CODES;
@@ -1296,6 +1300,14 @@ EmberAfCluster *emberAfGetNthCluster(uint8_t endpoint, uint8_t n, bool server)
     if ( (server && emberAfClusterIsServer(cluster) )
          || ( (!server) &&  emberAfClusterIsClient(cluster) ) ) {
       if ( c == n ) {
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+        // Apply cluster suppression for match descriptor response.
+        if ((server && emberAfGetSuppressCluster(cluster->clusterId, false))
+            || (!server && emberAfGetSuppressCluster(cluster->clusterId, true))) {
+          emberAfDebugPrintln("emberAfGetNthCluster - skipping: server = %d, cluster = %2X", server, cluster->clusterId);
+          return NULL;
+        }
+#endif
         return cluster;
       }
       c++;

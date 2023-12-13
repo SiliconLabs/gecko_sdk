@@ -1,19 +1,19 @@
 package: Zigbee
-description: This component contains the functionality necessary for creating a Zigbee
-  3.0 test harness application.
+description: This component contains the functionality necessary for creating a Zigbee 3.0 test harness application.
 label: Zigbee 3.0 Test Harness
 quality: production
 id: zigbee_test_harness_z3
 category: Zigbee|Utility|Testing
 provides:
-   - name: "zigbee_test_harness_z3"
+  - name: zigbee_test_harness_z3
 requires:
-   - name: "zigbee_zll_profile"
-   - name: "zigbee_network_steering"
-   - name: "zigbee_packet_handoff"
-   - name: "zigbee_zll_commissioning_common"
-   - name: "zigbee_ota_server"
-   - name: "zigbee_interpan"
+  - name: zigbee_zll_profile
+  - name: zigbee_network_steering
+  - name: zigbee_packet_handoff
+  - name: zigbee_zll_commissioning_common
+  - name: zigbee_interpan
+  - name: zigbee_address_table
+  - name: zigbee_end_device_support
 source:
   - path: protocol/zigbee/app/framework/plugin/test-harness-z3/test-harness-z3-core.c
   - path: protocol/zigbee/app/framework/plugin/test-harness-z3/test-harness-z3-mac.c
@@ -37,11 +37,255 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: sli_zigbee_af_test_harness_z3_init_callback    
+      function_name: sli_zigbee_af_test_harness_z3_init_callback
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
       function_name: emberAfPluginTestHarnessZ3StackStatusCallback
+  - name: cli_group
+    value:
+      name: core
+      help: core SAP interfaces.
+  - name: cli_command
+    value:
+      group: core
+      name: apsde-req
+      help: Sends out a request based on the input parameters.
+      handler: sl_zigbee_test_harness_z3_apsde_data_request
+      argument:
+        - type: uint8
+          help: Dest Mode 0=BOUND(Bind entry needed), 1=Group, 2=ShortAddress, 3=EUI64(address table entry needed).
+        - type: hex
+          help: Dest Address in Octate string of 2 bytes or 8 bytes in little endian format.
+        - type: uint8
+          help: Dest Endpoint.
+        - type: uint16
+          help: Profile Id.
+        - type: uint16
+          help: Cluster Id.
+        - type: uint8
+          help: src Endpoint.
+        - type: uint8
+          help: ASDU Length.
+        - type: hex
+          help: ASDU.
+        - type: uint8
+          help: txOption Bit(0)=Encryption, Bit(2)=ACK , rest not implemented.
+        - type: uint8
+          help: Use Alias for Source Address.
+        - type: uint16
+          help: Alias Address.
+        - type: uint8
+          help: Alias Sequence Number.
+        - type: uint8
+          help: Radius- only used for Alias now.
+  - name: cli_command
+    value:
+      group: core
+      name: nlde-req
+      help: Sends out a request based on the input parameters at NLDE layer
+      handler: sl_zigbee_test_harness_z3_nlde_data_request
+      argument:
+        - type: uint8
+          help: Dest Mode 2=16 bit dest address.
+        - type: uint16
+          help: Dest 16-bit Address.
+        - type: uint8
+          help: NSDU Length.
+        - type: hex
+          help: NSDU Octate String.
+        - type: uint16
+          help: NSDU Handle.
+        - type: uint8
+          help: Use Alias for Source Address.
+        - type: uint16
+          help: Alias source 16-bit address.
+        - type: uint8
+          help: Alias sequence number.
+        - type: uint8
+          help: The distance in hops.
+        - type: uint8
+          help: The distance in hops for a multicast by the nodes belonging to the group.
+        - type: uint16
+          help: Discover route , 0x00=Suppress, 0x01=Enable Route discovery.
+        - type: uint8
+          help: Enable NWK layer security based on NIB attribute nwkSecurityLevel.
+  - name: cli_command
+    value:
+      group: core
+      name: mcpsd-req
+      help: Sends out a request based on the input parameters at MAC layer
+      handler: sl_zigbee_test_harness_z3_mcps_data_request
+      argument:
+        - type: uint8
+          help: Source Mode  0=No Address, 1=RESERVE, 2= 16 Bit Short, 3=EUI64.
+        - type: uint16
+          help: Source PAN Id.
+        - type: hex
+          help: Source Address in Octate string of 2 bytes or 8 bytes in little endian format..
+        - type: uint8
+          help: Destination mode
+        - type: uint16
+          help: Destination PAN Id.
+        - type: hex
+          help: Destination address.
+        - type: uint8
+          help: MSDU Length.
+        - type: hex
+          help: MSDU Octate String.
+        - type: uint8
+          help: MSDU Handle.
+        - type: uint8
+          help: txOption Bit(0)=Ack, Bit(1)=GST, Bit(2)=Indirect, Bit(3)=Security.
+  - name: cli_command
+    value:
+      group: core
+      name: nlme-get-req
+      help: Gets the NWK Layer PIB with its attribute identifier.
+      handler: sl_zigbee_test_harness_z3_nwk_pib_get_request
+      argument:
+        - type: uint8
+          help: PIB Attribute Identifier.
+  - name: cli_command
+    value:
+      group: core
+      name: mlme-get-req
+      help: Gets the MAC Layer PIB with its attribute identifier.
+      handler: sl_zigbee_test_harness_z3_mac_pib_get_request
+      argument:
+        - type: uint8
+          help: PIB Attribute Identifier.
+  - name: cli_command
+    value:
+      group: core
+      name: mlme-set-req
+      help: Sets the MAC layer PIB given attribute id, length and value.
+      handler: sli_zigbee_test_harness_z3_mac_pib_set_request
+      argument:
+        - type: uint8
+          help: PIB Attribute Identifier.
+        - type: uint8
+          help: length of PIB data.
+        - type: hex
+          help: PIB Data.
+  - name: cli_command
+    value:
+      group: core
+      name: plme-get-req
+      help: Gets the PHY Layer PIB with its attribute identifier.
+      handler: sli_zigbee_test_harness_z3_pib_get_request
+      argument:
+        - type: uint8
+          help: PIB Attribute Identifier.
+  - name: cli_command
+    value:
+      group: core
+      name: plme-set-req
+      help: Sets the PHY layer PIB given attribute id, length and value.
+      handler: sli_zigbee_test_harness_z3_pib_set_request
+      argument:
+        - type: uint8
+          help: PIB Attribute Identifier.
+        - type: uint8
+          help: length of PIB data.
+        - type: hex
+          help: PIB Data.
+  - name: cli_group
+    value:
+      group: core
+      name: layer-select
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: plme
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: mcpsd
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: mlme
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: nlde
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: nlme
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: apsde
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
+  - name: cli_command
+    value:
+      group: layer-select
+      name: apsde
+      help: Selects a specefic layer in the TH for request / confirm and indication and then either the messages passes up in the layer or gets dropped.
+      handler: sli_zigbee_test_harness_z3_layer_select
+      argument:
+        - type: uint8
+          help: Drop the packet in this layer. 1 = Drop , 0 = Pass to NHL.
+        - type: uint8
+          help: Enable indication printing for this layer.
+        - type: uint8
+          help: Enable confirmation printing for this layer.
   - name: cli_group
     value:
       group: plugin
@@ -139,9 +383,48 @@ template_contribution:
       help: Disables printing raw MAC commands.
   - name: cli_group
     value:
+      group: packet-printing
+      name: zcl-printing
+      help: zcl-printing related commands.
+  - name: cli_command
+    value:
+      group: zcl-printing
+      name: enable
+      handler: sli_zigbee_af_test_harness_z3_printing_command
+      help: Enables printing zcl commands.
+  - name: cli_command
+    value:
+      group: zcl-printing
+      name: disable
+      handler: sli_zigbee_af_test_harness_z3_printing_command
+      help: Disables printing zcl commands.
+  - name: cli_group
+    value:
       group: test-harness
       name: z3
       help: z3 related commands.
+  - name: cli_command
+    value:
+      group: z3
+      name: set-network-key
+      handler: sli_zigbee_test_harness_z3_set_network_key_command
+      help: Sets a network key. This must set before forming the network.
+      argument:
+        - type: hex
+          help: The network key. 16 bytes octet string in little endian order
+  - name: cli_command
+    value:
+      group: z3
+      name: set-network-key-with-options
+      handler: sli_zigbee_test_harness_z3_network_key_with_options_command
+      help: Set a network key with a sequence number for the current key or the alternate key. This should be called after forming a network.
+      argument:
+        - type: hex
+          help: The network key. 16 bytes octet string in little endian order
+        - type: uint8
+          help: The sequence number used by the network key_status
+        - type: uint8
+          help: Set the network key as the current key or the alternate key.
   - name: cli_group
     value:
       group: z3
@@ -160,8 +443,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_beacon_beacons_config_command
       help: Sends a beacon.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: z3
@@ -174,8 +457,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_request_command
       help: Sends a Rejoin Request command.
       argument:
-      - type: uint16
-        help: The destination address of the command
+        - type: uint16
+          help: The destination address of the command
   - name: cli_command
     value:
       group: nwk
@@ -183,12 +466,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_response_command
       help: Sends a Rejoin Response command.
       argument:
-      - type: uint16
-        help: The new short address of the destination node
-      - type: uint8
-        help: The status of the rejoin
-      - type: uint16
-        help: The destination address of the command
+        - type: uint16
+          help: The new short address of the destination node
+        - type: uint8
+          help: The status of the rejoin
+        - type: uint16
+          help: The destination address of the command
   - name: cli_command
     value:
       group: nwk
@@ -196,16 +479,16 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_command
       help: Sends a Network Leave command.
       argument:
-      - type: int8
-        help: Whether or not the device should rejoin
-      - type: int8
-        help: Whether or not this command is a request
-      - type: int8
-        help: Whether or not the leaving device should remove its children
-      - type: uint16
-        help: The destination address of the command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: int8
+          help: Whether or not the device should rejoin
+        - type: int8
+          help: Whether or not this command is a request
+        - type: int8
+          help: Whether or not the leaving device should remove its children
+        - type: uint16
+          help: The destination address of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: nwk
@@ -215,14 +498,31 @@ template_contribution:
     value:
       group: nwk-leave-supression
       name: "on"
-      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression
+      handler: sli_zigbee_af_test_harness_z3_nwk_leave_suppression
       help: Suppresses network leave commands.
   - name: cli_command
     value:
       group: nwk-leave-supression
       name: "off"
-      handler: sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression
+      handler: sli_zigbee_af_test_harness_z3_nwk_leave_suppression
       help: Do not suppress network leave commands.
+  - name: cli_group
+    value:
+      group: nwk
+      name: nwk-rejoin-supression
+      help: nwk-rejoin-supression related commands.
+  - name: cli_command
+    value:
+      group: nwk-rejoin-supression
+      name: "on"
+      handler: sli_zigbee_af_test_harness_z3_nwk_rejoin_suppression
+      help: Suppresses network rejoin commands.
+  - name: cli_command
+    value:
+      group: nwk-rejoin-supression
+      name: "off"
+      handler: sli_zigbee_af_test_harness_z3_nwk_rejoin_suppression
+      help: Do not suppress network rejoin commands.
   - name: cli_group
     value:
       group: nwk
@@ -253,8 +553,69 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_nwk_set_network_update_id
       help: Sets the network update ID in the current network parameters block.
       argument:
-      - type: uint8
-        help: The new network update ID. 
+        - type: uint8
+          help: The new network update ID.
+  - name: cli_command
+    value:
+      group: nwk
+      name: nwk-update-request
+      handler: sli_zigbee_af_test_harness_z3_nwk_update_request_command
+      help: Send a NWK network update request.
+      argument:
+        - type: uint16
+          help: The new PAN id.
+        - type: uint16
+          help: The destination address of the command.
+  - name: cli_group
+    value:
+      group: nwk
+      name: ieee-addr-rsp-config
+      help: ieee-addr-rsp-config related commands.
+  - name: cli_command
+    value:
+      group: ieee-addr-rsp-config
+      name: reset
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
+      help: Configure the next outgoing IEEE address request.
+  - name: cli_command
+    value:
+      group: ieee-addr-rsp-config
+      name: issuer-nwk-address-remote-dev
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
+      help: Configure the next outgoing IEEE address request.
+  - name: cli_command
+    value:
+      group: ieee-addr-rsp-config
+      name: status-device-not-found
+      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
+      help: Configure the next outgoing IEEE address request.
+  - name: cli_command
+    value:
+      group: nwk
+      name: set-long-up-time
+      handler: sli_zigbee_test_harness_z3_nwk_set_long_up_time
+      help: Set or clear the TC connectivity bit in the beacon classification mask.
+      argument:
+        - type: uint8
+          help: Whether or not long uptime bit should be set.
+  - name: cli_command
+    value:
+      group: nwk
+      name: set-hub-connectivity
+      handler: sli_zigbee_test_harness_z3_nwk_set_hub_connectivity
+      help: Set or clear the TC connectivity bit in the beacon classification mask.
+      argument:
+        - type: uint8
+          help: Whether or not TC (hub) connectivity bit should be set
+  - name: cli_command
+    value:
+      group: nwk
+      name: set-parent-classification
+      handler: sli_zigbee_test_harness_z3_nwk_set_parent_classification
+      help: Set or clear the TC connectivity bit in the beacon classification mask.
+      argument:
+        - type: uint8
+          help: Whether or not parent classification bit should be set
   - name: cli_group
     value:
       group: z3
@@ -267,12 +628,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_aps_aps_remove_device
       help: Sends an APS remove device command.
       argument:
-      - type: hex
-        help: The long address of the parent whose child will be removed
-      - type: hex
-        help: The long address of the node which will be removed
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: hex
+          help: The long address of the parent whose child will be removed
+        - type: hex
+          help: The long address of the node which will be removed
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: aps
@@ -280,14 +641,14 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_aps_aps_request_key_command
       help: Sends an APS request key command.
       argument:
-      - type: uint16
-        help: The short address destination of the command
-      - type: uint8
-        help: The key type in the command payload
-      - type: hex
-        help: The partner address for the requested link key
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The short address destination of the command
+        - type: uint8
+          help: The key type in the command payload
+        - type: hex
+          help: The partner address for the requested link key
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: z3
@@ -300,12 +661,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_scan_request_process_command
       help: Starts the scan request process.
       argument:
-      - type: uint8
-        help: The link initiator bit in scan requests
-      - type: uint16
-        help: This argument is unused
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint8
+          help: The link initiator bit in scan requests
+        - type: uint16
+          help: This argument is unused
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -313,10 +674,10 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_start_as_router_command
       help: Starts a distributed network on which to perform ZLL operations.
       argument:
-      - type: uint16
-        help: The PAN ID that will be used
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The PAN ID that will be used
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -330,10 +691,10 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_request_command
       help: Sends a device information request to the target found in the scan request process.
       argument:
-      - type: uint8
-        help: The start index in the device information request command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint8
+          help: The start index in the device information request command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -341,12 +702,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_request_w_target_command
       help: Sends a device information request to the target specified with the short address in the command.
       argument:
-      - type: uint8
-        help: The start index in the device information request command
-      - type: uint16
-        help: The short address of the target
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint8
+          help: The start index in the device information request command
+        - type: uint16
+          help: The short address of the target
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -354,10 +715,10 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_identify_request_command
       help: Sends an identify request to the target found in the scan request process.
       argument:
-      - type: uint16
-        help: The duration length of the identify state
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The duration length of the identify state
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -365,8 +726,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_rtfn_request_command
       help: Sends a reset to factory new request to the target found in the scan request process.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -374,18 +735,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network start request to the target found in the scan request process.
       argument:
-      - type: uint16
-        help: The designated node ID for the target node
-      - type: uint16
-        help: The free address range begin
-      - type: uint16
-        help: The free address range end
-      - type: uint16
-        help: The free group range begin
-      - type: uint16
-        help: The free group range end
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The designated node ID for the target node
+        - type: uint16
+          help: The free address range begin
+        - type: uint16
+          help: The free address range end
+        - type: uint16
+          help: The free group range begin
+        - type: uint16
+          help: The free group range end
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -393,18 +754,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network router join request to the target found in the scan request process.
       argument:
-      - type: uint16
-        help: The designated node ID for the target node
-      - type: uint16
-        help: The free address range begin
-      - type: uint16
-        help: The free address range end
-      - type: uint16
-        help: The free group range begin
-      - type: uint16
-        help: The free group range end
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The designated node ID for the target node
+        - type: uint16
+          help: The free address range begin
+        - type: uint16
+          help: The free address range end
+        - type: uint16
+          help: The free group range begin
+        - type: uint16
+          help: The free group range end
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -412,18 +773,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_command
       help: Sends a network end device join request to the target found in the scan request process.
       argument:
-      - type: uint16
-        help: The designated node ID for the target node
-      - type: uint16
-        help: The free address range begin
-      - type: uint16
-        help: The free address range end
-      - type: uint16
-        help: The free group range begin
-      - type: uint16
-        help: The free group range end
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The designated node ID for the target node
+        - type: uint16
+          help: The free address range begin
+        - type: uint16
+          help: The free address range end
+        - type: uint16
+          help: The free group range begin
+        - type: uint16
+          help: The free group range end
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -431,8 +792,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_update_request_command
       help: Sends a network update request.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -440,8 +801,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_get_group_identifiers_request_command
       help: Sends a get group identifiers request.
       argument:
-      - type: uint8
-        help: The start index in the command payload
+        - type: uint8
+          help: The start index in the command payload
   - name: cli_command
     value:
       group: touchlink
@@ -449,8 +810,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_get_endpoint_list_request_command
       help: Sends a get endpoint list request.
       argument:
-      - type: uint8
-        help: The start index in the command payload
+        - type: uint8
+          help: The start index in the command payload
   - name: cli_command
     value:
       group: touchlink
@@ -458,8 +819,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_scan_response_config_command
       help: Configures the next scan response.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -467,8 +828,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_start_response_config
       help: Configures the next outgoing network start response command.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -476,8 +837,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_network_join_router_response_config
       help: Configures the next outgoing network join router response command.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: touchlink
@@ -485,8 +846,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_touchlink_device_information_response_config_command
       help: Configures the next device information response.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: z3
@@ -499,12 +860,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_mgmt_permit_joining_req_command
       help: Unicasts a permit joining command.
       argument:
-      - type: uint16
-        help: The permit duration, in seconds
-      - type: uint16
-        help: The destination address of the command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The permit duration, in seconds
+        - type: uint16
+          help: The destination address of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: mgmt
@@ -512,14 +873,14 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_mgmt_leave_command
       help: Unicasts a permit joining command.
       argument:
-      - type: uint16
-        help: The destination address of the command.
-      - type: int8
-        help: Whether or not the leaving device should remove its children
-      - type: int8
-        help: Whether or not the destination node should rejoin the network
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The destination address of the command.
+        - type: int8
+          help: Whether or not the leaving device should remove its children
+        - type: int8
+          help: Whether or not the destination node should rejoin the network
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: mgmt
@@ -527,16 +888,16 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_mgmt_nwk_update_request_command
       help: Unicasts a network update command.
       argument:
-      - type: uint16
-        help: The scan channel for the command
-      - type: uint16
-        help: The scan duration for the command
-      - type: uint8
-        help: The scan count for the command
-      - type: uint16
-        help: The scan destination
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The scan channel for the command
+        - type: uint16
+          help: The scan duration for the command
+        - type: uint8
+          help: The scan count for the command
+        - type: uint16
+          help: The scan destination
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: z3
@@ -555,8 +916,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_node_desc_req_command
       help: Unicasts a node descriptor request.
       argument:
-      - type: uint16
-        help: The destination address of the command
+        - type: uint16
+          help: The destination address of the command
   - name: cli_command
     value:
       group: zdo
@@ -564,8 +925,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_zdo_node_desc_rsp_config_command
       help: Configure the next outgoing node descriptor response.
       argument:
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -573,12 +934,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_active_endpoint_request_command
       help: Unicasts an active endpoint request.
       argument:
-      - type: uint16
-        help: The destination address of the command
-      - type: uint16
-        help: The network address of interest
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The destination address of the command
+        - type: uint16
+          help: The network address of interest
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -586,14 +947,14 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_match_desc_req_command
       help: Unicasts a match descriptor request.
       argument:
-      - type: uint16
-        help: The destination address of the command
-      - type: uint16
-        help: The network address of interest
-      - type: uint16
-        help: The profile id in the APS header of the command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The destination address of the command
+        - type: uint16
+          help: The network address of interest
+        - type: uint16
+          help: The profile id in the APS header of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -601,12 +962,12 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_match_desc_rsp_config_command
       help: Configures the next outgoing match descriptor response.
       argument:
-      - type: uint16
-        help: The network address of interest
-      - type: uint8
-        help: The status for the response command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The network address of interest
+        - type: uint8
+          help: The status for the response command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -614,14 +975,14 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_simple_desc_req_command
       help: Unicasts a simple descriptor request.
       argument:
-      - type: uint16
-        help: The destination address of the command
-      - type: uint8
-        help: The endpoint for the simple descriptor request
-      - type: uint16
-        help: The network address of interest
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The destination address of the command
+        - type: uint8
+          help: The endpoint for the simple descriptor request
+        - type: uint16
+          help: The network address of interest
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -629,14 +990,14 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_simple_desc_rsp_config_command
       help: Configures the next outgoing simple descriptor response.
       argument:
-      - type: uint16
-        help: The network address of interest
-      - type: uint8
-        help: The status for the response command
-      - type: uint8
-        help: The trimmed length of the command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: uint16
+          help: The network address of interest
+        - type: uint8
+          help: The status for the response command
+        - type: uint8
+          help: The trimmed length of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_group
     value:
       group: zdo
@@ -659,18 +1020,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_bind_group_command
       help: Sends a ZDO bind command to a device specified to create a groupcast binding.
       argument:
-      - type: uint16
-        help: The destination of the ZDO command
-      - type: uint8
-        help: Remote devices source endpoint to bind
-      - type: uint8
-        help: Remote endpoint to bind
-      - type: uint16
-        help: Two-byte destination address for the binding
-      - type: uint16
-        help: Cluster on which to bind
-      - type: hex
-        help: The source IEEE address for the binding
+        - type: uint16
+          help: The destination of the ZDO command
+        - type: uint8
+          help: Remote devices source endpoint to bind
+        - type: uint8
+          help: Remote endpoint to bind
+        - type: uint16
+          help: Two-byte destination address for the binding
+        - type: uint16
+          help: Cluster on which to bind
+        - type: hex
+          help: The source IEEE address for the binding
   - name: cli_command
     value:
       group: zdo
@@ -678,16 +1039,16 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_nwk_addr_req_command
       help: Sends a ZDO address request.
       argument:
-      - type: hex
-        help: The long address of the destination
-      - type: uint8
-        help: The type of the rejoin request
-      - type: uint8
-        help: The start index for the requested elements of the associated devices list, if the type is Extended response
-      - type: uint16
-        help: The destination address of the command
-      - type: uint32
-        help: The negative behavior options for this command
+        - type: hex
+          help: The long address of the destination
+        - type: uint8
+          help: The type of the rejoin request
+        - type: uint8
+          help: The start index for the requested elements of the associated devices list, if the type is Extended response
+        - type: uint16
+          help: The destination address of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -695,39 +1056,16 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_req_command
       help: Sends an IEEE address request.
       argument:
-      - type: uint16
-        help: The short address of interest
-      - type: uint8
-        help: The request type
-      - type: uint8
-        help: The start index for the requested elements of the associated devices list, if the type is Extended response.
-      - type: uint16
-        help: The destination address of the command
-      - type: uint32
-        help: The negative behavior options for this command
-  - name: cli_group
-    value:
-      group: nwk
-      name: ieee-addr-rsp-config
-      help: ieee-addr-rsp-config related commands.
-  - name: cli_command
-    value:
-      group: ieee-addr-rsp-config
-      name: reset
-      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
-      help: Configures the next outgoing IEEE address request.
-  - name: cli_command
-    value:
-      group: ieee-addr-rsp-config
-      name: issuer-nwk-address-remote-dev
-      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
-      help: Configures the next outgoing IEEE address request.
-  - name: cli_command
-    value:
-      group: ieee-addr-rsp-config
-      name: status-device-not-found
-      handler: sli_zigbee_af_test_harness_z3_zdo_ieee_addr_rsp_config_command
-      help: Configures the next outgoing IEEE address request.
+        - type: uint16
+          help: The short address of interest
+        - type: uint8
+          help: The request type
+        - type: uint8
+          help: The start index for the requested elements of the associated devices list, if the type is Extended response.
+        - type: uint16
+          help: The destination address of the command
+        - type: uint32
+          help: The negative behavior options for this command
   - name: cli_command
     value:
       group: zdo
@@ -735,10 +1073,10 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zdo_bc_device_announce_command
       help: Rebroadcasts a `fake` ZDO device announce. The device sets random frame counter values to appear as though the DeviceAnnounce has been rebroadcasted from another device on the network out of range of the DUT.
       argument:
-      - type: uint16
-        help: Short address of the fake device announce
-      - type: hex
-        help: IEEE address of the fake device announce
+        - type: uint16
+          help: Short address of the fake device announce
+        - type: hex
+          help: IEEE address of the fake device announce
   - name: cli_group
     value:
       group: z3
@@ -751,18 +1089,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_ota_server_activate_command
       help: Configuration command to set up OTA server.
       argument:
-      - type: uint16
-        help: Short Address 
-      - type: uint8
-        help: Destination Endpoint 
-      - type: uint16
-        help: Manufacturer Code
-      - type: uint16
-        help: Image Type
-      - type: uint32
-        help: File Version
-      - type: uint32
-        help: File Size
+        - type: uint16
+          help: Short Address
+        - type: uint8
+          help: Destination Endpoint
+        - type: uint16
+          help: Manufacturer Code
+        - type: uint16
+          help: Image Type
+        - type: uint32
+          help: File Version
+        - type: uint32
+          help: File Size
   - name: cli_command
     value:
       group: ota-server
@@ -781,18 +1119,18 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_zcl_read_command
       help: Sends a ZCL ReadAttribute command.
       argument:
-      - type: uint16
-        help: The cluster ID in the command
-      - type: uint16
-        help: The attribute ID in the command
-      - type: uint16
-        help: The destination of the command
-      - type: uint8
-        help: The source endpoint of the command
-      - type: uint8
-        help: The destination endpoint of the command
-      - type: uint16
-        help: The profile ID in the command
+        - type: uint16
+          help: The cluster ID in the command
+        - type: uint16
+          help: The attribute ID in the command
+        - type: uint16
+          help: The destination of the command
+        - type: uint8
+          help: The source endpoint of the command
+        - type: uint8
+          help: The destination endpoint of the command
+        - type: uint16
+          help: The profile ID in the command
   - name: cli_command
     value:
       group: z3
@@ -812,8 +1150,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_set_network_creator_pan_id
       help: Sets the PAN ID to be used by the Network Creator component.
       argument:
-      - type: uint16
-        help: The PAN ID for the Network Creator component to use
+        - type: uint16
+          help: The PAN ID for the Network Creator component to use
   - name: cli_command
     value:
       group: z3
@@ -821,8 +1159,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_set_short_address_command
       help: Sets the node ID to be used on the device.
       argument:
-      - type: uint16
-        help: The node ID to use as this devices short ID
+        - type: uint16
+          help: The node ID to use as this devices short ID
   - name: cli_group
     value:
       group: z3
@@ -847,8 +1185,8 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_set_device_mode_command
       help: Sets the node ID to be used on the device.
       argument:
-      - type: uint8
-        help: The device mode
+        - type: uint8
+          help: The device mode
   - name: cli_group
     value:
       group: z3
@@ -867,8 +1205,47 @@ template_contribution:
       handler: sli_zigbee_af_test_harness_z3_install_code_clear_or_set_command
       help: Clears the install code from the device.
       argument:
-      - type: hex
-        help: The install code for this device to use
+        - type: hex
+          help: The install code for this device to use
+  - name: cli_command
+    value:
+      group: z3
+      name: change-pan-id
+      handler: sli_zigbee_af_test_harness_z3_change_pan_id
+      help: Change the PAN ID on the local node.
+      argument:
+        - type: uint16
+          help: The new PAN ID.
+  - name: cli_command
+    value:
+      group: z3
+      name: change-channel
+      handler: sli_zigbeee_af_test_harness_z3_change_channel
+      help: Change the channel on the local node.
+      argument:
+        - type: uint8
+          help: The new radio channel
+  - name: cli_command
+    value:
+      group: zll-commissioning
+      name: set-radio-idle-mode
+      handler: sli_zigbee_test_harness_set_radio_idle_mode
+      help: Set MAC radio idle mode.
+  - name: cli_command
+    value:
+      group: zll-commissioning
+      name: get-radio-idle-mode
+      handler: sli_zigbee_test_harness_get_radio_idle_mode
+      help: Get MAC radio idle mode.
+  - name: cli_command
+    value:
+      group: ias-zone-client
+      name: allow-set-cie-address
+      handler: sli_zigbee_af_ias_zone_client_allow_set_cie_address
+      help: Allow/Disallow writing of the IAS CIE address attribute on the server..
+    condition:
+      - zigbee_ias_zone_client
+
 documentation:
   docset: zigbee
   document: zigbee-af-api/test-harness-z3

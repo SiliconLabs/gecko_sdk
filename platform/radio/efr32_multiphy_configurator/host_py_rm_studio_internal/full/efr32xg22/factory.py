@@ -9,7 +9,7 @@ class RM_EFR32XG22_Info(object):
     short_name = 'efr32xg22'
     val_die_name = 'EFR32XG22X000F512IM32'
     arm_core_revs = []
-    rtl_revs = ['A0', 'A1', 'A2', 'B0']
+    rtl_revs = ['A0', 'A1', 'A2', 'B0', 'B1']
     di_revs = []
     pte_revs = []
     pkg_path = _PKG_PATH

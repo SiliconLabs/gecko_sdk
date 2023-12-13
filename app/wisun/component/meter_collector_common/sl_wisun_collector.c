@@ -34,17 +34,17 @@
 
 #include <string.h>
 #include <assert.h>
+#include "cmsis_os2.h"
+#include "sli_wisun_meter_collector.h"
+#include "sl_cmsis_os2_common.h"
+#include "sl_component_catalog.h"
+#include "sl_mempool.h"
+#include "sl_sleeptimer.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_collector.h"
-#include "sl_wisun_meter_collector_config.h"
 #include "sl_wisun_collector_config.h"
-#include "cmsis_os2.h"
-#include "sl_cmsis_os2_common.h"
-#include "sl_sleeptimer.h"
-#include "sl_component_catalog.h"
+#include "sl_wisun_meter_collector_config.h"
 #include "sl_wisun_trace_util.h"
-#include "sli_wisun_meter_collector.h"
-#include "sl_mempool.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -52,6 +52,9 @@
 
 /// Meter response timeout factor
 #define SL_WISUN_COLLECTOR_TIMEOUT_FACTOR                               4U
+
+/// Collector receive buffer size
+#define SL_WISUN_COLLECTOR_BUFFER_LEN                                   256U
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -63,40 +66,64 @@
 static void _create_common_socket(void);
 
 /**************************************************************************//**
- * @brief Collector send request
- * @details Handler function
- * @param[in] sockid The socket used for sending or SOCKET_INVALID_ID for ad-hoc socket creation
- * @param[in] meter Meter entry
- * @param[in] req The request to send
- * @return SL_STATUS_OK On success
- * @return SL_STATUS_FAIL On failure
- *****************************************************************************/
-static sl_status_t _collector_send_request(const int32_t sockid,
-                                           sl_wisun_meter_entry_t *meter,
-                                           sl_wisun_meter_request_t *req);
-
-/**************************************************************************//**
  * @brief Collector receive response
  * @details Handler function
  * @param[in] sockid The socket used for receiving
- * @return sl_wisun_meter_entry_t*
+ * @param[out] remote_addr The address of the sender
+ * @param[out] packet_data_len Size of the received packet
+ * @return SL_STATUS_OK On success
+ * @return SL_STATUS_FAIL On failure
  *****************************************************************************/
-static sl_wisun_meter_entry_t * _collector_recv_response(int32_t sockid);
+static sl_status_t _collector_recv_response(const int32_t sockid,
+                                            sockaddr_in6_t *remote_addr,
+                                            int32_t * const packet_data_len);
+
+/**************************************************************************//**
+ * @brief Collector parse
+ * @details Handler function
+ * @param[in] raw Received data buffer
+ * @param[in] packet_data_len Length of the received packet
+ * @param[in] remote_addr Address of the sender
+ * @return sl_wisun_meter_entry_t* Meter entry or NULL on failure
+ *****************************************************************************/
+static sl_wisun_meter_entry_t *_collector_parse_response(void *raw,
+                                                         int32_t packet_data_len,
+                                                         const sockaddr_in6_t * const remote_addr);
+
+/**************************************************************************//**
+ * @brief Remove broken meters
+ * @details Remove meters from the given mempool that not responded for the
+ *          request in time.
+ * @param[in] mempool Mempool that stores the meter entry
+ *****************************************************************************/
+static void _collector_remove_broken_meters(sl_mempool_t *mempool);
 
 /**************************************************************************//**
  * @brief Collector receiver thread
  * @details Receiver thread handler function
  * @param[in] args Arguments
  *****************************************************************************/
-static void _collector_recv_thread_fnc(void * args);
+static void _collector_recv_thread_fnc(void *args);
 
 /**************************************************************************//**
- * @brief Collector get meter entry by address
- * @details Handler function
+ * @brief Collector get meter entry by address from a specific mempool
+ * @details Helper function
  * @param remote_addr Remote address
+ * @param block Pointer to the first block in the mempool
  * @return sl_wisun_meter_entry_t* Meter entry or NULL on error
  *****************************************************************************/
-static sl_wisun_meter_entry_t *_collector_get_meter_entry_by_address(const wisun_addr_t * const remote_addr);
+static sl_wisun_meter_entry_t *_collector_get_meter_entry_by_address_from_mempool(const sockaddr_in6_t * const remote_addr,
+                                                                                  sl_mempool_block_hnd_t *block);
+
+/**************************************************************************//**
+ * @brief Collector print async meters
+ *****************************************************************************/
+static void _collector_print_async_meters(void);
+
+/**************************************************************************//**
+ * @brief Collector print registered meters
+ *****************************************************************************/
+static void _collector_print_registered_meters(void);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -107,33 +134,44 @@ static sl_wisun_meter_entry_t *_collector_get_meter_entry_by_address(const wisun
 // -----------------------------------------------------------------------------
 
 /// Mempool to store registered meters
-static sl_mempool_t _meters_mempool = { 0 };
+static sl_mempool_t _reg_meters_mempool               = { 0 };
 
-/// Meter internal storage
-static sl_wisun_meter_entry_t _meters[SL_WISUN_COLLECTOR_MAX_REG_METER] = { 0 };
+/// Mempool to store async meters
+static sl_mempool_t _async_meters_mempool             = { 0 };
 
-static sl_wisun_meter_request_t _measurement_req = { 0 };
+/// Registered meter internal storage
+static sl_wisun_meter_entry_t _reg_meters[SL_WISUN_COLLECTOR_MAX_REG_METER]     = { 0 };
+
+/// Async meter internal storage
+static sl_wisun_meter_entry_t _async_meters[SL_WISUN_COLLECTOR_MAX_ASYNC_METER] = { 0 };
+
+static sl_wisun_meter_request_t _async_meas_req       = { 0 };
+static sl_wisun_meter_request_t _registration_req     = { 0 };
+static sl_wisun_meter_request_t _removal_req          = { 0 };
+
+/// Internal storage for raw rx data
+static uint8_t _rx_buf[SL_WISUN_COLLECTOR_BUFFER_LEN] = { 0U };
 
 /// Collector internal handler
-static sl_wisun_collector_hnd_t _collector_hnd = { 0 };
+static sl_wisun_collector_hnd_t _collector_hnd        = { 0 };
 
 /// Collector receiver task attributes
 static const osThreadAttr_t _collector_recv_task_attr = {
   .name        = "CollectorRecvTask",
   .attr_bits   = osThreadDetached,
   .cb_mem      = NULL,
-  .cb_size     = 0,
+  .cb_size     = 0U,
   .stack_mem   = NULL,
   .stack_size  = app_stack_size_word_to_byte(SL_WISUN_COLLECTOR_STACK_SIZE_WORD),
   .priority    = osPriorityBelowNormal,
-  .tz_module   = 0
+  .tz_module   = 0U
 };
 
 /// Collector receiver thread ID
-static osThreadId_t _collector_recv_thr_id = NULL;
+static osThreadId_t _collector_recv_thr_id            = NULL;
 
 /// Socket shared among the sender and receiver threads
-static int32_t _common_socket = SOCKET_INVALID_ID;
+static int32_t _common_socket                         = SOCKET_INVALID_ID;
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -141,50 +179,69 @@ static int32_t _common_socket = SOCKET_INVALID_ID;
 
 int32_t sl_wisun_collector_get_shared_socket(void)
 {
-  return(_common_socket);
+  return _common_socket;
 }
 
-void sl_wisun_collector_init()
+void sl_wisun_collector_init(void)
 {
   sl_wisun_meter_request_t req = { 0 };
+
+  sl_wisun_collector_set_handler(&_collector_hnd,
+                                 _collector_parse_response,
+                                 NULL);
 
   sl_wisun_collector_init_common_resources();
 
   // init collector-meter token
   sl_wisun_mc_init_token(SL_WISUN_METER_COLLECTOR_TOKEN);
 
-  // Set measurement request
-  req.buff = (uint8_t *)SL_WISUN_METER_COLLECTOR_TOKEN;
-  req.length = sl_wisun_mc_get_token_size();
-  sl_wisun_collector_set_measurement_request(&req);
+  req.length = SL_WISUN_METER_REQUEST_TYPE_LENGTH
+               + 1U
+               + sl_wisun_mc_get_token_size();
+
+  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC \
+             SL_WISUN_METER_REQUEST_DELIMITER                  \
+             SL_WISUN_METER_COLLECTOR_TOKEN;
+  sl_wisun_collector_set_async_measurement_request(&req);
+
+  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER \
+             SL_WISUN_METER_REQUEST_DELIMITER                     \
+             SL_WISUN_METER_COLLECTOR_TOKEN;
+  sl_wisun_collector_set_registration_request(&req);
+
+  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE \
+             SL_WISUN_METER_REQUEST_DELIMITER                   \
+             SL_WISUN_METER_COLLECTOR_TOKEN;
+  sl_wisun_collector_set_removal_request(&req);
 }
 
-void sl_wisun_collector_inherit_common_hnd(sl_wisun_collector_hnd_t *hnd)
+void sl_wisun_collector_inherit_common_hnd(sl_wisun_collector_hnd_t * const hnd)
 {
   // do not overwrite resource_hnd and get_meter
-  _collector_hnd.send = hnd->send;
-  _collector_hnd.recv = hnd->recv;
+  _collector_hnd.parse = hnd->parse;
   _collector_hnd.timeout = hnd->timeout;
-  hnd->get_meter = _collector_hnd.get_meter;
 }
 
 void sl_wisun_collector_init_common_resources(void)
 {
-  // Create mempool for meters
   sl_status_t stat = SL_STATUS_FAIL;
-  stat = sl_mempool_create(&_meters_mempool,
+  // Create mempool for registered meters
+  stat = sl_mempool_create(&_reg_meters_mempool,
                            SL_WISUN_COLLECTOR_MAX_REG_METER,
                            sizeof(sl_wisun_meter_entry_t),
-                           _meters,
-                           sizeof(_meters));
+                           _reg_meters,
+                           sizeof(_reg_meters));
   assert(stat == SL_STATUS_OK);
 
-  // init collector handler
-  sl_wisun_collector_set_handler(&_collector_hnd,
-                                 _collector_recv_response,
-                                 _collector_send_request,
-                                 NULL,
-                                 _collector_get_meter_entry_by_address);
+  // Create mempool for async meters
+  stat = sl_mempool_create(&_async_meters_mempool,
+                           SL_WISUN_COLLECTOR_MAX_ASYNC_METER,
+                           sizeof(sl_wisun_meter_entry_t),
+                           _async_meters,
+                           sizeof(_async_meters));
+  assert(stat == SL_STATUS_OK);
+
+  // Init collector handler
   sl_wisun_collector_init_hnd(&_collector_hnd);
 
   _collector_recv_thr_id = osThreadNew(_collector_recv_thread_fnc, NULL, &_collector_recv_task_attr);
@@ -192,10 +249,12 @@ void sl_wisun_collector_init_common_resources(void)
 }
 
 /* Register meter */
-sl_status_t sl_wisun_collector_register_meter(const wisun_addr_t *meter_addr)
+sl_status_t sl_wisun_collector_register_meter(const sockaddr_in6_t *meter_addr)
 {
+  const sl_mempool_block_hnd_t *block     = NULL;
   sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
-  sl_mempool_block_hnd_t *block = NULL;
+  sl_status_t res                         = SL_STATUS_FAIL;
+  const char *ip_addr                     = NULL;
 
   sl_wisun_mc_mutex_acquire(_collector_hnd);
 
@@ -203,152 +262,211 @@ sl_status_t sl_wisun_collector_register_meter(const wisun_addr_t *meter_addr)
     sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
   }
 
-  block = _meters_mempool.blocks;
+  block = _reg_meters_mempool.blocks;
 
   // Check if meter is already registered
   while (block != NULL) {
     tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
-    if (sl_wisun_collector_compare_address(&tmp_meter_entry->addr, meter_addr)) {
+    if (sl_wisun_mc_compare_address(&tmp_meter_entry->addr, meter_addr)) {
       sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_ALREADY_EXISTS);
     }
     block = block->next;
   }
 
-  tmp_meter_entry = sl_mempool_alloc(&_meters_mempool);
+  tmp_meter_entry = sl_mempool_alloc(&_reg_meters_mempool);
+  if (tmp_meter_entry == NULL) {
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
+  }
+  tmp_meter_entry->type = SL_WISUN_MC_REQ_REGISTER;
+  tmp_meter_entry->resp_recv_timestamp = 0U;
+  tmp_meter_entry->req_sent_timestamp = sl_sleeptimer_get_tick_count();
+  memcpy(&tmp_meter_entry->addr, meter_addr, sizeof(sockaddr_in6_t));
+
+  // Send a registration request to the meter
+  res = sl_wisun_collector_send_request(_common_socket, &tmp_meter_entry->addr, &_registration_req);
+  if (res != SL_STATUS_OK) {
+    ip_addr = app_wisun_trace_util_get_ip_str(&meter_addr->sin6_addr);
+    printf("[Collector cannot send registration request to the meter: %s]\n",
+           ip_addr);
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
+  }
+
+  sl_wisun_mc_mutex_release(_collector_hnd);
+  return SL_STATUS_OK;
+}
+
+/* Remove meter */
+sl_status_t sl_wisun_collector_remove_meter(const sockaddr_in6_t *meter_addr)
+{
+  const sl_mempool_block_hnd_t *block           = NULL;
+  const sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
+  sl_status_t res                               = SL_STATUS_FAIL;
+  const char *ip_addr                           = NULL;
+
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+
+  if (meter_addr == NULL) {
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
+  }
+
+  block = _reg_meters_mempool.blocks;
+
+  while (block != NULL) {
+    tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
+    if (sl_wisun_mc_compare_address(&tmp_meter_entry->addr, meter_addr)) {
+      break;
+    }
+    block = block->next;
+  }
   if (tmp_meter_entry == NULL) {
     sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
   }
 
-  tmp_meter_entry->schedule_tick_counter = 0U;
-  tmp_meter_entry->schedule = SL_WISUN_METER_DEFAULT_PERIOD_MS;
-  memcpy(&tmp_meter_entry->addr, meter_addr, sizeof(wisun_addr_t));
+  // Send a remove request to the meter
+  res = sl_wisun_collector_send_request(_common_socket, &tmp_meter_entry->addr, &_removal_req);
+  if (res != SL_STATUS_OK) {
+    ip_addr = app_wisun_trace_util_get_ip_str(&meter_addr->sin6_addr);
+    printf("[Collector cannot send removal request to the meter: %s]\n",
+           ip_addr);
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
+  }
+
+  sl_mempool_free(&_reg_meters_mempool, tmp_meter_entry);
 
   sl_wisun_mc_mutex_release(_collector_hnd);
 
   return SL_STATUS_OK;
 }
 
-/* Remove meter */
-sl_status_t sl_wisun_collector_remove_meter(const wisun_addr_t *meter_addr)
+sl_status_t sl_wisun_send_async_request(const sockaddr_in6_t *meter_addr)
 {
+  const sl_mempool_block_hnd_t *block     = NULL;
   sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
-  sl_mempool_block_hnd_t *block = NULL;
+  sl_status_t res                         = SL_STATUS_FAIL;
+  const char *ip_addr                     = NULL;
+
+  if (meter_addr == NULL) {
+    return SL_STATUS_FAIL;
+  }
 
   sl_wisun_mc_mutex_acquire(_collector_hnd);
 
-  if (meter_addr == NULL) {
-    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
-  }
+  block = _async_meters_mempool.blocks;
 
-  block = _meters_mempool.blocks;
-
+  // Check if async request has already been sent to the given meter
   while (block != NULL) {
     tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
-    if (sl_wisun_collector_compare_address(&tmp_meter_entry->addr, meter_addr)) {
-      sl_mempool_free(&_meters_mempool, tmp_meter_entry);
+    if (sl_wisun_mc_compare_address(&tmp_meter_entry->addr, meter_addr)) {
       sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_OK);
     }
     block = block->next;
   }
 
-  sl_wisun_mc_mutex_release(_collector_hnd);
-
-  return SL_STATUS_FAIL;
-}
-
-/* compare addresses */
-bool sl_wisun_collector_compare_address(const wisun_addr_t *addr1, const wisun_addr_t *addr2)
-{
-  uint8_t *p1 = (uint8_t *)&addr1->sin6_addr;
-  uint8_t *p2 = (uint8_t *)&addr2->sin6_addr;
-  for (uint8_t i = 0; i < sizeof(in6_addr_t); ++i) {
-    if (p1[i] != p2[i]) {
-      return false;
-    }
+  tmp_meter_entry = sl_mempool_alloc(&_async_meters_mempool);
+  if (tmp_meter_entry == NULL) {
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
   }
-  return true;
+  tmp_meter_entry->req_sent_timestamp = sl_sleeptimer_get_tick_count();
+  tmp_meter_entry->resp_recv_timestamp = 0U;
+  memcpy(&tmp_meter_entry->addr, meter_addr, sizeof(sockaddr_in6_t));
+
+  // Send a async measurement request to the meter
+  res = sl_wisun_collector_send_request(_common_socket, &tmp_meter_entry->addr, &_async_meas_req);
+  if (res != SL_STATUS_OK) {
+    ip_addr = app_wisun_trace_util_get_ip_str(&meter_addr->sin6_addr);
+    printf("[Collector cannot send async measurement request to the meter: %s]\n",
+           ip_addr);
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    sl_wisun_mc_release_mtx_and_return_val(_collector_hnd, SL_STATUS_FAIL);
+  }
+  sl_wisun_mc_mutex_release(_collector_hnd);
+  return SL_STATUS_OK;
 }
 
-/* Measurement loop */
-void sl_wisun_collector_measurement_request_loop(void)
+void sl_wisun_collector_set_async_measurement_request(const sl_wisun_meter_request_t * const req)
+{
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+  memcpy(&_async_meas_req, req, sizeof(_async_meas_req));
+  sl_wisun_mc_mutex_release(_collector_hnd);
+}
+
+void sl_wisun_collector_set_registration_request(const sl_wisun_meter_request_t * const req)
+{
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+  memcpy(&_registration_req, req, sizeof(_registration_req));
+  sl_wisun_mc_mutex_release(_collector_hnd);
+}
+
+void sl_wisun_collector_set_removal_request(const sl_wisun_meter_request_t * const req)
+{
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+  memcpy(&_removal_req, req, sizeof(_removal_req));
+  sl_wisun_mc_mutex_release(_collector_hnd);
+}
+
+void sl_wisun_collector_print_meters(void)
+{
+  _collector_print_async_meters();
+  _collector_print_registered_meters();
+}
+
+sl_wisun_meter_entry_t *sl_wisun_collector_get_async_meter_entry_by_address(const sockaddr_in6_t * const meter_addr)
 {
   sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
-  sl_mempool_block_hnd_t *block = NULL;
-  const char *ip_addr = NULL;
-  sl_status_t res = SL_STATUS_OK;
 
-  sl_wisun_mc_mutex_acquire(_collector_hnd);
-  if (_collector_hnd.send == NULL) {
-    sl_wisun_mc_release_mtx_and_return(_collector_hnd);
+  if (meter_addr == NULL) {
+    return NULL;
   }
-  block = _meters_mempool.blocks;
+  tmp_meter_entry = _collector_get_meter_entry_by_address_from_mempool(meter_addr,
+                                                                       _async_meters_mempool.blocks);
+  return tmp_meter_entry;
+}
 
-  while (block != NULL) {
-    tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
-    // send request by schedule
-    if (tmp_meter_entry->schedule_tick_counter == tmp_meter_entry->schedule) {
-      res = _collector_hnd.send(_common_socket, tmp_meter_entry, &_measurement_req);
-      if (res != SL_STATUS_OK) {
-        ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
-        printf("[Collector cannot send measurement request to the meter: %s]\n", ip_addr);
-        app_wisun_trace_util_destroy_ip_str(ip_addr);
-      }
-      tmp_meter_entry->req_sent_timestamp = sl_sleeptimer_get_tick_count();
-      tmp_meter_entry->schedule_tick_counter = 0U;
-    }
-    tmp_meter_entry->schedule_tick_counter++;
+sl_wisun_meter_entry_t *sl_wisun_collector_get_registered_meter_entry_by_address(const sockaddr_in6_t * const meter_addr)
+{
+  sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
 
-    block = block->next;
+  if (meter_addr == NULL) {
+    return NULL;
   }
-  sl_wisun_mc_mutex_release(_collector_hnd);
+  tmp_meter_entry = _collector_get_meter_entry_by_address_from_mempool(meter_addr,
+                                                                       _reg_meters_mempool.blocks);
+  return tmp_meter_entry;
 }
 
-void sl_wisun_collector_set_measurement_request(const sl_wisun_meter_request_t * const req)
+sl_wisun_meter_entry_t *sl_wisun_collector_get_meter(const sockaddr_in6_t * const meter_addr)
 {
-  sl_wisun_mc_mutex_acquire(_collector_hnd);
-  memcpy(&_measurement_req, req, sizeof(_measurement_req));
-  sl_wisun_mc_mutex_release(_collector_hnd);
-}
-// -----------------------------------------------------------------------------
-//                          Static Function Definitions
-// -----------------------------------------------------------------------------
+  sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
 
-static void _create_common_socket(void)
-{
-  int32_t res                   = SOCKET_INVALID_ID;
-  wisun_addr_t collector_addr   = { 0 };
-
-  _common_socket = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
-  assert(_common_socket != SOCKET_INVALID_ID);
-
-  collector_addr.sin6_family = AF_WISUN;
-  collector_addr.sin6_addr = in6addr_any;
-  collector_addr.sin6_port = htons(SL_WISUN_COLLECTOR_PORT);
-
-  res = bind(_common_socket, (const struct sockaddr *) &collector_addr,
-             sizeof(struct sockaddr_in6));
-  assert(res != SOCKET_RETVAL_ERROR);
+  tmp_meter_entry = sl_wisun_collector_get_registered_meter_entry_by_address(meter_addr);
+  if (tmp_meter_entry != NULL) {
+    return tmp_meter_entry;
+  }
+  tmp_meter_entry = sl_wisun_collector_get_async_meter_entry_by_address(meter_addr);
+  return tmp_meter_entry;
 }
 
-static sl_status_t _collector_send_request(const int32_t sockid,
-                                           sl_wisun_meter_entry_t *meter,
-                                           sl_wisun_meter_request_t *req)
+sl_status_t sl_wisun_collector_send_request(const int32_t sockid,
+                                            const sockaddr_in6_t *addr,
+                                            const sl_wisun_meter_request_t * const req)
 {
-#if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
-  int32_t res = SOCKET_INVALID_ID;
-  socklen_t len = 0;
-  sl_status_t retval = SL_STATUS_OK;
+  socklen_t len       = 0U;
+  int32_t res         = SOCKET_INVALID_ID;
+  sl_status_t retval  = SL_STATUS_OK;
 
   if (sockid == SOCKET_INVALID_ID) {
     return SL_STATUS_FAIL;
   }
 
-  len = sizeof(meter->addr);
+  len = sizeof(*addr);
 
   res = sendto(sockid,
                req->buff,
-               req->length, 0,
-               (const struct sockaddr *)&meter->addr,
+               req->length,
+               0,
+               (const struct sockaddr *)addr,
                len);
 
   if (res == SOCKET_RETVAL_ERROR) {
@@ -356,54 +474,157 @@ static sl_status_t _collector_send_request(const int32_t sockid,
   }
 
   return retval;
-#else
-  (void) sockid;
-  (void) meter;
-  (void) req;
-  return false;
-#endif
 }
 
-static sl_wisun_meter_entry_t * _collector_recv_response(int32_t sockid)
+// -----------------------------------------------------------------------------
+//                          Static Function Definitions
+// -----------------------------------------------------------------------------
+
+static void _create_common_socket(void)
+{
+  static sockaddr_in6_t collector_addr  = { 0 };
+  int32_t res                         = SOCKET_INVALID_ID;
+
+  _common_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  assert(_common_socket != SOCKET_INVALID_ID);
+
+  collector_addr.sin6_family = AF_INET6;
+  collector_addr.sin6_addr = in6addr_any;
+  collector_addr.sin6_port = htons(SL_WISUN_COLLECTOR_PORT);
+
+  res = bind(_common_socket,
+             (const struct sockaddr *) &collector_addr,
+             sizeof(struct sockaddr_in6));
+  assert(res != SOCKET_RETVAL_ERROR);
+}
+
+static sl_status_t _collector_recv_response(const int32_t sockid,
+                                            sockaddr_in6_t *remote_addr,
+                                            int32_t * const packet_data_len)
+{
+  socklen_t addrlen = 0U;
+  int32_t res       = SOCKET_INVALID_ID;
+
+  if (remote_addr == NULL || packet_data_len == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  *packet_data_len = -1;
+  addrlen = sizeof(sockaddr_in6_t);
+  res = recvfrom(sockid,
+                 _rx_buf,
+                 SL_WISUN_COLLECTOR_BUFFER_LEN,
+                 0,
+                 (struct sockaddr *)remote_addr,
+                 &addrlen);
+
+  if (res <= 0) {
+    return SL_STATUS_FAIL;
+  }
+
+  if (!memcmp(&remote_addr->sin6_addr, &in6addr_any, sizeof(in6addr_any))) {
+    printf("[Invalid address received]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  *packet_data_len = res;
+  return SL_STATUS_OK;
+}
+
+static sl_wisun_meter_entry_t *_collector_parse_response(void *raw,
+                                                         int32_t packet_data_len,
+                                                         const sockaddr_in6_t * const remote_addr)
 {
 #if !defined(SL_CATALOG_WISUN_COAP_PRESENT)
-  sl_wisun_meter_packet_packed_t packet = { 0 };
-  wisun_addr_t remote_addr              = { 0 };
-  const char *ip_addr                   = NULL;
-  sl_wisun_meter_entry_t *meter         = NULL;
-  socklen_t len                         = 0;
-  int32_t res                           = SOCKET_INVALID_ID;
+  uint16_t packet_size              = 0U;
+  sl_wisun_meter_entry_t *meter     = NULL;
+  const char *ip_addr               = NULL;
+  const char *packet                = NULL;
+  sl_wisun_request_type_t resp_type = SL_WISUN_MC_REQ_UNKNOWN;
 
-  len = sizeof(remote_addr);
-  memset(&packet, 0, sizeof(packet));
-  res = recvfrom(sockid, &packet, sizeof(packet), 0,
-                 (struct sockaddr *)&remote_addr, &len);
-  if (res == sizeof(packet)) {
-    sl_wisun_mc_mutex_acquire(_collector_hnd);
-    meter = _collector_hnd.get_meter(&remote_addr);
-    sl_wisun_mc_mutex_release(_collector_hnd);
-    if (meter != NULL) {
-      ip_addr = app_wisun_trace_util_get_ip_str(&remote_addr.sin6_addr);
-      meter->schedule = packet.schedule;
-      printf("['%s' meter scheduled: %lu ms]\n", ip_addr, meter->schedule);
-      sl_wisun_mc_print_mesurement(ip_addr, &packet, true);
-      app_wisun_trace_util_destroy_ip_str(ip_addr);
-      return meter;
-    } else {
-      printf("[Unknown remote message received!]\n");
-    }
+  packet_size = sizeof(sl_wisun_meter_packet_packed_t);
+  if (packet_data_len == packet_size) {
+    resp_type = SL_WISUN_MC_REQ_ASYNC;
+  } else {
+    resp_type = SL_WISUN_MC_REQ_REGISTER;
   }
-  return NULL;
+
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+  if (resp_type == SL_WISUN_MC_REQ_ASYNC) {
+    meter = sl_wisun_collector_get_async_meter_entry_by_address(remote_addr);
+  }
+  if (meter == NULL) {
+    meter = sl_wisun_collector_get_registered_meter_entry_by_address(remote_addr);
+  }
+  sl_wisun_mc_mutex_release(_collector_hnd);
+
+  if (meter == NULL) {
+    printf("[Unknown remote message received!]\n");
+    return NULL;
+  }
+
+  printf("[%s response]\n", resp_type == SL_WISUN_MC_REQ_ASYNC ? "Async" : "Periodic");
+  ip_addr = app_wisun_trace_util_get_ip_str(&remote_addr->sin6_addr);
+  packet = raw;
+  while (packet_data_len >= packet_size) {
+    sl_wisun_mc_print_mesurement(ip_addr, packet, true);
+    packet += packet_size;
+    packet_data_len -= packet_size;
+  }
+  app_wisun_trace_util_destroy_ip_str(ip_addr);
+  return meter;
 #else
-  (void) sockid;
+  (void) raw;
+  (void) packet_data_len;
+  (void) remote_addr;
   return NULL;
 #endif
 }
 
-static void _collector_recv_thread_fnc(void * args)
+static void _collector_remove_broken_meters(sl_mempool_t *mempool)
 {
-  sl_wisun_meter_entry_t *meter = NULL;
-  uint32_t response_time_ms     = 0;
+  const sl_mempool_block_hnd_t *block           = NULL;
+  const sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
+  uint32_t timestamp                            = 0U;
+  const char *ip_addr                           = NULL;
+  uint32_t elapsed_ms                           = 0U;
+
+  if (mempool == NULL) {
+    return;
+  }
+
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+
+  block = mempool->blocks;
+
+  while (block != NULL) {
+    tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
+    timestamp = sl_sleeptimer_get_tick_count();
+    elapsed_ms = sl_sleeptimer_tick_to_ms(timestamp - tmp_meter_entry->req_sent_timestamp);
+
+    block = block->next;
+    if ((tmp_meter_entry->resp_recv_timestamp) || (elapsed_ms <= SL_WISUN_COLLECTOR_REQUEST_TIMEOUT)) {
+      continue;
+    }
+
+    ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
+    printf("[%s not responded for the %s request in time, therefore has been removed]\n",
+           ip_addr,
+           tmp_meter_entry->type == SL_WISUN_MC_REQ_ASYNC ? "async" : "registration");
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    sl_mempool_free(mempool, tmp_meter_entry);
+  }
+
+  sl_wisun_mc_mutex_release(_collector_hnd);
+}
+
+static void _collector_recv_thread_fnc(void *args)
+{
+  uint32_t response_time_ms         = 0U;
+  sl_wisun_meter_entry_t *meter     = NULL;
+  sl_status_t res                   = SL_STATUS_FAIL;
+  static sockaddr_in6_t remote_addr = { 0 };
+  int32_t packet_data_len           = -1;
 
   (void) args;
 
@@ -411,65 +632,112 @@ static void _collector_recv_thread_fnc(void * args)
 
   SL_WISUN_THREAD_LOOP {
     if (!app_wisun_network_is_connected()) {
-      msleep(1000);
+      osDelay(1000);
       continue;
     }
 
+    _collector_remove_broken_meters(&_async_meters_mempool);
+    _collector_remove_broken_meters(&_reg_meters_mempool);
+
     meter = NULL;
-    if (_collector_hnd.recv != NULL) {
-      meter = _collector_hnd.recv(_common_socket);
+
+    res = _collector_recv_response(_common_socket,
+                                   &remote_addr,
+                                   &packet_data_len);
+
+    if (res != SL_STATUS_OK) {
+      app_wisun_dispatch_thread();
+      continue;
     }
-    if (meter != NULL) {
-      meter->resp_recv_timestamp = sl_sleeptimer_get_tick_count();
+
+    meter = _collector_hnd.parse(_rx_buf,
+                                 packet_data_len,
+                                 &remote_addr);
+
+    if (meter == NULL) {
+      app_wisun_dispatch_thread();
+      continue;
+    }
+
+    meter->resp_recv_timestamp = sl_sleeptimer_get_tick_count();
+    if (meter->type == SL_WISUN_MC_REQ_ASYNC) {
       response_time_ms = sl_sleeptimer_tick_to_ms(meter->resp_recv_timestamp
                                                   - meter->req_sent_timestamp);
       printf("[Response time: %ldms]\n", response_time_ms);
-      if (response_time_ms > (meter->schedule * SL_WISUN_COLLECTOR_TIMEOUT_FACTOR)) {
-        _collector_hnd.timeout(meter);
-      }
+      sl_mempool_free(&_async_meters_mempool, meter);
     }
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 
-static sl_wisun_meter_entry_t *_collector_get_meter_entry_by_address(const wisun_addr_t * const remote_addr)
+static sl_wisun_meter_entry_t *_collector_get_meter_entry_by_address_from_mempool(const sockaddr_in6_t * const remote_addr,
+                                                                                  sl_mempool_block_hnd_t *block)
 {
   sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
-  sl_mempool_block_hnd_t *block = NULL;
-
-  if (remote_addr == NULL) {
-    return NULL;
-  }
-
-  block = _meters_mempool.blocks;
 
   while (block != NULL) {
     tmp_meter_entry = (sl_wisun_meter_entry_t *) block->start_addr;
-    if (sl_wisun_collector_compare_address(&tmp_meter_entry->addr, remote_addr)) {
+    if (sl_wisun_mc_compare_address(&tmp_meter_entry->addr, remote_addr)) {
       return tmp_meter_entry;
     }
     block = block->next;
   }
-
   return NULL;
 }
 
-sl_status_t sl_wisun_collector_get_meter(const wisun_addr_t *meter_addr,
-                                         sl_wisun_meter_entry_t * const dest_meter)
+static void _collector_print_async_meters(void)
 {
-  sl_wisun_meter_entry_t *meter = NULL;
-  sl_status_t retval = SL_STATUS_FAIL;
+  uint32_t timestamp                            = 0U;
+  const sl_mempool_block_hnd_t *block           = NULL;
+  const sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
+  uint32_t remaining_ms                         = 0U;
+  uint32_t elapsed_ms                           = 0U;
+  const char *ip_addr                           = NULL;
 
   sl_wisun_mc_mutex_acquire(_collector_hnd);
 
-  meter = _collector_get_meter_entry_by_address(meter_addr);
+  printf("[Async meters:]\n");
+  timestamp = sl_sleeptimer_get_tick_count();
+  block = _async_meters_mempool.blocks;
 
-  if (meter != NULL) {
-    memcpy(dest_meter, meter, sizeof(sl_wisun_meter_entry_t));
-    retval = SL_STATUS_OK;
+  while (block != NULL) {
+    tmp_meter_entry = (sl_wisun_meter_entry_t *)block->start_addr;
+    elapsed_ms = sl_sleeptimer_tick_to_ms(timestamp - tmp_meter_entry->req_sent_timestamp);
+    if (elapsed_ms > SL_WISUN_COLLECTOR_REQUEST_TIMEOUT) {
+      remaining_ms = 0U;
+    } else {
+      remaining_ms = SL_WISUN_COLLECTOR_REQUEST_TIMEOUT - elapsed_ms;
+    }
+    ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
+    printf("[%s - time to live: %lu ms]\n", ip_addr, remaining_ms);
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    block = block->next;
   }
-
   sl_wisun_mc_mutex_release(_collector_hnd);
+}
 
-  return retval;
+static void _collector_print_registered_meters(void)
+{
+  uint32_t timestamp                            = 0U;
+  const sl_mempool_block_hnd_t *block           = NULL;
+  const sl_wisun_meter_entry_t *tmp_meter_entry = NULL;
+  uint32_t elapsed_ms                           = 0U;
+  const char *ip_addr                           = NULL;
+
+  sl_wisun_mc_mutex_acquire(_collector_hnd);
+
+  printf("[Registered meters:]\n");
+  timestamp = sl_sleeptimer_get_tick_count();
+  block = _reg_meters_mempool.blocks;
+
+  while (block != NULL) {
+    tmp_meter_entry = (sl_wisun_meter_entry_t *)block->start_addr;
+    elapsed_ms = sl_sleeptimer_tick_to_ms(timestamp
+                                          - tmp_meter_entry->req_sent_timestamp);
+    ip_addr = app_wisun_trace_util_get_ip_str(&tmp_meter_entry->addr.sin6_addr);
+    printf("[%s - registered %lu seconds ago]\n", ip_addr, elapsed_ms / 1000);
+    app_wisun_trace_util_destroy_ip_str(ip_addr);
+    block = block->next;
+  }
+  sl_wisun_mc_mutex_release(_collector_hnd);
 }

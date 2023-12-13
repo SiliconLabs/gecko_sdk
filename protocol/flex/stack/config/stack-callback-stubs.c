@@ -32,64 +32,64 @@
 //------------------------------------------------------------------------------
 // Stack handlers weak definitions.
 
-WEAK(void emberStackStatusHandler(EmberStatus status))
+SL_WEAK void emberStackStatusHandler(EmberStatus status)
 {
   (void)status;
 }
 
-WEAK(void emberChildJoinHandler(EmberNodeType nodeType, EmberNodeId nodeId))
+SL_WEAK void emberChildJoinHandler(EmberNodeType nodeType, EmberNodeId nodeId)
 {
   (void) nodeType;
   (void) nodeId;
 }
 
-WEAK(void emberRadioNeedsCalibratingHandler(void))
+SL_WEAK void emberRadioNeedsCalibratingHandler(void)
 {
 }
 
-WEAK(void emberStackIsrHandler(void))
+SL_WEAK void emberStackIsrHandler(void)
 {
 }
 
-WEAK(bool emberStackIdleHandler(uint32_t *idleTimeMs))
+SL_WEAK bool emberStackIdleHandler(uint32_t *idleTimeMs)
 {
   (void)idleTimeMs;
 
   return true;
 }
 
-WEAK(void emberMessageSentHandler(EmberStatus status,
-                                  EmberOutgoingMessage *message))
+SL_WEAK void emberMessageSentHandler(EmberStatus status,
+                                     EmberOutgoingMessage *message)
 {
   (void)status;
   (void)message;
 }
 
-WEAK(void emberIncomingMessageHandler(EmberIncomingMessage *message))
+SL_WEAK void emberIncomingMessageHandler(EmberIncomingMessage *message)
 {
   (void)message;
 }
 
-WEAK(void emberMacMessageSentHandler(EmberStatus status,
-                                     EmberOutgoingMacMessage *message))
+SL_WEAK void emberMacMessageSentHandler(EmberStatus status,
+                                        EmberOutgoingMacMessage *message)
 {
   (void)status;
   (void)message;
 }
 
-WEAK(void emberIncomingMacMessageHandler(EmberIncomingMacMessage *message))
+SL_WEAK void emberIncomingMacMessageHandler(EmberIncomingMacMessage *message)
 {
   (void)message;
 }
 
-WEAK(void emberIncomingBeaconHandler(EmberPanId panId,
-                                     EmberMacAddress *source,
-                                     int8_t rssi,
-                                     bool permitJoining,
-                                     uint8_t beaconFieldsLength,
-                                     uint8_t *beaconFields,
-                                     uint8_t beaconPayloadLength,
-                                     uint8_t *beaconPayload))
+SL_WEAK void emberIncomingBeaconHandler(EmberPanId panId,
+                                        EmberMacAddress *source,
+                                        int8_t rssi,
+                                        bool permitJoining,
+                                        uint8_t beaconFieldsLength,
+                                        uint8_t *beaconFields,
+                                        uint8_t beaconPayloadLength,
+                                        uint8_t *beaconPayload)
 {
   (void)panId;
   (void)source;
@@ -101,14 +101,14 @@ WEAK(void emberIncomingBeaconHandler(EmberPanId panId,
   (void)beaconPayload;
 }
 
-WEAK(void emberActiveScanCompleteHandler(void))
+SL_WEAK void emberActiveScanCompleteHandler(void)
 {
 }
 
-WEAK(void emberEnergyScanCompleteHandler(int8_t mean,
-                                         int8_t min,
-                                         int8_t max,
-                                         uint16_t variance))
+SL_WEAK void emberEnergyScanCompleteHandler(int8_t mean,
+                                            int8_t min,
+                                            int8_t max,
+                                            uint16_t variance)
 {
   (void)mean;
   (void)min;
@@ -116,11 +116,11 @@ WEAK(void emberEnergyScanCompleteHandler(int8_t mean,
   (void)variance;
 }
 
-WEAK(void emberFrequencyHoppingStartClientCompleteHandler(EmberStatus status))
+SL_WEAK void emberFrequencyHoppingStartClientCompleteHandler(EmberStatus status)
 {
   (void)status;
 }
 
-WEAK(void emberMarkApplicationBuffersHandler(void))
+SL_WEAK void emberMarkApplicationBuffersHandler(void)
 {
 }

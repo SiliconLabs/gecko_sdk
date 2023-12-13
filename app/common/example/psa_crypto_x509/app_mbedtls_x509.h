@@ -142,9 +142,10 @@ psa_status_t set_parameters(bool root, mbedtls_md_type_t hash_alg);
 /***************************************************************************//**
  * Set the serial number for a certificate.
  *
+ * @param root True for root certificate, false for device certificate.
  * @returns Returns an integer.
  ******************************************************************************/
-psa_status_t set_serial(void);
+psa_status_t set_serial(bool root);
 
 /***************************************************************************//**
  * Set the validity period for a certificate.

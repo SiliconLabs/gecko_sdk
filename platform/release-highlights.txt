@@ -1,4 +1,18 @@
-Gecko Platform 4.3.2.0
-- Targeted quality improvements and bug fixes
+Gecko Platform 4.4.0.0
+Peripherals
+ - New API names introduced for low-level drivers (with compatibility layer for old names)
+Services
+  - APIs for accessing value of tokens added to Token Manager
+CPC
+ - NVM3 module, enabling Host access to Secondary device's non-volatile memory, released at production quality
+ - CPC Primary, for use with MCU Hosts, released at Experimental quality
+ - Numerous optimizations and performance improvements made
+Security
+  - Mbed TLS upgraded (to version 3.5.0)
+RAIL
+ - Several new features added for EFR32xG25 devices, including a new component for selecting modulations supported by the software modem
+ - Support added for several new PHYs, including Sidewalk PHYs on EFR32xG23 and EFR32xG28
+Other components
+ - Compilers upgraded (to GCC 12.2.1 and IAR 9.40.1)
 
 

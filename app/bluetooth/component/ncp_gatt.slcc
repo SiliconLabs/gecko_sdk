@@ -10,7 +10,6 @@ quality: production
 root_path: app/bluetooth/common/ncp_gatt
 tag:
   - No-Code
-
 include:
   - path: .
     file_list:
@@ -18,8 +17,8 @@ include:
 source:
   - path: sl_ncp_gatt.c
 requires:
-  - name: "gatt_configuration"
-  - name: "app_assert"
+  - name: gatt_configuration
+  - name: app_assert
 provides:
   - name: ncp_gatt
 template_contribution:
@@ -28,3 +27,6 @@ template_contribution:
       include: sl_ncp_gatt.h
       function: sl_ncp_gatt_on_event
     priority: -9000
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp-gatt

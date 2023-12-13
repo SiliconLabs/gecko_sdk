@@ -84,8 +84,12 @@ __WEAK int32_t sl_ftp_socket_close(int32_t sockid)
 
 __WEAK bool sl_ftp_is_network_connected(void)
 {
-  (void) 0UL;
   return false;
+}
+
+__WEAK const char * sl_ftp_get_global_addr(void)
+{
+  return SL_FTP_LOCAL_HOST_STR;
 }
 
 #if SL_FTP_ENABLE_FTP_PROTOCOL

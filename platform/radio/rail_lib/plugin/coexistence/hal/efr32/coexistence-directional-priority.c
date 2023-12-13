@@ -247,19 +247,19 @@ __STATIC_INLINE void configPrsChain(PRS_ChannelConfig_t *prsConfig,
 #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   // enable ptaPriCfg interrupt if not already enabled
   if (sli_coex_ptaPriCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, NULL);
   }
 #endif //SL_RAIL_UTIL_COEX_PRI_PORT
 
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   // enable ptaPwmReqCfg interrupt if not already enabled
   if (sli_coex_ptaPwmReqCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, NULL);
   }
 #else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   // enable ptaReqCfg interrupt if not already enabled
   if (sli_coex_ptaReqCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, NULL);
   }
 #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 
@@ -502,7 +502,7 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs)
 
 #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   if (sli_coex_ptaPriCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, NULL);
   }
   // Disable priority and request interrupts
   GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_PRI_PORT,
@@ -514,7 +514,7 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs)
 #endif //SL_RAIL_UTIL_COEX_PRI_PORT
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   if (sli_coex_ptaPwmReqCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, NULL);
   }
   GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT,
                     SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN,
@@ -524,7 +524,7 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs)
                     false);
 #else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   if (sli_coex_ptaReqCfg.intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, false);
+    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, NULL);
   }
   GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT,
                     SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN,

@@ -1,9 +1,9 @@
 project_name: mbedtls_aescrypt
 package: platform
 quality: production
-label: Platform - mbedTLS AES
+label: Platform Security - SoC mbedTLS AES
 description: >
-  mbedTLS AES example using hardware accelerators to
+  This example uses hardware accelerators to
   accelerate the AES encryption and SHA hash functions of mbedTLS.
 category: Example|Platform
 filter:

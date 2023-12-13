@@ -458,4 +458,4 @@ typedef struct {
 /** @} End of group EFM32PG23_DCDC */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_DCDC_H */
+#endif // EFM32PG23_DCDC_H

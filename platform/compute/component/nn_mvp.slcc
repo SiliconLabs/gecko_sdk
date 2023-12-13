@@ -35,6 +35,8 @@ include:
 provides:
   - name: nn_mvp
 requires:
+  - name: compute_util
+  - name: nn_util
   - name: driver_mvp
   - name: math_mvp
   - name: emlib_common

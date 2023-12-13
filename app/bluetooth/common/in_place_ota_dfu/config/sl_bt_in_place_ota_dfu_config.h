@@ -3,7 +3,7 @@
  * @brief In-Place Over-the-Air Device Firmware Update Configuration
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -38,7 +38,7 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h> In-Place OTA DFU Security Configuration
+// <h> In-Place OTA DFU Security
 
 // <q SL_BT_IN_PLACE_OTA_DFU_BONDING_REQUIRED> Bonding required for OTA transfer
 
@@ -47,7 +47,25 @@
 // <i> 'sl_bt_in_place_ota_dfu_security_status' callback to decide if
 // <i> it is safe to start the OTA transfer or not.
 // <i> Default: 0
-#define SL_BT_IN_PLACE_OTA_DFU_BONDING_REQUIRED 0
+#define SL_BT_IN_PLACE_OTA_DFU_BONDING_REQUIRED            0
+
+// </h>
+
+// <h> In-Place OTA DFU Transfer
+
+// <o SL_BT_IN_PLACE_OTA_DFU_CALC_DELAY_MULTIPLIER> Calculated delay multiplier <3-20>
+
+// <i> 'Connection interval x 1.25 msec x (1 + latency)' will be multiplied by this configurable value.
+// <i> Default: 5
+#define SL_BT_IN_PLACE_OTA_DFU_CALC_DELAY_MULTIPLIER       5
+
+// <o SL_BT_IN_PLACE_OTA_DFU_MIN_DELAY_TO_DISCONNECT> Minimum delay [msec] <10-5000>
+
+// <i> Closing the connection after a calculated millisecond delay.
+// <i> The length of the delay is calculated from the connection interval and latency with a configurable multiplier
+// <i> and it has to be greater than a minimum value. This configuration parameter sets the minimum value.
+// <i> Default: 1000
+#define SL_BT_IN_PLACE_OTA_DFU_MIN_DELAY_TO_DISCONNECT     1000
 
 // </h>
 

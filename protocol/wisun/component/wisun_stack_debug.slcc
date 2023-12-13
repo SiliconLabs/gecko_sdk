@@ -21,3 +21,7 @@ include:
 documentation:
   docset: wisun
   document: wisun-stack-api/sl-wisun-trace-api
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_stack_debug

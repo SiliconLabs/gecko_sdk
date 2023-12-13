@@ -74,9 +74,7 @@ class cc_multilevel_sensor(cc_validate):
             # we don't need to ensure that it is unique because python would
             # throw an error in case of non unique keys
             if value['name'] not in self._names:
-                raise ValueError(
-                    'Invalid name {} for sensor for {}'.format(value['name'], key))
+                raise ValueError(f"Invalid name {value['name']} for sensor for {key}")
             for scale in value['scales']:
                 if scale not in self._scales:
-                    raise ValueError(
-                        'Invalid scale {} for sensor for {}'.format(scale, key))
+                    raise ValueError(f'Invalid scale {scale} for sensor for {key}')

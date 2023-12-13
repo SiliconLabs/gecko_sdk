@@ -1,34 +1,34 @@
-package: "Zigbee"
-id: "zigbee_green_power_adapter"
-label: "Green Power Adapter"
+package: Zigbee
+id: zigbee_green_power_adapter
+label: Green Power Adapter
 category: Zigbee|Green Power
-quality: "production"
-description: "This component provides the green power cluster user with all the in/out function interfaces. The customer should be able to use their framework."
+quality: production
+description: This component provides the green power cluster user with all the in/out function interfaces. The customer should be able to use their framework.
 provides:
-  - name: "zigbee_green_power_adapter"
+  - name: zigbee_green_power_adapter
 
 requires:
-  - name: "zigbee_signature_decode"
-  - name: "zigbee_cluster_service"
+  - name: zigbee_signature_decode
+  - name: zigbee_cluster_service
 
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/config/green-power-adapter-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-af-wrapper.c
     unless:
-    - zigbee_zcl_framework_core
+      - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-stack-wrapper.c
     unless:
-    - zigbee_zcl_framework_core
+      - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-print-wrapper.c
     unless:
-    - zigbee_zcl_framework_core
+      - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-token-wrapper.c
     unless:
-    - zigbee_zcl_framework_core
+      - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/plugin/green-power-adapter/green-power-event-wrapper.c
     unless:
-    - zigbee_zcl_framework_core
+      - zigbee_zcl_framework_core
   - path: protocol/zigbee/app/framework/util/attribute-storage.c
   - path: protocol/zigbee/app/framework/util/attribute-table.c
   - path: protocol/zigbee/app/framework/util/attribute-size.c
@@ -93,7 +93,7 @@ include:
       - path: zigbee-device-common.h
   - path: protocol/zigbee/app/util/serial
     file_list:
-      - path: sl_zigbee_command_interpreter.h  
+      - path: sl_zigbee_command_interpreter.h
 
 template_file:
   - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.h.jinja

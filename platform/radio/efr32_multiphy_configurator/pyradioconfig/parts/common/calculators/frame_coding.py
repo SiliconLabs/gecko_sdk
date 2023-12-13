@@ -137,6 +137,11 @@ class CALC_Whitening(ICalculator):
         array_width = 8
         coding_table_is_msb_first = True  # Pull this from the frame format variable
 
+        return self._create_content_table(message_bits, coded_bits, array_width, coding_table_is_msb_first,
+                                          coding_table)
+
+    def _create_content_table(self, message_bits, coded_bits, array_width, coding_table_is_msb_first, coding_table):
+
         # Notice that everything below this line could be refactored into common code.  The only
         # thing specific to a given coding scheme is the table above and parameters above
 
@@ -180,6 +185,10 @@ class CALC_Whitening(ICalculator):
         tx_table_size = 1 << message_bits
         for tx_data in range(tx_table_size):
             content.append(int(tx_map_table[tx_data]))
+
+        if message_bits == 1 and array_width == 8:
+            # Extend with zeros bytes to respect the RAM table 4 bytes boundary
+            content.extend([0, 0])
 
         return content
 
@@ -245,26 +254,26 @@ class CALC_Whitening(ICalculator):
 
     def calc_frame_coding_array_packed(self, model):
 
-            #Only perform this calculation when dealing with a frame_coding setting that produces a frame_coding_array
-            #that is not None
-            frame_coding = model.vars.frame_coding.value
-            if frame_coding != model.vars.frame_coding.var_enum.NONE and \
-                    frame_coding != model.vars.frame_coding.var_enum.UART_NO_VAL:
+        #Only perform this calculation when dealing with a frame_coding setting that produces a frame_coding_array
+        #that is not None
+        frame_coding = model.vars.frame_coding.value
+        if frame_coding != model.vars.frame_coding.var_enum.NONE and \
+                frame_coding != model.vars.frame_coding.var_enum.UART_NO_VAL:
 
-                coding_array = model.vars.frame_coding_array.value
-                width = model.vars.frame_coding_array_width.value
-                if width == 0:
-                    model.vars.frame_coding_array_packed.value = None
-                elif width == 8:
-                    if (len(coding_array) % 4) != 0:
-                        raise CalculationException("Frame coding array not word aligned!")
-                    model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
-                elif width == 16:
-                    if (len(coding_array) % 2) != 0:
-                        raise CalculationException("Frame coding array not word aligned!")
-                    model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
-                else:
-                    raise CalculationException("Unexpected frame coding array width of %s!" % width)
+            coding_array = model.vars.frame_coding_array.value
+            width = model.vars.frame_coding_array_width.value
+            if width == 0:
+                model.vars.frame_coding_array_packed.value = None
+            elif width == 8:
+                if (len(coding_array) % 4) != 0:
+                    raise CalculationException("Frame coding array not word aligned!")
+                model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
+            elif width == 16:
+                if (len(coding_array) % 2) != 0:
+                    raise CalculationException("Frame coding array not word aligned!")
+                model.vars.frame_coding_array_packed.value = self.pack_list(coding_array, width)
+            else:
+                raise CalculationException("Unexpected frame coding array width of %s!" % width)
 
     def calc_blockwhitemode(self, model):
         # This method calculates the FRC_FECCTRL_BLOCKWHITEMODE field

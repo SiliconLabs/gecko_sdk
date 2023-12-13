@@ -68,6 +68,11 @@
 #elif defined(SL_CATALOG_SENSOR_LUX_PRESENT)
 #include "sl_sensor_lux_config.h"
 #include "sl_sensor_lux.h"
+#elif defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT)
+#include "sl_sensor_light_config.h"
+#include "sl_sensor_lux.h"
+#include "sl_sensor_light.h"
+#include "sl_sensor_light_lux_mock.h"
 #endif
 
 #include "sl_btmesh_sensor_server.h"
@@ -107,7 +112,7 @@
 /// Acknowledgement request mask
 #define SET_CADENCE_ACK_FLAG    2
 /// Callback has no parameters
-#define NO_CALLBACK_DATA        (void *)NULL
+#define NO_CALLBACK_DATA        NULL
 /// Multiplier for seconds conversion to millisenconds
 #define SEC_TO_MS               1000
 /// Sensor Update Interval formula power extractor constant
@@ -115,13 +120,23 @@
 
 #define MIN(a, b)               (((a) < (b)) ? (a) : (b))
 
+/// If RHT is present in the component catalog, either sensor_rht
+/// or sensor_rht_mock is added to the project. If the sl_board
+/// sensor is not defined at all, that means the mock is used.
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT) && !defined(SL_BOARD_ENABLE_SENSOR_RHT)
+  #define SENSOR_TEMPERATURE_MOCK_PRESENT 1
+#else
+  #define SENSOR_TEMPERATURE_MOCK_PRESENT 0
+#endif
+
 #ifdef SL_CATALOG_SENSOR_RHT_PRESENT
 temperature_8_t get_temperature(void);
 bool            rht_initialized;
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 
 #if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
-  || defined(SL_CATALOG_SENSOR_LUX_PRESENT)
+  || defined(SL_CATALOG_SENSOR_LUX_PRESENT)  \
+  || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT)
 illuminance_t get_light(void);
 #endif //SL_CATALOG_SENSOR_LIGHT_PRESENT || SL_CATALOG_SENSOR_LUX_PRESENT
 
@@ -160,9 +175,8 @@ void sl_btmesh_sensor_server_node_init(void)
       .update_interval = SL_BTMESH_SENSOR_PEOPLE_COUNT_UPDATE_INTERVAL_CFG_VAL
     },
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
-#if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) \
-    && SL_BOARD_ENABLE_SENSOR_LIGHT
-#ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
+#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
+    || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT)
     {
       .property_id = PRESENT_AMBIENT_LIGHT_LEVEL,
       .positive_tolerance = SENSOR_LIGHT_POSITIVE_TOLERANCE,
@@ -181,10 +195,9 @@ void sl_btmesh_sensor_server_node_init(void)
       .update_interval = SENSOR_LUX_UPDATE_INTERVAL
     },
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT, SL_CATALOG_SENSOR_LUX_PRESENT
-#endif // SL_BOARD_ENABLE_SENSOR_LIGHT
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT) \
-    && defined(SL_BOARD_ENABLE_SENSOR_RHT) \
-    && SL_BOARD_ENABLE_SENSOR_RHT
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)                                  \
+    && ((defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT) \
+    || SENSOR_TEMPERATURE_MOCK_PRESENT)
     {
       .property_id = PRESENT_AMBIENT_TEMPERATURE,
       .positive_tolerance = SENSOR_THERMOMETER_POSITIVE_TOLERANCE,
@@ -221,9 +234,9 @@ void sl_btmesh_sensor_server_node_init(void)
   }
 #endif // SL_CATALOG_SENSOR_LUX_PRESENT
 #endif // SL_BOARD_ENABLE_SENSOR_LIGHT
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT) \
-  && defined(SL_BOARD_ENABLE_SENSOR_RHT)   \
-  && SL_BOARD_ENABLE_SENSOR_RHT
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)                                \
+  && ((defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT) \
+  || SENSOR_TEMPERATURE_MOCK_PRESENT)
   {
     sl_status_t sc;
     sc = sl_sensor_rht_init();
@@ -301,9 +314,8 @@ static void handle_sensor_server_get_request(
                                    (uint8_t*)&people_count);
   }
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
-#if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) \
-  && SL_BOARD_ENABLE_SENSOR_LIGHT
-#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
+#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT)           \
+  || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT) \
   || defined(SL_CATALOG_SENSOR_LUX_PRESENT)
   if ((evt->property_id == PRESENT_AMBIENT_LIGHT_LEVEL)
       || (evt->property_id == PROPERTY_ID_ALL)) {
@@ -313,10 +325,9 @@ static void handle_sensor_server_get_request(
                                    (uint8_t*)&light);
   }
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT || SL_CATALOG_SENSOR_LUX_PRESENT
-#endif // SL_BOARD_ENABLE_SENSOR_LIGHT
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT) \
-  && defined(SL_BOARD_ENABLE_SENSOR_RHT)   \
-  && SL_BOARD_ENABLE_SENSOR_RHT
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)                                \
+  && ((defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT) \
+  || SENSOR_TEMPERATURE_MOCK_PRESENT)
   if ((evt->property_id == PRESENT_AMBIENT_TEMPERATURE)
       || (evt->property_id == PROPERTY_ID_ALL)) {
     temperature_8_t temperature = get_temperature();
@@ -414,24 +425,23 @@ static void sensor_server_publish(void)
                                  (uint8_t*)&people_count);
 #endif // SL_CATALOG_BTMESH_SENSOR_PEOPLE_COUNT_PRESENT
 
-#if defined(SL_BOARD_ENABLE_SENSOR_LIGHT) && SL_BOARD_ENABLE_SENSOR_LIGHT
-#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
+#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT)           \
+  || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT) \
   || defined(SL_CATALOG_SENSOR_LUX_PRESENT)
   illuminance_t light = get_light();
   len += mesh_sensor_data_to_buf(PRESENT_AMBIENT_LIGHT_LEVEL,
                                  &sensor_data[len],
                                  (uint8_t*)&light);
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT || SL_CATALOG_SENSOR_LUX_PRESENT
-#endif // SL_BOARD_ENABLE_SENSOR_LIGHT
 
-#if defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT
-#ifdef SL_CATALOG_SENSOR_RHT_PRESENT
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)                                \
+  && ((defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT) \
+  || SENSOR_TEMPERATURE_MOCK_PRESENT)
   temperature_8_t temperature = get_temperature();
   len += mesh_sensor_data_to_buf(PRESENT_AMBIENT_TEMPERATURE,
                                  &sensor_data[len],
                                  (uint8_t*) &temperature);
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
-#endif // SL_BOARD_ENABLE_SENSOR_RHT
 
   if (len > 0) {
     sl_status_t sc = sl_btmesh_sensor_server_send_status(PUBLISH_TO_ALL_NODES,
@@ -742,7 +752,8 @@ temperature_8_t get_temperature(void)
 #endif // SL_CATALOG_SENSOR_RHT_PRESENT
 
 #if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
-  || defined(SL_CATALOG_SENSOR_LUX_PRESENT)
+  || defined(SL_CATALOG_SENSOR_LUX_PRESENT)  \
+  || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT)
 /***************************************************************************//**
  * Get the current light value measured by sensor.
  *
@@ -753,7 +764,8 @@ illuminance_t get_light(void)
   float lux;
   illuminance_t light = SL_BTMESH_SENSOR_LIGHT_VALUE_UNKNOWN;
   sl_status_t sc;
-#ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
+#if defined(SL_CATALOG_SENSOR_LIGHT_PRESENT) \
+  || defined(SL_CATALOG_SENSOR_LIGHT_LUX_MOCK_PRESENT)
   float uvi;
 
   sc = sl_sensor_light_get(&lux, &uvi);

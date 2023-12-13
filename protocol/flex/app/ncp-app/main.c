@@ -75,6 +75,4 @@ int main(void)
 #endif // SL_CATALOG_POWER_MANAGER_PRESENT
   }
 #endif // SL_CATALOG_KERNEL_PRESENT
-
-  return 0;
 }

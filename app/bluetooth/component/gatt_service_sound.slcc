@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_sound
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_gatt_service_sound_config.h
   - path: gatt_service_sound.xml
@@ -34,3 +33,6 @@ template_contribution:
       function: sl_gatt_service_sound_on_event
   - name: component_catalog
     value: gatt_service_sound
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-sound

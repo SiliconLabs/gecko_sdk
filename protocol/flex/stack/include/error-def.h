@@ -608,6 +608,20 @@ enum
 //@}
 
 /**
+ * @name  NCP specific Errors
+ */
+//@{
+
+/**
+ * @brief The NCP does not know the command ID that the host sent.
+ * This can correspond to a version mismatch, where an API is available on the
+ * host but not on the NCP.
+ */
+  EMBER_NCP_UNKNOWN_COMMAND_ID = 0xD0,
+
+//@}
+
+/**
  * @name  Application Errors
  * These error codes are available for application use.
  */

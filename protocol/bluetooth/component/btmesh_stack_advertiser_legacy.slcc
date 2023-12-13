@@ -14,69 +14,9 @@ requires:
   - name: "bluetooth_feature_legacy_advertiser"
 provides:
   - name: "btmesh_stack_advertiser_legacy"
-  - name: "btmesh_advertiser"
+  - name: "btmesh_nonconnectable_advertiser"
+    allow_multiple: true
 template_contribution:
-  - name: btmesh_advertisers
+  - name: btmesh_advertiser_init
     value:
-      name: mesh_data
-      count: 1
-  - name: btmesh_advertisers
-    value:
-      name: provisioning_advertisers
-      count: 2
-library:
-#EFR32XG12
-  - path: "lib/EFR32XG12/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg12"
-  - path: "lib/EFR32XG12/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg12"
-#EFR32XG13
-  - path: "lib/EFR32XG13/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg13"
-  - path: "lib/EFR32XG13/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg13"
-#EFR32XG21
-  - path: "lib/EFR32XG21/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg21"
-  - path: "lib/EFR32XG21/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg21"
-#EFR32XG22
-  - path: "lib/EFR32XG22/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg22"
-  - path: "lib/EFR32XG22/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg22"
-#EFR32XG24
-  - path: "lib/EFR32XG24/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg24"
-  - path: "lib/EFR32XG24/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg24"
-#EFR32XG27
-  - path: "lib/EFR32XG27/GCC/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_gcc"
-      - "device_generic_family_efr32xg27"
-  - path: "lib/EFR32XG27/IAR/libbtmesh_advertiser_legacy.a"
-    condition:
-      - "toolchain_iar"
-      - "device_generic_family_efr32xg27"
-
+      function: mesh_advertiser_legacy

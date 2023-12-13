@@ -59,7 +59,8 @@ typedef enum {
   EVENT_IDX_SOCKET_DATA_SENT,
   EVENT_IDX_ERROR,
   EVENT_IDX_JOIN_STATE,
-  EVENT_IDX_REGULATION_TX_LEVEL
+  EVENT_IDX_REGULATION_TX_LEVEL,
+  EVENT_IDX_LFN_WAKE_UP
 } app_wisun_event_id_t;
 
 // -----------------------------------------------------------------------------
@@ -113,32 +114,76 @@ static const osMutexAttr_t _app_wisun_event_mgr_mtx_attr = {
  *        Lookup table indexes must be matched with app_wisun_event_id_t!
  *****************************************************************************/
 static event_handler_t _wisun_events[] = {
-  { .id = SL_WISUN_MSG_NETWORK_UPDATE_IND_ID,
-    .callback = sl_wisun_network_update_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_CONNECTED_IND_ID,
-    .callback = sl_wisun_connected_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_DATA_IND_ID,
-    .callback = sl_wisun_socket_data_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_DATA_AVAILABLE_IND_ID,
-    .callback = sl_wisun_socket_data_available_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_CONNECTED_IND_ID,
-    .callback = sl_wisun_socket_connected_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_CONNECTION_AVAILABLE_IND_ID,
-    .callback = sl_wisun_socket_connection_available_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_CLOSING_IND_ID,
-    .callback = sl_wisun_socket_closing_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_DISCONNECTED_IND_ID,
-    .callback = sl_wisun_disconnected_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_CONNECTION_LOST_IND_ID,
-    .callback = sl_wisun_connection_lost_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
-    .callback = sl_wisun_socket_data_sent_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_ERROR_IND_ID,
-    .callback = sl_wisun_error_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_JOIN_STATE_IND_ID,
-    .callback = sl_wisun_join_state_event_hnd, .custom_callback = NULL },
-  { .id = SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID,
-    .callback = sl_wisun_regulation_tx_level_hnd, .custom_callback = NULL },
+  {
+    .id = SL_WISUN_MSG_NETWORK_UPDATE_IND_ID,
+    .callback = sl_wisun_network_update_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_CONNECTED_IND_ID,
+    .callback = sl_wisun_connected_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_DATA_IND_ID,
+    .callback = sl_wisun_socket_data_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_DATA_AVAILABLE_IND_ID,
+    .callback = sl_wisun_socket_data_available_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_CONNECTED_IND_ID,
+    .callback = sl_wisun_socket_connected_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_CONNECTION_AVAILABLE_IND_ID,
+    .callback = sl_wisun_socket_connection_available_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_CLOSING_IND_ID,
+    .callback = sl_wisun_socket_closing_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_DISCONNECTED_IND_ID,
+    .callback = sl_wisun_disconnected_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_CONNECTION_LOST_IND_ID,
+    .callback = sl_wisun_connection_lost_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
+    .callback = sl_wisun_socket_data_sent_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_ERROR_IND_ID,
+    .callback = sl_wisun_error_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_JOIN_STATE_IND_ID,
+    .callback = sl_wisun_join_state_event_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID,
+    .callback = sl_wisun_regulation_tx_level_hnd,
+    .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
+    .callback = sl_wisun_lfn_wake_up_hnd,
+    .custom_callback = NULL
+  }
 };
 
 /**************************************************************************//**
@@ -264,6 +309,7 @@ __STATIC_INLINE app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind
     case SL_WISUN_MSG_ERROR_IND_ID:                         return EVENT_IDX_ERROR;
     case SL_WISUN_MSG_JOIN_STATE_IND_ID:                    return EVENT_IDX_JOIN_STATE;
     case SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID:           return EVENT_IDX_REGULATION_TX_LEVEL;
+    case SL_WISUN_MSG_LFN_WAKE_UP_IND_ID:                   return EVENT_IDX_LFN_WAKE_UP;
     default:                                                return EVENT_IDX_NOTVALID;
   }
 }
@@ -300,7 +346,6 @@ SL_WEAK void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_data_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -311,7 +356,6 @@ SL_WEAK void sl_wisun_socket_data_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_data_available_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -322,7 +366,6 @@ SL_WEAK void sl_wisun_socket_data_available_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_connected_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -333,7 +376,6 @@ SL_WEAK void sl_wisun_socket_connected_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_connection_available_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -344,7 +386,6 @@ SL_WEAK void sl_wisun_socket_connection_available_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_closing_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -377,7 +418,6 @@ SL_WEAK void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
 SL_WEAK void sl_wisun_socket_data_sent_event_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
-  assert(false);
 }
 
 /**************************************************************************//**
@@ -408,6 +448,17 @@ SL_WEAK void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
  * @param[in] evt event ptr
  *****************************************************************************/
 SL_WEAK void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+  assert(false);
+}
+
+/**************************************************************************//**
+ * @brief Wi-SUN LFN Wake up event handler
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+SL_WEAK void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
   assert(false);

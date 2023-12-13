@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Core application logic.
+ * @brief Accurate Bluetooth Ranging - reflector example
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,15 +31,42 @@
 #include "app_assert.h"
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
+#include "app_log.h"
 #include "app.h"
 
 #include "abr_reflector.h"
+#include "sl_rail_util_hadm_antenna_offset_config.h"
+
+// This number comes from the matching network group delay + pcb trace delay +
+// antenna delay.
+// The offset is interpreted in cm (centimeters)
+static int16_t *ant_offset_cm;
+static int16_t ant_offset_cm_wireless[SL_RAIL_UTIL_HADM_ANTENNA_COUNT] = SL_RAIL_UTIL_HADM_ANTENNA_OFFSET_WIRELESS_CM;
+static int16_t ant_offset_cm_wired[SL_RAIL_UTIL_HADM_ANTENNA_COUNT] = SL_RAIL_UTIL_HADM_ANTENNA_OFFSET_WIRED_CM;
 
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
 SL_WEAK void app_init(void)
 {
+  app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
+
+  app_log_info(APP_LOG_NL);
+  app_log_append_info("Silicon Labs ABR Reflector" APP_LOG_NL);
+  app_log_append_info("--------------------------" APP_LOG_NL);
+  app_log_append_info("Maximum concurrent connections: %u" APP_LOG_NL, ABR_REFLECTOR_MAX_CONNECTIONS);
+  app_log_append_info("Channel Sounding event buffer size: %u" APP_LOG_NL, ABR_REFLECTOR_CS_EVENT_BUF_SIZE);
+  app_log_append_info("Minimum transmit power: %d dBm" APP_LOG_NL, ABR_REFLECTOR_MIN_TX_POWER_DBM);
+  app_log_append_info("Maximum transmit power: %d dBm" APP_LOG_NL, ABR_REFLECTOR_MAX_TX_POWER_DBM);
+
+  if (!ABR_REFLECTOR_ANTENNA_OFFSET) {
+    ant_offset_cm = ant_offset_cm_wireless;
+    app_log_info("Wireless antenna offset will be used." APP_LOG_NL);
+  } else {
+    ant_offset_cm = ant_offset_cm_wired;
+    app_log_info("Wired antenna offset will be used." APP_LOG_NL);
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
@@ -96,6 +123,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                    sizeof(system_id),
                                                    system_id);
       app_assert_status(sc);
+
+      // Set antenna offset on the SoC
+      // This can be called any time after booting.
+      sc = sl_bt_cs_set_antenna_configuration(SL_RAIL_UTIL_HADM_ANTENNA_COUNT * 2,
+                                              (uint8_t *) ant_offset_cm);
+      app_assert_status(sc);
+
       abr_reflector_advertise();
       break;
 

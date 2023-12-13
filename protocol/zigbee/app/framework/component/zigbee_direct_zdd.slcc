@@ -2,7 +2,7 @@ id: zigbee_direct_zdd
 label: Zigbee Direct Device Functionality
 package: Zigbee
 description: Zigbee Direct Device Functionality
-category: "Zigbee|Zigbee Direct ZDD"
+category: Zigbee|Zigbee Direct ZDD
 quality: production
 
 config_file:
@@ -35,7 +35,7 @@ requires:
 recommends:
   - id: zigbee_direct_security_p256
 
-source:  
+source:
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_security.c
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_common.c
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/zigbee_direct_session_key_negotiation.c
@@ -43,11 +43,11 @@ source:
 include:
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_zdd/
     file_list:
-    - path: zigbee_direct_security.h
-    - path: zigbee_direct_tlv.h
-    - path: zigbee-direct-zdd-tokens.h
-    - path: zigbee_direct_session_key_negotiation.h
-    - path: zigbee_direct_common.h
+      - path: zigbee_direct_security.h
+      - path: zigbee_direct_tlv.h
+      - path: zigbee-direct-zdd-tokens.h
+      - path: zigbee_direct_session_key_negotiation.h
+      - path: zigbee_direct_common.h
 
 template_contribution:
   - name: component_catalog
@@ -67,12 +67,12 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
-      function_name: sli_zigbee_af_plugin_zdd_stack_status_callback    
+      function_name: sli_zigbee_af_plugin_zdd_stack_status_callback
   - name: cluster_service
     value:
-      cluster_id: "0x003D"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "SERVER"
-      service_function: "emberAfZigbeeDirectClusterServerCommandParse"
+      cluster_id: '0x003D'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfZigbeeDirectClusterServerCommandParse
   - name: token_header
     value: app/framework/plugin-soc/zigbee_direct_zdd/zigbee-direct-zdd-tokens.h

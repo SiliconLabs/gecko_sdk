@@ -337,19 +337,19 @@ extern uint8_t cc_door_lock_mode_hw_change(door_lock_mode_t mode);
  * Returns bolt state.
  * @return True if unlocked, false if locked
  */
-extern bool door_lock_hw_bolt_is_unlocked();
+extern bool door_lock_hw_bolt_is_unlocked(void);
 
 /**
  *
  * @return
  */
-extern bool door_lock_hw_latch_is_closed();
+extern bool door_lock_hw_latch_is_closed(void);
 
 /**
  *
  * @return
  */
-extern bool door_lock_hw_handle_is_pressed();
+extern bool door_lock_hw_handle_is_pressed(void);
 
 /**
  * @}

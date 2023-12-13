@@ -5,7 +5,7 @@ label: Zigbee Enhanced Routing With LQI
 category: Zigbee|Utility
 quality: production
 provides:
-   - name: "zigbee_enhanced_routing"
+  - name: zigbee_enhanced_routing
 source:
   - path: protocol/zigbee/app/framework/common/zigbee_enhanced_routing.c
 

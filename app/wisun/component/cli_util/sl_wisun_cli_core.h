@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_CLI_CORE_H__
 #define __SL_WISUN_CLI_CORE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -87,6 +91,10 @@ void app_wisun_cli_mutex_lock(void);
  * @brief Unlock by mutex.
  *****************************************************************************/
 void app_wisun_cli_mutex_unlock(void);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

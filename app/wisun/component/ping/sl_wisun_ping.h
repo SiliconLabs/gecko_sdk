@@ -45,7 +45,7 @@ extern "C" {
  *****************************************************************************/
 
 #include <stdint.h>
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_wisun_ping_config.h"
 
 // -----------------------------------------------------------------------------
@@ -114,7 +114,7 @@ typedef struct sl_wisun_ping_info {
   /// Response time millisecond
   uint32_t response_time_ms;
   /// Wi-SUN remote address
-  wisun_addr_t remote_addr;
+  sockaddr_in6_t remote_addr;
   /// Start time stamp
   uint32_t start_time_stamp;
   /// Stop time stamp
@@ -126,7 +126,7 @@ typedef struct sl_wisun_ping_info {
 /// Statistic ping type definition
 typedef struct sl_wisun_ping_stat {
   /// Wi-SUN remote address
-  wisun_addr_t remote_addr;
+  sockaddr_in6_t remote_addr;
   /// Packet count
   uint16_t packet_count;
   /// Packet length
@@ -189,7 +189,7 @@ void sl_wisun_ping_response(sl_wisun_ping_info_t * const ping_response);
  * @param[in] req_resp_sent_hnd Request/Response sent handler function
  * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL or SL_STATUS_ABORT
  *****************************************************************************/
-sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
+sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
                           const uint16_t packet_count,
                           const uint16_t packet_length,
                           sl_wisun_ping_stat_hnd_t stat_hnd,

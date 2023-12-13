@@ -40,6 +40,7 @@
 
 #include "sl_btmesh_lighting_level_transition_handler.h"
 #include "sl_btmesh_lighting_server_config.h"
+#include "sl_btmesh_lighting_server.h"
 
 /***************************************************************************//**
  * @addtogroup Lighting Level Transition Handler
@@ -50,8 +51,8 @@
 #define NO_FLAGS              0
 /// Immediate transition time is 0 seconds
 #define IMMEDIATE             0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA      (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA      NULL
 /// High Priority
 #define HIGH_PRIORITY         0
 
@@ -122,6 +123,7 @@ static void transition_timer_cb(app_timer_t *handle,
       // Trigger a UI update in order to provide the target values at the end
       // of the current transition
       sl_btmesh_lighting_server_on_ui_update(current_level);
+      sl_btmesh_update_lightness(current_level, level_transtime_ticks - level_transtime_elapsed);
     } else {
       // calculate current PWM duty cycle based on elapsed transition time
       if (target_level >= start_level) {
@@ -144,6 +146,7 @@ static void transition_timer_cb(app_timer_t *handle,
       if (SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL <= time_elapsed_since_ui_update) {
         time_elapsed_since_ui_update -= SL_BTMESH_LIGHTING_SERVER_UI_UPDATE_PERIOD_CFG_VAL;
         sl_btmesh_lighting_server_on_ui_update(current_level);
+        sl_btmesh_update_lightness(current_level, level_transtime_ticks - level_transtime_elapsed);
       }
     }
   }

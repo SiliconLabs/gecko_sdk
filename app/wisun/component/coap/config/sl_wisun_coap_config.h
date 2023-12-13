@@ -69,6 +69,37 @@
 #define SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE       1024UL
 // </h>
 
+// <h>Wi-SUN CoAP Notification Service Configuration
+// <o SL_WISUN_COAP_NOTIFY_MAX_NOTIFICATION> Maximum capacity of the CoAP Resource Table
+// <i> Default: 10
+#define SL_WISUN_COAP_NOTIFY_MAX_NOTIFICATION           10U
+
+// <q SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE> Enable Notification service
+// <i> Enable notification service to send notifications to remote host
+#define SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE             0U
+
+// <o SL_WISUN_COAP_NOTIFY_DEFAULT_REMOTE_PORT> Default port of the remote host to notify
+// <i> Default: 5683
+// <1-65536>
+#define SL_WISUN_COAP_NOTIFY_DEFAULT_REMOTE_PORT        5683U
+
+// <s SL_WISUN_COAP_NOTIFY_DEFAULT_REMOTE_ADDR> Default remote address to notify
+// <i> This address is used by default as notification target
+#define SL_WISUN_COAP_NOTIFY_DEFAULT_REMOTE_ADDR        "2001:db8::1"
+
+// <o SL_WISUN_COAP_NOTIFY_STACK_SIZE_WORD> Notification service stack size in CPU word
+// <i> Default: 256
+#define SL_WISUN_COAP_NOTIFY_STACK_SIZE_WORD            256UL
+
+// <o SL_WISUN_COAP_NOTIFY_SOCK_BUFF_SIZE> Notification service socket communication buffer size
+// <i> Default: 1024
+#define SL_WISUN_COAP_NOTIFY_SOCK_BUFF_SIZE             1024UL
+
+// <q SL_WISUN_COAP_EASY_CLNT_SRV_INSTANCE_ENABLE> Enable easy CoAP client and CoAP server instances
+// <i> Enable easy CoAP client and CoAP server instances
+#define SL_WISUN_COAP_EASY_CLNT_SRV_INSTANCE_ENABLE     0U
+// </h>
+
 // <<< end of configuration section >>>
 
 /** @}*/

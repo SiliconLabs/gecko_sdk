@@ -25,3 +25,6 @@ template_contribution:
     value:
       function: sl_btctrl_init_past_local_sync_transfer()
     priority: 11
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-advertiser-past

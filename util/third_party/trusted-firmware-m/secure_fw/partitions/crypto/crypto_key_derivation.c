@@ -313,6 +313,47 @@ psa_status_t tfm_crypto_key_derivation_input_bytes(psa_invec in_vec[],
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 
+psa_status_t tfm_crypto_key_derivation_input_integer(psa_invec in_vec[],
+                                                     size_t in_len,
+                                                     psa_outvec out_vec[],
+                                                     size_t out_len)
+{
+#ifdef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
+    SUPPRESS_UNUSED_IOVEC_PARAM_WARNING();
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    (void)out_vec;
+    psa_status_t status;
+
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 0, 0);
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+
+    uint32_t handle = iov->op_handle;
+    psa_key_derivation_step_t step = iov->step;
+
+    if ((in_vec[1].len != sizeof(uint64_t))) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+    uint64_t value = *((uint64_t *)in_vec[1].base);
+
+    psa_key_derivation_operation_t *operation = NULL;
+
+    /* Look up the corresponding operation context */
+    status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
+                                         handle,
+                                         (void **)&operation);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_key_derivation_input_integer(operation, step, value);
+#endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
+}
+
 psa_status_t tfm_crypto_key_derivation_output_bytes(psa_invec in_vec[],
                                                     size_t in_len,
                                                     psa_outvec out_vec[],

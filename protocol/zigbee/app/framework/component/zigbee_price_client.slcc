@@ -1,22 +1,20 @@
 package: Zigbee
-description: This component provides an implementation of a Price client. It simply stores
-  the prices received over-the-air. This component requires extending to act on the
-  price changes.
+description: This component provides an implementation of a Price client. It simply stores the prices received over-the-air. This component requires extending to act on the price changes.
 label: Price Client
 quality: production
 id: zigbee_price_client
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_price_client"
+  - name: zigbee_price_client
 requires:
-   - name: "zigbee_price_common"
+  - name: zigbee_price_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/price-client/config/price-client-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/price-client/price-client.c
   - path: protocol/zigbee/app/framework/plugin/price-client/price-client-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/price-client/price-client-consolidated-bills.c
   - path: protocol/zigbee/app/framework/plugin/price-client/price-client-cb.c
 include:
@@ -28,10 +26,10 @@ template_contribution:
     value: zigbee_price_client
   - name: cluster_service
     value:
-       cluster_id: "0x0700"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emberAfPriceClusterClientCommandParse"    
+      cluster_id: '0x0700'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfPriceClusterClientCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -44,8 +42,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_init
       help: Initializes the price info for the provided endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-client
@@ -53,8 +51,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_print
       help: Prints the price info for the provided endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-client
@@ -62,10 +60,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_printEvent
       help: Prints the price info for the provided endpoint and event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The event ID that should be printed if found in the price table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The event ID that should be printed if found in the price table
   - name: cli_group
     value:
       group: price-client
@@ -78,10 +76,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_conversion_factor_print_by_event_id
       help: Prints the conversion factor table entry with a matching event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The event ID that should be printed if found in the conversion factor table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The event ID that should be printed if found in the conversion factor table
   - name: cli_group
     value:
       group: price-client
@@ -94,10 +92,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_calorific_value_print_by_event_id
       help: Prints the calorific value table entry with a matching event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The event ID that should be printed if found in the calorific value table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The event ID that should be printed if found in the calorific value table
   - name: cli_group
     value:
       group: price-client
@@ -110,8 +108,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_co2_value_table_print_current
       help: Prints the active CO2 value.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_group
     value:
       group: price-client
@@ -124,8 +122,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_billing_period_print_current
       help: Prints the billing period table entry that is currently active.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_group
     value:
       group: price-client
@@ -138,10 +136,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_block_period_print_entry_by_event_id
       help: Prints the entry of the Block Period table with a matching event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The event ID whose information in the block period table should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The event ID whose information in the block period table should be printed
   - name: cli_group
     value:
       group: price-client
@@ -154,10 +152,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_tier_label_table_print_tariff_id
       help: Prints the tier label table entry with a matching tariff ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The issuer tariff ID that should be looked for in the tier label table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The issuer tariff ID that should be looked for in the tier label table
   - name: cli_command
     value:
       group: price-client
@@ -165,8 +163,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_table_clear
       help: Clears out the currently set price for the supplied endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_group
     value:
       group: price-client
@@ -180,10 +178,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_consolidated_bill_table_print
       help: Prints the entry of the consolidated bill table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint8
-        help: The index of the consolidated bill table that should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint8
+          help: The index of the consolidated bill table that should be printed
   - name: cli_command
     value:
       group: console-bill-1
@@ -191,8 +189,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_consolidated_bill_print_current_entry
       help: Prints the entry of the active consolidated bill in the consolidated bills table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: console-bill-1
@@ -200,10 +198,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_consolidated_bill_print_entry_by_event_id
       help: Prints the entry of the consolidated bill table with a matching event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The event ID whose information in the consolidated bill table should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The event ID whose information in the consolidated bill table should be printed
   - name: cli_group
     value:
       group: price-client
@@ -217,8 +215,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_set_cpp_event_auth
       help: Sets the authorization status for future CPP events.
       argument:
-      - type: uint8
-        help: The authorization status for future CPP events
+        - type: uint8
+          help: The authorization status for future CPP events
   - name: cli_command
     value:
       group: cpp-event-1
@@ -226,7 +224,7 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_cpp_event_print
       help: Prints the entry of the CPP event table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_group
     value:
       group: price-client
@@ -239,10 +237,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_credit_payment_table_print
       help: Prints the entry of the credit payment table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint8
-        help: The index of the credit payment table entry that should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint8
+          help: The index of the credit payment table entry that should be printed
   - name: cli_command
     value:
       group: credit-pmt
@@ -250,10 +248,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_credit_payment_print_entry_by_event_id
       help: Prints the entry of the credit payment table with a matching issuer event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The issuerEventId of the credit payment table entry that should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The issuerEventId of the credit payment table entry that should be printed
   - name: cli_group
     value:
       group: price-client
@@ -266,10 +264,10 @@ template_contribution:
       handler: sli_zigbee_af_price_client_cli_currency_conversion_print_by_event_id
       help: Prints the entry of the currency conversion table with a matching issuer event ID.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The issuerEventId of the currency conversion table entry that should be printed
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The issuerEventId of the currency conversion table entry that should be printed
   - name: cli_command
     value:
       group: currency-convers
@@ -277,8 +275,8 @@ template_contribution:
       handler: sli_zigbee_af_price_client_clie_currency_conversion_print_current_currency
       help: Prints the active entry of the currency conversion table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cluster_functions
     value:
       cluster_name: Price

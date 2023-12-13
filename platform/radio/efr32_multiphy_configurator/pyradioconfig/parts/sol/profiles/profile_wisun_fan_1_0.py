@@ -36,4 +36,4 @@ class ProfileWisunFanSol(ProfileWisunFanOcelot):
         super()._fixed_wisun_vars(model)
 
         # Add the ofdm_option variable
-        model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1
+        model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz

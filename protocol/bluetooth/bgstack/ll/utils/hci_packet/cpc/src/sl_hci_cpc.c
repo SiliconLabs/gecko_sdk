@@ -73,9 +73,9 @@ void sl_hci_cpc_error(uint8_t endpoint_id, void *arg)
   (void)endpoint_id;
   (void)arg;
   uint8_t state = sl_cpc_get_endpoint_state(&endpoint_handle);
+  cpc_connected = false;
   if (state == SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE) {
     sl_cpc_close_endpoint(&endpoint_handle);
-    cpc_connected = false;
   }
 }
 

@@ -1,18 +1,11 @@
 package: Zigbee
-description: Silicon Labs implementation of a simple clock. The component provides time keeping
-  functionality to the framework and the application through implementations of both
-  emberAfGetCurrentTimeCallback and emberAfSetTimeCallback.  When the application
-  knows the current time (e.g., by reading the time attribute from a time server),
-  it should call emberAfSetTime to keep the component synchronized. The component is not
-  a substitute for an accurate clock and is only intended for use during development.  Before
-  production, this component should be replaced with code that provides more accurate
-  time.
+description: Silicon Labs implementation of a simple clock. The component provides time keeping functionality to the framework and the application through implementations of both emberAfGetCurrentTimeCallback and emberAfSetTimeCallback.  When the application knows the current time (e.g., by reading the time attribute from a time server), it should call emberAfSetTime to keep the component synchronized. The component is not a substitute for an accurate clock and is only intended for use during development.  Before production, this component should be replaced with code that provides more accurate time.
 id: zigbee_simple_clock
 label: Simple Clock
 category: Zigbee|Utility
 quality: production
 provides:
-   - name: "zigbee_simple_clock"
+  - name: zigbee_simple_clock
 source:
   - path: protocol/zigbee/app/framework/plugin/simple-clock/simple-clock.c
 include:

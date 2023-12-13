@@ -281,11 +281,6 @@ void app_init(int argc, char *argv[])
   } else {
     app_log_info("No configuration." APP_LOG_NL);
   }
-
-  app_log_info("Resetting NCP..." APP_LOG_NL);
-  // Reset NCP to ensure it gets into a defined state.
-  // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 }
 
 /**************************************************************************//**

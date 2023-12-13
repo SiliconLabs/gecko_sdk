@@ -48,7 +48,7 @@
 #include "sl_wisun_network_measurement_config.h"
 #include "sl_display.h"
 #include "sl_gui.h"
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "silabs_wisun_logo.h"
 
@@ -306,7 +306,7 @@ void sli_wisun_neighbors_select_form(void *args)
   sl_gui_title_set_label("Neighbors");
   sl_gui_title_update();
 
-  sl_wisun_nwm_get_nodes(NULL, 0);
+  sl_wisun_nwm_get_nodes(NULL, 0, true);
 
   parent_available = sl_wisun_nwm_get_primary_parent_stat(&_primary_parent_stat);
 

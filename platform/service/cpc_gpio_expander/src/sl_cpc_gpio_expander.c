@@ -64,7 +64,7 @@
  **************************   ENUMS   ******************************************
  ******************************************************************************/
 /// @brief Enumeration representing command types from the host.
-SL_ENUM_GENERIC(host_cmd_t, uint8_t){
+SL_ENUM_GENERIC(host_cmd_t, uint8_t) {
   HOST_CMD_GET_VERSION = 0,
   HOST_CMD_GET_UNIQUE_ID = 1,
   HOST_CMD_GET_CHIP_LABEL = 2,
@@ -77,7 +77,7 @@ SL_ENUM_GENERIC(host_cmd_t, uint8_t){
 };
 
 /// @brief Enumeration representing command types from the secondary.
-SL_ENUM_GENERIC(secondary_cmd_t, uint8_t){
+SL_ENUM_GENERIC(secondary_cmd_t, uint8_t) {
   SECONDARY_CMD_VERSION_IS = 128,
   SECONDARY_CMD_STATUS_IS = 129,
   SECONDARY_CMD_UNIQUE_ID_IS = 130,
@@ -89,7 +89,7 @@ SL_ENUM_GENERIC(secondary_cmd_t, uint8_t){
 };
 
 /// @brief Enumeration representing gpio config types.
-SL_ENUM_GENERIC(gpio_config_t, uint8_t){
+SL_ENUM_GENERIC(gpio_config_t, uint8_t) {
   GPIO_CONFIG_BIAS_DISABLE = 0,
   GPIO_CONFIG_BIAS_PULL_DOWN = 1,
   GPIO_CONFIG_BIAS_PULL_UP = 2,
@@ -99,14 +99,14 @@ SL_ENUM_GENERIC(gpio_config_t, uint8_t){
 };
 
 /// @brief Enumeration representing gpio direction types.
-SL_ENUM_GENERIC(gpio_direction_t, uint8_t){
+SL_ENUM_GENERIC(gpio_direction_t, uint8_t) {
   GPIO_DIRECTION_OUTPUT = 0,
   GPIO_DIRECTION_INPUT = 1,
   GPIO_DIRECTION_DISABLED = 2,
 };
 
 /// @brief Enumeration representing gpio status types.
-SL_ENUM_GENERIC(gpio_status_t, uint8_t){
+SL_ENUM_GENERIC(gpio_status_t, uint8_t) {
   GPIO_STATUS_OK = 0,
   GPIO_STATUS_NOT_SUPPORTED = 1,
   GPIO_STATUS_INVALID_PIN = 2,
@@ -114,7 +114,7 @@ SL_ENUM_GENERIC(gpio_status_t, uint8_t){
 };
 
 /// @brief Enumeration representing endpoint state types.
-SL_ENUM_GENERIC(endpoint_state_t, uint8_t){
+SL_ENUM_GENERIC(endpoint_state_t, uint8_t) {
   ENDPOINT_STATE_INIT,
   ENDPOINT_STATE_RESTART,
   ENDPOINT_STATE_WRITE_COMPLETED,
@@ -126,114 +126,114 @@ SL_ENUM_GENERIC(endpoint_state_t, uint8_t){
  **************************   STRUCTS   ****************************************
  ******************************************************************************/
 /// @brief Struct representing a header.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   uint8_t cmd;
   uint8_t len;
 } header_t;
 
 /// @brief Struct representing a host header.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   uint8_t seq;
 } host_header_t;
 
 /// @brief Struct representing a secondary header.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   uint8_t seq;
 } secondary_header_t;
 
 /// @brief Struct representing a get version request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
 } get_version_t;
 
-typedef struct __attribute__((packed)){
+typedef __PACKED_STRUCT {
   uint8_t major;
   uint8_t minor;
   uint8_t patch;
 } version_t;
 
 /// @brief Struct representing a version response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   version_t version;
 } version_is_t;
 
 /// @brief Struct representing a status response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   gpio_status_t status;
 } status_is_t;
 
 /// @brief Struct representing a get unique identifier request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
 } get_unique_id_t;
 
 /// @brief Struct representing a get unique identifier response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   uint64_t unique_id;
 } unique_id_is_t;
 
 /// @brief Struct representing a get chip label request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
 } get_chip_label_t;
 
 /// @brief Struct representing a get chip label response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   char chip_label[];
 } chip_label_is_t;
 
 /// @brief Struct representing a get gpio count request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
 } get_gpio_count_t;
 
 /// @brief Struct representing a gpio count response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   uint8_t count;
 } gpio_count_is_t;
 
 /// @brief Struct representing a get gpio name request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
   uint8_t pin;
 } get_gpio_name_t;
 
 /// @brief Struct representing a gpio name response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   char name[];
 } gpio_name_is_t;
 
 /// @brief Struct representing a get gpio value request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
   uint8_t pin;
 } get_gpio_value_t;
 
 /// @brief Struct representing a gpio value response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   secondary_header_t secondary_header;
   uint8_t value;
 } gpio_value_is_t;
 
 /// @brief Struct representing a set gpio value request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
   uint8_t pin;
@@ -241,7 +241,7 @@ typedef struct __attribute__((packed)) {
 } set_gpio_value_t;
 
 /// @brief Struct representing a set gpio config request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
   uint8_t pin;
@@ -249,7 +249,7 @@ typedef struct __attribute__((packed)) {
 } set_gpio_config_t;
 
 /// @brief Struct representing a set gpio direction request from the host.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   host_header_t host_header;
   uint8_t pin;
@@ -257,7 +257,7 @@ typedef struct __attribute__((packed)) {
 } set_gpio_direction_t;
 
 /// @brief Struct representing an unsupported cmd response from the secondary.
-typedef struct __attribute__((packed)) {
+typedef __PACKED_STRUCT {
   header_t header;
   uint8_t unsupported_cmd;
 } unsupported_cmd_is_t;

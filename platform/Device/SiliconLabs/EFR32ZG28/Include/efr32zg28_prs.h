@@ -1550,4 +1550,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_PRS */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_PRS_H */
+#endif // EFR32ZG28_PRS_H

@@ -101,6 +101,7 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
   switch (evt_id) {
     // node
     // Mesh Node
+    #if SL_BTMESH_EVENT_LOG_ENABLE_NODE
     case sl_btmesh_evt_node_initialized_id: {
       app_log(PREFIX "node_initialized(");
       sl_btmesh_evt_node_initialized_t *data =
@@ -314,9 +315,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log(PREFIX "node_dcd_updated(");
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_NODE
 
     // prov
     // Bluetooth Mesh Stack Provisioner
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PROV
     case sl_btmesh_evt_prov_initialized_id: {
       app_log(PREFIX "prov_initialized(");
       sl_btmesh_evt_prov_initialized_t *data =
@@ -503,9 +506,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" authentication_size="); log_append_uint8_t(data->authentication_size);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PROV
 
     // proxy
     // Bluetooth Mesh Proxy Connections
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PROXY
     case sl_btmesh_evt_proxy_connected_id: {
       app_log(PREFIX "proxy_connected(");
       sl_btmesh_evt_proxy_connected_t *data =
@@ -530,9 +535,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" count="); log_append_uint16_t(data->count);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PROXY
 
     // silabs_config_client
     // Bluetooth Mesh Silabs Configuration Client Vendor Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SILABS_CONFIG_CLIENT
     case sl_btmesh_evt_silabs_config_client_tx_status_id: {
       app_log(PREFIX "silabs_config_client_tx_status(");
       sl_btmesh_evt_silabs_config_client_tx_status_t *data =
@@ -564,9 +571,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" pdu_max_size="); log_append_uint16_t(data->pdu_max_size);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SILABS_CONFIG_CLIENT
 
     // vendor_model
     // Bluetooth Mesh Vendor Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_VENDOR_MODEL
     case sl_btmesh_evt_vendor_model_receive_id: {
       app_log(PREFIX "vendor_model_receive(");
       sl_btmesh_evt_vendor_model_receive_t *data =
@@ -594,9 +603,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" message_flags="); log_append_uint8_t(data->message_flags);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_VENDOR_MODEL
 
     // health_client
     // Bluetooth Mesh Health Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_HEALTH_CLIENT
     case sl_btmesh_evt_health_client_server_status_id: {
       app_log(PREFIX "health_client_server_status(");
       sl_btmesh_evt_health_client_server_status_t *data =
@@ -633,9 +644,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" attention_sec="); log_append_uint8_t(data->attention_sec);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_HEALTH_CLIENT
 
     // health_server
     // Bluetooth Mesh Health Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_HEALTH_SERVER
     case sl_btmesh_evt_health_server_attention_id: {
       app_log(PREFIX "health_server_attention(");
       sl_btmesh_evt_health_server_attention_t *data =
@@ -657,9 +670,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" response_required="); log_append_uint8_t(data->response_required);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_HEALTH_SERVER
 
     // generic_client
     // Bluetooth Mesh Generic Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_GENERIC_CLIENT
     case sl_btmesh_evt_generic_client_server_status_id: {
       app_log(PREFIX "generic_client_server_status(");
       sl_btmesh_evt_generic_client_server_status_t *data =
@@ -674,9 +689,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" parameters="); log_append_uint8array(data->parameters);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_GENERIC_CLIENT
 
     // generic_server
     // Bluetooth Mesh Generic Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_GENERIC_SERVER
     case sl_btmesh_evt_generic_server_client_request_id: {
       app_log(PREFIX "generic_server_client_request(");
       sl_btmesh_evt_generic_server_client_request_t *data =
@@ -715,9 +732,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" parameters="); log_append_uint8array(data->parameters);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_GENERIC_SERVER
 
     // test
     // Bluetooth Mesh Test Utilities
+    #if SL_BTMESH_EVENT_LOG_ENABLE_TEST
     case sl_btmesh_evt_test_local_heartbeat_subscription_complete_id: {
       app_log(PREFIX "test_local_heartbeat_subscription_complete(");
       sl_btmesh_evt_test_local_heartbeat_subscription_complete_t *data =
@@ -755,9 +774,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log(PREFIX "test_replay_protection_list_full(");
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_TEST
 
     // lpn
     // Bluetooth Mesh Low Power Node API
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LPN
     case sl_btmesh_evt_lpn_friendship_established_id: {
       app_log(PREFIX "lpn_friendship_established(");
       sl_btmesh_evt_lpn_friendship_established_t *data =
@@ -782,9 +803,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" reason="); log_append_uint16_t(data->reason);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LPN
 
     // friend
     // Bluetooth Mesh Friend Node API
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FRIEND
     case sl_btmesh_evt_friend_friendship_established_id: {
       app_log(PREFIX "friend_friendship_established(");
       sl_btmesh_evt_friend_friendship_established_t *data =
@@ -802,15 +825,21 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" reason="); log_append_uint16_t(data->reason);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FRIEND
 
     // proxy_client
     // Bluetooth Mesh GATT Proxy Client
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PROXY_CLIENT
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PROXY_CLIENT
 
     // proxy_server
     // Bluetooth Mesh GATT Proxy Server
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PROXY_SERVER
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PROXY_SERVER
 
     // config_client
     // Bluetooth Mesh Configuration Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_CONFIG_CLIENT
     case sl_btmesh_evt_config_client_request_modified_id: {
       app_log(PREFIX "config_client_request_modified(");
       sl_btmesh_evt_config_client_request_modified_t *data =
@@ -1075,9 +1104,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" friend_addr="); log_append_uint16_t(data->friend_addr);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_CONFIG_CLIENT
 
     // mbt_client
     // Bluetooth Mesh BLOB Transfer Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_MBT_CLIENT
     case sl_btmesh_evt_mbt_client_server_information_status_id: {
       app_log(PREFIX "mbt_client_server_information_status(");
       sl_btmesh_evt_mbt_client_server_information_status_t *data =
@@ -1201,9 +1232,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" elem_index="); log_append_uint16_t(data->elem_index);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_MBT_CLIENT
 
     // mbt_server
     // Bluetooth Mesh BLOB Transfer Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_MBT_SERVER
     case sl_btmesh_evt_mbt_server_state_changed_id: {
       app_log(PREFIX "mbt_server_state_changed(");
       sl_btmesh_evt_mbt_server_state_changed_t *data =
@@ -1282,9 +1315,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" requested_chunks="); log_append_uint8array(data->requested_chunks);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_MBT_SERVER
 
     // sensor_server
     // Bluetooth Mesh Sensor Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_SERVER
     case sl_btmesh_evt_sensor_server_get_request_id: {
       app_log(PREFIX "sensor_server_get_request(");
       sl_btmesh_evt_sensor_server_get_request_t *data =
@@ -1331,9 +1366,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" period_ms="); log_append_uint32_t(data->period_ms);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_SERVER
 
     // sensor_setup_server
     // Bluetooth Mesh Sensor Setup Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_SETUP_SERVER
     case sl_btmesh_evt_sensor_setup_server_get_cadence_request_id: {
       app_log(PREFIX "sensor_setup_server_get_cadence_request(");
       sl_btmesh_evt_sensor_setup_server_get_cadence_request_t *data =
@@ -1408,9 +1445,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" period_ms="); log_append_uint32_t(data->period_ms);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_SETUP_SERVER
 
     // sensor_client
     // Bluetooth Mesh Sensor Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_CLIENT
     case sl_btmesh_evt_sensor_client_descriptor_status_id: {
       app_log(PREFIX "sensor_client_descriptor_status(");
       sl_btmesh_evt_sensor_client_descriptor_status_t *data =
@@ -1509,9 +1548,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" period_ms="); log_append_uint32_t(data->period_ms);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SENSOR_CLIENT
 
     // fw_update_client
     // Bluetooth Mesh Firmware Update Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FW_UPDATE_CLIENT
     case sl_btmesh_evt_fw_update_client_info_status_current_fwid_id: {
       app_log(PREFIX "fw_update_client_info_status_current_fwid(");
       sl_btmesh_evt_fw_update_client_info_status_current_fwid_t *data =
@@ -1560,9 +1601,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" fw_index="); log_append_uint8_t(data->fw_index);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FW_UPDATE_CLIENT
 
     // lc_client
     // Bluetooth Mesh Light Control Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LC_CLIENT
     case sl_btmesh_evt_lc_client_mode_status_id: {
       app_log(PREFIX "lc_client_mode_status(");
       sl_btmesh_evt_lc_client_mode_status_t *data =
@@ -1610,9 +1653,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" property_value="); log_append_uint8array(data->property_value);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LC_CLIENT
 
     // lc_server
     // Bluetooth Mesh Light Control Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LC_SERVER
     case sl_btmesh_evt_lc_server_mode_updated_id: {
       app_log(PREFIX "lc_server_mode_updated(");
       sl_btmesh_evt_lc_server_mode_updated_t *data =
@@ -1696,9 +1741,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" l="); log_append_uint16_t(data->l);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LC_SERVER
 
     // lc_setup_server
     // Bluetooth Mesh Light Control Setup Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LC_SETUP_SERVER
     case sl_btmesh_evt_lc_setup_server_set_property_id: {
       app_log(PREFIX "lc_setup_server_set_property(");
       sl_btmesh_evt_lc_setup_server_set_property_t *data =
@@ -1711,9 +1758,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" property_value="); log_append_uint8array(data->property_value);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LC_SETUP_SERVER
 
     // scene_client
     // Bluetooth Mesh Scene Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SCENE_CLIENT
     case sl_btmesh_evt_scene_client_status_id: {
       app_log(PREFIX "scene_client_status(");
       sl_btmesh_evt_scene_client_status_t *data =
@@ -1741,9 +1790,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" scenes="); log_append_uint8array(data->scenes);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SCENE_CLIENT
 
     // scene_server
     // Bluetooth Mesh Scene Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SCENE_SERVER
     case sl_btmesh_evt_scene_server_get_id: {
       app_log(PREFIX "scene_server_get(");
       sl_btmesh_evt_scene_server_get_t *data =
@@ -1791,9 +1842,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" states="); log_append_uint8array(data->states);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SCENE_SERVER
 
     // scene_setup_server
     // Bluetooth Mesh Scene Setup Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SCENE_SETUP_SERVER
     case sl_btmesh_evt_scene_setup_server_store_id: {
       app_log(PREFIX "scene_setup_server_store(");
       sl_btmesh_evt_scene_setup_server_store_t *data =
@@ -1824,9 +1877,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" period_ms="); log_append_uint32_t(data->period_ms);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SCENE_SETUP_SERVER
 
     // scheduler_client
     // Bluetooth Mesh Scheduler Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SCHEDULER_CLIENT
     case sl_btmesh_evt_scheduler_client_status_id: {
       app_log(PREFIX "scheduler_client_status(");
       sl_btmesh_evt_scheduler_client_status_t *data =
@@ -1859,9 +1914,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" scene_number="); log_append_uint16_t(data->scene_number);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SCHEDULER_CLIENT
 
     // scheduler_server
     // Bluetooth Mesh Scheduler Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SCHEDULER_SERVER
     case sl_btmesh_evt_scheduler_server_action_changed_id: {
       app_log(PREFIX "scheduler_server_action_changed(");
       sl_btmesh_evt_scheduler_server_action_changed_t *data =
@@ -1900,9 +1957,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" scene_number="); log_append_uint16_t(data->scene_number);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SCHEDULER_SERVER
 
     // fw_update_server
     // Bluetooth Mesh Firmware Update Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FW_UPDATE_SERVER
     case sl_btmesh_evt_fw_update_server_check_fw_metadata_req_id: {
       app_log(PREFIX "fw_update_server_check_fw_metadata_req(");
       sl_btmesh_evt_fw_update_server_check_fw_metadata_req_t *data =
@@ -1957,9 +2016,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" fw_list_index="); log_append_uint16_t(data->fw_list_index);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FW_UPDATE_SERVER
 
     // time_server
     // Bluetooth Mesh Time Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_TIME_SERVER
     case sl_btmesh_evt_time_server_time_updated_id: {
       app_log(PREFIX "time_server_time_updated(");
       sl_btmesh_evt_time_server_time_updated_t *data =
@@ -2001,9 +2062,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" time_role="); log_append_uint8_t(data->time_role);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_TIME_SERVER
 
     // time_client
     // Bluetooth Mesh Time Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_TIME_CLIENT
     case sl_btmesh_evt_time_client_time_status_id: {
       app_log(PREFIX "time_client_time_status(");
       sl_btmesh_evt_time_client_time_status_t *data =
@@ -2057,9 +2120,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" time_role="); log_append_uint8_t(data->time_role);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_TIME_CLIENT
 
     // fw_dist_server
     // Bluetooth Mesh Firmware Distribution Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FW_DIST_SERVER
     case sl_btmesh_evt_fw_dist_server_nodes_added_id: {
       app_log(PREFIX "fw_dist_server_nodes_added(");
       sl_btmesh_evt_fw_dist_server_nodes_added_t *data =
@@ -2249,9 +2314,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" transfer_mode="); log_append_uint16_t(data->transfer_mode);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FW_DIST_SERVER
 
     // fw_dist_client
     // Bluetooth Mesh Firmware Distribution Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FW_DIST_CLIENT
     case sl_btmesh_evt_fw_dist_client_receivers_status_id: {
       app_log(PREFIX "fw_dist_client_receivers_status(");
       sl_btmesh_evt_fw_dist_client_receivers_status_t *data =
@@ -2371,9 +2438,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" fwid="); log_append_uint8array(data->fwid);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FW_DIST_CLIENT
 
     // remote_provisioning_client
     // Bluetooth Mesh Remote Provisioning Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_REMOTE_PROVISIONING_CLIENT
     case sl_btmesh_evt_remote_provisioning_client_scan_capabilities_id: {
       app_log(PREFIX "remote_provisioning_client_scan_capabilities(");
       sl_btmesh_evt_remote_provisioning_client_scan_capabilities_t *data =
@@ -2439,9 +2508,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" reason="); log_append_uint8_t(data->reason);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_REMOTE_PROVISIONING_CLIENT
 
     // remote_provisioning_server
     // Bluetooth Mesh Remote Provisioning Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_REMOTE_PROVISIONING_SERVER
     case sl_btmesh_evt_remote_provisioning_server_link_open_request_id: {
       app_log(PREFIX "remote_provisioning_server_link_open_request(");
       sl_btmesh_evt_remote_provisioning_server_link_open_request_t *data =
@@ -2457,9 +2528,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" connection="); log_append_uint8_t(data->connection);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_REMOTE_PROVISIONING_SERVER
 
     // fw_standalone_updater
     // Bluetooth Mesh Standalone Updater
+    #if SL_BTMESH_EVENT_LOG_ENABLE_FW_STANDALONE_UPDATER
     case sl_btmesh_evt_fw_standalone_updater_dist_state_changed_id: {
       app_log(PREFIX "fw_standalone_updater_dist_state_changed(");
       sl_btmesh_evt_fw_standalone_updater_dist_state_changed_t *data =
@@ -2482,12 +2555,16 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" fw_index="); log_append_uint8_t(data->fw_index);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_FW_STANDALONE_UPDATER
 
     // migration
     // Bluetooth Mesh Key migration
+    #if SL_BTMESH_EVENT_LOG_ENABLE_MIGRATION
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_MIGRATION
 
     // ncp_fw_list
     // NCP firmware list cache
+    #if SL_BTMESH_EVENT_LOG_ENABLE_NCP_FW_LIST
     case sl_btmesh_evt_ncp_fw_list_fw_deleted_id: {
       app_log(PREFIX "ncp_fw_list_fw_deleted(");
       sl_btmesh_evt_ncp_fw_list_fw_deleted_t *data =
@@ -2515,9 +2592,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" fwid="); log_append_uint8array(data->fwid);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_NCP_FW_LIST
 
     // sar_config_client
     // Bluetooth Mesh SAR Configuration Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SAR_CONFIG_CLIENT
     case sl_btmesh_evt_sar_config_client_sar_transmitter_status_id: {
       app_log(PREFIX "sar_config_client_sar_transmitter_status(");
       sl_btmesh_evt_sar_config_client_sar_transmitter_status_t *data =
@@ -2546,9 +2625,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" ack_retrans_count="); log_append_uint8_t(data->ack_retrans_count);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SAR_CONFIG_CLIENT
 
     // sar_config_server
     // Bluetooth Mesh SAR Configuration Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SAR_CONFIG_SERVER
     case sl_btmesh_evt_sar_config_server_sar_transmitter_set_id: {
       app_log(PREFIX "sar_config_server_sar_transmitter_set(");
       sl_btmesh_evt_sar_config_server_sar_transmitter_set_t *data =
@@ -2573,9 +2654,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" ack_retrans_count="); log_append_uint8_t(data->ack_retrans_count);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SAR_CONFIG_SERVER
 
     // private_beacon_client
     // Bluetooth Mesh Private Beacon Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PRIVATE_BEACON_CLIENT
     case sl_btmesh_evt_private_beacon_client_beacon_status_id: {
       app_log(PREFIX "private_beacon_client_beacon_status(");
       sl_btmesh_evt_private_beacon_client_beacon_status_t *data =
@@ -2606,12 +2689,16 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" state="); log_append_uint8_t(data->state);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PRIVATE_BEACON_CLIENT
 
     // private_beacon_server
     // Bluetooth Mesh Private Beacon Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_PRIVATE_BEACON_SERVER
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_PRIVATE_BEACON_SERVER
 
     // lcd_client
     // Bluetooth Mesh Large Composition Data Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LCD_CLIENT
     case sl_btmesh_evt_lcd_client_data_header_id: {
       app_log(PREFIX "lcd_client_data_header(");
       sl_btmesh_evt_lcd_client_data_header_t *data =
@@ -2638,12 +2725,16 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" handle="); log_append_uint32_t(data->handle);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LCD_CLIENT
 
     // lcd_server
     // Bluetooth Mesh Large Composition Data Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_LCD_SERVER
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_LCD_SERVER
 
     // on_demand_private_proxy_client
     // Bluetooth Mesh On-demand Private Proxy Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_ON_DEMAND_PRIVATE_PROXY_CLIENT
     case sl_btmesh_evt_on_demand_private_proxy_client_private_gatt_proxy_status_id: {
       app_log(PREFIX "on_demand_private_proxy_client_private_gatt_proxy_status(");
       sl_btmesh_evt_on_demand_private_proxy_client_private_gatt_proxy_status_t *data =
@@ -2653,9 +2744,11 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" value="); log_append_uint8_t(data->value);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_ON_DEMAND_PRIVATE_PROXY_CLIENT
 
     // solicitation_config_client
     // Bluetooth Mesh Solicitation PDU RPL Config Client Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SOLICITATION_CONFIG_CLIENT
     case sl_btmesh_evt_solicitation_config_client_items_status_id: {
       app_log(PREFIX "solicitation_config_client_items_status(");
       sl_btmesh_evt_solicitation_config_client_items_status_t *data =
@@ -2668,12 +2761,16 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" range_length="); log_append_uint8_t(data->range_length);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SOLICITATION_CONFIG_CLIENT
 
     // on_demand_private_proxy_server
     // Bluetooth Mesh On-demand Private Proxy Server Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_ON_DEMAND_PRIVATE_PROXY_SERVER
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_ON_DEMAND_PRIVATE_PROXY_SERVER
 
     // silabs_config_server
     // Bluetooth Mesh Silabs Configuration Server Vendor Model
+    #if SL_BTMESH_EVENT_LOG_ENABLE_SILABS_CONFIG_SERVER
     case sl_btmesh_evt_silabs_config_server_tx_changed_id: {
       app_log(PREFIX "silabs_config_server_tx_changed(");
       sl_btmesh_evt_silabs_config_server_tx_changed_t *data =
@@ -2699,11 +2796,27 @@ void sl_btmesh_log_btmesh_events(sl_btmesh_msg_t *evt)
       app_log_append(" max_size="); log_append_uint16_t(data->max_size);
       app_log_append(" )" NL);
     } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_SILABS_CONFIG_SERVER
+
+    // diagnostic
+    // Bluetooth Mesh Diagnostic Utilities
+    #if SL_BTMESH_EVENT_LOG_ENABLE_DIAGNOSTIC
+    case sl_btmesh_evt_diagnostic_relay_id: {
+      app_log(PREFIX "diagnostic_relay(");
+      sl_btmesh_evt_diagnostic_relay_t *data =
+        &evt->data.evt_diagnostic_relay;
+      app_log_append(" destination_address="); log_append_uint16_t(data->destination_address);
+      app_log_append(" source_address="); log_append_uint16_t(data->source_address);
+      app_log_append(" rssi="); log_append_int8_t(data->rssi);
+      app_log_append(" ttl="); log_append_uint8_t(data->ttl);
+      app_log_append(" )" NL);
+    } break;
+    #endif // SL_BTMESH_EVENT_LOG_ENABLE_DIAGNOSTIC
 
     default:
       #if SL_BTMESH_EVENT_LOG_ENABLE_UNKNOWN_CFG_VAL
       app_log(PREFIX);
-      app_log_append("unknown evt: %8.8x class %2.2x method %2.2x" NL,
+      app_log_append("unknown evt: %8.8lu class %2.2lu method %2.2lu" NL,
                      evt_id,
                      (evt_id >> 16) & 0xFF,
                      (evt_id >> 24) & 0xFF);

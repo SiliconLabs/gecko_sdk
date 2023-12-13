@@ -11,12 +11,11 @@
 #include <utils.h>
 
 #ifdef SUPPORT_ZW_SET_LISTEN_BEFORE_TALK_THRESHOLD
-void func_id_set_listen_before_talk(uint8_t inputLength,
+void func_id_set_listen_before_talk(__attribute__((unused)) uint8_t inputLength,
                                     const uint8_t *pInputBuffer,
                                     uint8_t *pOutputBuffer,
                                     uint8_t *pOutputLength)
 {
-  UNUSED(inputLength);
   uint8_t bReturn;
   SZwaveCommandPackage setLBTMode = {
        .eCommandType = EZWAVECOMMANDTYPE_ZW_SET_LBT_THRESHOLD,

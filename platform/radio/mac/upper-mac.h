@@ -35,8 +35,11 @@
 #define MAX_MAC_INDEX 1
 #endif
 //#define MAX_MAC_INDEX 2
+#ifdef HIGH_SPEED_PHY
+#define MAX_FLAT_PACKET_SIZE 2049
+#else
 #define MAX_FLAT_PACKET_SIZE 127
-
+#endif //HIGH_SPEED_PHY
 // When this callback is called, the higher layer shall perform any final adjustments to the packet necessary just before TX (such as NWK encryption)
 // It shall place the packet to send in the flat buffer, with the payload at mac_payload_offset.
 // This callback is able to drop a packet by setting the length byte to 0 (flat_packet_buffer[0]) to zero
@@ -173,10 +176,15 @@ sl_status_t sl_mac_schedule_symbol_timer(uint8_t mac_index,
 uint8_t sl_mac_prepare_transmit(uint8_t nwk_index, Buffer packet, uint8_t *outgoing_flat_packet);
 
 sl_status_t sl_mac_send_raw_message(uint8_t mac_index,
+                                    uint8_t nwk_index,
                                     Buffer message,
                                     sl_mac_transmit_priority_t priority,
                                     bool useCca,
                                     sl_mac_transmit_complete_callback_t callback);
+
+#ifdef HIGH_SPEED_PHY
+sl_status_t sl_mac_send_raw_high_bandwidth_phy_message(uint8_t nwk_index, uint8_t *payload);
+#endif //HIGH_SPEED_PHY
 
 typedef struct {
   Buffer packet;

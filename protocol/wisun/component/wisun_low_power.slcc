@@ -16,7 +16,6 @@ requires:
   - name: "wisun_stack_lfn"
   - name: "power_manager"
 
-recommends:
-  - id: "iostream_leuart"
-    condition: [device_has_leuart]
-    instance: [vcom]
+template_contribution:
+  - name: component_catalog
+    value: wisun_low_power

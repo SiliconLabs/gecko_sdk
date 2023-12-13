@@ -116,8 +116,9 @@ int main(int argc, char *argv[])
       continue;
     }
 
-    if (cpc_hci_bridge_loop() < 0) {
-      app_log_error("Runtime error: %s" APP_LOG_NL, strerror(errno));
+    int ret = cpc_hci_bridge_loop();
+    if (ret < 0) {
+      app_log_error("Runtime error: '%d'" APP_LOG_NL, ret);
     }
   }
 }
@@ -157,7 +158,7 @@ int cpc_hci_bridge_init(const char *cpc_instance_name)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_init failed with '%s': %s" APP_LOG_NL, cpc_instance_name, strerror(errno));
+    app_log_error("cpc_init for '%s' failed: '%s'" APP_LOG_NL, cpc_instance_name, strerror(-ret));
     return ret;
   }
   app_log_info("CPC successfully initialized with '%s'" APP_LOG_NL, cpc_instance_name);
@@ -178,7 +179,7 @@ int cpc_hci_bridge_init(const char *cpc_instance_name)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_open_endpoint failed: %s" APP_LOG_NL, strerror(errno));
+    app_log_error("cpc_open_endpoint failed: '%s'" APP_LOG_NL, strerror(-ret));
     return ret;
   }
   app_log_info("CPC Bluetooth endpoint opened" APP_LOG_NL);
@@ -226,7 +227,7 @@ int cpc_hci_bridge_reset(void)
     if (ret == 0) {
       cpc_sock_fd = -1;
     } else {
-      app_log_error("cpc_close_endpoint failed: %s" APP_LOG_NL, strerror(errno));
+      app_log_error("cpc_close_endpoint failed: '%s'" APP_LOG_NL, strerror(-ret));
       return ret;
     }
   }
@@ -243,7 +244,7 @@ int cpc_hci_bridge_reset(void)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_restart failed: %s" APP_LOG_NL, strerror(errno));
+    app_log_error("cpc_restart failed: '%s'" APP_LOG_NL, strerror(-ret));
     return ret;
   }
 
@@ -263,7 +264,7 @@ int cpc_hci_bridge_reset(void)
   } while (retry < RETRY_COUNT);
 
   if (ret < 0) {
-    app_log_error("cpc_open_endpoint failed: %s" APP_LOG_NL, strerror(errno));
+    app_log_error("cpc_open_endpoint failed: '%s'" APP_LOG_NL, strerror(-ret));
   }
 
   return ret;
@@ -290,6 +291,7 @@ int cpc_hci_bridge_loop(void)
   // Check if any of the file descriptors have data available
   int ret = select(max_fd + 1, &readfds, NULL, NULL, &tv);
   if ((ret < 0) && (errno != EINTR)) {
+    app_log_error("Select failed: '%s'" APP_LOG_NL, strerror(errno));
     return ret;
   }
 
@@ -331,14 +333,14 @@ int transfer_data_from_pty_to_cpc(void)
       // Write data to CPC
       cpc_write_result = cpc_write_endpoint(cpc_endpoint, hci_packet_buf, hci_packet_len, 0);
       if (cpc_write_result < 0) {
-        app_log_error("cpc_write_endpoint failed: %s" APP_LOG_NL, strerror(errno));
+        app_log_error("CPC write failed: '%s'" APP_LOG_NL, strerror(-cpc_write_result));
         return FAILURE;
       }
       size -= hci_packet_len;
       hci_packet_buf += hci_packet_len;
     } while (size > 0);
   } else if (errno != EAGAIN && errno != ECONNRESET) {
-    app_log_error("PTY read operation failed: %s" APP_LOG_NL, strerror(errno));
+    app_log_error("PTY read failed: '%s'" APP_LOG_NL, strerror(errno));
     return FAILURE;
   }
   return SUCCESS;
@@ -360,10 +362,14 @@ int transfer_data_from_cpc_to_pty(void)
     app_log_debug("cpc_read  - ");
     debug_log_buffer("cpc_rx_buffer", cpc_rx_buffer, size);
     // Write data to PTY
-    write(pty_master_fd, &cpc_rx_buffer[0], size);
+    int res = write(pty_master_fd, &cpc_rx_buffer[0], size);
     memset(&cpc_rx_buffer[0], 0, CPC_RX_BUF_SIZE);
+    if (res < 0) {
+      app_log_error("PTY write failed: '%s'" APP_LOG_NL, strerror(errno));
+      return FAILURE;
+    }
   } else if ((int)size != -EAGAIN && (int)size != -ECONNRESET) {
-    app_log_error("PTY write operation failed: %s" APP_LOG_NL, strerror(errno));
+    app_log_error("CPC read failed: '%s'" APP_LOG_NL, strerror(-size));
     return FAILURE;
   }
   return SUCCESS;

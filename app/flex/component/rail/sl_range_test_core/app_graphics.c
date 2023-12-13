@@ -738,7 +738,13 @@ static uint8_t graphics_draw_volatile_info(uint8_t row)
     if (RANGETEST_PACKET_COUNT_INVALID == pktsRcvd) {
       snprintf(buff, sizeof(buff), "MA: --.-%%  PER: --.-%%");
     } else {
+      #if defined(__IAR_SYSTEMS_ICC__)
+        #pragma diag_suppress=Pa205
+      #endif
       snprintf(buff, sizeof(buff), "MA:%5.1f%%  PER:%5.1f%%", MA, PER);
+      #if defined(__IAR_SYSTEMS_ICC__)
+        #pragma diag_default=Pa205
+      #endif
     }
     GLIB_drawString(&glib_context, buff, safe_strlen(buff), 1U, row, false);
     row += GRAPHICS_FONT_HEIGHT;

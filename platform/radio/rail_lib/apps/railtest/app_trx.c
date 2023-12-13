@@ -428,61 +428,8 @@ void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
   RAILCb_TxPacketSentHadm(railHandle);
 #endif
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
-  if (modeSwitchState == TX_MS_PACKET || modeSwitchState == TX_ON_NEW_PHY) { // Packet has been sent in a MS context
-    if (txCountAfterModeSwitchId == 0) { // Sent packet was MS packet
-      if (RAIL_IsValidChannel(railHandle, modeSwitchNewChannel)
-          == RAIL_STATUS_NO_ERROR) {
-        changeChannel(modeSwitchNewChannel);
-        modeSwitchState = TX_ON_NEW_PHY;
-      }
-
-      // Restore first 2 bytes overwritten by Mode Switch PHR
-      txData[0] = txData_2B[0];
-      txData[1] = txData_2B[1];
-
-      if (txCountAfterModeSwitch != 0) {
-        // Send next packets asap
-        txCount = txCountAfterModeSwitch;
-        pendPacketTx();
-        sendPacketIfPending(); // txCount is decremented in this function
-        txCountAfterModeSwitchId++;
-      } else {
-        endModeSwitchSequence();
-      }
-    } else {
-      if (txCountAfterModeSwitchId < txCountAfterModeSwitch) { // Sent packet was not the last data packet to be tx
-        txCountAfterModeSwitchId++;
-        internalTransmitCounter++;
-        // previousTxAppendedInfo.isAck already initialized false
-        previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
-        (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
-        (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
-        scheduleNextTx();
-      } else {
-        modeSwitchSequenceId++;
-        if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
-          txCountAfterModeSwitchId = 0;
-          // Start timer if needed
-          if (modeSwitchDelayUs > 0) {
-            RAIL_SetMultiTimer(&modeSwitchMultiTimer,
-                               modeSwitchDelayUs,
-                               RAIL_TIME_DELAY,
-                               &RAILCb_ModeSwitchMultiTimerExpired,
-                               NULL);
-          } else {
-            restartModeSwitchSequence();
-          }
-        } else {
-          endModeSwitchSequence();
-          internalTransmitCounter++;
-          // previousTxAppendedInfo.isAck already initialized false
-          previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
-          (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
-          (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
-          scheduleNextTx();
-        }
-      }
-    }
+  if ((modeSwitchState == TX_MS_PACKET) || (modeSwitchState == TX_ON_NEW_PHY)) { // Packet has been sent in a MS context
+    scheduleNextModeSwitchTx(true);
   } else
 #endif
   {

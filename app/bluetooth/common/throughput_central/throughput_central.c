@@ -484,9 +484,15 @@ static sl_status_t throughput_central_scanning_apply_phy(throughput_scan_phy_t p
 void timer_on_refresh_rssi(void)
 {
   sl_status_t sc;
+  int8_t rssi = SL_BT_CONNECTION_RSSI_UNAVAILABLE;
   if (connection_handle_central != SL_BT_INVALID_CONNECTION_HANDLE  && central_state.state != THROUGHPUT_STATE_TEST) {
-    sc = sl_bt_connection_get_rssi(connection_handle_central);
-    app_assert_status(sc);
+    sc = sl_bt_connection_get_median_rssi(connection_handle_central, &rssi);
+    if (sc == SL_STATUS_OK) {
+      central_state.rssi = rssi;
+      throughput_central_on_rssi_change(central_state.rssi);
+    } else {
+      app_log_warning("Failed to get RSSI. sc = 0x%04x" APP_LOG_NL, (unsigned int)sc);
+    }
   }
 }
 
@@ -647,11 +653,6 @@ void bt_on_event_central(sl_bt_msg_t *evt)
 
       throughput_central_on_state_change(central_state.state);
 
-      break;
-
-    case sl_bt_evt_connection_rssi_id:
-      central_state.rssi = evt->data.evt_connection_rssi.rssi;
-      throughput_central_on_rssi_change(central_state.rssi);
       break;
 
     default:

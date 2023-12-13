@@ -207,6 +207,42 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t       class_nbr,
 #endif
 
 /****************************************************************************************************//**
+ * @brief    Abort receive the data from the host through the Bulk OUT endpoint.
+ *
+ * @param    class_nbr   Class instance number.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_read_bulk(uint8_t  class_nbr);
+
+/****************************************************************************************************//**
+ * @brief    Abort send the data to the host through the Bulk IN endpoint.
+ *
+ * @param    class_nbr   Class instance number.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_write_bulk(uint8_t  class_nbr);
+
+/****************************************************************************************************//**
+ * @brief    Abort receive the data from the host through the Interrupt OUT endpoint.
+ *
+ * @param    class_nbr   Class instance number.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_read_interrupt(uint8_t  class_nbr);
+
+/****************************************************************************************************//**
+ * @brief    Abort send the data to the host through the Interrupt IN endpoint.
+ *
+ * @param    class_nbr   Class instance number.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_write_interrupt(uint8_t  class_nbr);
+
+/****************************************************************************************************//**
  * @brief    Receive the data from the host through the Bulk OUT endpoint. This function is blocking.
  *
  * @param    class_nbr   Class instance number.

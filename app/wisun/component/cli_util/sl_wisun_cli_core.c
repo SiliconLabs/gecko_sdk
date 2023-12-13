@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include "cmsis_os2.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_cmsis_os2_common.h"

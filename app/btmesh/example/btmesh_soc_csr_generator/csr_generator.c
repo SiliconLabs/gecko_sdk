@@ -226,6 +226,8 @@ void csr_generate(void)
   sl_status_t sc;
   int mbedtls_ret = 0;
   size_t auth_len = 0;
+  size_t field_count;
+  uint8_t certificate_position;
 
   mbedtls_svc_key_id_t signing_key_id = 0;
   mbedtls_svc_key_id_t ecdh_key_id = 0;
@@ -350,8 +352,9 @@ void csr_generate(void)
     sprintf(p, "BPID:" CSR_GENERATOR_PRODUCT_ID);
     p += 9;
 
+    field_count = config.subject_name_field_count;
     mbedtls_ret = der_encode_csr(config.subject_name_field_array,
-                                 config.subject_name_field_count,
+                                 field_count,
                                  signing_key_id,
                                  csr_der_buf,
                                  sizeof(csr_der_buf),
@@ -360,10 +363,11 @@ void csr_generate(void)
 
     app_log_info("CSR created successfully." APP_LOG_NL);
 
+    certificate_position = config.certificate_pos;
     // Set device certificate as present with the configured NVM3 ID.
     update_provisoning_control_block(POS_DEVICE_CERTIFICATE,
                                      config.certificate_on_device,
-                                     config.certificate_pos);
+                                     certificate_position);
 
     config.output->csr_len = csr_der_len;
     memcpy(config.output->csr, csr_der_buf, csr_der_len);

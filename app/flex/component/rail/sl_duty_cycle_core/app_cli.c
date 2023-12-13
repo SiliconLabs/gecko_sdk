@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include "sl_component_catalog.h"
 #include "em_system.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_cli.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)

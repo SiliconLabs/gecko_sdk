@@ -19,4 +19,4 @@ requires:
 
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_RSA_PKCS1V15_SIGN
+    value: PSA_WANT_ALG_RSA_PKCS1V15_SIGN 1

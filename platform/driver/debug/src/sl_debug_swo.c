@@ -1,3 +1,32 @@
+/***************************************************************************//**
+ * @file
+ * @brief SWO debug
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
 #include "sl_debug_swo.h"
 
 #include "em_device.h"
@@ -6,9 +35,11 @@
 
 #if _SILICON_LABS_32B_SERIES <= 2
 #include "em_gpio.h"
-#include "em_cmu.h"
+#else
+#include "sl_peripheral_gpio.h"
 #endif
 
+#include "em_cmu.h"
 #include "sl_debug_swo_config.h"
 
 sl_status_t sl_debug_swo_init(void)
@@ -40,6 +71,13 @@ sl_status_t sl_debug_swo_init(void)
 
   // Enable SWO pin
   GPIO_DbgSWOEnable(true);
+
+#else
+#if defined(GPIO_SWV_PORT)
+  sl_gpio_set_pin_mode((sl_gpio_port_t)GPIO_SWV_PORT, GPIO_SWV_PIN, SL_GPIO_MODE_PUSH_PULL, 1);
+#endif
+
+  sl_gpio_enable_debug_swo(true);
 #endif
 
 #if _SILICON_LABS_32B_SERIES < 2
@@ -48,7 +86,7 @@ sl_status_t sl_debug_swo_init(void)
 
   // Get debug clock frequency
   freq = CMU_ClockFreqGet(cmuClock_DBG);
-#elif _SILICON_LABS_32B_SERIES == 2
+#else
 
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_MASK)
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_HFRCOEM23)

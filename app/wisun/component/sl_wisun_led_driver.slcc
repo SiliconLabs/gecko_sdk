@@ -16,6 +16,9 @@ include:
     file_list:
     - "path": "sl_wisun_led_driver.h"
 
+config_file:
+  - path: "config/sl_wisun_led_driver_config.h"
+
 requires:
   - name: simple_led
 

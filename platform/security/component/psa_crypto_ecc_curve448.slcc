@@ -3,18 +3,55 @@ package: platform
 label: Curve448
 description: >-
   This component adds support for the Montgomery 448 bit elliptic curve
-  in PSA Crypto. This curve is only supported on Vault High devices.
+  in PSA Crypto.
 category: Platform|Security|PSA Crypto|Elliptic Curves
 quality: evaluation
+
 provides:
   - name: psa_crypto_ecc_curve448
   - name: psa_crypto_ecc_curve
     allow_multiple: true
+
 requires:
   - name: psa_crypto_ecc
+  - name: mbedtls_ecc_curve448
+    condition: [device_series_0]
+  - name: mbedtls_ecc_curve448
+    condition: [device_series_1]
+  - name: mbedtls_ecc_curve448
+    condition: [device_security_rot]
+  - name: mbedtls_ecc_curve448
+    condition: [device_security_se]
+
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_MONTGOMERY_448
-    condition: [device_security_vault]
+    value: PSA_WANT_ECC_MONTGOMERY_448 1
+
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_ECC_MONTGOMERY_448 1"
+    condition: [mbedtls_ecc_curve448]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1"
+    condition: [mbedtls_ecc_curve448]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1"
+    condition: [mbedtls_ecc_curve448]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_IMPORT 1"
+    condition: [mbedtls_ecc_curve448]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_EXPORT 1"
+    condition: [mbedtls_ecc_curve448]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1"
+    condition: [mbedtls_ecc_curve448]
+
+  - name: mbedtls_config
+    value: MBEDTLS_ECP_DP_CURVE448_ENABLED
+    condition: [mbedtls_uses_psa_crypto]
+  - name: mbedtls_mpi_max
+    value: 56
+    condition: [mbedtls_uses_psa_crypto]
+
 documentation:
   url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_MONTGOMERY

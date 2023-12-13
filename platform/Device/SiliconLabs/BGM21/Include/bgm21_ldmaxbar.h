@@ -81,4 +81,4 @@ typedef struct {
 /** @} End of group BGM21_LDMAXBAR */
 /** @} End of group Parts */
 
-#endif /* BGM21_LDMAXBAR_H */
+#endif // BGM21_LDMAXBAR_H

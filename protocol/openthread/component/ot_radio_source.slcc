@@ -22,7 +22,6 @@ source:
       - path: common/binary_search.cpp
       - path: common/error.cpp
       - path: common/frame_builder.cpp
-      - path: common/instance.cpp
       - path: common/log.cpp
       - path: common/random.cpp
       - path: common/string.cpp
@@ -34,6 +33,7 @@ source:
       - path: crypto/crypto_platform.cpp
       - path: crypto/storage.cpp
       - path: diags/factory_diags.cpp
+      - path: instance/instance.cpp
       - path: mac/link_raw.cpp
       - path: mac/mac_frame.cpp
       - path: mac/mac_types.cpp

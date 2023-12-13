@@ -19,6 +19,12 @@
 
 typedef void(*zaf_event_distributor_cc_event_handler_handler_v1_t)(const uint8_t, const void*);
 
+typedef struct {
+  const void* data;               ///< This must point to a global data
+  uint16_t command_class;
+  uint8_t event;
+} event_cc_t;
+
 /**
  * ZAF Event Distributor Handler Map
  */

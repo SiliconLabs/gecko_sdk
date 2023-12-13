@@ -14,7 +14,6 @@ config_file:
   - path: "config/sl_wisun_udp_server_config.h"
 
 requires:
-  - name: "sl_wisun_socket"
   - name: "sl_wisun_app_core"
 
 ui_hints:

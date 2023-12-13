@@ -1,7 +1,7 @@
 project_name: tz_psa_crypto_ecdh_ns
 package: platform
 quality: production
-label: Platform - TrustZone PSA Crypto ECDH (Non-secure application)
+label: Platform Security - SoC TrustZone PSA Crypto ECDH (Non-secure application)
 description: >
   The Non-secure part of the application demonstrates how to use the ECDH key agreement API. The Non-secure application needs to build with the Secure application on a workspace (tz_psa_crypto_ecdh_ws).
 category: Example|Platform

@@ -1,15 +1,13 @@
 package: Zigbee
-description: This component handles the retrieval of diagnostic information from the stack
-  through the diagnostic cluster. Implement the component as follows. 1. Mark all diagnostic attributes you wish to track as external. 2. Add a call
-  to emberAfReadDiagnosticAttribute(attributeMetadata, buffer); from emberAfExternalAttributeReadCallback().
+description: This component handles the retrieval of diagnostic information from the stack through the diagnostic cluster. Implement the component as follows. 1. Mark all diagnostic attributes you wish to track as external. 2. Add a call to emberAfReadDiagnosticAttribute(attributeMetadata, buffer); from emberAfExternalAttributeReadCallback().
 id: zigbee_diagnostic_server
 label: Diagnostic Server
 category: Zigbee|Cluster Library|Home Automation
 quality: evaluation
 provides:
-   - name: "zigbee_diagnostic_server"
+  - name: zigbee_diagnostic_server
 requires:
-   - name: "zigbee_counters"
+  - name: zigbee_counters
 source:
   - path: protocol/zigbee/app/framework/plugin/diagnostic-server/diagnostic-server-soc.c
     condition:
@@ -20,7 +18,7 @@ source:
 include:
   - path: protocol/zigbee/app/framework/plugin/diagnostic-server
     file_list:
-      - path: diagnostic-server.h  
+      - path: diagnostic-server.h
 template_contribution:
   - name: component_catalog
     value: zigbee_diagnostic_server

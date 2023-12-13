@@ -7,6 +7,9 @@ category: Platform|Security|Mbed TLS|Utilities
 quality: production
 source:
   - path: util/third_party/mbedtls/library/bignum.c
+  - path: util/third_party/mbedtls/library/bignum_core.c
+  - path: util/third_party/mbedtls/library/bignum_mod.c
+  - path: util/third_party/mbedtls/library/bignum_mod_raw.c
 provides:
   - name: mbedtls_mpi
 requires:

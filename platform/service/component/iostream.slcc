@@ -3,7 +3,7 @@ package: platform
 label: IO Stream
 description: >
   The IO Stream component allows to read/write data using a variety of physical
-  communication interfaces, or Streams. This allows for standardized data 
+  communication interfaces, or Streams. This allows for standardized data
   transfer operations while abstracting the underlying interface. IO Stream
   also enables the implementation of the printf standard C function, using the
   configured Stream, making it easier to send formatted data over a physical link.
@@ -39,6 +39,8 @@ template_file:
   - path: init/sl_iostream_handles.c.jinja
   - path: init/sl_iostream_init_instances.h.jinja
 template_contribution:
+  - name: component_catalog
+    value: iostream
   - name: event
     value:
       id: iostream_instance_init
@@ -52,7 +54,7 @@ template_contribution:
       include: sl_iostream_init_instances.h
       handler: sl_iostream_init_instances
     priority: 4
-    
+
 documentation:
     docset: gecko-platform
     document: platform-service/iostream

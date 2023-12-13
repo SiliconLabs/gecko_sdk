@@ -129,6 +129,18 @@ build_simulation()
         options+=("-DOT_CSL_RECEIVER=ON")
         options+=("-DOT_LINK_METRICS_INITIATOR=ON")
         options+=("-DOT_LINK_METRICS_SUBJECT=ON")
+        options+=("-DOT_LINK_METRICS_MANAGER=ON")
+    fi
+
+    if [[ ${OT_NODE_TYPE} == cli* ]]; then
+        # Only enable OT_PLATFORM_BOOTLOADER_MODE when testing cli.
+        # This is intended to test that the "reset bootloader" CLI command returns a "NotCapable" error
+
+        # Note: Setting this option to ON for all OT_NODE_TYPEs will cause the posix/expects CI check to fail.
+        #       This is because the simulation RCP will have the SPINEL_CAP_RCP_RESET_TO_BOOTLOADER capability,
+        #       causing the ot-cli POSIX app to send the reset to simulation RCP successfully instead of printing
+        #       the expected error.
+        options+=("-DOT_PLATFORM_BOOTLOADER_MODE=ON")
     fi
 
     if [[ ${ot_extra_options[*]+x} ]]; then
@@ -157,11 +169,19 @@ build_simulation()
 build_posix()
 {
     local version="$1"
-    local options=("-DOT_MESSAGE_USE_HEAP=ON" "-DOT_THREAD_VERSION=${version}" "-DBUILD_TESTING=ON")
+    local options=(
+        "-DBUILD_TESTING=ON"
+        "-DOT_MESSAGE_USE_HEAP=ON"
+        "-DOT_PLATFORM_BOOTLOADER_MODE=ON"
+        "-DOT_THREAD_VERSION=${version}"
+    )
 
     if [[ ${version} != "1.1" ]]; then
         options+=("-DOT_DUA=ON")
         options+=("-DOT_MLR=ON")
+        options+=("-DOT_LINK_METRICS_INITIATOR=ON")
+        options+=("-DOT_LINK_METRICS_SUBJECT=ON")
+        options+=("-DOT_LINK_METRICS_MANAGER=ON")
     fi
 
     if [[ ${FULL_LOGS} == 1 ]]; then
@@ -338,6 +358,7 @@ do_build_otbr_docker()
         "REST_API=0"
         "WEB_GUI=0"
         "MDNS=${OTBR_MDNS:-mDNSResponder}"
+        "FIREWALL=${FIREWALL:-1}"
     )
 
     if [[ ${NAT64} != 1 ]]; then
@@ -377,6 +398,8 @@ do_build_otbr_docker()
         rm -rf third_party/openthread/repo
         rsync -r \
             --exclude=build \
+            --exclude=ot_testing \
+            --exclude=__pycache__ \
             "${otdir}/." \
             third_party/openthread/repo
         rm -rf .git
@@ -656,7 +679,7 @@ main()
 {
     envsetup "$@"
 
-    if [[ -z ${1:-} ]]; then
+    if [[ -z ${1-} ]]; then
         print_usage 1
     fi
 

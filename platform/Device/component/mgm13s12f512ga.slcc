@@ -84,6 +84,7 @@
   - name: cortexm4
   - name: armv7em
   - name: device_is_module
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: device_has_acmp
   - name: device_has_acmp0

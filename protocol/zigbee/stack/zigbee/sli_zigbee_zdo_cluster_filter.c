@@ -25,6 +25,7 @@ extern void sli_zigbee_zig_dev_prepare_zdo_message(EmberApsFrame *apsFrame,
                                                    EmberApsOption options,
                                                    uint8_t sequence);
 extern EmberStatus sli_zigbee_send_zig_dev_message(EmberNodeId destination,
+                                                   EmberApsFrame *apsFrame,
                                                    const char * format, ...);
 // NOTE from aps-relay.h
 extern bool sli_zigbee_aps_relay_frame_required(EmberNodeId dest_short_id);
@@ -88,7 +89,7 @@ bool sli_zigbee_zdo_cluster_command_is_authorized(EmberNodeId sender,
                                              cluster_id | CLUSTER_ID_RESPONSE_MINIMUM,
                                              options,
                                              sequence_number);
-      (void) sli_zigbee_send_zig_dev_message(sender, "1", EMBER_ZDP_NOT_AUTHORIZED);
+      (void) sli_zigbee_send_zig_dev_message(sender, &shortcutResponseFrame, "1", EMBER_ZDP_NOT_AUTHORIZED);
     }
     return false;
   }

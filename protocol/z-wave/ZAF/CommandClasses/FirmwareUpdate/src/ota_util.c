@@ -238,16 +238,16 @@ static OTA_UTIL myOta = {
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
-static void initOTAState();
-static void TimerCancelFwUpdateFrameGet();
-static void TimerStartFwUpdateFrameGet();
+static void initOTAState(void);
+static void TimerCancelFwUpdateFrameGet(void);
+static void TimerStartFwUpdateFrameGet(void);
 
 static void ZCB_TimerOutFwUpdateFrameGet(SSwTimer* pTimer);
 static void ZCB_FinishFwUpdate(TRANSMISSION_RESULT * pTransmissionResult);
 static void ZCB_VerifyImage(SSwTimer* pTimer);
 
-static void UpdateStatusSuccess();
-static void SendFirmwareUpdateStatusReport();
+static void UpdateStatusSuccess(void);
+static void SendFirmwareUpdateStatusReport(void);
 
 static void handleEvent(uint8_t event);
 static void fw_action_send_get(void);
@@ -260,32 +260,35 @@ static void fw_action_reboot_and_Install(void);
 static char* getStateAsString(FW_STATE state);
 static char* getEventAsString(FW_EVENT event);
 #endif //DEBUGPRINT
-static void resetReceivedReportsData();
-static bool useMultiFrames();
+static void resetReceivedReportsData(void);
+static bool useMultiFrames(void);
 
 static JOB_STATUS
 CmdClassFirmwareUpdateMdStatusReport(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
                                       uint8_t status, uint16_t waitTime,
                                       ZAF_TX_Callback_t pCbFunc)
 {
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-  zaf_tx_options_t tx_options;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
-  memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
 
+  zaf_tx_options_t tx_options;
   /* Send status, when finished */
-  pTxBuf->ZW_FirmwareUpdateMdStatusReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
-  pTxBuf->ZW_FirmwareUpdateMdStatusReportV5Frame.cmd = FIRMWARE_UPDATE_MD_STATUS_REPORT_V5;
-  pTxBuf->ZW_FirmwareUpdateMdStatusReportV5Frame.status = status;
-  pTxBuf->ZW_FirmwareUpdateMdStatusReportV5Frame.waittime1 = (uint8_t)(waitTime >> 8);
-  pTxBuf->ZW_FirmwareUpdateMdStatusReportV5Frame.waittime2 = (uint8_t)(waitTime);
+  ZAF_TRANSPORT_TX_BUFFER  TxBuf = {
+    .appTxBuf.ZW_FirmwareUpdateMdStatusReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5,
+    .appTxBuf.ZW_FirmwareUpdateMdStatusReportV5Frame.cmd = FIRMWARE_UPDATE_MD_STATUS_REPORT_V5,
+    .appTxBuf.ZW_FirmwareUpdateMdStatusReportV5Frame.status = status,
+    .appTxBuf.ZW_FirmwareUpdateMdStatusReportV5Frame.waittime1 = (uint8_t)(waitTime >> 8),
+    .appTxBuf.ZW_FirmwareUpdateMdStatusReportV5Frame.waittime2 = (uint8_t)(waitTime)
+  };
 
   zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
-  if(!zaf_transport_tx((uint8_t *)pTxBuf,
+  if(!zaf_transport_tx((uint8_t *)&(TxBuf.appTxBuf),
           sizeof(ZW_FIRMWARE_UPDATE_MD_STATUS_REPORT_V5_FRAME),
           pCbFunc, &tx_options))
   {
-    TRANSMISSION_RESULT result = {0xff, TRANSMIT_COMPLETE_FAIL, TRANSMISSION_RESULT_FINISHED};
+    TRANSMISSION_RESULT result = {
+      .nodeId = 0xff,
+      .status = TRANSMIT_COMPLETE_FAIL,
+      .isFinished = TRANSMISSION_RESULT_FINISHED
+    };
     pCbFunc(&result);
     return JOB_STATUS_BUSY;
   }
@@ -297,23 +300,21 @@ CmdClassFirmwareUpdateMdGet(RECEIVE_OPTIONS_TYPE_EX *rxOpt,
                             uint16_t firmwareUpdateReportNumber,
                             ZAF_TX_Callback_t pCbFunc)
 {
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
   zaf_tx_options_t tx_options;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
 
   DPRINTF("Transmit Md Get CMD with report number %d\n", firmwareUpdateReportNumber);
 
-  memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
   /* Ask for the next report */
-  pTxBuf->ZW_FirmwareUpdateMdGetV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
-  pTxBuf->ZW_FirmwareUpdateMdGetV5Frame.cmd = FIRMWARE_UPDATE_MD_GET_V5;
-  pTxBuf->ZW_FirmwareUpdateMdGetV5Frame.numberOfReports = getFWUpdateMDGetNumberOfReports();
-  pTxBuf->ZW_FirmwareUpdateMdGetV5Frame.properties1 = (uint8_t)(firmwareUpdateReportNumber >> 8);
-  pTxBuf->ZW_FirmwareUpdateMdGetV5Frame.reportNumber2 = (uint8_t)(firmwareUpdateReportNumber);
+  ZAF_TRANSPORT_TX_BUFFER  TxBuf = {
+    .appTxBuf.ZW_FirmwareUpdateMdGetV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5,
+    .appTxBuf.ZW_FirmwareUpdateMdGetV5Frame.cmd = FIRMWARE_UPDATE_MD_GET_V5,
+    .appTxBuf.ZW_FirmwareUpdateMdGetV5Frame.numberOfReports = getFWUpdateMDGetNumberOfReports(),
+    .appTxBuf.ZW_FirmwareUpdateMdGetV5Frame.properties1 = (uint8_t)(firmwareUpdateReportNumber >> 8),
+    .appTxBuf.ZW_FirmwareUpdateMdGetV5Frame.reportNumber2 = (uint8_t)(firmwareUpdateReportNumber)
+  };
 
   zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
-  if(!zaf_transport_tx((uint8_t *)pTxBuf,
+  if(!zaf_transport_tx((uint8_t *)&(TxBuf.appTxBuf),
           sizeof(ZW_FIRMWARE_UPDATE_MD_GET_V5_FRAME),
           pCbFunc, &tx_options))
   {
@@ -328,34 +329,33 @@ CC_FirmwareUpdate_ActivationStatusReport_tx(
     uint16_t checksum,
     uint8_t status)
 {
-  ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-  ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
   zaf_tx_options_t tx_options;
   // Activation supports the Z-Wave firmware only.
   const uint8_t FIRMWARE_TARGET = 0;
   uint16_t manufacturerID;
   uint16_t firmwareID;
 
-  memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
   manufacturerID = zaf_config_get_manufacturer_id();
 
   firmwareID = handleFirmWareIdGetExtended(FIRMWARE_TARGET);
 
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.cmd = FIRMWARE_UPDATE_ACTIVATION_STATUS_REPORT_V5;
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.manufacturerId1 = (uint8_t)(manufacturerID >> 8);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.manufacturerId2 = (uint8_t)(manufacturerID & 0xFF);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareId1 = (uint8_t)(firmwareID >> 8);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareId2 = (uint8_t)(firmwareID & 0xFF);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.checksum1 = (uint8_t)(checksum >> 8);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.checksum2 = (uint8_t)(checksum);
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareTarget = FIRMWARE_TARGET;
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareUpdateStatus = status;
-  pTxBuf->ZW_FirmwareUpdateActivationStatusReportV5Frame.hardwareVersion = zaf_config_get_hardware_version();
+  ZAF_TRANSPORT_TX_BUFFER  TxBuf = {
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5,
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.cmd = FIRMWARE_UPDATE_ACTIVATION_STATUS_REPORT_V5,
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.manufacturerId1 = (uint8_t)(manufacturerID >> 8),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.manufacturerId2 = (uint8_t)(manufacturerID & 0xFF),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareId1 = (uint8_t)(firmwareID >> 8),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareId2 = (uint8_t)(firmwareID & 0xFF),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.checksum1 = (uint8_t)(checksum >> 8),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.checksum2 = (uint8_t)(checksum),
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareTarget = FIRMWARE_TARGET,
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.firmwareUpdateStatus = status,
+    .appTxBuf.ZW_FirmwareUpdateActivationStatusReportV5Frame.hardwareVersion = zaf_config_get_hardware_version()
+  };
+
 
   zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
-  if(!zaf_transport_tx((uint8_t *)pTxBuf,
+  if(!zaf_transport_tx((uint8_t *)&(TxBuf.appTxBuf),
           sizeof(ZW_FIRMWARE_UPDATE_ACTIVATION_STATUS_REPORT_V5_FRAME),
           NULL, &tx_options))
   {
@@ -388,7 +388,7 @@ static inline bool ActivationIsEnabled(void)
   return (ACTIVATION_SUPPORT_ENABLED_MASK == myOta.activation_enabled);
 }
 
-static void cc_firmware_update_send_status_report()
+static void cc_firmware_update_send_status_report(void)
 {
   bool updated_successfully = false;
   if (false == zpal_bootloader_is_first_boot(&updated_successfully))
@@ -398,8 +398,7 @@ static void cc_firmware_update_send_status_report()
   }
   DPRINT("\nFIRMWARE UPDATE DONE NOW!");
 
-  SFirmwareUpdateFile file;
-  memset(&file, 0, sizeof(file));
+  SFirmwareUpdateFile file = { 0 };
   size_t dataLen = 0;
   ZAF_nvm_get_object_size(ZAF_FILE_ID_CC_FIRMWARE_UPDATE, &dataLen);
 
@@ -428,19 +427,22 @@ static void cc_firmware_update_send_status_report()
     ZAF_nvm_write(ZAF_FILE_ID_CC_FIRMWARE_UPDATE, &file, ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
   }
 
-  RECEIVE_OPTIONS_TYPE_EX rxOpt;
-  rxOpt.sourceNode.nodeId   = file.srcNodeID;
+  RECEIVE_OPTIONS_TYPE_EX rxOpt = {
+    .sourceNode.nodeId   = file.srcNodeID,
+    .rxStatus            = file.rxStatus,
+    .securityKey         = (security_key_t) file.securityKey,
+    .destNode.endpoint   = 0 // Firmware update is part of the root device.
+  };
   /*
    * Ignore bitfield conversion warnings as there is no good solution other than stop
    * using bitfields.
    */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
-  rxOpt.sourceNode.endpoint = file.srcEndpoint;
+  // endpoint is stored into 7 bits, prevent overflow with 0x7F mask.
+  rxOpt.sourceNode.endpoint = file.srcEndpoint & 0x7F;
 #pragma GCC diagnostic pop
-  rxOpt.rxStatus            = file.rxStatus;
-  rxOpt.securityKey         = (security_key_t) file.securityKey;
-  rxOpt.destNode.endpoint   = 0; // Firmware update is part of the root device.
+
 
   if (ACTIVATION_SUPPORT_ENABLED_MASK == file.activation_was_applied)
   {
@@ -486,7 +488,7 @@ bool CC_FirmwareUpdate_Init(
 {
   zpal_status_t retvalue;
 
-  zpal_bootloader_info_t bloaderInfo;
+  zpal_bootloader_info_t bloaderInfo = { 0 };
 
   myOta.pOtaStart = pOtaStart;
   myOta.pOtaFinish = pOtaFinish;
@@ -532,9 +534,9 @@ bool CC_FirmwareUpdate_Init(
   if (ZPAL_STATUS_OK != status)
   {
     DPRINT("\nFile default!");
-    SFirmwareUpdateFile file;
-    memset(&file, 0, sizeof(file));
-    file.fileVersion = FIRMWARE_UPDATE_FILE_VERSION;
+    SFirmwareUpdateFile file = {
+      .fileVersion = FIRMWARE_UPDATE_FILE_VERSION
+    };
     dataLen = ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE;
     ZAF_nvm_write(  ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
                     &file,
@@ -568,7 +570,7 @@ bool CC_FirmwareUpdate_Init(
 ** Side effects:
 **
 **-------------------------------------------------------------------------*/
-static void UpdateStatusSuccess()
+static void UpdateStatusSuccess(void)
 {
   DPRINT("OTA_SUCCESS_CB");
 
@@ -593,9 +595,8 @@ static void UpdateStatusSuccess()
 ** Side effects:
 **
 **-------------------------------------------------------------------------*/
-static void ZCB_VerifyImage(SSwTimer* pTimer)
+static void ZCB_VerifyImage(__attribute__((unused)) SSwTimer* pTimer)
 {
-  UNUSED(pTimer);
   if (FW_STATE_AWAIT_TIMEOUT == myOta.currentState) {
     handleEvent(FW_EVENT_START_FW_INSTALL);
   } else {
@@ -819,9 +820,9 @@ handleCmdClassFirmwareUpdateMdReport( uint16_t crc16Result,
 }
 
 static uint16_t
-handleBootloaderFirmWareIdGet()
+handleBootloaderFirmWareIdGet(void)
 {
-  zpal_bootloader_info_t bootloader_info;
+  zpal_bootloader_info_t bootloader_info = { 0 };
   zpal_bootloader_get_info(&bootloader_info);
   return ((bootloader_info.version & ZPAL_BOOTLOADER_VERSION_BUGFIX_MASK) >> ZPAL_BOOTLOADER_VERSION_BUGFIX_SHIFT);
 }
@@ -1025,7 +1026,7 @@ void ZCB_CmdClassFwUpdateMdReqReport(transmission_result_t * pTxResult)
  * @param pTransmissionResult : pointer to TRANSMISSION_RESULT structure containing transmit result.
  */
 static void
-ZCB_CmdClassFwUpdateMdGet(TRANSMISSION_RESULT * pTransmissionResult)
+ZCB_CmdClassFwUpdateMdGet(__attribute__((unused)) TRANSMISSION_RESULT * pTransmissionResult)
 {
   zpal_feed_watchdog();
 
@@ -1033,7 +1034,6 @@ ZCB_CmdClassFwUpdateMdGet(TRANSMISSION_RESULT * pTransmissionResult)
     zaf_transport_pause();
   }
   //DPRINT("Md Get CMD queued and now transmitted! Resetting Md Get CMD timer...\n");
-  UNUSED(pTransmissionResult);
   /// MdGet transmission now done, SendDataAbort not needed anymore for this transmit
   myOta.MdGetDone = true;
   /// Start MdGet retry timer
@@ -1042,7 +1042,7 @@ ZCB_CmdClassFwUpdateMdGet(TRANSMISSION_RESULT * pTransmissionResult)
 
 
 /// Sets/Resets myOta to initial values
-static void initOTAState()
+static void initOTAState(void)
 {
   myOta.currentState = FW_STATE_IDLE;
   myOta.fw_crcrunning = CRC_INITAL_VALUE;
@@ -1071,7 +1071,7 @@ reboot_and_install(void)
  * Possible values defined in SDS13782, CC:007A.05.07.11.006
  */
 static void
-SendFirmwareUpdateStatusReport()
+SendFirmwareUpdateStatusReport(void)
 {
   uint8_t waitTime = WAITTIME_FWU_FAIL;
   TimerCancelFwUpdateFrameGet();
@@ -1109,10 +1109,8 @@ SendFirmwareUpdateStatusReport()
 }
 
 /// Callback Finish Fw update status to application.
-static void ZCB_FinishFwUpdate(TRANSMISSION_RESULT * pTransmissionResult)
+static void ZCB_FinishFwUpdate(__attribute__((unused)) TRANSMISSION_RESULT * pTransmissionResult)
 {
-  UNUSED(pTransmissionResult);
-
   if (NULL != myOta.pOtaFinish)
   {
     myOta.pOtaFinish(myOta.finishStatus);
@@ -1245,7 +1243,7 @@ bool CC_FirmwareUpdate_ActivationSet_handler(
    * therefore need to restore the calculated value from file storage */
   if (0 == myOta.firmwareCrc)
   {
-    SFirmwareUpdateFile file;
+    SFirmwareUpdateFile file = { 0 };
     ZAF_nvm_read( ZAF_FILE_ID_CC_FIRMWARE_UPDATE,
                   &file,
                   ZAF_FILE_SIZE_CC_FIRMWARE_UPDATE);
@@ -1359,7 +1357,7 @@ static void fw_action_send_req_report(void)
   // Done. Actual Request Report is sent from CC.
 }
 /// OTA done. Sends FW Update Status Report.
-static void fw_action_send_status_report()
+static void fw_action_send_status_report(void)
 {
   DPRINTF(">> %s(), send status report[%d] and end.\n", __func__, myOta.statusReport);
 
@@ -1454,7 +1452,7 @@ static char* __attribute ((used)) getEventAsString(FW_EVENT event)
 #endif //DEBUGPRINT
 
 
-uint8_t getFWUpdateMDGetNumberOfReports()
+uint8_t getFWUpdateMDGetNumberOfReports(void)
 {
   // Number of reports to request = Max number of reports - number or reports already received
   // Device should keep receiving MD reports as long as mdReportsStorage is not full.
@@ -1471,7 +1469,7 @@ uint8_t getFWUpdateMDGetNumberOfReports()
 
 /// Called after all reports requested in one GET are received,
 /// or entire transfer is complete.
-static void resetReceivedReportsData()
+static void resetReceivedReportsData(void)
 {
   DPRINTF(">> %s() - reset data\n", __func__);
   myOta.reportsReceived = 0;
@@ -1480,7 +1478,7 @@ static void resetReceivedReportsData()
 
 /// Checks whether multi frames should be used. To use it, Multi frames option
 /// must be enabled, and number of reports should be greater than 1
-static bool useMultiFrames()
+static bool useMultiFrames(void)
 {
   return CC_FIRMWARE_UPDATE_CONFIG_OTA_MULTI_FRAME && ( mdGetNumberOfReports > 1 );
 }

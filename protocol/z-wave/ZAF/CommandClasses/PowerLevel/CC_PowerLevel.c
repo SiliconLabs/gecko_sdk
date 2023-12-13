@@ -68,25 +68,26 @@ static void SetRadioAttenuation(uint8_t adjustTxPower);
 static void
 SendTestReport(void)
 {
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  zaf_tx_options_t tx_options;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
+  zaf_tx_options_t tx_options = {
+    .dest_node_id = testSourceNodeID,
+    .source_endpoint = 0,
+    .dest_endpoint = 0,
+    .tx_options = ZWAVE_PLUS_TX_OPTIONS,
+    .security_key = GetHighestSecureLevel(ZAF_GetSecurityKeys()),
+    .bit_addressing = false,
+    .use_supervision = false
+  };
 
-  tx_options.dest_node_id = testSourceNodeID;
-  tx_options.source_endpoint = 0;
-  tx_options.dest_endpoint = 0;
-  tx_options.tx_options = ZWAVE_PLUS_TX_OPTIONS;
-  tx_options.security_key = GetHighestSecureLevel(ZAF_GetSecurityKeys());
-  tx_options.bit_addressing = false;
-  tx_options.use_supervision = false;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL,
+    .ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT,
+    .ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID,   // Z-Wave only (not for Z-Wave LR)
+    .ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState,
+    .ZW_PowerlevelTestNodeReportFrame.testFrameCount1 = (uint8_t)(testFrameSuccessCount >> 8),
+    .ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)testFrameSuccessCount
+  };
 
-  txBuf.ZW_PowerlevelTestNodeReportFrame.cmdClass = COMMAND_CLASS_POWERLEVEL;
-  txBuf.ZW_PowerlevelTestNodeReportFrame.cmd = POWERLEVEL_TEST_NODE_REPORT;
-  txBuf.ZW_PowerlevelTestNodeReportFrame.testNodeid = (uint8_t)testNodeID;   // Z-Wave only (not for Z-Wave LR)
-  txBuf.ZW_PowerlevelTestNodeReportFrame.statusOfOperation = testState;
-  txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount1 =
-      (uint8_t)(testFrameSuccessCount >> 8);
-  txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)testFrameSuccessCount;
+  tx_options.use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t*)&txBuf,
                           sizeof(txBuf.ZW_PowerlevelTestNodeReportFrame),
@@ -164,17 +165,17 @@ static void StartTest(void)
  * This function is called when the delay timer triggers.
  */
 static void
-ZCB_DelayTestFrame (SSwTimer* pTimer)
+ZCB_DelayTestFrame (__attribute__((unused)) SSwTimer* pTimer)
 {
-  UNUSED(pTimer);
   SQueueNotifying* pTxQueueNotifying = ZAF_getZwTxQueue();
 
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.uTransmitParams.Test.DestNodeId = testNodeID;
-  FramePackage.uTransmitParams.Test.PowerLevel = testPowerLevel;
-  FramePackage.uTransmitParams.Test.Handle = ZCB_SendTestDone;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_TESTFRAME;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.Test.DestNodeId = testNodeID,
+    .uTransmitParams.Test.PowerLevel = testPowerLevel,
+    .uTransmitParams.Test.Handle = ZCB_SendTestDone,
+    .eTransmitType = EZWAVETRANSMITTYPE_TESTFRAME
+  };
 
   // Put the package on queue (and dont wait for it)
   if (EQUEUENOTIFYING_STATUS_TIMEOUT == QueueNotifyingSendToBack(pTxQueueNotifying, (uint8_t*)&FramePackage, 0))
@@ -215,12 +216,10 @@ static received_frame_status_t
 CC_Powerlevel_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength,
+  __attribute__((unused)) uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER * pFrameOut,
   uint8_t * pLengthOut)
 {
-  UNUSED(cmdLength);
-
   switch (pCmd->ZW_Common.cmd)
   {
     case POWERLEVEL_SET:
@@ -328,9 +327,10 @@ CC_Powerlevel_handler(
 static void SetRadioAttenuation(uint8_t adjustTxPower)
 {
   const SApplicationHandles * pAppHandle = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {0};
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_SET_TX_ATTENUATION;
-  cmdPackage.uCommandParams.SetTxAttenuation.value = adjustTxPower;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_SET_TX_ATTENUATION,
+    .uCommandParams.SetTxAttenuation.value = adjustTxPower
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(pAppHandle->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 }

@@ -73,6 +73,8 @@ void emRadioHoldOffIsr(bool active)
     } else if (txType == TX_TYPE_LBT) {
       ccaThreshold = lbtConfig->lbtThreshold;
       RAIL_SetCcaThreshold(railHandle, RAIL_RSSI_INVALID_DBM);
+    } else {
+      // MISRA
     }
     if ((sl_rail_util_coex_get_options() & SL_RAIL_UTIL_COEX_OPT_ACK_HOLDOFF) != SL_RAIL_UTIL_COEX_OPT_DISABLED) {
       RAIL_PauseRxAutoAck(railHandle, true);
@@ -211,13 +213,15 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV          (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX            (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM             (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT)
+
 #if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT   (3U)
 #define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT)
 #endif
+
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY_SHIFT   (4U)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY         (9U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_1MBPS_FEC_PHY     (10U)
 #endif
 
 typedef RAIL_Status_t (*RAIL_IEEE802154_2p4GHzRadioConfig_t)(RAIL_Handle_t railHandle);
@@ -232,9 +236,12 @@ static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
   &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem,
 #if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
   &RAIL_IEEE802154_Config2p4GHzRadioCustom1,
+#else
+  NULL,
 #endif
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
   &RAIL_IEEE802154_Config2p4GHzRadio2Mbps,
+  // &RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec, //TODO: [HighBW] will be taken care in conflict resolution
 #endif
 };
 
@@ -277,10 +284,19 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
   if ((sl_cli_get_argument_count(args) >= 5)
       && (sl_cli_get_argument_uint8(args, 4) != 0U)) {
-    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY;
-    if (ieee802154Config > RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY) {
+    RAIL_ConfigEvents(railHandle,
+                      RAIL_EVENT_RX_SYNC2_DETECT,
+                      RAIL_EVENT_RX_SYNC2_DETECT);
+    if (ieee802154Config != 0U) {
       responsePrintError(sl_cli_get_command_string(args, 0), 1,
                          "Cannot set antdiv, coex, fem, or custom PHY options with 2Mbps PHY");
+    } else if (sl_cli_get_argument_uint8(args, 4) == 1) {
+      ieee802154Config = RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY;
+    } else if (sl_cli_get_argument_uint8(args, 4) == 2) {
+      ieee802154Config =  RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_1MBPS_FEC_PHY;
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                         "Unsupported high bandwidth PHY");
     }
   }
 #endif //RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
@@ -687,6 +703,95 @@ void ieee802154SetPHR(sl_cli_command_arg_t *args)
 }
 
 #if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+
+#define EU_REG_DOMAIN                 0x03U
+#define BZ_REG_DOMAIN                 0x07U
+
+typedef struct channelMaskBorder {
+  uint8_t forbiddenChannel;
+  uint8_t supportedChannel;
+} channelMaskBorder_t;
+
+typedef struct channelMask {
+  uint8_t chanPlanId;
+  uint8_t channelMaskBorderCount;
+  channelMaskBorder_t *channelMaskBorderList;
+} channelMask_t;
+
+channelMaskBorder_t eu33ChannelMaskBorderList[] = { { 27, 26 }, { 30, 29 }, { 32, 34 } };
+channelMaskBorder_t eu35ChannelMaskBorderList[] = { { 27, 26 } };
+channelMaskBorder_t eu37ChannelMaskBorderList[] = { { 27, 26 }, { 30, 29 }, { 32, 34 }, { 62, 61 } };
+
+channelMaskBorder_t bz2ChannelMaskBorderList[] = { { 12, 11 }, { 32, 33 } };
+channelMaskBorder_t bz3ChannelMaskBorderList[] = { { 8, 7 }, { 21, 22 } };
+channelMaskBorder_t bz4ChannelMaskBorderList[] = { { 6, 5 }, { 15, 16 } };
+channelMaskBorder_t bz5ChannelMaskBorderList[] = { { 3, 2 }, { 10, 11 } };
+
+channelMask_t euChannelMaskList[] = {
+  { 33U, COUNTOF(eu33ChannelMaskBorderList), eu33ChannelMaskBorderList },
+  { 35U, COUNTOF(eu35ChannelMaskBorderList), eu35ChannelMaskBorderList },
+  { 37U, COUNTOF(eu37ChannelMaskBorderList), eu37ChannelMaskBorderList },
+};
+
+channelMask_t bzChannelMaskList[] = {
+  { 2U, COUNTOF(bz2ChannelMaskBorderList), bz2ChannelMaskBorderList },
+  { 3U, COUNTOF(bz3ChannelMaskBorderList), bz3ChannelMaskBorderList },
+  { 4U, COUNTOF(bz4ChannelMaskBorderList), bz4ChannelMaskBorderList },
+  { 5U, COUNTOF(bz5ChannelMaskBorderList), bz5ChannelMaskBorderList },
+};
+
+RAIL_Status_t RAILCb_IEEE802154_IsModeSwitchNewChannelValid(uint32_t currentBaseFreq,
+                                                            uint8_t newPhyModeId,
+                                                            const RAIL_ChannelConfigEntry_t *configEntryNewPhyModeId,
+                                                            uint16_t *pChannel)
+{
+  (void) newPhyModeId;
+  (void) currentBaseFreq;
+
+  // Select the channelMaskList corresponding to the RegDomain
+  uint32_t channelMaskListSize;
+  channelMask_t *channelMaskList = NULL;
+  RAIL_StackInfoWisun_t *stackInfoWisun = (RAIL_StackInfoWisun_t*)(configEntryNewPhyModeId->stackInfo);
+  switch (stackInfoWisun->wisunRegDomain) {
+    case EU_REG_DOMAIN:
+      channelMaskListSize = COUNTOF(euChannelMaskList);
+      channelMaskList = euChannelMaskList;
+      break;
+    case BZ_REG_DOMAIN:
+      channelMaskListSize = COUNTOF(bzChannelMaskList);
+      channelMaskList = bzChannelMaskList;
+      break;
+    default:
+      return RAIL_STATUS_NO_ERROR;
+      break;
+  }
+
+  // Search for a channelMask to apply regarding the new chanPlanId
+  uint8_t physicalChannel = (uint8_t)(*pChannel - configEntryNewPhyModeId->physicalChannelOffset);
+  for (uint32_t channelMaskIndex = 0; channelMaskIndex < channelMaskListSize; channelMaskIndex++) {
+    uint8_t chanPlanId = channelMaskList[channelMaskIndex].chanPlanId;
+    if (chanPlanId > stackInfoWisun->wisunChannelParam) {
+      // channelMask are ordered by ascending chanPlanId so we can stop searching
+      return RAIL_STATUS_NO_ERROR;
+    }
+    if (chanPlanId == stackInfoWisun->wisunChannelParam) {
+      // Check if the new channel is on a border (forbiddenChannel), if so apply the correction (supportedChannel) and return
+      for (uint32_t borderIndex = 0; borderIndex < channelMaskList[channelMaskIndex].channelMaskBorderCount; borderIndex++) {
+        uint8_t forbiddenChannel = channelMaskList[channelMaskIndex].channelMaskBorderList[borderIndex].forbiddenChannel;
+        if (forbiddenChannel > physicalChannel) {
+          // channelMaskBorder are ordered by ascending forbiddenChannel so we can stop searching
+          return RAIL_STATUS_NO_ERROR;
+        }
+        if (forbiddenChannel == physicalChannel) {
+          physicalChannel = channelMaskList[channelMaskIndex].channelMaskBorderList[borderIndex].supportedChannel;
+          *pChannel = ((uint16_t)physicalChannel) + configEntryNewPhyModeId->physicalChannelOffset;
+          return RAIL_STATUS_NO_ERROR;
+        }
+      }
+    }
+  }
+  return RAIL_STATUS_NO_ERROR;
+}
 
 uint32_t modeSwitchSequenceIterations = 1;
 uint32_t modeSwitchSequenceId = 0;

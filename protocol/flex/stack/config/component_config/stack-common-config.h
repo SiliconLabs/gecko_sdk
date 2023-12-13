@@ -52,6 +52,10 @@
 // <i> This table is only used for EMBER_MAC_MODE_DEVICE and EMBER_MAC_MODE_SLEEPY_DEVICE, but the memory will be allocated on all device types.
 #define EMBER_SECURITY_SHORT_TO_LONG_MAPPING_TABLE_SIZE (10)
 
+// <o EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE> Size of the the receiving buffer in CSP Callbacks
+// <i> Default: 127
+#define EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE 127
+
 // </h>
 
 // <<< end of configuration section >>>

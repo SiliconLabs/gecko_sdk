@@ -3,7 +3,6 @@ label: OTA client with signature verify support
 package: Zigbee
 category: Zigbee|Over-The-Air Bootloading
 quality: production
-
 description: Provides support for OTA image signature verification. This requires all received images to be signed with an ECDSA signature and verifies the signature once the download has completed.  If an image fails verification it is discarded.  This verification occurs before any custom verification that might verify the contents.
 
 provides:

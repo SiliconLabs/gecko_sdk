@@ -37,7 +37,7 @@
 #define FRAME_TERMINATOR         SPIP_FRAME_TERMINATOR
 
 /**
- * @description  A pointer to the length byte at the start of the Payload.
+ *  A pointer to the length byte at the start of the Payload.
  * Upper layers will read the command from this location after
  * halHostSerialTick(false) returns true. The upper layer will write the
  * response to this location before calling halHostSerialTick(true). This
@@ -46,12 +46,13 @@
 extern uint8_t *halHostFrame;
 
 /**
- * @description  A flag that is set to true when the Host initiates the wake
+ *  A flag that is set to true when the Host initiates the wake
  * handshake.
  */
 extern bool spipFlagWakeFallingEdge;
 
-/** @description
+/**
+ *
  *
  * The SPIP Init routine will also set a flag in the SPIP indicating a
  * wakeup handshake should be performed.  The handshake should only be
@@ -62,17 +63,18 @@ extern bool spipFlagWakeFallingEdge;
 void halHostSerialInit(void);
 
 /**
- * @description Reinitializes the SPI Protocol when coming out of sleep
+ * Reinitializes the SPI Protocol when coming out of sleep
  * (powerdown).
  */
 void halHostSerialPowerup(void);
 
 /**
- * @description Shuts down the SPI Protocol when entering sleep (powerdown).
+ * Shuts down the SPI Protocol when entering sleep (powerdown).
  */
 void halHostSerialPowerdown(void);
 
-/** @description
+/**
+ *
  *
  * When the upper application has a callback it needs to deliver to the Host, it
  * calls halHostCallback() at will with haveData set to true. The HAL will
@@ -88,21 +90,24 @@ void halHostSerialPowerdown(void);
 void halHostCallback(bool haveData);
 
 /**
- * @description Returns true if SPIP is busy.
+ * Returns true if SPIP is busy.
+ *
+ * @returns true if SPIP is busy.
  */
 bool halHostSerialBusy(void);
 
 /**
- * @description Clears NCP's state flag to signify receipt of nWAKE handshake at
+ * Clears NCP's state flag to signify receipt of nWAKE handshake at
  *  at the application/EZSP level.
  */
 void halNcpClearWakeFlag(void);
 
-/** @description Test function used by haltest. Nothing to see here...
+/**
+ * Test function used by haltest. Nothing to see here...
  *
- * @param :
+ * @param test
  *
- * @param :
+ * @param params
  */
 void spipTest(uint16_t test, uint16_t params);
 

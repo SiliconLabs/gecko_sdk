@@ -37,12 +37,12 @@
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/encoding.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/logging.hpp"
 #include "common/message.hpp"
 #include "common/random.hpp"
 #include "common/timer.hpp"
+#include "instance/instance.hpp"
 #include "mac/mac_types.hpp"
 #include "thread/lowpan.hpp"
 #include "thread/mle_router.hpp"
@@ -244,6 +244,11 @@ Error LeaderBase::RouteLookup(const Ip6::Address &aSource, const Ip6::Address &a
 
     while ((prefixTlv = FindNextMatchingPrefixTlv(aSource, prefixTlv)) != nullptr)
     {
+        if (prefixTlv->FindSubTlv<BorderRouterTlv>() == nullptr)
+        {
+            continue;
+        }
+
         if (ExternalRouteLookup(prefixTlv->GetDomainId(), aDestination, aRloc16) == kErrorNone)
         {
             ExitNow(error = kErrorNone);
@@ -423,95 +428,120 @@ exit:
     return error;
 }
 
-Error LeaderBase::SetCommissioningData(const uint8_t *aValue, uint8_t aValueLength)
+const CommissioningDataTlv *LeaderBase::FindCommissioningData(void) const
 {
-    Error                 error = kErrorNone;
-    CommissioningDataTlv *commissioningDataTlv;
+    return NetworkDataTlv::Find<CommissioningDataTlv>(GetTlvsStart(), GetTlvsEnd());
+}
 
-    RemoveCommissioningData();
+const MeshCoP::Tlv *LeaderBase::FindCommissioningDataSubTlv(uint8_t aType) const
+{
+    const MeshCoP::Tlv   *subTlv  = nullptr;
+    const NetworkDataTlv *dataTlv = FindCommissioningData();
 
-    if (aValueLength > 0)
-    {
-        VerifyOrExit(aValueLength <= kMaxSize - sizeof(CommissioningDataTlv), error = kErrorNoBufs);
-        commissioningDataTlv = As<CommissioningDataTlv>(AppendTlv(sizeof(CommissioningDataTlv) + aValueLength));
-        VerifyOrExit(commissioningDataTlv != nullptr, error = kErrorNoBufs);
+    VerifyOrExit(dataTlv != nullptr);
+    subTlv = As<MeshCoP::Tlv>(Tlv::FindTlv(dataTlv->GetValue(), dataTlv->GetLength(), aType));
 
-        commissioningDataTlv->Init();
-        commissioningDataTlv->SetLength(aValueLength);
-        memcpy(commissioningDataTlv->GetValue(), aValue, aValueLength);
-    }
+exit:
+    return subTlv;
+}
 
-    mVersion++;
-    SignalNetDataChanged();
+Error LeaderBase::ReadCommissioningDataUint16SubTlv(MeshCoP::Tlv::Type aType, uint16_t &aValue) const
+{
+    Error               error  = kErrorNone;
+    const MeshCoP::Tlv *subTlv = FindCommissioningDataSubTlv(aType);
+
+    VerifyOrExit(subTlv != nullptr, error = kErrorNotFound);
+    VerifyOrExit(subTlv->GetLength() >= sizeof(uint16_t), error = kErrorParse);
+    aValue = Encoding::BigEndian::ReadUint16(subTlv->GetValue());
 
 exit:
     return error;
 }
 
-const CommissioningDataTlv *LeaderBase::GetCommissioningData(void) const
+void LeaderBase::GetCommissioningDataset(MeshCoP::CommissioningDataset &aDataset) const
 {
-    return NetworkDataTlv::Find<CommissioningDataTlv>(GetTlvsStart(), GetTlvsEnd());
-}
+    const CommissioningDataTlv *dataTlv = FindCommissioningData();
+    const MeshCoP::Tlv         *subTlv;
+    const MeshCoP::Tlv         *endTlv;
 
-const MeshCoP::Tlv *LeaderBase::GetCommissioningDataSubTlv(MeshCoP::Tlv::Type aType) const
-{
-    const MeshCoP::Tlv   *rval = nullptr;
-    const NetworkDataTlv *commissioningDataTlv;
+    aDataset.Clear();
 
-    commissioningDataTlv = GetCommissioningData();
-    VerifyOrExit(commissioningDataTlv != nullptr);
+    VerifyOrExit(dataTlv != nullptr);
 
-    rval = MeshCoP::Tlv::FindTlv(commissioningDataTlv->GetValue(), commissioningDataTlv->GetLength(), aType);
+    aDataset.mIsLocatorSet       = (FindBorderAgentRloc(aDataset.mLocator) == kErrorNone);
+    aDataset.mIsSessionIdSet     = (FindCommissioningSessionId(aDataset.mSessionId) == kErrorNone);
+    aDataset.mIsJoinerUdpPortSet = (FindJoinerUdpPort(aDataset.mJoinerUdpPort) == kErrorNone);
+    aDataset.mIsSteeringDataSet  = (FindSteeringData(AsCoreType(&aDataset.mSteeringData)) == kErrorNone);
 
-exit:
-    return rval;
-}
+    // Determine if the Commissioning data has any extra unknown TLVs
 
-bool LeaderBase::IsJoiningEnabled(void) const
-{
-    const MeshCoP::Tlv *steeringData;
-    bool                rval = false;
+    subTlv = reinterpret_cast<const MeshCoP::Tlv *>(dataTlv->GetValue());
+    endTlv = reinterpret_cast<const MeshCoP::Tlv *>(dataTlv->GetValue() + dataTlv->GetLength());
 
-    VerifyOrExit(GetCommissioningDataSubTlv(MeshCoP::Tlv::kBorderAgentLocator) != nullptr);
-
-    steeringData = GetCommissioningDataSubTlv(MeshCoP::Tlv::kSteeringData);
-    VerifyOrExit(steeringData != nullptr);
-
-    for (int i = 0; i < steeringData->GetLength(); i++)
+    for (; subTlv < endTlv; subTlv = subTlv->GetNext())
     {
-        if (steeringData->GetValue()[i] != 0)
+        switch (subTlv->GetType())
         {
-            ExitNow(rval = true);
+        case MeshCoP::Tlv::kBorderAgentLocator:
+        case MeshCoP::Tlv::kSteeringData:
+        case MeshCoP::Tlv::kJoinerUdpPort:
+        case MeshCoP::Tlv::kCommissionerSessionId:
+            break;
+        default:
+            ExitNow(aDataset.mHasExtraTlv = true);
         }
     }
-
-exit:
-    return rval;
-}
-
-void LeaderBase::RemoveCommissioningData(void)
-{
-    CommissioningDataTlv *tlv = GetCommissioningData();
-
-    VerifyOrExit(tlv != nullptr);
-    RemoveTlv(tlv);
 
 exit:
     return;
 }
 
-Error LeaderBase::SteeringDataCheck(const FilterIndexes &aFilterIndexes) const
+Error LeaderBase::FindBorderAgentRloc(uint16_t &aRloc16) const
 {
-    Error                 error = kErrorNone;
-    const MeshCoP::Tlv   *steeringDataTlv;
+    return ReadCommissioningDataUint16SubTlv(MeshCoP::Tlv::kBorderAgentLocator, aRloc16);
+}
+
+Error LeaderBase::FindCommissioningSessionId(uint16_t &aSessionId) const
+{
+    return ReadCommissioningDataUint16SubTlv(MeshCoP::Tlv::kCommissionerSessionId, aSessionId);
+}
+
+Error LeaderBase::FindJoinerUdpPort(uint16_t &aPort) const
+{
+    return ReadCommissioningDataUint16SubTlv(MeshCoP::Tlv::kJoinerUdpPort, aPort);
+}
+
+Error LeaderBase::FindSteeringData(MeshCoP::SteeringData &aSteeringData) const
+{
+    Error                           error           = kErrorNone;
+    const MeshCoP::SteeringDataTlv *steeringDataTlv = FindInCommissioningData<MeshCoP::SteeringDataTlv>();
+
+    VerifyOrExit(steeringDataTlv != nullptr, error = kErrorNotFound);
+    steeringDataTlv->CopyTo(aSteeringData);
+
+exit:
+    return error;
+}
+
+bool LeaderBase::IsJoiningAllowed(void) const
+{
+    bool                  isAllowed = false;
     MeshCoP::SteeringData steeringData;
 
-    steeringDataTlv = GetCommissioningDataSubTlv(MeshCoP::Tlv::kSteeringData);
-    VerifyOrExit(steeringDataTlv != nullptr, error = kErrorInvalidState);
+    SuccessOrExit(FindSteeringData(steeringData));
+    isAllowed = !steeringData.IsEmpty();
 
-    As<MeshCoP::SteeringDataTlv>(steeringDataTlv)->CopyTo(steeringData);
+exit:
+    return isAllowed;
+}
 
-    VerifyOrExit(steeringData.Contains(aFilterIndexes), error = kErrorNotFound);
+Error LeaderBase::SteeringDataCheck(const FilterIndexes &aFilterIndexes) const
+{
+    Error                 error = kErrorInvalidState;
+    MeshCoP::SteeringData steeringData;
+
+    SuccessOrExit(FindSteeringData(steeringData));
+    error = steeringData.Contains(aFilterIndexes) ? kErrorNone : kErrorNotFound;
 
 exit:
     return error;

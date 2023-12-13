@@ -10,15 +10,14 @@ quality: evaluation
 root_path: app/bluetooth/common/l2cap_transfer
 tag:
   - Low-Code
-
 source:
   - path: src/sl_bt_l2cap_transfer.c
   - path: src/sl_bt_l2cap_transfer_freertos.c
     condition:
-      - "freertos"
+      - freertos
   - path: src/sl_bt_l2cap_transfer_micriumos.c
     condition:
-      - "micriumos_kernel"
+      - micriumos_kernel
 include:
   - path: inc
     file_list:
@@ -28,10 +27,10 @@ config_file:
   - path: config/sl_bt_l2cap_transfer_config.h
   - path: config/sl_bt_l2cap_transfer_freertos_config.h
     condition:
-      - "freertos"
+      - freertos
   - path: config/sl_bt_l2cap_transfer_micriumos_config.h
     condition:
-      - "micriumos_kernel"
+      - micriumos_kernel
 provides:
   - name: l2cap_transfer
 requires:
@@ -41,7 +40,6 @@ requires:
   - name: component_catalog
   - name: power_manager
   - name: slist
-
 template_contribution:
   - name: bluetooth_on_event
     value:
@@ -67,3 +65,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: sl_bt_l2cap_transfer.h
       handler: sli_bt_l2cap_transfer_sleep_on_isr_exit
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/l2cap-transfer

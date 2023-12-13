@@ -1,7 +1,7 @@
 project_name: se_manager_symmetric_key_handling
 package: platform
 quality: production
-label: Platform - SE Manager Symmetric Key Handling
+label: Platform Security - SoC SE Manager Symmetric Key Handling
 description: >
   This example project demonstrates the symmetric key handling API of SE Manager.
 category: Example|Platform

@@ -37,7 +37,6 @@ component:
   - id: rail_util_pa
   - id: rail_util_pti
   - id: rail_util_rf_path
-  - id: rail_util_rf_path_switch
   - id: rail_util_rssi
   - id: rail_util_built_in_phys
 
@@ -146,8 +145,6 @@ configuration:
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
     value: "1"
     condition:
@@ -162,6 +159,12 @@ configuration:
       - a_radio_config
       - device_is_module
       - device_family_fgm23
+  - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+    value: "0"
+    condition:
+      - a_radio_config
+      - device_is_module
+      - device_family_mgm24
 #------------- RAIL init, Protocol -------------------
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
     value: "1"
@@ -206,6 +209,13 @@ configuration:
       - device_supports_zwave
     unless:
       - device_has_radio_2g4hz
+    # MGM24 Modules override default phy, choosing 802.15.4
+  - name: SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT
+    value: "SL_RAIL_UTIL_PROTOCOL_IEEE802154_2P4GHZ"
+    condition:
+      - a_radio_config
+      - device_is_module
+      - device_family_mgm24
 #------------- RAIL init, Calibrations ---------------
   - name: SL_RAIL_UTIL_INIT_CALIBRATIONS_INST0_ENABLE
     value: "1"

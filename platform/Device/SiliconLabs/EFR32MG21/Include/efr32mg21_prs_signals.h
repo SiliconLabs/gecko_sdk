@@ -740,4 +740,4 @@
 #define PRS_PRORTC_CCV0                                 (PRS_ASYNC_PRORTC_CCV0)
 #define PRS_PRORTC_CCV1                                 (PRS_ASYNC_PRORTC_CCV1)
 
-#endif /* EFR32MG21_PRS_SIGNALS_H */
+#endif // EFR32MG21_PRS_SIGNALS_H

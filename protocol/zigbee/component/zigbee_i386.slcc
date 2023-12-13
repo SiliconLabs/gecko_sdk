@@ -1,15 +1,16 @@
-id: "zigbee_i386"
-label: "Zigbee i386"
-package: "Zigbee"
-category: "Zigbee"
-quality: "production"
-description: "This plugin contains defines to build Zigbee apps against i386."
+id: zigbee_i386
+label: Zigbee i386
+package: Zigbee
+category: Zigbee
+quality: production
+description: This plugin contains defines to build Zigbee apps against i386.
 
 provides:
-  - name: "zigbee_i386"
+  - name: i386
+  - name: zigbee_i386
 
 requires:
-  - name: "linux_arch_32"
+  - name: linux_arch_32
 
 documentation:
   docset: zigbee

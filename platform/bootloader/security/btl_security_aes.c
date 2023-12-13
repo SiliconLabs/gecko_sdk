@@ -89,7 +89,8 @@ void btl_initAesCcm(void          *ctx,
 
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
 
-#if defined(SEMAILBOX_PRESENT) && defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE) \
+#if defined(SEMAILBOX_PRESENT)
+#if defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE) \
   && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE == 1)
   (void)key;
   context->aesKeyDesc.type = SL_SE_KEY_TYPE_SYMMETRIC;
@@ -98,7 +99,19 @@ void btl_initAesCcm(void          *ctx,
   context->aesKeyDesc.storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
   context->aesKeyDesc.storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY;
 #else
-  // Store the key
+  // Store the key  (HSE + Keys in internal flash)
+  mbedtls_aes_init(&(context->aesContext));
+  mbedtls_aes_setkey_enc(&(context->aesContext), key, keySize);
+#if defined(BOOTLOADER_AES_CTR_STREAM_BLOCK_CFG_ON) && (BOOTLOADER_AES_CTR_STREAM_BLOCK_CFG_ON == 1)
+  context->aesKeyDesc.size = keySize / 8UL; // keySize in bytes
+  context->aesKeyDesc.flags = 0;
+  context->aesKeyDesc.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
+  context->aesKeyDesc.storage.location.buffer.pointer = (uint8_t *)&context->aesContext.key;
+  context->aesKeyDesc.storage.location.buffer.size = keySize;
+#endif
+#endif //defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE)
+#else
+  // Store the key   (VSE Devices)
   mbedtls_aes_init(&(context->aesContext));
   mbedtls_aes_setkey_enc(&(context->aesContext), key, keySize);
 #endif
@@ -123,8 +136,10 @@ void btl_processAesCtrData(void          *ctx,
                            size_t        length)
 {
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
-#if defined(SEMAILBOX_PRESENT) && defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE) \
-  && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE == 1)
+ #if defined(SEMAILBOX_PRESENT)                                                                          \
+  && ((defined(BOOTLOADER_AES_CTR_STREAM_BLOCK_CFG_ON) && (BOOTLOADER_AES_CTR_STREAM_BLOCK_CFG_ON == 1)) \
+  ||  (defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE)                                             \
+  && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE == 1)))
   sl_se_command_context_t cmd_ctx;
   sl_se_init_command_context(&cmd_ctx);
   sl_se_aes_crypt_ctr(&cmd_ctx,

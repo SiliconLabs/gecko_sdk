@@ -40,8 +40,11 @@ template_contribution:
       include: sl_device_init_rffpll.h
       handler: sl_device_init_rffpll
     priority: -9445
+    condition: [sl_system]
   - name: device_init_clocks_present
     value: rffpll
+  - name: component_catalog
+    value: device_init_rffpll
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-rffpll

@@ -629,4 +629,4 @@ typedef struct {
 /** @} End of group ZGM23_LCD */
 /** @} End of group Parts */
 
-#endif /* ZGM23_LCD_H */
+#endif // ZGM23_LCD_H

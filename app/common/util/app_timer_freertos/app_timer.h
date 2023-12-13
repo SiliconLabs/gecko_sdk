@@ -67,7 +67,12 @@ struct app_timer {
  * Start timer or restart if it is running already.
  *
  * @param[in] timer Pointer to the timer.
- * @param[in] timeout_ms Timer timeout, in milliseconds.
+ * @param[in] timeout_ms Timer timeout, in milliseconds. Resolution is inversely
+ *                       proportional to the OS timer frequency that can be
+ *                       adjusted by the configTICK_RATE_HZ OS configuration
+ *                       parameter.
+ *                       Higher frequency leads to grater resolution. Setting
+ *                       configTICK_RATE_HZ to 100 Hz leads to 10 ms resolution.
  * @param[in] callback Callback function that is called when timeout expires.
  * @param[in] callback_data Pointer to user data that will be passed to callback.
  * @param[in] is_periodic Reload timer when it expires if true.

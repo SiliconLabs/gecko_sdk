@@ -59,6 +59,13 @@ mesh_device_properties_t app_get_current_property(void);
 void app_show_btmesh_node_provisioning_started(uint16_t result);
 
 /***************************************************************************//**
+ * Shows the provisioning fail information
+ *
+ * @param[in] result  Result code. 0: success, non-zero: error
+ ******************************************************************************/
+void app_show_btmesh_node_provisioning_failed(uint16_t result);
+
+/***************************************************************************//**
  * Shows the provisioning completed information
  *
  * @param[in] address      Unicast address of the primary element of the node.

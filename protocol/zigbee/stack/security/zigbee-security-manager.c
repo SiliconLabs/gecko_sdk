@@ -44,16 +44,20 @@ extern bool sli_zigbee_is_token_data_initialized(uint8_t* data, uint8_t length);
 extern uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_t bitmask);
 extern EmberStatus sli_zigbee_get_link_key(EmberEUI64 partner,
                                            EmberKeyData* key,
+                                           sl_zb_sec_man_context_t* context,
                                            uint32_t **frameCounterLocLoc,
                                            uint8_t getKeyBitmask);
 #define sli_zigbee_get_security_state(item) ((sli_zigbee_security_state_bitmask & (item)) == (item))
+extern void sli_legacy_mfg_security_config_modify_key(EmberKeyData* key);
 
 sl_status_t sl_zb_sec_man_import_key(sl_zb_sec_man_context_t* context,
                                      sl_zb_sec_man_key_t* plaintext_key)
 {
   sl_status_t status = SL_STATUS_INVALID_PARAMETER;
 
-  if (context->derived_type != SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE) {
+  if (context == NULL
+      || plaintext_key == NULL
+      || context->derived_type != SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE) {
     status = SL_STATUS_INVALID_PARAMETER;
     return status;
   }
@@ -71,11 +75,6 @@ sl_status_t sl_zb_sec_man_import_key(sl_zb_sec_man_context_t* context,
     case SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK:
       status = zb_sec_man_store_in_link_key_table(context, plaintext_key);
       break;
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY:
-      status = zb_sec_man_store_secure_ezsp_key(context, plaintext_key);
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT) || defined(EMBER_TEST)
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY:
@@ -102,6 +101,9 @@ sl_status_t sl_zb_sec_man_export_key(sl_zb_sec_man_context_t* context,
                                      sl_zb_sec_man_key_t* plaintext_key)
 {
   sl_status_t status = SL_STATUS_INVALID_PARAMETER;
+  if (plaintext_key == NULL || context == NULL) {
+    return status;
+  }
 
   switch (context->core_key_type) {
     case SL_ZB_SEC_MAN_KEY_TYPE_NETWORK:
@@ -116,11 +118,6 @@ sl_status_t sl_zb_sec_man_export_key(sl_zb_sec_man_context_t* context,
     case SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK:
       status = zb_sec_man_fetch_from_link_key_table(context, plaintext_key);
       break;
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY:
-      status = zb_sec_man_fetch_secure_ezsp_key(context, plaintext_key);
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT) || defined(EMBER_TEST)
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY:
@@ -140,6 +137,8 @@ sl_status_t sl_zb_sec_man_export_key(sl_zb_sec_man_context_t* context,
       break;
   }
 
+  //Clear key data if read protection token instructs this.
+  sli_legacy_mfg_security_config_modify_key((EmberKeyData*) plaintext_key);
   return status;
 }
 
@@ -210,8 +209,8 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
 
   if (plaintext_key == NULL) {
     //For callers who want this to return a key's index but not its actual value
-    sl_zb_sec_man_key_t unused_key;
-    status = sl_zb_sec_man_export_key(context, &unused_key);
+    context->key_index = sli_zigbee_find_key_table_entry(eui, true, 0);
+    status = (context->key_index != 0xFF) ? SL_STATUS_OK : SL_STATUS_NOT_FOUND;
   } else {
     status = sl_zb_sec_man_export_key(context, plaintext_key);
   }
@@ -219,9 +218,9 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
   if (status != SL_STATUS_OK) {
     return SL_STATUS_NOT_FOUND;
   }
+  context->flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
 
   if (eui != NULL && key_data != NULL) {
-    context->flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
     //populate key_data if we did find a link key for this EUI
     (void) sl_zb_sec_man_get_aps_key_info(context, key_data);
   }
@@ -324,6 +323,18 @@ sl_status_t sl_zb_sec_man_export_transient_key_by_index(uint8_t index,
     return SL_STATUS_NOT_FOUND;
   }
 
+  return status;
+}
+
+sl_status_t sli_zigbee_sec_man_export_derived_key(sl_zb_sec_man_context_t* context,
+                                                  sl_zb_sec_man_key_t* derived_key)
+{
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_status_t status = sl_zb_sec_man_export_key(context, &plaintext_key);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+  status = zb_sec_man_derive_key(&plaintext_key, context, derived_key);
   return status;
 }
 
@@ -441,21 +452,6 @@ sl_status_t zb_sec_man_fetch_link_key_table_key_info(sl_zb_sec_man_context_t* co
   return SL_STATUS_OK;
 }
 
-//Defined here to support code that still calls this; sl_zb_sec_man_hmac_aes_mmo
-//is designed to replace it.
-void emberHmacAesHash(const uint8_t *key,
-                      const uint8_t *data,
-                      uint8_t dataLength,
-                      uint8_t *result)
-{
-  sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_init_context(&context);
-  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
-  (void) sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t *)key);
-  (void) sl_zb_sec_man_load_key_context(&context);
-  sl_zb_sec_man_hmac_aes_mmo(data, dataLength, result);
-}
-
 uint8_t zb_sec_man_version(void)
 {
   return ZB_SEC_MAN_VERSION;
@@ -537,6 +533,20 @@ bool sl_zb_sec_man_have_link_key(EmberEUI64 eui)
   return (EMBER_SUCCESS
           == sli_zigbee_get_link_key(eui,
                                      NULL, // key return data
+                                     NULL, // context return data
                                      NULL, // frame counter location
-                                     false)); // authorized keys only?
+                                     0)); // key is not transient, and does not need to be authorized
+}
+
+bool sl_zigbee_sec_man_link_key_slot_available(EmberEUI64 eui64)
+{
+  sl_zb_sec_man_context_t context_existing;
+  sl_zb_sec_man_context_t context_open;
+  sl_zb_sec_man_export_link_key_by_eui(eui64, &context_existing, NULL, NULL);
+  sl_zb_sec_man_export_link_key_by_eui(NULL, &context_open, NULL, NULL);
+  if (0xFF != context_existing.key_index
+      || 0xFF != context_open.key_index) {
+    return true;
+  }
+  return false;
 }

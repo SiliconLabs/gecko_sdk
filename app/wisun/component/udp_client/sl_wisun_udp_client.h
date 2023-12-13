@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_UDP_CLIENT_H__
 #define __SL_WISUN_UDP_CLIENT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -79,5 +83,9 @@ void sl_wisun_udp_client_write(const int32_t sockid, const char *remote_ip_addre
  * @param size size of data to read
  *****************************************************************************/
 void sl_wisun_udp_client_read(const int32_t sockid, const uint16_t size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

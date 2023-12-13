@@ -6,11 +6,9 @@ description: >
 category: Bluetooth|Application|ABR
 quality: experimental
 root_path: app/bluetooth/common/abr_cs_parser
-
 config_file:
   - path: config/abr_cs_parser_config.h
     file_id: abr_cs_parser_config
-
 include:
   - path: .
     file_list:
@@ -28,6 +26,5 @@ requires:
   - name: power_manager
   - name: bluetooth_feature_cs
   - name: rtllib
-
 provides:
   - name: abr_cs_parser

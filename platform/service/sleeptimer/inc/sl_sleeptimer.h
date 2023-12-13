@@ -43,7 +43,8 @@
 #include "sl_common.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
-#define SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG 0x01
+#define SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG (0x01)
+#define SL_SLEEPTIMER_ANY_FLAG                                  (0xFF)
 
 #define SLEEPTIMER_ENUM(name) typedef uint8_t name; enum name##_enum
 
@@ -53,7 +54,7 @@
 typedef uint32_t sl_sleeptimer_timestamp_t;
 
 // Timestamp, 64 bits wall clock in seconds.
-typedef uint64_t sl_sleeptimer_timestamp_64_t;
+typedef uint64_t sl_sleeptimer_timestamp_64_t;     ///< sl sleeptimer timestamp 64 t
 
 /// Time zone offset from UTC(second).
 typedef int32_t sl_sleeptimer_time_zone_offset_t;
@@ -149,6 +150,7 @@ sl_status_t sl_sleeptimer_init(void);
  * @param option_flags Bit array of option flags for the timer.
  *        Valid bit-wise OR of one or more of the following:
  *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
+ *        or 0 for not flags.
  *
  * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
@@ -268,7 +270,9 @@ sl_status_t sl_sleeptimer_get_timer_time_remaining(sl_sleeptimer_timer_handle_t 
  * Gets the time remaining until the first timer with the matching set of flags
  * expires.
  *
- * @param option_flags Set of flags to match.
+ * @param option_flags Set of flags to match:
+ *          - SL_SLEEPTIMER_ANY_TIMER_FLAG
+ *          - SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG
  *
  * @param time_remaining Time left in timer ticks.
  *
@@ -432,7 +436,7 @@ sl_sleeptimer_timestamp_64_t sl_sleeptimer_get_time_64(void);
 /***************************************************************************//**
  * Sets current time.
  *
- * @param 32 bit time to set.
+ * @param time timestamp structure to set.
  *
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.
@@ -444,7 +448,7 @@ sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
 /***************************************************************************//**
  * Sets current time.
  *
- * @param 64 bit time to set.
+ * @param time timestamp structure to set.
  *
  * @note Function definition is accessible only when
  *       SL_SLEEPTIMER_WALLCLOCK_CONFIG is set to 1.

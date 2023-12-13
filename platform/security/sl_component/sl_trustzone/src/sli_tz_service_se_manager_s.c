@@ -41,6 +41,21 @@
 #include "em_device.h"
 
 //------------------------------------------------------------------------------
+// Macros
+
+/**
+ * \brief Validate the number of IOVECs passed.
+ */
+#define _TZ_SE_MANAGER_ASSERT_N_IOVECS(expected_invecs, expected_outvecs) \
+  SLI_TZ_IOVEC_ASSERT_N_IOVECS(expected_invecs, expected_outvecs, SL_STATUS_INVALID_PARAMETER)
+
+/**
+ * \brief Validate the number of IOVECs passed.
+ */
+#define _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(iovec, expected_struct_type) \
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec, expected_struct_type, SL_STATUS_INVALID_PARAMETER)
+
+//------------------------------------------------------------------------------
 // Function definitions
 
 sl_status_t sli_tz_se_check_se_image(sli_tz_invec in_vec[],
@@ -48,10 +63,9 @@ sl_status_t sli_tz_se_check_se_image(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -68,10 +82,9 @@ sl_status_t sli_tz_se_apply_se_image(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -88,12 +101,11 @@ sl_status_t sli_tz_se_get_upgrade_status_se_image(sli_tz_invec in_vec[],
                                                   sli_tz_outvec out_vec[],
                                                   size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], uint32_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -111,10 +123,9 @@ sl_status_t sli_tz_se_check_host_image(sli_tz_invec in_vec[],
                                        sli_tz_outvec out_vec[],
                                        size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -132,10 +143,9 @@ sl_status_t sli_tz_se_apply_host_image(sli_tz_invec in_vec[],
                                        sli_tz_outvec out_vec[],
                                        size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -153,12 +163,11 @@ sl_status_t sli_tz_se_get_upgrade_status_host_image(sli_tz_invec in_vec[],
                                                     sli_tz_outvec out_vec[],
                                                     size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], uint32_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -178,12 +187,10 @@ sl_status_t sli_tz_se_init_otp_key(sli_tz_invec in_vec[],
                                    sli_tz_outvec out_vec[],
                                    size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2],
-                                  sl_se_device_key_type_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], sl_se_device_key_type_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -203,12 +210,10 @@ sl_status_t sli_tz_se_read_pubkey(sli_tz_invec in_vec[],
                                   sli_tz_outvec out_vec[],
                                   size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2],
-                                  sl_se_device_key_type_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], sl_se_device_key_type_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -227,11 +232,10 @@ sl_status_t sli_tz_se_init_otp(sli_tz_invec in_vec[],
                                sli_tz_outvec out_vec[],
                                size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], sl_se_otp_init_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], sl_se_otp_init_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -248,12 +252,10 @@ sl_status_t sli_tz_se_read_otp(sli_tz_invec in_vec[],
                                sli_tz_outvec out_vec[],
                                size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], sl_se_otp_init_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], sl_se_otp_init_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -269,12 +271,10 @@ sl_status_t sli_tz_se_get_se_version(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -290,12 +290,10 @@ sl_status_t sli_tz_se_get_debug_lock_status(sli_tz_invec in_vec[],
                                             sli_tz_outvec out_vec[],
                                             size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], sl_se_debug_status_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], sl_se_debug_status_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -311,10 +309,9 @@ sl_status_t sli_tz_se_apply_debug_lock(sli_tz_invec in_vec[],
                                        sli_tz_outvec out_vec[],
                                        size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -330,12 +327,10 @@ sl_status_t sli_tz_se_get_otp_version(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -353,10 +348,9 @@ sl_status_t sli_tz_se_read_executed_command(sli_tz_invec in_vec[],
                                             sli_tz_outvec out_vec[],
                                             size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -372,10 +366,9 @@ sl_status_t sli_tz_se_ack_command(sli_tz_invec in_vec[],
                                   sli_tz_outvec out_vec[],
                                   size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -395,12 +388,10 @@ sl_status_t sli_tz_se_get_status(sli_tz_invec in_vec[],
                                  sli_tz_outvec out_vec[],
                                  size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], sl_se_status_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], sl_se_status_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -416,10 +407,9 @@ sl_status_t sli_tz_se_get_serialnumber(sli_tz_invec in_vec[],
                                        sli_tz_outvec out_vec[],
                                        size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -438,10 +428,9 @@ sl_status_t sli_tz_se_enable_secure_debug(sli_tz_invec in_vec[],
                                           sli_tz_outvec out_vec[],
                                           size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -457,10 +446,9 @@ sl_status_t sli_tz_se_disable_secure_debug(sli_tz_invec in_vec[],
                                            sli_tz_outvec out_vec[],
                                            size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -476,12 +464,10 @@ sl_status_t sli_tz_se_set_debug_options(sli_tz_invec in_vec[],
                                         sli_tz_outvec out_vec[],
                                         size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2],
-                                  sl_se_debug_options_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], sl_se_debug_options_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -499,10 +485,9 @@ sl_status_t sli_tz_se_erase_device(sli_tz_invec in_vec[],
                                    sli_tz_outvec out_vec[],
                                    size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -518,10 +503,9 @@ sl_status_t sli_tz_se_disable_device_erase(sli_tz_invec in_vec[],
                                            sli_tz_outvec out_vec[],
                                            size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -537,12 +521,10 @@ sl_status_t sli_tz_se_get_challenge(sli_tz_invec in_vec[],
                                     sli_tz_outvec out_vec[],
                                     size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], sl_se_challenge_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], sl_se_challenge_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -558,10 +540,9 @@ sl_status_t sli_tz_se_roll_challenge(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -577,12 +558,10 @@ sl_status_t sli_tz_se_open_debug(sli_tz_invec in_vec[],
                                  sli_tz_outvec out_vec[],
                                  size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3],
-                                  sl_se_debug_options_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], sl_se_debug_options_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -604,11 +583,10 @@ sl_status_t sli_tz_se_write_user_data(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -627,10 +605,9 @@ sl_status_t sli_tz_se_erase_user_data(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -646,12 +623,10 @@ sl_status_t sli_tz_se_get_reset_cause(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -669,12 +644,10 @@ sl_status_t sli_tz_se_read_cert_size(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0],
-                                  sl_se_cert_size_type_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], sl_se_cert_size_type_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -690,12 +663,10 @@ sl_status_t sli_tz_se_read_cert(sli_tz_invec in_vec[],
                                 sli_tz_outvec out_vec[],
                                 size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 1);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(3, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2],
-                                  sl_se_cert_type_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], sl_se_cert_type_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -715,12 +686,10 @@ sl_status_t sli_tz_se_disable_tamper(sli_tz_invec in_vec[],
                                      sli_tz_outvec out_vec[],
                                      size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3],
-                                  sl_se_tamper_signals_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], sl_se_tamper_signals_t);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;
@@ -747,14 +716,11 @@ sl_status_t sli_tz_se_get_tamper_reset_cause(sli_tz_invec in_vec[],
                                              sli_tz_outvec out_vec[],
                                              size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_SE_MANAGER_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1],
-                                  sl_se_command_context_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2],
-                                  bool*);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3],
-                                  uint32_t*);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], sl_se_command_context_t);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], bool*);
+  _TZ_SE_MANAGER_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], uint32_t*);
 
   // Input arguments
   sl_se_command_context_t *cmd_ctx = (sl_se_command_context_t *)in_vec[1].base;

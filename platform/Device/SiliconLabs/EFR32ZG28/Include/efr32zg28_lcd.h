@@ -705,4 +705,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_LCD */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_LCD_H */
+#endif // EFR32ZG28_LCD_H

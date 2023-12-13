@@ -3,7 +3,6 @@ label: Zigbee 2.4GHz/SubGHz Joining End Device
 package: Zigbee
 category: Zigbee|Stack|PHY support
 quality: production
-
 description: Zigbee Multi-MAC Joining End Device - An end device that can join on either 2.4GHz or Sub-GHz band. This component has exactly same resources as the selection device except that it can not allow the interface switch for rejoining.The supported radio boards are BRD4150c and BRD4170a.
 
 provides:

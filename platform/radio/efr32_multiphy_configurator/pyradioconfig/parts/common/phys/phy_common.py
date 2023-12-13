@@ -93,6 +93,19 @@ def PHY_COMMON_FRAME_BLE(phy, model):
     phy.profile_inputs.crc_pad_input.value = False
     phy.profile_inputs.crc_invert.value = False
 
+    # : set protocol_id to BLE
+    model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.BLE
+
+# Common Frame Configuration for Bluetooth LR
+def PHY_COMMON_FRAME_BLE_CODED(phy, model):
+    PHY_COMMON_FRAME_BLE(phy, model)
+
+    # : MCUW_RADIO_CFG-2279
+    # : BLE Core Spec Section 2.2.1
+    # : The preamble is 80 symbols in length and consists of 10 repetitions of the symbol pattern '00111100
+    # : need to be flipped for coded PHYs compared to uncoded phys
+    phy.profile_inputs.preamble_pattern.value = 0b01
+
 def PHY_COMMON_FRAME_IOHOME (phy, model):
     #Packet Inputs
     phy.profile_inputs.frame_bitendian.value = model.vars.frame_bitendian.var_enum.LSB_FIRST

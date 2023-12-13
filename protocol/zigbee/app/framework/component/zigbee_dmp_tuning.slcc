@@ -1,22 +1,12 @@
 id: zigbee_dmp_tuning
 package: Zigbee
-label: "DMP Tuning and Testing"
-quality: "production"
+label: DMP Tuning and Testing
+quality: production
 category: Zigbee|Utility
-
-description: Certain networking stack configurations can be crucial for proper networking
-  operation in multiprotocol use cases, such as transmission,
-  reception, connection and advertisement priorities. This component provides better
-  access to such stack configuration options, to help in tuning and
-  testing a DMP application. It provides three DMP configuration profiles for three
-  major use cases. These are Bluetooth LE (BLE) priority, Zigbee priority, and balanced priority.
-  These provide priority for BLE-over-Zigbee transmission and reception, priority for Zigbee-over-BLE connection, advertisement etc., and to provide
-  and a balanced priority configuration option, respectively. The component also provides
-  a way for users to manually configure the default value of these configuration options
-  (component option inputs) or to change them at run time over the CLI.
+description: Certain networking stack configurations can be crucial for proper networking operation in multiprotocol use cases, such as transmission, reception, connection and advertisement priorities. This component provides better access to such stack configuration options, to help in tuning and testing a DMP application. It provides three DMP configuration profiles for three major use cases. These are Bluetooth LE (BLE) priority, Zigbee priority, and balanced priority. These provide priority for BLE-over-Zigbee transmission and reception, priority for Zigbee-over-BLE connection, advertisement etc., and to provide and a balanced priority configuration option, respectively. The component also provides a way for users to manually configure the default value of these configuration options (component option inputs) or to change them at run time over the CLI.
 
 provides:
-   - name: "zigbee_dmp_tuning"
+  - name: zigbee_dmp_tuning
 
 requires:
   - name: bluetooth_stack
@@ -29,7 +19,7 @@ source:
   - path: protocol/zigbee/app/framework/plugin-soc/dmp-tuning/dmp-tuning.c
   - path: protocol/zigbee/app/framework/plugin-soc/dmp-tuning/dmp-tuning-cli.c
     condition:
-      - "cli"
+      - cli
 
 include:
   - path: protocol/zigbee/app/framework/plugin-soc/dmp-tuning
@@ -63,12 +53,12 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetZigbeeSchedulerPrioritiesCommand
       help: Sets scheduler priorities for Zigbee.
       argument:
-      - type: uint8
-        help: Background RX priority
-      - type: uint8
-        help: Active RX priority
-      - type: uint8
-        help: Active TX priority
+        - type: uint8
+          help: Background RX priority
+        - type: uint8
+          help: Active RX priority
+        - type: uint8
+          help: Active TX priority
 
   - name: cli_command
     value:
@@ -84,8 +74,8 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetZigbeeSlipTimeCommand
       help: Sets slip time for Zigbee.
       argument:
-      - type: uint32
-        help: Slip time.
+        - type: uint32
+          help: Slip time.
 
   - name: cli_command
     value:
@@ -106,10 +96,10 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetBleAdvertisementPrioritiesCommand
       help: Sets BLE advertisement scheduler priorities.
       argument:
-      - type: uint8
-        help: Advertisement scheduler priority - Min
-      - type: uint8
-        help: Advertisement scheduler priority - Max
+        - type: uint8
+          help: Advertisement scheduler priority - Min
+        - type: uint8
+          help: Advertisement scheduler priority - Max
 
   - name: cli_command
     value:
@@ -125,10 +115,10 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetBleScanPrioritiesCommand
       help: Sets BLE scan scheduler priorities.
       argument:
-      - type: uint8
-        help: Scan scheduler priority - Min
-      - type: uint8
-        help: Scan scheduler priority - Max
+        - type: uint8
+          help: Scan scheduler priority - Min
+        - type: uint8
+          help: Scan scheduler priority - Max
 
   - name: cli_command
     value:
@@ -144,10 +134,10 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetBleConnectionInitPrioritiesCommand
       help: Sets BLE connection init scheduler priorities
       argument:
-      - type: uint8
-        help: Connection init scheduler priority - Min
-      - type: uint8
-        help: Connection init scheduler priority - Max
+        - type: uint8
+          help: Connection init scheduler priority - Min
+        - type: uint8
+          help: Connection init scheduler priority - Max
 
   - name: cli_command
     value:
@@ -163,10 +153,10 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetBleConnectionPrioritiesCommand
       help: Sets BLE connection scheduler priorities.
       argument:
-      - type: uint8
-        help: Connection scheduler priority - Min
-      - type: uint8
-        help: Connection scheduler priority - Max
+        - type: uint8
+          help: Connection scheduler priority - Min
+        - type: uint8
+          help: Connection scheduler priority - Max
 
   - name: cli_command
     value:
@@ -182,10 +172,10 @@ template_contribution:
       handler: emberAfPluginDmpTuningSetBleRailMappingCommand
       help: Sets BLE RAIL priority mapping.
       argument:
-      - type: uint8
-        help: RAIL mapping offset
-      - type: uint8
-        help: RAIL mapping range
+        - type: uint8
+          help: RAIL mapping offset
+        - type: uint8
+          help: RAIL mapping range
 
   - name: cli_command
     value:
@@ -226,7 +216,7 @@ template_contribution:
       group: rail
       handler: emberAfPluginDmpTuningGetRailConfigSchedulerEventsEnabled
       help: Gets the enable state of the RAIL config scheduler events.
-      
+
   - name: cli_command
     value:
       name: stop-radio

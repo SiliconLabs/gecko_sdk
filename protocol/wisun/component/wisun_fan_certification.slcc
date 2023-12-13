@@ -1,22 +1,28 @@
-id: "wisun_fan_certification"
-label: "Wi-SUN FAN Certification"
-description: "Add settings to Wi-SUN CLI for FAN certification process.
-Provide all the CLI commands required to run Wi-SUN FAN certification test suite.
-
-Can only be used in Wi-SUN SoC CLI application"
-package: "wisun"
-category: "Wi-SUN|Application|Wi-SUN CLI"
-quality: "production"
-root_path: "protocol/wisun"
+id: wisun_fan_certification
+label: Wi-SUN FAN Certification
+description: >-
+  Add settings to Wi-SUN SoC CLI application for FAN certification process.
+  Provide all CLI commands required to run Wi-SUN FAN certification test suite.
+  Can only be used in Wi-SUN SoC CLI application.
+package: wisun
+category: Wi-SUN|Application|Wi-SUN CLI
+quality: production
+root_path: protocol/wisun
 
 provides:
-  - name: "wisun_fan_certification"
+  - name: wisun_fan_certification
 
 source:
-  - path: "plugin/sl_wisun_fan_certification.c"
+  - path: plugin/sl_wisun_fan_certification.c
 
 define:
-  - name: "WISUN_FAN_CERTIFICATION"
+  - name: WISUN_FAN_CERTIFICATION
+  - name: FAN_TPS_VERSION
+    value: 1
 
 config_file:
-  - path: "plugin/config/sl_wisun_alliance_certificates.h"
+  - path: plugin/config/sl_wisun_alliance_certificates.h
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_fan_certification

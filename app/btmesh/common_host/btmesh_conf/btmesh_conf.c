@@ -104,13 +104,41 @@
 #define NL APP_LOG_NL
 
 /// BT Mesh configuration server model ID
-#define BTMESH_CONF_CONFIG_SERVER_MODEL_ID  0x0000
+#define BTMESH_CONF_CONFIG_SERVER_MODEL_ID                  0x0000
 /// BT Mesh configuration client model ID
-#define BTMESH_CONF_CONFIG_CLIENT_MODEL_ID  0x0001
+#define BTMESH_CONF_CONFIG_CLIENT_MODEL_ID                  0x0001
 /// BT Mesh health server model ID
-#define BTMESH_CONF_HEALTH_SERVER_MODEL_ID  0x0002
+#define BTMESH_CONF_HEALTH_SERVER_MODEL_ID                  0x0002
 /// BT Mesh health client model ID
-#define BTMESH_CONF_HEALTH_CLIENT_MODEL_ID  0x0003
+#define BTMESH_CONF_HEALTH_CLIENT_MODEL_ID                  0x0003
+/// BT Mesh Directed Forwarding Configuration Server Model ID
+#define BTMESH_DIRECTED_FORWARD_CONF_SERVER_MODEL_ID        0x0006
+/// BT Mesh Directed Forwarding Configuration Client Model ID
+#define BTMESH_DIRECTED_FORWARD_CONF_CLIENT_MODEL_ID        0x0007
+/// BT Mesh Bridge Configuration Server Model ID
+#define BTMESH_BRIDGE_CONF_SERVER_MODEL_ID                  0x0008
+/// BT Mesh Bridge Configuration Client Model ID
+#define BTMESH_BRIDGE_CONF_CLIENT_MODEL_ID                  0x0009
+/// BT Mesh On-Demand Private Proxy Server Model ID
+#define BTMESH_ON_DEMAND_PRIVATE_PROXY_SERVER_MODEL_ID      0x000C
+/// BT Mesh On-Demand Private Proxy Client Model ID
+#define BTMESH_ON_DEMAND_PRIVATE_PROXY_CLIENT_MODEL_ID      0x000D
+/// BT Mesh SAR Configuration Server Model ID */
+#define BTMESH_SAR_CONFIG_SERVER_MODEL_ID                   0x000E
+/// BT Mesh SAR Configuration Client Model ID */
+#define BTMESH_SAR_CONFIG_CLIENT_MODEL_ID                   0x000F
+/// BT Mesh opcode aggregator server model ID
+#define BTMESH_OPCODE_AGGREGATOR_SERVER_MODEL_ID            0x0010
+/// BT Mesh opcode aggregator client model ID
+#define BTMESH_OPCODE_AGGREGATOR_CLIENT_MODEL_ID            0x0011
+/// BT Mesh Large Composition Data Server Model ID
+#define BTMESH_LCD_SERVER_MODEL_ID                          0x0012
+/// BT Mesh Large Composition Data Client Model ID
+#define BTMESH_LCD_CLIENT_MODEL_ID                          0x0013
+/// BT Mesh Solicitation PDU RPL Configuration Server Model ID
+#define BTMESH_SOLICITATION_PDU_RPL_CONFIG_SERVER_MODEL_ID  0x0014
+/// BT Mesh Solicitation PDU RPL Configuration Client Model ID
+#define BTMESH_SOLICITATION_PDU_RPL_CONFIG_CLIENT_MODEL_ID  0x0015
 
 /// BT Mesh Stack BGAPI class ID mask
 #define BTMESH_CONF_CLASS_ID_MASK  (0x00FF0000UL)
@@ -565,6 +593,118 @@ static const btmesh_conf_model_info_t model_info_array[] = {
     .publication = false,
   },
   {
+    .id = BTMESH_DIRECTED_FORWARD_CONF_SERVER_MODEL_ID,
+    .name = "Directed Forwarding Configuration Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_DIRECTED_FORWARD_CONF_CLIENT_MODEL_ID,
+    .name = "Directed Forwarding Configuration Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_BRIDGE_CONF_SERVER_MODEL_ID,
+    .name = "Bridge Configuration Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_BRIDGE_CONF_CLIENT_MODEL_ID,
+    .name = "Bridge Configuration Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = MESH_PRIVATE_BEACON_SERVER_MODEL_ID,
+    .name = "Mesh Private Beacon Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = MESH_PRIVATE_BEACON_CLIENT_MODEL_ID,
+    .name = "Mesh Private Beacon Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_ON_DEMAND_PRIVATE_PROXY_SERVER_MODEL_ID,
+    .name = "On-Demand Private Proxy Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_ON_DEMAND_PRIVATE_PROXY_CLIENT_MODEL_ID,
+    .name = "On-Demand Private Proxy Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_SAR_CONFIG_SERVER_MODEL_ID,
+    .name = "SAR Configuration Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_SAR_CONFIG_CLIENT_MODEL_ID,
+    .name = "SAR Configuration Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_OPCODE_AGGREGATOR_SERVER_MODEL_ID,
+    .name = "Opcodes Aggregator Server",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_OPCODE_AGGREGATOR_CLIENT_MODEL_ID,
+    .name = "Opcodes Aggregator Client",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_LCD_SERVER_MODEL_ID,
+    .name = "Large Composition Data Server",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_LCD_CLIENT_MODEL_ID,
+    .name = "Large Composition Data Client",
+    .appkey_binding = false,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_SOLICITATION_PDU_RPL_CONFIG_SERVER_MODEL_ID,
+    .name = "Solicitation PDU RPL Configuration Server",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = BTMESH_SOLICITATION_PDU_RPL_CONFIG_CLIENT_MODEL_ID,
+    .name = "Solicitation PDU RPL Configuration Client",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
     .id = MESH_GENERIC_ON_OFF_SERVER_MODEL_ID,
     .name = "Generic OnOff Server",
     .appkey_binding = true,
@@ -927,7 +1067,49 @@ static const btmesh_conf_model_info_t model_info_array[] = {
     .appkey_binding = true,
     .subscription = true,
     .publication = true,
-  }
+  },
+  {
+    .id = MESH_MBT_SERVER_MODEL_ID,
+    .name = "BLOB Transfer Server",
+    .appkey_binding = true,
+    .subscription = true,
+    .publication = false,
+  },
+  {
+    .id = MESH_MBT_CLIENT_MODEL_ID,
+    .name = "BLOB Transfer Client",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = MESH_DFU_SERVER_MODEL_ID,
+    .name = "Firmware Update Server",
+    .appkey_binding = true,
+    .subscription = true,
+    .publication = false,
+  },
+  {
+    .id = MESH_DFU_CLIENT_MODEL_ID,
+    .name = "Firmware Update Client",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
+  {
+    .id = MESH_DFU_DISTRIBUTOR_SERVER_MODEL_ID,
+    .name = "Firmware Distribution Server",
+    .appkey_binding = true,
+    .subscription = true,
+    .publication = false,
+  },
+  {
+    .id = MESH_DFU_DISTRIBUTOR_CLIENT_MODEL_ID,
+    .name = "Firmware Distribution Client",
+    .appkey_binding = true,
+    .subscription = false,
+    .publication = false,
+  },
 };
 
 static const uint16_t model_info_count = sizeof(model_info_array)

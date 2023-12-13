@@ -35,6 +35,7 @@
 #include "psa/crypto.h"
 
 #include "sli_se_opaque_types.h"
+#include "sli_se_opaque_functions.h"
 #include "sli_se_driver_key_management.h"
 #include "sli_psa_driver_common.h"  // sli_psa_zeroize()
 #include "sli_se_version_dependencies.h"
@@ -897,23 +898,37 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
           return PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        // Refer to wrapped key context in input
-        sli_se_opaque_wrapped_key_context_t *key_context =
-          (sli_se_opaque_wrapped_key_context_t *)key_buffer;
-
         // Reconstruct key_desc from the key context
         memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
+
+        // Refer to wrapped key context in input
+        sli_se_opaque_wrapped_key_context_t key_context_temp;
+        sli_se_opaque_wrapped_key_context_t *key_context =
+          (sli_se_opaque_wrapped_key_context_t *)key_buffer;
+        key_desc->storage.location.buffer.pointer =
+          (uint8_t *)&(key_context->wrapped_buffer);
+
+        // If the key buffer is unaligned, copy the content into a
+        // temporary buffer in order to prevent hardfaults caused by
+        // instructions that do not support unaligned words (e.g. LDRD, LDM).
+        if ((uintptr_t)key_buffer & 0x3) {
+          memcpy(&key_context_temp, key_buffer, sizeof(sli_se_opaque_wrapped_key_context_t));
+          key_context = &key_context_temp;
+        }
 
         key_desc->type = key_context->key_type;
         key_desc->size = key_context->key_size;
         key_desc->flags = key_context->key_flags;
 
         key_desc->storage.method = SL_SE_KEY_STORAGE_EXTERNAL_WRAPPED;
-        key_desc->storage.location.buffer.pointer =
-          (uint8_t *)&(key_context->wrapped_buffer);
         key_desc->storage.location.buffer.size =
           key_buffer_size - offsetof(sli_se_opaque_wrapped_key_context_t,
                                      wrapped_buffer);
+
+        // Clear temporary key context
+        if ((uintptr_t)key_buffer & 0x3) {
+          memset(&key_context_temp, 0, sizeof(sli_se_opaque_wrapped_key_context_t));
+        }
 
         if (sli_key_get_size(key_desc, &key_size) != SL_STATUS_OK) {
           memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
@@ -1401,6 +1416,23 @@ psa_status_t sli_se_opaque_export_public_key(
 }
 
 #if defined(SLI_PSA_DRIVER_FEATURE_WRAPPED_KEYS)
+
+psa_status_t sli_se_opaque_copy_key(const psa_key_attributes_t *attributes,
+                                    const uint8_t *source_key,
+                                    size_t source_key_length,
+                                    uint8_t *target_key_buffer,
+                                    size_t target_key_buffer_size,
+                                    size_t *target_key_buffer_length)
+{
+  size_t bits = 0;
+  return sli_se_opaque_import_key(attributes,
+                                  source_key,
+                                  source_key_length,
+                                  target_key_buffer,
+                                  target_key_buffer_size,
+                                  target_key_buffer_length,
+                                  &bits);
+}
 
 psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
                                       const uint8_t *data,

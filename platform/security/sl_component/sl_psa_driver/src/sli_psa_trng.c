@@ -41,13 +41,13 @@
   #include "sl_se_manager_entropy.h"
 #elif defined(SLI_MBEDTLS_DEVICE_VSE)
   #include "sx_trng.h"
+  #include "ba431_config.h"
   #include "cryptolib_types.h"
   #include "cryptoacc_management.h"
 #elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
   #include "sli_crypto_trng_driver.h"
 #elif defined(SLI_TRNG_DEVICE_SI91X)
   #include "sl_si91x_psa_trng.h"
-  #include "sl_status.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -105,12 +105,22 @@ static psa_status_t cryptoacc_get_random(unsigned char *output,
   }
 
   if (len > 0) {
+    size_t remaining = len;
+
     trng_status = cryptoacc_management_acquire();
     if (trng_status != PSA_SUCCESS) {
       return trng_status;
     }
-    block_t data_out = block_t_convert(output, len);;
-    sx_trng_get_rand_blk(data_out);
+
+    while (remaining > 0) {
+      // Never read more than fifo level allows
+      uint32_t chunk_len = SX_MIN(remaining, sizeof(uint32_t) * (ba431_read_fifolevel()));
+      block_t chunk_block = block_t_convert(output, chunk_len);
+      sx_trng_get_rand_blk(chunk_block);
+      output += chunk_len;
+      remaining -= chunk_len;
+    }
+
     trng_status = cryptoacc_management_release();
   }
 
@@ -160,9 +170,7 @@ psa_status_t mbedtls_psa_external_get_random(
                                                 output_size - offset,
                                                 output_length);
     #elif defined(SLI_TRNG_DEVICE_SI91X)
-    sl_status_t trng_status;
-    trng_status = sl_si91x_psa_get_random(&output[offset], output_size - offset, output_length);
-    entropy_status = convert_si91x_error_code_to_psa_status(trng_status);
+    entropy_status = sl_si91x_psa_get_random(&output[offset], output_size - offset, output_length);
     #endif
 
     *output_length += offset;

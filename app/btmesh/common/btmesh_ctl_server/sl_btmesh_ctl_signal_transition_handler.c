@@ -57,8 +57,8 @@
 
 #define NO_FLAGS              0       ///< No flags used for message
 #define IMMEDIATE             0       ///< Immediate transition time is 0 seconds
-#define NO_CALLBACK_DATA      (void *)NULL   // Callback has not parameters
-#define HIGH_PRIORITY         0              // High Priority
+#define NO_CALLBACK_DATA      NULL    // Callback has no parameters
+#define HIGH_PRIORITY         0       // High Priority
 
 /// current temperature level
 static uint16_t current_temperature = SL_BTMESH_CTL_SERVER_DEFAULT_TEMPERATURE_CFG_VAL;

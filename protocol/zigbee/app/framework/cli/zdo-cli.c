@@ -89,7 +89,7 @@ void zdoSimpleCommand(sl_cli_command_arg_t *args)
   EmberStatus status = emberSimpleDescriptorRequest(target,
                                                     targetEndpoint,
                                                     EMBER_AF_DEFAULT_APS_OPTIONS);
-  emberAfAppPrintln("ZDO simple desc req %x", status);
+  sl_zigbee_app_debug_println("ZDO simple desc req %02x", status);
 }
 
 void zdoNodeCommand(sl_cli_command_arg_t *args)
@@ -97,7 +97,7 @@ void zdoNodeCommand(sl_cli_command_arg_t *args)
   EmberNodeId target = (EmberNodeId)sl_cli_get_argument_uint16(args, 0);
   EmberStatus status = emberNodeDescriptorRequest(target,
                                                   EMBER_AF_DEFAULT_APS_OPTIONS);
-  emberAfAppPrintln("ZDO node desc req %x", status);
+  sl_zigbee_app_debug_println("ZDO node desc req %02x", status);
 }
 
 void zdoMatchCommand(sl_cli_command_arg_t *args)
@@ -111,7 +111,7 @@ void zdoMatchCommand(sl_cli_command_arg_t *args)
                                                sli_zigbee_af_cli_zdo_in_clusters,
                                                sli_zigbee_af_cli_zdo_out_clusters,
                                                EMBER_AF_DEFAULT_APS_OPTIONS);
-  emberAfAppPrintln("ZDO match desc req %x", status);
+  sl_zigbee_app_debug_println("ZDO match desc req %x", status);
 }
 
 static EmberStatus copyOrLookupEui64(sl_cli_command_arg_t *args,
@@ -123,7 +123,7 @@ static EmberStatus copyOrLookupEui64(sl_cli_command_arg_t *args,
   if (0 == sl_zigbee_copy_eui64_arg(args, argumentNumber, returnEui64, true)) {
     status = emberLookupEui64ByNodeId(nodeId, returnEui64);
     if (status != EMBER_SUCCESS) {
-      emberAfAppPrintln("Error:  EUI64 argument is empty and lookup by node ID failed.");
+      sl_zigbee_app_debug_println("Error:  EUI64 argument is empty and lookup by node ID failed.");
     }
   }
   return status;
@@ -164,7 +164,7 @@ void zdoBindCommand(sl_cli_command_arg_t *args)
   // be used instead of the local EUI.  This is used for setting
   // multiple bindings on the same remote device.
   if (0 == sl_zigbee_copy_eui64_arg(args, 5, destEui, true)) {
-    emberAfAppPrintln("Using my local EUI64 for dest EUI64 in binding");
+    sl_zigbee_app_debug_println("Using my local EUI64 for dest EUI64 in binding");
     emberAfGetEui64(destEui);
   }
 
@@ -178,7 +178,7 @@ void zdoBindCommand(sl_cli_command_arg_t *args)
                             destinationEndpoint,
                             EMBER_AF_DEFAULT_APS_OPTIONS);
   UNUSED_VAR(status);
-  emberAfAppPrintln("ZDO bind req %x", status);
+  sl_zigbee_app_debug_println("ZDO bind req %02x", status);
 }
 
 void zdoAddClusterCommand(sl_cli_command_arg_t *args)
@@ -198,7 +198,7 @@ void zdoAddClusterCommand(sl_cli_command_arg_t *args)
     clusters[*clCount] = sl_cli_get_argument_uint16(args, 0);
     (*clCount)++;
   } else {
-    emberAfAppPrintln("cluster limit reached");
+    sl_zigbee_app_debug_println("cluster limit reached");
   }
 }
 
@@ -228,7 +228,7 @@ void zdoNetworkUpdateChannelCommand(sl_cli_command_arg_t *args)
   }
 
   if (EMBER_SUCCESS != sli_zigbee_af_validate_channel_pages(page, channel)) {
-    emberAfAppPrintln("invalid page: %d or channel: %d", page, channel);
+    sl_zigbee_app_debug_println("invalid page: %d or channel: %d", page, channel);
   } else {
     if (page == EMBER_NO_CHANNEL_PAGE_IN_USE) {
       // Request for 2.4Ghz network if page is zero
@@ -241,7 +241,7 @@ void zdoNetworkUpdateChannelCommand(sl_cli_command_arg_t *args)
                                       0xFE,
                                       0);
     }
-    emberAfAppPrintln("Change channel status: 0x%x", status);
+    sl_zigbee_app_debug_println("Change channel status: 0x%02x", status);
   }
 }
 
@@ -252,8 +252,8 @@ void zdoNetworkUpdateScanCommand(sl_cli_command_arg_t *args)
   uint16_t scanCount = sl_cli_get_argument_uint16(args, 2);
   uint32_t scanChannelsMask = EMBER_ALL_802_15_4_CHANNELS_MASK;
   if (scanDuration > 5 || scanCount == 0 || scanCount > 8) {
-    emberAfAppPrintln("duration must be in range 0 - 5");
-    emberAfAppPrintln("count must be in range 1 - 8");
+    sl_zigbee_app_debug_println("duration must be in range 0 - 5");
+    sl_zigbee_app_debug_println("count must be in range 1 - 8");
   } else {
     if (sl_cli_get_argument_count(args) > 3) {
       scanChannelsMask = sl_cli_get_argument_uint32(args, 3);
@@ -326,7 +326,7 @@ void zdoLeaveRequestCommand(sl_cli_command_arg_t *args)
                              options,
                              EMBER_APS_OPTION_RETRY);
 
-  emberAfAppPrintln("Leave %p0x%X", "Request: ", status);
+  sl_zigbee_app_debug_println("Leave %p0x%X", "Request: ", status);
 }
 
 void zdoPowerDescriptorRequestCommand(sl_cli_command_arg_t *args)
@@ -334,7 +334,7 @@ void zdoPowerDescriptorRequestCommand(sl_cli_command_arg_t *args)
   EmberNodeId target = (EmberNodeId)sl_cli_get_argument_uint16(args, 0);
   EmberStatus status = emberPowerDescriptorRequest(target,
                                                    EMBER_APS_OPTION_RETRY);
-  emberAfAppPrintln("Power Descriptor %p0x%X", "Request: ", status);
+  sl_zigbee_app_debug_println("Power Descriptor %p0x%X", "Request: ", status);
 }
 
 static void unbindRequest(sl_cli_command_arg_t *args,
@@ -373,12 +373,12 @@ static void unbindRequest(sl_cli_command_arg_t *args,
                               destinationEndpoint,
                               EMBER_APS_OPTION_RETRY);
   UNUSED_VAR(status);
-  emberAfAppPrintln("Unbind %p %p0x%X",
-                    (isGroupAddress
-                     ? "Group"
-                     : "Unicast"),
-                    "Request: ",
-                    status);
+  sl_zigbee_app_debug_println("Unbind %p %p0x%X",
+                              (isGroupAddress
+                               ? "Group"
+                               : "Unicast"),
+                              "Request: ",
+                              status);
 }
 
 void zdoUnbindGroupCommand(sl_cli_command_arg_t *args)
@@ -397,7 +397,7 @@ void zdoUnbindUnicastCommand(sl_cli_command_arg_t *args)
   // If the destination EUI64 of the binding (not the destination of the
   // actual message) is empty, use our local EUI64.
   if (0 == sl_zigbee_copy_eui64_arg(args, 4, destinationEui64, true)) {
-    emberAfAppPrintln("Using my local EUI64 for dest EUI64 in unbinding");
+    sl_zigbee_app_debug_println("Using my local EUI64 for dest EUI64 in unbinding");
     emberAfGetEui64(destinationEui64);
   }
 
@@ -413,7 +413,7 @@ void zdoRouteRequestCommand(sl_cli_command_arg_t *args)
   EmberStatus status = emberRoutingTableRequest(target,
                                                 index,
                                                 EMBER_APS_OPTION_RETRY);
-  emberAfAppPrintln("Route Table %p0x%X", "Request: ", status);
+  sl_zigbee_app_debug_println("Route Table %p0x%X", "Request: ", status);
 }
 
 //------------------------------------------------------------------------------

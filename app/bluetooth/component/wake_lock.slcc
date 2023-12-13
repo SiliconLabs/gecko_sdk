@@ -14,7 +14,6 @@ quality: production
 root_path: app/bluetooth/common/wake_lock
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_wake_lock_config.h
 source:
@@ -39,3 +38,6 @@ template_contribution:
       event: internal_app_init
       include: sl_wake_lock.h
       handler: sl_wake_lock_init
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/wake-lock

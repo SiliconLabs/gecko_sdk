@@ -49,8 +49,8 @@
 #define APP_OS_STAT_UPDATE_PERIODE_TIME_MS       1000U
 
 // <o APP_OS_STAT_MAX_THREAD_CNT> Maximum registerable thread count
-// <i> Default: 10
-#define APP_OS_STAT_MAX_THREAD_CNT               10U
+// <i> Default: 20
+#define APP_OS_STAT_MAX_THREAD_CNT               20U
 
 // <o APP_OS_STAT_RTT_LOG_CHANNEL> RTT Log channel for app os statistics
 // <i> Default: 0

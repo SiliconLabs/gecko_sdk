@@ -30,6 +30,10 @@
 #ifndef __SL_WISUN_RHT_MEASUREMENT__
 #define __SL_WISUN_RHT_MEASUREMENT__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -70,5 +74,9 @@ void sl_wisun_rht_deinit(void);
  *         or SL_STATUS_TRANSMIT I2C on error
  *****************************************************************************/
 sl_status_t sl_wisun_rht_get(uint32_t *rh, int32_t *t);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

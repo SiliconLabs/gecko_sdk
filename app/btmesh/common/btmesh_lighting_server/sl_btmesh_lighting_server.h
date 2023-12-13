@@ -114,7 +114,7 @@ void sl_btmesh_set_lightness_default(uint16_t lightness);
 void sl_btmesh_set_lightness_last(uint16_t lightness);
 
 /***************************************************************************//**
- * This function convert mesh format of default transition time to milliseconds.
+ * This function converts mesh format of default transition time to milliseconds.
  *
  * @return Default transition time in milliseconds.
  ******************************************************************************/
@@ -126,5 +126,13 @@ uint32_t sl_btmesh_get_default_transition_time(void);
  * @return Default lightness on power up
  ******************************************************************************/
 uint16_t sl_btmesh_get_lightness_onpowerup(void);
+
+/***************************************************************************//**
+ * This function updates the lightness level in the mesh stack during a transition
+ *
+ * @param[in] lightness     Current lightness level within the transition
+ * @param[in] remaining_ms  Remaining transition time in milliseconds
+ ******************************************************************************/
+void sl_btmesh_update_lightness(uint16_t lightness, uint32_t remaining_ms);
 
 #endif // SL_BTMESH_LIGHTING_SERVER_H

@@ -59,14 +59,15 @@
 void app_ping(sl_cli_command_arg_t *arguments)
 {
   const char *remote_ip = NULL;
-  wisun_addr_t remote_addr;
+  sockaddr_in6_t remote_addr;
 
   app_wisun_cli_mutex_lock();
 
   remote_ip = sl_cli_get_argument_string(arguments, 0);
-  remote_addr.sin6_family = AF_WISUN;
-  if (inet_pton(AF_WISUN, remote_ip, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
+  remote_addr.sin6_family = AF_INET6;
+  if (inet_pton(AF_INET6, remote_ip, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\r\n");
+    app_wisun_cli_mutex_unlock();
     return;
   }
   if (sl_wisun_ping(&remote_addr,

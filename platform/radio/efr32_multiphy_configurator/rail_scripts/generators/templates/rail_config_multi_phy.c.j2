@@ -144,6 +144,20 @@ static const uint8_t {{newHfxoRetimingConfigEntryName}}[] = {
   {%- endfor %}
 };
 {% endfor %}
+
+{%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+{%- for stackInfoName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}
+static const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
+{%- for element in stackInfoEntry[:-1] -%}
+  {{" 0x{0[0]:02x}, ".format(element | split32)}}
+{%- endfor -%}
+{{-"0x{0[0]:02x} ".format(stackInfoEntry|last | split32)-}}
+};
+{%- endfor %}
+#endif // RADIO_CONFIG_ENABLE_STACK_INFO
+{% endif %}
+
 {%- for entryName, entry in multiPhyConfig.commonStructures.railChannelConfigEntryAttrEntries.items() %}
 static RAIL_ChannelConfigEntryAttr_t {{entryName}} = {
 #if RAIL_SUPPORTS_OFDM_PA
@@ -396,19 +410,6 @@ const RAIL_IEEE802154_ModeSwitchPhr_t wisun_modeSwitchPhrs[WISUN_MODESWITCHPHRS_
   },
 {%- endfor %}
 };
-{% endif %}
-
-{%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
-#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-{%- for stackInfoName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}
-const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] = {
-{%- for element in stackInfoEntry[:-1] -%}
-  {{"0x{0[0]:02x}, ".format(element | split32)}}
-{%- endfor -%}
-{{-"0x{0[0]:02x}".format(stackInfoEntry|last | split32)-}}
-};
-{%- endfor %}
-#endif // RADIO_CONFIG_ENABLE_STACK_INFO
 {% endif %}
 
 {%- if not rail_secondary_config %}

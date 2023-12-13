@@ -32,13 +32,16 @@
 #define PERIPHERAL_SYSRTC_H
 
 #include "em_device.h"
-#if defined(SYSRTC_COUNT) && (SYSRTC_COUNT > 0)
 
-#include <stdbool.h>
+#if defined(SYSRTC_COUNT) && (SYSRTC_COUNT > 0)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdbool.h>
+#include "peripheral_sysrtc_compat.h"
+#include "sl_enum.h"
 
 /***************************************************************************//**
  * @addtogroup sysrtc
@@ -60,10 +63,8 @@ extern "C" {
 #define SYSRTC_GROUP_MAX_CHANNEL_CAPTURE  1u
 
 /// Sysrtc group number.
-#ifdef _SILICON_LABS_32B_SERIES_2
 #if !defined(SYSRTC_GROUP_NUMBER)
 #define SYSRTC_GROUP_NUMBER   1u
-#endif
 #endif
 
 /// Validation of valid SYSRTC group for assert statements.
@@ -74,20 +75,20 @@ extern "C" {
  ******************************************************************************/
 
 /// Capture input edge select.
-typedef enum {
-  SL_SYSRTC_CAPTURE_EDGE_RISING = 0,  ///< Rising edges detected.
-  SL_SYSRTC_CAPTURE_EDGE_FALLING,     ///< Falling edges detected.
-  SL_SYSRTC_CAPTURE_EDGE_BOTH         ///< Both edges detected.
-} sl_sysrtc_capture_edge_t;
+SL_ENUM(sl_hal_sysrtc_capture_edge_t) {
+  SL_HAL_SYSRTC_CAPTURE_EDGE_RISING = 0,  ///< Rising edges detected.
+  SL_HAL_SYSRTC_CAPTURE_EDGE_FALLING,     ///< Falling edges detected.
+  SL_HAL_SYSRTC_CAPTURE_EDGE_BOTH         ///< Both edges detected.
+};
 
 /// Compare match output action mode.
-typedef enum {
-  SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CLEAR = 0, ///< Clear output.
-  SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_SET,       ///< Set output.
-  SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_PULSE,     ///< Generate a pulse.
-  SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_TOGGLE,    ///< Toggle output.
-  SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CMPIF      ///< Export CMPIF.
-} sl_sysrtc_compare_match_out_action_t;
+SL_ENUM(sl_hal_sysrtc_compare_match_out_action_t) {
+  SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CLEAR = 0, ///< Clear output.
+  SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_SET,       ///< Set output.
+  SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_PULSE,     ///< Generate a pulse.
+  SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_TOGGLE,    ///< Toggle output.
+  SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CMPIF      ///< Export CMPIF.
+};
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -96,7 +97,7 @@ typedef enum {
 /// SYSRTC configuration structure.
 typedef struct {
   bool enable_debug_run;      ///< Counter shall keep running during debug halt.
-} sl_sysrtc_config_t;
+} sl_hal_sysrtc_config_t;
 
 /// Suggested default values for SYSRTC configuration structure.
 #define SYSRTC_CONFIG_DEFAULT                        \
@@ -106,40 +107,40 @@ typedef struct {
 
 /// Compare channel configuration structure.
 typedef struct {
-  sl_sysrtc_compare_match_out_action_t  compare_match_out_action; ///< Compare mode channel match output action.
-} sl_sysrtc_group_channel_compare_config_t;
+  sl_hal_sysrtc_compare_match_out_action_t  compare_match_out_action; ///< Compare mode channel match output action.
+} sl_hal_sysrtc_group_channel_compare_config_t;
 
 /// Capture channel configuration structure.
 typedef struct {
-  sl_sysrtc_capture_edge_t  capture_input_edge; ///< Capture mode channel input edge.
-} sl_sysrtc_group_channel_capture_config_t;
+  sl_hal_sysrtc_capture_edge_t  capture_input_edge; ///< Capture mode channel input edge.
+} sl_hal_sysrtc_group_channel_capture_config_t;
 
 /// Group configuration structure.
 typedef struct {
-  bool compare_channel0_enable;                                             ///< Enable/Disable compare channel 0
-  bool compare_channel1_enable;                                             ///< Enable/Disable compare channel 1
-  bool capture_channel0_enable;                                             ///< Enable/Disable capture channel 0
-  sl_sysrtc_group_channel_compare_config_t const *p_compare_channel0_config; ///< Pointer to compare channel 0 config
-  sl_sysrtc_group_channel_compare_config_t const *p_compare_channel1_config; ///< Pointer to compare channel 1 config
-  sl_sysrtc_group_channel_capture_config_t const *p_capture_channel0_config; ///< Pointer to capture channel 0 config
-} sl_sysrtc_group_config_t;
+  bool compare_channel0_enable;                                                  ///< Enable/Disable compare channel 0
+  bool compare_channel1_enable;                                                  ///< Enable/Disable compare channel 1
+  bool capture_channel0_enable;                                                  ///< Enable/Disable capture channel 0
+  sl_hal_sysrtc_group_channel_compare_config_t const *p_compare_channel0_config; ///< Pointer to compare channel 0 config
+  sl_hal_sysrtc_group_channel_compare_config_t const *p_compare_channel1_config; ///< Pointer to compare channel 1 config
+  sl_hal_sysrtc_group_channel_capture_config_t const *p_capture_channel0_config; ///< Pointer to capture channel 0 config
+} sl_hal_sysrtc_group_config_t;
 
 /// Suggested default values for compare channel configuration structure.
 #define SYSRTC_GROUP_CHANNEL_COMPARE_CONFIG_DEFAULT \
   {                                                 \
-    SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_PULSE        \
+    SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_PULSE    \
   }
 
 /// Compare channel configuration for starting HFXO using PRS.
 #define SYSRTC_GROUP_CHANNEL_COMPARE_CONFIG_EARLY_WAKEUP \
   {                                                      \
-    SL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CMPIF             \
+    SL_HAL_SYSRTC_COMPARE_MATCH_OUT_ACTION_CMPIF         \
   }
 
 /// Suggested default values for capture channel configuration structure.
 #define SYSRTC_GROUP_CHANNEL_CAPTURE_CONFIG_DEFAULT \
   {                                                 \
-    SL_SYSRTC_CAPTURE_EDGE_RISING                   \
+    SL_HAL_SYSRTC_CAPTURE_EDGE_RISING               \
   }
 
 /// Suggested default values for SYSRTC group configuration structure.
@@ -161,30 +162,30 @@ typedef struct {
  * Initializes SYSRTC module.
  *
  * Note that the compare values must be set separately with
- * (sl_sysrtc_set_group_compare_channel_value()), which should probably be
+ * (sl_hal_sysrtc_set_group_compare_channel_value()), which should probably be
  * done prior to the use of this function if configuring the SYSRTC to start
  * when initialization is completed.
  *
  * @param[in] p_config  A pointer to the SYSRTC initialization structure
  *                      variable.
  ******************************************************************************/
-void sl_sysrtc_init(const sl_sysrtc_config_t *p_config);
+void sl_hal_sysrtc_init(const sl_hal_sysrtc_config_t *p_config);
 
 /***************************************************************************//**
  * Enables SYSRTC counting.
  ******************************************************************************/
-void sl_sysrtc_enable(void);
+void sl_hal_sysrtc_enable(void);
 
 /***************************************************************************//**
  * Disables SYSRTC counting.
  ******************************************************************************/
-void sl_sysrtc_disable(void);
+void sl_hal_sysrtc_disable(void);
 
 /***************************************************************************//**
  * Waits for the SYSRTC to complete all synchronization of register changes
  * and commands.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_wait_sync(void)
+__INLINE void sl_hal_sysrtc_wait_sync(void)
 {
   while ((SYSRTC0->EN & SYSRTC_EN_EN) && (SYSRTC0->SYNCBUSY != 0U)) {
     // Wait for all synchronizations to finish
@@ -194,7 +195,7 @@ __STATIC_INLINE void sl_sysrtc_wait_sync(void)
 /***************************************************************************//**
  * Waits for the SYSRTC to complete reseting or disabling procedure.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_wait_ready(void)
+__INLINE void sl_hal_sysrtc_wait_ready(void)
 {
   while ((SYSRTC0->SWRST & _SYSRTC_SWRST_RESETTING_MASK) || (SYSRTC0->EN & _SYSRTC_EN_DISABLING_MASK) || (SYSRTC0->SYNCBUSY != 0U)) {
     // Wait for all synchronizations to finish
@@ -206,14 +207,14 @@ __STATIC_INLINE void sl_sysrtc_wait_ready(void)
  *
  * This function will send a start command to the SYSRTC peripheral. The SYSRTC
  * peripheral will use some LF clock ticks before the command is executed.
- * The sl_sysrtc_wait_sync() function can be used to wait for the start
+ * The sl_hal_sysrtc_wait_sync() function can be used to wait for the start
  * command to be executed.
  *
  * @note  This function requires the SYSRTC to be enabled.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_start(void)
+__INLINE void sl_hal_sysrtc_start(void)
 {
-  sl_sysrtc_wait_sync();
+  sl_hal_sysrtc_wait_sync();
   SYSRTC0->CMD = SYSRTC_CMD_START;
 }
 
@@ -222,28 +223,28 @@ __STATIC_INLINE void sl_sysrtc_start(void)
  *
  * This function will send a stop command to the SYSRTC peripheral. The SYSRTC
  * peripheral will use some LF clock ticks before the command is executed.
- * The sl_sysrtc_wait_sync() function can be used to wait for the stop
+ * The sl_hal_sysrtc_wait_sync() function can be used to wait for the stop
  * command to be executed.
  *
  * @note  This function requires the SYSRTC to be enabled.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_stop(void)
+__INLINE void sl_hal_sysrtc_stop(void)
 {
-  sl_sysrtc_wait_sync();
+  sl_hal_sysrtc_wait_sync();
   SYSRTC0->CMD = SYSRTC_CMD_STOP;
 }
 
 /***************************************************************************//**
  * Restores SYSRTC to its reset state.
  ******************************************************************************/
-void sl_sysrtc_reset(void);
+void sl_hal_sysrtc_reset(void);
 
 /***************************************************************************//**
  * Gets SYSRTC STATUS register value.
  *
  * @return  Current STATUS register value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_sysrtc_get_status(void)
+__INLINE uint32_t sl_hal_sysrtc_get_status(void)
 {
   return SYSRTC0->STATUS;
 }
@@ -255,7 +256,7 @@ __STATIC_INLINE uint32_t sl_sysrtc_get_status(void)
  *        SYSRTC_SWRST, SYSRTC_CNT and SYSRTC_TOPCNT registers cannot be written
  *        to.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_lock(void)
+__INLINE void sl_hal_sysrtc_lock(void)
 {
   SYSRTC0->LOCK = ~SYSRTC_LOCK_LOCKKEY_UNLOCK;
 }
@@ -267,7 +268,7 @@ __STATIC_INLINE void sl_sysrtc_lock(void)
  *        SYSRTC_SWRST, SYSRTC_CNT and SYSRTC_TOPCNT registers cannot be written
  *        to.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_unlock(void)
+__INLINE void sl_hal_sysrtc_unlock(void)
 {
   SYSRTC0->LOCK = SYSRTC_LOCK_LOCKKEY_UNLOCK;
 }
@@ -277,10 +278,10 @@ __STATIC_INLINE void sl_sysrtc_unlock(void)
  *
  * @return  Current SYSRTC counter value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_sysrtc_get_counter(void)
+__INLINE uint32_t sl_hal_sysrtc_get_counter(void)
 {
   // Wait for Counter to synchronize before getting value
-  sl_sysrtc_wait_sync();
+  sl_hal_sysrtc_wait_sync();
 
   return SYSRTC0->CNT;
 }
@@ -290,10 +291,10 @@ __STATIC_INLINE uint32_t sl_sysrtc_get_counter(void)
  *
  * @param[in] value   The new SYSRTC counter value.
  ******************************************************************************/
-__STATIC_INLINE void sl_sysrtc_set_counter(uint32_t value)
+__INLINE void sl_hal_sysrtc_set_counter(uint32_t value)
 {
   // Wait for Counter to synchronize before getting value
-  sl_sysrtc_wait_sync();
+  sl_hal_sysrtc_wait_sync();
 
   SYSRTC0->CNT = value;
 }
@@ -306,15 +307,15 @@ __STATIC_INLINE void sl_sysrtc_set_counter(uint32_t value)
  * @param[in] p_group_config  Pointer to group configuration structure
  *                            variable.
  ******************************************************************************/
-void sl_sysrtc_init_group(uint8_t group_number,
-                          sl_sysrtc_group_config_t const *p_group_config);
+void sl_hal_sysrtc_init_group(uint8_t group_number,
+                              sl_hal_sysrtc_group_config_t const *p_group_config);
 
 /***************************************************************************//**
  * Enables one or more SYSRTC interrupts for the given group.
  *
  * @note  Depending on the use, a pending interrupt may already be set prior to
  *        enabling the interrupt. To ignore a pending interrupt, consider using
- *        sl_sysrtc_clear_group_interrupts() prior to enabling the interrupt.
+ *        sl_hal_sysrtc_clear_group_interrupts() prior to enabling the interrupt.
  *
  * @param[in] group_number  SYSRTC group number to use.
  *
@@ -322,8 +323,8 @@ void sl_sysrtc_init_group(uint8_t group_number,
  *                    Use a set of interrupt flags OR-ed together to set
  *                    multiple interrupt sources for the given SYSRTC group.
  ******************************************************************************/
-void sl_sysrtc_enable_group_interrupts(uint8_t group_number,
-                                       uint32_t flags);
+void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
+                                           uint32_t flags);
 
 /***************************************************************************//**
  * Disables one or more SYSRTC interrupts for the given group.
@@ -334,8 +335,8 @@ void sl_sysrtc_enable_group_interrupts(uint8_t group_number,
  *                    Use a set of interrupt flags OR-ed together to disable
  *                    multiple interrupt sources for the given SYSRTC group.
  ******************************************************************************/
-void sl_sysrtc_disable_group_interrupts(uint8_t group_number,
-                                        uint32_t flags);
+void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
+                                            uint32_t flags);
 
 /***************************************************************************//**
  * Clears one or more pending SYSRTC interrupts for the given group.
@@ -346,8 +347,8 @@ void sl_sysrtc_disable_group_interrupts(uint8_t group_number,
  *                    Use a set of interrupt flags OR-ed together to clear
  *                    multiple interrupt sources for the given SYSRTC group.
  ******************************************************************************/
-void sl_sysrtc_clear_group_interrupts(uint8_t group_number,
-                                      uint32_t flags);
+void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
+                                          uint32_t flags);
 
 /***************************************************************************//**
  * Gets pending SYSRTC interrupt flags for the given group.
@@ -360,7 +361,7 @@ void sl_sysrtc_clear_group_interrupts(uint8_t group_number,
  *          Returns a set of interrupt flags OR-ed together for multiple
  *          interrupt sources in the SYSRTC group.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_interrupts(uint8_t group_number);
+uint32_t sl_hal_sysrtc_get_group_interrupts(uint8_t group_number);
 
 /***************************************************************************//**
  * Gets enabled and pending SYSRTC interrupt flags.
@@ -375,7 +376,7 @@ uint32_t sl_sysrtc_get_group_interrupts(uint8_t group_number);
  *          - the enabled interrupt sources in SYSRTC_GRPx_IEN and
  *          - the pending interrupt flags SYSRTC_GRPx_IF.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_enabled_interrupts(uint8_t group_number);
+uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number);
 
 /***************************************************************************//**
  * Sets one or more pending SYSRTC interrupts for the given group from Software.
@@ -386,8 +387,8 @@ uint32_t sl_sysrtc_get_group_enabled_interrupts(uint8_t group_number);
  *                    Use a set of interrupt flags OR-ed together to set
  *                    multiple interrupt sources for the SYSRTC group.
  ******************************************************************************/
-void sl_sysrtc_set_group_interrupts(uint8_t group_number,
-                                    uint32_t flags);
+void sl_hal_sysrtc_set_group_interrupts(uint8_t group_number,
+                                        uint32_t flags);
 
 /***************************************************************************//**
  * Gets SYSRTC compare register value for selected channel of given group.
@@ -398,8 +399,8 @@ void sl_sysrtc_set_group_interrupts(uint8_t group_number,
  *
  * @return  Compare register value.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_compare_channel_value(uint8_t group_number,
-                                                   uint8_t channel);
+uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
+                                                       uint8_t channel);
 
 /***************************************************************************//**
  * Sets SYSRTC compare register value for selected channel of given group.
@@ -410,9 +411,9 @@ uint32_t sl_sysrtc_get_group_compare_channel_value(uint8_t group_number,
  *
  * @param[in] value   Compare register value.
  ******************************************************************************/
-void sl_sysrtc_set_group_compare_channel_value(uint8_t group_number,
-                                               uint8_t channel,
-                                               uint32_t value);
+void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
+                                                   uint8_t channel,
+                                                   uint32_t value);
 
 /***************************************************************************//**
  * Gets SYSRTC input capture register value for capture channel of given group.
@@ -421,7 +422,7 @@ void sl_sysrtc_set_group_compare_channel_value(uint8_t group_number,
  *
  * @return  Capture register value.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_capture_channel_value(uint8_t group_number);
+uint32_t sl_hal_sysrtc_get_group_capture_channel_value(uint8_t group_number);
 
 /** @} (end addtogroup sysrtc) */
 

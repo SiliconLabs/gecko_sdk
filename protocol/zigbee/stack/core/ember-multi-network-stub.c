@@ -417,8 +417,12 @@ void sli_zigbee_build_and_send_counter_info(EmberCounterType counter, EmberNodeI
       && !requireDestination) {
     tmpIndex  = sli_zigbee_get_phy_interface_by_node_id(dst);
     // default to phy index 0 if dst is not found in neighbor or child table,
-    // dst should always present for phyIndex required counters though.
-    tmpIndex = (tmpIndex == 0xFF) ? PHY_INDEX_NATIVE : tmpIndex;
+    // dst should always be present for phyIndex required counters though.
+    // However, it's possible for dst to be populated with EMBER_UNKNOWN_NODE_ID if no short
+    // destination address was available for the packet in question, making PHY lookup impossible.
+    if (tmpIndex == SL_MAC_CHILD_INVALID_INDEX) {
+      tmpIndex = PHY_INDEX_NATIVE;
+    }
     info.otherFields = &tmpIndex;
   } else if (!requirePhyIndex
              && requireDestination) {
@@ -427,8 +431,12 @@ void sli_zigbee_build_and_send_counter_info(EmberCounterType counter, EmberNodeI
              && requireDestination) {
     tmpIndex  = sli_zigbee_get_phy_interface_by_node_id(dst);
     // default to phy index 0 if dst is not found in neighbor or child table,
-    // dst should always present for phyIndex required counters though.
-    tmpIndex = (tmpIndex == 0xFF) ? PHY_INDEX_NATIVE : tmpIndex;
+    // dst should always be present for phyIndex required counters though.
+    // However, it's possible for dst to be populated with EMBER_UNKNOWN_NODE_ID if no short
+    // destination address was available for the packet in question, making PHY lookup impossible.
+    if (tmpIndex == SL_MAC_CHILD_INVALID_INDEX) {
+      tmpIndex = PHY_INDEX_NATIVE;
+    }
     other.phy_index = tmpIndex;
     other.destinationNodeId = dst;
     info.otherFields = &other;

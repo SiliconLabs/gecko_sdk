@@ -35,12 +35,7 @@
 #include "sl_duty_cycle_utility.h"
 #include "sl_duty_cycle_config.h"
 #include "sl_component_catalog.h"
-#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
-#include "app_assert.h"
-#endif
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-#include "app_log.h"
-#endif
+#include "simple_rail_assistance.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -102,16 +97,8 @@ RAIL_Status_t calculate_preamble_bit_length_from_time(const uint32_t bit_rate,
 
     preamble_time = ((float)(PREAMBLE_PATTERN_LENGTH * PREAMBLE_PATTERN * PREAMBLE_OVERSAMPLING) * U_SEC) / (float)bit_rate;
 
-#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
     app_assert(preamble_time < on_time,
                "Please modify the on time according to the bitrate\n");
-#else
-    if (preamble_time >= on_time) {
-      while (1) {
-        // Please modify the on time according to the bitrate
-      }
-    }
-#endif
 
     while (1) {
       preamble_time = (off_time + (2 * on_time)) / 1000000;
@@ -122,11 +109,9 @@ RAIL_Status_t calculate_preamble_bit_length_from_time(const uint32_t bit_rate,
       off_time = off_time - on_time;
     }
 
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     if (((uint32_t)off_time) != DUTY_CYCLE_OFF_TIME) {
       app_log_warning("Duty Cycle Off time was changed to ensure stable working\n");
     }
-#endif
 
     duty_cycle_config->delay = (uint32_t) off_time;
 

@@ -3,7 +3,7 @@
  * @brief Bluetooth event handler for Connection CTE mode.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -55,6 +55,8 @@ static const uint8_t cte_enable_char[] = { 0xAD, 0x2B };
 // Flag indicating that SL_BT_CONFIG_MAX_CONNECTIONS is reached.
 static bool connections_unavailable = false;
 
+static sl_status_t cte_conn_process_advertisement_report(bd_addr *address, uint8_t address_type, uint8_t event_flags, const uint8array *adv_data);
+
 /**************************************************************************//**
  * CTE specific Bluetooth event handler.
  *****************************************************************************/
@@ -93,50 +95,22 @@ sl_status_t cte_bt_on_event_conn(sl_bt_msg_t *evt)
       break;
 
     // -------------------------------
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
     {
-      // Check if the tag is allowlisted.
-      if (SL_STATUS_NOT_FOUND == aoa_db_allowlist_find(evt->data.evt_scanner_scan_report.address.addr)) {
-        break;
-      }
-
-      // Check if tag is already known.
-      // NOTE:
-      // It is possible that multiple scan report events arrive from the same
-      // asset tag before the connection opened event arrives and the asset tag
-      // is added to the database. Therefore, the asset tag is unknown at this
-      // point, and connection open command is sent multiple times in a row.
-      // This is normal and shouldn't cause any issues.
-      if (SL_STATUS_OK == aoa_db_get_tag_by_address(&evt->data.evt_scanner_scan_report.address, &tag)) {
-        break;
-      }
-
-      // Check for connectable advertising type.
-      if ((evt->data.evt_scanner_scan_report.packet_type & 0x06) != 0x0) {
-        break;
-      }
-
-      // Check for CTE service.
-      if (!find_service_in_advertisement(evt->data.evt_scanner_scan_report.data.data,
-                                         evt->data.evt_scanner_scan_report.data.len,
-                                         cte_service,
-                                         sizeof(cte_service))) {
-        break;
-      }
-
-      // Establish connection with the advertising device.
-      uint8_t conn_handle;
-      sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                 evt->data.evt_scanner_scan_report.address_type,
-                                 sl_bt_gap_phy_1m,
-                                 &conn_handle);
-      if (SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED == sc) {
-        app_log_warning("SL_BT_CONFIG_MAX_CONNECTIONS reached, stop scanning." APP_LOG_NL);
-        connections_unavailable = true;
-        sc = sl_bt_scanner_stop();
-      }
+      sc = cte_conn_process_advertisement_report(&(evt->data.evt_scanner_legacy_advertisement_report.address),
+                                                 evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                                                 evt->data.evt_scanner_legacy_advertisement_report.event_flags,
+                                                 &(evt->data.evt_scanner_legacy_advertisement_report.data));
       break;
     }
+
+    // -------------------------------
+    case sl_bt_evt_scanner_extended_advertisement_report_id:
+      sc = cte_conn_process_advertisement_report(&(evt->data.evt_scanner_extended_advertisement_report.address),
+                                                 evt->data.evt_scanner_extended_advertisement_report.address_type,
+                                                 evt->data.evt_scanner_extended_advertisement_report.event_flags,
+                                                 &(evt->data.evt_scanner_extended_advertisement_report.data));
+      break;
 
     // -------------------------------
     case sl_bt_evt_connection_opened_id:
@@ -314,5 +288,60 @@ sl_status_t cte_bt_on_event_conn(sl_bt_msg_t *evt)
       break;
   }
 
+  return sc;
+}
+
+/******************************************************************************
+ * Check if the advertiser is a tag and initiate a connection if it is not
+ * connected.
+ *****************************************************************************/
+static sl_status_t cte_conn_process_advertisement_report(bd_addr *address,
+                                                         uint8_t address_type,
+                                                         uint8_t event_flags,
+                                                         const uint8array *adv_data)
+{
+  sl_status_t sc = SL_STATUS_OK;
+  aoa_db_entry_t *tag;
+
+  // Check if the tag is allowlisted.
+  if (SL_STATUS_NOT_FOUND == aoa_db_allowlist_find(address->addr)) {
+    return sc;
+  }
+
+  // Check if tag is already known.
+  // NOTE:
+  // It is possible that multiple scan report events arrive from the same
+  // asset tag before the connection opened event arrives and the asset tag
+  // is added to the database. Therefore, the asset tag is unknown at this
+  // point, and connection open command is sent multiple times in a row.
+  // This is normal and shouldn't cause any issues.
+  if (SL_STATUS_OK == aoa_db_get_tag_by_address(address, &tag)) {
+    return sc;
+  }
+
+  // Check for connectable advertising type.
+  if ((event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) != SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) {
+    return sc;
+  }
+
+  // Check for CTE service.
+  if (!find_service_in_advertisement((uint8_t *)adv_data->data,
+                                     adv_data->len,
+                                     cte_service,
+                                     sizeof(cte_service))) {
+    return sc;
+  }
+
+  // Establish connection with the advertising device.
+  uint8_t conn_handle;
+  sc = sl_bt_connection_open(*address,
+                             address_type,
+                             sl_bt_gap_phy_1m,
+                             &conn_handle);
+  if (SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED == sc) {
+    app_log_warning("SL_BT_CONFIG_MAX_CONNECTIONS reached, stop scanning." APP_LOG_NL);
+    connections_unavailable = true;
+    sc = sl_bt_scanner_stop();
+  }
   return sc;
 }

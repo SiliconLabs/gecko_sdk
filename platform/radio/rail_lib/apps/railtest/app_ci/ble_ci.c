@@ -50,6 +50,7 @@ void bleStatus(sl_cli_command_arg_t *args);
 
 void bleEnable(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   bool enable = !!sl_cli_get_argument_uint8(args, 0);
 
   // Turn BLE mode on or off as requested
@@ -70,6 +71,7 @@ void bleEnable(sl_cli_command_arg_t *args)
 
 void bleStatus(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   bool enabled = RAIL_BLE_IsEnabled(railHandle);
 
   // Report the current enabled status for BLE
@@ -140,6 +142,7 @@ void bleSetSimulscan(sl_cli_command_arg_t *args)
 // channel, accessAddress, crcInit, whitening
 void bleSetChannelParams(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   // Default to the parameters for advertising channels
   uint32_t accessAddress = 0x8E89BED6UL;
   uint32_t crcInit = 0x00555555UL;

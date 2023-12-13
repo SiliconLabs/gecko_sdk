@@ -42,7 +42,7 @@
 #include "sl_bt_api.h"
 
 // Optstring argument for getopt.
-#define OPTSTRING      NCP_HOST_OPTSTRING APP_LOG_OPTSTRING "h"
+#define OPTSTRING      NCP_HOST_OPTSTRING APP_LOG_OPTSTRING "hR"
 
 // Usage info.
 #define USAGE          APP_LOG_NL "%s " NCP_HOST_USAGE APP_LOG_USAGE " [-h]" APP_LOG_NL
@@ -64,7 +64,6 @@ void app_init(int argc, char *argv[])
 {
   sl_status_t sc;
   int opt;
-  bool reset_on_start = true;
 
   // Process command line options.
   while ((opt = getopt(argc, argv, OPTSTRING)) != -1) {
@@ -75,12 +74,9 @@ void app_init(int argc, char *argv[])
         app_log(OPTIONS);
         exit(EXIT_SUCCESS);
 
-#if defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
-      // No reset on start
       case 'R':
-        reset_on_start = false;
-        // Intentional fall-through, lower layers need to process this flag as well
-#endif // defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
+        app_log("Deprecated option: -R" APP_LOG_NL);
+        break;
 
       // Process options for other modules.
       default:
@@ -104,14 +100,6 @@ void app_init(int argc, char *argv[])
   }
   app_assert_status(sc);
   app_log_info("NCP host initialised." APP_LOG_NL);
-
-  if (reset_on_start) {
-    app_log_info("Resetting NCP target..." APP_LOG_NL);
-    // Reset NCP to ensure it gets into a defined state.
-    // Once the chip successfully boots, boot event should be received.
-    sl_bt_system_reset(sl_bt_system_boot_mode_normal);
-  }
-
   app_log_info("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -212,7 +200,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
       // Start general advertising and enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       app_log_info("Started advertising." APP_LOG_NL);
       break;
@@ -237,7 +225,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Restart advertising after client has disconnected.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       app_log_info("Started advertising." APP_LOG_NL);
       break;

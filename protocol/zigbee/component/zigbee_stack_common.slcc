@@ -5,7 +5,6 @@ category: Zigbee|Stack|Pro Core
 quality: production
 ui_hints:
   visibility: never
-
 description: This component provides common header and source files for the Zigbee PRO stack to both SoC and NCP apps.
 
 provides:
@@ -105,7 +104,7 @@ include:
   - path: platform/radio/mac/rail_mux
     file_list:
       - path: sl_rail_mux_rename.h
-      - path: sl_rail_mux.h      
+      - path: sl_rail_mux.h
   #ToDo: These should be treated as internal headers: as such, we should clean up
   #our released code so that we no longer need to release these (EMZIGBEE-6706)
   - path: platform/radio/mac
@@ -143,6 +142,9 @@ include:
       - path: command-handlers-zll.h
         condition:
           - zigbee_ncp
+      - path: command-handlers-binding.h
+        condition:
+          - zigbee_ncp
       - path: command-handlers-security.h
         condition:
           - zigbee_ncp
@@ -177,6 +179,9 @@ source:
       - rail_util_coex
   - path: protocol/zigbee/stack/config/ember-configuration.c
   - path: protocol/zigbee/stack/config/ember-configuration-access.c
+  - path: protocol/zigbee/app/em260/command-handlers-binding-generated.c
+    condition:
+      - zigbee_ncp
   - path: protocol/zigbee/app/em260/command-handlers-messaging-generated.c
     condition:
       - zigbee_ncp
@@ -192,7 +197,7 @@ source:
   # Stubs
   - path: protocol/zigbee/stack/framework/debug-stub.c
     unless:
-      - zigbee_debug_basic 
+      - zigbee_debug_basic
   - path: protocol/zigbee/stack/security/cbke-crypto-engine-stub.c
     unless:
       - zigbee_cbke_core
@@ -211,18 +216,9 @@ source:
   - path: protocol/zigbee/stack/security/cbke-crypto-engine-dsa-verify-283k1-stub.c
     unless:
       - zigbee_cbke_dsa_verify_283k1
-  - path: protocol/zigbee/stack/security/install-code-stub.c
-    unless:
-      - zigbee_install_code
-  - path: protocol/zigbee/stack/zigbee/binding-table-stub.c
-    unless:
-      - zigbee_binding_table
   - path: protocol/zigbee/stack/framework/debug-extended-stub.c
     unless:
       - zigbee_debug_extended
-  - path: protocol/zigbee/stack/zigbee/end-device-bind-stub.c
-    unless:
-      - zigbee_end_device_bind
   - path: protocol/zigbee/stack/gp/gp-stub.c
     unless:
       - zigbee_gp
@@ -233,9 +229,6 @@ source:
     unless:
       - zigbee_multi_pan
   - path: protocol/zigbee/stack/core/multi-pan-common.c
-  - path: protocol/zigbee/stack/security/packet-validate-stub.c
-    unless:
-      - zigbee_packet_validate
   - path: protocol/zigbee/stack/zigbee/aps-keys-full-stub.c
     unless:
       - zigbee_security_link_keys
@@ -299,7 +292,7 @@ template_contribution:
   - name: component_catalog
     value: zigbee_stack_common
   - name: application_type
-    value: "APPLICATION_TYPE_ZIGBEE"
+    value: APPLICATION_TYPE_ZIGBEE
     condition:
       - bootloader_app_properties
   # These callbacks are consumed by zigbee pro NCP command handlers.
@@ -367,96 +360,123 @@ template_contribution:
       callback_type: get_value
       function_name: emberAfPluginEzspSecurityGetValueCommandCallback
 
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: set_configuration_value
+      function_name: emberAfPluginEzspBindingConfigurationValueCommandCallback
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: get_policy
+      function_name: emberAfPluginEzspBindingPolicyCommandCallback
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: set_policy
+      function_name: emberAfPluginEzspBindingPolicyCommandCallback
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: get_configuration_value
+      function_name: emberAfPluginEzspBindingConfigurationValueCommandCallback
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: modify_memory_allocation
+      function_name: sli_zigbee_initialize_binding_table
+
+  - name: zigbee_ncp_callback
+    value:
+      callback_type: permit_host_to_ncp_frame
+      function_name: emberAfPluginEzspBindingPermitHostToNcpFrameCallback
+
+
   - name: zigbee_stack_callback
     value:
       callback_type: mac_filter_match_message
       function_name: sli_zigbee_af_mac_filter_match_message_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: bootload_transmit_complete
       function_name: sli_zigbee_af_bootload_transmit_complete_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_bootload_message
       function_name: sli_zigbee_af_incoming_bootload_message_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: raw_transmit_complete
       function_name: sli_zigbee_af_raw_transmit_complete_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: mac_passthrough_message
       function_name: sli_zigbee_af_mac_passthrough_message_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: id_conflict
       function_name: sli_zigbee_af_id_conflict_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_network_status
       function_name: sli_zigbee_af_incoming_network_status_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_route_error
       function_name: sli_zigbee_af_incoming_route_error_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_many_to_one_route_request
       function_name: sli_zigbee_af_incoming_many_to_one_route_requestCallback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: duty_cycle
       function_name: sli_zigbee_af_duty_cycle_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: child_join
       function_name: sli_zigbee_af_child_joinCallback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: network_found
       function_name: sli_zigbee_af_network_found_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: scan_complete
       function_name: sli_zigbee_af_scan_complete_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: incoming_message
       function_name: sli_zigbee_af_incoming_message_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: message_sent
-      function_name:  sli_zigbee_af_message_sent_callback
+      function_name: sli_zigbee_af_message_sent_callback
     condition:
-       - zigbee_ncp
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: switch_network_key

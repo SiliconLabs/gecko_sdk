@@ -201,10 +201,10 @@ EmberCalType emberGetCalType(void)
   return emApiGetCalType();
 }
 
-uint8_t emberGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
-                                     EmberMacAddressMode dstAddressMode,
-                                     bool interpan,
-                                     bool secured)
+uint16_t emberGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
+                                      EmberMacAddressMode dstAddressMode,
+                                      bool interpan,
+                                      bool secured)
 {
   return emApiGetMaximumPayloadLength(srcAddressMode,
                                       dstAddressMode,
@@ -217,6 +217,11 @@ EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs)
   return emApiSetIndirectQueueTimeout(timeoutMs);
 }
 
+uint32_t emberGetInt32uMillisecondTick(void)
+{
+  return emApiGetInt32uMillisecondTick();
+}
+
 EmberStatus emberGetVersionInfo(uint16_t* gsdkVersion,
                                 uint16_t* connectStackVersion,
                                 uint32_t* bootloaderVersion)
@@ -224,6 +229,26 @@ EmberStatus emberGetVersionInfo(uint16_t* gsdkVersion,
   return emApiGetVersionInfo(gsdkVersion,
                              connectStackVersion,
                              bootloaderVersion);
+}
+
+EmberStatus emberOfdmSetMcs(uint8_t mcs)
+{
+  return emApiOfdmSetMcs(mcs);
+}
+
+EmberStatus emberOfdmGetMcs(uint8_t* mcs)
+{
+  return emApiOfdmGetMcs(mcs);
+}
+
+EmberStatus emberNcpSetLongMessagesUse(bool useLongMessages)
+{
+  return emApiNcpSetLongMessagesUse(useLongMessages);
+}
+
+bool emberUsingLongMessages(void)
+{
+  return emApiUsingLongMessages();
 }
 
 uint32_t emberStackIdleTimeMs(uint16_t * currentStackTasks)

@@ -30,7 +30,7 @@
 
 #include "common/array.hpp"
 #include "common/code_utils.hpp"
-#include "common/instance.hpp"
+#include "instance/instance.hpp"
 
 #include "ncp/ncp_base.hpp"
 #include "openthread/link_raw.h"

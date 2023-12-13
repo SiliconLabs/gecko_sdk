@@ -282,10 +282,10 @@ float sl_icm20648_gyro_set_sample_rate(float sampleRate)
   float gyroSampleRate;
 
   /* Calculate the sample rate divider */
-  gyroSampleRate = (1125.0 / sampleRate) - 1.0;
+  gyroSampleRate = (1125.0f / sampleRate) - 1.0f;
 
   /* Check if it fits in the divider register */
-  if ( gyroSampleRate > 255.0 ) {
+  if ( gyroSampleRate > 255.0f ) {
     gyroSampleRate = 255.0;
   }
 
@@ -312,10 +312,10 @@ float sl_icm20648_accel_set_sample_rate(float sampleRate)
   float accelSampleRate;
 
   /* Calculate the sample rate divider */
-  accelSampleRate = (1125.0 / sampleRate) - 1.0;
+  accelSampleRate = (1125.0f / sampleRate) - 1.0f;
 
   /* Check if it fits in the divider registers */
-  if ( accelSampleRate > 4095.0 ) {
+  if ( accelSampleRate > 4095.0f ) {
     accelSampleRate = 4095.0;
   }
 
@@ -711,9 +711,9 @@ sl_status_t sl_icm20648_calibrate_accel_and_gyro(float *accelBiasScaled, float *
 
   /* Acceleormeter: add or remove (depending on the orientation of the chip) 1G (gravity) from the Z axis value */
   if ( accelBias[2] > 0L ) {
-    accelBias[2] -= (int32_t) (1.0 / accelRes);
+    accelBias[2] -= (int32_t) (1.0f / accelRes);
   } else {
-    accelBias[2] += (int32_t) (1.0 / accelRes);
+    accelBias[2] += (int32_t) (1.0f / accelRes);
   }
 
   /* Convert the values to degrees per sec for displaying */
@@ -960,7 +960,7 @@ sl_status_t sl_icm20648_read_temperature_data(float *temperature)
   raw_temp = (int16_t) ( (data[0] << 8) + data[1]);
 
   /* Calculate the Celsius value from the raw reading */
-  *temperature = ( (float) raw_temp / 333.87) + 21.0;
+  *temperature = ( (float) raw_temp / 333.87f) + 21.0f;
 
   return SL_STATUS_OK;
 }

@@ -29,13 +29,12 @@
 
 #include "poll-config.h"
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "poll.h"
 
 static uint8_t shortPollIntervalQS = EMBER_AF_PLUGIN_POLL_SHORT_POLL_INTERVAL_QS;
 static uint16_t longPollIntervalS = EMBER_AF_PLUGIN_POLL_LONG_POLL_INTERVAL_S;
-static bool shortPolling = FALSE;
+static bool shortPolling = false;
 static uint32_t lastPollMs;
 
 EmberEventControl emberAfPluginPollEventControl;
@@ -50,7 +49,7 @@ static void scheduleNextPoll(void)
 
 void emberAfPluginPollEventHandler(void)
 {
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   emberEventControlSetInactive(emberAfPluginPollEventControl);
 
   if (emberStackIsUp()
@@ -94,7 +93,7 @@ void emberAfPluginPollSetLongPollInterval(uint16_t intervalS)
 
 void emberAfPluginPollEnableShortPolling(bool enable)
 {
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   uint32_t pollIntervalMs;
 
   // Already short polling or already long polling, nothing to do.

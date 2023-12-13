@@ -1,0 +1,16 @@
+label: ZWave_NCP_ZnifferPTI_Solution
+description: >
+  Demonstrates Zniffer Packet Trace Interface application combined with OTA bootloader. 
+  The Z-Wave Zniffer Packet Trace Interface application helps with analyzing the 
+  communication between devices and debugging the application. It is possible to 
+  log and filter datagrams in any supported region. The log can be saved for later analysis.
+quality: internal
+project:
+  - path: ../../Apps/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti.slcp
+    id: application
+    output: app
+  - path: ../../UCBootLoader/series1/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_ncp_zniffer_pti_ws_postbuild

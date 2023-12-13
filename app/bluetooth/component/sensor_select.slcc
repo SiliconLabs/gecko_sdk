@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_select
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_select.c
 include:
@@ -17,6 +16,7 @@ include:
 provides:
   - name: sensor_select
 requires:
+  - name: board_control
   - name: i2cspm
   - name: brd4166a_support
     condition:
@@ -25,3 +25,6 @@ define:
   - name: BRD4166A_SUPPORT
     condition:
       - brd4166a
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-select

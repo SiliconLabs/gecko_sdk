@@ -1169,17 +1169,17 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
   sl_gpio_clear_pin_output(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
 
   /* 1-byte Header */
-  sl_eusart_tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
+  sl_hal_eusart_tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
   /* Just ignore data read back */
-  (void)sl_eusart_rx(BSP_SPI_USART_USED);
+  (void)sl_hal_eusart_rx(BSP_SPI_USART_USED);
 
   /* SPI data LSB */
-  sl_eusart_tx(BSP_SPI_USART_USED, data & 0xFF);
-  tmp = (uint16_t) sl_eusart_rx(BSP_SPI_USART_USED);
+  sl_hal_eusart_tx(BSP_SPI_USART_USED, data & 0xFF);
+  tmp = (uint16_t) sl_hal_eusart_rx(BSP_SPI_USART_USED);
 
   /* SPI data MSB */
-  sl_eusart_tx(BSP_SPI_USART_USED, data >> 8);
-  tmp |= (uint16_t) sl_eusart_rx(BSP_SPI_USART_USED) << 8;
+  sl_hal_eusart_tx(BSP_SPI_USART_USED, data >> 8);
+  tmp |= (uint16_t) sl_hal_eusart_rx(BSP_SPI_USART_USED) << 8;
 
   /* Disable CS */
   sl_gpio_set_pin_output(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
@@ -1231,7 +1231,7 @@ static void SpiBcDisable(void)
 {
   /* Restore and disable USART */
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  sl_eusart_reset(BSP_SPI_USART_USED);
+  sl_hal_eusart_reset(BSP_SPI_USART_USED);
 #elif defined(USART_PRESENT)
   USART_Reset(BSP_SPI_USART_USED);
 #elif defined(EUSART_PRESENT)
@@ -1260,7 +1260,7 @@ static void SpiBcDisable(void)
 static void SpiBcInit(void)
 {
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  sl_eusart_spi_config_t bcinit = SL_EUSART_SPI_MASTER_INIT_DEFAULT_HF;
+  sl_hal_eusart_spi_config_t bcinit = SL_HAL_EUSART_SPI_MASTER_INIT_DEFAULT_HF;
 #elif defined(USART_PRESENT)
   USART_InitSync_TypeDef bcinit = USART_INITSYNC_DEFAULT;
 #elif defined(EUSART_PRESENT)
@@ -1300,11 +1300,12 @@ static void SpiBcInit(void)
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  bcinit.clock_div = sl_eusart_spi_calculate_clock_div(ref_freq, 2000000);
-  sl_eusart_init_spi(BSP_SPI_USART_USED, &bcinit);
-  sl_eusart_enable_rx(BSP_SPI_USART_USED);
-  sl_eusart_enable_tx(BSP_SPI_USART_USED);
-  sl_eusart_wait_sync(BSP_SPI_USART_USED, _EUSART_SYNCBUSY_MASK);
+  bcinit.clock_div = sl_hal_eusart_spi_calculate_clock_div(ref_freq, 2000000);
+  sl_hal_eusart_init_spi(BSP_SPI_USART_USED, &bcinit);
+  sl_hal_eusart_enable(BSP_SPI_USART_USED);
+  sl_hal_eusart_enable_rx(BSP_SPI_USART_USED);
+  sl_hal_eusart_enable_tx(BSP_SPI_USART_USED);
+  sl_hal_eusart_wait_sync(BSP_SPI_USART_USED, _EUSART_SYNCBUSY_MASK);
 #elif defined(USART_PRESENT)
   bcinit.baudrate = 7000000;
   /* Initialize USART */
@@ -1364,7 +1365,7 @@ static void SpiControl(BSP_SpiControl_TypeDef device)
 
     case BSP_SPI_OFF:
 #if defined(_SILICON_LABS_32B_SERIES_3)
-      sl_eusart_reset(BSP_SPI_USART_USED);
+      sl_hal_eusart_reset(BSP_SPI_USART_USED);
 #elif defined(USART_PRESENT)
       USART_Reset(BSP_SPI_USART_USED);
 #elif defined(EUSART_PRESENT)

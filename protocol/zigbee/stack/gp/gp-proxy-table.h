@@ -100,10 +100,7 @@ void sli_zigbee_gp_write_incoming_fc_to_token(uint8_t index);
 void sli_zigbee_af_gp_proxy_table_init(void);
 EmberStatus sli_zigbee_af_gp_proxy_table_set_entry(uint8_t proxyIndex,
                                                    EmberGpProxyTableEntry *entry);
-EmberStatus emberGpProxyTableGetEntry(uint8_t proxyIndex,
-                                      EmberGpProxyTableEntry *entry);
 uint8_t sli_zigbee_af_gp_proxy_table_get_free_entry_index(void);
-uint8_t emberGpProxyTableLookup(EmberGpAddress *addr);
 uint8_t sli_zigbee_af_gp_proxy_table_find_or_allocate_entry(EmberGpAddress *addr);
 //void sli_zigbee_af_gp_proxy_table_add_sink(uint8_t index,uint16_t options,EmberEUI64 sinkIeeeAddress,EmberNodeId sinkNwkAddress,uint16_t sinkGroupId,uint32_t gpdSecurityFrameCounter,uint8_t *gpdKey,uint16_t assignedAlias,uint8_t forwardingRadius);
 void sli_zigbee_af_gp_proxy_table_add_sink(uint8_t index,
@@ -122,6 +119,47 @@ void sli_zigbee_af_gp_proxy_table_remove_entry(uint8_t index);
 void sli_zigbee_af_gp_proxy_table_set_key(uint8_t index, uint8_t * gpdKey, EmberGpKeyType securityKeyType);
 void sli_zigbee_af_gp_proxy_table_get_key(uint8_t index, EmberKeyData *key);
 bool sli_zigbee_af_gp_address_match(const EmberGpAddress *a1, const EmberGpAddress *a2);
+
+/** @brief Get Proxy table entry
+ *
+ * This function gets an entry from proxy table at the supplied index.
+ *
+ * @param proxyIndex a valid index to proxy table.
+ * @param entry proxy table entry
+ *
+ * @return An ::EmberStatus as status.
+ */
+EmberStatus emberGpProxyTableGetEntry(uint8_t proxyIndex,
+                                      EmberGpProxyTableEntry *entry);
+
+/** @brief Proxy table look up
+ *
+ * This function looks up a gpd address in the Gp Proxy Table and returns index of the entry.
+ *
+ * @param addr The gpd address ::EmberGpAddress to look up.
+ *
+ * @return a valid index to the entry in proxy table and 0xFF in case of not found.
+ */
+uint8_t emberGpProxyTableLookup(EmberGpAddress *addr);
+
+/** @brief Process Gp Pairing
+ *
+ * This function adds or updates the entry in the proxy table as part of Gp Pairing command processing.
+ * All the input arguments for this API is derived directly from the incoming GP Pairing command
+ *
+ * @param options option field of the Gp Pairing command, this holds the validity of other inputs.
+ * @param addr The gpd address ::EmberGpAddress.
+ * @param commMode Communication mode as supplied in the Gp Pairing command.
+ * @param sinkNwkAddress Network address of the sink.
+ * @param sinkGroupId Group Id of the sink.
+ * @param assignedAlias Assigned alias for the GPD under commissioning.
+ * @param sinkIeeeAddress sink EUI64 address
+ * @param gpdKey GPD key
+ * @param gpdSecurityFrameCounter security frame counter from GPD.
+ * @param forwardingRadius forwarding radius
+ *
+ * @return true on success and false for failure.
+ */
 bool emberGpProxyTableProcessGpPairing(uint32_t options,
                                        EmberGpAddress* addr,
                                        uint8_t commMode,

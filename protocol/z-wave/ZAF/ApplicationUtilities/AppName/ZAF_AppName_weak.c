@@ -20,7 +20,7 @@ ZW_WEAK bool ZAF_AppName_Read(char * app_name)
   return true;
 }
 
-ZW_WEAK bool ZAF_AppName_Write()
+ZW_WEAK bool ZAF_AppName_Write(void)
 {
   return true;
 }

@@ -145,24 +145,23 @@ uint16_t emberAfFillCommandGreenPowerClusterGpNotificationSmart(uint16_t options
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(gpdEndpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdEndpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
-  (void) emberAfPutInt32uInResp(gpdSecurityFrameCounter);
-  (void) emberAfPutInt8uInResp(gpdCommandId);
-  (void) emberAfPutInt8uInResp(gpdCommandPayloadLength);
-  emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength);
-
-  charCount += 2 + 1 + gpdCommandPayloadLength + 1;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSecurityFrameCounter));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandId));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandPayloadLength));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength));
+  charCount += sizeof(uint32_t) + sizeof(uint8_t) + gpdCommandPayloadLength + sizeof(uint8_t);
   if (options & EMBER_AF_GP_NOTIFICATION_OPTION_PROXY_INFO_PRESENT) {
-    (void) emberAfPutInt16uInResp(gppShortAddress);
-    (void) emberAfPutInt8uInResp(gppDistance);
-    charCount += 3;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(gppShortAddress));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gppDistance));
+    charCount += sizeof(uint16_t) + sizeof(uint8_t);
   }
 
   return charCount;
@@ -190,12 +189,12 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingSearchSmart(uint16_t option
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
   return charCount;
@@ -226,19 +225,19 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTunnelingStopSmart(uint8_t options
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
-  (void) emberAfPutInt32uInResp(gpdSecurityFrameCounter);
-  (void) emberAfPutInt16uInResp(gppShortAddress);
-  (void) emberAfPutInt8uInResp(gppDistance);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSecurityFrameCounter));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(gppShortAddress));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gppDistance));
 
-  charCount += 7;
+  charCount += sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint8_t);
 
   return charCount;
 }
@@ -275,12 +274,12 @@ uint16_t emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(uin
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
   if (gpdfSecurityLevel == 0 ) {
@@ -288,20 +287,20 @@ uint16_t emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(uin
   } else {
     securityFrameCounter = gpdSecurityFrameCounter;
   }
-  (void) emberAfPutInt32uInResp(securityFrameCounter);
-  (void) emberAfPutInt8uInResp(gpdCommandId);
-  (void) emberAfPutInt8uInResp(gpdCommandPayloadLength);
-  emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength);
-  charCount += 3 + gpdCommandPayloadLength + 1;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(securityFrameCounter));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandId));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandPayloadLength));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength));
+  charCount += sizeof(uint32_t) + sizeof(uint8_t) + gpdCommandPayloadLength + sizeof(uint8_t);
   if (options & EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_PROXY_INFO_PRESENT) {
-    (void) emberAfPutInt16uInResp(gppShortAddress);
-    (void) emberAfPutInt8uInResp(gppLink);
-    charCount += 3;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(gppShortAddress));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gppLink));
+    charCount += sizeof(uint16_t) + sizeof(uint8_t);
   }
 
   if (options & EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_SECURITY_PROCESSING_FAILED) {
-    (void) emberAfPutInt32uInResp(mic);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(mic));
+    charCount += sizeof(uint32_t);
   }
 
   return charCount;
@@ -333,27 +332,27 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTranslationTableUpdateSmart(uint16
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
-  (void) emberAfPutInt8uInResp(translations->index);
-  charCount += 1;
-  (void) emberAfPutInt8uInResp(translations->gpdCommandId);
-  charCount += 1;
-  (void) emberAfPutInt8uInResp(translations->endpoint);
-  charCount += 1;
-  (void) emberAfPutInt16uInResp(translations->profile);
-  charCount += 2;
-  (void) emberAfPutInt16uInResp(translations->cluster);
-  charCount += 2;
-  (void) emberAfPutInt8uInResp(translations->zigbeeCommandId);
-  charCount += 1;
-  (void) emberAfPutStringInResp(translations->zigbeeCommandPayload);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(translations->index));
+  charCount += sizeof(uint8_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(translations->gpdCommandId));
+  charCount += sizeof(uint8_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(translations->endpoint));
+  charCount += sizeof(uint8_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(translations->profile));
+  charCount += sizeof(uint16_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(translations->cluster));
+  charCount += sizeof(uint16_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(translations->zigbeeCommandId));
+  charCount += sizeof(uint8_t);
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutStringInResp(translations->zigbeeCommandPayload));
   charCount += emberAfStringLength(translations->zigbeeCommandPayload) + 1;
   if (emberAfGreenPowerTTUpdateGetAdditionalInfoBlockPresent(options) != 0
       && additionalInfoBlock) {
@@ -361,9 +360,9 @@ uint16_t emberAfFillCommandGreenPowerClusterGpTranslationTableUpdateSmart(uint16
     uint16_t length = sli_zigbee_af_copy_additional_info_block_structure_to_array(translations->gpdCommandId,
                                                                                   additionalInfoBlock,
                                                                                   tempBuffer);
-    (void) emberAfPutInt8uInResp(length);
-    charCount += 1;
-    emberAfPutBlockInResp(tempBuffer, length);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(length));
+    charCount += sizeof(uint8_t);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(tempBuffer, length));
     charCount += length;
   }
   return charCount;
@@ -417,79 +416,79 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(uint8_t 
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
-  (void) emberAfPutInt8uInResp(deviceId);
-  emberAfPutBlockInResp(groupList, groupListCount);
-  charCount += 1 + groupListCount;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(deviceId));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(groupList, groupListCount));
+  charCount += sizeof(uint8_t) + groupListCount;
 
   if (options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_ASSIGNED_ALIAS) {
-    (void) emberAfPutInt16uInResp(gpdAssignedAlias);
-    charCount += 2;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(gpdAssignedAlias));
+    charCount += sizeof(uint16_t);
   }
 
-  (void) emberAfPutInt8uInResp(groupcastRadius);
-  charCount += 1;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(groupcastRadius));
+  charCount += sizeof(uint8_t);
 
   if (options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_SECURITY_USE) {
-    (void) emberAfPutInt8uInResp(securityOptions);
-    (void) emberAfPutInt32uInResp(gpdSecurityFrameCounter);
-    emberAfPutBlockInResp(gpdSecurityKey, EMBER_ENCRYPTION_KEY_SIZE);
-    charCount += 3 + EMBER_ENCRYPTION_KEY_SIZE;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(securityOptions));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSecurityFrameCounter));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdSecurityKey, EMBER_ENCRYPTION_KEY_SIZE));
+    charCount += sizeof(uint32_t) + sizeof(uint8_t) + EMBER_ENCRYPTION_KEY_SIZE;
   }
 
-  (void) emberAfPutInt8uInResp(numberOfPairedEndpoints);
-  charCount += 1;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(numberOfPairedEndpoints));
+  charCount += sizeof(uint8_t);
   if (numberOfPairedEndpoints < EMBER_AF_GP_TRANSLATION_TABLE_ZB_ENDPOINT_PASS_FRAME_TO_APLLICATION) {
-    emberAfPutBlockInResp(pairedEndpoints, numberOfPairedEndpoints);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(pairedEndpoints, numberOfPairedEndpoints));
     charCount += numberOfPairedEndpoints;
   }
 
   if (options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_INFORMATION_PRESENT) {
-    (void) emberAfPutInt8uInResp(applicationInformation);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(applicationInformation));
     if (applicationInformation & EMBER_AF_GP_APPLICATION_INFORMATION_MANUFACTURE_ID_PRESENT) {
-      (void) emberAfPutInt16uInResp(manufacturerId);
-      charCount += 2;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(manufacturerId));
+      charCount += sizeof(uint16_t);
     }
 
     if (applicationInformation & EMBER_AF_GP_APPLICATION_INFORMATION_MODEL_ID_PRESENT) {
-      (void) emberAfPutInt16uInResp(modeId);
-      charCount += 2;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(modeId));
+      charCount += sizeof(uint16_t);
     }
 
     if (applicationInformation & EMBER_AF_GP_APPLICATION_INFORMATION_GPD_COMMANDS_PRESENT) {
-      (void) emberAfPutInt8uInResp(numberOfGpdCommands);
-      emberAfPutBlockInResp(gpdCommandIdList, numberOfGpdCommands);
-      charCount += 1 + numberOfGpdCommands;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(numberOfGpdCommands));
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdCommandIdList, numberOfGpdCommands));
+      charCount += sizeof(uint8_t) + numberOfGpdCommands;
     }
 
     if (applicationInformation & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_PRESENT) {
-      (void) emberAfPutInt8uInResp(clusterIdListCount);
-      emberAfPutBlockInResp((uint8_t*)clusterListServer, sizeof(EmberAfClusterId) * (clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_SERVER_CLUSTER_MASK));
-      emberAfPutBlockInResp((uint8_t*)clusterListClient, sizeof(EmberAfClusterId) * ((clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK) >> EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK_OFFSET));
-      charCount += 1
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(clusterIdListCount));
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp((uint8_t*)clusterListServer, sizeof(EmberAfClusterId) * (clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_SERVER_CLUSTER_MASK)));
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp((uint8_t*)clusterListClient, sizeof(EmberAfClusterId) * ((clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK) >> EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK_OFFSET)));
+      charCount += sizeof(uint8_t)
                    + sizeof(EmberAfClusterId) * (clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_SERVER_CLUSTER_MASK)
                    + sizeof(EmberAfClusterId) * ((clusterIdListCount & EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK) >> EMBER_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_NUMBER_OF_CLIENT_CLUSTER_MASK_OFFSET);
     }
   }
   if (applicationInformation & EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT) { // Switch Information Present
-    (void) emberAfPutInt8uInResp(switchInformationLength);
-    charCount += 1;
-    (void) emberAfPutInt8uInResp(genericSwitchConfiguration);
-    charCount += 1;
-    (void) emberAfPutInt8uInResp(currentContactStatus);
-    charCount += 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(switchInformationLength));
+    charCount += sizeof(uint8_t);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(genericSwitchConfiguration));
+    charCount += sizeof(uint8_t);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(currentContactStatus));
+    charCount += sizeof(uint8_t);
   }
   // Application description should add the reports
   if (actions == EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_APPLICATION_DESCRIPTION) {
-    (void) emberAfPutInt8uInResp(totalNumberOfReports);
-    (void) emberAfPutInt8uInResp(numberOfReports);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(totalNumberOfReports));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(numberOfReports));
     uint8_t nextOffset = 0;
     for (uint8_t index = 0; index < numberOfReports; index++) {
       uint8_t * descPtr;  // pointing to each report descriptor
@@ -508,7 +507,7 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(uint8_t 
       nextOffset += descLength;
     }
     // ptr to block and bytes to copy
-    emberAfPutBlockInResp(reportDescriptorM, nextOffset);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(reportDescriptorM, nextOffset));
     charCount += nextOffset;
   }
   return charCount;
@@ -540,18 +539,18 @@ uint16_t emberAfFillCommandGreenPowerClusterGpSinkTableRequestSmart(uint8_t opti
   if ( ((options & EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
         >> EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET) == EMBER_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_GPD_ID) {
     if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-      (void) emberAfPutInt32uInResp(gpdSrcId);
-      charCount += 4;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+      charCount += sizeof(uint32_t);
     } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-      emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-      (void) emberAfPutInt8uInResp(index);
-      charCount += EUI64_SIZE + 1;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(index));
+      charCount += EUI64_SIZE + sizeof(uint8_t);
     }
   }
   if ( ((options & EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
         >> EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET) == EMBER_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_INDEX) {
-    (void) emberAfPutInt8uInResp(index);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(index));
+    charCount += sizeof(uint8_t);
   }
 
   return charCount;
@@ -580,15 +579,15 @@ uint32_t emberAfFillCommandGreenPowerClusterGpNotificationResponseSmart(uint8_t 
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
-  (void) emberAfPutInt32uInResp(gpdSecurityFrameCounter);
-  charCount += 4;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSecurityFrameCounter));
+  charCount += sizeof(uint32_t);
 
   return charCount;
 }
@@ -625,44 +624,44 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingSmart(uint32_t options,
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
   if ((options & EMBER_AF_GP_PAIRING_OPTION_REMOVE_GPD) == 0x00) {
     if ((commMode == 0x00) || (commMode == 0x03)) {
-      emberAfPutBlockInResp(sinkIeeeAddress, EUI64_SIZE);
-      (void) emberAfPutInt16uInResp(sinkNwkAddress);
-      charCount += EUI64_SIZE + 2;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(sinkIeeeAddress, EUI64_SIZE));
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(sinkNwkAddress));
+      charCount += EUI64_SIZE + sizeof(uint16_t);
     } else if (commMode == 0x01 || commMode == 0x02) {
-      (void) emberAfPutInt16uInResp(sinkGroupId);
-      charCount += 2;
+      emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(sinkGroupId));
+      charCount += sizeof(uint16_t);
     }
   }
 
   if (emberAfGreenPowerPairingOptionsGetAddSink(options)) {
-    (void) emberAfPutInt8uInResp(deviceId);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(deviceId));
+    charCount += sizeof(uint8_t);
   }
   if (options & EMBER_AF_GP_PAIRING_OPTION_GPD_SECURITY_FRAME_COUNTER_PRESENT) {
-    (void) emberAfPutInt32uInResp(gpdSecurityFrameCounter);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSecurityFrameCounter));
+    charCount += sizeof(uint32_t);
   }
   if (options & EMBER_AF_GP_PAIRING_OPTION_GPD_SECURITY_KEY_PRESENT) {
-    emberAfPutBlockInResp(gpdKey, EMBER_ENCRYPTION_KEY_SIZE);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdKey, EMBER_ENCRYPTION_KEY_SIZE));
     charCount += EMBER_ENCRYPTION_KEY_SIZE;
   }
   if (options & EMBER_AF_GP_PAIRING_OPTION_ASSIGNED_ALIAS_PRESENT) {
-    (void) emberAfPutInt16uInResp(assignedAlias);
-    charCount += 2;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(assignedAlias));
+    charCount += sizeof(uint16_t);
   }
   if (options & EMBER_AF_GP_PAIRING_OPTION_GROUPCAST_RADIUS_PRESENT) {
-    (void) emberAfPutInt8uInResp(groupcastRadius);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(groupcastRadius));
+    charCount += sizeof(uint8_t);
   }
 
   return charCount;
@@ -687,13 +686,13 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(uint8_
                                          options);
 
   if (options & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_EXIT_MODE_ON_COMMISSIONING_WINDOW_EXPIRATION) {
-    (void) emberAfPutInt16uInResp(commissioningWindow);
-    charCount += 2;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(commissioningWindow));
+    charCount += sizeof(uint16_t);
   }
 
   if (options & EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_CHANNEL_PRESENT) {
-    (void) emberAfPutInt8uInResp(channel);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(channel));
+    charCount += sizeof(uint8_t);
   }
 
   return charCount;
@@ -727,19 +726,19 @@ uint16_t emberAfFillCommandGreenPowerClusterGpResponseSmart(uint8_t  options,
                                          tempMasterTxChannel);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
     charCount += EUI64_SIZE;
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += sizeof(uint8_t);
   }
 
-  (void) emberAfPutInt8uInResp(gpdCommandId);
-  (void) emberAfPutInt8uInResp(gpdCommandPayloadLength);
-  emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength);
-  charCount += gpdCommandPayloadLength + 1;
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandId));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(gpdCommandPayloadLength));
+  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdCommandPayload, gpdCommandPayloadLength));
+  charCount += sizeof(uint8_t) + gpdCommandPayloadLength + sizeof(uint8_t);
 
   return charCount;
 }
@@ -767,17 +766,17 @@ uint16_t emberAfFillCommandGreenPowerClusterGpProxyTableRequestSmart(uint8_t opt
                                          options);
 
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
-    (void) emberAfPutInt32uInResp(gpdSrcId);
-    charCount += 4;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt32uInResp(gpdSrcId));
+    charCount += sizeof(uint32_t);
   } else if (appId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
-    emberAfPutBlockInResp(gpdIeee, EUI64_SIZE);
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount += EUI64_SIZE + 1;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(gpdIeee, EUI64_SIZE));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += EUI64_SIZE + sizeof(uint8_t);
   }
 
   if (requestType == 0x01) {
-    (void) emberAfPutInt8uInResp(endpoint);
-    charCount++;
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(endpoint));
+    charCount += sizeof(uint8_t);
   }
 
   return charCount;
@@ -804,10 +803,10 @@ bool emberAfGreenPowerCommonGpAddrCompare(const EmberGpAddress * a1,
              && a2->applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
     if (!MEMCOMPARE(a1->id.gpdIeeeAddress, a2->id.gpdIeeeAddress, EUI64_SIZE)) {
       if (a1->endpoint == a2->endpoint
-          || a1->endpoint == 0xff
-          || a2->endpoint == 0xff
-          || a1->endpoint == 0x00
-          || a2->endpoint == 0x00) {
+          || a1->endpoint == GREEN_POWER_SERVER_ALL_SINK_ENDPOINTS
+          || a2->endpoint == GREEN_POWER_SERVER_ALL_SINK_ENDPOINTS
+          || a1->endpoint == GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS
+          || a2->endpoint == GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS) {
         return true;
       }
     }
@@ -822,9 +821,12 @@ bool sli_zigbee_af_gp_make_addr(EmberGpAddress *addr,
                                 uint8_t *gpdIeee,
                                 uint8_t endpoint)
 {
-  if (addr == NULL) {
+  if (addr == NULL
+      || ((endpoint > GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT)
+          && (endpoint < GREEN_POWER_SERVER_RAW_GPD_PROCESS_IN_APP_ENDPOINTS))) {
     return false;
   }
+
   if (appId == EMBER_GP_APPLICATION_SOURCE_ID) {
     if (IS_RESERVED_GPD_SRC_ID(srcId)) {
       return false;

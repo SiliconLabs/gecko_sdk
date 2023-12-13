@@ -3,7 +3,6 @@ label: Zigbee Direct Security P256
 package: Zigbee
 category: Zigbee|Zigbee Direct ZDD
 quality: production
-
 description: Zigbee Direct Security using P256
 
 config_file:

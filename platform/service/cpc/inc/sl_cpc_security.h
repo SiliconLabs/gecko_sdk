@@ -46,12 +46,12 @@
 #define SL_CPC_SECURITY_STATE_BOUND_MASK  (1 << 1)
 
 // Binding types
-#define  SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC    0x03
-#define  SL_CPC_SECURITY_BINDING_KEY_ECDH                 0x02
-#define  SL_CPC_SECURITY_BINDING_KEY_PLAINTEXT_SHARE      0x01
-#define  SL_CPC_SECURITY_BINDING_KEY_NONE                 0x00
+#define  SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC    0x03 ///< Security binding key customer specific.
+#define  SL_CPC_SECURITY_BINDING_KEY_ECDH                 0x02 ///< Security binding key ECDH.
+#define  SL_CPC_SECURITY_BINDING_KEY_PLAINTEXT_SHARE      0x01 ///< Security binding key plaintex share.
+#define  SL_CPC_SECURITY_BINDING_KEY_NONE                 0x00 ///< Security binding key none.
 
-#define SL_CPC_SECURITY_OK_TO_UNBIND 0xAAAAAAAAAAAAAAAA
+#define SL_CPC_SECURITY_OK_TO_UNBIND 0xAAAAAAAAAAAAAAAA        ///< Security ok to unbind.
 
 /***************************************************************************/ /**
  * @addtogroup cpc-security CPC-Security
@@ -77,7 +77,7 @@ SL_ENUM_GENERIC(sl_cpc_security_state_t, uint8_t)
  ******************************************************************************/
 typedef void (*sl_cpc_unbind_notification_t)(void *data);
 
-/// @brief Enumeration representing unbind notification handle.
+/** @brief Enumeration representing unbind notification handle. */
 typedef struct {
   sl_cpc_unbind_notification_t fnct;      ///< Notification Callback
   sl_slist_node_t node;                   ///< Single list node
@@ -103,7 +103,7 @@ sl_cpc_security_state_t sl_cpc_security_get_state(void);
  * SL_CPC_SECURITY_BINDING_KEY_CUSTOMER_SPECIFIC
  *
  * @param[out] key               The encryption key
- * @param[out] key_size          The encryption key size
+ * @param[out] key_size_in_bytes The encryption key size
  *                               Note: Only 16 bytes keys are supported for the moment
  ******************************************************************************/
 void sl_cpc_security_fetch_user_specified_binding_key(uint8_t **key, uint16_t *key_size_in_bytes);
@@ -112,9 +112,11 @@ void sl_cpc_security_fetch_user_specified_binding_key(uint8_t **key, uint16_t *k
  * Authorize an unbind request.
  *
  * @note Declared as a weak symbol. If no strong definition is given by the user,
- *       unbind requests are always denied. If the user gives a definition
+ *       unbind requests are always denied. If the user gives sl_cpc_security_fetch_user_specified_binding_key definition
  *       for this function, its return value will dictate if unbind requests
  *       are accepted.
+ *
+ * @param is_link_encrypted
  *
  * @return Whether to allow unbind or not, use SL_CPC_SECURITY_OK_TO_UNBIND as a return value
  *         to allow. Return anything else to deny.

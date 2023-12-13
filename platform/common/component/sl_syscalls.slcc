@@ -1,0 +1,15 @@
+id: sl_syscalls
+package: platform
+label: "SystemCall Functions"
+description: Component that provides system calls stub functions.
+category: Platform|Utilities
+quality: production
+ui_hints:
+  visibility: never
+root_path: platform/common
+source:
+  - path: src/sl_syscalls.c
+provides:
+  - name: sl_syscalls
+requires:
+  - name: cmsis_core

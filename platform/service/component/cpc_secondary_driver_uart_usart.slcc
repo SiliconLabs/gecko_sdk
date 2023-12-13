@@ -8,14 +8,14 @@ instantiable:
   prefix: inst
 root_path: platform/service/cpc
 config_file:
-  - path: config/s1/sl_cpc_drv_secondary_uart_usart_{{instance}}_config.h
-    file_id: cpc_drv_secondary_uart_usart_config
+  - path: config/s1/sl_cpc_drv_uart_usart_{{instance}}_config.h
+    file_id: cpc_drv_uart_usart_config
     condition: [device_series_1]
-  - path: config/s2/sl_cpc_drv_secondary_uart_usart_{{instance}}_config.h
-    file_id: cpc_drv_secondary_uart_usart_config
+  - path: config/s2/sl_cpc_drv_uart_usart_{{instance}}_config.h
+    file_id: cpc_drv_uart_usart_config
     condition: [device_series_2]
 source:
-  - path: src/sl_cpc_drv_secondary_uart.c
+  - path: src/sl_cpc_drv_uart.c
 provides:
   - name: cpc_driver
   - name: cpc_secondary_driver_uart_usart_interface
@@ -34,9 +34,9 @@ requires:
   - name: emlib_usart
   - name: slist
 template_file:
-  - path: template/s1/sl_cpc_drv_secondary_uart_config.h.jinja
+  - path: template/s1/sl_cpc_drv_uart_config.h.jinja
     condition: [device_series_1]
-  - path: template/s2/sl_cpc_drv_secondary_uart_config.h.jinja
+  - path: template/s2/sl_cpc_drv_uart_config.h.jinja
     condition: [device_series_2]
 template_contribution:
   - name: cpc_instance_name
@@ -45,3 +45,5 @@ template_contribution:
     value: uart
   - name: cpc_periph_type
     value: usart
+  - name: component_catalog
+    value: cpc_driver_uart

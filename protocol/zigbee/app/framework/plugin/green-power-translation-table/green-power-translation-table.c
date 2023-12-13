@@ -1032,6 +1032,8 @@ uint16_t sli_zigbee_af_gp_copy_additional_info_block_array_to_structure(uint8_t 
         totalLengthOfAddInfoBlockCnt -= 1;
         //additionalInfoBlockOut->optionRecord[recordIndex].optionData.compactAttr.manufacturerIdPresent  = ( (attributeoptions >> 1) & 0x01);
         //additionalInfoBlockOut->optionRecord[recordIndex].optionData.compactAttr.clientServer = (attributeoptions & 0x01);
+        // Until the above is uncommented out, void cast recordIndex to avoid an unused variable warning
+        (void)recordIndex;
         additionalInfoBlockOut->optionData.compactAttr.attributeOptions  = attributeoptions;
         if ( additionalInfoBlockOut->optionData.compactAttr.attributeOptions & 0x02 ) {
           additionalInfoBlockOut->optionData.compactAttr.manufacturerID = emberAfGetInt16u(additionalInfoBlockInPtr, 0, totalLengthOfAddInfoBlockCnt);

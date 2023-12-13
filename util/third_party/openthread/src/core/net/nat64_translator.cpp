@@ -99,7 +99,7 @@ Error Translator::SendMessage(Message &aMessage)
 
     VerifyOrExit(result == kForward);
 
-    error = Get<Ip6::Ip6>().SendRaw(aMessage, !OPENTHREAD_CONFIG_IP6_ALLOW_LOOP_BACK_HOST_DATAGRAMS);
+    error = Get<Ip6::Ip6>().SendRaw(OwnedPtr<Message>(&aMessage).PassOwnership());
     freed = true;
 
 exit:
@@ -504,9 +504,9 @@ Error Translator::SetIp4Cidr(const Ip4::Cidr &aCidr)
         IgnoreError(mIp4AddressPool.PushBack(addr));
     }
 
-    LogInfo("IPv4 CIDR for NAT64: %s (actual address pool: %s - %s, %u addresses)", aCidr.ToString().AsCString(),
+    LogInfo("IPv4 CIDR for NAT64: %s (actual address pool: %s - %s, %lu addresses)", aCidr.ToString().AsCString(),
             mIp4AddressPool.Front()->ToString().AsCString(), mIp4AddressPool.Back()->ToString().AsCString(),
-            numberOfHosts);
+            ToUlong(numberOfHosts));
     mIp4Cidr = aCidr;
 
     // Always notify the platform when the CIDR is changed.

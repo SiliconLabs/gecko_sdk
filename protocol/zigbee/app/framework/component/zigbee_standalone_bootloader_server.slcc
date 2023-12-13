@@ -1,27 +1,21 @@
 package: Zigbee
-description: This component implements the legacy Ember over-the-air, 1-hop, bootload protocol. This
-  can bootload a target node that has a standalone bootloader client running on it. It
-  first scans for neighboring devices supporting the protocol. Once a client target
-  has been identified, it sends the request to bootload, answers the challenge using
-  the configured encryption key, and then transfers a new EBL file via Xmodem using
-  802.15.4 MAC data frames. It utilizes the OTA Storage code to retrieve the EBL
-  file for sending to the target node. This is not a Zigbee-certifiable protocol.
+description: This component implements the legacy Ember over-the-air, 1-hop, bootload protocol. This can bootload a target node that has a standalone bootloader client running on it. It first scans for neighboring devices supporting the protocol. Once a client target has been identified, it sends the request to bootload, answers the challenge using the configured encryption key, and then transfers a new EBL file via Xmodem using 802.15.4 MAC data frames. It utilizes the OTA Storage code to retrieve the EBL file for sending to the target node. This is not a Zigbee-certifiable protocol.
 label: Standalone Bootloader Server
 quality: production
 id: zigbee_standalone_bootloader_server
-category: Zigbee|Utility|Standalone Bootloader
+category: Zigbee|Bootloader
 provides:
-   - name: "zigbee_standalone_bootloader_server"
+  - name: zigbee_standalone_bootloader_server
 requires:
-   - name: "zigbee_standalone_bootloader_common"
-   - name: "zigbee_xmodem_sender"
+  - name: zigbee_standalone_bootloader_common
+  - name: zigbee_xmodem_sender
 config_file:
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-server/config/standalone-bootloader-server-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-server/standalone-bootloader-server.c
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-server/standalone-bootloader-server-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-server/standalone-bootloader-server-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-server
@@ -33,11 +27,11 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: emberAfPluginStandaloneBootloaderServerInitCallback   
+      function_name: emberAfPluginStandaloneBootloaderServerInitCallback
   - name: zigbee_af_callback
     value:
       callback_type: local_data_init
-      function_name: emberAfPluginStandaloneBootloaderServerInitCallback   
+      function_name: emberAfPluginStandaloneBootloaderServerInitCallback
   - name: cli_group
     value:
       group: plugin
@@ -73,10 +67,10 @@ template_contribution:
       handler: sendLaunchRequestToTarget
       help: Starts the process for bootloading a device using the currently cached target info.
       argument:
-      - type: uint8
-        help: The index of the image being sent to the target
-      - type: uint8
-        help: The tag ID within the image, which will be sent to the target
+        - type: uint8
+          help: The index of the image being sent to the target
+        - type: uint8
+          help: The tag ID within the image, which will be sent to the target
   - name: cli_command
     value:
       group: bootload
@@ -84,12 +78,12 @@ template_contribution:
       handler: sendLaunchRequestToEui
       help: Starts the process for bootloading a device using the passed EUI64.
       argument:
-      - type: hex
-        help: The EUI64 of the target of the bootload
-      - type: uint8
-        help: The index of the image being sent to the target
-      - type: uint8
-        help: The tag ID within the image, which will be sent to the target
+        - type: hex
+          help: The EUI64 of the target of the bootload
+        - type: uint8
+          help: The index of the image being sent to the target
+        - type: uint8
+          help: The tag ID within the image, which will be sent to the target
 documentation:
   docset: zigbee
   document: zigbee-af-api/standalone-bootloader-server

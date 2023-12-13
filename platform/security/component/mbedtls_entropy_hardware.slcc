@@ -55,11 +55,7 @@ provides:
     condition: [rail_lib]
 requires:
   - name: device
-    condition: [device_series_0]
-  - name: device
-    condition: [device_series_1]
-  - name: device
-    condition: [device_series_2]
+    condition: [device_efx]
   # Include TRNG driver for all devices with a functional TRNG
   - name: psa_crypto_trng
     condition: [device_series_2]
@@ -73,6 +69,8 @@ requires:
     condition: [device_sdid_103]
   - name: psa_crypto_trng
     condition: [device_sdid_106]
+  - name: psa_crypto_trng
+    condition: [device_si91x]
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ENTROPY_HARDWARE_ALT

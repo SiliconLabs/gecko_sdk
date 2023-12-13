@@ -34,11 +34,11 @@
 #include "data_poll_sender.hpp"
 
 #include "common/code_utils.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/message.hpp"
 #include "common/num_utils.hpp"
+#include "instance/instance.hpp"
 #include "net/ip6.hpp"
 #include "net/netif.hpp"
 #include "thread/mesh_forwarder.hpp"
@@ -504,9 +504,9 @@ uint32_t DataPollSender::CalculatePollPeriod(void) const
         period = Min(period, kRetxPollPeriod);
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-        if (Get<Mac::Mac>().GetCslPeriodMs() > 0)
+        if (Get<Mac::Mac>().GetCslPeriodInMsec() > 0)
         {
-            period = Min(period, Get<Mac::Mac>().GetCslPeriodMs());
+            period = Min(period, Get<Mac::Mac>().GetCslPeriodInMsec());
         }
 #endif
     }
@@ -577,8 +577,7 @@ Mac::TxFrame *DataPollSender::PrepareDataRequest(Mac::TxFrames &aTxFrames)
         addresses.mSource.SetShort(Get<Mac::Mac>().GetShortAddress());
     }
 
-    panIds.mSource      = Get<Mac::Mac>().GetPanId();
-    panIds.mDestination = Get<Mac::Mac>().GetPanId();
+    panIds.SetBothSourceDestination(Get<Mac::Mac>().GetPanId());
 
     Get<MeshForwarder>().PrepareMacHeaders(*frame, Mac::Frame::kTypeMacCmd, addresses, panIds,
                                            Mac::Frame::kSecurityEncMic32, Mac::Frame::kKeyIdMode1, nullptr);

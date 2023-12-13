@@ -1467,7 +1467,7 @@ static psa_status_t sli_ccm_starts(sli_crypto_transparent_aead_operation_t *oper
                               : cryptoKey256Bits);
 
   // Clear tag register (DATA2)
-  for (uint32_t i = 0; i < 4; ++i) {
+  for (i = 0; i < 4; ++i) {
     crypto->DATA2 = 0;
   }
 

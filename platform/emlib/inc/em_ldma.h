@@ -1081,8 +1081,18 @@ typedef struct {
 
 /** @brief Size in words of a non-extended DMA descriptor. */
 #define LDMA_DESCRIPTOR_NON_EXTEND_SIZE_WORD  4
+
 /** @brief Size in words of an extended DMA descriptor. */
 #define LDMA_DESCRIPTOR_EXTEND_SIZE_WORD      7
+
+/** @brief Maximum transfer size possible per descriptor. */
+#define LDMA_DESCRIPTOR_MAX_XFER_SIZE (((_LDMA_CH_CTRL_XFERCNT_MASK >> _LDMA_CH_CTRL_XFERCNT_SHIFT) + 1))
+
+/** @brief Converts a LDMA_Descriptor_t pointer to the value suitable to write to the linkAddr field of a LDMA_Descriptor_t. */
+#define LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(addr) (int32_t) ((((uintptr_t)addr) & _LDMA_CH_LINK_LINKADDR_MASK) >> _LDMA_CH_LINK_LINKADDR_SHIFT)
+
+/** @brief Converts a LDMA_Descriptor_t linkAddr field value back to a LDMA_Descriptor_t pointer. */
+#define LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(linkAddr) (LDMA_Descriptor_t *) (linkAddr << _LDMA_CH_LINK_LINKADDR_SHIFT)
 
 /*******************************************************************************
  **************************   STRUCT INITIALIZERS   ****************************
@@ -1405,10 +1415,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of words to transfer.
@@ -1450,10 +1461,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of words to transfer.
@@ -1496,10 +1508,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of half-words to transfer.
@@ -1541,10 +1554,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of half-words to transfer.
@@ -1587,10 +1601,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of bytes to transfer.
@@ -1632,10 +1647,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR macro should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] src       Source data address.
  * @param[in] dest      Destination data address.
  * @param[in] count     Number of bytes to transfer.
@@ -2415,10 +2431,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] value     Immediate value to write.
  * @param[in] address   Write address.
  */
@@ -2530,10 +2547,11 @@ typedef struct {
  *   The linkAddr member of the transfer descriptor is not initialized.
  *   linkAddr must be initialized by using the proper bits right-shift
  *   to get the correct bits from the absolute address.
- *   _LDMA_CH_LINK_LINKADDR_SHIFT should be used for that operation:
+ *   LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR should be used for that operation:
  * @code
-     desc.linkAddr = ((int32_t)&next_desc) >> _LDMA_CH_LINK_LINKADDR_SHIFT;@endcode
- *   The opposite bit shift (left) must be done if linkAddr is read.
+     desc.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&next_desc);@endcode
+ *   The opposite bit shift (left) must be done with LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR
+ *   if linkAddr is read.
  * @param[in] set          Sync pattern bits to set.
  * @param[in] clr          Sync pattern bits to clear.
  * @param[in] matchValue   Sync pattern to match.
@@ -2653,7 +2671,7 @@ __STATIC_INLINE void LDMA_Reset(void)
   LDMA->SWRST_SET = LDMA_SWRST_SWRST;
 
   /* Wait for reset to complete. */
-  while ((LDMA->SWRST & _LDMA_SWRST_RESETTING_MASK)) {
+  while (0UL != (LDMA->SWRST & _LDMA_SWRST_RESETTING_MASK)) {
   }
 }
 #endif
@@ -2675,11 +2693,11 @@ __STATIC_INLINE bool LDMA_ChannelEnabled(int ch)
     return false;
   }
 #if defined(_LDMA_CHSTATUS_MASK)
-  return LDMA->CHSTATUS & (1 << ch);
+  return (0UL != (LDMA->CHSTATUS & (1UL << (uint8_t)ch)));
 #else
   // We've already confirmed ch is between 0 and 31,
   // so it's now safe to cast it to uint8_t
-  return LDMA->CHEN & (1 << (uint8_t)ch);
+  return (0UL != (LDMA->CHEN & (1 << (uint8_t)ch)));
 #endif
 }
 

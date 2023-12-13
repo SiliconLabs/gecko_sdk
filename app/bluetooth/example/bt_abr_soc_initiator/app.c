@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,17 +34,25 @@
 
 #include "abr_initiator.h"
 #include "initiator_config.h"
+#include "abr_initiator_component_config.h"
 #include "abr_ui.h"
 #include "abr_ui_types.h"
 #include "sl_component_catalog.h"
 #include "sl_simple_button.h"
 #include "sl_simple_button_instances.h"
+#include "sl_rail_util_hadm_antenna_offset_config.h"
 
 #define PB0               SL_SIMPLE_BUTTON_INSTANCE(0)
 
 static void abr_on_result(abr_rtl_result_t *result, void *user_data);
 
 static abr_initiator_config_t initiator_config;
+// This number comes from the matching network group delay + pcb trace delay +
+// antenna delay.
+// The offset is interpreted in cm (centimeters)
+static int16_t *ant_offset_cm;
+static int16_t ant_offset_cm_wireless[SL_RAIL_UTIL_HADM_ANTENNA_COUNT] = SL_RAIL_UTIL_HADM_ANTENNA_OFFSET_WIRELESS_CM;
+static int16_t ant_offset_cm_wired[SL_RAIL_UTIL_HADM_ANTENNA_COUNT] = SL_RAIL_UTIL_HADM_ANTENNA_OFFSET_WIRED_CM;
 
 /**************************************************************************//**
  * Application Init.
@@ -59,9 +67,33 @@ SL_WEAK void app_init(void)
   uint8_t mode = ABR_INITIATOR_MODE_PBR; // PBR, the default mode
   sl_button_state_t button_pressed = SL_SIMPLE_BUTTON_RELEASED;
 
+  if (!ABR_INITIATOR_ANTENNA_OFFSET) {
+    ant_offset_cm = ant_offset_cm_wireless;
+    app_log_info("Wireless antenna offset will be used." APP_LOG_NL);
+  } else {
+    ant_offset_cm = ant_offset_cm_wired;
+    app_log_info("Wired antenna offset will be used." APP_LOG_NL);
+  }
+
+  app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
+  app_log_filter_threshold_enable(true);
+  app_log_info(APP_LOG_NL);
+  app_log_info("Silicon Labs ABR Initiator" APP_LOG_NL);
+  app_log_info("--------------------------" APP_LOG_NL);
+
+  app_log_info("Minimum CS procedure interval: %u" APP_LOG_NL, ABR_INITIATOR_MIN_CS_INTERVAL);
+  app_log_info("Maximum CS procedure interval: %u"  APP_LOG_NL, ABR_INITIATOR_MAX_CS_INTERVAL);
+
   // Default parameters
   abr_initiator_config_set_default(&initiator_config);
   abr_ui_init();
+
+  // Log channel map
+  app_log_info("CS channel map:" APP_LOG_NL "    ");
+  for (uint32_t i = 0; i < initiator_config.channel_map_len; i++) {
+    app_log_append_info("0x%02x ", initiator_config.channel_map.data[i]);
+  }
+  app_log_append_info(APP_LOG_NL);
 
   // Configured parameters
   initiator_config.rssi_measurement_enabled = ABR_RSSI_MEASUREMENT_ENABLED;
@@ -81,12 +113,10 @@ SL_WEAK void app_init(void)
   switch (mode) {
     case ABR_INITIATOR_MODE_RTT: // RTT
       initiator_config.mode = sl_bt_cs_mode_rtt;
-      initiator_config.submode = 0xff;
       abr_ui_write_text("RTT mode", ROW_MODE);
       break;
     case ABR_INITIATOR_MODE_PBR: // PBR
       initiator_config.mode = sl_bt_cs_mode_pbr;
-      initiator_config.submode = sl_bt_cs_mode_rtt;
       abr_ui_write_text("PBR mode", ROW_MODE);
       break;
     default:
@@ -96,15 +126,16 @@ SL_WEAK void app_init(void)
 
   // Set up the distance display
   abr_ui_set_alignment(GLIB_ALIGN_CENTER);
+  abr_ui_write_text("ABR distance", ROW_DISTANCE_TEXT);
+  abr_ui_print_value(0.0f, ROW_DISTANCE_VALUE, "m");
+  abr_ui_write_text("Likeliness", ROW_LIKELINESS_TEXT);
+  abr_ui_print_value(0.0f, ROW_LIKELINESS_VALUE, NULL);
   if (initiator_config.rssi_measurement_enabled) {
-    abr_ui_write_text("ABR distance", ROW_DISTANCE_TEXT);
-    abr_ui_print_distance(0.0f, ROW_DISTANCE_VALUE);
     abr_ui_write_text("RSSI distance", ROW_RSSI_DISTANCE_TEXT);
-    abr_ui_print_distance(0.0f, ROW_RSSI_DISTANCE_VALUE);
-  } else {
-    abr_ui_write_text("Distance", ROW_DISTANCE_TEXT);
-    abr_ui_print_distance(0.0f, ROW_DISTANCE_VALUE);
+    abr_ui_print_value(0.0f, ROW_RSSI_DISTANCE_VALUE, "m");
   }
+  abr_ui_write_text("Bit error rate", ROW_BIT_ERROR_RATE_TEXT);
+  abr_ui_print_value(0, ROW_BIT_ERROR_RATE_VALUE, NULL);
   abr_ui_update();
 }
 
@@ -143,6 +174,12 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
 
       abr_initiator_init(abr_on_result, &initiator_config);
+
+      // Set antenna offset on the SoC
+      // This can be called any time after booting.
+      sc = sl_bt_cs_set_antenna_configuration(SL_RAIL_UTIL_HADM_ANTENNA_COUNT * 2,
+                                              (uint8_t *) ant_offset_cm);
+      app_assert_status(sc);
       abr_initiator_enable();
       break;
 
@@ -157,17 +194,30 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 static void abr_on_result(abr_rtl_result_t *result, void *user_data)
 {
   (void) user_data;
-  app_log_info("Measurement result: %lu mm",
+
+  app_log_info("Measurement result: %lu mm" APP_LOG_NL,
                (uint32_t)(result->distance * 1000.f));
 
+  uint32_t likeliness_whole = (uint32_t)result->likeliness;
+  uint32_t likeliness_frac = (uint32_t)((result->likeliness - (float)likeliness_whole) * 100.0f);
+  app_log_info("Measurement likeliness: %lu.%02lu" APP_LOG_NL,
+               likeliness_whole,
+               likeliness_frac);
+
   abr_ui_set_alignment(GLIB_ALIGN_CENTER);
-  abr_ui_print_distance(result->distance, ROW_DISTANCE_VALUE);
+  abr_ui_print_value(result->distance, ROW_DISTANCE_VALUE, "m");
+  abr_ui_print_value(result->likeliness, ROW_LIKELINESS_VALUE, NULL);
   if (initiator_config.rssi_measurement_enabled) {
-    abr_ui_print_distance(result->rssi_distance, ROW_RSSI_DISTANCE_VALUE);
-    app_log_append_info(" | RSSI distance: %lu mm" APP_LOG_NL,
-                        (uint32_t)(result->rssi_distance * 1000.f));
-  } else {
-    app_log_append_info(APP_LOG_NL);
+    abr_ui_print_value(result->rssi_distance,
+                       ROW_RSSI_DISTANCE_VALUE,
+                       "m");
+    app_log_info("RSSI distance: %lu mm" APP_LOG_NL,
+                 (uint32_t)(result->rssi_distance * 1000.f));
   }
+
+  app_log_info("CS bit error rate: %u" APP_LOG_NL, result->cs_bit_error_rate);
+  abr_ui_print_value(result->cs_bit_error_rate, ROW_BIT_ERROR_RATE_VALUE, NULL);
+
+  app_log_info("Measurement finished" APP_LOG_NL);
   abr_ui_update();
 }

@@ -1,0 +1,75 @@
+id: ot_crash_handler
+label: Crash Handler
+package: OpenThread
+category: OpenThread
+quality: production
+description: |-
+  This component provides a set of APIs for printing crash info.
+  In the case of a crash, this component captures the details and prints them on the next reboot.
+provides:
+  - name: ot_crash_handler
+conflicts:
+  - name: legacy_hal_soc
+requires:
+  - name: component_catalog
+  - name: device
+  - name: emlib_rmu
+  - name: event_handler
+
+include:
+  - path: protocol/openthread/src/legacy_hal/include
+    file_list:
+      - path: crash_handler.h
+  - path: platform/service/legacy_hal/inc
+    file_list:
+    - path: asm.h
+    - path: efm32_micro.h
+      condition:
+        - device_cortexm
+    - path: micro-common.h
+    - path: micro-types.h
+    - path: micro.h
+    - path: reset-def.h
+    - path: platform-header.h
+    - path: cortexm3/diagnostic.h
+      condition:
+      - device_cortexm
+source:
+  - path: protocol/openthread/src/legacy_hal/crash_handler.c
+  - path: protocol/openthread/src/legacy_hal/diagnostic.c
+  - path: platform/service/legacy_hal/src/faults.s
+define:
+  - name: "PLATFORM_HEADER"
+    value: "\"platform-header.h\""
+  - name: CORTEXM3_EFM32_MICRO
+    condition:
+      - device_cortexm
+  - name: CORTEXM3
+    condition:
+      - device_cortexm
+  - name: CORTEXM3_EFR32
+    condition:
+      - device_cortexm
+  - name: PHY_RAIL
+    condition:
+      - device_cortexm
+template_contribution:
+  - name: component_catalog
+    value: ot_crash_handler
+  - name: event_handler
+    value:
+      event: platform_init
+      include: crash_handler.h
+      handler: sl_ot_crash_handler_init
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: platform-efr32.h
+      handler: efr32PrintResetInfo
+    # Maximum priority to ensure this handler is called last during init
+    priority: 10000
+    # `efr32PrintResetInfo` is called by `mainloop()` in `sl_ot_rtos_adaptation.c`
+    # Without this `unless`, the device will be stuck in `otPlatUartFlush()`,
+    # trying to print crash data. This is because `otPlatUartFlush()` will try
+    # to use a timer before the kernel is started and before the timer task is created
+    unless: [freertos]

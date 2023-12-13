@@ -16,7 +16,6 @@ component:
   - id: radio_config_simple_connect_singlephy
   - id: app_log
   - id: app_assert
-  - id: legacy_hal
   - id: token_manager
   - id: rail_util_pti
   # Connect components
@@ -45,6 +44,7 @@ component:
   - id: mpu
 #-------------- Restriction rules -------------------
   - id: restrictions_profile_connect
+  - id: restrictions_profile_connect_ofdm
   - id: restrictions_profile_long_range
 
 #----------------- Require list ----------------------
@@ -100,12 +100,13 @@ configuration:
     value: "eusartHwFlowControlNone"
   - name: APP_LOG_PREFIX_ENABLE
     value: "0"
-  - name: "SL_HEAP_SIZE"
+  - name: "SL_STACK_SIZE"
     value: "8192"
+  - name: "SL_HEAP_SIZE"
+    value: "10240"
 #----------------- Watchdog  -------------------------
-  - name: SL_LEGACY_HAL_DISABLE_WATCHDOG
-    value: "1"
-
+define:
+  - name: SL_CONNECT_DISABLE_WATCHDOG
 #-------------- Template Contribution ----------------
 template_contribution:
 #------------------ CLI commands ---------------------

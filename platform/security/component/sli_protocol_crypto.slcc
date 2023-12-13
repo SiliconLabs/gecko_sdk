@@ -29,7 +29,7 @@ requires:
   - name: emlib_core
   - name: emlib_crypto
     condition: [device_has_crypto]
-  - name: psa_driver
+  - name: psa_driver_source
     condition: [device_has_crypto]
   - name: se_manager_osal
     condition: [device_has_radioaes]

@@ -1544,4 +1544,4 @@ typedef struct {
 #define GPIO_USART_TXROUTE_PIN_DEFAULT               (_GPIO_USART_TXROUTE_PIN_DEFAULT << 16) /**< Shifted mode DEFAULT for GPIO_USART_TXROUTE */
 /** @} End of group Parts */
 
-#endif /* BGM21_GPIO_H */
+#endif // BGM21_GPIO_H

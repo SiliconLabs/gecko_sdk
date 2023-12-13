@@ -64,7 +64,7 @@ void DebugPrint(const char* pString);
 // Do While 0 is to require the ; at the end, compiler will optimize it away.
 // Its intentional that there is no code using the variables passed to DPRINT / DPRINTF
 // and thus avoiding issues when they become unused when debug is not defined.
-// Variables only used for debugging should be marked with the UNUSED(MyDebugVar) macro
+// Variables only used for debugging should be marked with the __attribute__((unused))  macro
 // to avoid warning and to clearly show that the variable is only for debug.
 // Issues has also been observed with GCC, which will give warnings iwhen variables only used
 // in code that is optimized away is struct members etc. (e.g. MyStruct->myMember)

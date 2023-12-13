@@ -15,8 +15,6 @@ Table of content:
   - [Getting started](#getting-started)
     - [Pre-steps before building](#pre-steps-before-building)
     - [Building the shared libraries](#building-the-shared-libraries)
-    - [Pre-steps before building](#pre-steps-before-building-1)
-    - [Building the shared libraries](#building-the-shared-libraries-1)
     - [Starting AP application](#starting-ap-application)
   - [Runtime commands](#runtime-commands)
     - [ESL Tag commands](#esl-tag-commands)
@@ -57,9 +55,11 @@ Table of content:
 
 ## Limitations, known issues
 ---
-- In some cases, especially when there are many BLE devices advertising nearby while the AP is scanning for longer periods, the AP script may become unresponsive. In such a case, it may help to limit the period of scanning or to reduce the number of nearby advertising devices. If neither of these are possible, you may want to increase the throughput of the NCP VCOM according to [this article](https://community.silabs.com/s/article/wstk-virtual-com-port-baudrate-setting?language=en_US). After changing the WSTK VCOM speed as described, do not forget to update the VCOM Baud rate configuration of the ESL AP NCP example also accordingly, then re-build and re-flash the target with the new firmware.
-- On Windows, there is also a known issue when running the AP where the debugging trace and command line input can interfere with each other on some terminals if python pyreadline3 is installed, so it is strongly recommended to uninstall it using the command `pip uninstall pyreadline3` before running the AP. To find out if it is installed or not, the command `pip freeze` can be used.
-- MSYS2 MinGW bash is not recommended for use with ESL Access Point Python example application due to various compatibility issues between the native Windows Python environment and that of MSYS2.
+- In some cases, particularly if there are many BLE devices advertising nearby while the AP is scanning for long periods, the AP script may become unresponsive. In this case, it may help to limit the scanning window or reduce the number of nearby advertising devices. If neither of these is possible, it is best to increase the throughput of the NCP VCOM as described in [this article](https://community.silabs.com/s/article/wstk-virtual-com-port-baudrate-setting?language=en_US). After changing the WSTK VCOM speed, please don't forget to update the VCOM Baud rate configuration of the ESL NCP Access Point example also accordingly, then re-build and re-flash the target with the new firmware.
+- On Windows, there is also a known issue when running the AP where the debugging trace and command line input can interfere with each other on some terminals if Python's pyreadline3 module is installed, so it is strongly recommended to uninstall it using the command `pip uninstall pyreadline3` before running the AP. To find out if it is installed or not, the command `pip freeze` can be used.
+- MSYS2 MinGW bash is not recommended for running ESL Access Point Python example application due to various compatibility issues between the native Windows Python environment and that of MSYS2. Still, the ESL C library has to be build with it.
+- Sometimes, especially on systems where Python 2 and 3 environments are installed together, the ESL AP script cannot run due to the way these systems handle the default Python environments. If you experience import problems with Python modules that you are sure are installed for the correct Python version, you may need to modify the PATH environment variable.
+- The PAwR response delay should not be set to less than 30 ms if the ESL Tag uses the WSTK memory LCD as its display, as its platform driver does not support non-blocking mode during image transfer. As a result, for a PAwR train required to serve networks of up to 7000 ESLs, it is not possible to set the PAwR interval below 1.54 seconds in our default example settings. For any shorter response delays than 30ms, please write a custom display driver based on the ESL Display implementation recommendations using non-blocking code.
  
 ## Project structure
 ---
@@ -100,7 +100,7 @@ _Note: Shall any unsolicited error occur during the automated process, the autom
 
 ## Getting started
 ---
-The NCP Host side application requires Python 3. Run `pip install -r requirements.txt` to install all other requirements for the application. Make sure to run this command before running `make`.
+The NCP Host side application requires Python 3. Run `pip install -r requirements.txt` to install all other requirements for the application. Make sure to run this command before running `make`. See [Pre-steps before building](#pre-steps-before-building) on how to get a working build environment.
 
 On the target side an EFR device is needed, programmed with the *Bluetooth - NCP ESL Access Point* sample application along with an appropriate bootloader project called *Bootloader - NCP BGAPI UART DFU*.
 
@@ -108,6 +108,8 @@ To run the ESL AP Python host example, a preliminary step is required to build t
 
 ### Pre-steps before building
 For Windows only, the first thing we need is a UNIX-like utility environment, for which we have MSYS2 as a regular tool at Silabs. After downloading and installing MSYS2, we also need to download make utility and the appropriate Minimalist GNU for Windows GCC compiler: to choose the right architecture, we need to know which Python architecture we have, as it needs to compile slightly differently for 64-bit and 32-bit versions.
+
+Please note that if you already have Cygwin installed, installing MSYS2 and MingW may cause problems, so installation in such an environment is not recommended. Instead, we recommend that you keep your regular environment, but you will need to find out what additional components may need to be installed via your package manager, and what confuguration may need to be changed,  as we do not provide direct support for Cygwin.
 
 As for the Python version, version 3.9 is recommended - but later versions may work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only '*Program Files*' folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
 
@@ -118,31 +120,17 @@ In addition, as it was mentioned earlier, if the native Windows Python is locate
 
 Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make mingw-w64-x86_64-gcc`, or `pacman -S make mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture.
 
-Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd –mingw64 -use-full-path` depending on Python.
+Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd -mingw64 -use-full-path` depending on Python.
 
 ### Building the shared libraries
 
-### Pre-steps before building
-For Windows only, the first thing we need is a UNIX-like utility environment, for which we have MSYS2 as a regular tool at Silabs. After downloading and installing MSYS2, we also need to download make utility and the appropriate Minimalist GNU for Windows GCC compiler: to choose the right architecture, we need to know which Python architecture we have, as it needs to compile slightly differently for 64-bit and 32-bit versions.
+Once you have your favourite UNIX environment up and running, the procedure for building our ESL C library is pretty much the same on all supported systems, except that you will need to obtain the library requirements as follows. Before you can build, you'll of course need the build essentials for your system, as well as the `openssl` library with development headers (the latter is often called `libssl-dev` or `openssl-devel`). Due to the existence of many package managers on different systems and distros, this last step may also vary and can't be listed exactly here.
 
-As for the Python version, version 3.9 is recommended - but later versions may work as well. On Windows, it is also recommended to install it into a custom directory to avoid unexpected errors later. It is essential that the installed executable environment is not placed in the read-only `Program Files` folders, and that the installer is allowed to set the necessary PATH variables. Furtunatelly, no such complications are known to exist with Linux and macOS.
-
-Some possible pitfalls of a Windows installation may happen: the MSYS2 MinGW environment can have a built-in Python interpreter installed in the */usr/bin* or */mingw/bin* folder (`which Python` can be used to find out). Although advanced users will be definitely able to compile with this Python if they know how to fix various errors that may come during the build execution, it is strongly discouraged due to the many potential sources of trouble.
-In addition, as it was mentioned earlier, if the native Windows Python is located in Program Files, advanced manual configuration of the PATH environment variable may be also required, without which the build process can stall at the final stage. That's why it's heavily recommended to install it in location that isn't write-protected, as shown in the image below.
-
-![](images/python_install_windows.png)
-
-Installing the proper GCC version is also essential. For example, if our Python is 32-bit, but the ESL key library and ESL C library are compiled with GCC for MinGW64, the import will fail and the AP example code will not start. This means either issuing `pacman -S make mingw-w64-x86_64-gcc`, or `pacman -S make mingw-w64-i686-gcc` in the MinGW32 or MinGW64 bash terminal, depending on Python interpreter architecture.
-
-Finally, as we're about to use the systems' native Python environment, the MSYS2 MinGW environment should be started with the `-use-full-path` option. Without this, the compilation will fail as well. That is, start either with `msys2_shell.cmd -mingw32 -use-full-path` or `msys2_shell.cmd mingw64 -use-full-path` depending on Python.
-
-### Building the shared libraries
-
-Run the `make` command in the project's root folder (*example\_host/bt\_host\_esl\_ap*). It will generate the *esl\_lib\_wrapper.py* and the *esl\_key\_lib\_wrapper.py*. These files are responsible for the transfer between the Python script and the C library.
+Run the `make` command in the project's root folder (*example\_host/bt\_host\_esl\_ap*). It will generate the *esl\_lib\_wrapper.py* and the *esl\_key\_lib\_wrapper.py*. These files are responsible for the communication between the Python script and the C library.
 
 ### Starting AP application
 
-On Windows, the PowerShell is the preferred running environment, but it can also run under the basic command line. However, using the MSYS2 MinGW bash is not recommended for this purpose due to known compatibility issues between the native Windows Python running environment and that of MSYS2. On other systems like Linux and macOS any terminal can be used. 
+On Windows, the PowerShell is the preferred running environment, but it can also run under the basic command line. However, using the MSYS2 MinGW bash is not recommended for this purpose due to known compatibility issues between the native Windows Python running environment and that of MSYS2. On other systems like Linux and macOS any terminal can be used.
  
 AP can be run in manual, demo or automatic mode. Without using the `--cmd` or the `--demo` command line parameter, automatic mode is started.
 
@@ -466,6 +454,11 @@ Examples:
 
   4 bytes payload, the resulting ESL TLV is 4F0500012233
 
+_Notes:_
+ - _The payload is always interpreted as an ASCII hex string, regardless of the presence or absence of the '0x' prefix, and if an odd number of bytes is entered, a leading zero will be added._
+ - _The latest Silabs ESL example supports PAwR interval skipping as an experimental feature to further reduce power consumption. To enable skipping on supported ESLs, you can issue the `vendor_opcode <esl_id> -d <skip_count>` command. Skipping can be disabled by issuing the command `vendor_opcode <esl_id> -d 0`._
+ - _An ESL for which PAwR skipping is currently enabled **may not receive PAwR commands immediately!** Commands are automatically retransmitted up to 3 times if not responded to, but for higher skip rates you may need to manually retry several times to succeed._
+
 ### Access Point control commands
 ---
 #### help
@@ -568,7 +561,8 @@ _Notes:_
 - _Issuing `sync config` without any further parameter will display the current sync train configuration._
 - _Using the optional `-ms` argument with the 'config' subcommand allows you to specify timing parameters in milliseconds instead of their natural units, but this may introduce rounding errors. Please also note that with this option the fractional milliseconds can't be specified precisely._
 - _You can ask for the current status of the PAwR train by omitting the choice._
-
+- _If a configuration attempt is made with an implausible parameter set, the previous working configuration is restored._
+- 
 Examples:
 - `sync start`
 
@@ -591,6 +585,8 @@ Usage:  `demo [-h] {on,off}`
 Parameters:
 - `{on,off}`: Turn AP advertising on or off for ESL Demo in EFR Connect mobile app.
 
+_Note: You can obtain the current status of the demo mode by omitting the choice._
+
 #### script
      Record or execute commands from an input file.
 
@@ -604,7 +600,7 @@ Parameters:
                  or wait interval in seconds (in case of wait)
 
 _Notes:_
-- _Note: If `stop` given as a filename then recording of commands will stop._
+- _If `stop` given as a filename then recording of commands will stop._
 - _Scripting is an experimental feature, only - it is lack of advanced features like programmed reactions to events or configuration dependent and / or conditional execution, etc.._
 - _Recorded script files may run other scripts also, but never use it recursively! That is, avoid running the script from within itself or the AP script will crash. However, it is strongly advised to keep the scripting level low as possible. Use with care!_
 
@@ -626,14 +622,15 @@ Examples:
 
      Set Access Point logging verbosity level at runtime
 
-Usage:  `verbosity [-h] [{NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL}]`
+Usage:  `verbosity [-h] [{NOTSET,TRACE,DEBUG,INFO,WARNING,ERROR,CRITICAL}]`
 
 Parameters:
-- `{NOTSET,DEBUG,INFO,WARNING,ERROR,CRITICAL}` Level to apply
+- `{NOTSET,TRACE,DEBUG,INFO,WARNING,ERROR,CRITICAL}` Level to apply
 
 _Notes:_
 - _To check current verbosity level you can issue the command without argument._
-- _NOTSET can be used to display debugging messages not only for AP code, but also for all python modules that may utilze logging._
+- _TRACE can be used to display debugging messages not only for AP code, but also for the underlying ESL library._
+- _NOTSET can be used to display debugging messages for all python modules that may utilze logging (including but not limited to ESL shared library)._
 
 #### exit
     Terminate AP application.

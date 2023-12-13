@@ -35,6 +35,7 @@
 #include "sl_cli.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_ota_dfu.h"
+#include "sl_wisun_ota_dfu_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -70,6 +71,18 @@ void app_fw_update_stop(sl_cli_command_arg_t *arguments)
   (void) arguments;
   stat = sl_wisun_ota_dfu_stop_fw_update();
   printf("[Firmware update %s]\n", stat == SL_STATUS_OK ? "stopped" : "cannot be stopped");
+}
+
+void app_fw_reboot_and_install(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+#if SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED
+  printf("[Firmware reboot command is not available in auto-reboot mode]\n");
+#else
+  printf("[Installing firmware...]\n");
+  (void) sl_wisun_ota_dfu_reboot_and_install();
+  printf("[Firmware update reboot was unsuccesful]\n");
+#endif
 }
 
 void app_fw_update_status(sl_cli_command_arg_t *arguments)

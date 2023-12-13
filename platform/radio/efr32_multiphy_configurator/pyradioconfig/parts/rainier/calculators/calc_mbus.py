@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_mbus import calc_mbus_viper
+from pyradioconfig.parts.bobcat.calculators.calc_mbus import Calc_Mbus_Bobcat
 
 
-class CalcMbusRainier(calc_mbus_viper):
+class CalcMbusRainier(Calc_Mbus_Bobcat):
     pass

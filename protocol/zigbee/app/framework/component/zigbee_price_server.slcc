@@ -1,29 +1,25 @@
 package: Zigbee
-description: This component provides an implementation of a Smart Energy price server.  The
-  price server holds a table of prices locally and answers requests to retrieve
-  the list of commodity prices.  It requires extension to add / remove prices from
-  the table and to send out new prices to those devices that have subscribed to the
-  ESI for price updates.
+description: This component provides an implementation of a Smart Energy price server.  The price server holds a table of prices locally and answers requests to retrieve the list of commodity prices.  It requires extension to add / remove prices from the table and to send out new prices to those devices that have subscribed to the ESI for price updates.
 label: Price Server
 quality: production
 id: zigbee_price_server
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_price_server"
+  - name: zigbee_price_server
 requires:
-   - name: "zigbee_price_common"
+  - name: zigbee_price_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/price-server/config/price-server-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/price-server/price-server.c
   - path: protocol/zigbee/app/framework/plugin/price-server/price-server-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/price-server/price-server-tick.c
   - path: protocol/zigbee/app/framework/plugin/price-server/price-server-cb.c
   - path: protocol/zigbee/app/framework/plugin/price-server/price-server-tariff-matrix-stub.c
     unless:
-    - zigbee_price_server_tariff_matrix
+      - zigbee_price_server_tariff_matrix
 include:
   - path: protocol/zigbee/app/framework/plugin/price-server
     file_list:
@@ -34,10 +30,10 @@ template_contribution:
     value: zigbee_price_server
   - name: cluster_service
     value:
-       cluster_id: "0x0700"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"       
-       service_function: "emberAfPriceClusterServerCommandParse"
+      cluster_id: '0x0700'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfPriceClusterServerCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -50,8 +46,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_init
       help: Initializes the price info for the provided endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-server
@@ -59,8 +55,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_print
       help: Prints the price info for the provided endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-server
@@ -68,8 +64,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_clear
       help: Clears out the currently set price for the supplied endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-server
@@ -77,12 +73,12 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_who
       help: Sets identifying information about the price.
       argument:
-      - type: uint32
-        help: Provider ID
-      - type: string
-        help: Rate label
-      - type: uint32
-        help: Issuer event ID
+        - type: uint32
+          help: Provider ID
+        - type: string
+          help: Rate label
+        - type: uint32
+          help: Issuer event ID
   - name: cli_command
     value:
       group: price-server
@@ -90,16 +86,16 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_what
       help: Indicates what units the price is presented in.
       argument:
-      - type: uint8
-        help: Unit of measure
-      - type: uint16
-        help: Currency
-      - type: uint8
-        help: Price trailing digit and tier
-      - type: uint8
-        help: Number of price tiers and tier
-      - type: uint8
-        help: Number of block thresholds
+        - type: uint8
+          help: Unit of measure
+        - type: uint16
+          help: Currency
+        - type: uint8
+          help: Price trailing digit and tier
+        - type: uint8
+          help: Number of price tiers and tier
+        - type: uint8
+          help: Number of block thresholds
   - name: cli_command
     value:
       group: price-server
@@ -107,8 +103,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_when
       help: Sets start time and duration for the price.
       argument:
-      - type: uint32
-      - type: uint16
+        - type: uint32
+        - type: uint16
   - name: cli_command
     value:
       group: price-server
@@ -116,14 +112,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_price
       help: Sets the single price held within the price server component.
       argument:
-      - type: uint32
-        help: Price
-      - type: uint8
-        help: Ratio
-      - type: uint32
-        help: Generation price
-      - type: uint8
-        help: Generation price ratio
+        - type: uint32
+          help: Price
+        - type: uint8
+          help: Ratio
+        - type: uint32
+          help: Generation price
+        - type: uint8
+          help: Generation price ratio
   - name: cli_command
     value:
       group: price-server
@@ -131,12 +127,12 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_alternate
       help: Sets the alternate values for the price.
       argument:
-      - type: uint32
-        help: Alternate cost delivered
-      - type: uint8
-        help: Alternate cost unit
-      - type: uint8
-        help: Alternate cost trailing digit
+        - type: uint32
+          help: Alternate cost delivered
+        - type: uint8
+          help: Alternate cost unit
+        - type: uint8
+          help: Alternate cost trailing digit
   - name: cli_command
     value:
       group: price-server
@@ -144,8 +140,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_ack
       help: Turns price acknowledgement on or off depending on passed boolean value.
       argument:
-      - type: uint8
-        help: Bool acknowledgement required
+        - type: uint8
+          help: Bool acknowledgement required
   - name: cli_command
     value:
       group: price-server
@@ -153,10 +149,10 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_valid
       help: Makes a price at a given index valid.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint8
-        help: Index in the price table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint8
+          help: Index in the price table
   - name: cli_command
     value:
       group: price-server
@@ -164,10 +160,10 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_valid
       help: Makes a price at a given index invalid.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint8
-        help: Index in the price table
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint8
+          help: Index in the price table
   - name: cli_command
     value:
       group: price-server
@@ -175,10 +171,10 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_get
       help: Retrieves a price from a given index into the price buffer for editing.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint8
-        help: Index of the price to retrieve
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint8
+          help: Index of the price to retrieve
   - name: cli_command
     value:
       group: price-server
@@ -186,8 +182,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_sprint
       help: Prints the contents of the price buffer for the provided endpoint.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: price-server
@@ -195,14 +191,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_publish
       help: Publishes the current price.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the price to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the price to publish
   - name: cli_command
     value:
       group: price-server
@@ -210,14 +206,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_pub_tariff_info
       help: Publishes the tariff info.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the tariff to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the tariff to publish
   - name: cli_group
     value:
       group: price-server
@@ -230,11 +226,11 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_conversion_factor_add
       help: Sets the conversion factor information in the conversion factor table.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
   - name: cli_command
     value:
       group: conversion-factor
@@ -242,7 +238,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_conversion_factor_clear
       help: Clears the conversion factor table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: conversion-factor
@@ -250,7 +246,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_conversion_factor_print
       help: Prints the conversion factor table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: conversion-factor
@@ -258,14 +254,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_conversion_factor_pub
       help: Publishes the specified conversion factor entry.
       argument:
-      - type: uint8
-        help: The network address of the server to which the request will be sent
-      - type: uint16
-        help: The network address of the server to which the request will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
-        help: The remote endpoint to which the request will be sent
+        - type: uint8
+          help: The network address of the server to which the request will be sent
+        - type: uint16
+          help: The network address of the server to which the request will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
+          help: The remote endpoint to which the request will be sent
   - name: cli_group
     value:
       group: price-server
@@ -278,12 +274,12 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_calorific_value_add
       help: Sets the calorific value in table.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: calorific-value
@@ -291,7 +287,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_calorific_value_clear
       help: Clears the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: calorific-value
@@ -299,7 +295,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_calorific_value_print
       help: Prints the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_group
     value:
       group: price-server
@@ -312,8 +308,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_block_period_print
       help: Prints the block period table.
       argument:
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: block-period
@@ -321,17 +317,17 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_block_period_add
       help: Sets the block period value in the table.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: block-period
@@ -339,10 +335,10 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_block_period_pub
       help: Sends a Publish Block Period command.
       argument:
-      - type: uint16
-      - type: uint8
-      - type: uint8
-      - type: uint8
+        - type: uint16
+        - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: block-period
@@ -350,7 +346,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_block_period_clear
       help: Clears the local Block Period table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_group
     value:
       group: price-server
@@ -363,14 +359,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_co2_value_add
       help: Sets the CO2 value in table.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint32
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint32
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: co2-val
@@ -378,7 +374,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_co2_value_clear
       help: Clears the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: co2-val
@@ -386,7 +382,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_co2_value_print
       help: Prints the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: co2-val
@@ -394,14 +390,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_co2_value_pub
       help: Publishes a table entry.
       argument:
-      - type: uint16
-        help: the destination node id
-      - type: uint8
-        help: the source endpoint
-      - type: uint8
-        help: the destination endpoint
-      - type: uint8
-        help: index of the tariff to publish
+        - type: uint16
+          help: the destination node id
+        - type: uint8
+          help: the source endpoint
+        - type: uint8
+          help: the destination endpoint
+        - type: uint8
+          help: index of the tariff to publish
   - name: cli_group
     value:
       group: price-server
@@ -414,14 +410,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tier_label_set
       help: Sets specific info for the tier label.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: string
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: string
   - name: cli_command
     value:
       group: tier-label
@@ -429,10 +425,10 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tier_label_add_label
       help: Adds additional tier labels to a given tier.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint8
-      - type: string
+        - type: uint8
+        - type: uint32
+        - type: uint8
+        - type: string
   - name: cli_command
     value:
       group: tier-label
@@ -440,7 +436,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tier_label_print
       help: Prints the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: tier-label
@@ -448,14 +444,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tier_label_pub
       help: Publishes the table.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the tariff to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the tariff to publish
   - name: cli_group
     value:
       group: price-server
@@ -468,13 +464,13 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_billing_period_add
       help: Sets specific info for the billing period.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: billing-period
@@ -482,7 +478,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_billing_period_print
       help: Prints the table.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: billing-period
@@ -490,14 +486,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_billing_period_pub
       help: Publishes a billing period entry.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the billing period entry to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the billing period entry to publish
   - name: cli_command
     value:
       group: billing-period
@@ -505,8 +501,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_billing_period_repeat
       help: Sets whether or not a billing period should repeat after it finishes. Per the SE spec, the billing period is supposed to repeat, but this command can be used to turn that feature off for debugging.
       argument:
-      - type: uint8
-        help: Whether or not a billing period should repeat. 0 stops all billing periods from repeating.
+        - type: uint8
+          help: Whether or not a billing period should repeat. 0 stops all billing periods from repeating.
   - name: cli_group
     value:
       group: price-server
@@ -519,16 +515,16 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_consolidated_bill_add
       help: Sets specific info for the consolidated bill.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint16
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint16
+        - type: uint8
   - name: cli_command
     value:
       group: consol-bill
@@ -536,8 +532,8 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_consolidated_bill_print
       help: Prints the consolidated bills table.
       argument:
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: consol-bill
@@ -545,14 +541,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_consolidated_bill_pub
       help: Publishes a billing period entry.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the consolidated bill entry to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the consolidated bill entry to publish
   - name: cli_group
     value:
       group: price-server
@@ -565,15 +561,15 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_cpp_event_set
       help: Configures values for a CPP event.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint16
-      - type: uint8
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint16
+        - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: cpp-event
@@ -581,9 +577,9 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_cpp_event_pub
       help: Publishes a CPP event command using the configured values for the CPP event.
       argument:
-      - type: uint16
-      - type: uint8
-      - type: uint8
+        - type: uint16
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: cpp-event
@@ -591,7 +587,7 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_cpp_event_print
       help: Prints the current CPP event values.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_group
     value:
       group: price-server
@@ -604,14 +600,14 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_credit_payment_pub
       help: Publishes Credit Payment command.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: Index of the credit payment table entry to publish
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: Index of the credit payment table entry to publish
   - name: cli_command
     value:
       group: credit-pmt
@@ -619,17 +615,17 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_credit_payment_set
       help: Sets specific info for a credit payment.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: string
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: string
   - name: cli_group
     value:
       group: price-server
@@ -642,12 +638,12 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_currency_conversion_pub
       help: Publishes the currency conversion command.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
   - name: cli_command
     value:
       group: currency-conv
@@ -655,16 +651,16 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_currency_conversion_set
       help: Configures the currency conversion settings.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint16
-      - type: uint16
-      - type: uint32
-      - type: uint8
-      - type: uint32
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint16
+        - type: uint16
+        - type: uint32
+        - type: uint8
+        - type: uint32
   - name: cli_group
     value:
       group: price-server
@@ -677,11 +673,11 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tariffCancellationSet
       help: Sets the values of the Tariff Cancellation structure.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint8
   - name: cli_command
     value:
       group: tariff-cancel
@@ -689,15 +685,15 @@ template_contribution:
       handler: sli_zigbee_af_price_server_cli_tariffCancellationPub
       help: Sends a Tariff Cancellation command using the values of the Tariff Cancellation structure.
       argument:
-      - type: uint16
-      - type: uint8
-      - type: uint8
+        - type: uint16
+        - type: uint8
+        - type: uint8
   - name: cluster_functions
     value:
       cluster_name: Price
       cluster_id: 0x700
       cluster_type: server
-      init_function: emberAfPriceClusterServerInitCallback    
+      init_function: emberAfPriceClusterServerInitCallback
 
 documentation:
   docset: zigbee

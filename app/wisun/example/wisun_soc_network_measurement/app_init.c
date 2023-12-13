@@ -34,7 +34,6 @@
 #include <assert.h>
 #include "sl_component_catalog.h"
 #include "app_init.h"
-#include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_app_core_util.h"
@@ -46,7 +45,6 @@
 #include "app.h"
 #include "app_custom_callback.h"
 #include "sl_wisun_coap_rhnd.h"
-
 
 #if defined(SL_CATALOG_GUI_PRESENT)
 #include "sl_gui.h"

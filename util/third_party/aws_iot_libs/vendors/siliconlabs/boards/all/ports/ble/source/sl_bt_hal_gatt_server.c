@@ -1139,7 +1139,7 @@ void prvGattServerOnSlBtEvent(sl_bt_msg_t* evt)
 {
   switch( SL_BT_MSG_ID(evt->header) ) {
     case sl_bt_evt_gatt_server_characteristic_status_id:
-      if( evt->data.evt_gatt_server_characteristic_status.status_flags == gatt_server_confirmation )
+      if( evt->data.evt_gatt_server_characteristic_status.status_flags == sl_bt_gatt_server_confirmation )
       {
         /* Call the application as a result of prvSendIndication as confirmation of
            indication has been received. */
@@ -1169,8 +1169,8 @@ void prvGattServerOnSlBtEvent(sl_bt_msg_t* evt)
       {
         bool bIsNeedRsp = false;
 
-        if( ( evt->data.evt_gatt_server_user_write_request.att_opcode == gatt_write_request ) ||
-          ( evt->data.evt_gatt_server_user_write_request.att_opcode == gatt_prepare_write_request) )
+        if( ( evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_request ) ||
+          ( evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_prepare_write_request) )
         {
             bIsNeedRsp = true;
         }
@@ -1180,8 +1180,8 @@ void prvGattServerOnSlBtEvent(sl_bt_msg_t* evt)
 
         switch( evt->data.evt_gatt_server_user_write_request.att_opcode)
         {
-            case gatt_write_request:
-            case gatt_write_command:
+            case sl_bt_gatt_write_request:
+            case sl_bt_gatt_write_command:
                 {
                   if( pxGattServerCallbacks->pxRequestWriteCb != NULL )
                   {
@@ -1204,7 +1204,7 @@ void prvGattServerOnSlBtEvent(sl_bt_msg_t* evt)
                 }
                 break;
 
-            case gatt_prepare_write_request:
+            case sl_bt_gatt_prepare_write_request:
                 {
                   if( pxGattServerCallbacks->pxRequestWriteCb != NULL )
                   {
@@ -1227,7 +1227,7 @@ void prvGattServerOnSlBtEvent(sl_bt_msg_t* evt)
                 }
                 break;
 
-            case gatt_execute_write_request:
+            case sl_bt_gatt_execute_write_request:
                 if( pxGattServerCallbacks->pxRequestExecWriteCb != NULL )
                 {
                     SILABS_BLE_LOG_CB_CALL_DEBUG( "pxRequestExecWriteCb", "Connection = %d ",

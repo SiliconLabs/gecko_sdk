@@ -308,7 +308,7 @@ void dataConfig(sl_cli_command_arg_t *args)
 
   RAIL_Status_t status = RAIL_ConfigData(railHandle, &newConfig);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Failed to successfully call RAIL_DataConfig: %d", status);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Failed to successfully call RAIL_ConfigData: %d", status);
     return;
   }
 

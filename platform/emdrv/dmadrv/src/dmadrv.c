@@ -32,12 +32,12 @@
 #include <stddef.h>
 
 #include "em_device.h"
-#include "em_cmu.h"
 #include "em_core.h"
 
 #include "dmadrv.h"
 
 #if defined(EMDRV_DMADRV_UDMA)
+#include "em_cmu.h"
 #include "dmactrl.h"
 #endif
 
@@ -66,7 +66,7 @@ typedef struct {
   int               length;
 #endif
   bool              allocated;
-#if defined(EMDRV_DMADRV_LDMA)
+#if defined(EMDRV_DMADRV_LDMA) || defined(EMDRV_DMADRV_LDMA_S3)
   DmaMode_t         mode;
 #endif
 } ChTable_t;
@@ -78,31 +78,44 @@ static ChTable_t chTable[EMDRV_DMADRV_DMA_CH_COUNT];
 static DMA_CB_TypeDef dmaCallBack[EMDRV_DMADRV_DMA_CH_COUNT];
 #endif
 
+#if defined(EMDRV_DMADRV_LDMA) || defined(EMDRV_DMADRV_LDMA_S3)
 #if defined(EMDRV_DMADRV_LDMA)
-const LDMA_TransferCfg_t xferCfg = LDMA_TRANSFER_CFG_PERIPHERAL(0);
+const LDMA_TransferCfg_t xferCfgPeripheral = LDMA_TRANSFER_CFG_PERIPHERAL(0);
 const LDMA_Descriptor_t m2p = LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(NULL, NULL, 1UL);
 const LDMA_Descriptor_t p2m = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(NULL, NULL, 1UL);
 
 typedef struct {
   LDMA_Descriptor_t desc[2];
 } DmaXfer_t;
+#else
+const sl_hal_ldma_transfer_config_t xferCfgPeripheral = SL_HAL_LDMA_TRANSFER_CFG_PERIPHERAL(0);
+const sl_hal_ldma_descriptor_t m2p = SL_HAL_LDMA_DESCRIPTOR_SINGLE_M2P(SL_HAL_LDMA_CTRL_SIZE_BYTE, NULL, NULL, 1UL);
+const sl_hal_ldma_descriptor_t p2m = SL_HAL_LDMA_DESCRIPTOR_SINGLE_P2M(SL_HAL_LDMA_CTRL_SIZE_BYTE, NULL, NULL, 1UL);
+
+typedef struct {
+  sl_hal_ldma_descriptor_t desc[2];
+} DmaXfer_t;
+#endif
 
 static DmaXfer_t dmaXfer[EMDRV_DMADRV_DMA_CH_COUNT];
 #endif
 
-static Ecode_t StartTransfer(DmaMode_t             mode,
-                             DmaDirection_t        direction,
-                             unsigned int          channelId,
-                             DMADRV_PeripheralSignal_t
-                             peripheralSignal,
-                             void                  *buf0,
-                             void                  *buf1,
-                             void                  *buf2,
-                             bool                  bufInc,
-                             int                   len,
-                             DMADRV_DataSize_t     size,
-                             DMADRV_Callback_t     callback,
-                             void                  *cbUserParam);
+static Ecode_t StartTransfer(DmaMode_t                 mode,
+                             DmaDirection_t            direction,
+                             unsigned int              channelId,
+                             DMADRV_PeripheralSignal_t peripheralSignal,
+                             void                      *buf0,
+                             void                      *buf1,
+                             void                      *buf2,
+                             bool                      bufInc,
+                             int                       len,
+                             DMADRV_DataSize_t         size,
+                             DMADRV_Callback_t         callback,
+                             void                      *cbUserParam);
+
+#if defined(EMDRV_DMADRV_LDMA_S3)
+static void LDMA_IRQHandlerDefault(uint8_t chnum);
+#endif
 
 /// @endcond
 
@@ -184,6 +197,19 @@ Ecode_t DMADRV_DeInit(void)
     CMU_ClockEnable(cmuClock_DMA, false);
 #elif defined(EMDRV_DMADRV_LDMA)
     LDMA_DeInit();
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+    NVIC_DisableIRQ(LDMA_CHNL0_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL1_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL2_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL3_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL4_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL5_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL6_IRQn);
+    NVIC_DisableIRQ(LDMA_CHNL7_IRQn);
+
+    sl_hal_ldma_reset();
+
+    // TODO CM add call to the equivalent of CMU_ClockEnable() to disable cmuClock_LDMA. It will require to include the proper S3 CMU header file.
 #endif
     initialized = false;
     CORE_EXIT_ATOMIC();
@@ -248,6 +274,9 @@ Ecode_t DMADRV_Init(void)
 #elif defined(EMDRV_DMADRV_LDMA)
   LDMA_Init_t dmaInit = LDMA_INIT_DEFAULT;
   dmaInit.ldmaInitCtrlNumFixed = EMDRV_DMADRV_DMA_CH_PRIORITY;
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  sl_hal_ldma_config_t dmaInit = SL_HAL_LDMA_INIT_DEFAULT;
+  dmaInit.num_fixed_priority = EMDRV_DMADRV_DMA_CH_PRIORITY;
 #endif
 
   CORE_ENTER_ATOMIC();
@@ -274,6 +303,37 @@ Ecode_t DMADRV_Init(void)
 #elif defined(EMDRV_DMADRV_LDMA)
   dmaInit.ldmaInitIrqPriority = EMDRV_DMADRV_DMA_IRQ_PRIORITY;
   LDMA_Init(&dmaInit);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  sl_hal_ldma_init(&dmaInit);
+
+  NVIC_ClearPendingIRQ(LDMA_CHNL0_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL1_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL2_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL3_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL4_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL5_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL6_IRQn);
+  NVIC_ClearPendingIRQ(LDMA_CHNL7_IRQn);
+
+  NVIC_SetPriority(LDMA_CHNL0_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL1_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL2_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL3_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL4_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL5_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL6_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+  NVIC_SetPriority(LDMA_CHNL7_IRQn, EMDRV_DMADRV_DMA_IRQ_PRIORITY);
+
+  NVIC_EnableIRQ(LDMA_CHNL0_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL1_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL2_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL3_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL4_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL5_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL6_IRQn);
+  NVIC_EnableIRQ(LDMA_CHNL7_IRQn);
+
+  sl_hal_ldma_enable();
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -625,6 +685,8 @@ Ecode_t DMADRV_PauseTransfer(unsigned int channelId)
   DMA_ChannelRequestEnable(channelId, false);
 #elif defined(EMDRV_DMADRV_LDMA)
   LDMA_EnableChannelRequest(channelId, false);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  sl_hal_ldma_disable_channel_request(channelId);
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -659,6 +721,8 @@ Ecode_t DMADRV_ResumeTransfer(unsigned int channelId)
   DMA_ChannelRequestEnable(channelId, true);
 #elif defined(EMDRV_DMADRV_LDMA)
   LDMA_EnableChannelRequest(channelId, true);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  sl_hal_ldma_enable_channel_request(channelId);
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -693,6 +757,8 @@ Ecode_t DMADRV_StopTransfer(unsigned int channelId)
   DMA_ChannelEnable(channelId, false);
 #elif defined(EMDRV_DMADRV_LDMA)
   LDMA_StopTransfer(channelId);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  sl_hal_ldma_stop_transfer(channelId);
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -731,6 +797,8 @@ Ecode_t DMADRV_TransferActive(unsigned int channelId, bool *active)
   if ( DMA_ChannelEnabled(channelId) )
 #elif defined(EMDRV_DMADRV_LDMA)
   if ( LDMA_ChannelEnabled(channelId) )
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  if ( sl_hal_ldma_channel_is_enabled(channelId) )
 #endif
   {
     *active = true;
@@ -778,6 +846,8 @@ Ecode_t DMADRV_TransferCompletePending(unsigned int channelId, bool *pending)
   if ( DMA->IF & (1 << channelId) )
 #elif defined(EMDRV_DMADRV_LDMA)
   if ( LDMA->IF & (1 << channelId) )
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  if ( sl_hal_ldma_get_interrupts() & (1 << channelId) )
 #endif
   {
     *pending = true;
@@ -842,6 +912,8 @@ Ecode_t DMADRV_TransferDone(unsigned int channelId, bool *done)
   }
 #elif defined(EMDRV_DMADRV_LDMA)
   *done = LDMA_TransferDone(channelId);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  *done = sl_hal_ldma_transfer_is_done(channelId);
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -903,6 +975,8 @@ Ecode_t DMADRV_TransferRemainingCount(unsigned int channelId,
   }
 #elif defined(EMDRV_DMADRV_LDMA)
   *remaining = LDMA_TransferRemainingCount(channelId);
+#elif defined(EMDRV_DMADRV_LDMA_S3)
+  *remaining = sl_hal_ldma_transfer_remaining_count(channelId);
 #endif
 
   return ECODE_EMDRV_DMADRV_OK;
@@ -927,47 +1001,158 @@ void LDMA_IRQHandler(void)
 
   /* Check for LDMA error. */
   if ( pending & LDMA_IF_ERROR ) {
-    /* Clear the error flag */
-#if defined (LDMA_HAS_SET_CLEAR)
-    LDMA->IF_CLR = LDMA_IF_ERROR;
-#else
-    LDMA->IFC = LDMA_IF_ERROR;
-#endif
-
-    /* Read the errant channel*/
-    chnum = (LDMA->STATUS & _LDMA_STATUS_CHERROR_MASK) >> _LDMA_STATUS_CHERROR_SHIFT;
-    ch = &chTable[chnum];
-    if ( ch->callback != NULL ) {
-      ch->callback(chnum, 0, ch->userParam);
+    /* Loop to enable debugger to see what has happened. */
+    while (true) {
+      /* Wait forever. */
     }
-  } else {
-    /* Iterate over all LDMA channels. */
-    for ( chnum = 0, chmask = 1;
-          chnum < EMDRV_DMADRV_DMA_CH_COUNT;
-          chnum++, chmask <<= 1 ) {
-      if ( pending & chmask ) {
-        /* Clear the interrupt flag. */
+  }
+
+  /* Iterate over all LDMA channels. */
+  for ( chnum = 0, chmask = 1;
+        chnum < EMDRV_DMADRV_DMA_CH_COUNT;
+        chnum++, chmask <<= 1 ) {
+    if ( pending & chmask ) {
+      /* Clear the interrupt flag. */
 #if defined (LDMA_HAS_SET_CLEAR)
-        LDMA->IF_CLR = chmask;
+      LDMA->IF_CLR = chmask;
 #else
-        LDMA->IFC = chmask;
+      LDMA->IFC = chmask;
 #endif
 
-        ch = &chTable[chnum];
-        if ( ch->callback != NULL ) {
-          ch->callbackCount++;
-          stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
+      ch = &chTable[chnum];
+      if ( ch->callback != NULL ) {
+        ch->callbackCount++;
+        stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
 
-          if ( (ch->mode == dmaModePingPong) && stop ) {
-            dmaXfer[chnum].desc[0].xfer.link = 0;
-            dmaXfer[chnum].desc[1].xfer.link = 0;
-          }
+        if ( (ch->mode == dmaModePingPong) && stop ) {
+          dmaXfer[chnum].desc[0].xfer.link = 0;
+          dmaXfer[chnum].desc[1].xfer.link = 0;
         }
       }
     }
   }
 }
 #endif /* defined( EMDRV_DMADRV_LDMA ) */
+
+#if defined(EMDRV_DMADRV_LDMA_S3)
+/***************************************************************************//**
+ * @brief
+ *  Default interrupt handler for LDMA common to all interrupt channel lines.
+ *
+ * @param[in] chnum
+ *  The channel ID responsible for the interrupt signal trigger.
+ ******************************************************************************/
+static void LDMA_IRQHandlerDefault(uint8_t chnum)
+{
+  bool stop;
+  ChTable_t *ch;
+  uint32_t pending;
+  uint32_t chmask;
+
+  /* Get all pending and enabled interrupts. */
+  pending = sl_hal_ldma_get_enabled_interrupts();
+
+  /* Check for LDMA error. */
+  if ( pending & LDMA_IF_ERROR ) {
+    /* Loop to enable debugger to see what has happened. */
+    while (true) {
+      /* Wait forever. */
+    }
+  }
+
+  chmask = 1 << chnum;
+  if ( pending & chmask ) {
+    /* Clear the interrupt flag. */
+    sl_hal_ldma_clear_interrupts(chmask);
+
+    /* Callback called if it was provided for the given channel. */
+    ch = &chTable[chnum];
+    if ( ch->callback != NULL ) {
+      ch->callbackCount++;
+      stop = !ch->callback(chnum, ch->callbackCount, ch->userParam);
+
+      /* Continue or not a ping-pong transfer. */
+      if ( (ch->mode == dmaModePingPong) && stop ) {
+        dmaXfer[chnum].desc[0].xfer.link = 0;
+        dmaXfer[chnum].desc[1].xfer.link = 0;
+      }
+    }
+  }
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 0.
+ ******************************************************************************/
+void LDMA_CHNL0_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(0);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 1.
+ ******************************************************************************/
+void LDMA_CHNL1_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(1);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 2.
+ ******************************************************************************/
+void LDMA_CHNL2_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(2);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 3.
+ ******************************************************************************/
+void LDMA_CHNL3_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(3);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 4.
+ ******************************************************************************/
+void LDMA_CHNL4_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(4);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 5.
+ ******************************************************************************/
+void LDMA_CHNL5_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(5);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 6.
+ ******************************************************************************/
+void LDMA_CHNL6_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(6);
+}
+
+/***************************************************************************//**
+ * @brief
+ *  Root interrupt handler for LDMA channel 7.
+ ******************************************************************************/
+void LDMA_CHNL7_IRQHandler(void)
+{
+  LDMA_IRQHandlerDefault(7);
+}
+
+#endif /* defined( EMDRV_DMADRV_LDMA_S3 ) */
 
 #if defined(EMDRV_DMADRV_UDMA)
 /***************************************************************************//**
@@ -1187,7 +1372,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
     return ECODE_EMDRV_DMADRV_CH_NOT_ALLOCATED;
   }
 
-  xfer = xferCfg;
+  xfer = xferCfgPeripheral;
   desc = &dmaXfer[channelId].desc[0];
 
   if ( direction == dmaDirectionMemToPeripheral ) {
@@ -1240,6 +1425,102 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
   return ECODE_EMDRV_DMADRV_OK;
 }
 #endif /* defined( EMDRV_DMADRV_LDMA ) */
+
+#if defined(EMDRV_DMADRV_LDMA_S3)
+/***************************************************************************//**
+ * @brief
+ *  Start an LDMA transfer.
+ ******************************************************************************/
+static Ecode_t StartTransfer(DmaMode_t             mode,
+                             DmaDirection_t        direction,
+                             unsigned int          channelId,
+                             DMADRV_PeripheralSignal_t
+                             peripheralSignal,
+                             void                  *buf0,
+                             void                  *buf1,
+                             void                  *buf2,
+                             bool                  bufInc,
+                             int                   len,
+                             DMADRV_DataSize_t     size,
+                             DMADRV_Callback_t     callback,
+                             void                  *cbUserParam)
+{
+  ChTable_t *ch;
+  sl_hal_ldma_transfer_config_t xfer;
+  sl_hal_ldma_descriptor_t *desc;
+
+  if ( !initialized ) {
+    return ECODE_EMDRV_DMADRV_NOT_INITIALIZED;
+  }
+
+  if ( (channelId >= EMDRV_DMADRV_DMA_CH_COUNT)
+       || (buf0 == NULL)
+       || (buf1 == NULL)
+       || (len > DMADRV_MAX_XFER_COUNT)
+       || ((mode == dmaModePingPong) && (buf2 == NULL)) ) {
+    return ECODE_EMDRV_DMADRV_PARAM_ERROR;
+  }
+
+  ch = &chTable[channelId];
+  if ( ch->allocated == false ) {
+    return ECODE_EMDRV_DMADRV_CH_NOT_ALLOCATED;
+  }
+
+  xfer = xferCfgPeripheral;
+  desc = &dmaXfer[channelId].desc[0];
+
+  if ( direction == dmaDirectionMemToPeripheral ) {
+    *desc = m2p;
+    if ( !bufInc ) {
+      desc->xfer.src_inc = SL_HAL_LDMA_CTRL_SRC_INC_NONE;
+    }
+  } else {
+    *desc = p2m;
+    if ( !bufInc ) {
+      desc->xfer.dst_inc = SL_HAL_LDMA_CTRL_DST_INC_NONE;
+    }
+  }
+
+  xfer.request_sel      = peripheralSignal;
+  desc->xfer.xfer_count = len - 1;
+  desc->xfer.dst_addr   = (uint32_t)(uint8_t *)buf0;
+  desc->xfer.src_addr   = (uint32_t)(uint8_t *)buf1;
+  desc->xfer.size       = size;
+
+  if ( mode == dmaModePingPong ) {
+    desc->xfer.link_mode = SL_HAL_LDMA_LINK_MODE_REL;
+    desc->xfer.link      = 1;
+    desc->xfer.link_addr = 4;      /* Refer to the "pong" descriptor. */
+
+    /* Set the "pong" descriptor equal to the "ping" descriptor. */
+    dmaXfer[channelId].desc[1] = *desc;
+    /* Refer to the "ping" descriptor. */
+    dmaXfer[channelId].desc[1].xfer.link_addr = -4;
+    dmaXfer[channelId].desc[1].xfer.src_addr = (uint32_t)(uint8_t *)buf2;
+
+    if ( direction == dmaDirectionPeripheralToMem ) {
+      dmaXfer[channelId].desc[1].xfer.dst_addr = (uint32_t)(uint8_t *)buf1;
+      desc->xfer.src_addr = (uint32_t)(uint8_t *)buf2;
+    }
+  }
+
+  /* Whether an interrupt is needed. */
+  if ( (callback == NULL) && (mode == dmaModeBasic) ) {
+    desc->xfer.done_ifs = 0;
+  }
+
+  ch->callback      = callback;
+  ch->userParam     = cbUserParam;
+  ch->callbackCount = 0;
+  ch->mode          = mode;
+
+  sl_hal_ldma_init_transfer(channelId, &xfer, desc);
+  sl_hal_ldma_start_transfer(channelId);
+  sl_hal_ldma_enable_interrupts((0x1UL << channelId));
+
+  return ECODE_EMDRV_DMADRV_OK;
+}
+#endif /* defined( EMDRV_DMADRV_LDMA_S3 ) */
 
 /// @endcond
 

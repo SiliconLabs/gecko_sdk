@@ -1,14 +1,14 @@
-id: "zigbee_host_framework_common"
-label: "Host Framework Common"
-package: "Zigbee"
-category: "Zigbee"
-quality: "production"
-description: "This component declares all the required application framework globals, initializes the Zigbee stack and dispatches stack callbacks calls as needed to the application components."
+id: zigbee_host_framework_common
+label: Host Framework Common
+package: Zigbee
+category: Zigbee
+quality: production
+description: This component declares all the required application framework globals, initializes the Zigbee stack and dispatches stack callbacks calls as needed to the application components.
 
 provides:
-  - name: "zigbee_host_framework_common"
+  - name: zigbee_host_framework_common
 requires:
-  - name: "zigbee_device_config"
+  - name: zigbee_device_config
   - name: endianness
 
 source:
@@ -32,7 +32,6 @@ include:
       - path: bootload.h
       - path: byte-utilities.h
       - path: cbke-crypto-engine.h
-      - path: ccm-star.h
       - path: child.h
       - path: ember-alternate-mac.h
       - path: ember-debug.h
@@ -73,16 +72,16 @@ include:
       - path: event_queue/event-queue.h
 
 define:
-  - name: "USE_ZAP_CONFIG"
-    value: "1"
+  - name: USE_ZAP_CONFIG
+    value: '1'
 
 toolchain_settings:
   - option: gcc_compiler_option
-    value: "-Wno-unused-parameter"
+    value: -Wno-unused-parameter
   - option: gcc_compiler_option
-    value: "-Wno-missing-field-initializers"
+    value: -Wno-missing-field-initializers
   - option: gcc_compiler_option
-    value: "-Wno-missing-braces"
+    value: -Wno-missing-braces
 
 template_file:
   - path: protocol/zigbee/app/framework/common/template/zigbee_stack_callback_dispatcher.h.jinja
@@ -97,18 +96,19 @@ template_contribution:
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_init_callback
     priority: -8998
   - name: event_handler
     value:
       event: stack_process_action
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_tick_callback
   - name: zigbee_af_callback
     value:
       callback_type: tick
       function_name: sli_zigbee_af_host_framework_tick
+    priority: -10000
 
 
 documentation:

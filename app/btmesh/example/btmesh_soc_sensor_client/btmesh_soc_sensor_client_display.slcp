@@ -23,13 +23,13 @@ component:
   - id: bluetooth_feature_system
   - id: bootloader_interface
   - id: app_button_press
+  - id: bt_post_build
   - id: btmesh_factory_reset
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
-  - id: btmesh_sar_config_server
   - id: btmesh_sensor_client
   - id: btmesh_stack
   - id: btmesh_target_node
@@ -73,8 +73,6 @@ readme:
   - path: ../../documentation/example/btmesh_soc_sensor_client/readme.md
 
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
   - path: ../../documentation/example/btmesh_soc_sensor_client/readme_img0.png
   - path: ../../documentation/example/btmesh_soc_sensor_client/readme_img1.png
   - path: ../../documentation/example/btmesh_soc_sensor_client/readme_img2.png
@@ -98,6 +96,11 @@ configuration:
     value: "1"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL
+    value: "0xB"
+    unless:
+      - "device_sdid_89"   # xG13
+      - "device_sdid_230"  # xG27
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL

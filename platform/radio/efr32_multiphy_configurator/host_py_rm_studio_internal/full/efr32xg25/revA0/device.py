@@ -35,6 +35,7 @@ from . FEFILT1_S import *
 from . FRC_NS import *
 from . FRC_S import *
 from . LEGOQPSK import *
+from . LRSWKOFDM import *
 from . MODEM_NS import *
 from . MODEM_S import *
 from . RAC_NS import *
@@ -44,6 +45,8 @@ from . RFCRC_S import *
 from . RFFPLL0_NS import *
 from . RFFPLL0_S import *
 from . SEQ import *
+from . SMCTRL_NS import *
+from . SMCTRL_S import *
 from . SUNFSK import *
 from . SUNOFDM import *
 from . SUNOQPSK import *
@@ -148,6 +151,8 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
         self.zz_pdict['FRC_S'] = self.FRC_S
         self.LEGOQPSK = RM_Peripheral_LEGOQPSK(self.zz_rmio, self.zz_label)
         self.zz_pdict['LEGOQPSK'] = self.LEGOQPSK
+        self.LRSWKOFDM = RM_Peripheral_LRSWKOFDM(self.zz_rmio, self.zz_label)
+        self.zz_pdict['LRSWKOFDM'] = self.LRSWKOFDM
         self.MODEM_NS = RM_Peripheral_MODEM_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['MODEM_NS'] = self.MODEM_NS
         self.MODEM_S = RM_Peripheral_MODEM_S(self.zz_rmio, self.zz_label)
@@ -166,6 +171,10 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
         self.zz_pdict['RFFPLL0_S'] = self.RFFPLL0_S
         self.SEQ = RM_Peripheral_SEQ(self.zz_rmio, self.zz_label)
         self.zz_pdict['SEQ'] = self.SEQ
+        self.SMCTRL_NS = RM_Peripheral_SMCTRL_NS(self.zz_rmio, self.zz_label)
+        self.zz_pdict['SMCTRL_NS'] = self.SMCTRL_NS
+        self.SMCTRL_S = RM_Peripheral_SMCTRL_S(self.zz_rmio, self.zz_label)
+        self.zz_pdict['SMCTRL_S'] = self.SMCTRL_S
         self.SUNFSK = RM_Peripheral_SUNFSK(self.zz_rmio, self.zz_label)
         self.zz_pdict['SUNFSK'] = self.SUNFSK
         self.SUNOFDM = RM_Peripheral_SUNOFDM(self.zz_rmio, self.zz_label)
@@ -190,6 +199,7 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
             self.RAC = self.RAC_S
             self.RFCRC = self.RFCRC_S
             self.RFFPLL0 = self.RFFPLL0_S
+            self.SMCTRL = self.SMCTRL_S
             self.SYNTH = self.SYNTH_S
             self.TXFRONT = self.TXFRONT_S
             pass
@@ -202,6 +212,7 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
             self.RAC = self.RAC_NS
             self.RFCRC = self.RFCRC_NS
             self.RFFPLL0 = self.RFFPLL0_NS
+            self.SMCTRL = self.SMCTRL_NS
             self.SYNTH = self.SYNTH_NS
             self.TXFRONT = self.TXFRONT_NS
             pass

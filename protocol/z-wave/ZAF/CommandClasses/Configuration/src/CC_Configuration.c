@@ -191,7 +191,7 @@ cc_configuration_set(uint16_t parameter_number,
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_signed_int(cc_config_parameter_buffer_t const* parameter_buffer,
                                            cc_config_parameter_value_t * pNewValue);
 
@@ -202,7 +202,7 @@ cc_configuration_limit_value_signed_int(cc_config_parameter_buffer_t const* para
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_8bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                  cc_config_parameter_value_t * pNewValue);
 
@@ -213,7 +213,7 @@ cc_configuration_limit_value_signed_int_8bit(cc_config_parameter_buffer_t const 
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_16bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                  cc_config_parameter_value_t * pNewValue);
 
@@ -224,7 +224,7 @@ cc_configuration_limit_value_signed_int_16bit(cc_config_parameter_buffer_t const
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_32bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                  cc_config_parameter_value_t * pNewValue);
 
@@ -235,7 +235,7 @@ cc_configuration_limit_value_signed_int_32bit(cc_config_parameter_buffer_t const
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int(cc_config_parameter_buffer_t const* parameter_buffer,
                                              cc_config_parameter_value_t * pNewValue);
 
@@ -246,7 +246,7 @@ cc_configuration_limit_value_unsigned_int(cc_config_parameter_buffer_t const* pa
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_8bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                                    cc_config_parameter_value_t * pNewValue);
 
@@ -257,7 +257,7 @@ cc_configuration_limit_value_unsigned_int_8bit(cc_config_parameter_buffer_t cons
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_16bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                                    cc_config_parameter_value_t * pNewValue);
 
@@ -268,7 +268,7 @@ cc_configuration_limit_value_unsigned_int_16bit(cc_config_parameter_buffer_t con
  * @param[out] pNewValue the new value to be limited
  * @return Result of the limiting true in case of success, else false
 */
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_32bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                                    cc_config_parameter_value_t * pNewValue);
 /**
@@ -326,7 +326,7 @@ cc_configuration_check_if_parameter_number_is_valid(uint16_t input);
  * @param[in] size_value the size value that needs to be checked
  * @return true if valid, false anyways
 */
-static bool 
+static bool
 cc_configuration_is_valid_size(cc_config_parameter_size_t size_value);
 
 static size_t
@@ -344,11 +344,11 @@ static cc_configuration_t const* configuration_pool;
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
 static void
-init_and_reset()
+init_and_reset(void)
 {
   bool retval = false;
   bool is_migrated = false;
-  cc_config_parameter_buffer_t parameter_buffer;
+  cc_config_parameter_buffer_t parameter_buffer = { 0 };
   configuration_pool = cc_configuration_get_configuration();
 
   for(uint16_t loop_cnt = 0; loop_cnt < configuration_pool->numberOfParameters ; loop_cnt++)
@@ -413,12 +413,10 @@ cc_configuration_copyToFrame(  cc_config_parameter_value_t* pFrame,
 static received_frame_status_t CC_Configuration_handler(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                         ZW_APPLICATION_TX_BUFFER *pCmd,
                                                         uint8_t cmdLength,
-                                                        ZW_APPLICATION_TX_BUFFER * pFrameOut,
-                                                        uint8_t * pLengthOut)
+                                                        __attribute__((unused)) ZW_APPLICATION_TX_BUFFER * pFrameOut,
+                                                        __attribute__((unused)) uint8_t * pLengthOut)
 {
   received_frame_status_t frame_status = RECEIVED_FRAME_STATUS_NO_SUPPORT;
-  UNUSED(pFrameOut);
-  UNUSED(pLengthOut);
 
   switch (pCmd->ZW_Common.cmd) {
     case CONFIGURATION_INFO_GET_V4:
@@ -454,7 +452,7 @@ static received_frame_status_t CC_Configuration_handler(RECEIVE_OPTIONS_TYPE_EX 
 // -----------------------------------------------------------------------------
 //              Static Function Definitions
 // -----------------------------------------------------------------------------
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_8bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                 cc_config_parameter_value_t * pNewValue)
 {
@@ -474,7 +472,7 @@ cc_configuration_limit_value_signed_int_8bit(cc_config_parameter_buffer_t const 
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_16bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                  cc_config_parameter_value_t * pNewValue)
 {
@@ -494,7 +492,7 @@ cc_configuration_limit_value_signed_int_16bit(cc_config_parameter_buffer_t const
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_signed_int_32bit(cc_config_parameter_buffer_t const * parameter_buffer,
                                                  cc_config_parameter_value_t * pNewValue)
 {
@@ -514,7 +512,7 @@ cc_configuration_limit_value_signed_int_32bit(cc_config_parameter_buffer_t const
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_signed_int(cc_config_parameter_buffer_t const * parameter_buffer,
                                            cc_config_parameter_value_t * pNewValue)
 {
@@ -538,7 +536,7 @@ cc_configuration_limit_value_signed_int(cc_config_parameter_buffer_t const * par
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_8bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                              cc_config_parameter_value_t * pNewValue)
 {
@@ -558,7 +556,7 @@ cc_configuration_limit_value_unsigned_int_8bit(cc_config_parameter_buffer_t cons
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_16bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                                    cc_config_parameter_value_t * pNewValue)
 {
@@ -578,7 +576,7 @@ cc_configuration_limit_value_unsigned_int_16bit(cc_config_parameter_buffer_t con
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int_32bit(cc_config_parameter_buffer_t const* parameter_buffer,
                                                    cc_config_parameter_value_t * pNewValue)
 {
@@ -594,11 +592,11 @@ cc_configuration_limit_value_unsigned_int_32bit(cc_config_parameter_buffer_t con
     pNewValue->as_uint32 = parameter_buffer->metadata->attributes.max_value.as_uint32;
     return_value = false;
   }
-  
+
   return return_value;
 }
 
-static bool 
+static bool
 cc_configuration_limit_value_unsigned_int(cc_config_parameter_buffer_t const* parameter_buffer,
                                              cc_config_parameter_value_t * pNewValue)
 {
@@ -646,21 +644,17 @@ cc_configuration_limit_value(cc_config_parameter_buffer_t const* parameter_buffe
 static received_frame_status_t
 cc_configuration_command_info(   RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                     const ZW_APPLICATION_TX_BUFFER *pCmd,
-                                    const uint8_t cmdLength)
+                                    __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   ZW_CONFIGURATION_PROPERTIES_GET_V4_FRAME const* pCfgNameGetFrame = &pCmd->ZW_ConfigurationPropertiesGetV4Frame;
 
-  cc_config_parameter_buffer_t parameter_buffer;
+  cc_config_parameter_buffer_t parameter_buffer = { 0 };
   const uint16_t payload_limit = ZAF_getAppHandle()->pNetworkInfo->MaxPayloadSize;
   uint16_t parameter_number = (uint16_t)(((uint16_t)pCfgNameGetFrame->parameterNumber1<<8) | pCfgNameGetFrame->parameterNumber2);
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  zaf_tx_options_t tx_options;
+
+  zaf_tx_options_t tx_options = { 0 };
   bool is_io_transaction_success = false;
   uint8_t reports_to_follow_count = 0;
-  size_t info_str_length = 0;
-  size_t info1_offset_in_struct = offsetof(ZW_CONFIGURATION_INFO_REPORT_4BYTE_V4_FRAME , info1);
 
   if (true == Check_not_legal_response_job(pRxOpt))
   {
@@ -668,19 +662,21 @@ cc_configuration_command_info(   RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   }
 
   is_io_transaction_success = cc_configuration_get(parameter_number, &parameter_buffer);
-  memset((void*)&txBuf.ZW_ConfigurationInfoReport4byteV4Frame, 0 ,sizeof(txBuf.ZW_ConfigurationInfoReport4byteV4Frame));
-  txBuf.ZW_ConfigurationInfoReport4byteV4Frame.cmdClass   = COMMAND_CLASS_CONFIGURATION_V4;
-  txBuf.ZW_ConfigurationInfoReport4byteV4Frame.cmd        = CONFIGURATION_INFO_REPORT_V4;
-  txBuf.ZW_ConfigurationInfoReport4byteV4Frame.parameterNumber1 = pCfgNameGetFrame->parameterNumber1;
-  txBuf.ZW_ConfigurationInfoReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2;
-  txBuf.ZW_ConfigurationInfoReport4byteV4Frame.reportsToFollow  = reports_to_follow_count;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_ConfigurationInfoReport4byteV4Frame.cmdClass   = COMMAND_CLASS_CONFIGURATION_V4,
+    .ZW_ConfigurationInfoReport4byteV4Frame.cmd        = CONFIGURATION_INFO_REPORT_V4,
+    .ZW_ConfigurationInfoReport4byteV4Frame.parameterNumber1 = pCfgNameGetFrame->parameterNumber1,
+    .ZW_ConfigurationInfoReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2,
+    .ZW_ConfigurationInfoReport4byteV4Frame.reportsToFollow  = reports_to_follow_count
+  };
   zaf_transport_rx_to_tx_options(pRxOpt, &tx_options);
 
   if(is_io_transaction_success != false)
   {
     size_t str_pointer = 0;
-    info_str_length = cc_configuration_strnlen(parameter_buffer.metadata->attributes.info,
+    size_t info_str_length = cc_configuration_strnlen(parameter_buffer.metadata->attributes.info,
                                                   SLI_CC_CONFIGURATION_MAX_STR_LENGTH);
+    size_t info1_offset_in_struct = offsetof(ZW_CONFIGURATION_INFO_REPORT_4BYTE_V4_FRAME , info1);
     // maximum supported length of an info field per frame
     uint16_t info_field_limit = payload_limit - info1_offset_in_struct;
     reports_to_follow_count = cc_configuration_calc_reports_to_follow(info_str_length, info_field_limit);
@@ -719,17 +715,15 @@ cc_configuration_command_info(   RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 static received_frame_status_t
 cc_configuration_command_name_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                       const ZW_APPLICATION_TX_BUFFER *pCmd,
-                                      const uint8_t cmdLength)
+                                      __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   ZW_CONFIGURATION_NAME_GET_V4_FRAME const* pCfgNameGetFrame = &pCmd->ZW_ConfigurationNameGetV4Frame;
 
   const uint16_t payload_limit = ZAF_getAppHandle()->pNetworkInfo->MaxPayloadSize;
   uint16_t parameter_number = (uint16_t)(((uint16_t)pCfgNameGetFrame->parameterNumber1<<8) | pCfgNameGetFrame->parameterNumber2);
-  cc_config_parameter_buffer_t parameter_buffer;
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  zaf_tx_options_t tx_options;
+  cc_config_parameter_buffer_t parameter_buffer = { 0 };
+
+  zaf_tx_options_t tx_options = { 0 };
   bool is_io_transaction_success = false;
   uint8_t reports_to_follow_count = 0;
   size_t name_str_length = 0;
@@ -740,12 +734,13 @@ cc_configuration_command_name_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   }
 
   is_io_transaction_success = cc_configuration_get(parameter_number, &parameter_buffer);
-  memset((void*)&txBuf.ZW_ConfigurationNameReport4byteV4Frame, 0, sizeof(txBuf.ZW_ConfigurationNameReport4byteV4Frame));
-  txBuf.ZW_ConfigurationNameReport4byteV4Frame.cmdClass = COMMAND_CLASS_CONFIGURATION_V4;
-  txBuf.ZW_ConfigurationNameReport4byteV4Frame.cmd      = CONFIGURATION_NAME_REPORT_V4;
-  txBuf.ZW_ConfigurationNameReport4byteV4Frame.parameterNumber1 = pCfgNameGetFrame->parameterNumber1;
-  txBuf.ZW_ConfigurationNameReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2;
-  txBuf.ZW_ConfigurationNameReport4byteV4Frame.reportsToFollow  = reports_to_follow_count;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_ConfigurationNameReport4byteV4Frame.cmdClass = COMMAND_CLASS_CONFIGURATION_V4,
+    .ZW_ConfigurationNameReport4byteV4Frame.cmd      = CONFIGURATION_NAME_REPORT_V4,
+    .ZW_ConfigurationNameReport4byteV4Frame.parameterNumber1 = pCfgNameGetFrame->parameterNumber1,
+    .ZW_ConfigurationNameReport4byteV4Frame.parameterNumber2 = pCfgNameGetFrame->parameterNumber2,
+    .ZW_ConfigurationNameReport4byteV4Frame.reportsToFollow  = reports_to_follow_count
+  };
   zaf_transport_rx_to_tx_options(pRxOpt, &tx_options);
 
   if(is_io_transaction_success != false)
@@ -758,7 +753,7 @@ cc_configuration_command_name_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 
     reports_to_follow_count = cc_configuration_calc_reports_to_follow(name_str_length, payload_limit);
     txBuf.ZW_ConfigurationNameReport4byteV4Frame.reportsToFollow  = reports_to_follow_count;
-    
+
     while(str_pointer < name_str_length)
     {
       size_t remaining_byte_count = name_str_length - str_pointer;
@@ -786,18 +781,15 @@ cc_configuration_command_name_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     }
 
   }
-  
+
   return RECEIVED_FRAME_STATUS_SUCCESS;
 }
 
 static received_frame_status_t
-cc_configuration_command_set(  RECEIVE_OPTIONS_TYPE_EX const *rxOpt,
-                                  ZW_APPLICATION_TX_BUFFER const *pCmd,
-                                  const uint8_t cmdLength)
+cc_configuration_command_set(   __attribute__((unused)) RECEIVE_OPTIONS_TYPE_EX const *rxOpt,
+                                ZW_APPLICATION_TX_BUFFER const *pCmd,
+                                __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(rxOpt);
-  UNUSED(cmdLength);
-
   received_frame_status_t frame_status = RECEIVED_FRAME_STATUS_SUCCESS;
   ZW_CONFIGURATION_SET_4BYTE_V4_FRAME const* pCfgSetFrame = &pCmd->ZW_ConfigurationSet4byteV4Frame;
   cc_config_parameter_size_t size  =   pCfgSetFrame->level&0x07;
@@ -808,11 +800,11 @@ cc_configuration_command_set(  RECEIVE_OPTIONS_TYPE_EX const *rxOpt,
   }
 
   bool is_default                  = ((pCfgSetFrame->level&0x80) == 0x80)?true:false;
-  cc_config_parameter_value_t new_value;
+
 
   if(is_default == false)
   {
-    memset(&new_value, 0, sizeof(cc_config_parameter_value_t));
+    cc_config_parameter_value_t new_value = { 0 };
     const cc_config_parameter_value_t* pConfigValue = ( cc_config_parameter_value_t *)&pCmd->ZW_ConfigurationSet4byteV4Frame.configurationValue1;
     uint8_t size_of_configuration_values = (uint8_t)size;
 
@@ -834,17 +826,15 @@ cc_configuration_command_set(  RECEIVE_OPTIONS_TYPE_EX const *rxOpt,
       frame_status = RECEIVED_FRAME_STATUS_FAIL;
     }
   }
-  
+
   return frame_status;
 }
 
 static received_frame_status_t
-cc_configuration_command_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                  ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                  const uint8_t cmdLength)
+cc_configuration_command_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+                              ZW_APPLICATION_TX_BUFFER const * pCmd,
+                              __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   ZW_CONFIGURATION_GET_V4_FRAME const* pCfgGetFrame = &pCmd->ZW_ConfigurationGetV4Frame;
   ZW_APPLICATION_TX_BUFFER txBuf;
   uint16_t parameter_number = pCfgGetFrame->parameterNumber;
@@ -866,7 +856,7 @@ cc_configuration_command_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   {
     parameter_number = parameter_buffer.metadata->number;
   }
-  
+
 
   if(is_io_transaction_success == false)
   {
@@ -881,7 +871,7 @@ cc_configuration_command_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   {
     txBuf.ZW_ConfigurationReport4byteV4Frame.level         = (uint8_t)parameter_buffer.metadata->attributes.size;
   }
-  
+
   cc_configuration_copyToFrame((cc_config_parameter_value_t *)&txBuf.ZW_ConfigurationReport4byteV4Frame.configurationValue1,
                                   &parameter_buffer,
                                   &parameter_buffer.data_buffer);
@@ -933,12 +923,10 @@ cc_configuration_check_if_parameter_number_is_valid(uint16_t input)
 
 
 static received_frame_status_t
-cc_configuration_command_properties_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                             ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                             const uint8_t cmdLength)
+cc_configuration_command_properties_get(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+                                        ZW_APPLICATION_TX_BUFFER const * pCmd,
+                                        __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   ZW_CONFIGURATION_PROPERTIES_GET_V4_FRAME const* pCfgNameGetFrame = &pCmd->ZW_ConfigurationPropertiesGetV4Frame;
   uint16_t parameter_number = (uint16_t)(((uint16_t)pCfgNameGetFrame->parameterNumber1<<8) | pCfgNameGetFrame->parameterNumber2);
   cc_config_parameter_buffer_t parameter_buffer;
@@ -976,7 +964,7 @@ cc_configuration_command_properties_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     raw_buffer[raw_buffer_index++] = (uint8_t)((next_parameter_number >> 8) & 0xFF);
     raw_buffer[raw_buffer_index++] = (uint8_t)(next_parameter_number  & 0xFF);
     raw_buffer[raw_buffer_index++] = 0; // Properties 2
-    
+
     if(!zaf_transport_tx((uint8_t*) &txBuf, raw_buffer_index, NULL, &tx_options)) {
       return RECEIVED_FRAME_STATUS_FAIL;
     }
@@ -1041,12 +1029,10 @@ cc_configuration_command_properties_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 
 
 static received_frame_status_t
-cc_configuration_command_bulk_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                      ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                      const uint8_t cmdLength)
+cc_configuration_command_bulk_get(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+                                  ZW_APPLICATION_TX_BUFFER const * pCmd,
+                                  __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   ZW_CONFIGURATION_BULK_GET_V4_FRAME const* pCfgBulkGetFrame = &pCmd->ZW_ConfigurationBulkGetV4Frame;
 
   uint16_t parameter_offset    = (uint16_t)(((uint16_t)pCfgBulkGetFrame->parameterOffset1<<8) |
@@ -1069,17 +1055,15 @@ cc_configuration_command_bulk_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 }
 
 static received_frame_status_t
-cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                      ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                      const uint8_t cmdLength)
+cc_configuration_command_bulk_set(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+                                  ZW_APPLICATION_TX_BUFFER const * pCmd,
+                                  __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(cmdLength);
-
   received_frame_status_t frame_status = RECEIVED_FRAME_STATUS_SUCCESS;
   uint8_t const* p_raw_cmd = (uint8_t const*)pCmd;
   bool io_transaction_result = false;
   cc_config_parameter_buffer_t parameter_buffer;
-  
+
   uint8_t cmd_index = 0;
   cmd_index++; /*Command Class*/
   cmd_index++; /*Command */
@@ -1089,7 +1073,7 @@ cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   cmd_index+=2;
   uint8_t number_of_parameters = p_raw_cmd[cmd_index];   /*Number of parameters*/
   cmd_index++;
-  
+
   bool is_default   = ((p_raw_cmd[cmd_index]&(1<<7)) == 0x80)?true:false; /*Default*/
   bool handshake    = ((p_raw_cmd[cmd_index]&(1<<6)) == 0x40)?true:false; /*Handshake*/
   cc_config_parameter_size_t size = p_raw_cmd[cmd_index]&0x07; /*Size*/
@@ -1154,7 +1138,7 @@ cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 
       for(uint8_t index = 0; index < size_of_new_parameter_value ; index++)
       {
-        new_parameter_value.as_uint8_array[size_of_new_parameter_value - index -1] = p_raw_cmd[cmd_index + index];  
+        new_parameter_value.as_uint8_array[size_of_new_parameter_value - index -1] = p_raw_cmd[cmd_index + index];
       }
 
       cc_config_configuration_set_return_value return_value = cc_configuration_set(first_parameter_number, &new_parameter_value, size);
@@ -1176,7 +1160,7 @@ cc_configuration_command_bulk_set( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
       has_to_break = true;
     }
     updated_parameter_counter++;
-    
+
   }
 
   if(handshake == true)
@@ -1358,20 +1342,17 @@ cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 }
 
 static received_frame_status_t
-cc_configuration_command_default_reset( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                           ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                           const uint8_t cmdLength)
+cc_configuration_command_default_reset( __attribute__((unused)) RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
+                                        __attribute__((unused)) ZW_APPLICATION_TX_BUFFER const * pCmd,
+                                        __attribute__((unused)) const uint8_t cmdLength)
 {
-  UNUSED(pRxOpt);
-  UNUSED(pCmd);
-  UNUSED(cmdLength);
   bool write_success = false;
 
   for(uint16_t parameter_ix = 0 ; parameter_ix < configuration_pool->numberOfParameters ; parameter_ix++)
   {
     write_success = cc_configuration_io_write( configuration_pool->parameters[parameter_ix].file_id,
                                                         (const uint8_t*)&configuration_pool->parameters[parameter_ix].attributes.default_value,
-                                                          sizeof(cc_config_parameter_value_t)); 
+                                                          sizeof(cc_config_parameter_value_t));
     if(false == write_success)
     {
       return RECEIVED_FRAME_STATUS_FAIL;
@@ -1392,8 +1373,8 @@ cc_configuration_set(uint16_t parameter_number,  cc_config_parameter_value_t* ne
 
     for(uint16_t parameter_ix = 0 ; parameter_ix < configuration_pool->numberOfParameters ; parameter_ix++)
     {
-      if( configuration_pool->parameters[parameter_ix].attributes.flags.read_only == false            && 
-          configuration_pool->parameters[parameter_ix].number                     == parameter_number) 
+      if( configuration_pool->parameters[parameter_ix].attributes.flags.read_only == false            &&
+          configuration_pool->parameters[parameter_ix].number                     == parameter_number)
       {
         if(configuration_pool->parameters[parameter_ix].attributes.size != size)
         {
@@ -1412,7 +1393,7 @@ cc_configuration_set(uint16_t parameter_number,  cc_config_parameter_value_t* ne
         {
           return_value = CC_CONFIG_RETURN_CODE_IO_FAIL;
         }
-        
+
         parameter_buffer.metadata = &configuration_pool->parameters[parameter_ix];
         is_value_in_range = cc_configuration_limit_value(&parameter_buffer, new_value);
         if( true == is_value_in_range)
@@ -1425,7 +1406,7 @@ cc_configuration_set(uint16_t parameter_number,  cc_config_parameter_value_t* ne
                                                             (const uint8_t*)&parameter_buffer.data_buffer,
                                                             sizeof(cc_config_parameter_value_t));
         } else {
-          return_value = CC_CONFIG_RETURN_CODE_IO_FAIL;
+          return_value = CC_CONFIG_RETURN_CODE_NOT_SUPPORTED;
         }
         if(io_transaction_result == false)
         {
@@ -1445,7 +1426,7 @@ cc_configuration_get(uint16_t parameter_number, cc_config_parameter_buffer_t* pa
   bool io_transaction_result = false;
 
   if(parameter_buffer != NULL)
-  { 
+  {
      for(uint16_t parameter_ix = 0 ; parameter_ix < configuration_pool->numberOfParameters ; parameter_ix++)
      {
        if(configuration_pool->parameters[parameter_ix].number == parameter_number)
@@ -1486,23 +1467,23 @@ cc_configuration_reset_to_default_value(uint16_t parameter_number)
       io_transaction_result = cc_configuration_io_write( configuration_pool->parameters[parameter_ix].file_id,
                                                           (const uint8_t*)&configuration_pool->parameters[parameter_ix].attributes.default_value,
                                                            sizeof(cc_config_parameter_value_t));
-      
+
       break;
     }
   }
-  
+
   return io_transaction_result;
 }
 
 static bool
 cc_configuration_get_first_parameter(cc_config_parameter_buffer_t* parameter_buffer)
 {
-  uint16_t lowest_parameter_number = cc_configuration_get_lowest_parameter_number(parameter_buffer);
+  uint16_t lowest_parameter_number = cc_configuration_get_lowest_parameter_number();
   return cc_configuration_get(lowest_parameter_number, parameter_buffer);
 }
 
 static uint16_t
-cc_configuration_get_lowest_parameter_number()
+cc_configuration_get_lowest_parameter_number(void)
 {
   uint16_t lowest_parameter_number = 0xFFFF;
 
@@ -1540,7 +1521,7 @@ cc_configuration_strnlen(const char *str, size_t maxlen)
   return i;
 }
 
-static bool 
+static bool
 cc_configuration_is_valid_size(cc_config_parameter_size_t size_value)
 {
   //Reffering to SDS13781-15 document, table-32 (page 165)

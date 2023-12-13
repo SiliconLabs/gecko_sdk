@@ -21,15 +21,15 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
         #Build variables from Ocelot
         super().buildVariables(model)
 
-        self._addModelVariable(model, 'ofdm_option', Enum, ModelVariableFormat.DECIMAL, desc='Option number of OFDM PHYs')
+        self._addModelVariable(model, 'ofdm_option', Enum, ModelVariableFormat.DECIMAL, desc='Option number and Bandwidth of OFDM PHYs')
         model.vars.ofdm_option.var_enum = CreateModelVariableEnum(
             enum_name='OfdmOptionEnum',
-            enum_desc='OFDM Option Number',
+            enum_desc='OFDM Option Number and Bandwidth',
             member_data=[
-                ['OPT1', 0, 'Option 1'],
-                ['OPT2', 1, 'Option 2'],
-                ['OPT3', 2, 'Option 3'],
-                ['OPT4', 3, 'Option 4'],
+                ['OPT1_OFDM_BW_1p2MHz', 0, 'OFDM 1.2 MHz Bandwidth'],
+                ['OPT2_OFDM_BW_0p8MHz', 1, 'OFDM 0.8 MHz Bandwidth'],
+                ['OPT3_OFDM_BW_0p4MHz', 2, 'OFDM 0.4 MHz Bandwidth'],
+                ['OPT4_OFDM_BW_0p2MHz', 3, 'OFDM 0.2 MHz Bandwidth'],
             ])
 
         model.vars.demod_select.var_enum = CreateModelVariableEnum(
@@ -86,6 +86,145 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
     def calc_init_advanced(self, model):
         pass
+
+    def calc_datapath_delays(self, model):
+
+        dec0 = model.vars.dec0_actual.value
+        dec1 = model.vars.dec1_actual.value
+        dec2 = model.vars.dec2_actual.value
+        datafilter_taps = model.vars.datafilter_taps.value
+        chflatency = model.vars.chflatency_actual.value
+        src2_actual = model.vars.src2_ratio_actual.value
+        adc_freq_actual = model.vars.adc_freq_actual.value
+        demod_sel = model.vars.demod_select.value
+        trecs_enabled = model.vars.trecs_enabled.value
+        remoden = model.vars.MODEM_PHDMODCTRL_REMODEN.value
+        remoddwn = model.vars.MODEM_PHDMODCTRL_REMODDWN.value
+        oversampling_rate = model.vars.oversampling_rate_actual.value
+
+        # : pg_Sol pp. 2717
+        # : DEC8
+        dec8_filter_taps = del_dec8 = 22
+        dec8_filter_rate = adc_freq_actual / 8
+        dec8_grp_delay = dec8_filter_taps / 2
+        dec8_grp_delay_us = dec8_grp_delay / adc_freq_actual * 1e6
+
+        # : DEC0
+        dec0_filter_taps = del_dec0 = 27.0 if dec0 == 3 or dec0 == 4 else 40
+        dec0_filter_rate = dec8_filter_rate / dec0
+        dec0_grp_delay = dec0_filter_taps / 2
+        dec0_grp_delay_us = dec0_grp_delay / dec8_filter_rate * 1e6
+
+        # : IRCAL
+        dc_ircal_digmix_grp_delay = del_dc_ircal_digmix = 2
+        dc_ircal_digmix_rate = dec0_filter_rate
+        dc_ircal_digmix_grp_delay_us = dc_ircal_digmix_grp_delay / dc_ircal_digmix_rate * 1e6
+
+        # : DEC1
+        dec1_filter_taps = del_dec1 = (dec1 - 1) * 4.0 + 1
+        dec1_filter_rate = dc_ircal_digmix_rate / dec1
+        dec1_delay = dec1_filter_taps / 2
+        dec1_grp_delay_us = dec1_delay / dc_ircal_digmix_rate * 1e6
+
+        # : channel filter
+        chf_filter_taps = del_chflt = 29.0 - chflatency * 6.0
+        chf_filter_rate = dec1_filter_rate
+        # : channel filter is odd (taps+1)/2.
+        # : -1 term comes from CHF input goes directly into the combinational logic and does not pass into the delay line before multiplier.
+        chf_grp_delay = (chf_filter_taps + 1) / 2 - 1 # : channel filter is odd (taps+1)/2.
+        chf_grp_delay_us = chf_grp_delay / chf_filter_rate * 1e6
+
+        # : src delay
+        src2_grp_delay = del_src2 = 2
+        src2_rate = chf_filter_rate * src2_actual
+        src2_delay_us = src2_grp_delay / chf_filter_rate * 1e6
+
+        # Digital gain and CORDIC do not introduce any delays
+        del_digigain = 0
+        del_cordic = 0
+
+        # Differentiation delay of 1, frequency gain has no delay
+        diff_grp_delay = del_diff = 1
+        diff_rate = src2_rate
+        diff_delay_us = diff_grp_delay / diff_rate * 1e6
+
+        # : DEC2
+        dec2_grp_delay = del_dec2 = dec2
+        dec2_rate = src2_rate / dec2
+        dec2_delay_us = dec2_grp_delay / src2_rate * 1e6
+
+        # : data filter delay
+        del_data = datafilter_taps
+        datafilter_grp_delay = datafilter_taps / 2
+        datafilter_rate = dec2_rate
+        datafilter_delay_us = datafilter_grp_delay / datafilter_rate * 1e6
+
+        # : Phase Remod Down sampling delay
+        if remoddwn > 1:
+            del_remod = remoddwn
+            remod_rate = dec2_rate / remoddwn
+            remod_delay_us = del_remod / remod_rate * 1e6
+        else:
+            del_remod = 0
+            remod_delay_us = 0
+
+        # : Soft modem coproc filter delay
+        softmodem_filter_taps = 32  # : coproc filter has 32 taps
+        softmodem_filter_rate = dec2_rate  # : softmodem operates at 2xFs
+        softmodem_delay = softmodem_filter_taps / 2
+        softmodem_grp_delay_us = softmodem_delay / softmodem_filter_rate * 1e6
+
+        # : calculate delay in samples from adc to src
+        del_adc_to_src = (((del_dec8 / 8 + del_dec0) / dec0 + del_dc_ircal_digmix + del_dec1) / dec1 + \
+                           del_chflt + del_src2) / src2_actual
+
+        # : calculate delay in samples from adc to diff
+        del_adc_to_diff = del_adc_to_src + del_digigain + del_cordic + del_diff
+
+        grpdel_mixer_to_diff = ((del_dec1 + 1) / 2 / dec1 + (del_chflt + 1) / 2 + del_src2) / src2_actual + del_digigain + del_cordic + del_diff
+
+        # : Calculate group delay to src in us
+        grp_delay_to_src_us = dec8_grp_delay_us + dec0_grp_delay_us + dc_ircal_digmix_grp_delay_us + \
+                              dec1_grp_delay_us + chf_grp_delay_us + src2_delay_us
+
+        # : Calculate group delay for each demod
+        if trecs_enabled:
+            if remoden == 1 and remoddwn == 0:  # demod at DEC2 output
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us
+                delay_adc_to_demod = (del_adc_to_diff + del_dec2) / dec2  # delay at dec2 output in samples at that point
+                delay_adc_to_demod_symbols = (delay_adc_to_demod + del_data) / oversampling_rate / dec2
+                grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2  # delay at dec2 output in samples at that point
+                delay_agc = delay_adc_to_demod * dec2 * src2_actual
+            elif remoden == 1 and remoddwn > 1: # demod at down sampler
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us + datafilter_delay_us + remod_delay_us
+                delay_adc_to_demod = ((del_adc_to_diff + del_dec2) / dec2 + del_data + del_remod) / remoddwn
+                delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate / dec2
+                grpdelay_to_demod = ((grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2 + (del_data + 1) / 2 + (del_remod + 1) / 2) / remoddwn
+                delay_agc = delay_adc_to_demod * dec2 * src2_actual * remoddwn
+            else: # : demod at differentiator
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us
+                delay_adc_to_demod = del_adc_to_diff
+                delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate
+                grpdelay_to_demod = grpdel_mixer_to_diff
+                delay_agc = del_adc_to_diff * src2_actual
+        elif demod_sel == model.vars.demod_select.var_enum.SOFT_DEMOD: # : demod at coproc filter
+            front_end_grp_delay_us = grp_delay_to_src_us + dec2_delay_us
+            grp_delay_us = front_end_grp_delay_us + softmodem_grp_delay_us
+            delay_adc_to_demod = (del_adc_to_diff + del_dec2) / dec2 + del_data
+            delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate / dec2
+            grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2 + (del_data + 1) / 2
+            delay_agc = delay_adc_to_demod * dec2 * src2_actual
+        else:
+            grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us + datafilter_delay_us
+            delay_adc_to_demod = (del_adc_to_diff + del_dec2) / dec2 + del_data
+            delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate / dec2
+            grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2 + (del_data + 1) / 2
+            delay_agc = delay_adc_to_demod * dec2 * src2_actual
+
+        model.vars.rx_grp_delay_us.value = grp_delay_us
+        model.vars.grpdelay_to_demod.value = int(ceil(grpdelay_to_demod))
+        model.vars.agc_settling_delay.value = int(ceil(delay_agc))
+        model.vars.delay_adc_to_demod_symbols.value = int(ceil(delay_adc_to_demod_symbols))
 
     def calc_demod_rate_actual(self,model):
         #This function calculates the actual sample rate at the demod
@@ -1051,13 +1190,13 @@ class Calc_Demodulator_Sol(CALC_Demodulator_ocelot):
 
         #Lookup the number of subcarriers
         if modulation_type == model.vars.modulation_type.var_enum.OFDM:
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                 ofdm_subcarrier_count = 104
                 ofdm_fft_size = 128
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                 ofdm_subcarrier_count = 52
                 ofdm_fft_size = 64
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                 ofdm_subcarrier_count = 26
                 ofdm_fft_size = 32
             else:

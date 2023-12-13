@@ -47,7 +47,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                 ['EIGHTHRATE',2,'Eighth rate mode']
             ])
         self._addModelVariable(model, 'adc_xo_mult', int, ModelVariableFormat.DECIMAL)
-        self._addModelActual(model, 'adc_freq', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'datafilter_taps', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'enable_high_mod_trecs', int, ModelVariableFormat.DECIMAL)
         self._addModelActual(model, 'adc_xo_mult', int, ModelVariableFormat.DECIMAL)
@@ -83,6 +82,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._addModelVariable(model, 'max_src2', float, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'bandwidth_tol', float, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'phscale_derate_factor', int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'rx_grp_delay_us', float, ModelVariableFormat.DECIMAL, desc='RX group delay in us from adc to demod')
 
         var = self._addModelVariable(model, 'directmode_rx', Enum,      ModelVariableFormat.DECIMAL, desc='Direct RX modes')
         member_data = [
@@ -96,6 +96,10 @@ class CALC_Demodulator_ocelot(ICalculator):
             member_data)
 
         self._add_demod_rate_variable(model)
+
+        self._addModelActual(model, 'iq_rate', float, ModelVariableFormat.DECIMAL)
+
+        self._addModelVariable(model, 'modulation_index_for_ksi', float, ModelVariableFormat.DECIMAL)
 
     def _add_demod_rate_variable(self, model):
         self._addModelActual(model, 'demod_rate', int, ModelVariableFormat.DECIMAL)
@@ -1140,6 +1144,11 @@ class CALC_Demodulator_ocelot(ICalculator):
         digmix_res = adc_freq_actual/((2**20) * 8.0 * dec0_actual)
         model.vars.digmix_res_actual.value = digmix_res
 
+    def calc_iq_rate_actual(self, model):
+        demod_rate_actual = model.vars.demod_rate_actual.value
+        dec2_actual = model.vars.dec2_actual.value
+        model.vars.iq_rate_actual.value = demod_rate_actual / dec2_actual
+
     def calc_digmixfreq_val(self,model):
         digmix_res = model.vars.digmix_res_actual.value
         fif = model.vars.if_frequency_hz_actual.value  # IF frequency based on the actual SYNTH settings
@@ -1658,6 +1667,25 @@ class CALC_Demodulator_ocelot(ICalculator):
         phscale_reg = model.vars.MODEM_TRECPMDET_PHSCALE.value
         model.vars.phscale_actual.value = float(2 ** (phscale_reg))
 
+    def calc_modulation_index_for_ksi(self, model):
+        demod_sel = model.vars.demod_select.value
+        modtype = model.vars.modulation_type.value
+        freq_dev_max = model.vars.freq_dev_max.value
+        freq_dev_min = model.vars.freq_dev_min.value
+        baudrate = model.vars.baudrate.value
+
+        # Calculate minimum and maximum possible modulation indices
+        mi_min = 2.0 * freq_dev_min / baudrate
+        mi_max = 2.0 * freq_dev_max / baudrate
+
+        # Determine which modulation index to use for the purposes of KSI calculation
+        mi_to_use = mi_min + (mi_max - mi_min) * 0.5
+        if (modtype == model.vars.modulation_type.var_enum.FSK4 and \
+                demod_sel == model.vars.demod_select.var_enum.BCR):
+            mi_to_use *= 3  # KSI values used for 4FSK + BCR are primarily for CFE-DSA (2FSK-like)
+
+        model.vars.modulation_index_for_ksi.value = mi_to_use
+
     def return_ksi1_calc(self, model, phscale):
         # Load model variables into local variables
         demod_sel = model.vars.demod_select.value
@@ -1666,9 +1694,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         remoden = model.vars.MODEM_PHDMODCTRL_REMODEN.value
         freq_gain_actual = model.vars.freq_gain_actual.value
         osr = model.vars.oversampling_rate_actual.value
-        baudrate = model.vars.baudrate.value
-        freq_dev_max = model.vars.freq_dev_max.value
-        freq_dev_min = model.vars.freq_dev_min.value
+        mi_to_use = model.vars.modulation_index_for_ksi.value
 
         # when remod is enabled scaling is controlled by freqgain and phscale is currently set to 1
         if remoden:
@@ -1678,18 +1704,12 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             gain = 1 / phscale
 
-        #Calculate minimum and maximum possible modulation indices
-        mi_min = 2.0*freq_dev_min/baudrate
-        mi_max = 2.0*freq_dev_max/baudrate
-
-        #Determine which modulation index to use for the purposes of KSI calculation
-        mi_to_use = mi_min + (mi_max - mi_min) * 0.5
-
         # calculate ksi values for Viterbi demod only
         # if the gain is set correctly this should give us nominal soft decisions of 64 for regular case
         # in case of remod we actually use the legacy demod's gain which sets the deviation + freq offset to 128
         if ((trecs_enabled or demod_sel == model.vars.demod_select.var_enum.BCR) and
                 (modtype == model.vars.modulation_type.var_enum.FSK2 or
+                 modtype == model.vars.modulation_type.var_enum.FSK4 or
                  modtype == model.vars.modulation_type.var_enum.MSK)):
             if demod_sel == model.vars.demod_select.var_enum.BCR:
                 saturation_value = 63
@@ -1729,7 +1749,6 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         model.vars.chflatency_actual.value = chflatency
 
-
     def calc_datapath_delays(self, model):
 
         dec0 = model.vars.dec0_actual.value
@@ -1738,64 +1757,118 @@ class CALC_Demodulator_ocelot(ICalculator):
         datafilter_taps = model.vars.datafilter_taps.value
         chflatency = model.vars.chflatency_actual.value
         src2_actual = model.vars.src2_ratio_actual.value
+        adc_freq_actual = model.vars.adc_freq_actual.value
+        trecs_enabled = model.vars.trecs_enabled.value
         remoden = model.vars.MODEM_PHDMODCTRL_REMODEN.value
         remoddwn = model.vars.MODEM_PHDMODCTRL_REMODDWN.value
-        trecs_enabled = model.vars.trecs_enabled.value
         oversampling_rate = model.vars.oversampling_rate_actual.value
 
-        # need to flush out the entire delay line so delay is not group delay but number of taps
-        # DEC8 delay: 22 taps
-        del_dec8 = 22
-        # DEC0 delay: 27 or 40 taps depending on decimation
-        del_dec0 = 27.0 if dec0 == 3 or dec0 == 4 else 40
-        # DC cancel filter group delay of 1, IRCAL delay of 1, no delay in dig mixer
-        del_dc_ircal_digmix  = 2
-        # DEC1 delay: 4 additional taps per decimation as this is 4th order CIC
-        del_dec1 = (dec1 - 1) * 4.0 + 1
-        # CHFLT delay: 29 taps minus the 6 taps for each increment in latency reduction field
-        del_chflt = 29.0 - chflatency * 6.0
-        # SRC delay: can be up to 2 samples
-        del_src2 = 2
+        # : DEC8
+        dec8_filter_taps = del_dec8 = 22
+        dec8_filter_rate = adc_freq_actual / 8
+        dec8_grp_delay = dec8_filter_taps / 2
+        dec8_grp_delay_us = dec8_grp_delay / adc_freq_actual * 1e6
+
+        # : DEC0
+        dec0_filter_taps = del_dec0 = 27.0 if dec0 == 3 or dec0 == 4 else 40
+        dec0_filter_rate = dec8_filter_rate / dec0
+        dec0_grp_delay = dec0_filter_taps / 2
+        dec0_grp_delay_us = dec0_grp_delay / dec8_filter_rate * 1e6
+
+        # : IRCAL
+        dc_ircal_digmix_grp_delay = del_dc_ircal_digmix = 2
+        dc_ircal_digmix_rate = dec0_filter_rate
+        dc_ircal_digmix_grp_delay_us = dc_ircal_digmix_grp_delay / dc_ircal_digmix_rate * 1e6
+
+        # : DEC1
+        dec1_filter_taps = del_dec1 = (dec1 - 1) * 4.0 + 1
+        dec1_filter_rate = dc_ircal_digmix_rate / dec1
+        dec1_delay = dec1_filter_taps / 2
+        dec1_grp_delay_us = dec1_delay / dc_ircal_digmix_rate * 1e6
+
+        # : channel filter
+        chf_filter_taps = del_chflt = 29.0 - chflatency * 6.0
+        chf_filter_rate = dec1_filter_rate
+        # : channel filter is odd (taps+1)/2.
+        # : -1 term comes from CHF input goes directly into the combinational logic and does not pass into the delay line before multiplier.
+        chf_grp_delay = (chf_filter_taps + 1) / 2 - 1 # : channel filter is odd (taps+1)/2.
+        chf_grp_delay_us = chf_grp_delay / chf_filter_rate * 1e6
+
+        # : src delay
+        src2_grp_delay = del_src2 = 2
+        src2_rate = chf_filter_rate * src2_actual
+        src2_delay_us = src2_grp_delay / chf_filter_rate * 1e6
+
         # Digital gain and CORDIC do not introduce any delays
         del_digigain = 0
         del_cordic = 0
+
         # Differentiation delay of 1, frequency gain has no delay
-        del_diff = 1
-        # DEC2 delay: 1st or CIC so number of taps is the same as decimation
-        del_dec2 = dec2
-        # DATAFILT delay: number of taps
+        diff_grp_delay = del_diff = 1
+        diff_rate = src2_rate
+        diff_delay_us = diff_grp_delay / diff_rate * 1e6
+
+        # : DEC2
+        dec2_grp_delay = del_dec2 = dec2
+        dec2_rate = src2_rate / dec2
+        dec2_delay_us = dec2_grp_delay / src2_rate * 1e6
+
+        # : data filter delay
         del_data = datafilter_taps
-        # remod operation delay
-        # FIXME: verify the delay in this block
-        del_remod = remoddwn
+        datafilter_grp_delay = datafilter_taps / 2
+        datafilter_rate = dec2_rate
+        datafilter_delay_us = datafilter_grp_delay / datafilter_rate * 1e6
 
-        del_adc_to_diff = (((del_dec8 / 8 + del_dec0) / dec0 + del_dc_ircal_digmix + del_dec1) / dec1 + del_chflt + del_src2 ) / src2_actual + \
-            del_digigain + del_cordic + del_diff
+        # : Phase Remod Down sampling delay
+        if remoddwn > 1:
+            del_remod = remoddwn
+            remod_rate = dec2_rate / remoddwn
+            remod_delay_us = del_remod / remod_rate * 1e6
+        else:
+            del_remod = 0
+            remod_delay_us = 0
 
-        grpdel_mixer_to_diff = ( (del_dec1+1)/2 / dec1 + (del_chflt+1)/2 + del_src2) / src2_actual + del_digigain + del_cordic + del_diff
+        # : calculate delay in samples from adc to src
+        del_adc_to_src = (((del_dec8 / 8 + del_dec0) / dec0 + del_dc_ircal_digmix + del_dec1) / dec1 + \
+                           del_chflt + del_src2) / src2_actual
 
+        # : calculate delay in samples from adc to diff
+        del_adc_to_diff = del_adc_to_src + del_digigain + del_cordic + del_diff
+
+        grpdel_mixer_to_diff = ((del_dec1 + 1) / 2 / dec1 + (del_chflt + 1) / 2 + del_src2) / src2_actual + del_digigain + del_cordic + del_diff
+
+        # : Calculate group delay to src in us
+        grp_delay_to_src_us = dec8_grp_delay_us + dec0_grp_delay_us + dc_ircal_digmix_grp_delay_us + \
+                              dec1_grp_delay_us + chf_grp_delay_us + src2_delay_us
+
+        # : Calculate group delay for each demod
         if trecs_enabled:
-            if remoden == 1 and remoddwn == 0: # demod at DEC2 output
-                delay_adc_to_demod =  (del_adc_to_diff + del_dec2) / dec2 # delay at dec2 output in samples at that point
+            if remoden == 1 and remoddwn == 0:  # demod at DEC2 output
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us
+                delay_adc_to_demod = (del_adc_to_diff + del_dec2) / dec2  # delay at dec2 output in samples at that point
                 delay_adc_to_demod_symbols = (delay_adc_to_demod + del_data) / oversampling_rate / dec2
-                grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2+1)/2) / dec2  # delay at dec2 output in samples at that point
+                grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2  # delay at dec2 output in samples at that point
                 delay_agc = delay_adc_to_demod * dec2 * src2_actual
-            elif remoden == 1 and remoddwn > 1:
+            elif remoden == 1 and remoddwn > 1: # demod at down sampler
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us + datafilter_delay_us + remod_delay_us
                 delay_adc_to_demod = ((del_adc_to_diff + del_dec2) / dec2 + del_data + del_remod) / remoddwn
                 delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate / dec2
-                grpdelay_to_demod = ((grpdel_mixer_to_diff + (del_dec2+1)/2) / dec2 + (del_data+1)/2 + (del_remod+1)/2) / remoddwn
+                grpdelay_to_demod = ((grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2 + (del_data + 1) / 2 + (del_remod + 1) / 2) / remoddwn
                 delay_agc = delay_adc_to_demod * dec2 * src2_actual * remoddwn
-            else:
+            else: # : demod at differentiator
+                grp_delay_us = grp_delay_to_src_us + diff_delay_us
                 delay_adc_to_demod = del_adc_to_diff
                 delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate
                 grpdelay_to_demod = grpdel_mixer_to_diff
                 delay_agc = del_adc_to_diff * src2_actual
         else:
+            grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us + datafilter_delay_us
             delay_adc_to_demod = (del_adc_to_diff + del_dec2) / dec2 + del_data
             delay_adc_to_demod_symbols = delay_adc_to_demod / oversampling_rate / dec2
-            grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2+1)/2) / dec2 + (del_data+1)/2
+            grpdelay_to_demod = (grpdel_mixer_to_diff + (del_dec2 + 1) / 2) / dec2 + (del_data + 1) / 2
             delay_agc = delay_adc_to_demod * dec2 * src2_actual
 
+        model.vars.rx_grp_delay_us.value = grp_delay_us
         model.vars.grpdelay_to_demod.value = int(ceil(grpdelay_to_demod))
         model.vars.agc_settling_delay.value = int(ceil(delay_agc))
         model.vars.delay_adc_to_demod_symbols.value = int(ceil(delay_adc_to_demod_symbols))
@@ -1860,7 +1933,9 @@ class CALC_Demodulator_ocelot(ICalculator):
 
     def get_limits(self, demod_select, withremod, relaxsrc2, model):
         #Load model variables into local variables
-        bandwidth = model.vars.bandwidth_hz.value #from calc_target_bandwidth
+        freq_tol = model.vars.freq_offset_hz.value
+        bandwidth = model.vars.bandwidth_hz.value
+        carson_bandwidth = model.vars.bandwidth_carson_hz.value
 
         baudrate = model.vars.baudrate.value #We don't know the actual bandrate yet
         modtype = model.vars.modulation_type.value
@@ -1890,9 +1965,19 @@ class CALC_Demodulator_ocelot(ICalculator):
             max_src2 = 1.0
             min_dec2 = 1
             max_dec2 = 1
-            min_bwsel = 0.2
-            target_bwsel = 0.4
-            max_bwsel = 0.4
+
+            # High freqtol, low lock_bw case.
+            # Calculations will use the maximum bwsel range available in self.return_coeffs() in exchange for degraded blocking performance
+            # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2287
+            if ((freq_tol * 2 + carson_bandwidth) / carson_bandwidth) > 3.5 and modtype == model.vars.modulation_type.var_enum.FSK2:
+                LogMgr.Info("AFC BW >> demod BW. Expect reduced blocker performance")
+                min_bwsel = 0.15
+                target_bwsel = 0.5
+                max_bwsel = 0.5
+            else:
+                min_bwsel = 0.2
+                target_bwsel = 0.4
+                max_bwsel = 0.4
         elif demod_select == model.vars.demod_select.var_enum.LEGACY:
             if (modtype == model.vars.modulation_type.var_enum.FSK2 or \
                   modtype == model.vars.modulation_type.var_enum.FSK4 or \
@@ -2454,9 +2539,9 @@ class CALC_Demodulator_ocelot(ICalculator):
         ksi3wb = model.vars.ksi3wb.value
 
         #Write the reg fields
-        self._reg_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI2, int(ksi2))
-        self._reg_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI3, int(ksi3))
-        self._reg_write(model.vars.MODEM_VTCORRCFG1_VITERBIKSI3WB, int(ksi3wb))
+        self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI2, int(ksi2))
+        self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI3, int(ksi3))
+        self._reg_sat_write(model.vars.MODEM_VTCORRCFG1_VITERBIKSI3WB, int(ksi3wb))
 
     def calc_prefiltcoeff_reg(self, model):
         dsss0 = model.vars.MODEM_DSSS0_DSSS0.value

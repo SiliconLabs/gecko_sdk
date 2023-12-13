@@ -1,0 +1,47 @@
+id: psa_crypto_jpake
+package: platform
+label: J-PAKE over Elliptic Curves
+description: >-
+  This component provides support for Elliptic Curve (EC) J-PAKE in PSA Crypto.
+category: Platform|Security|PSA Crypto|Key Exchange
+quality: production
+
+provides:
+  - name: psa_crypto_jpake
+
+requires:
+  - name: psa_crypto
+  - name: psa_crypto_ecc_secp256r1
+  - name: psa_crypto_sha256
+
+  # We have not implemented any EC J-PAKE PSA drivers yet, so we need to rely on
+  # the built-in Mbed TLS implementation.
+  - name: mbedtls_jpake
+
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_JPAKE 1
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_PAKE 1"
+    condition: [mbedtls_jpake]
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_JPAKE 1"
+    condition: [mbedtls_jpake]
+
+  # We will assume for now that if EC J-PAKE and (D)TLS are included in a
+  # project together, that means that EC J-PAKE is actually used in (D)TLS.
+  - name: psa_crypto_builtin_config
+    value: "PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS 1"
+    condition: [mbedtls_jpake, mbedtls_dtls]
+  - name: psa_crypto_builtin_config
+    value: "PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS 1"
+    condition: [mbedtls_jpake, mbedtls_tls]
+
+  # Enable a patch to Mbed TLS which adds a combined EC J-PAKE key agreement +
+  # key derivation for TLS.
+  - name: psa_crypto_builtin_config
+    value: "SLI_MBEDTLS_PSA_EC_JPAKE_TLS_WORKAROUND"
+    condition: [mbedtls_jpake, mbedtls_dtls, device_has_semailbox]
+  - name: psa_crypto_builtin_config
+    value: "SLI_MBEDTLS_PSA_EC_JPAKE_TLS_WORKAROUND"
+    condition: [mbedtls_jpake, mbedtls_tls, device_has_semailbox]

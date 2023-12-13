@@ -35,7 +35,6 @@ config_file:
       - "sl_wisun_coap"
 
 requires:
-  - name: "sl_wisun_socket"
   - name: "sl_wisun_app_core"
   - name: "sl_mempool"
 

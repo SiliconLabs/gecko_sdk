@@ -60,6 +60,7 @@ enum sli_bt_class_id
     sli_bt_l2cap_class_id = 0x43,
     sli_bt_cte_transmitter_class_id = 0x44,
     sli_bt_cte_receiver_class_id = 0x45,
+    sli_bt_connection_analyzer_class_id = 0x48,
     sli_bt_user_class_id = 0xff,
 };
 
@@ -156,7 +157,7 @@ enum sli_bt_command_id
     sli_bt_connection_set_parameters_command_id = 0x06,
     sli_bt_connection_set_preferred_phy_command_id = 0x08,
     sli_bt_connection_disable_slave_latency_command_id = 0x03,
-    sli_bt_connection_get_rssi_command_id = 0x02,
+    sli_bt_connection_get_median_rssi_command_id = 0x15,
     sli_bt_connection_read_channel_map_command_id = 0x07,
     sli_bt_connection_set_power_reporting_command_id = 0x09,
     sli_bt_connection_set_remote_power_reporting_command_id = 0x0a,
@@ -167,8 +168,10 @@ enum sli_bt_command_id
     sli_bt_connection_get_security_status_command_id = 0x0e,
     sli_bt_connection_set_data_length_command_id = 0x11,
     sli_bt_connection_read_statistics_command_id = 0x13,
+    sli_bt_connection_get_scheduling_details_command_id = 0x14,
     sli_bt_connection_close_command_id = 0x05,
     sli_bt_connection_forcefully_close_command_id = 0x0f,
+    sli_bt_connection_get_rssi_command_id = 0x02,
     sli_bt_gatt_set_max_mtu_command_id = 0x00,
     sli_bt_gatt_discover_primary_services_command_id = 0x01,
     sli_bt_gatt_discover_primary_services_by_uuid_command_id = 0x02,
@@ -249,6 +252,7 @@ enum sli_bt_command_id
     sli_bt_sm_get_bonding_handles_command_id = 0x15,
     sli_bt_sm_get_bonding_details_command_id = 0x16,
     sli_bt_sm_find_bonding_by_address_command_id = 0x17,
+    sli_bt_sm_resolve_rpa_command_id = 0x1d,
     sli_bt_sm_set_bonding_key_command_id = 0x18,
     sli_bt_sm_set_legacy_oob_command_id = 0x19,
     sli_bt_sm_set_oob_command_id = 0x1a,
@@ -282,6 +286,7 @@ enum sli_bt_command_id
     sli_bt_cs_set_procedure_parameters_command_id = 0x05,
     sli_bt_cs_procedure_enable_command_id = 0x06,
     sli_bt_cs_set_antenna_configuration_command_id = 0x07,
+    sli_bt_cs_read_local_supported_capabilities_command_id = 0x08,
     sli_bt_cs_test_start_command_id = 0x00,
     sli_bt_l2cap_open_le_channel_command_id = 0x01,
     sli_bt_l2cap_send_le_channel_open_response_command_id = 0x02,
@@ -308,6 +313,8 @@ enum sli_bt_command_id
     sli_bt_cte_receiver_disable_connectionless_cte_command_id = 0x04,
     sli_bt_cte_receiver_enable_silabs_cte_command_id = 0x07,
     sli_bt_cte_receiver_disable_silabs_cte_command_id = 0x08,
+    sli_bt_connection_analyzer_start_command_id = 0x00,
+    sli_bt_connection_analyzer_stop_command_id = 0x01,
     sli_bt_user_message_to_target_command_id = 0x00,
     sli_bt_user_manage_event_filter_command_id = 0x01,
     sli_bt_user_reset_to_dfu_command_id = 0x02,
@@ -406,7 +413,7 @@ enum sli_bt_response_id
     sli_bt_connection_set_parameters_response_id = 0x06,
     sli_bt_connection_set_preferred_phy_response_id = 0x08,
     sli_bt_connection_disable_slave_latency_response_id = 0x03,
-    sli_bt_connection_get_rssi_response_id = 0x02,
+    sli_bt_connection_get_median_rssi_response_id = 0x15,
     sli_bt_connection_read_channel_map_response_id = 0x07,
     sli_bt_connection_set_power_reporting_response_id = 0x09,
     sli_bt_connection_set_remote_power_reporting_response_id = 0x0a,
@@ -417,8 +424,10 @@ enum sli_bt_response_id
     sli_bt_connection_get_security_status_response_id = 0x0e,
     sli_bt_connection_set_data_length_response_id = 0x11,
     sli_bt_connection_read_statistics_response_id = 0x13,
+    sli_bt_connection_get_scheduling_details_response_id = 0x14,
     sli_bt_connection_close_response_id = 0x05,
     sli_bt_connection_forcefully_close_response_id = 0x0f,
+    sli_bt_connection_get_rssi_response_id = 0x02,
     sli_bt_gatt_set_max_mtu_response_id = 0x00,
     sli_bt_gatt_discover_primary_services_response_id = 0x01,
     sli_bt_gatt_discover_primary_services_by_uuid_response_id = 0x02,
@@ -499,6 +508,7 @@ enum sli_bt_response_id
     sli_bt_sm_get_bonding_handles_response_id = 0x15,
     sli_bt_sm_get_bonding_details_response_id = 0x16,
     sli_bt_sm_find_bonding_by_address_response_id = 0x17,
+    sli_bt_sm_resolve_rpa_response_id = 0x1d,
     sli_bt_sm_set_bonding_key_response_id = 0x18,
     sli_bt_sm_set_legacy_oob_response_id = 0x19,
     sli_bt_sm_set_oob_response_id = 0x1a,
@@ -532,6 +542,7 @@ enum sli_bt_response_id
     sli_bt_cs_set_procedure_parameters_response_id = 0x05,
     sli_bt_cs_procedure_enable_response_id = 0x06,
     sli_bt_cs_set_antenna_configuration_response_id = 0x07,
+    sli_bt_cs_read_local_supported_capabilities_response_id = 0x08,
     sli_bt_cs_test_start_response_id = 0x00,
     sli_bt_l2cap_open_le_channel_response_id = 0x01,
     sli_bt_l2cap_send_le_channel_open_response_response_id = 0x02,
@@ -558,6 +569,8 @@ enum sli_bt_response_id
     sli_bt_cte_receiver_disable_connectionless_cte_response_id = 0x04,
     sli_bt_cte_receiver_enable_silabs_cte_response_id = 0x07,
     sli_bt_cte_receiver_disable_silabs_cte_response_id = 0x08,
+    sli_bt_connection_analyzer_start_response_id = 0x00,
+    sli_bt_connection_analyzer_stop_response_id = 0x01,
     sli_bt_user_message_to_target_response_id = 0x00,
     sli_bt_user_manage_event_filter_response_id = 0x01,
     sli_bt_user_reset_to_dfu_response_id = 0x02,
@@ -597,8 +610,8 @@ enum sli_bt_event_id
     sli_bt_pawr_advertiser_response_report_event_id = 0x01,
     sli_bt_connection_opened_event_id = 0x00,
     sli_bt_connection_parameters_event_id = 0x02,
+    sli_bt_connection_set_parameters_failed_event_id = 0x10,
     sli_bt_connection_phy_status_event_id = 0x04,
-    sli_bt_connection_rssi_event_id = 0x03,
     sli_bt_connection_get_remote_tx_power_completed_event_id = 0x05,
     sli_bt_connection_tx_power_event_id = 0x06,
     sli_bt_connection_remote_tx_power_event_id = 0x07,
@@ -606,6 +619,7 @@ enum sli_bt_event_id
     sli_bt_connection_data_length_event_id = 0x09,
     sli_bt_connection_statistics_event_id = 0x0a,
     sli_bt_connection_closed_event_id = 0x01,
+    sli_bt_connection_rssi_event_id = 0x03,
     sli_bt_gatt_mtu_exchanged_event_id = 0x00,
     sli_bt_gatt_service_event_id = 0x01,
     sli_bt_gatt_characteristic_event_id = 0x02,
@@ -644,6 +658,8 @@ enum sli_bt_event_id
     sli_bt_cte_receiver_connection_iq_report_event_id = 0x00,
     sli_bt_cte_receiver_connectionless_iq_report_event_id = 0x01,
     sli_bt_cte_receiver_silabs_iq_report_event_id = 0x03,
+    sli_bt_connection_analyzer_report_event_id = 0x00,
+    sli_bt_connection_analyzer_completed_event_id = 0x01,
     sli_bt_user_message_to_host_event_id = 0x00,
 };
 
@@ -1400,12 +1416,12 @@ PACKSTRUCT( struct sl_bt_cmd_connection_disable_slave_latency_s
 typedef struct sl_bt_cmd_connection_disable_slave_latency_s sl_bt_cmd_connection_disable_slave_latency_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_connection_get_rssi_s
+PACKSTRUCT( struct sl_bt_cmd_connection_get_median_rssi_s
 {
     uint8_t connection;
 });
 
-typedef struct sl_bt_cmd_connection_get_rssi_s sl_bt_cmd_connection_get_rssi_t;
+typedef struct sl_bt_cmd_connection_get_median_rssi_s sl_bt_cmd_connection_get_median_rssi_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_connection_read_channel_map_s
@@ -1496,6 +1512,14 @@ PACKSTRUCT( struct sl_bt_cmd_connection_read_statistics_s
 typedef struct sl_bt_cmd_connection_read_statistics_s sl_bt_cmd_connection_read_statistics_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_connection_get_scheduling_details_s
+{
+    uint8_t connection;
+});
+
+typedef struct sl_bt_cmd_connection_get_scheduling_details_s sl_bt_cmd_connection_get_scheduling_details_t;
+
+
 PACKSTRUCT( struct sl_bt_cmd_connection_close_s
 {
     uint8_t connection;
@@ -1510,6 +1534,14 @@ PACKSTRUCT( struct sl_bt_cmd_connection_forcefully_close_s
 });
 
 typedef struct sl_bt_cmd_connection_forcefully_close_s sl_bt_cmd_connection_forcefully_close_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_connection_get_rssi_s
+{
+    uint8_t connection;
+});
+
+typedef struct sl_bt_cmd_connection_get_rssi_s sl_bt_cmd_connection_get_rssi_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_gatt_set_max_mtu_s
@@ -2213,6 +2245,14 @@ PACKSTRUCT( struct sl_bt_cmd_sm_find_bonding_by_address_s
 typedef struct sl_bt_cmd_sm_find_bonding_by_address_s sl_bt_cmd_sm_find_bonding_by_address_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_sm_resolve_rpa_s
+{
+    bd_addr rpa;
+});
+
+typedef struct sl_bt_cmd_sm_resolve_rpa_s sl_bt_cmd_sm_resolve_rpa_t;
+
+
 PACKSTRUCT( struct sl_bt_cmd_sm_set_bonding_key_s
 {
     uint32_t bonding;
@@ -2760,6 +2800,35 @@ PACKSTRUCT( struct sl_bt_cmd_cte_receiver_enable_silabs_cte_s
 });
 
 typedef struct sl_bt_cmd_cte_receiver_enable_silabs_cte_s sl_bt_cmd_cte_receiver_enable_silabs_cte_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_start_s
+{
+    uint32_t access_address;
+    uint32_t crc_init;
+    uint16_t interval;
+    uint16_t supervision_timeout;
+    uint8_t central_clock_accuracy;
+    uint8_t central_phy;
+    uint8_t peripheral_phy;
+    uint8_t channel_selection_algorithm;
+    uint8_t hop;
+    sl_bt_connection_channel_map_t channel_map;
+    uint8_t channel;
+    uint16_t event_counter;
+    uint32_t start_time_us;
+    uint32_t flags;
+});
+
+typedef struct sl_bt_cmd_connection_analyzer_start_s sl_bt_cmd_connection_analyzer_start_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_stop_s
+{
+    uint8_t analyzer;
+});
+
+typedef struct sl_bt_cmd_connection_analyzer_stop_s sl_bt_cmd_connection_analyzer_stop_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_user_message_to_target_s
@@ -3532,12 +3601,13 @@ PACKSTRUCT( struct sl_bt_rsp_connection_disable_slave_latency_s
 typedef struct sl_bt_rsp_connection_disable_slave_latency_s sl_bt_rsp_connection_disable_slave_latency_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_connection_get_rssi_s
+PACKSTRUCT( struct sl_bt_rsp_connection_get_median_rssi_s
 {
     uint16_t result;
+    int8_t rssi;
 });
 
-typedef struct sl_bt_rsp_connection_get_rssi_s sl_bt_rsp_connection_get_rssi_t;
+typedef struct sl_bt_rsp_connection_get_median_rssi_s sl_bt_rsp_connection_get_median_rssi_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_connection_read_channel_map_s
@@ -3627,6 +3697,28 @@ PACKSTRUCT( struct sl_bt_rsp_connection_read_statistics_s
 typedef struct sl_bt_rsp_connection_read_statistics_s sl_bt_rsp_connection_read_statistics_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_connection_get_scheduling_details_s
+{
+    uint16_t result;
+    uint32_t access_address;
+    uint8_t role;
+    uint32_t crc_init;
+    uint16_t interval;
+    uint16_t supervision_timeout;
+    uint8_t central_clock_accuracy;
+    uint8_t central_phy;
+    uint8_t peripheral_phy;
+    uint8_t channel_selection_algorithm;
+    uint8_t hop;
+    sl_bt_connection_channel_map_t channel_map;
+    uint8_t channel;
+    uint16_t event_counter;
+    uint32_t start_time_us;
+});
+
+typedef struct sl_bt_rsp_connection_get_scheduling_details_s sl_bt_rsp_connection_get_scheduling_details_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_connection_close_s
 {
     uint16_t result;
@@ -3641,6 +3733,14 @@ PACKSTRUCT( struct sl_bt_rsp_connection_forcefully_close_s
 });
 
 typedef struct sl_bt_rsp_connection_forcefully_close_s sl_bt_rsp_connection_forcefully_close_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_connection_get_rssi_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_connection_get_rssi_s sl_bt_rsp_connection_get_rssi_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_gatt_set_max_mtu_s
@@ -4313,6 +4413,17 @@ PACKSTRUCT( struct sl_bt_rsp_sm_find_bonding_by_address_s
 typedef struct sl_bt_rsp_sm_find_bonding_by_address_s sl_bt_rsp_sm_find_bonding_by_address_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_sm_resolve_rpa_s
+{
+    uint16_t result;
+    bd_addr address;
+    uint8_t address_type;
+    uint32_t bonding;
+});
+
+typedef struct sl_bt_rsp_sm_resolve_rpa_s sl_bt_rsp_sm_resolve_rpa_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_sm_set_bonding_key_s
 {
     uint16_t result;
@@ -4584,6 +4695,31 @@ PACKSTRUCT( struct sl_bt_rsp_cs_set_antenna_configuration_s
 typedef struct sl_bt_rsp_cs_set_antenna_configuration_s sl_bt_rsp_cs_set_antenna_configuration_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_cs_read_local_supported_capabilities_s
+{
+    uint16_t result;
+    uint8_t num_config;
+    uint16_t max_consecutive_procedures;
+    uint8_t num_antennas;
+    uint8_t max_antenna_paths;
+    uint8_t roles;
+    uint8_t optional_modes;
+    uint8_t rtt_capability;
+    uint8_t rtt_aa_only;
+    uint8_t rtt_sounding;
+    uint8_t rtt_random_payload;
+    uint8_t optional_cs_sync_phys;
+    uint16_t optional_subfeatures;
+    uint16_t optional_t_ip1_times;
+    uint16_t optional_t_ip2_times;
+    uint16_t optional_t_fcs_times;
+    uint16_t optional_t_pm_times;
+    uint8_t t_sw_times;
+});
+
+typedef struct sl_bt_rsp_cs_read_local_supported_capabilities_s sl_bt_rsp_cs_read_local_supported_capabilities_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_cs_test_start_s
 {
     uint16_t result;
@@ -4793,6 +4929,23 @@ PACKSTRUCT( struct sl_bt_rsp_cte_receiver_disable_silabs_cte_s
 typedef struct sl_bt_rsp_cte_receiver_disable_silabs_cte_s sl_bt_rsp_cte_receiver_disable_silabs_cte_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_connection_analyzer_start_s
+{
+    uint16_t result;
+    uint8_t analyzer;
+});
+
+typedef struct sl_bt_rsp_connection_analyzer_start_s sl_bt_rsp_connection_analyzer_start_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_connection_analyzer_stop_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_connection_analyzer_stop_s sl_bt_rsp_connection_analyzer_stop_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_user_message_to_target_s
 {
     uint16_t result;
@@ -4894,7 +5047,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_connection_set_parameters_t                        cmd_connection_set_parameters;
     sl_bt_cmd_connection_set_preferred_phy_t                     cmd_connection_set_preferred_phy;
     sl_bt_cmd_connection_disable_slave_latency_t                 cmd_connection_disable_slave_latency;
-    sl_bt_cmd_connection_get_rssi_t                              cmd_connection_get_rssi;
+    sl_bt_cmd_connection_get_median_rssi_t                       cmd_connection_get_median_rssi;
     sl_bt_cmd_connection_read_channel_map_t                      cmd_connection_read_channel_map;
     sl_bt_cmd_connection_set_power_reporting_t                   cmd_connection_set_power_reporting;
     sl_bt_cmd_connection_set_remote_power_reporting_t            cmd_connection_set_remote_power_reporting;
@@ -4905,8 +5058,10 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_connection_get_security_status_t                   cmd_connection_get_security_status;
     sl_bt_cmd_connection_set_data_length_t                       cmd_connection_set_data_length;
     sl_bt_cmd_connection_read_statistics_t                       cmd_connection_read_statistics;
+    sl_bt_cmd_connection_get_scheduling_details_t                cmd_connection_get_scheduling_details;
     sl_bt_cmd_connection_close_t                                 cmd_connection_close;
     sl_bt_cmd_connection_forcefully_close_t                      cmd_connection_forcefully_close;
+    sl_bt_cmd_connection_get_rssi_t                              cmd_connection_get_rssi;
     sl_bt_cmd_gatt_set_max_mtu_t                                 cmd_gatt_set_max_mtu;
     sl_bt_cmd_gatt_discover_primary_services_t                   cmd_gatt_discover_primary_services;
     sl_bt_cmd_gatt_discover_primary_services_by_uuid_t           cmd_gatt_discover_primary_services_by_uuid;
@@ -4981,6 +5136,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_sm_get_bonding_handles_t                           cmd_sm_get_bonding_handles;
     sl_bt_cmd_sm_get_bonding_details_t                           cmd_sm_get_bonding_details;
     sl_bt_cmd_sm_find_bonding_by_address_t                       cmd_sm_find_bonding_by_address;
+    sl_bt_cmd_sm_resolve_rpa_t                                   cmd_sm_resolve_rpa;
     sl_bt_cmd_sm_set_bonding_key_t                               cmd_sm_set_bonding_key;
     sl_bt_cmd_sm_set_legacy_oob_t                                cmd_sm_set_legacy_oob;
     sl_bt_cmd_sm_set_oob_t                                       cmd_sm_set_oob;
@@ -5034,6 +5190,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_cte_receiver_enable_connectionless_cte_t           cmd_cte_receiver_enable_connectionless_cte;
     sl_bt_cmd_cte_receiver_disable_connectionless_cte_t          cmd_cte_receiver_disable_connectionless_cte;
     sl_bt_cmd_cte_receiver_enable_silabs_cte_t                   cmd_cte_receiver_enable_silabs_cte;
+    sl_bt_cmd_connection_analyzer_start_t                        cmd_connection_analyzer_start;
+    sl_bt_cmd_connection_analyzer_stop_t                         cmd_connection_analyzer_stop;
     sl_bt_cmd_user_message_to_target_t                           cmd_user_message_to_target;
     sl_bt_cmd_user_manage_event_filter_t                         cmd_user_manage_event_filter;
     sl_bt_rsp_dfu_flash_set_address_t                            rsp_dfu_flash_set_address;
@@ -5126,7 +5284,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_connection_set_parameters_t                        rsp_connection_set_parameters;
     sl_bt_rsp_connection_set_preferred_phy_t                     rsp_connection_set_preferred_phy;
     sl_bt_rsp_connection_disable_slave_latency_t                 rsp_connection_disable_slave_latency;
-    sl_bt_rsp_connection_get_rssi_t                              rsp_connection_get_rssi;
+    sl_bt_rsp_connection_get_median_rssi_t                       rsp_connection_get_median_rssi;
     sl_bt_rsp_connection_read_channel_map_t                      rsp_connection_read_channel_map;
     sl_bt_rsp_connection_set_power_reporting_t                   rsp_connection_set_power_reporting;
     sl_bt_rsp_connection_set_remote_power_reporting_t            rsp_connection_set_remote_power_reporting;
@@ -5137,8 +5295,10 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_connection_get_security_status_t                   rsp_connection_get_security_status;
     sl_bt_rsp_connection_set_data_length_t                       rsp_connection_set_data_length;
     sl_bt_rsp_connection_read_statistics_t                       rsp_connection_read_statistics;
+    sl_bt_rsp_connection_get_scheduling_details_t                rsp_connection_get_scheduling_details;
     sl_bt_rsp_connection_close_t                                 rsp_connection_close;
     sl_bt_rsp_connection_forcefully_close_t                      rsp_connection_forcefully_close;
+    sl_bt_rsp_connection_get_rssi_t                              rsp_connection_get_rssi;
     sl_bt_rsp_gatt_set_max_mtu_t                                 rsp_gatt_set_max_mtu;
     sl_bt_rsp_gatt_discover_primary_services_t                   rsp_gatt_discover_primary_services;
     sl_bt_rsp_gatt_discover_primary_services_by_uuid_t           rsp_gatt_discover_primary_services_by_uuid;
@@ -5219,6 +5379,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_sm_get_bonding_handles_t                           rsp_sm_get_bonding_handles;
     sl_bt_rsp_sm_get_bonding_details_t                           rsp_sm_get_bonding_details;
     sl_bt_rsp_sm_find_bonding_by_address_t                       rsp_sm_find_bonding_by_address;
+    sl_bt_rsp_sm_resolve_rpa_t                                   rsp_sm_resolve_rpa;
     sl_bt_rsp_sm_set_bonding_key_t                               rsp_sm_set_bonding_key;
     sl_bt_rsp_sm_set_legacy_oob_t                                rsp_sm_set_legacy_oob;
     sl_bt_rsp_sm_set_oob_t                                       rsp_sm_set_oob;
@@ -5252,6 +5413,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_cs_set_procedure_parameters_t                      rsp_cs_set_procedure_parameters;
     sl_bt_rsp_cs_procedure_enable_t                              rsp_cs_procedure_enable;
     sl_bt_rsp_cs_set_antenna_configuration_t                     rsp_cs_set_antenna_configuration;
+    sl_bt_rsp_cs_read_local_supported_capabilities_t             rsp_cs_read_local_supported_capabilities;
     sl_bt_rsp_cs_test_start_t                                    rsp_cs_test_start;
     sl_bt_rsp_l2cap_open_le_channel_t                            rsp_l2cap_open_le_channel;
     sl_bt_rsp_l2cap_send_le_channel_open_response_t              rsp_l2cap_send_le_channel_open_response;
@@ -5278,6 +5440,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_cte_receiver_disable_connectionless_cte_t          rsp_cte_receiver_disable_connectionless_cte;
     sl_bt_rsp_cte_receiver_enable_silabs_cte_t                   rsp_cte_receiver_enable_silabs_cte;
     sl_bt_rsp_cte_receiver_disable_silabs_cte_t                  rsp_cte_receiver_disable_silabs_cte;
+    sl_bt_rsp_connection_analyzer_start_t                        rsp_connection_analyzer_start;
+    sl_bt_rsp_connection_analyzer_stop_t                         rsp_connection_analyzer_stop;
     sl_bt_rsp_user_message_to_target_t                           rsp_user_message_to_target;
     sl_bt_rsp_user_manage_event_filter_t                         rsp_user_manage_event_filter;
     sl_bt_evt_dfu_boot_t                                         evt_dfu_boot;
@@ -5310,8 +5474,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_pawr_advertiser_response_report_t                  evt_pawr_advertiser_response_report;
     sl_bt_evt_connection_opened_t                                evt_connection_opened;
     sl_bt_evt_connection_parameters_t                            evt_connection_parameters;
+    sl_bt_evt_connection_set_parameters_failed_t                 evt_connection_set_parameters_failed;
     sl_bt_evt_connection_phy_status_t                            evt_connection_phy_status;
-    sl_bt_evt_connection_rssi_t                                  evt_connection_rssi;
     sl_bt_evt_connection_get_remote_tx_power_completed_t         evt_connection_get_remote_tx_power_completed;
     sl_bt_evt_connection_tx_power_t                              evt_connection_tx_power;
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power;
@@ -5319,6 +5483,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_connection_data_length_t                           evt_connection_data_length;
     sl_bt_evt_connection_statistics_t                            evt_connection_statistics;
     sl_bt_evt_connection_closed_t                                evt_connection_closed;
+    sl_bt_evt_connection_rssi_t                                  evt_connection_rssi;
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged;
     sl_bt_evt_gatt_service_t                                     evt_gatt_service;
     sl_bt_evt_gatt_characteristic_t                              evt_gatt_characteristic;
@@ -5357,6 +5522,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_cte_receiver_connection_iq_report_t                evt_cte_receiver_connection_iq_report;
     sl_bt_evt_cte_receiver_connectionless_iq_report_t            evt_cte_receiver_connectionless_iq_report;
     sl_bt_evt_cte_receiver_silabs_iq_report_t                    evt_cte_receiver_silabs_iq_report;
+    sl_bt_evt_connection_analyzer_report_t                       evt_connection_analyzer_report;
+    sl_bt_evt_connection_analyzer_completed_t                    evt_connection_analyzer_completed;
     sl_bt_evt_user_message_to_host_t                             evt_user_message_to_host;
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;

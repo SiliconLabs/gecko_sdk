@@ -209,14 +209,4 @@ bool BSP_TraceProfilerSetup(void)
 
   return true;
 }
-
-/**************************************************************************//**
- * @brief  Energy Profiler SWO setup.
- * @deprecated
- *         Deprecated function. New code should call @ref BSP_TraceProfilerSetup().
- *****************************************************************************/
-void BSP_TraceSwoSetup(void)
-{
-  (void)BSP_TraceProfilerSetup();
-}
 #endif

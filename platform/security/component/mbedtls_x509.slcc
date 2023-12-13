@@ -12,6 +12,7 @@ source:
   - path: util/third_party/mbedtls/library/x509_crl.c
   - path: util/third_party/mbedtls/library/x509_crt.c
   - path: util/third_party/mbedtls/library/x509_csr.c
+  - path: util/third_party/mbedtls/library/x509write.c
   - path: util/third_party/mbedtls/library/x509write_crt.c
   - path: util/third_party/mbedtls/library/x509write_csr.c
 provides:

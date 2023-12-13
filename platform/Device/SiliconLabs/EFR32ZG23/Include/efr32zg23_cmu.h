@@ -1125,4 +1125,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_CMU */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_CMU_H */
+#endif // EFR32ZG23_CMU_H

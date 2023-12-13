@@ -1,0 +1,113 @@
+project_name: ot-cli-mtd-tz-ns
+label: OpenThread - SoC CLI (MTD) (TrustZone)
+package: OpenThread
+description: >
+    This is a variant of the openthread MTD CLI application with trustzone awareness enabled.
+category: OpenThread Examples
+quality: evaluation
+
+component:
+  - id: ot_stack_mtd
+  - id: ot_cli_source
+  - id: uartdrv_usart
+    instance:
+      - vcom
+  - id: rail_util_pti
+  - id: bootloader_interface
+  - id: trustzone_nonsecure
+  - id: tz_secure_key_library
+
+## Disabling RTOS by default
+# - id: freertos
+# - id: freertos_heap_3
+# - id: simple_button
+  # instance:
+    # - btn0
+    # - btn1
+
+include:
+  - path: ../
+    file_list:
+    - path: app.h
+  - path: ../../../../../util/third_party/openthread/src/lib/platform
+    file_list:
+    - path: reset_util.h
+
+source:
+  - path: ../main.c
+  - path: ../app.c
+
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+    value: 1
+  - name: SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
+    value: 1
+  - name: UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [freertos, uartdrv_usart]
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [freertos, iostream_usart]
+  - name: SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE
+    value: 128 # Increase from default 32
+    condition: [iostream_usart]
+  - name: SL_HEAP_SIZE
+    value: 16384
+    condition: [freertos]
+  - name: SL_STACK_SIZE
+    value: 4608
+
+template_contribution:
+  - name: memory_flash_start
+    value: 0x2C000
+    condition: [device_sdid_200]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x0802C000
+    unless: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x30000
+    condition: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x08032000
+    condition: [bootloader_interface]
+    unless: [device_sdid_200]
+
+  - name: memory_flash_size
+    value: 0x70000
+
+  - name: memory_ram_start
+    value: 0x20003000
+
+  - name: memory_ram_size
+    value: 0xC000
+
+import:
+  # Import the config files from the TZ Secure application
+  - id: ot-tz-secure-application
+
+post_build:
+  profile: tz_nonsecure_application
+
+tag:
+  - companion:secure_app
+
+readme:
+  - path: ../README.md
+  - path: README.md
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+ui_hints:
+  highlight:
+    - path: ../README.md
+    - path: README.md
+      focus: true

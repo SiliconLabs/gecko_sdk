@@ -770,6 +770,47 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
                             void *cert,
                             uint32_t num_bytes);
 
+/***************************************************************************//**
+ * @brief
+ *   Enter SE active mode.
+ *
+ * @details
+ *   SE will enter active mode. This will ensure SE is not powered down between
+ *   operations, at the expense of increased power consumption.
+ *
+ * @warning
+ *   Active mode will prevent entry to EM2/3/4. To allow energy mode entry, exit
+ *   active mode through @ref sl_se_exit_active_mode().
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @return
+ *   One of the following sl_status_t codes:
+ * @retval SL_STATUS_OK when the command was executed successfully
+ * @retval SL_STATUS_INVALID_PARAMETER when an invalid parameter was passed
+ * @retval SL_STATUS_COMMAND_IS_INVALID when already in active mode
+ ******************************************************************************/
+sl_status_t sl_se_enter_active_mode(sl_se_command_context_t *cmd_ctx);
+
+/***************************************************************************//**
+ * @brief
+ *   Exit SE active mode.
+ *
+ * @details
+ *   SE will exit active mode.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @return
+ *   One of the following sl_status_t codes:
+ * @retval SL_STATUS_OK when the command was executed successfully
+ * @retval SL_STATUS_INVALID_PARAMETER when an invalid parameter was passed
+ * @retval SL_STATUS_COMMAND_IS_INVALID when already not in active mode
+ ******************************************************************************/
+sl_status_t sl_se_exit_active_mode(sl_se_command_context_t *cmd_ctx);
+
 #endif // defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #ifdef __cplusplus

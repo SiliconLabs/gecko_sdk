@@ -41,7 +41,7 @@ static uint8_t g_on_off_period_length = 0;  /**< Period length in 1/10 second */
 static uint8_t g_on_off_num_cycles    = 0;  /**< Number of cycles */
 static uint8_t g_on_time              = 0;  /**< On time in 1/10 second */
 
-static s_CC_indicator_data_t indicatorData;
+static s_CC_indicator_data_t indicatorData = { 0 };
 
 /* True Status Engine (TSE) variables */
 /* Indicate here which End Points (including root device) support each command class */
@@ -58,7 +58,7 @@ static s_CC_indicator_data_t ZAF_TSE_localActuationIdentifyData = {
 
 static void
 prepare_report_v3(uint8_t indicatorId, ZW_APPLICATION_TX_BUFFER *pTxBuffer, uint8_t *payloadLen);
-static void 
+static void
 CC_Indicator_report_stx(zaf_tx_options_t *tx_options, void* pData);
 
 /****************************************************************************/
@@ -210,9 +210,8 @@ GetIndicator0Value(void)
  */
 static e_cmd_handler_return_code_t
 IndicatorHandler_Set_V1(ZW_APPLICATION_TX_BUFFER *cmd,
-                        uint8_t                   cmd_length)
+                        __attribute__((unused)) uint8_t                   cmd_length)
 {
-  UNUSED(cmd_length);
   const ZW_INDICATOR_SET_FRAME *set_cmd = &(cmd->ZW_IndicatorSetFrame);
 
   /* Value MUST be in the range 0x00..0x63 or 0xFF */
@@ -397,7 +396,7 @@ IndicatorHandler_Set_V3(ZW_APPLICATION_TX_BUFFER *cmd,
  */
 static received_frame_status_t
 IndicatorHandler_Get_V1(ZW_APPLICATION_TX_BUFFER *pFrameOut,
-                        uint8_t                  *pLengthOut)                        
+                        uint8_t                  *pLengthOut)
 {
   pFrameOut->ZW_IndicatorReportFrame.cmdClass    = COMMAND_CLASS_INDICATOR;
   pFrameOut->ZW_IndicatorReportFrame.cmd         = INDICATOR_REPORT;
@@ -465,7 +464,7 @@ static received_frame_status_t
 IndicatorHandler_SupportedGet_V3(ZW_APPLICATION_TX_BUFFER *cmd,
                                  uint8_t                   cmd_length,
                                  ZW_APPLICATION_TX_BUFFER *pFrameOut,
-                                 uint8_t                  *pLengthOut)                                 
+                                 uint8_t                  *pLengthOut)
 {
   if (cmd_length < sizeof(ZW_INDICATOR_SUPPORTED_GET_V3_FRAME))
   {
@@ -590,7 +589,7 @@ CC_Indicator_handler(RECEIVE_OPTIONS_TYPE_EX  *rx_opt,
   return rc;
 }
 
-static void 
+static void
 CC_Indicator_report_stx(zaf_tx_options_t *tx_options, void* pData)
 {
   DPRINTF("* %s() *\n"
@@ -599,13 +598,12 @@ CC_Indicator_report_stx(zaf_tx_options_t *tx_options, void* pData)
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
+  ZW_APPLICATION_TX_BUFFER txBuf = { 0 };
   uint8_t payloadLen;
   s_CC_indicator_data_t* pIndicatorData = (s_CC_indicator_data_t*)pData;
 
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
   prepare_report_v3(pIndicatorData->indicatorId, &txBuf, &payloadLen);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t*)&txBuf, payloadLen, ZAF_TSE_TXCallback, tx_options);
 }
@@ -661,11 +659,10 @@ static uint8_t lifeline_reporting(ccc_pair_t * p_ccc_pair)
   return 1;
 }
 
-ZW_WEAK void cc_indicator_handler(uint32_t on_time_ms, uint32_t off_time_ms, uint32_t num_cycles)
+ZW_WEAK void cc_indicator_handler(__attribute__((unused)) uint32_t on_time_ms,
+                                  __attribute__((unused)) uint32_t off_time_ms,
+                                  __attribute__((unused)) uint32_t num_cycles)
 {
-    UNUSED(on_time_ms);
-    UNUSED(off_time_ms);
-    UNUSED(num_cycles);
 }
 
 REGISTER_CC_V3(COMMAND_CLASS_INDICATOR, INDICATOR_VERSION_V3, CC_Indicator_handler, NULL, NULL, lifeline_reporting, 0);

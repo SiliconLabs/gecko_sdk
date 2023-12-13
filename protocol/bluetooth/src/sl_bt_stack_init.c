@@ -82,6 +82,7 @@ SLI_BT_DECLARE_BGAPI_CLASS(bt, cte_transmitter);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, test);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, coex);
 SLI_BT_DECLARE_BGAPI_CLASS(bt, resource);
+SLI_BT_DECLARE_BGAPI_CLASS(bt, connection_analyzer);
 
 // Forward declaration of the internal Bluetooth stack init function
 sl_status_t sli_bt_init_stack(const sl_bt_configuration_t *config,
@@ -532,6 +533,12 @@ SLI_BT_DECLARE_FEATURE(bt, accurate_api_address_types);
 #define SLI_BT_FEATURE_ACCURATE_API_ADDRESS_TYPES
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
+#define SLI_BT_BGAPI_CONNECTION_ANALYZER SLI_BT_USE_BGAPI_CLASS(bt, connection_analyzer),
+#else
+#define SLI_BT_BGAPI_CONNECTION_ANALYZER
+#endif
+
 /** @brief Structure that specifies the Bluetooth configuration */
 static const sl_bt_configuration_t bt_config = SL_BT_CONFIG_DEFAULT;
 
@@ -617,6 +624,7 @@ static const struct sli_bgapi_class * const bt_bgapi_classes[] =
   SLI_BT_BGAPI_TEST
   SLI_BT_BGAPI_COEX
   SLI_BT_BGAPI_RESOURCE
+  SLI_BT_BGAPI_CONNECTION_ANALYZER
   NULL
 };
 
@@ -626,6 +634,8 @@ extern sl_status_t sl_bt_ll_deinit();
 #include "sl_bt_ll_config.h"
 extern sl_status_t ll_connPowerControlEnable(const sl_bt_ll_power_control_config_t *);
 extern void sl_bt_init_app_controlled_tx_power();
+extern sl_status_t sl_btctrl_init_sniff(uint8_t);
+extern void sl_btctrl_deinit_sniff(void);
 #if defined(SL_CATALOG_RAIL_UTIL_COEX_PRESENT)
 #include "coexistence-ble.h"
 #endif
@@ -826,7 +836,19 @@ sl_status_t sli_bt_init_controller_features()
 #endif
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT)
-  sl_btctrl_init_cs_initiator();
+#include "sl_bluetooth_cs_config.h"
+  struct sl_btctrl_cs_config cs_config = { 0 };
+  cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;
+  cs_config.procedures = SL_BT_CONFIG_MAX_CS_PROCEDURES;
+  sl_btctrl_init_cs(&cs_config);
+#endif
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
+#include "sl_bluetooth_connection_analyzer_config.h"
+  status = sl_btctrl_init_sniff(SL_BT_CONFIG_MAX_CONNECTION_ANALYZERS);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
 #endif
 
   return status;
@@ -839,6 +861,10 @@ sl_status_t sli_bt_init_controller_features()
  */
 void sli_bt_deinit_controller_features()
 {
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_ANALYZER_PRESENT)
+  sl_btctrl_deinit_sniff();
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_allocate_resolving_list_memory(0);
 #endif

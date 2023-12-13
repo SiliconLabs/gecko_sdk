@@ -1,6 +1,6 @@
-from pyradioconfig.parts.viper.calculators.calc_rail import CalcRailViper
+from pyradioconfig.parts.bobcat.calculators.calc_rail import CalcRailBobcat
 
 
-class CalcRailRainier(CalcRailViper):
+class CalcRailRainier(CalcRailBobcat):
     pass
 

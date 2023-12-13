@@ -27,10 +27,10 @@
  *
  ******************************************************************************/
 
+#include <assert.h>
 #include "ota-unicast-bootloader-client-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "ota-unicast-bootloader-client.h"
 #include "ota-unicast-bootloader-client-internal.h"

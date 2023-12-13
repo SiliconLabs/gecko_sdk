@@ -1,0 +1,25 @@
+id: zw_appshw_zniffer
+label: Zniffer AppsHw
+category: Z-Wave|AppsHw
+description: AppsHw for Zniffer application
+package: Z-Wave
+quality: production
+config_file:
+  # For series 1
+  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/Zniffer/config/s1/zniffer_config.h
+    file_id: zniffer_config
+    condition: [device_series_1]
+  # For series 2
+  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/Zniffer/config/s2/zniffer_config.h
+    file_id: zniffer_config
+    condition: [device_series_2]
+source:
+  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/Zniffer/Zniffer_hw.c"
+include:
+  - path: "protocol/z-wave/Apps/zwave_ncp_zniffer"
+    file_list:
+      - path: "Zniffer_hw.h"
+provides:
+  - name: zw_appshw_zniffer
+requires:
+  - name: zw_appshw

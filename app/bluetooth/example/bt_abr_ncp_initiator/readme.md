@@ -1,6 +1,6 @@
 # NCP - ABR
 
-This is a Network  Co-Processor (NCP) based target application. This serves as the target application of the ABR Initiator role. The Host sample app for it is provided under the folder: ..app/bluetooth/example_host/bt_abr_host_initiator
+This is a Network  Co-Processor (NCP) based target application. This serves as the target application of the ABR Initiator role. The Host sample app for it is provided under the folder: ../app/bluetooth/example_host/bt_abr_host_initiator
 
 ## Getting Started with NCP
 
@@ -10,7 +10,7 @@ The NCP Host and Target communicate via a serial interface (UART), which can be 
 
 ## Usage
 
-Build and flash the application. Use the "bt_abr_host_initiator" Host sample application to connect to it. The Host application will scan for a device running the "Soc - ABR Reflector" sample application. When found, the initiator will create a connection between them and will start the distance measurement process. The initiator calculates the distance, and display them in the command line terminal. It also saves the measured values to a txt file next to the executable.
+Build and flash the application. Use the "bt_abr_host_initiator" Host sample application to connect to it. The Host application will scan for a device running the "Soc - ABR Reflector" sample application. When found, the initiator will create a connection between them and will start the distance measurement process. The initiator calculates the distance, and display them in the command line terminal. It also saves the measured values to a jsonl file next to the executable.
 
 ## Troubleshooting
 

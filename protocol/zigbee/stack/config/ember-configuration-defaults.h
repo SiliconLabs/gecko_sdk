@@ -66,10 +66,6 @@
 #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_ZIGBEE_BINDING_TABLE_PRESENT)
-#include "sl_zigbee_binding_table_config.h"
-#endif
-
 #if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
 #include "sl_zigbee_green_power_config.h"
 #endif
@@ -86,20 +82,22 @@
 #include "zigbee_device_config.h"
 #endif
 
-#if defined(SL_CATALOG_ZIGBEE_PRO_STACK_PRESENT)
+#if defined(SL_CATALOG_ZIGBEE_PRO_STACK_PRESENT)                      \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_MAC_TEST_CMDS_PRESENT)       \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_ALT_MAC_PRESENT)             \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_NON_DEFAULT_MAC_PRESENT)     \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_RAIL_MUX_PRESENT)            \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_WITH_HIGH_SPEED_PHY_PRESENT) \
+  || defined(SL_CATALOG_ZIGBEE_PRO_ROUTER_STACK_PRESENT)              \
+  || defined(SL_CATALOG_ZIGBEE_PRO_STACK_WITH_HIGH_SPEED_PHY_RAIL_MUX)
 #include "sl_zigbee_pro_stack_config.h"
-#endif
-
-#if defined(SL_CATALOG_ZIGBEE_PRO_LEAF_STACK_PRESENT) || defined(SL_CATALOG_ZIGBEE_PRO_LEAF_STACK_WITH_CSL_PRESENT)
+#elif defined(SL_CATALOG_ZIGBEE_PRO_LEAF_STACK_PRESENT)         \
+  || defined(SL_CATALOG_ZIGBEE_PRO_LEAF_STACK_WITH_CSL_PRESENT) \
+  || defined(SL_CATALOG_ZIGBEE_PRO_LEAF_STACK_MAC_TEST_CMDS_PRESENT)
 #include "sl_zigbee_pro_leaf_stack_config.h"
-#endif
-
-#if defined(SL_CATALOG_ZIGBEE_PRO_STACK_ALT_MAC_PRESENT)
-#include "sl_zigbee_pro_stack_alt_mac_config.h"
-#endif
-
-#if defined(SL_CATALOG_ZIGBEE_PRO_STACK_NON_DEFAULT_MAC_PRESENT)
-#include "sl_zigbee_pro_stack_non_default_mac_config.h"
+#elif defined(EMBER_SCRIPTED_TEST) || defined(ZAPTEST) || defined(IMAGE_BUILDER) || defined(SLI_ZIGBEE_LIBRARY_BUILD) || defined(EZSP_HOST) || defined(RAIL_MAKE_TEST)
+#else
+#error "No stack configuration header included"
 #endif
 
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
@@ -583,13 +581,6 @@
   #define EMBER_TRANSIENT_KEY_SESSION_TIMEOUT_VAL 0xFFFF
 #endif
 
-/** @brief The time the coordinator will wait (in seconds) for a second end
- *  device bind request to arrive. The default value is 60.
- */
-#ifndef EMBER_END_DEVICE_BIND_TIMEOUT
-  #define EMBER_END_DEVICE_BIND_TIMEOUT 60
-#endif
-
 /** @brief The number of PAN ID conflict reports that must be received by
  * the network manager within one minute to trigger a PAN ID change.
  * Very rarely, a corrupt beacon can pass the CRC check and trigger a
@@ -773,7 +764,12 @@
 #endif
 
 #ifndef SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS
-  #define SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS (10000u)
+  #ifdef SL_CATALOG_ZIGBEE_DELAYED_JOIN_PRESENT
+    #define SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS (65535u)
+    #define SL_ZIGBEE_TRANSIENT_DEVICE_MINIMUM_TIMEOUT_MS (10000u)
+  #else
+    #define SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS (10000u)
+  #endif
 #endif
 
 //Allows the aps acks for APSME commands to be turned off or on
@@ -783,11 +779,7 @@
 #endif
 
 #ifndef EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE
-#if !defined(EMBER_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
   #define EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE 2
-#else
-  #define EMBER_CUSTOM_MAC_FILTER_TABLE_SIZE 64
-#endif
 #endif
 
 /** @brief The 802.15.4 CCA mode that should be used at startup. The default

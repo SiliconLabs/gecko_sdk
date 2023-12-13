@@ -56,7 +56,7 @@ static bool NvmBackupOpen(void)
   uint8_t bReturn = QueueProtocolCommand((uint8_t*)&nvmOpen);
   if (EQUEUENOTIFYING_STATUS_SUCCESS == bReturn)
   {
-    SZwaveCommandStatusPackage cmdStatus;
+    SZwaveCommandStatusPackage cmdStatus = { 0 };
     if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_NVM_BACKUP_RESTORE))
     {
       if (cmdStatus.Content.NvmBackupRestoreStatus.status)
@@ -89,7 +89,7 @@ static uint8_t NvmBackupRead( uint32_t offset, uint8_t length, uint8_t* pNvmData
   uint8_t bReturn = QueueProtocolCommand((uint8_t*)&nvmRead);
   if (EQUEUENOTIFYING_STATUS_SUCCESS == bReturn)
   {
-    SZwaveCommandStatusPackage cmdStatus;
+    SZwaveCommandStatusPackage cmdStatus = { 0 };
     if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_NVM_BACKUP_RESTORE))
     {
       if (cmdStatus.Content.NvmBackupRestoreStatus.status)
@@ -139,7 +139,7 @@ static uint8_t NvmBackupRestore( uint32_t offset, uint8_t length, uint8_t* pNvmD
   uint8_t bReturn = QueueProtocolCommand((uint8_t*)&nvmWrite);
   if (EQUEUENOTIFYING_STATUS_SUCCESS == bReturn)
   {
-    SZwaveCommandStatusPackage cmdStatus;
+    SZwaveCommandStatusPackage cmdStatus = { 0 };
     if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_NVM_BACKUP_RESTORE))
     {
       if (cmdStatus.Content.NvmBackupRestoreStatus.status)
@@ -153,9 +153,8 @@ static uint8_t NvmBackupRestore( uint32_t offset, uint8_t length, uint8_t* pNvmD
   return false;
 }
 
-void func_id_serial_api_nvm_backup_restore(uint8_t inputLength, uint8_t *pInputBuffer, uint8_t *pOutputBuffer, uint8_t *pOutputLength)
+void func_id_serial_api_nvm_backup_restore(__attribute__((unused)) uint8_t inputLength, uint8_t *pInputBuffer, uint8_t *pOutputBuffer, uint8_t *pOutputLength)
 {
-  UNUSED(inputLength);
   uint32_t NVM_WorkPtr;
   uint8_t dataLength;
   const uint32_t nvm_storage_size = zpal_nvm_backup_get_size();

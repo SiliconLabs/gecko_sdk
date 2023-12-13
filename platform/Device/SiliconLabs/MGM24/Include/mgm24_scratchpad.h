@@ -84,4 +84,4 @@ typedef struct {
 /** @} End of group MGM24_SCRATCHPAD */
 /** @} End of group Parts */
 
-#endif /* MGM24_SCRATCHPAD_H */
+#endif // MGM24_SCRATCHPAD_H

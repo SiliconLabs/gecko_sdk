@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #ifndef OPENTHREAD_CORE_EFR32_CONFIG_CHECK_H_
 #define OPENTHREAD_CORE_EFR32_CONFIG_CHECK_H_
 
+#include "board_config.h"
 #ifndef RADIO_CONFIG_915MHZ_OQPSK_SUPPORT
 #if OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT
 #error "Platform not configured to support configuration option: OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT"
@@ -41,8 +42,10 @@
 #endif
 #endif
 
-#if !defined(RADIO_CONFIG_915MHZ_OQPSK_SUPPORT) && !defined(RADIO_CONFIG_SUBGHZ_SUPPORT) && !defined(RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT)
-#error "One of the following must be defined: RADIO_CONFIG_915MHZ_OQPSK_SUPPORT, RADIO_CONFIG_SUBGHZ_SUPPORT or RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT"
+#if !defined(RADIO_CONFIG_915MHZ_OQPSK_SUPPORT) && !defined(RADIO_CONFIG_SUBGHZ_SUPPORT) \
+    && !defined(RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT)
+#error \
+    "One of the following must be defined: RADIO_CONFIG_915MHZ_OQPSK_SUPPORT, RADIO_CONFIG_SUBGHZ_SUPPORT or RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT"
 #endif
 
 #endif /* OPENTHREAD_CORE_EFR32_CONFIG_CHECK_H_ */

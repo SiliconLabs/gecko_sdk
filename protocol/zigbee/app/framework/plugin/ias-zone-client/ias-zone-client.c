@@ -69,6 +69,7 @@ typedef enum {
 static IasZoneClientState iasZoneClientState = IAS_ZONE_CLIENT_STATE_NONE;
 static uint8_t currentIndex = NO_INDEX;
 static uint8_t myEndpoint = 0;
+static bool allowCieAddress = true;
 
 static sl_zigbee_event_t stateMachineEvent;
 static void stateMachineEventHandler(sl_zigbee_event_t * event);
@@ -81,12 +82,19 @@ static void iasClientLoadCommand(void);
 
 //-----------------------------------------------------------------------------
 // Functions
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+void sl_zigbee_ias_client_allow_set_cie_address(bool allow)
+{
+  allowCieAddress = allow;
+}
+#endif
 void emberAfIasZoneClusterClientInitCallback(uint8_t endpoint)
 {
   sl_zigbee_event_init(&stateMachineEvent,
                        stateMachineEventHandler);
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  sl_zigbee_ias_client_allow_set_cie_address(true);
+#endif
   sli_zigbee_af_clear_servers();
   myEndpoint = endpoint;
   iasClientLoadCommand();
@@ -404,7 +412,8 @@ static void setCieAddress(EmberNodeId destAddress)
 static void iasZoneClientServiceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result)
 {
   if (result->status == EMBER_AF_UNICAST_SERVICE_DISCOVERY_COMPLETE_WITH_RESPONSE
-      && result->zdoRequestClusterId == MATCH_DESCRIPTORS_REQUEST) {
+      && result->zdoRequestClusterId == MATCH_DESCRIPTORS_REQUEST
+      && allowCieAddress) {
     const EmberAfEndpointList* endpointList = (const EmberAfEndpointList *)result->responseData;
     if (endpointList->count > 0) {
       setServerEndpoint(currentIndex, endpointList->list[0]);
@@ -430,7 +439,8 @@ static void checkForIasZoneServer(EmberNodeId emberNodeId, uint8_t* ieeeAddress)
 
   setCurrentIndex(serverIndex);
 
-  if (emberAfIasZoneClientKnownServers[serverIndex].endpoint != UNKNOWN_ENDPOINT) {
+  if (emberAfIasZoneClientKnownServers[serverIndex].endpoint != UNKNOWN_ENDPOINT
+      && allowCieAddress) {
     // If a remote endpoint that you have already seen announces itself,
     // write your IEEE in them just in case they left and are rejoining. --agkeesle
     // Bug: EMAPPFWKV2-1078
@@ -609,3 +619,11 @@ uint32_t emberAfIasZoneClusterClientCommandParse(sl_service_opcode_t opcode,
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
 }
+
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+void sli_zigbee_af_ias_zone_client_allow_set_cie_address(sl_cli_command_arg_t *arguments)
+{
+  bool allowCieAddress = ((uint8_t)sl_cli_get_argument_uint8(arguments, 0) != 0);
+  sl_zigbee_ias_client_allow_set_cie_address(allowCieAddress);
+}
+#endif

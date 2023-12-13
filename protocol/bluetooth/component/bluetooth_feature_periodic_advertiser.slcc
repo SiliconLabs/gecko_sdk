@@ -28,3 +28,6 @@ template_contribution:
       function: "sl_btctrl_alloc_periodic_adv(SL_BT_CONFIG_MAX_PERIODIC_ADVERTISERS);sl_btctrl_init_periodic_adv()"
       deinit: "sl_btctrl_alloc_periodic_adv(0)"
     priority: 10
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-periodic-advertiser

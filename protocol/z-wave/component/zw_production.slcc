@@ -22,13 +22,6 @@ library:
   ### Series 2
   - path: protocol/z-wave/ZWave/lib/libZWaveSlave_800s.a
     condition: [device_series_2, zw_end_device]
-  ## Portable Controllers
-  ### Series 1
-  - path: protocol/z-wave/ZWave/lib/libZWaveControllerPortable_700s.a
-    condition: [device_series_1, zw_role_type_portable_controller]
-  ### Series 2
-  - path: protocol/z-wave/ZWave/lib/libZWaveControllerPortable_800s.a
-    condition: [device_series_2, zw_role_type_portable_controller]
   ## Controllers
   ### Series 1
   - path: protocol/z-wave/ZWave/lib/libZWaveController_700s.a

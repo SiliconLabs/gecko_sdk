@@ -6,8 +6,9 @@ description: >
   The CoAP protocol is designed as a specialized Internet Application Protocol for constrained devices in lossy networks (see RFC 7252 for additional information). 
   Wi-SUN FAN networks fit this definition. The CoAP implementation relies on the UDP transport layer to send and receive packets.
   A number of helper functions are part of the component to help build CoAP payloads, parse CoAP packets, free CoAP packets, and more.
-  CoAP Resource Handler service handles registered resources. 
+  The CoAP Resource Handler service handles registered resources.
   Resource Discovery request provides an interface to get information about available resources. Resource has more attributes over URI (Uniform Resource Identifier) path, which can be filtered by particular Resource Discovery request.
+  The CoAP Notification service provides interface to create and schedule notifications to the remote host. Schedule time and send condition can be customized depending on the application.
   To use the CoAP component in your application, add it to your project and initialize it with sl_wisun_coap_init().
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
@@ -23,6 +24,7 @@ source:
   - path: "sl_wisun_coap.c"
   - path: "sli_wisun_coap_mem.c"
   - path: "sl_wisun_coap_rhnd.c"
+  - path: "sl_wisun_coap_notify.c"
   - path: "sli_wisun_coap_rd.c"
   - path: "mbed-coap/sn_coap_protocol.c"
   - path: "mbed-coap/sn_coap_parser.c"
@@ -35,6 +37,7 @@ include:
     - "path": "sl_wisun_coap.h"
     - "path": "sli_wisun_coap_mem.h"
     - "path": "sl_wisun_coap_rhnd.h"
+    - "path": "sl_wisun_coap_notify.h"
     - "path": "sli_wisun_coap_rd.h"
   - path: "./mbed-coap"
     file_list:

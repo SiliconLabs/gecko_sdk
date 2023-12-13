@@ -19,7 +19,9 @@
 #include "../../include/af.h"
 #include "../../util/common.h"
 #include "simple-metering-server.h"
+#ifdef SL_CATALOG_ZIGBEE_SIMPLE_METERING_SERVER_TEST_METER_PRESENT
 #include "simple-metering-test.h"
+#endif
 
 #include "zap-cluster-command-parser.h"
 
@@ -117,13 +119,36 @@ static uint8_t findSamplingSessionByEventId(uint32_t issuerEventId)
   return 0xFF;
 }
 
+WEAK(void sli_zigbee_af_test_meter_init(uint8_t endpoint))
+{
+  (void) endpoint;
+}
+
+WEAK(void sli_zigbee_af_test_meter_tick(uint8_t endpoint))
+{
+  (void) endpoint;
+}
+
+WEAK(bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
+                                                uint32_t endTime,
+                                                uint8_t numberOfPeriods))
+{
+  (void) intervalChannel;
+  (void) endTime;
+  (void) numberOfPeriods;
+
+  return false;
+}
+
 void emberAfSimpleMeteringClusterServerInitCallback(uint8_t endpoint)
 {
   sl_zigbee_event_init(samplingEvent,
                        emberAfPluginSimpleMeteringServerSamplingEventHandler);
   sl_zigbee_event_init(supplyEvent,
                        emberAfPluginSimpleMeteringServerSupplyEventHandler);
+
   sli_zigbee_af_test_meter_init(endpoint);
+
   fastPollEndTimeUtcTableInit();
   samplingDataInit();
   sl_zigbee_zcl_schedule_server_tick(endpoint,
@@ -808,25 +833,4 @@ uint32_t emberAfSimpleMeteringClusterServerCommandParse(sl_service_opcode_t opco
   return ((wasHandled)
           ? EMBER_ZCL_STATUS_SUCCESS
           : EMBER_ZCL_STATUS_UNSUP_COMMAND);
-}
-
-WEAK(void sli_zigbee_af_test_meter_init(uint8_t endpoint))
-{
-  (void) endpoint;
-}
-
-WEAK(void sli_zigbee_af_test_meter_tick(uint8_t endpoint))
-{
-  (void) endpoint;
-}
-
-WEAK(bool sli_zigbee_af_test_meter_get_profiles(uint8_t intervalChannel,
-                                                uint32_t endTime,
-                                                uint8_t numberOfPeriods))
-{
-  (void) intervalChannel;
-  (void) endTime;
-  (void) numberOfPeriods;
-
-  return false;
 }

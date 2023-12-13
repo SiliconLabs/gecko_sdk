@@ -37,7 +37,6 @@
 #include "app/ezsp-host/ezsp-host-io.h"
 #include "app/ezsp-host/ezsp-host-queues.h"
 #include "app/ezsp-host/ezsp-host-ui.h"
-#include "app/util/gateway/backchannel.h"
 #include "app/ezsp-host/spi/spi-host-ui.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -87,20 +86,6 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
           snprintf(errStr, ERR_LEN, "Invalid trace flag value %s.\n", optarg);
         } else {
           spiWriteConfig(traceFlags, trace);
-        }
-        break;
-      case 'v':
-        if (!backchannelSupported) {
-          fprintf(stderr, "Error: Backchannel support not compiled into this application.\n");
-          exit(1);
-        }
-        backchannelEnable = true;
-        if (optarg) {
-          int port = atoi(optarg);
-          if (port == 0 || port > 65535) {
-            snprintf(errStr, ERR_LEN, "Invalid virtual ISA port number '%d'.\n", port);
-          }
-          backchannelSerialPortOffset = port;
         }
         break;
       case 'd': {

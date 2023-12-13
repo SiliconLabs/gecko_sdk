@@ -1,22 +1,20 @@
 package: Zigbee
-description: This component provides the test code for the simple metering server. 
-  It enables the code that pretends it is a meter and also supports meter error along with CLI 
-  implementation. It should be only used for testing purposes.
+description: This component provides the test code for the simple metering server. It enables the code that pretends it is a meter and also supports meter error along with CLI implementation. It should be only used for testing purposes.
 label: Simple Metering Server Test Meter
 quality: production
 id: zigbee_simple_metering_server_test_meter
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_simple_metering_server_test_meter"
+  - name: zigbee_simple_metering_server_test_meter
 requires:
-    - name: "zigbee_simple_metering_server"
+  - name: zigbee_simple_metering_server
 config_file:
   - path: protocol/zigbee/app/framework/plugin/simple-metering-server/config/simple-metering-server-test-meter-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/simple-metering-server/simple-metering-test.c
   - path: protocol/zigbee/app/framework/plugin/simple-metering-server/simple-metering-server-test-meter-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/simple-metering-server
     file_list:
@@ -42,10 +40,10 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_rate
       help: Changes the rate argument.
       argument:
-      - type: uint16
-        help: The rate at which the test meter generates test data
-      - type: uint8
-        help: The endpoint
+        - type: uint16
+          help: The rate at which the test meter generates test data
+        - type: uint8
+          help: The endpoint
   - name: cli_command
     value:
       group: simple-metering-server
@@ -53,7 +51,7 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_variance
       help: Change the variance in the test data created by the test meter.
       argument:
-      - type: uint16
+        - type: uint16
   - name: cli_command
     value:
       group: simple-metering-server
@@ -61,8 +59,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_adjust
       help: Adjusts the test meter.
       argument:
-      - type: uint8
-        help: The endpoint of the test meter
+        - type: uint8
+          help: The endpoint of the test meter
   - name: cli_command
     value:
       group: simple-metering-server
@@ -70,8 +68,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_off
       help: Turns off output from the test meter.
       argument:
-      - type: uint8
-        help: The endpoint of the test meter
+        - type: uint8
+          help: The endpoint of the test meter
   - name: cli_command
     value:
       group: simple-metering-server
@@ -79,8 +77,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_electric
       help: Turns test meter into an electric meter.
       argument:
-      - type: uint8
-        help: The endpoint of the test meter
+        - type: uint8
+          help: The endpoint of the test meter
   - name: cli_command
     value:
       group: simple-metering-server
@@ -88,8 +86,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_gas
       help: Turns test meter into a gas meter.
       argument:
-      - type: uint8
-        help: The endpoint of the test meter
+        - type: uint8
+          help: The endpoint of the test meter
   - name: cli_command
     value:
       group: simple-metering-server
@@ -97,8 +95,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_random_error
       help: Sets the random error to the value provided, which is the chance in 256 of an error occurring.
       argument:
-      - type: uint8
-        help: The chance of an error occurring in 255
+        - type: uint8
+          help: The chance of an error occurring in 255
   - name: cli_command
     value:
       group: simple-metering-server
@@ -106,10 +104,10 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_set_error
       help: Sets the meters status attribute ID to the passed error value.
       argument:
-      - type: uint8
-        help: The chance of an error occurring in 255
-      - type: uint8
-        help: The endpoint affected
+        - type: uint8
+          help: The chance of an error occurring in 255
+        - type: uint8
+          help: The endpoint affected
   - name: cli_command
     value:
       group: simple-metering-server
@@ -117,8 +115,8 @@ template_contribution:
       handler: sli_zigbee_af_simple_metering_server_cli_profiles
       help: Turns on and off profiles on the test meter server.
       argument:
-      - type: uint8
-        help: The profile to set     
+        - type: uint8
+          help: The profile to set
 
 documentation:
   docset: zigbee

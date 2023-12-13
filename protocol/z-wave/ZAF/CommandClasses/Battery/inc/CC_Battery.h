@@ -2,6 +2,18 @@
  * @file
  * Handler for Command Class Battery.
  * @copyright 2019 Silicon Laboratories Inc.
+ * 
+ * @addtogroup CC Command Classes
+ * @{
+ * @addtogroup Battery
+ * @{
+ * 
+ * This command class can be used for reporting the device's battery level with additional features.
+ * Additional functionality may be added to the application, if needed. See CC_Battery_BatteryGet_handler() in zwave_soc_sensor_pir's app.c source file as an example.
+ * 
+ * @}
+ * @}
+ * 
  */
 
 #ifndef _CC_BATTERY_H_

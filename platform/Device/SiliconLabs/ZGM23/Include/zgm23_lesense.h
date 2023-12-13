@@ -1219,4 +1219,4 @@ typedef struct {
 /** @} End of group ZGM23_LESENSE */
 /** @} End of group Parts */
 
-#endif /* ZGM23_LESENSE_H */
+#endif // ZGM23_LESENSE_H

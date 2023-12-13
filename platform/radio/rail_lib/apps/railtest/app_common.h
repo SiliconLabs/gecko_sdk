@@ -385,6 +385,8 @@ typedef struct Counters{
   uint32_t receive;
   uint32_t receiveCrcErrDrop;
   uint32_t syncDetect;
+  uint32_t syncDetect1;
+  uint32_t syncDetect2;
   uint32_t preambleLost;
   uint32_t preambleDetect;
   uint32_t frameError;
@@ -539,7 +541,7 @@ extern RAIL_Handle_t railHandle;
 extern bool printTxAck;
 
 // Strings representing the possible PA selections
-extern const char* paStrings[];
+extern const char * const paStrings[];
 
 // LQI offset variable
 extern int16_t lqiOffset;
@@ -597,8 +599,9 @@ void RAILCb_TimerExpired(RAIL_Handle_t railHandle);
 void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
                                         RAIL_Time_t expectedTimeOfEvent,
                                         void *cbArg);
-void restartModeSwitchSequence(void);
+void restartModeSwitchSequence(bool applyDelay);
 void endModeSwitchSequence(void);
+void scheduleNextModeSwitchTx(bool MSPktSent);
 #endif
 void RAILCb_SwTimerExpired(RAIL_Handle_t railHandle);
 AppMode_t previousAppMode(void);

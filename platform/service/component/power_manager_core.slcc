@@ -15,6 +15,8 @@ source:
     condition: [device_series_1]
   - path: platform/service/power_manager/src/sl_power_manager_hal_s2.c
     condition: [device_series_2]
+  - path: platform/service/power_manager/src/sl_power_manager_hal_s3.c
+    condition: [device_series_3]
   - path: platform/service/power_manager/src/sli_power_manager_private.h
 include:
   - path: platform/service/power_manager/inc
@@ -26,8 +28,23 @@ provides:
   - name: power_manager_core
 requires:
   - name: emlib_cmu
+    condition: [device_series_2]
+  - name: emlib_cmu
+    condition: [device_series_1]
+  - name: emlib_cmu
+    condition: [device_series_0]
   - name: emlib_emu
+    condition: [device_series_2]
+  - name: emlib_emu
+    condition: [device_series_1]
+  - name: emlib_emu
+    condition: [device_series_0]
   - name: emlib_core
+    condition: [device_series_2]
+  - name: emlib_core
+    condition: [device_series_1]
+  - name: emlib_core
+    condition: [device_series_0]
   - name: sl_assert
   - name: status
   - name: slist
@@ -42,6 +59,8 @@ recommends:
     condition: [device_series_1]    
   - id: power_manager_deepsleep
     condition: [device_series_2, device_has_sysrtc]
+  - id: power_manager_no_deepsleep
+    condition: [device_series_3]
   - id: power_manager_deepsleep_blocking_hfxo_restore
     condition: [device_series_2, device_has_rtcc]    
 template_contribution:

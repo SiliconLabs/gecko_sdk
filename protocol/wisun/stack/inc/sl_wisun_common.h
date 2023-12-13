@@ -33,12 +33,6 @@
 
 #include "ns_types.h"
 
-#ifdef HAVE_SIMULATION
-#define SLI_WISUN_TASK_LOOP 
-#else
-#define SLI_WISUN_TASK_LOOP while(1)
-#endif
-
 #define CMSIS_RTOS_ERROR_MASK       0x80000000
 
 #define SLI_WISUN_ERROR_CHECK(__result)\
@@ -131,6 +125,9 @@ int64_t divide_integer(int64_t dividend, int32_t divisor);
 /// Convert hours to minutes
 #define HOUR_TO_MIN(x) ((x) * 60)
 
+/// Convert minutes to seconds
+#define MIN_TO_SEC(x) ((x) * 60)
+
 /// Convert hours to seconds
 #define HOUR_TO_SEC(x) ((x) * 3600)
 
@@ -140,6 +137,15 @@ int64_t divide_integer(int64_t dividend, int32_t divisor);
 /// Convert signal level in dBm to RSL range from -174 (0) to +80 (254) dBm
 #define DBM_TO_RSL_RANGE(x)  (174 + (x))
 
+#define ABSOLUTE_DIFF(a, b) ((a) > (b)) ? (a) - (b) : (b) - (a)
+
+#define MIN(a, b) (((a) <= (b)) ? (a) : (b))
+
+#define MAX(a, b) (((a) >= (b)) ? (a) : (b))
+
 #define container_of(ptr, type, member)  (type *)((uintptr_t)(ptr) - ((uintptr_t)(&((type *)0)->member)))
+
+/// Get the number of elements in an array (must not be used with pointers)
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
 #endif

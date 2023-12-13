@@ -17,7 +17,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_cte_adv
 tag:
   - No-Code
-
 source:
   - path: sl_gatt_service_cte_connectionless.c
 config_file:
@@ -40,3 +39,6 @@ template_contribution:
       count: 1
   - name: component_catalog
     value: gatt_service_cte_connectionless
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-cte-connectionless

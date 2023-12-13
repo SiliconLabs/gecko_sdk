@@ -50,6 +50,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -124,6 +125,17 @@ void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
  * @return Delay for the complete wake-up process with full restore.
  ******************************************************************************/
 uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+/*******************************************************************************
+ * Gets the status of power manager variable is_sleeping_waiting_for_clock_restore.
+ *
+ * @return true if Power Manager is sleeping waiting for clock restore, else false.
+ *
+ * @note FOR INTERNAL USE ONLY.
+ ******************************************************************************/
+bool sli_power_manager_get_clock_restore_status(void);
+#endif
 
 #ifdef __cplusplus
 }

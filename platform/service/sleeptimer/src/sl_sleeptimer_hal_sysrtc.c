@@ -36,10 +36,17 @@
 #include "sli_sleeptimer_hal.h"
 #include "em_core.h"
 #include "em_cmu.h"
-#include "em_prs.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_HFXO_MANAGER_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#include "em_prs.h"
+#else
+#include "sl_peripheral_prs.h"
+#endif
 #endif
 
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC
@@ -63,8 +70,8 @@ __STATIC_INLINE uint32_t get_time_diff(uint32_t a,
  *****************************************************************************/
 void sleeptimer_hal_init_timer(void)
 {
-  sl_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
-  sl_sysrtc_group_config_t group_config = SYSRTC_GROUP_CONFIG_DEFAULT;
+  sl_hal_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
+  sl_hal_sysrtc_group_config_t group_config = SYSRTC_GROUP_CONFIG_DEFAULT;
 
   CMU_ClockEnable(cmuClock_SYSRTC, true);
 
@@ -72,16 +79,16 @@ void sleeptimer_hal_init_timer(void)
   sysrtc_config.enable_debug_run = true;
 #endif
 
-  sl_sysrtc_init(&sysrtc_config);
+  sl_hal_sysrtc_init(&sysrtc_config);
 
   group_config.compare_channel0_enable = false;
 
-  sl_sysrtc_init_group(0u, &group_config);
+  sl_hal_sysrtc_init_group(0u, &group_config);
 
-  sl_sysrtc_disable_group_interrupts(0u, _SYSRTC_GRP0_IEN_MASK);
-  sl_sysrtc_clear_group_interrupts(0u, _SYSRTC_GRP0_IF_MASK);
-  sl_sysrtc_enable();
-  sl_sysrtc_set_counter(0u);
+  sl_hal_sysrtc_disable_group_interrupts(0u, _SYSRTC_GRP0_IEN_MASK);
+  sl_hal_sysrtc_clear_group_interrupts(0u, _SYSRTC_GRP0_IF_MASK);
+  sl_hal_sysrtc_enable();
+  sl_hal_sysrtc_set_counter(0u);
 
   NVIC_ClearPendingIRQ(SYSRTC_APP_IRQn);
   NVIC_EnableIRQ(SYSRTC_APP_IRQn);
@@ -90,37 +97,53 @@ void sleeptimer_hal_init_timer(void)
 /*******************************************************************************
  * Hardware Abstraction Layer to perform initialization related to Power Manager.
  ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 void sli_sleeptimer_hal_power_manager_integration_init(void)
 {
   // Initialize PRS to start HFXO for early wakeup
   CMU_ClockEnable(cmuClock_PRS, true);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
   PRS_ConnectSignal(1UL, prsTypeAsync, prsSignalSYSRTC0_GRP0OUT1);
   PRS_ConnectConsumer(1UL, prsTypeAsync, prsConsumerHFXO0_OSCREQ);
+#else
+  sl_hal_prs_async_connect_channel_producer(1UL, SL_HAL_PRS_ASYNC_SYSRTC0_GRP0OUT1);
+  sl_hal_prs_connect_channel_consumer(1UL, SL_HAL_PRS_TYPE_ASYNC, SL_HAL_PRS_CONSUMER_HFXO0_OSCREQ);
+#endif
 
   // Set SYSRTC Compare Channel 1
   SYSRTC0->GRP0_CTRL |= (_SYSRTC_GRP0_CTRL_CMP1CMOA_CMPIF << _SYSRTC_GRP0_CTRL_CMP1CMOA_SHIFT);
 }
+#endif
 
 /*******************************************************************************
  * Hardware Abstraction Layer to perform initialization related to HFXO Manager.
  ******************************************************************************/
+#if defined(SL_CATALOG_HFXO_MANAGER_PRESENT)
 void sli_sleeptimer_hal_hfxo_manager_integration_init(void)
 {
   // Set PRS signal from HFXO to SYSRTC capture channel
   CMU_ClockEnable(cmuClock_PRS, true);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
   PRS_ConnectSignal(2UL, prsTypeAsync, prsSignalHFXO0L_STATUS1);
   PRS_ConnectConsumer(2UL, prsTypeAsync, prsConsumerSYSRTC0_SRC0);
+#else
+  sl_hal_prs_async_connect_channel_producer(2UL, SL_HAL_PRS_ASYNC_SYXO0L_STATUS1);
+  sl_hal_prs_connect_channel_consumer(2UL, SL_HAL_PRS_TYPE_ASYNC, SL_HAL_PRS_CONSUMER_SYSRTC0_IN0);
+#endif
 
   // Set SYSRTC Capture Channel
   SYSRTC0->GRP0_CTRL |= (_SYSRTC_GRP0_CTRL_CAP0EDGE_RISING << _SYSRTC_GRP0_CTRL_CAP0EDGE_SHIFT);
 }
+#endif
 
 /******************************************************************************
  * Gets SYSRTC counter value.
  *****************************************************************************/
 uint32_t sleeptimer_hal_get_counter(void)
 {
-  return sl_sysrtc_get_counter();
+  return sl_hal_sysrtc_get_counter();
 }
 
 /******************************************************************************
@@ -128,7 +151,7 @@ uint32_t sleeptimer_hal_get_counter(void)
  *****************************************************************************/
 uint32_t sleeptimer_hal_get_compare(void)
 {
-  return sl_sysrtc_get_group_compare_channel_value(0u, 0u);
+  return sl_hal_sysrtc_get_group_compare_channel_value(0u, 0u);
 }
 
 /******************************************************************************
@@ -150,7 +173,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
   counter = sleeptimer_hal_get_counter();
   compare = sleeptimer_hal_get_compare();
 
-  if (((sl_sysrtc_get_group_interrupts(0u) & SYSRTC_GRP0_IEN_CMP0) != 0)
+  if (((sl_hal_sysrtc_get_group_interrupts(0u) & SYSRTC_GRP0_IEN_CMP0) != 0)
       || get_time_diff(compare, counter) > SLEEPTIMER_COMPARE_MIN_DIFF
       || compare == counter) {
     // Add margin if necessary
@@ -159,7 +182,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
     }
     compare_value %= SLEEPTIMER_TMR_WIDTH;
 
-    sl_sysrtc_set_group_compare_channel_value(0u, 0u, compare_value - 1);
+    sl_hal_sysrtc_set_group_compare_channel_value(0u, 0u, compare_value - 1);
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
   CORE_EXIT_CRITICAL();
@@ -197,7 +220,7 @@ void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value)
 
   compare_value %= SLEEPTIMER_TMR_WIDTH;
 
-  sl_sysrtc_set_group_compare_channel_value(0u, 1u, compare_value - 1);
+  sl_hal_sysrtc_set_group_compare_channel_value(0u, 1u, compare_value - 1);
 
   CORE_EXIT_CRITICAL();
 
@@ -223,7 +246,7 @@ void sleeptimer_hal_enable_int(uint8_t local_flag)
     sysrtc_ien |= SYSRTC_GRP0_IEN_CMP0;
   }
 
-  sl_sysrtc_enable_group_interrupts(0u, sysrtc_ien);
+  sl_hal_sysrtc_enable_group_interrupts(0u, sysrtc_ien);
 }
 
 /******************************************************************************
@@ -244,7 +267,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
     SYSRTC0->GRP0_CTRL &= ~_SYSRTC_GRP0_CTRL_CMP0EN_MASK;
   }
 
-  sl_sysrtc_disable_group_interrupts(0u, sysrtc_int_dis);
+  sl_hal_sysrtc_disable_group_interrupts(0u, sysrtc_int_dis);
 }
 
 /*******************************************************************************
@@ -265,7 +288,7 @@ void sleeptimer_hal_set_int(uint8_t local_flag)
 bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag)
 {
   bool int_is_set = false;
-  uint32_t irq_flag = sl_sysrtc_get_group_interrupts(0u);
+  uint32_t irq_flag = sl_hal_sysrtc_get_group_interrupts(0u);
 
   switch (local_flag) {
     case SLEEPTIMER_EVENT_COMP:
@@ -293,7 +316,7 @@ void SYSRTC_APP_IRQHandler(void)
   uint32_t irq_flag;
 
   CORE_ENTER_ATOMIC();
-  irq_flag = sl_sysrtc_get_group_interrupts(0u);
+  irq_flag = sl_hal_sysrtc_get_group_interrupts(0u);
 
   if (irq_flag & SYSRTC_GRP0_IF_OVF) {
     local_flag |= SLEEPTIMER_EVENT_OF;
@@ -302,7 +325,7 @@ void SYSRTC_APP_IRQHandler(void)
   if (irq_flag & SYSRTC_GRP0_IF_CMP0) {
     local_flag |= SLEEPTIMER_EVENT_COMP;
   }
-  sl_sysrtc_clear_group_interrupts(0u, irq_flag & (SYSRTC_GRP0_IF_OVF | SYSRTC_GRP0_IF_CMP0));
+  sl_hal_sysrtc_clear_group_interrupts(0u, irq_flag & (SYSRTC_GRP0_IF_OVF | SYSRTC_GRP0_IF_CMP0));
 
   process_timer_irq(local_flag);
 
@@ -349,9 +372,9 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
  ******************************************************************************/
 uint32_t sleeptimer_hal_get_capture(void)
 {
-  if ((sl_sysrtc_get_group_interrupts(0) & _SYSRTC_GRP0_IF_CAP0_MASK) != 0) {
-    sl_sysrtc_clear_group_interrupts(0, _SYSRTC_GRP0_IF_CAP0_MASK);
-    return sl_sysrtc_get_group_capture_channel_value(0);
+  if ((sl_hal_sysrtc_get_group_interrupts(0) & _SYSRTC_GRP0_IF_CAP0_MASK) != 0) {
+    sl_hal_sysrtc_clear_group_interrupts(0, _SYSRTC_GRP0_IF_CAP0_MASK);
+    return sl_hal_sysrtc_get_group_capture_channel_value(0);
   } else {
     return 0;
   }
@@ -363,7 +386,7 @@ uint32_t sleeptimer_hal_get_capture(void)
  ******************************************************************************/
 void sleeptimer_hal_reset_prs_signal(void)
 {
-  sl_sysrtc_clear_group_interrupts(0, SYSRTC_GRP0_IF_CMP1);
+  sl_hal_sysrtc_clear_group_interrupts(0, SYSRTC_GRP0_IF_CMP1);
 }
 
 /*******************************************************************************

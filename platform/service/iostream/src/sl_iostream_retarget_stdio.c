@@ -188,7 +188,13 @@ int _write(int file, const char *ptr, int len)
 
   (void)file;
   status = sl_iostream_write(SL_IOSTREAM_STDOUT, ptr, (size_t)len);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  switch (status) {
+    case SL_STATUS_INVALID_STATE:
+      break;  // Ignore error if the state doesn't allow to write.
+    default:
+      EFM_ASSERT(status == SL_STATUS_OK);
+      break;
+  }
 
   return len;
 }
@@ -240,7 +246,13 @@ static int TxBuf(uint8_t *buffer, int nbytes)
   sl_status_t status;
 
   status = sl_iostream_write(SL_IOSTREAM_STDOUT, buffer, nbytes);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  switch (status) {
+    case SL_STATUS_INVALID_STATE:
+      break;
+    default:
+      EFM_ASSERT(status == SL_STATUS_OK);
+      break;
+  }
 
   return nbytes;
 }

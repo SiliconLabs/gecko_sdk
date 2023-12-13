@@ -5,14 +5,14 @@ label: Barrier Control Server Cluster
 category: Zigbee|Cluster Library|Home Automation
 quality: production
 provides:
-   - name: "zigbee_barrier_control_server"
+  - name: zigbee_barrier_control_server
 requires:
-   - name: "zigbee_reporting"
+  - name: zigbee_reporting
 source:
   - path: protocol/zigbee/app/framework/plugin/barrier-control-server/barrier-control-server.c
   - path: protocol/zigbee/app/framework/plugin/barrier-control-server/barrier-control-server-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/barrier-control-server
     file_list:
@@ -22,10 +22,10 @@ template_contribution:
     value: zigbee_barrier_control_server
   - name: cluster_service
     value:
-       cluster_id: "0x0103"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"       
-       service_function: "emberAfBarrierControlClusterServerCommandParse"    
+      cluster_id: '0x0103'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfBarrierControlClusterServerCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -38,8 +38,8 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_status_command
       help: Prints out the status of the Barrier Control server cluster implementation.
       argument:
-      - type: uint8
-        help: The endpoint from which to receive status
+        - type: uint8
+          help: The endpoint from which to receive status
   - name: cli_command
     value:
       group: barrier-control-server
@@ -47,8 +47,8 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_open_or_close_command
       help: Notifies the component that the barrier has been opened manually.
       argument:
-      - type: uint8
-        help: The endpoint on which the barrier has been opened
+        - type: uint8
+          help: The endpoint on which the barrier has been opened
   - name: cli_command
     value:
       group: barrier-control-server
@@ -56,8 +56,8 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_open_or_close_command
       help: Notifies the component that the barrier has been closed manually.
       argument:
-      - type: uint8
-        help: The endpoint on which the barrier has been closed
+        - type: uint8
+          help: The endpoint on which the barrier has been closed
   - name: cli_command
     value:
       group: barrier-control-server
@@ -65,10 +65,10 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a remote lockout event on the barrier (i.e., sets or clears the RemoteLockout bit in the SafetyStatus attribute).
       argument:
-      - type: uint8
-        help: The endpoint on which to simulate this remote lockout event
-      - type: uint8
-        help: Whether to set (1) or clear (0) the remote lockout state
+        - type: uint8
+          help: The endpoint on which to simulate this remote lockout event
+        - type: uint8
+          help: Whether to set (1) or clear (0) the remote lockout state
   - name: cli_command
     value:
       group: barrier-control-server
@@ -76,10 +76,10 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a tamper-detected event on the barrier (i.e., sets or clears the TamperDetected bit in the SafetyStatus attribute).
       argument:
-      - type: uint8
-        help: The endpoint on which to simulate this tamper-detected event
-      - type: uint8
-        help: Whether to set (1) or clear (0) the tamper detected state
+        - type: uint8
+          help: The endpoint on which to simulate this tamper-detected event
+        - type: uint8
+          help: Whether to set (1) or clear (0) the tamper detected state
   - name: cli_command
     value:
       group: barrier-control-server
@@ -87,10 +87,10 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a failed communication event on the barrier (i.e., sets or clears the FailedCommunication bit in the SafetyStatus attribute).
       argument:
-      - type: uint8
-        help: The endpoint on which to simulate this failed communication event
-      - type: uint8
-        help: Whether to set (1) or clear (0) the failed communication state
+        - type: uint8
+          help: The endpoint on which to simulate this failed communication event
+        - type: uint8
+          help: Whether to set (1) or clear (0) the failed communication state
   - name: cli_command
     value:
       group: barrier-control-server
@@ -98,10 +98,10 @@ template_contribution:
       handler: sli_zigbee_af_barrier_control_server_safety_status_command
       help: Simulates or clears a position failure event on the barrier (i.e., sets or clears the PositionFailure bit in the SafetyStatus attribute).
       argument:
-      - type: uint8
-        help: The endpoint on which to simulate this position failure event
-      - type: uint8
-        help: Whether to set (1) or clear (0) the position failure state
+        - type: uint8
+          help: The endpoint on which to simulate this position failure event
+        - type: uint8
+          help: Whether to set (1) or clear (0) the position failure state
 documentation:
   docset: zigbee
   document: zigbee-af-api/barrier-control-server

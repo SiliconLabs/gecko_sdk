@@ -12,11 +12,12 @@ include:
   - path: "inc"
     file_list:
     - path: "peripheral_etampdet.h"
+    - path: "peripheral_etampdet_compat.h"
 provides:
   - name: peripheral_etampdet
 requires:
   - name: device_has_etampdet
-
+  - name: enum
 documentation:
   docset: gecko-platform
   document:

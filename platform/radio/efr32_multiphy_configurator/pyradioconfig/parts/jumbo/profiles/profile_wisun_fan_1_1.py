@@ -3,10 +3,12 @@ from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.common.profiles.jumbo_regs import build_modem_regs_jumbo
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutputs, buildRailOutputs
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
-    buildWhiteOutputs, build_ircal_sw_vars
+    buildWhiteOutputs, build_ircal_sw_vars, buildStudioLogOutput
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
+from collections import namedtuple
 
+chplan_id_params = namedtuple('chplan_id_params', ['enum_name', 'b_freq_hz', 'chsp_hz'])
 
 class ProfileWisunFan1v1Jumbo(IProfile):
 
@@ -14,6 +16,58 @@ class ProfileWisunFan1v1Jumbo(IProfile):
     phySunFskSfd_1_uncoded = 0b0111101000001110
     phySunFskSfd_0_coded = 0b0110111101001110
     phySunFskSfd_1_coded = 0b0110001100101101
+
+    # Below info is from WiSUN FAN TPS 2v01, Table 6
+    wisun_1v1_chplan_table = {
+        # wisun_channel_plan_id: chplan_id_params(enum_name, base_frequency_hz, channel_spacing_hz)
+
+        1:   chplan_id_params('Plan1_902M_928M_200k', 902.2e6, 200e3),
+        2:   chplan_id_params('Plan2_902M_928M_400k', 902.4e6, 400e3),
+        3:   chplan_id_params('Plan3_902M_928M_600k', 902.6e6, 600e3),
+        4:   chplan_id_params('Plan4_902M_928M_800k', 902.8e6, 800e3),
+        5:   chplan_id_params('Plan5_902M_928M_1200k', 903.2e6, 1.2e6),
+        21:  chplan_id_params('Plan21_920M_928M_200k', 920.6e6, 200e3),
+        22:  chplan_id_params('Plan22_920M_928M_400k', 920.9e6, 400e3),
+        23:  chplan_id_params('Plan23_920M_928M_600k', 920.8e6, 600e3),
+        24:  chplan_id_params('Plan24_920M_928M_800k', 921.1e6, 800e3),
+        32:  chplan_id_params('Plan32_863M_870M_100k', 863.1e6, 100e3),
+        33:  chplan_id_params('Plan33_863M_870M_200k', 863.1e6, 200e3),
+        34:  chplan_id_params('Plan34_870M_876M_100k', 870.1e6, 100e3),
+        35:  chplan_id_params('Plan35_870M_876M_200k', 870.2e6, 200e3),
+        36:  chplan_id_params('Plan36_863M_876M_100k', 863.1e6, 100e3),
+        37:  chplan_id_params('Plan37_863M_876M_200k', 863.1e6, 200e3),
+        38:  chplan_id_params('Plan38_863M_870M_400k', 863.5e6, 400e3),
+        39:  chplan_id_params('Plan39_865M_868M_100k', 865.1e6, 100e3),
+        40:  chplan_id_params('Plan40_865M_868M_200k', 865.1e6, 200e3),
+        48:  chplan_id_params('Plan48_915M_928M_200k', 915.2e6, 200e3),
+        49:  chplan_id_params('Plan49_915M_928M_400k', 915.4e6, 400e3),
+        64:  chplan_id_params('Plan64_920M_925M_200k', 920.2e6, 200e3),
+        65:  chplan_id_params('Plan65_920M_925M_400k', 920.4e6, 400e3),
+        80:  chplan_id_params('Plan80_919M_923M_200k', 919.2e6, 200e3),
+        81:  chplan_id_params('Plan81_919M_923M_400k', 919.2e6, 400e3),
+        96:  chplan_id_params('Plan96_917M_923M_200k', 917.1e6, 200e3),
+        97:  chplan_id_params('Plan97_917M_923M_400k', 917.3e6, 400e3),
+
+        # WW chplan definition conflict - see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2183
+        # We will stick to what's coherent throughout calculator
+        112: chplan_id_params('Plan112_2400M_2483M_200k', 2400.4e6, 200e3),
+        113: chplan_id_params('Plan113_2400M_2483M_400k', 2400.2e6, 400e3),
+
+        128: chplan_id_params('Plan128_920M_925M_250k', 920.625e6, 250e3),
+        144: chplan_id_params('Plan144_779M_787M_200k', 779.2e6, 200e3),
+        145: chplan_id_params('Plan145_779M_787M_400k', 779.4e6, 400e3),
+        160: chplan_id_params('Plan160_470M_510M_200k', 470.2e6, 200e3),
+
+    }
+
+    # Region exceptions for b_freq_hz (mismatch with chplan id b_freq_hz)
+    # Get this list from Apps (see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2313)
+    wisun_1v1_chanfreq0_exception = {
+        # (region, chplan_id): b_freq_hz
+        ('SG', 32): 866.1e6,
+        ('SG', 33): 866.1e6,
+        ('SG', 38): 866.3e6
+    }
 
     def __init__(self):
         self._profileName = "wisun_fan_1_1"
@@ -40,6 +94,10 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
 
+        buildStudioLogOutput(model, profile)
+
+        return profile
+
     def profile_calculate(self, model):
         self._fixed_wisun_vars(model)
         self._lookup_from_wisun_mode(model)
@@ -53,12 +111,10 @@ class ProfileWisunFan1v1Jumbo(IProfile):
                                      readable_name="Wi-SUN Regulatory Domain")
 
         IProfile.make_required_input(profile, model.vars.wisun_phy_mode_id_select, "WiSUN",
-                                     readable_name="Wi-SUN PHY Operating Mode ID", value_limit_min=0,
-                                     value_limit_max=0x0F) #No OFDM or FSK+FEC support on Jumbo
+                                     readable_name="Wi-SUN PHY Operating Mode ID")
 
         IProfile.make_required_input(profile, model.vars.wisun_channel_plan_id, "WiSUN",
-                                     readable_name="Wi-SUN Channel Plan ID", value_limit_min=0,
-                                     value_limit_max=63)
+                                     readable_name="Wi-SUN Channel Plan ID")
 
         IProfile.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",
                                      readable_name="Crystal Frequency", value_limit_min=38000000,
@@ -233,6 +289,18 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_lsbit.value_forced = 0
 
+        self._region_ww_wisun_tol_temp_overrides(model)   # Implement this to allow Ocelot to call the same overrides
+
+    def _region_ww_wisun_tol_temp_overrides(self, model):
+
+        # For WiSUN 2.4GHz PHYs, tolerances have not been finalized.
+        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2183
+        if model.profile.inputs.wisun_reg_domain.var_value == model.vars.wisun_reg_domain.var_enum.WW \
+                and model.profile.inputs.wisun_phy_mode_id_select.var_value.value < 8:
+            model.vars.rx_xtal_error_ppm.value_forced = 10
+            model.vars.tx_xtal_error_ppm.value_forced = 10
+
+
     def _fixed_wisun_crc(self, model):
         model.vars.crc_poly.value_forced = model.vars.crc_poly.var_enum.ANSIX366_1979
         model.vars.crc_invert.value_forced = True
@@ -250,7 +318,7 @@ class ProfileWisunFan1v1Jumbo(IProfile):
         # This function calculates some variables/registers based on the PhyModeID
 
         # Read profile inputs (not yet written to model vars)
-        wisun_phy_mode_id_select = model.profile.inputs.wisun_phy_mode_id_select.var_value
+        wisun_phy_mode_id_select = model.profile.inputs.wisun_phy_mode_id_select.var_value.value
         wisun_reg_domain = model.profile.inputs.wisun_reg_domain.var_value
         shaping_filter = model.profile.inputs.shaping_filter.var_value
         shaping_filter_param = model.profile.inputs.shaping_filter_param.var_value
@@ -382,68 +450,46 @@ class ProfileWisunFan1v1Jumbo(IProfile):
     def _lookup_from_channel_plan(self, model):
         # This function calculates some variables/registers based on the ChanPlanId
         wisun_channel_plan_id = model.profile.inputs.wisun_channel_plan_id.var_value
+        wisun_reg_domain = model.profile.inputs.wisun_reg_domain.var_value
 
-        error = False
-        if wisun_channel_plan_id <= 1:
-            base_frequency_hz = 902.2e6
-            channel_spacing_hz = 200e3
-            if wisun_channel_plan_id == 0:
-                error = True
-        elif wisun_channel_plan_id == 2:
-            base_frequency_hz = 902.4e6
-            channel_spacing_hz = 400e3
-        elif wisun_channel_plan_id == 3:
-            base_frequency_hz = 902.6e6
-            channel_spacing_hz = 600e3
-        elif wisun_channel_plan_id == 4:
-            base_frequency_hz = 902.8e6
-            channel_spacing_hz = 800e3
-        elif wisun_channel_plan_id == 5:
-            base_frequency_hz = 903.2e6
-            channel_spacing_hz = 1.2e6
-        elif wisun_channel_plan_id <= 21:
-            base_frequency_hz = 920.6e6
-            channel_spacing_hz = 200e3
-            if wisun_channel_plan_id < 21:
-                error = True
-        elif wisun_channel_plan_id == 22:
-            base_frequency_hz = 920.9e6
-            channel_spacing_hz = 400e3
-        elif wisun_channel_plan_id == 23:
-            base_frequency_hz = 920.8e6
-            channel_spacing_hz = 600e3
-        elif wisun_channel_plan_id == 24:
-            base_frequency_hz = 921.1e6
-            channel_spacing_hz = 800e3
-        elif wisun_channel_plan_id <= 32:
-            base_frequency_hz = 863.1e6
-            channel_spacing_hz = 100e3
-            if wisun_channel_plan_id < 32:
-                error = True
-        elif wisun_channel_plan_id == 33:
-            base_frequency_hz = 863.1e6
-            channel_spacing_hz = 200e3
-        elif wisun_channel_plan_id == 34:
-            base_frequency_hz = 870.1e6
-            channel_spacing_hz = 100e3
-        elif wisun_channel_plan_id == 35:
-            base_frequency_hz = 870.2e6
-            channel_spacing_hz = 200e3
-        elif wisun_channel_plan_id == 36:
-            base_frequency_hz = 863.1e6
-            channel_spacing_hz = 100e3
-        else:
-            base_frequency_hz = 863.1e6
-            channel_spacing_hz = 200e3
-            if wisun_channel_plan_id > 37:
-                error = True
 
+        error, b_freq_hz, chsp_hz = self._get_info_from_chplan_table(wisun_channel_plan_id, wisun_reg_domain)
+        base_frequency_hz = b_freq_hz
+        channel_spacing_hz = chsp_hz
         if error:
             LogMgr.Error("Error: Unsupported Wi-SUN ChanPlanID")
 
         #Write the variables
         model.vars.base_frequency_hz.value_forced = int(base_frequency_hz)
         model.vars.channel_spacing_hz.value_forced = int(channel_spacing_hz)
+
+    def _get_info_from_chplan_table(self, wisun_chplan_id, wisun_reg_domain):
+
+        error = False
+        ref_chplan_id = wisun_chplan_id       # If valid id, use as reference
+
+        if wisun_chplan_id not in self.wisun_1v1_chplan_table:        # Invalid id
+            error = True
+            if wisun_chplan_id > max(self.wisun_1v1_chplan_table.keys()):
+                # Use largest valid ID as ref
+                ref_chplan_id = max(self.wisun_1v1_chplan_table.keys())
+            else:
+                # Use smallest valid ID larger than requested ID as ref
+                ref_chplan_id = min([id for id in self.wisun_1v1_chplan_table.keys() if id > wisun_chplan_id])
+
+
+        # Account for mismatches between chplan b_freq_hz and region
+        wisun_reg_domain_str = wisun_reg_domain.name
+        if (wisun_reg_domain_str, wisun_chplan_id) in self.wisun_1v1_chanfreq0_exception:
+            b_freq_hz = self.wisun_1v1_chanfreq0_exception[(wisun_reg_domain_str, wisun_chplan_id)]
+            LogMgr.Info(f"Overwriting channel plan base_frequency_hz to {b_freq_hz} "
+                           f"for reg domain '{wisun_reg_domain_str}',  chplan id {wisun_chplan_id}")
+        else:
+            b_freq_hz = self.wisun_1v1_chplan_table[ref_chplan_id].b_freq_hz
+
+        chsp_hz = self.wisun_1v1_chplan_table[ref_chplan_id].chsp_hz
+
+        return error, b_freq_hz, chsp_hz
 
     def _lookup_syncword_from_fec(self, model):
         #This function sets sync0 and sync1 based on whether FEC is enabled or not

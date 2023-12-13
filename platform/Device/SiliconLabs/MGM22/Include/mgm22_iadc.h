@@ -1002,4 +1002,4 @@ typedef struct {
 /** @} End of group MGM22_IADC */
 /** @} End of group Parts */
 
-#endif /* MGM22_IADC_H */
+#endif // MGM22_IADC_H

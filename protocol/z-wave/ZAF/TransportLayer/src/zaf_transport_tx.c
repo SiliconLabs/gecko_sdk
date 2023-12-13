@@ -29,9 +29,9 @@ typedef struct {
 
 static bool transport_busy;
 static bool transport_queue_paused;
-static StaticQueue_t transport_queue;
+static StaticQueue_t transport_queue = { 0 };
 static uint8_t transport_queue_buffer[ZAF_TRANSPORT_CONFIG_QUEUE_SIZE * ZAF_TRANSPORT_QUEUE_ITEM_SIZE];
-static QueueHandle_t transport_queue_handle;
+static QueueHandle_t transport_queue_handle = { 0 };
 static zaf_tx_callback_t transport_pending_callback;
 
 static void transport_tx(void);
@@ -60,21 +60,21 @@ transport_callback(transmission_result_t * transmission_result)
 static void
 transport_tx_failed(node_id_t node_id)
 {
-  transmission_result_t transmission_result;
-
-  transmission_result.nodeId = node_id;
-  transmission_result.status = TRANSMIT_COMPLETE_FAIL;
-  transmission_result.isFinished = TRANSMISSION_RESULT_FINISHED;
+  transmission_result_t transmission_result = {
+    .nodeId = node_id,
+    .status = TRANSMIT_COMPLETE_FAIL,
+    .isFinished = TRANSMISSION_RESULT_FINISHED
+  };
   transport_callback(&transmission_result);
 }
 
 static void
 transport_tx(void)
 {
-  transport_queue_item_t queue_item;
+  transport_queue_item_t queue_item = { 0 };
   TRANSMIT_OPTIONS_TYPE_EX *tx_options_ex;
-  TRANSMIT_OPTIONS_TYPE_SINGLE_EX tx_options_single_ex;
-  MULTICHAN_NODE_ID node_id;
+  TRANSMIT_OPTIONS_TYPE_SINGLE_EX tx_options_single_ex = { 0 };
+  MULTICHAN_NODE_ID node_id = { 0 };
 
   if (xQueueReceive(transport_queue_handle, &queue_item, 0) == pdPASS) {
     DPRINT("Transmitting frame\n");
@@ -129,16 +129,15 @@ bool
 zaf_transport_tx(const uint8_t *frame, uint8_t frame_length,
                  zaf_tx_callback_t callback, zaf_tx_options_t *zaf_tx_options)
 {
-  transport_queue_item_t queue_item;
   BaseType_t ret;
-
-  DPRINT("Adding new frame to queue\n");
-
-  queue_item.callback = callback;
+  transport_queue_item_t queue_item = {
+    .callback = callback,
+    .frame_length = frame_length
+  };
   memcpy(&queue_item.frame, frame, frame_length);
-  queue_item.frame_length = frame_length;
   memcpy(&queue_item.zaf_tx_options, zaf_tx_options, sizeof(zaf_tx_options_t));
 
+  DPRINT("Adding new frame to queue\n");
   ret = xQueueSend(transport_queue_handle, &queue_item, 0);
   if (ret == pdFAIL) {
     DPRINT("Failed to add new frame to queue\n");

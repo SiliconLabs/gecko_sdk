@@ -31,6 +31,10 @@
 #ifndef APP_INIT_H
 #define APP_INIT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -52,5 +56,9 @@
  *          register the custom callbacks
  *****************************************************************************/
 void app_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // APP_INIT_H

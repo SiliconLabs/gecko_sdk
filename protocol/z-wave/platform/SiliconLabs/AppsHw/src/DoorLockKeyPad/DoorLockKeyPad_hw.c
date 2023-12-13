@@ -172,30 +172,28 @@ void cc_door_lock_bolt_set(bool locked)
 }
 
 
-bool door_lock_hw_bolt_is_unlocked()
+bool door_lock_hw_bolt_is_unlocked(void)
 {
   return door_lock_hw.bolt_unlocked;
 }
 
-bool door_lock_hw_latch_is_closed()
+bool door_lock_hw_latch_is_closed(void)
 {
   return door_lock_hw.latch_closed;
 }
 
-bool door_lock_hw_handle_is_pressed()
+bool door_lock_hw_handle_is_pressed(void)
 {
   return door_lock_hw.handle_pressed;
 }
 
-uint8_t 
-CC_Battery_BatteryGet_handler(uint8_t endpoint)
+uint8_t
+CC_Battery_BatteryGet_handler(__attribute__((unused)) uint8_t endpoint)
 {
   uint32_t VBattery;
   uint8_t accurateLevel;
   uint8_t roundedLevel;
   uint8_t reporting_decrements;
-
-  UNUSED(endpoint);
 
   /*
    * Simple example how to use the ADC to measure the battery voltage
@@ -249,9 +247,8 @@ uint8_t cc_door_lock_mode_hw_change(door_lock_mode_t mode)
 }
 
 void
-door_lock_operation_set_callback(SSwTimer *pTimer)
+door_lock_operation_set_callback(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
   door_lock_mode_t mode = (door_lock_mode_t)pTimer->dummy[0];
   cc_door_lock_bolt_set((mode == DOOR_MODE_SECURED));
 

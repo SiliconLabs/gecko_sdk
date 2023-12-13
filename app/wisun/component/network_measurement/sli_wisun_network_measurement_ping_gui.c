@@ -45,7 +45,7 @@
 #include "sl_wisun_network_measurement_config.h"
 #include "sl_display.h"
 #include "sl_gui.h"
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "silabs_wisun_logo.h"
 

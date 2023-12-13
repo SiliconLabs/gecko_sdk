@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
+#include <openthread-system.h>
 #include <stddef.h>
 #include <string.h>
-#include "openthread-system.h"
 #include "utils/code_utils.h"
 #include "utils/uart.h"
 
@@ -53,30 +53,31 @@
 
 #define RECEIVE_BUFFER_SIZE 128
 
-static uint8_t              sReceiveBuffer[RECEIVE_BUFFER_SIZE];
-static const uint8_t *      sTransmitBuffer = NULL;
-static volatile uint16_t    sTransmitLength = 0;
+static uint8_t           sReceiveBuffer[RECEIVE_BUFFER_SIZE];
+static const uint8_t    *sTransmitBuffer = NULL;
+static volatile uint16_t sTransmitLength = 0;
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
 
-static unsigned int         sGpioIntContext = 0;
+static unsigned int sGpioIntContext = 0;
 
 static void gpioSerialWakeupCallback(uint8_t interrupt_no, void *context)
 {
-  unsigned int *pin = (unsigned int *)context;
+    unsigned int *pin = (unsigned int *)context;
 
-  (void)interrupt_no;
+    (void)interrupt_no;
 
-  if (*pin == SL_IOSTREAM_USART_VCOM_RX_PIN) {
-      otSysEventSignalPending();
-  }
+    if (*pin == SL_IOSTREAM_USART_VCOM_RX_PIN)
+    {
+        otSysEventSignalPending();
+    }
 }
 #endif // SL_CATALOG_KERNEL_PRESENT
 
 static void processReceive(void)
 {
     sl_status_t status;
-    size_t bytes_read = 0;
+    size_t      bytes_read = 0;
     memset(sReceiveBuffer, 0, RECEIVE_BUFFER_SIZE);
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
@@ -86,7 +87,8 @@ static void processReceive(void)
 
     status = sl_iostream_read(sl_iostream_vcom_handle, &sReceiveBuffer, sizeof(sReceiveBuffer), &bytes_read);
 
-    if (status == SL_STATUS_OK) {
+    if (status == SL_STATUS_OK)
+    {
         otPlatUartReceived(sReceiveBuffer, bytes_read);
     }
 }
@@ -125,12 +127,10 @@ otError otPlatUartEnable(void)
 
     otEXPECT_ACTION(intNo != INTERRUPT_UNAVAILABLE, error = OT_ERROR_FAILED);
 
-    GPIO_ExtIntConfig(SL_IOSTREAM_USART_VCOM_RX_PORT, 
-                      SL_IOSTREAM_USART_VCOM_RX_PIN, 
-                      intNo, false, true, true);
+    GPIO_ExtIntConfig(SL_IOSTREAM_USART_VCOM_RX_PORT, SL_IOSTREAM_USART_VCOM_RX_PIN, intNo, false, true, true);
 #endif
 
-exit:    
+exit:
     return error;
 }
 
@@ -148,7 +148,7 @@ OT_TOOL_WEAK void otPlatUartReceived(const uint8_t *aBuf, uint16_t aBufLength)
 
 otError otPlatUartSend(const uint8_t *aBuf, uint16_t aBufLength)
 {
-    otError error = OT_ERROR_NONE;
+    otError     error = OT_ERROR_NONE;
     sl_status_t status;
 
     otEXPECT_ACTION(sTransmitBuffer == NULL, error = OT_ERROR_BUSY);
@@ -157,7 +157,8 @@ otError otPlatUartSend(const uint8_t *aBuf, uint16_t aBufLength)
     sTransmitLength = aBufLength;
 
     status = sl_iostream_write(sl_iostream_vcom_handle, (uint8_t *)sTransmitBuffer, sTransmitLength);
-    if (status == SL_STATUS_OK) {
+    if (status == SL_STATUS_OK)
+    {
         sTransmitLength = 0;
     }
     otSysEventSignalPending();

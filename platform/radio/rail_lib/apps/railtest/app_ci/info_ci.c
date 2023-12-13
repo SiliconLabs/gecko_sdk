@@ -103,6 +103,8 @@ void getStatus(sl_cli_command_arg_t *args)
                         "RxCount:%u,"
                         "RxCrcErrDrop:%u,"
                         "SyncDetect:%u,"
+                        "SyncDetect1:%u,"
+                        "SyncDetect2:%u,"
                         "NoRxBuffer:%u",
                         counters.userTx,
                         counters.ackTx,
@@ -115,6 +117,8 @@ void getStatus(sl_cli_command_arg_t *args)
                         counters.receive,
                         counters.receiveCrcErrDrop,
                         counters.syncDetect,
+                        counters.syncDetect1,
+                        counters.syncDetect2,
                         counters.noRxBuffer
                         );
   responsePrintContinue("TxRemainErrs:%u,"
@@ -457,6 +461,55 @@ void setTime(sl_cli_command_arg_t *args)
   }
 }
 
+static const uint32_t compileTimePowerModes
+  = (0U
+    #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HP
+     | (1UL << RAIL_TX_POWER_MODE_2P4GIG_HP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_2P4GIG_MP
+     | (1UL << RAIL_TX_POWER_MODE_2P4GIG_MP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_2P4GIG_LP
+     | (1UL << RAIL_TX_POWER_MODE_2P4GIG_LP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_2P4GIG_LLP
+     | (1UL << RAIL_TX_POWER_MODE_2P4GIG_LLP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+     | (1UL << RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_HP
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_HP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_MP
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_MP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_LP
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_LP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_LLP
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_LLP)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_OFDP_MA_POWERSETTING_TABLE
+     | (1UL << RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE
+     | (1UL << RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE
+     | (1UL << RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE)
+    #endif
+    #ifdef  RAIL_TX_POWER_MODE_NONE
+     | (1UL << RAIL_TX_POWER_MODE_NONE)
+    #endif
+     );
+
 void printChipFeatures(sl_cli_command_arg_t *args)
 {
   RAIL_TxPowerLevel_t maxPowerLevel;
@@ -525,198 +578,21 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_TX_REPEAT_START_TO_START",
                      RAIL_SUPPORTS_TX_REPEAT_START_TO_START ? "Yes" : "No",
                      RAIL_SupportsTxRepeatStartToStart(railHandle) ? "Yes" : "No");
- #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_2P4GIG_HIGHEST,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST", "Yes", "No");
+  uint32_t compileTimeMask = compileTimePowerModes;
+  for (RAIL_TxPowerMode_t mode = 0U; mode < RAIL_TX_POWER_MODE_NONE; mode++) {
+    if (RAIL_SupportsTxPowerMode(railHandle, mode, &maxPowerLevel)
+        && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+      responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                         paStrings[mode],
+                         (compileTimeMask & 1U) ? "Yes" : "N/A",
+                         maxPowerLevel);
+    } else {
+      responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:No",
+                         paStrings[mode],
+                         (compileTimeMask & 1U) ? "Yes" : "N/A");
+    }
+    compileTimeMask >>= 1;
   }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
- #ifdef  RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_HIGHEST,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
- #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_2P4GIG_HP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_2P4GIG_HP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_2P4GIG_HP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_2P4GIG_HP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_2P4GIG_HP
- #ifdef  RAIL_TX_POWER_MODE_2P4GIG_MP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_2P4GIG_MP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_2P4GIG_MP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_2P4GIG_MP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_2P4GIG_MP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_2P4GIG_LP
- #ifdef  RAIL_TX_POWER_MODE_2P4GIG_LP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_2P4GIG_LP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_2P4GIG_LP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_2P4GIG_LP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_2P4GIG_LP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_2P4GIG_LP
- #ifdef  RAIL_TX_POWER_MODE_2P4GIG_LLP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_2P4GIG_LLP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_2P4GIG_LLP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_2P4GIG_LLP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_2P4GIG_LLP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_2P4GIG_LLP
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_HP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_HP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_HP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_HP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_HP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_HP
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_MP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_MP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_MP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_MP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_MP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_MP
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_LP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_LP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_LP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_LP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_LP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_LP
- #ifdef RAIL_TX_POWER_MODE_SUBGIG_LLP
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG_LLP,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG_LLP", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG_LLP", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG_LLP", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG_LLP
- #ifdef RAIL_TX_POWER_MODE_SUBGIG
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG
- #ifdef RAIL_TX_POWER_MODE_OFDM_PA
-  if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_OFDM_PA,
-                               &maxPowerLevel)
-      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_OFDM_PA", "Yes",
-                       maxPowerLevel);
-  } else {
-    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_OFDM_PA", "Yes", "No");
-  }
- #else
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_OFDM_PA", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_OFDM_PA
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_BLE",
                      RAIL_SUPPORTS_PROTOCOL_BLE ? "Yes" : "No",

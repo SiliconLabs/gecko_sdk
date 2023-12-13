@@ -30,8 +30,7 @@ from typing import (Callable, ClassVar, Dict, Iterable, List, Optional, Tuple,
                     Union)
 
 from bgapi.bglib import BGEvent, CommandFailedError
-from bgapix.bglibx import (BGLibExtRetryParams, BGLibExtWaitEventError,
-                           EventParamValues)
+from bgapix.bglibx import BGLibExtRetryParams, BGLibExtWaitEventError
 from bgapix.slstatus import SlStatus
 
 from . import util

@@ -57,8 +57,8 @@
 void app_task(void *args)
 {
   static char buff[SL_WISUN_UDP_SERVER_BUFF_SIZE] = { 0U };
-  static wisun_addr_t srv_addr_udp                = { 0U };
-  static wisun_addr_t clnt_addr_udp               = { 0U };
+  static sockaddr_in6_t srv_addr_udp                = { 0U };
+  static sockaddr_in6_t clnt_addr_udp               = { 0U };
   socklen_t len                                   = 0UL;
   int32_t r                                       = SOCKET_RETVAL_ERROR;
   int32_t sockd_udp_srv                           = SOCKET_INVALID_ID;
@@ -71,11 +71,11 @@ void app_task(void *args)
   printf("[Port: %u]\n", SL_WISUN_UDP_SERVER_PORT);
 
   // creating socket
-  sockd_udp_srv = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+  sockd_udp_srv = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
   assert_res(sockd_udp_srv, "UDP server socket()");
 
   // fill the server address structure
-  srv_addr_udp.sin6_family = AF_WISUN;
+  srv_addr_udp.sin6_family = AF_INET6;
   srv_addr_udp.sin6_addr = in6addr_any;
   srv_addr_udp.sin6_port = htons(SL_WISUN_UDP_SERVER_PORT);
 
@@ -100,7 +100,7 @@ void app_task(void *args)
       }
     }
     // dispatch thread
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 

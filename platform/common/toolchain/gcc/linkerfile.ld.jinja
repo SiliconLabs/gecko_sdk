@@ -31,7 +31,11 @@
   Device specific sizes and addresses. These variables describes the physical
   memory of the device.
 #}
+{%- set series = device_series | first %}
 {%- set sram_addr = device_ram_addr | first | default(536870912, true) %}
+{%- if device_ram_alias_addr is defined %}
+{%-   set sram_alias_addr = device_ram_alias_addr | first | default(536870912, true) %}
+{%- endif %}
 {%- set sram_size = device_ram_size | first %}
 {%- set flash_addr = device_flash_addr | first | default(0, true) %}
 {%- set flash_size = device_flash_size | first %}
@@ -57,8 +61,14 @@
 #}
 {%- if memory_ram_start is defined %}
 {%-   set app_ram_start = memory_ram_start | first %}
+{%-   if memory_ram_alias_start is defined %}
+{%-     set app_ram_alias_start = memory_ram_alias_start | first %}
+{%-   endif %}
 {%- else %}
 {%-   set app_ram_start = sram_addr %}
+{%-   if sram_alias_addr is defined %}
+{%-     set app_ram_alias_start = sram_alias_addr %}
+{%-   endif %}
 {%- endif %}
 
 {%- if memory_ram_size is defined %}
@@ -70,6 +80,9 @@
 {%- if bootloader_enable %}
 {%-   set bootloader_reset_region_start = app_ram_start %}
 {%-   set app_ram_start = app_ram_start + bootloader_reset_cause_size %}
+{%-   if app_ram_alias_start is defined %}
+{%-     set app_ram_alias_start = app_ram_alias_start + bootloader_reset_cause_size %}
+{%-   endif %}
 {%-   set app_ram_size = app_ram_size - bootloader_reset_cause_size %}
 {%- endif %}
 
@@ -114,15 +127,21 @@
 {%- if bootloader_enable %}
  MEMORY
  {
-   FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % bootloader_flash_startaddr }}, LENGTH = 0x{{ '%0x' % bootloader_flash_size }}
-   RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+   FLASH      (rx)  : ORIGIN = 0x{{ '%0x' % bootloader_flash_startaddr }}, LENGTH = 0x{{ '%0x' % bootloader_flash_size }}
+   RAM        (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+{%-   if app_ram_alias_start is defined %}
+   RAM_ALIAS  (x)   : ORIGIN = 0x{{ '%0x' % app_ram_alias_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+{%-   endif %}
    BOOTLOADER_RESET_REGION (rwx) : ORIGIN = 0x{{ '%0x' % bootloader_reset_region_start }}, LENGTH = 0x{{ '%0x' % bootloader_reset_cause_size }}
  }
 {%- else %}
  MEMORY
  {
-   FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
-   RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+   FLASH      (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
+   RAM        (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+{%-   if app_ram_alias_start is defined %}
+   RAM_ALIAS  (x)   : ORIGIN = 0x{{ '%0x' % app_ram_alias_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+{%-   endif %}
  }
 {%- endif %}
 
@@ -153,6 +172,7 @@ SECTIONS
 
     linker_code_begin = .;
     *(SORT_BY_ALIGNMENT(.text*))
+    . = ALIGN(32);
     linker_code_end = .;
 
     KEEP(*(.init))
@@ -171,6 +191,12 @@ SECTIONS
     *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
     *(SORT(.dtors.*))
     *(.dtors)
+
+    __code_classification_validator_start__ = .;
+    . = . + 0x20;
+    *(code_classification_validator)
+    . = ALIGN(32);
+    __code_classification_validator_end__ = .;
 
     *(.rodata*)
     *(.eh_frame*)
@@ -279,13 +305,10 @@ SECTIONS
     __data_start__ = .;
     *(vtable)
     *(SORT_BY_ALIGNMENT(.data*))
-    . = ALIGN (4);
+    . = ALIGN(4);
 
     PROVIDE(__ram_func_section_start = .);
     *(.ram)
-{%- for entry in common_code_classes %}
-    *(text_{{entry['component']}}_*{{entry['class']}}*)
-{%- endfor %}
     PROVIDE(__ram_func_section_end = .);
 
     . = ALIGN(4);
@@ -332,6 +355,66 @@ SECTIONS
     . = ALIGN(4);
     __bss_end__ = .;
   } > RAM
+
+  __ramfuncs_start__ = .;
+
+{%- if (series >= 3) and (app_ram_alias_start is defined) %}
+  __ramfuncs_ram_offset__ = . - ORIGIN(RAM);
+  . = ORIGIN(RAM_ALIAS) + __ramfuncs_ram_offset__;
+{%- endif %}
+
+  __vma_ramfuncs_start__ = .;
+  __lma_ramfuncs_start__ = __etext + SIZEOF(.data);
+
+{%- if series >= 3 %}
+{%- for component in code_classification_components %}
+  __text_{{component}}_ram_offset__ = . - __vma_ramfuncs_start__;
+  text_{{component}}_ram . : AT(__lma_ramfuncs_start__ + __text_{{component}}_ram_offset__)
+  {
+    __text_{{component}}_ram_start__ = .;
+{%-   for selection in code_classification_selections %}
+{%-     if selection['component'] == component  %}
+    *(text_{{selection['component']}}_*{{selection['class']}}*)
+{%-     endif %}
+{%-   endfor %}
+    . = ALIGN(4);
+{%-   if "timecritical" in code_classification_standard_selections %}
+    *(text_{{component}}_*timecritical*)
+{%-   endif %}
+    . = ALIGN(4);
+    __text_{{component}}_ram_end__ = .;
+{%-   if app_ram_alias_start is defined %}
+  } > RAM_ALIAS
+{%-   else %}
+  } > RAM
+{%-   endif %}
+{%- endfor %}
+{%- endif %}
+
+  __text_application_ram_offset__ = . - __vma_ramfuncs_start__;
+  text_application_ram . : AT(__lma_ramfuncs_start__ + __text_application_ram_offset__)
+  {
+    . = ALIGN(4);
+    __text_application_ram_start__ = .;
+    *(text_application_ram)
+    . = ALIGN(4);
+    __text_application_ram_end__ = .;
+{%- if app_ram_alias_start is defined %}
+  } > RAM_ALIAS
+{%- else %}
+  } > RAM
+{%- endif %}
+
+  . = ALIGN(4);
+  __vma_ramfuncs_end__ = .;
+  __lma_ramfuncs_end__ = __lma_ramfuncs_start__ + __text_application_ram_offset__ + SIZEOF(text_application_ram);
+
+{%- if (series >= 3) and (app_ram_alias_start is defined) %}
+  __heap_ram_offset__ = . - ORIGIN(RAM_ALIAS);
+  . = ORIGIN(RAM) + __heap_ram_offset__;
+{%- endif %}
+
+  __ramfuncs_end__ = .;
 
   .heap (COPY):
   {

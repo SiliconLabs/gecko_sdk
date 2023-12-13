@@ -1,0 +1,17 @@
+label: ZWave_SoC_DoorLockKeypad_Solution
+description: >
+  Demonstrates Door Lock application combined with OTA bootloader. 
+  The Z-Wave certified Door Lock application shows a lock implementation. 
+  It will support user codes to open a door and thereby eliminate the 
+  need for traditional keys. It is possible to both lock and unlock the 
+  door remotely through the Z-Wave protocol.
+quality: production
+project:
+  - path: ../../Apps/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad.slcp
+    id: application
+    output: app
+  - path: ../../UCBootLoader/series1/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_door_lock_keypad_ws_postbuild

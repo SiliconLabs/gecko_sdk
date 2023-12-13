@@ -90,7 +90,7 @@ static int get_notification_by_endpoint(uint8_t endpoint)
    return -1;
 }
 
-static void init()
+static void init(void)
 {
   // If there is existing setting saved in NVM, update notifications array with it.
   if (!cc_notification_read()) {
@@ -100,7 +100,7 @@ static void init()
   notifications = cc_notification_get_config();
 }
 
-static void reset() {
+static void reset(void) {
   //Save default settings to persistent data
   cc_notification_write();
 
@@ -264,7 +264,7 @@ bool notification_report_get_data(notification_type_t* pType,
   return true;
 }
 
-s_CC_notification_data_t ZAF_TSE_NotificationData;
+s_CC_notification_data_t ZAF_TSE_NotificationData = { 0 };
 
 static RECEIVE_OPTIONS_TYPE_EX pRxOpt = {
     .rxStatus = 0,        /* rxStatus, verified by the TSE for Multicast */
@@ -554,20 +554,18 @@ JOB_STATUS CmdClassNotificationReport(
     uint8_t evParLen,
     void(*pCallback)(TRANSMISSION_RESULT * pTransmissionResult))
 {
-  ZW_NOTIFICATION_REPORT_1BYTE_V4_FRAME frame;
-
-  frame.cmdClass = COMMAND_CLASS_NOTIFICATION_V4;
-  frame.cmd = NOTIFICATION_REPORT_V4;
-  frame.v1AlarmType = 0;
-  frame.v1AlarmLevel = 0;
-  frame.reserved = 0;
-  frame.notificationStatus = NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED;
-  frame.notificationType = cc_notification_get_type(notification_index);
-  frame.mevent = cc_notification_get_current_event(notification_index);
+  ZW_NOTIFICATION_REPORT_1BYTE_V4_FRAME frame = {
+    .cmdClass = COMMAND_CLASS_NOTIFICATION_V4,
+    .cmd = NOTIFICATION_REPORT_V4,
+    .v1AlarmType = 0,
+    .v1AlarmLevel = 0,
+    .reserved = 0,
+    .notificationStatus = NOTIFICATION_STATUS_UNSOLICIT_ACTIVATED,
+    .notificationType = cc_notification_get_type(notification_index),
+    .mevent = cc_notification_get_current_event(notification_index),
+    .properties1 = evParLen & NOTIFICATION_REPORT_PROPERTIES1_EVENT_PARAMETERS_LENGTH_MASK_V4 /*remove sequence number and reserved flags*/
+  };
   memcpy(&(frame.eventParameter1), pEvPar, evParLen);
-
-  frame.properties1 = evParLen;
-  frame.properties1 &= NOTIFICATION_REPORT_PROPERTIES1_EVENT_PARAMETERS_LENGTH_MASK_V4; /*remove sequence number and reserved flags*/
 
   uint8_t dataLength = sizeof(ZW_NOTIFICATION_REPORT_1BYTE_V4_FRAME) - sizeof(uint8_t) +
                        frame.properties1 - sizeof(CMD_CLASS_GRP);
@@ -606,24 +604,24 @@ CC_Notification_report_stx(zaf_tx_options_t *tx_options, void* pData)
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
   s_CC_notification_data_t* pNotificationData = (s_CC_notification_data_t*)pData;
   cc_notification_t *notification = cc_notification_get(pNotificationData->index);
 
-  txBuf.ZW_NotificationReport1byteV4Frame.cmdClass = COMMAND_CLASS_NOTIFICATION_V4;
-  txBuf.ZW_NotificationReport1byteV4Frame.cmd = NOTIFICATION_REPORT_V4;
-  txBuf.ZW_NotificationReport1byteV4Frame.v1AlarmType = 0;
-  txBuf.ZW_NotificationReport1byteV4Frame.v1AlarmLevel = 0;
-  txBuf.ZW_NotificationReport1byteV4Frame.reserved = 0;
-  txBuf.ZW_NotificationReport1byteV4Frame.notificationStatus = notification->status;
-  txBuf.ZW_NotificationReport1byteV4Frame.notificationType = notification->type;
-  txBuf.ZW_NotificationReport1byteV4Frame.mevent = notification->current_event;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_NotificationReport1byteV4Frame.cmdClass = COMMAND_CLASS_NOTIFICATION_V4,
+    .ZW_NotificationReport1byteV4Frame.cmd = NOTIFICATION_REPORT_V4,
+    .ZW_NotificationReport1byteV4Frame.v1AlarmType = 0,
+    .ZW_NotificationReport1byteV4Frame.v1AlarmLevel = 0,
+    .ZW_NotificationReport1byteV4Frame.reserved = 0,
+    .ZW_NotificationReport1byteV4Frame.notificationStatus = notification->status,
+    .ZW_NotificationReport1byteV4Frame.notificationType = notification->type,
+    .ZW_NotificationReport1byteV4Frame.mevent = notification->current_event,
+    .ZW_NotificationReport1byteV4Frame.properties1 = pNotificationData->eventParamLength & NOTIFICATION_REPORT_PROPERTIES1_EVENT_PARAMETERS_LENGTH_MASK_V4 /*remove sequence number and reserved flags*/
+  };
+
   memcpy(&(txBuf.ZW_NotificationReport1byteV4Frame.eventParameter1),
          pNotificationData->pEventParameters,
          pNotificationData->eventParamLength);
-  txBuf.ZW_NotificationReport1byteV4Frame.properties1 = pNotificationData->eventParamLength;
-  txBuf.ZW_NotificationReport1byteV4Frame.properties1 &= NOTIFICATION_REPORT_PROPERTIES1_EVENT_PARAMETERS_LENGTH_MASK_V4; /*remove sequence number and reserved flags*/
 
   size_t dataLength = sizeof(ZW_NOTIFICATION_REPORT_1BYTE_V4_FRAME) - sizeof(uint8_t) +
                        txBuf.ZW_NotificationReport1byteV4Frame.properties1;
@@ -633,6 +631,7 @@ CC_Notification_report_stx(zaf_tx_options_t *tx_options, void* pData)
   {
     dataLength -= sizeof(uint8_t);
   }
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           dataLength,

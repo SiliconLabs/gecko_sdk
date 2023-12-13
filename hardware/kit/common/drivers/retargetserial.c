@@ -99,7 +99,7 @@ static bool             em1HasBeenRequired = false; /**< EM1 requirement indicat
 static void disableRxInterrupt()
 {
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  sl_eusart_disable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  sl_hal_eusart_disable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_EUSART)
   EUSART_IntDisable(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_USART)
@@ -115,7 +115,7 @@ static void disableRxInterrupt()
 static void enableRxInterrupt()
 {
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  sl_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  sl_hal_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_EUSART)
   EUSART_IntEnable(RETARGET_UART, EUSART_IF_RXFL);
 #elif defined(RETARGET_USART)
@@ -190,7 +190,7 @@ void RETARGET_SerialInit(void)
   sl_gpio_set_pin_mode(RETARGET_RXPORT, RETARGET_RXPIN, SL_GPIO_MODE_INPUT_PULL, 1);
 
   EUSART_TypeDef *  eusart = RETARGET_UART;
-  sl_eusart_uart_config_t  init    = SL_EUSART_UART_INIT_DEFAULT_HF;
+  sl_hal_eusart_uart_config_t  init    = SL_HAL_EUSART_UART_INIT_DEFAULT_HF;
 
   /* Enable DK RS232/UART switch */
   RETARGET_PERIPHERAL_ENABLE();
@@ -200,10 +200,10 @@ void RETARGET_SerialInit(void)
 
   /* Configure USART for basic async operation */
   uint32_t ref_freq = CMU_ClockFreqGet(RETARGET_CLK);
-  init.clock_div = sl_eusart_uart_calculate_clock_div(ref_freq, 115200, init.oversampling);
-  sl_eusart_init_uart_hf(eusart, &init);
-  sl_eusart_disable(eusart);
-  sl_eusart_wait_ready(eusart);
+  init.clock_div = sl_hal_eusart_uart_calculate_clock_div(ref_freq, 115200, init.oversampling);
+  sl_hal_eusart_init_uart_hf(eusart, &init);
+  sl_hal_eusart_disable(eusart);
+  sl_hal_eusart_wait_ready(eusart);
 
   /* Enable pins at correct UART/USART location. */
   GPIO->EUSARTROUTE[RETARGET_UART_INDEX].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
@@ -214,18 +214,18 @@ void RETARGET_SerialInit(void)
                                                    | (RETARGET_RXPIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
 
   /* Clear previous RX interrupts */
-  sl_eusart_clear_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  sl_hal_eusart_clear_interrupts(RETARGET_UART, EUSART_IF_RXFL);
   NVIC_ClearPendingIRQ(RETARGET_IRQn);
 
   /* Enable RX interrupts */
-  sl_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
+  sl_hal_eusart_enable_interrupts(RETARGET_UART, EUSART_IF_RXFL);
   NVIC_EnableIRQ(RETARGET_IRQn);
 
   /* Finally enable it */
-  sl_eusart_enable(RETARGET_UART);
-  sl_eusart_enable_rx(RETARGET_UART);
-  sl_eusart_enable_tx(RETARGET_UART);
-  sl_eusart_wait_sync(RETARGET_UART, _EUSART_SYNCBUSY_MASK);
+  sl_hal_eusart_enable(RETARGET_UART);
+  sl_hal_eusart_enable_rx(RETARGET_UART);
+  sl_hal_eusart_enable_tx(RETARGET_UART);
+  sl_hal_eusart_wait_sync(RETARGET_UART, _EUSART_SYNCBUSY_MASK);
 #elif defined(RETARGET_EUSART)
   /* To avoid false start, configure output as high */
   GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModePushPull, 1);

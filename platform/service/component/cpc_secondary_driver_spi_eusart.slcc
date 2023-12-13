@@ -39,3 +39,5 @@ template_contribution:
     value: spi
   - name: cpc_periph_type
     value: eusart
+  - name: component_catalog
+    value: cpc_driver_spi

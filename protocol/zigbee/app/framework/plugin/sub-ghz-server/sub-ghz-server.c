@@ -328,6 +328,13 @@ bool sli_zigbee_af_sub_ghz_server_incoming_message(EmberIncomingMessageType type
                                           NULL, // interPanHeader, not needed here
                                           &cmd)) {
 # ifdef SL_CATALOG_ZIGBEE_OTA_SERVER_PRESENT
+        if (dcState <= EMBER_DUTY_CYCLE_LBT_LIMITED_THRESHOLD_REACHED
+            && apsFrame->clusterId == ZCL_OTA_BOOTLOAD_CLUSTER_ID
+            && cmd.direction == ZCL_DIRECTION_CLIENT_TO_SERVER
+            && cmd.clusterSpecific) {
+          // If Server is in Limited DC then it should still continue to process any message related to OTA cluster
+          return false;
+        }
         if (dcState >= EMBER_DUTY_CYCLE_LBT_CRITICAL_THRESHOLD_REACHED
             && apsFrame->clusterId == ZCL_OTA_BOOTLOAD_CLUSTER_ID
             && cmd.direction == ZCL_DIRECTION_CLIENT_TO_SERVER

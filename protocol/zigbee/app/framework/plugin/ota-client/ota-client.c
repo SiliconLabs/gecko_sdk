@@ -629,6 +629,7 @@ static void getPartnerLinkKey(void)
   for (i = 0; i < emberAfGetKeyTableSize(); i++) {
     sl_zb_sec_man_aps_key_metadata_t key_info;
     sl_zb_sec_man_context_t context;
+    sl_zb_sec_man_init_context(&context);
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
     context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
     context.key_index = i;

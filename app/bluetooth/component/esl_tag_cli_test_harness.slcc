@@ -12,29 +12,23 @@ quality: production
 root_path: app/bluetooth/common/esl_tag_cli_test_harness
 tag:
   - No-Code
-
 config_file:
   - path: config/esl_log_config.h
     file_id: esl_log_config
-    
 include:
   - path: .
     file_list:
       - path: esl_tag_cli_test_harness.h
-
 source:
   - path: esl_tag_cli_test_harness.c
-
 provides:
   - name: esl_tag_cli_test_harness
-
 requires:
   - name: esl_tag_core
   - name: app_log
   - name: iostream
   - name: cli
   - name: board_control
-
 recommends:
   - id: iostream_usart
     instance:
@@ -42,7 +36,6 @@ recommends:
   - id: cli
     instance:
       - example
-
 template_contribution:
   - name: event_handler
     value:
@@ -55,21 +48,21 @@ template_contribution:
   - name: cli_group
     value:
       name: esl_tag_cli_test_harness
-      help: "CLI Test Harness for ESL Tag application"
+      help: CLI Test Harness for ESL Tag application
       shortcuts:
         - name: esl
   - name: cli_group
     value:
       group: esl_tag_cli_test_harness
       name: get
-      help: "Getter commands"
+      help: Getter commands
       shortcuts:
         - name: g
   - name: cli_group
     value:
       group: esl_tag_cli_test_harness
       name: set
-      help: "Setter commands"
+      help: Setter commands
       shortcuts:
         - name: s
   - name: cli_command
@@ -79,7 +72,7 @@ template_contribution:
       handler: cli_esl_tag_address_get
       shortcuts:
         - name: a
-      help: "Read ESL Address value"
+      help: Read ESL Address value
   - name: cli_command
     value:
       group: get
@@ -87,7 +80,7 @@ template_contribution:
       handler: cli_esl_tag_ap_key_get
       shortcuts:
         - name: ak
-      help: "Read ESL Access Point Key value"
+      help: Read ESL Access Point Key value
   - name: cli_command
     value:
       group: get
@@ -95,7 +88,7 @@ template_contribution:
       handler: cli_esl_tag_response_key_get
       shortcuts:
         - name: rk
-      help: "Read Response Key value"
+      help: Read Response Key value
   - name: cli_command
     value:
       group: get
@@ -103,7 +96,7 @@ template_contribution:
       handler: cli_esl_tag_absolute_time_get
       shortcuts:
         - name: t
-      help: "Read Absolute Time value"
+      help: Read Absolute Time value
   - name: cli_command
     value:
       group: get
@@ -111,7 +104,7 @@ template_contribution:
       handler: cli_esl_tag_led_info_get
       shortcuts:
         - name: l
-      help: "Read LED Information"
+      help: Read LED Information
   - name: cli_command
     value:
       group: get
@@ -119,7 +112,7 @@ template_contribution:
       handler: cli_esl_tag_display_info_get
       shortcuts:
         - name: d
-      help: "Read Display Information"
+      help: Read Display Information
   - name: cli_command
     value:
       group: get
@@ -127,7 +120,7 @@ template_contribution:
       handler: cli_esl_tag_image_info_get
       shortcuts:
         - name: i
-      help: "Read Image Information"
+      help: Read Image Information
   - name: cli_command
     value:
       group: get
@@ -135,7 +128,7 @@ template_contribution:
       handler: cli_esl_tag_sensor_info_get
       shortcuts:
         - name: s
-      help: "Read Sensor Information"
+      help: Read Sensor Information
   - name: cli_command
     value:
       group: get
@@ -143,7 +136,7 @@ template_contribution:
       handler: cli_esl_tag_status_get
       shortcuts:
         - name: sm
-      help: "Read ESL State Machine status"
+      help: Read ESL State Machine status
   - name: cli_command
     value:
       group: get
@@ -151,7 +144,7 @@ template_contribution:
       handler: cli_esl_tag_basic_state_get
       shortcuts:
         - name: b
-      help: "Read Basic State"
+      help: Read Basic State
   - name: cli_command
     value:
       group: set
@@ -162,7 +155,7 @@ template_contribution:
       argument:
         - type: uint8
           help: "0: clear flag, 1: set flag"
-      help: "Write Basic State - Servicie Needed flag"
+      help: Write Basic State - Servicie Needed flag
   - name: cli_command
     value:
       group: set
@@ -170,7 +163,7 @@ template_contribution:
       handler: cli_esl_tag_advertising_set
       shortcuts:
         - name: adv
-      help: "Start ESL Tag advertising"
+      help: Start ESL Tag advertising
   - name: cli_command
     value:
       group: set
@@ -180,8 +173,8 @@ template_contribution:
         - name: im
       argument:
         - type: uint8
-          help: "Image index"
-      help: "Set static image data for selected image"
+          help: Image index
+      help: Set static image data for selected image
   - name: cli_command
     value:
       group: esl_tag_cli_test_harness
@@ -192,4 +185,7 @@ template_contribution:
       argument:
         - type: uint8
           help: "1: MCU reset, 2: MCU and factory reset"
-      help: "Restarts the ESL Tag if the proper parameter is given"
+      help: Restarts the ESL Tag if the proper parameter is given
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/esl-tag-cli-test-harness

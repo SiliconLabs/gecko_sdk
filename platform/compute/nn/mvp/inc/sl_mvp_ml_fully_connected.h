@@ -32,9 +32,9 @@
 #define SL_MVP_ML_FULLY_CONNECTED_H
 
 #include "sl_status.h"
-#include "sl_math_types.h"
-#include "sl_mvp_types.h"
 #include "sl_mvp_ml.h"
+#include "sl_math_types.h"
+#include "sl_nn_util.h"
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -51,15 +51,15 @@ extern "C" {
 /** Fully connected data structure. */
 typedef struct {
   const int8_t    *input;             ///< Input data pointer.
-  sli_shape_t     input_shape;        ///< Input shape.
+  sli_nn_shape_t  input_shape;        ///< Input shape.
   int             input_offset;       ///< Input offset. This is negative input zero point.
   const int8_t    *weight;            ///< Weight data pointer.
-  sli_shape_t     weight_shape;       ///< Weight shape.
+  sli_nn_shape_t  weight_shape;       ///< Weight shape.
   int             weight_offset;      ///< Weight zero point. This is negative weight zero point.
   const float16_t *bias;              ///< Bias data pointer.
   size_t          bias_length;        ///< Bias length.
   int8_t          *output;            ///< Output data pointer.
-  sli_shape_t     output_shape;       ///< Output shape.
+  sli_nn_shape_t  output_shape;       ///< Output shape.
   int             output_offset;      ///< Output offset. This is the same as output zero point.
   float16_t       output_multiplier;  ///< Output multiplier, see @ref sli_mvp_ml_fully_connected_output_multiplier.
   int8_t          activation_min;     ///< Minimum activation/output value.

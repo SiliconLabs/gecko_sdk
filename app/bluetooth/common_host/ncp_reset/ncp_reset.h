@@ -3,7 +3,7 @@
  * @brief NCP reset module.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,18 +34,23 @@
 #include "sl_status.h"
 #include "sl_bt_api.h"
 
-/**
+/**************************************************************************//**
+ * Module initialization.
+ *****************************************************************************/
+void ncp_reset_init(void);
+
+/**************************************************************************//**
  * Bluetooth stack event handler.
  *
  * @param [in] evt Event from the Bluetooth stack.
  * @retval SL_STATUS_OK NCP target is operational.
- * @retval SL_STATUS_BUSY NCP target reset is pending.
- */
+ * @retval SL_STATUS_NOT_READY Waiting for boot event from NCP target.
+ *****************************************************************************/
 sl_status_t ncp_reset_on_event(sl_bt_msg_t *evt);
 
-/**
- * Send system reset request to ncp target.
- */
+/**************************************************************************//**
+ * Send system reset request to the NCP target.
+ *****************************************************************************/
 void ncp_reset(void);
 
 #endif // NCP_RESET_H

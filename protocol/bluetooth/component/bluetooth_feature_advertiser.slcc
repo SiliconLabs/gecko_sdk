@@ -41,3 +41,6 @@ template_contribution:
       include: "sl_bluetooth_advertiser_config.h"
       function: sl_btctrl_init_adv()
     priority: 3
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-advertiser

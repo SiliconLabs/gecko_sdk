@@ -50,6 +50,13 @@ typedef enum {
   ABR_DEVICE_INITIATOR       = 1        ///< Initiator
 } abr_role_t;
 
+///ABR mode
+typedef enum {
+  ABR_MODE_CALIBRATION   = 0,                   // Calibration CS mode
+  ABR_MODE_RTT           = sl_bt_cs_mode_rtt,   // RTT CS mode
+  ABR_MODE_PBR           = sl_bt_cs_mode_pbr    // PBR CS mode
+} abr_mode_t;
+
 /// Initiator claibration step
 typedef struct {
   uint8_t packet_quality;           ///< Packet quality
@@ -67,30 +74,30 @@ typedef struct {
 
 /// CS RTT step result
 typedef struct {
-  uint8_t  packet_quality;          ///< Packet quality
+  uint8_t  packet_quality;          ///< Packet quality raw value
   uint8_t  nadm;                    ///< Packet NADM
   int8_t   rssi;                    ///< Packet RSSI
   int16_t tod_toa;                  ///< Time difference between arrival and departure time of the CS packets
   uint8_t  antenna;                 ///< Antenna identifier used for the RTT packet
 } rtt_result_t;
 
-/// CS RTP step result
+/// CS PBR step result
 typedef struct {
   uint8_t  antenna_permutation_index;             ///< Antenna Permutation Index for the chosen
                                                   ///  Num_Antenna_Paths parameter used during the phase measurement stage
   float    pct_q[ANTENNA_PERMUTATION_MAX];        ///< Phase Correction Term Q sample
   float    pct_i[ANTENNA_PERMUTATION_MAX];        ///< Phase Correction Term I sample
-  uint8_t  tone_quality[ANTENNA_PERMUTATION_MAX]; ///< PCT quality indicator
+  uint8_t  tone_quality[ANTENNA_PERMUTATION_MAX]; ///< PCT quality indicator raw value
   uint8_t  pct_sample_num;                        ///< Number of PCT samples
   uint32_t channel;                               ///< Channel
-} rtp_result_t;
+} pbr_result_t;
 
 /// CS Step data type
 typedef enum {
   CALIBRATION_INITIATOR       = 0,  ///< Initiator calibration data
   CALIBRATION_REFLECTOR       = 1,  ///< Reflector calibration data
   MEASUREMENT_RTT             = 2,  ///< RTT measurement data
-  MEASUREMENT_RTP             = 3,  ///< RTP measurement data
+  MEASUREMENT_PBR             = 3,  ///< PBR measurement data
 } cs_step_data_type_t;
 
 /// CS step structure
@@ -103,7 +110,7 @@ typedef struct {
     reflector_calibration_t reflector_calib;  ///< Reflector calibration step
     initiator_calibration_t initiator_calib;  ///< Initiator claibration step
     rtt_result_t            meas_rtt;         ///< RTT step
-    rtp_result_t            meas_rtp;         ///< RTP step
+    pbr_result_t            meas_pbr;         ///< PBR step
   } data;                                     ///< Step data
 } cs_step_t;
 

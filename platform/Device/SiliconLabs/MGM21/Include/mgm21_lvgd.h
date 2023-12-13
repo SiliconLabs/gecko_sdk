@@ -64,4 +64,4 @@ typedef struct {
 /** @} End of group MGM21_LVGD */
 /** @} End of group Parts */
 
-#endif /* MGM21_LVGD_H */
+#endif // MGM21_LVGD_H

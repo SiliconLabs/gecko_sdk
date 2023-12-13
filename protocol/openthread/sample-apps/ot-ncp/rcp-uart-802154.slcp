@@ -17,6 +17,7 @@ category: OpenThread Examples
 quality: production
 
 component:
+  - id: ot_crash_handler
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
   - id: cpc_secondary_driver_uart_usart
@@ -50,7 +51,7 @@ configuration:
   - name: OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_DIAG_ENABLE
-    value: 1  
+    value: 1
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT
     value: OPENTHREAD_CONFIG_LOG_OUTPUT_NONE
   - name: OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE

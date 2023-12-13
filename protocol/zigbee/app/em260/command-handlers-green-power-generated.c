@@ -12,7 +12,6 @@
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
 #include "ezsp-enum.h"
-#include "secure-ezsp-types.h"
 #include "app/em260/command-context.h"
 #include "stack/include/cbke-crypto-engine.h"
 #include "stack/include/zigbee-security-manager.h"
@@ -35,6 +34,8 @@
 #include "zigbee-device-stack.h"
 #include "ember-duty-cycle.h"
 #include "multi-phy.h"
+#include "stack/gp/gp-sink-table.h"
+#include "stack/gp/gp-proxy-table.h"
 
 bool sli_zigbee_af_process_ezsp_command_green_power(uint16_t commandId)
 {
@@ -174,6 +175,13 @@ bool sli_zigbee_af_process_ezsp_command_green_power(uint16_t commandId)
       index = fetchInt8u();
       sfc = fetchInt32u();
       emberGpSinkTableSetSecurityFrameCounter(index, sfc);
+      break;
+    }
+
+    case EZSP_GP_SINK_TABLE_GET_NUMBER_OF_ACTIVE_ENTRIES: {
+      uint8_t number_of_entries;
+      number_of_entries = emberGpSinkTableGetNumberOfActiveEntries();
+      appendInt8u(number_of_entries);
       break;
     }
 

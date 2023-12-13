@@ -19,19 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define min(x, y) ({ \
-    typeof(x) _x = (x); \
-    typeof(y) _y = (y); \
-    _x < _y ? _x : _y;  \
-})
-
-#define max(x, y) ({ \
-    typeof(x) _x = (x); \
-    typeof(y) _y = (y); \
-    _x > _y ? _x : _y;  \
-})
+#define min(x, y) ((x) < (y) ? (x) : (y))
+#define max(x, y) ((x) > (y) ? (x) : (y))
 
 #define container_of(ptr, type, member)  (type *)((uintptr_t)(ptr) - ((uintptr_t)(&((type *)0)->member)))
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 
 #endif

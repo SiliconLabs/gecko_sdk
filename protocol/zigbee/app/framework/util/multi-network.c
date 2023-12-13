@@ -17,7 +17,12 @@
 
 #include "app/framework/include/af.h"
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+// This is now non-const, so that the node type may be changed at run-time.
+sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network = NULL;
+#else
 const sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network = NULL;
+#endif
 
 //#define NETWORK_INDEX_DEBUG
 #if defined(EMBER_TEST) || defined(NETWORK_INDEX_DEBUG)

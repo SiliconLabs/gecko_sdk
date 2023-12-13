@@ -37,6 +37,21 @@
 #include "sli_tz_iovec_check.h"
 
 //------------------------------------------------------------------------------
+// Macros
+
+/**
+ * \brief Validate the number of IOVECs passed.
+ */
+#define _TZ_NVM3_ASSERT_N_IOVECS(expected_invecs, expected_outvecs) \
+  SLI_TZ_IOVEC_ASSERT_N_IOVECS(expected_invecs, expected_outvecs, ECODE_NVM3_ERR_PARAMETER)
+
+/**
+ * \brief Validate the number of IOVECs passed.
+ */
+#define _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(iovec, expected_struct_type) \
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec, expected_struct_type, ECODE_NVM3_ERR_PARAMETER)
+
+//------------------------------------------------------------------------------
 // Global variables
 
 nvm3_Handle_t  nvm3_defaultHandleData;
@@ -55,9 +70,9 @@ Ecode_t sli_tz_nvm3_init_default(sli_tz_invec in_vec[],
                                  size_t out_len)
 {
   (void) out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Init_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Init_t);
 
   // Copy the provided init data into a new struct, such that the original
   // remains untouched (which is expected since it's a const parameter).
@@ -113,7 +128,7 @@ Ecode_t sli_tz_nvm3_deinit_default(sli_tz_invec in_vec[],
                                    sli_tz_outvec out_vec[],
                                    size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(1, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(1, 0);
   (void)in_vec;
   (void)out_vec;
 
@@ -135,11 +150,11 @@ Ecode_t sli_tz_nvm3_read_partial_data(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(4, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], size_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -158,10 +173,10 @@ Ecode_t sli_tz_nvm3_read_data(sli_tz_invec in_vec[],
                               sli_tz_outvec out_vec[],
                               size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(3, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -180,10 +195,10 @@ Ecode_t sli_tz_nvm3_write_data(sli_tz_invec in_vec[],
                                size_t out_len)
 {
   (void) out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -200,10 +215,10 @@ Ecode_t sli_tz_nvm3_delete_object(sli_tz_invec in_vec[],
                                   size_t out_len)
 {
   (void) out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(3, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -217,10 +232,10 @@ Ecode_t sli_tz_nvm3_open(sli_tz_invec in_vec[],
                          sli_tz_outvec out_vec[],
                          size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Init_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Init_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], nvm3_Handle_t);
 
   // Input arguments
   // Copy the provided init data into a new struct, such that the original
@@ -294,9 +309,9 @@ Ecode_t sli_tz_nvm3_close(sli_tz_invec in_vec[],
                           size_t out_len)
 {
   (void)out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -324,12 +339,12 @@ Ecode_t sli_tz_nvm3_get_object_info(sli_tz_invec in_vec[],
                                     sli_tz_outvec out_vec[],
                                     size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 2);
+  _TZ_NVM3_ASSERT_N_IOVECS(3, 2);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[1], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[1], size_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -348,11 +363,11 @@ Ecode_t sli_tz_nvm3_write_counter(sli_tz_invec in_vec[],
                                   size_t out_len)
 {
   (void)out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], uint32_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], uint32_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -367,11 +382,11 @@ Ecode_t sli_tz_nvm3_read_counter(sli_tz_invec in_vec[],
                                  sli_tz_outvec out_vec[],
                                  size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(3, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -388,10 +403,10 @@ Ecode_t sli_tz_nvm3_increment_counter(sli_tz_invec in_vec[],
                                       sli_tz_outvec out_vec[],
                                       size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(3, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(3, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_ObjectKey_t);
 
   // The size of this parameter is allowed to be 0 if the pointer is null.
   if (out_vec[0].base == NULL) {
@@ -416,9 +431,9 @@ Ecode_t sli_tz_nvm3_erase_all(sli_tz_invec in_vec[],
                               size_t out_len)
 {
   (void)out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -431,10 +446,10 @@ Ecode_t sli_tz_nvm3_get_erase_count(sli_tz_invec in_vec[],
                                     sli_tz_outvec out_vec[],
                                     size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], uint32_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], uint32_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -451,9 +466,9 @@ Ecode_t sli_tz_nvm3_set_erase_count(sli_tz_invec in_vec[],
                                     size_t out_len)
 {
   (void)out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], uint32_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], uint32_t);
 
   // Input arguments
   uint32_t erase_cnt = *((uint32_t *)in_vec[1].base);
@@ -469,9 +484,9 @@ Ecode_t sli_tz_nvm3_repack(sli_tz_invec in_vec[],
                            size_t out_len)
 {
   (void) out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -484,10 +499,10 @@ Ecode_t sli_tz_nvm3_repack_needed(sli_tz_invec in_vec[],
                                   sli_tz_outvec out_vec[],
                                   size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(2, 1);
+  _TZ_NVM3_ASSERT_N_IOVECS(2, 1);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], bool);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], bool);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -506,11 +521,11 @@ Ecode_t sli_tz_nvm3_resize(sli_tz_invec in_vec[],
                            size_t out_len)
 {
   (void) out_vec;
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(4, 0);
+  _TZ_NVM3_ASSERT_N_IOVECS(4, 0);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], nvm3_HalPtr_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], nvm3_HalPtr_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], size_t);
 
   // Input arguments
   nvm3_Handle_t *h = (nvm3_Handle_t *)in_vec[1].base;
@@ -525,13 +540,13 @@ Ecode_t sli_tz_nvm3_enum_objects(sli_tz_invec in_vec[],
                                  sli_tz_outvec out_vec[],
                                  size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(5, 2);
+  _TZ_NVM3_ASSERT_N_IOVECS(5, 2);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], size_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[4], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[4], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], size_t);
 
   // The size of this parameter is allowed to be 0 if the pointer is null.
   if (out_vec[1].base == NULL) {
@@ -560,13 +575,13 @@ Ecode_t sli_tz_nvm3_enum_deleted_objects(sli_tz_invec in_vec[],
                                          sli_tz_outvec out_vec[],
                                          size_t out_len)
 {
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(5, 2);
+  _TZ_NVM3_ASSERT_N_IOVECS(5, 2);
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[2], size_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[3], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(in_vec[4], nvm3_ObjectKey_t);
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(out_vec[0], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[1], nvm3_Handle_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[2], size_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[3], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(in_vec[4], nvm3_ObjectKey_t);
+  _TZ_NVM3_ASSERT_IOVEC_STRUCT_SIZE(out_vec[0], size_t);
 
   // The size of this parameter is allowed to be 0 if the pointer is null.
   if (out_vec[1].base == NULL) {

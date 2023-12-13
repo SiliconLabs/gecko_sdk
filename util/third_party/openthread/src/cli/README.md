@@ -41,6 +41,7 @@ Done
 - [csl](#csl)
 - [dataset](README_DATASET.md)
 - [delaytimermin](#delaytimermin)
+- [detach](#detach)
 - [deviceprops](#deviceprops)
 - [diag](#diag)
 - [discover](#discover-channel)
@@ -65,6 +66,7 @@ Done
 - [leaderdata](#leaderdata)
 - [leaderweight](#leaderweight)
 - [linkmetrics](#linkmetrics-mgmt-ipaddr-enhanced-ack-clear)
+- [linkmetricsmgr](#linkmetricsmgr-disable)
 - [locate](#locate)
 - [log](#log-filename-filename)
 - [mac](#mac-retries-direct)
@@ -87,7 +89,7 @@ Done
 - [parent](#parent)
 - [parentpriority](#parentpriority)
 - [partitionid](#partitionid)
-- [ping](#ping-async--i-source-ipaddr-size-count-interval-hoplimit-timeout)
+- [ping](#ping-async--i-source--m-ipaddr-size-count-interval-hoplimit-timeout)
 - [platform](#platform)
 - [pollperiod](#pollperiod-pollperiod)
 - [preferrouterid](#preferrouterid-routerid)
@@ -983,10 +985,12 @@ Done
 
 Get the CSL configuration.
 
+CSL period is shown in microseconds.
+
 ```bash
 > csl
 Channel: 11
-Period: 1000 (in units of 10 symbols), 160ms
+Period: 160000us
 Timeout: 1000s
 Done
 ```
@@ -1002,10 +1006,12 @@ Done
 
 ### csl period \<period\>
 
-Set CSL period in units of 10 symbols. Disable CSL by setting this parameter to `0`.
+Set CSL period in microseconds. Disable CSL by setting this parameter to `0`.
+
+The CSL period MUST be a multiple 160 microseconds which is 802.15.4 "ten symbols time".
 
 ```bash
-> csl period 3000
+> csl period 30000000
 Done
 ```
 
@@ -1058,6 +1064,25 @@ Set the minimal delay timer (in seconds).
 
 ```bash
 > delaytimermin 60
+Done
+```
+
+### detach
+
+Start the graceful detach process by first notifying other nodes (sending Address Release if acting as a router, or setting Child Timeout value to zero on parent if acting as a child) and then stopping Thread protocol operation.
+
+```bash
+> detach
+Finished detaching
+Done
+```
+
+### detach async
+
+Start the graceful detach process similar to the `detach` command without blocking and waiting for the callback indicating that detach is finished.
+
+```bash
+> detach async
 Done
 ```
 
@@ -1240,15 +1265,23 @@ The parameters after `service-name` are optional. Any unspecified (or zero) valu
 > dns browse _service._udp.example.com
 DNS browse response for _service._udp.example.com.
 inst1
+inst2
+inst3
+Done
+```
+
+The detailed service info (port number, weight, host name, TXT data, host addresses) is outputted only when provided by server/resolver in the browse response (in additional Data Section). This is a SHOULD and not a MUST requirement, and servers/resolvers are not required to provide this.
+
+The recommended behavior, which is supported by the OpenThread DNS-SD resolver, is to only provide the additional data when there is a single instance in the response. However, users should assume that the browse response may only contain the list of matching service instances and not any detail service info. To resolve a service instance, users can use the `dns service` or `dns servicehost` commands.
+
+```bash
+> dns browse _service._udp.example.com
+DNS browse response for _service._udp.example.com.
+inst1
     Port:1234, Priority:1, Weight:2, TTL:7200
     Host:host.example.com.
     HostAddress:fd00:0:0:0:0:0:0:abcd TTL:7200
     TXT:[a=6531, b=6c12] TTL:7300
-instance2
-    Port:1234, Priority:1, Weight:2, TTL:7200
-    Host:host.example.com.
-    HostAddress:fd00:0:0:0:0:0:0:abcd TTL:7200
-    TXT:[a=1234] TTL:7300
 Done
 ```
 
@@ -1516,13 +1549,19 @@ fe80:0:0:0:f3d9:2a82:c8d8:fe43
 Done
 ```
 
-Use `-v` to get more verbose information about the address.
+Use `-v` to get more verbose information about the address:
+
+- `origin`: can be `thread`, `slaac`, `dhcp6`, or `manual`, and indicates the origin of the address
+- `plen`: prefix length (in bits)
+- `preferred`: preferred flag (boolean)
+- `valid`: valid flag (boolean)
 
 ```bash
 > ipaddr -v
-fdde:ad00:beef:0:0:ff:fe00:0 origin:thread
-fdde:ad00:beef:0:558:f56b:d688:799 origin:thread
-fe80:0:0:0:f3d9:2a82:c8d8:fe43 origin:thread
+fd5e:18fa:f4a5:b8:0:ff:fe00:fc00 origin:thread plen:64 preferred:0 valid:1
+fd5e:18fa:f4a5:b8:0:ff:fe00:dc00 origin:thread plen:64 preferred:0 valid:1
+fd5e:18fa:f4a5:b8:f8e:5d95:87a0:e82c origin:thread plen:64 preferred:0 valid:1
+fe80:0:0:0:4891:b191:e277:8826 origin:thread plen:64 preferred:1 valid:1
 Done
 ```
 
@@ -1843,6 +1882,41 @@ Done
  - LQI: 76 (Exponential Moving Average)
  - Margin: 82 (dB) (Exponential Moving Average)
  - RSSI: -18 (dBm) (Exponential Moving Average)
+```
+
+### linkmetricsmgr disable
+
+Disable the Link Metrics Manager.
+
+`OPENTHREAD_CONFIG_LINK_METRICS_MANAGER_ENABLE` is required.
+
+```bash
+> linkmetricsmgr disable
+Done
+```
+
+### linkmetricsmgr enable
+
+Enable the Link Metrics Manager.
+
+`OPENTHREAD_CONFIG_LINK_METRICS_MANAGER_ENABLE` is required.
+
+```bash
+> linkmetricsmgr enable
+Done
+```
+
+### linkmetricsmgr show
+
+Display the Link Metrics data of all subjects. The subjects are identified by its extended address.
+
+`OPENTHREAD_CONFIG_LINK_METRICS_MANAGER_ENABLE` is required.
+
+```bash
+
+> linkmetricsmgr show
+ExtAddr:827aa7f7f63e1234, LinkMargin:80, Rssi:-20
+Done
 ```
 
 ### locate
@@ -2654,12 +2728,13 @@ Set the preferred Thread Leader Partition ID.
 Done
 ```
 
-### ping \[async\] \[-I source\] \<ipaddr\> \[size\] \[count\] \[interval\] \[hoplimit\] \[timeout\]
+### ping \[async\] \[-I source\] \[-m] \<ipaddr\> \[size\] \[count\] \[interval\] \[hoplimit\] \[timeout\]
 
 Send an ICMPv6 Echo Request.
 
 - async: Use the non-blocking mode. New commands are allowed before the ping process terminates.
 - source: The source IPv6 address of the echo request.
+- -m: multicast loop, which allows looping back pings to multicast addresses that the device itself is subscribed to.
 - size: The number of data bytes to be sent.
 - count: The number of ICMPv6 Echo Requests to be sent.
 - interval: The interval between two consecutive ICMPv6 Echo Requests in seconds. The value may have fractional form, for example `0.5`.
@@ -3000,6 +3075,17 @@ Signal a platform reset.
 > reset
 ```
 
+### reset bootloader
+
+Signal a platform reset to bootloader mode, if supported.
+
+Requires `OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE`.
+
+```bash
+> reset bootloader
+Done
+```
+
 ### rloc16
 
 Get the Thread RLOC16 value.
@@ -3020,12 +3106,13 @@ Get the external route list in the local Network Data.
 Done
 ```
 
-### route add \<prefix\> [sn][prf]
+### route add \<prefix\> [sna][prf]
 
 Add a valid external route to the Network Data.
 
 - s: Stable flag
 - n: NAT64 flag
+- a: Advertising PIO (AP) flag
 - prf: Default Router Preference, which may be: 'high', 'med', or 'low'.
 
 ```bash
@@ -3885,7 +3972,7 @@ Done
 ```
 
 ```bash
-> macfilter rss add 0f6127e33af6b404 2
+> macfilter rss add-lqi 0f6127e33af6b404 2
 Done
 ```
 

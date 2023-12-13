@@ -148,12 +148,12 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
     },
-    {                                                        \
-      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,          \
-      .segments = 0U,                                        \
-      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,                 \
-      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,                 \
-      .conversion = { .mappingTable = &RAIL_curves24Lp[0] }, \
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
     },
   }
 };
@@ -170,12 +170,12 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
     },
-    {                                                        \
-      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,          \
-      .segments = 0U,                                        \
-      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,                 \
-      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,                 \
-      .conversion = { .mappingTable = &RAIL_curves24Lp[0] }, \
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
     },
   }
 };
@@ -250,7 +250,6 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
     },
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
     {
       .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
       .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
@@ -258,7 +257,6 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_MP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataMpVbat },
     },
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG == 1
     {
       .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
       .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
@@ -297,7 +295,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
     },
   }
 };
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
 static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpVbat = {
   RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER,
   RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER,
@@ -327,12 +325,12 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
     },
-    {                                                        \
-      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,          \
-      .segments = 0U,                                        \
-      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,                 \
-      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,                 \
-      .conversion = { .mappingTable = &RAIL_curves24Lp[0] }, \
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
     },
   }
 };
@@ -353,18 +351,85 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
 #endif
     },
-    {                                                        \
-      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,          \
-      .segments = 0U,                                        \
-      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,                 \
-      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,                 \
-      .conversion = { .mappingTable = &RAIL_curves24Lp[0] }, \
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
     },
   }
 };
 
 #else
+#ifdef RAIL_INTERNAL_BUILD
+static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpVbat = {
+  RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER,
+  RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER,
+  RAIL_PA_CURVES_2P4_HP_VBAT_CURVES,
+};
+
+#if defined(RAIL_DECLARE_TX_POWER_DCDC_CURVES_ALT)
+static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataHpDcdc = {
+  RAIL_PA_CURVES_2P4_HP_DCDC_MAX_POWER,
+  RAIL_PA_CURVES_2P4_HP_DCDC_MIN_POWER,
+  RAIL_PA_CURVES_2P4_HP_DCDC_CURVES,
+};
+#endif
+
+static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =
+  RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
+
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+__WEAK
+#endif
+const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
+  .curves = {
+    {
+      .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
+      .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
+      .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
+      .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
+    },
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
+    },
+  }
+};
+
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+__WEAK
+#endif
+const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
+  .curves = {
+    {
+      .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
+      .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
+      .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
+#if defined(RAIL_DECLARE_TX_POWER_DCDC_CURVES_ALT)
+      .conversion = { .powerCurve = &RAIL_piecewiseDataHpDcdc },
+#else
+      .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
+#endif
+    },
+    {
+      .algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE,
+      .segments = 0U,
+      .min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN,
+      .max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX,
+      .conversion = { .mappingTable = &RAIL_curves24Lp[0] },
+    },
+  }
+};
+#else
 #error "Unsupported platform!"
+#endif
 #endif
 
 #endif //_SILICON_LABS_MODULE

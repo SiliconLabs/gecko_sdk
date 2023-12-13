@@ -101,10 +101,6 @@ void app_init(int argc, char *argv[])
   SL_BTMESH_API_REGISTER();
 
   app_log_info("Empty NCP-host initialised." APP_LOG_NEW_LINE);
-  app_log_info("Resetting NCP..." APP_LOG_NEW_LINE);
-  // Reset NCP to ensure it gets into a defined state.
-  // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
@@ -152,14 +148,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-
-      // Print boot message.
-      app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d" APP_LOG_NEW_LINE,
-                   evt->data.evt_system_boot.major,
-                   evt->data.evt_system_boot.minor,
-                   evt->data.evt_system_boot.patch,
-                   evt->data.evt_system_boot.build);
-
       // Initialize Mesh stack in Node operation mode,
       // wait for initialized event
       app_log_info("Node init" APP_LOG_NEW_LINE);

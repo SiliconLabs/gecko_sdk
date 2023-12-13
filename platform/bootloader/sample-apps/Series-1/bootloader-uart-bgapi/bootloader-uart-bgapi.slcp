@@ -21,6 +21,7 @@ component:
   - id: bootloader_crc
   - id: bootloader_aes_sha_ecdsa
   - id: bootloader_delay_driver
+  - id: bootloader_gpio_activation
   - id: bootloader_image_parser
   - id: bootloader_token_management
   - id: bootloader_serial_driver

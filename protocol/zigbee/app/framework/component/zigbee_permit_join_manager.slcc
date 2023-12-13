@@ -5,7 +5,7 @@ quality: production
 id: zigbee_permit_join_manager
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_permit_join_manager"
+  - name: zigbee_permit_join_manager
 config_file:
   - path: protocol/zigbee/app/framework/plugin/permit-join-manager/config/permit-join-manager-config.h
 source:

@@ -32,6 +32,7 @@
 
 /* Standard includes. */
 #include <stdint.h>
+#include <stddef.h>
 
 /**
  * @defgroup iot_spi SPI Abstraction APIs.

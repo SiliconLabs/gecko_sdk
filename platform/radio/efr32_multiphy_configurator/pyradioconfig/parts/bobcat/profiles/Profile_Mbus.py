@@ -93,4 +93,6 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
 
         build_ircal_sw_vars(model, profile)
 
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
         return profile

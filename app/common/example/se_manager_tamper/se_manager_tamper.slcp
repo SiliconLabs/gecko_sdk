@@ -1,7 +1,7 @@
 project_name: se_manager_tamper
 package: platform
 quality: production
-label: Platform - SE Manager Tamper
+label: Platform Security - SoC SE Manager Tamper
 description: >
   This example project demonstrates the tamper feature of Secure Vault High device.
 category: Example|Platform

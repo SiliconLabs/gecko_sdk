@@ -954,6 +954,16 @@ class RM_Field_FRC_NS_CTRL_LPMODEEXTEND(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_FRC_NS_CTRL_LPMODELRBLE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_CTRL_LPMODELRBLE, self).__init__(register,
+            'LPMODELRBLE', 'FRC_NS.CTRL.LPMODELRBLE', 'read-write',
+            u"",
+            30, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_FRC_NS_RXCTRL_STORECRC(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -1134,13 +1144,23 @@ class RM_Field_FRC_NS_TRAILRXDATA_CRCOK(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASE(Base_RM_Field):
+class RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASEL(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASE, self).__init__(register,
-            'PROTIMERCC0BASE', 'FRC_NS.TRAILRXDATA.PROTIMERCC0BASE', 'read-write',
+        super(RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASEL, self).__init__(register,
+            'PROTIMERCC0BASEL', 'FRC_NS.TRAILRXDATA.PROTIMERCC0BASEL', 'read-write',
             u"",
             2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASEH(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0BASEH, self).__init__(register,
+            'PROTIMERCC0BASEH', 'FRC_NS.TRAILRXDATA.PROTIMERCC0BASEH', 'read-write',
+            u"",
+            3, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1150,7 +1170,7 @@ class RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0WRAPL(Base_RM_Field):
         super(RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0WRAPL, self).__init__(register,
             'PROTIMERCC0WRAPL', 'FRC_NS.TRAILRXDATA.PROTIMERCC0WRAPL', 'read-write',
             u"",
-            3, 1)
+            4, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1160,7 +1180,7 @@ class RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0WRAPH(Base_RM_Field):
         super(RM_Field_FRC_NS_TRAILRXDATA_PROTIMERCC0WRAPH, self).__init__(register,
             'PROTIMERCC0WRAPH', 'FRC_NS.TRAILRXDATA.PROTIMERCC0WRAPH', 'read-write',
             u"",
-            4, 1)
+            5, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1170,7 +1190,7 @@ class RM_Field_FRC_NS_TRAILRXDATA_RTCSTAMP(Base_RM_Field):
         super(RM_Field_FRC_NS_TRAILRXDATA_RTCSTAMP, self).__init__(register,
             'RTCSTAMP', 'FRC_NS.TRAILRXDATA.RTCSTAMP', 'read-write',
             u"",
-            5, 1)
+            6, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2094,11 +2114,11 @@ class RM_Field_FRC_NS_SNIFFCTRL_SNIFFAUXDATA(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_FRC_NS_SNIFFCTRL_SNIFFBR(Base_RM_Field):
+class RM_Field_FRC_NS_SNIFFCTRL_SNIFFAUXDATAMASK(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_FRC_NS_SNIFFCTRL_SNIFFBR, self).__init__(register,
-            'SNIFFBR', 'FRC_NS.SNIFFCTRL.SNIFFBR', 'read-write',
+        super(RM_Field_FRC_NS_SNIFFCTRL_SNIFFAUXDATAMASK, self).__init__(register,
+            'SNIFFAUXDATAMASK', 'FRC_NS.SNIFFCTRL.SNIFFAUXDATAMASK', 'read-write',
             u"",
             8, 8)
         self.__dict__['zz_frozen'] = True
@@ -2134,6 +2154,36 @@ class RM_Field_FRC_NS_SNIFFCTRL_SNIFFRACSTATE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_FRC_NS_SNIFFCTRL_SNIFFDFRAMECTRL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_SNIFFCTRL_SNIFFDFRAMECTRL, self).__init__(register,
+            'SNIFFDFRAMECTRL', 'FRC_NS.SNIFFCTRL.SNIFFDFRAMECTRL', 'read-write',
+            u"",
+            19, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_SNIFFCTRL_SNIFFDFRAMEFORCE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_SNIFFCTRL_SNIFFDFRAMEFORCE, self).__init__(register,
+            'SNIFFDFRAMEFORCE', 'FRC_NS.SNIFFCTRL.SNIFFDFRAMEFORCE', 'read-write',
+            u"",
+            20, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_SNIFFCTRL_SNIFFBR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_SNIFFCTRL_SNIFFBR, self).__init__(register,
+            'SNIFFBR', 'FRC_NS.SNIFFCTRL.SNIFFBR', 'read-write',
+            u"",
+            24, 8)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_FRC_NS_AUXDATA_AUXDATA(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2141,6 +2191,16 @@ class RM_Field_FRC_NS_AUXDATA_AUXDATA(Base_RM_Field):
             'AUXDATA', 'FRC_NS.AUXDATA.AUXDATA', 'write-only',
             u"",
             0, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_AUXDATA_AUXDATAMASK(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_AUXDATA_AUXDATAMASK, self).__init__(register,
+            'AUXDATAMASK', 'FRC_NS.AUXDATA.AUXDATAMASK', 'write-only',
+            u"",
+            24, 8)
         self.__dict__['zz_frozen'] = True
 
 
@@ -3601,6 +3661,646 @@ class RM_Field_FRC_NS_PKTBUF11_PKTBUF47(Base_RM_Field):
             'PKTBUF47', 'FRC_NS.PKTBUF11.PKTBUF47', 'read-only',
             u"",
             24, 8)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXDONE, self).__init__(register,
+            'TXDONE', 'FRC_NS.FSWIF.TXDONE', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXAFTERFRAMEDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXAFTERFRAMEDONE, self).__init__(register,
+            'TXAFTERFRAMEDONE', 'FRC_NS.FSWIF.TXAFTERFRAMEDONE', 'read-write',
+            u"",
+            1, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXABORTED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXABORTED, self).__init__(register,
+            'TXABORTED', 'FRC_NS.FSWIF.TXABORTED', 'read-write',
+            u"",
+            2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXUF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXUF, self).__init__(register,
+            'TXUF', 'FRC_NS.FSWIF.TXUF', 'read-write',
+            u"",
+            3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXDONE, self).__init__(register,
+            'RXDONE', 'FRC_NS.FSWIF.RXDONE', 'read-write',
+            u"",
+            4, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXABORTED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXABORTED, self).__init__(register,
+            'RXABORTED', 'FRC_NS.FSWIF.RXABORTED', 'read-write',
+            u"",
+            5, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_FRAMEERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_FRAMEERROR, self).__init__(register,
+            'FRAMEERROR', 'FRC_NS.FSWIF.FRAMEERROR', 'read-write',
+            u"",
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_BLOCKERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_BLOCKERROR, self).__init__(register,
+            'BLOCKERROR', 'FRC_NS.FSWIF.BLOCKERROR', 'read-write',
+            u"",
+            7, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXOF, self).__init__(register,
+            'RXOF', 'FRC_NS.FSWIF.RXOF', 'read-write',
+            u"",
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP0(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP0, self).__init__(register,
+            'WCNTCMP0', 'FRC_NS.FSWIF.WCNTCMP0', 'read-write',
+            u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP1(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP1, self).__init__(register,
+            'WCNTCMP1', 'FRC_NS.FSWIF.WCNTCMP1', 'read-write',
+            u"",
+            10, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP2(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP2, self).__init__(register,
+            'WCNTCMP2', 'FRC_NS.FSWIF.WCNTCMP2', 'read-write',
+            u"",
+            11, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_ADDRERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_ADDRERROR, self).__init__(register,
+            'ADDRERROR', 'FRC_NS.FSWIF.ADDRERROR', 'read-write',
+            u"",
+            12, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_BUSERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_BUSERROR, self).__init__(register,
+            'BUSERROR', 'FRC_NS.FSWIF.BUSERROR', 'read-write',
+            u"",
+            13, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXRAWEVENT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXRAWEVENT, self).__init__(register,
+            'RXRAWEVENT', 'FRC_NS.FSWIF.RXRAWEVENT', 'read-write',
+            u"",
+            14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXRAWEVENT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXRAWEVENT, self).__init__(register,
+            'TXRAWEVENT', 'FRC_NS.FSWIF.TXRAWEVENT', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_SNIFFOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_SNIFFOF, self).__init__(register,
+            'SNIFFOF', 'FRC_NS.FSWIF.SNIFFOF', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP3(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP3, self).__init__(register,
+            'WCNTCMP3', 'FRC_NS.FSWIF.WCNTCMP3', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP4(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP4, self).__init__(register,
+            'WCNTCMP4', 'FRC_NS.FSWIF.WCNTCMP4', 'read-write',
+            u"",
+            18, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_BOISET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_BOISET, self).__init__(register,
+            'BOISET', 'FRC_NS.FSWIF.BOISET', 'read-write',
+            u"",
+            19, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_PKTBUFSTART(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_PKTBUFSTART, self).__init__(register,
+            'PKTBUFSTART', 'FRC_NS.FSWIF.PKTBUFSTART', 'read-write',
+            u"",
+            20, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_PKTBUFTHRESHOLD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_PKTBUFTHRESHOLD, self).__init__(register,
+            'PKTBUFTHRESHOLD', 'FRC_NS.FSWIF.PKTBUFTHRESHOLD', 'read-write',
+            u"",
+            21, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXRAWOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXRAWOF, self).__init__(register,
+            'RXRAWOF', 'FRC_NS.FSWIF.RXRAWOF', 'read-write',
+            u"",
+            22, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_WCNTCMP5(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_WCNTCMP5, self).__init__(register,
+            'WCNTCMP5', 'FRC_NS.FSWIF.WCNTCMP5', 'read-write',
+            u"",
+            23, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_FRAMEDETPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_FRAMEDETPAUSED, self).__init__(register,
+            'FRAMEDETPAUSED', 'FRC_NS.FSWIF.FRAMEDETPAUSED', 'read-write',
+            u"",
+            24, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_INTERLEAVEWRITEPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_INTERLEAVEWRITEPAUSED, self).__init__(register,
+            'INTERLEAVEWRITEPAUSED', 'FRC_NS.FSWIF.INTERLEAVEWRITEPAUSED', 'read-write',
+            u"",
+            25, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_INTERLEAVEREADPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_INTERLEAVEREADPAUSED, self).__init__(register,
+            'INTERLEAVEREADPAUSED', 'FRC_NS.FSWIF.INTERLEAVEREADPAUSED', 'read-write',
+            u"",
+            26, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXSUBFRAMEPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXSUBFRAMEPAUSED, self).__init__(register,
+            'TXSUBFRAMEPAUSED', 'FRC_NS.FSWIF.TXSUBFRAMEPAUSED', 'read-write',
+            u"",
+            27, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_CONVPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_CONVPAUSED, self).__init__(register,
+            'CONVPAUSED', 'FRC_NS.FSWIF.CONVPAUSED', 'read-write',
+            u"",
+            28, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_RXWORD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_RXWORD, self).__init__(register,
+            'RXWORD', 'FRC_NS.FSWIF.RXWORD', 'read-write',
+            u"",
+            29, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_TXWORD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_TXWORD, self).__init__(register,
+            'TXWORD', 'FRC_NS.FSWIF.TXWORD', 'read-write',
+            u"",
+            30, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIF_UARTERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIF_UARTERROR, self).__init__(register,
+            'UARTERROR', 'FRC_NS.FSWIF.UARTERROR', 'read-write',
+            u"",
+            31, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXDONE, self).__init__(register,
+            'TXDONE', 'FRC_NS.FSWIEN.TXDONE', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXAFTERFRAMEDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXAFTERFRAMEDONE, self).__init__(register,
+            'TXAFTERFRAMEDONE', 'FRC_NS.FSWIEN.TXAFTERFRAMEDONE', 'read-write',
+            u"",
+            1, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXABORTED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXABORTED, self).__init__(register,
+            'TXABORTED', 'FRC_NS.FSWIEN.TXABORTED', 'read-write',
+            u"",
+            2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXUF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXUF, self).__init__(register,
+            'TXUF', 'FRC_NS.FSWIEN.TXUF', 'read-write',
+            u"",
+            3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXDONE, self).__init__(register,
+            'RXDONE', 'FRC_NS.FSWIEN.RXDONE', 'read-write',
+            u"",
+            4, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXABORTED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXABORTED, self).__init__(register,
+            'RXABORTED', 'FRC_NS.FSWIEN.RXABORTED', 'read-write',
+            u"",
+            5, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_FRAMEERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_FRAMEERROR, self).__init__(register,
+            'FRAMEERROR', 'FRC_NS.FSWIEN.FRAMEERROR', 'read-write',
+            u"",
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_BLOCKERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_BLOCKERROR, self).__init__(register,
+            'BLOCKERROR', 'FRC_NS.FSWIEN.BLOCKERROR', 'read-write',
+            u"",
+            7, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXOF, self).__init__(register,
+            'RXOF', 'FRC_NS.FSWIEN.RXOF', 'read-write',
+            u"",
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP0(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP0, self).__init__(register,
+            'WCNTCMP0', 'FRC_NS.FSWIEN.WCNTCMP0', 'read-write',
+            u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP1(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP1, self).__init__(register,
+            'WCNTCMP1', 'FRC_NS.FSWIEN.WCNTCMP1', 'read-write',
+            u"",
+            10, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP2(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP2, self).__init__(register,
+            'WCNTCMP2', 'FRC_NS.FSWIEN.WCNTCMP2', 'read-write',
+            u"",
+            11, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_ADDRERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_ADDRERROR, self).__init__(register,
+            'ADDRERROR', 'FRC_NS.FSWIEN.ADDRERROR', 'read-write',
+            u"",
+            12, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_BUSERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_BUSERROR, self).__init__(register,
+            'BUSERROR', 'FRC_NS.FSWIEN.BUSERROR', 'read-write',
+            u"",
+            13, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXRAWEVENT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXRAWEVENT, self).__init__(register,
+            'RXRAWEVENT', 'FRC_NS.FSWIEN.RXRAWEVENT', 'read-write',
+            u"",
+            14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXRAWEVENT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXRAWEVENT, self).__init__(register,
+            'TXRAWEVENT', 'FRC_NS.FSWIEN.TXRAWEVENT', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_SNIFFOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_SNIFFOF, self).__init__(register,
+            'SNIFFOF', 'FRC_NS.FSWIEN.SNIFFOF', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP3(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP3, self).__init__(register,
+            'WCNTCMP3', 'FRC_NS.FSWIEN.WCNTCMP3', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP4(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP4, self).__init__(register,
+            'WCNTCMP4', 'FRC_NS.FSWIEN.WCNTCMP4', 'read-write',
+            u"",
+            18, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_BOISET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_BOISET, self).__init__(register,
+            'BOISET', 'FRC_NS.FSWIEN.BOISET', 'read-write',
+            u"",
+            19, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_PKTBUFSTART(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_PKTBUFSTART, self).__init__(register,
+            'PKTBUFSTART', 'FRC_NS.FSWIEN.PKTBUFSTART', 'read-write',
+            u"",
+            20, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_PKTBUFTHRESHOLD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_PKTBUFTHRESHOLD, self).__init__(register,
+            'PKTBUFTHRESHOLD', 'FRC_NS.FSWIEN.PKTBUFTHRESHOLD', 'read-write',
+            u"",
+            21, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXRAWOF(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXRAWOF, self).__init__(register,
+            'RXRAWOF', 'FRC_NS.FSWIEN.RXRAWOF', 'read-write',
+            u"",
+            22, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_WCNTCMP5(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_WCNTCMP5, self).__init__(register,
+            'WCNTCMP5', 'FRC_NS.FSWIEN.WCNTCMP5', 'read-write',
+            u"",
+            23, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_FRAMEDETPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_FRAMEDETPAUSED, self).__init__(register,
+            'FRAMEDETPAUSED', 'FRC_NS.FSWIEN.FRAMEDETPAUSED', 'read-write',
+            u"",
+            24, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_INTERLEAVEWRITEPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_INTERLEAVEWRITEPAUSED, self).__init__(register,
+            'INTERLEAVEWRITEPAUSED', 'FRC_NS.FSWIEN.INTERLEAVEWRITEPAUSED', 'read-write',
+            u"",
+            25, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_INTERLEAVEREADPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_INTERLEAVEREADPAUSED, self).__init__(register,
+            'INTERLEAVEREADPAUSED', 'FRC_NS.FSWIEN.INTERLEAVEREADPAUSED', 'read-write',
+            u"",
+            26, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXSUBFRAMEPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXSUBFRAMEPAUSED, self).__init__(register,
+            'TXSUBFRAMEPAUSED', 'FRC_NS.FSWIEN.TXSUBFRAMEPAUSED', 'read-write',
+            u"",
+            27, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_CONVPAUSED(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_CONVPAUSED, self).__init__(register,
+            'CONVPAUSED', 'FRC_NS.FSWIEN.CONVPAUSED', 'read-write',
+            u"",
+            28, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_RXWORD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_RXWORD, self).__init__(register,
+            'RXWORD', 'FRC_NS.FSWIEN.RXWORD', 'read-write',
+            u"",
+            29, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_TXWORD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_TXWORD, self).__init__(register,
+            'TXWORD', 'FRC_NS.FSWIEN.TXWORD', 'read-write',
+            u"",
+            30, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_FRC_NS_FSWIEN_UARTERROR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_FRC_NS_FSWIEN_UARTERROR, self).__init__(register,
+            'UARTERROR', 'FRC_NS.FSWIEN.UARTERROR', 'read-write',
+            u"",
+            31, 1)
         self.__dict__['zz_frozen'] = True
 
 

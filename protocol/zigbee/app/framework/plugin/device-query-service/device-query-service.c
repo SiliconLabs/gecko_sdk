@@ -53,7 +53,7 @@ static bool enabled = AUTO_START_BOOLEAN;
 #if defined(DEBUG_ON)
   #define debugPrintln(...) emberAfCorePrintln(__VA_ARGS__)
   #define debugPrint(...) emberAfCorePrint(__VA_ARGS__)
-  #define debugPrintEui64(eui64ToPrint) emberAfPrintLittleEndianEui64(eui64ToPrint)
+  #define debugPrintEui64(eui64ToPrint) emberAfPrintBigEndianEui64(eui64ToPrint)
 #else
   #define debugPrintln(...)
   #define debugPrint(...)
@@ -166,12 +166,12 @@ bool sli_zigbee_af_device_query_pre_zdo_message_received(EmberNodeId sender,
     if (device == NULL) {
       emberAfCorePrint("Error: %p failed to add device to database: ",
                        PLUGIN_NAME);
-      emberAfPrintLittleEndianEui64(tempEui64);
+      emberAfPrintBigEndianEui64(tempEui64);
       emberAfCorePrintln("");
     } else {
       if (device->status == EMBER_AF_DEVICE_DISCOVERY_STATUS_NEW) {
         emberAfCorePrint("%p added device to database: ", PLUGIN_NAME);
-        emberAfPrintLittleEndianEui64(tempEui64);
+        emberAfPrintBigEndianEui64(tempEui64);
         emberAfCorePrintln(", capabilities: 0x%X", device->capabilities);
         scheduleEvent(WITH_DELAY);
       }
@@ -227,7 +227,7 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result
   const EmberAfDeviceInfo* device = emberAfPluginDeviceDatabaseFindDeviceByEui64(currentEui64);
   if (device == NULL) {
     emberAfCorePrint("Error:  %p could not find device in database with EUI64: ", PLUGIN_NAME);
-    emberAfPrintLittleEndianEui64(currentEui64);
+    emberAfPrintBigEndianEui64(currentEui64);
     emberAfCorePrintln("");
     clearCurrentDevice();
     scheduleEvent(WITH_DELAY);
@@ -250,7 +250,7 @@ static void serviceDiscoveryCallback(const EmberAfServiceDiscoveryResult* result
                                                  listStruct->list,
                                                  listStruct->count)) {
       emberAfCorePrint("Error: %p failed to set endpoints in device database for:", PLUGIN_NAME);
-      emberAfPrintLittleEndianEui64(device->eui64);
+      emberAfPrintBigEndianEui64(device->eui64);
       emberAfCorePrintln("");
       noteFailedDiscovery(device);
       scheduleEvent(WITH_DELAY);
@@ -378,7 +378,7 @@ static void myEventHandler(sl_zigbee_event_t * event)
     device = emberAfPluginDeviceDatabaseFindDeviceByEui64(currentEui64);
     if (device == NULL) {
       emberAfCorePrint("Error: %p the current EUI64 does not correspond to any known device: ", PLUGIN_NAME);
-      emberAfPrintLittleEndianEui64(currentEui64);
+      emberAfPrintBigEndianEui64(currentEui64);
       emberAfCorePrintln("");
       clearCurrentDevice();
       scheduleEvent(WITH_DELAY);

@@ -434,4 +434,4 @@ typedef struct {
 /** @} End of group EFR32BG21_BUFC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG21_BUFC_H */
+#endif // EFR32BG21_BUFC_H

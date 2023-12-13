@@ -107,22 +107,22 @@ uint32_t halInternalGetHeapBottom(void);
 /**
  * @brief A numerical definition for a vector.
  */
-#define STACK_VECTOR_INDEX          0U // special case: stack pointer at reset
-#define RESET_VECTOR_INDEX          1U
-#define NMI_VECTOR_INDEX            2U
-#define HARD_FAULT_VECTOR_INDEX     3U
-#define MEMORY_FAULT_VECTOR_INDEX   4U
-#define BUS_FAULT_VECTOR_INDEX      5U
-#define USAGE_FAULT_VECTOR_INDEX    6U
-#define RESERVED07_VECTOR_INDEX     7U
-#define RESERVED08_VECTOR_INDEX     8U
-#define RESERVED09_VECTOR_INDEX     9U
-#define RESERVED10_VECTOR_INDEX     10U
-#define SVCALL_VECTOR_INDEX         11U
-#define DEBUG_MONITOR_VECTOR_INDEX  12U
-#define RESERVED13_VECTOR_INDEX     13U
-#define PENDSV_VECTOR_INDEX         14U
-#define SYSTICK_VECTOR_INDEX        15U
+#define STACK_VECTOR_INDEX          0U         ///< special case: stack pointer at reset
+#define RESET_VECTOR_INDEX          1U             ///< reset vector index
+#define NMI_VECTOR_INDEX            2U             ///< nmi vector index
+#define HARD_FAULT_VECTOR_INDEX     3U             ///< hard fault vector index
+#define MEMORY_FAULT_VECTOR_INDEX   4U             ///< memory fault vector index
+#define BUS_FAULT_VECTOR_INDEX      5U             ///< bus fault vector index
+#define USAGE_FAULT_VECTOR_INDEX    6U             ///< usage fault vector index
+#define RESERVED07_VECTOR_INDEX     7U             ///< reserved07 vector index
+#define RESERVED08_VECTOR_INDEX     8U             ///< reserved08 vector index
+#define RESERVED09_VECTOR_INDEX     9U             ///< reserved09 vector index
+#define RESERVED10_VECTOR_INDEX     10U            ///< reserved10 vector index
+#define SVCALL_VECTOR_INDEX         11U            ///< svcall vector index
+#define DEBUG_MONITOR_VECTOR_INDEX  12U            ///< debug monitor vector index
+#define RESERVED13_VECTOR_INDEX     13U            ///< reserved13 vector index
+#define PENDSV_VECTOR_INDEX         14U            ///< pendsv vector index
+#define SYSTICK_VECTOR_INDEX        15U            ///< systick vector index
 
 /**
  * @brief Utility macro to convert from IRQ numbers to exception numbers/
@@ -146,16 +146,18 @@ uint32_t halInternalGetHeapBottom(void);
 /**
  * @brief EM2xx-compatible reset code returned by halGetEm2xxResetInfo()
  */
-#define EM2XX_RESET_UNKNOWN               0
-#define EM2XX_RESET_EXTERNAL              1   // EM2XX reports POWERON instead
-#define EM2XX_RESET_POWERON               2
-#define EM2XX_RESET_WATCHDOG              3
-#define EM2XX_RESET_ASSERT                6
-#define EM2XX_RESET_BOOTLOADER            9
-#define EM2XX_RESET_SOFTWARE              11
+#define EM2XX_RESET_UNKNOWN               0      ///< EN2XX reset unknow
+#define EM2XX_RESET_EXTERNAL              1        ///< EM2XX reports POWERON instead
+#define EM2XX_RESET_POWERON               2        ///< EM2XX reset poweron
+#define EM2XX_RESET_WATCHDOG              3        ///< EM2XX reset watchdog
+#define EM2XX_RESET_ASSERT                6        ///< EM2XX reset assert
+#define EM2XX_RESET_BOOTLOADER            9        ///< EM2XX reset bootloader
+#define EM2XX_RESET_SOFTWARE              11       ///< EM2XX reset software
 
 /**
  * @brief Records the specified reset cause then forces a reboot.
+ *
+ * @param extendedCause
  */
 void halInternalSysReset(uint16_t extendedCause);
 
@@ -170,7 +172,7 @@ uint16_t halGetExtendedResetInfo(void);
  *  reset code to the corresponding value used by the EM2XX HAL. Any reset codes
  * not present in the EM2XX are returned after being OR'ed with 0x80.
  *
- * @appusage Used by the EZSP host as a platform-independent NCP reset code.
+ * Used by the EZSP host as a platform-independent NCP reset code.
  *
  * @return The EM2XX-compatible reset code. If not supported by the EM2XX,
  *         return the platform-specific code with B7 set.
@@ -181,7 +183,7 @@ uint8_t halGetEm2xxResetInfo(void);
  *  the extended cause of the reset.  halGetResetString() should also be called
  *  to get the string for the base reset cause
  *
- * @appusage Useful for diagnostic printing of text just after program
+ * Useful for diagnostic printing of text just after program
  * initialization.
  *
  * @return A pointer to a program space string.

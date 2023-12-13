@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_diversity import calc_diversity_viper
+from pyradioconfig.parts.bobcat.calculators.calc_diversity import Calc_Diversity_Bobcat
 
 
-class CalcDiversityRainier(calc_diversity_viper):
+class CalcDiversityRainier(Calc_Diversity_Bobcat):
     pass

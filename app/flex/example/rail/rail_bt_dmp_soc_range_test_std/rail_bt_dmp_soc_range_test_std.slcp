@@ -43,11 +43,6 @@ component:
   - id: glib
 #---------------- Images for LCD ---------------------  
   - id: sl_flex_images_for_lcd
-#--------------------- BUTTON ------------------------
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
 #--------------------- VCOM --------------------------
   - id: printf
   - id: iostream_recommended_stream
@@ -72,6 +67,7 @@ requires:
   - name: rail_util_aox
     condition:
       - "hardware_board_has_rfswitch_aox"
+  - name: simple_button
 #----------------- Project files ---------------------
 source:
   - path: ../common/main/main.c
@@ -141,12 +137,7 @@ configuration:
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
-    value: "1"
-#------------- RAIL init, Multi-protocol Support -----
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
 #------------- RAIL init, Auto Transitions -----------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE

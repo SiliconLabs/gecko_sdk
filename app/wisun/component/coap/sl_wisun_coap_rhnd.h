@@ -58,7 +58,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
 /**************************************************************************//**
- * @defgroup SL_WISUN_COAP_RESOURCE_TYPES CoAP type definitions
+ * @defgroup SL_WISUN_COAP_RESOURCE_TYPES CoAP Resource Handler type definitions
  * @ingroup SL_WISUN_COAP
  * @{
  *****************************************************************************/
@@ -188,6 +188,16 @@ void sl_wisun_coap_rhnd_service_resp_send_error_hnd(sl_wisun_coap_packet_t * req
                                                     sl_wisun_coap_packet_t * resp_packet);
 
 #endif
+
+/**************************************************************************//**
+ * @brief Is request packet?
+ * @details helper function
+ * @param[in] packet Packet
+ * @return true Request packet
+ * @return false Response or Empty packet
+ *****************************************************************************/
+bool sl_wisun_coap_rhnd_is_request_packet(const sl_wisun_coap_packet_t * const packet);
+
 /** @}*/
 
 #ifdef __cplusplus

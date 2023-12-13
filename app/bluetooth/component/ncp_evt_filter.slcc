@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/ncp_evt_filter
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_ncp_evt_filter_config.h
 source:
@@ -24,4 +23,6 @@ provides:
 requires:
   - name: bluetooth_stack
   - name: status
-  
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp-evt-filter

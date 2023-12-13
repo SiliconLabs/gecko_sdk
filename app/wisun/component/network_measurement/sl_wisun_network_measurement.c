@@ -42,7 +42,7 @@
 #include "sl_wisun_ping.h"
 #include "sl_wisun_ping_config.h"
 #include "cmsis_os2.h"
-#include "socket.h"
+#include "socket/socket.h"
 
 #if defined(SL_CATALOG_GUI_PRESENT)
 #include "sl_wisun_network_measurement_gui.h"
@@ -129,7 +129,7 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
   char str_buff[64U] = { 0 };
   const char *ip_str = NULL;
 
-  node_count =  sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT);
+  node_count = sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT, false);
   measurable_count = _init_meas_by_setting_type(meas_type, node_count);
 
   _meas_packet_cnt.max_count = measurable_count * meas_count;
@@ -193,7 +193,7 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
   uint8_t node_count = 0;
   const char *ip_str = NULL;
 
-  node_count =  sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT);
+  node_count =  sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT, false);
   (void) _init_meas_by_setting_type(meas_type, node_count);
 
   for (uint8_t i = 0; i < node_count; ++i) {
@@ -214,9 +214,14 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
 }
 #endif
 
+void sl_wisun_print_node_info(void)
+{
+  (void) sl_wisun_nwm_get_nodes(_meas_nodes, SL_WISUN_MAX_NODE_COUNT, true);
+}
+
 #if defined(SL_CATALOG_GUI_PRESENT)
 /* Network quick measurement */
-void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+void sl_wisun_nwm_measure(const sockaddr_in6_t * const remote_address,
                           const uint16_t meas_count,
                           const uint16_t meas_packet_length,
                           const bool update_gui)
@@ -248,8 +253,9 @@ static void _interrupt_ping(void *args)
   sl_wisun_ping_stop();
   sl_display_renderer(sl_wisun_nwm_main_form, NULL, 0);
 }
-#else 
-void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+
+#else
+void sl_wisun_nwm_measure(const sockaddr_in6_t * const remote_address,
                           const uint16_t meas_count,
                           const uint16_t meas_packet_length)
 {

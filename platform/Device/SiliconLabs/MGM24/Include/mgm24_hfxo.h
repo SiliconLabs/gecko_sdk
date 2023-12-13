@@ -798,4 +798,4 @@ typedef struct {
 /** @} End of group MGM24_HFXO */
 /** @} End of group Parts */
 
-#endif /* MGM24_HFXO_H */
+#endif // MGM24_HFXO_H

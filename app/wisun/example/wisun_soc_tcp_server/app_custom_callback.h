@@ -31,6 +31,10 @@
 #ifndef APP_CUSTOM_CALLBACK_H
 #define APP_CUSTOM_CALLBACK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -75,5 +79,9 @@ void app_custom_socket_data_callback(sl_wisun_evt_t *evt);
  * @param[in] evt event argument
  *****************************************************************************/
 void app_custom_socket_closing_event_handler(sl_wisun_evt_t *evt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // APP_CUSTOM_CALLBACK_H

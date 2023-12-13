@@ -393,6 +393,7 @@ static void flashWriteSE(uint32_t realAddress, void *data, uint32_t len)
   #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)    \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)    \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)    \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)    \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)
     #define FLASHWRITE(realAddress, data, len) \

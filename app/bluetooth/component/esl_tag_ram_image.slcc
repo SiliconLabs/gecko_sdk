@@ -16,26 +16,24 @@ quality: production
 root_path: app/bluetooth/common/esl_tag_ram_image
 tag:
   - Low-Code
-
 config_file:
   - path: config/esl_tag_ram_image.xml
     file_id: esl_tag_ram_image_characteristics
     directory: btconf
   - path: config/esl_tag_image_config.h
     file_id: esl_tag_image_config
-
 include:
   - path: ./inc
     file_list:
       - path: esl_tag_image.h
-
 source:
   - path: src/esl_tag_ram_image.c
-
 provides:
   - name: esl_tag_image
   - name: esl_tag_ram_image
-
 requires:
   - name: esl_tag_core
   - name: esl_tag_ots_server
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/esl-tag-ram-image

@@ -1,0 +1,18 @@
+label: ZWave_SoC_LEDBulb_Solution
+description: >
+  Demonstrates LED Bulb application combined with OTA bootloader. 
+  The Z-Wave LED Bulb application shows an implementation 
+  of a remotely controlled color switch. An example is an LED bulb 
+  or any other color-capable device. The app supports dimming of an RGB LED.
+
+  This is the EFR32xG28 Explorer Kit specific version of the application.
+quality: production
+project:
+  - path: ../../NonCertifiableApps/zwave_soc_led_bulb/zwave_soc_led_bulb_explorer_kit.slcp
+    id: application
+    output: app
+  - path: ../../UCBootLoader/series2/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_led_bulb_ws_postbuild

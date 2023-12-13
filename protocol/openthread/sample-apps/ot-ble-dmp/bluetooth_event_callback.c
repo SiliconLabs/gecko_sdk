@@ -74,13 +74,22 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 		otCliOutputFormat("BLE connection parameters handle=%d interval=%d latency=%d timeout=%d security_mode=%d txsize=%d\r\n", params_evt->connection, params_evt->interval, params_evt->latency, params_evt->timeout, params_evt->security_mode, params_evt->txsize);
       }
       break;
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
       {
-		sl_bt_evt_scanner_scan_report_t *rsp_evt =
-	  		(sl_bt_evt_scanner_scan_report_t *)&(evt->data);
-		otCliOutputFormat("BLE scan response address=");
-		printBleAddress(rsp_evt->address);
-		otCliOutputFormat(" address_type=%d\r\n", rsp_evt->address_type);
+        sl_bt_evt_scanner_legacy_advertisement_report_t *rsp_evt =
+          (sl_bt_evt_scanner_legacy_advertisement_report_t *)&(evt->data);
+        otCliOutputFormat("BLE scan response address=");
+        printBleAddress(rsp_evt->address);
+        otCliOutputFormat(" address_type=%d\r\n", rsp_evt->address_type);
+      }
+      break;
+    case sl_bt_evt_scanner_extended_advertisement_report_id:
+      {
+        sl_bt_evt_scanner_extended_advertisement_report_t *rsp_evt =
+          (sl_bt_evt_scanner_extended_advertisement_report_t *)&(evt->data);
+        otCliOutputFormat("BLE scan response address=");
+        printBleAddress(rsp_evt->address);
+        otCliOutputFormat(" address_type=%d\r\n", rsp_evt->address_type);
       }
       break;
     case sl_bt_evt_gatt_procedure_completed_id:

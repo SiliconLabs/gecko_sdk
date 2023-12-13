@@ -51,6 +51,18 @@ void connect_standard_phy_2_4g(void);
 
 /**
  *
+ * @brief Get the last reset cause mask.
+ *
+ * @return A reset cause mask.
+ *
+ * @note This API replaces halGetResetInfo() or halGetExtendedResetInfo.
+ * emberAfGetResetCause() is a RMU_ResetCauseGet() overhaul. See the reference
+ * manual of the EMLIB RMU for a description of the returned reset cause mask.
+ */
+uint32_t emberAfGetResetCause(void);
+
+/**
+ *
  * @brief Allocate a new event to the app event table.
  *
  *  @param[out] control   The EmberEventControl to allocate

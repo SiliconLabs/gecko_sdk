@@ -11,9 +11,11 @@ source:
 provides:
   - name: mbedtls_jpake
 requires:
-  - name: mbedtls_ecc
-  - name: mbedtls_hash
   - name: mbedtls_core
+  - name: mbedtls_ecc_secp256r1
+  - name: mbedtls_sha256
+  - name: psa_crypto_jpake
+    condition: [psa_crypto]
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ECJPAKE_C

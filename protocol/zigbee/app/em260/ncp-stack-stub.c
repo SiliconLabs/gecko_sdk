@@ -23,7 +23,7 @@
 #include "app/util/ezsp/ezsp-frame-utilities.h"
 #include "stack/include/stack-info.h"
 #ifndef SL_CATALOG_ZIGBEE_BINDING_TABLE_PRESENT
-bool sli_zigbee_af_process_ezsp_command_binding(uint16_t commandId)
+WEAK(bool sli_zigbee_af_process_ezsp_command_binding(uint16_t commandId))
 {
   (void)commandId;
   return false;
@@ -31,7 +31,7 @@ bool sli_zigbee_af_process_ezsp_command_binding(uint16_t commandId)
 #endif  // SL_CATALOG_ZIGBEE_BINDING_TABLE_PRESENT
 
 #ifndef SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT
-bool sli_zigbee_af_process_ezsp_command_zll(uint16_t commandId)
+WEAK(bool sli_zigbee_af_process_ezsp_command_zll(uint16_t commandId))
 {
   (void)commandId;
   return false;
@@ -39,7 +39,7 @@ bool sli_zigbee_af_process_ezsp_command_zll(uint16_t commandId)
 #endif  // SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT
 
 #ifndef SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
-bool sli_zigbee_af_process_ezsp_command_green_power(uint16_t commandId)
+WEAK(bool sli_zigbee_af_process_ezsp_command_green_power(uint16_t commandId))
 {
   (void)commandId;
   return false;
@@ -47,7 +47,7 @@ bool sli_zigbee_af_process_ezsp_command_green_power(uint16_t commandId)
 #endif
 
 #ifndef SL_CATALOG_ZIGBEE_MFGLIB_PRESENT
-bool sli_zigbee_af_process_ezsp_command_mfglib(uint16_t commandId)
+WEAK(bool sli_zigbee_af_process_ezsp_command_mfglib(uint16_t commandId))
 {
   (void)commandId;
   return false;
@@ -55,7 +55,7 @@ bool sli_zigbee_af_process_ezsp_command_mfglib(uint16_t commandId)
 #endif
 
 #ifndef SL_CATALOG_ZIGBEE_CBKE_CORE_PRESENT
-bool sli_zigbee_af_process_ezsp_command_certificate_based_key_exchange_cbke(uint16_t commandId)
+WEAK(bool sli_zigbee_af_process_ezsp_command_certificate_based_key_exchange_cbke(uint16_t commandId))
 {
   (void)commandId;
   appendInt8u(EMBER_LIBRARY_NOT_PRESENT);

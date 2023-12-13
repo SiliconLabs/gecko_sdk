@@ -8,10 +8,8 @@ root_path: "app/flex/component/connect/sl_connect_sdk_ota_bootloader_interface"
 provides:
   - name: "sl_connect_sdk_ota_bootloader_interface"
 requires:
-  - name: "legacy_hal"
-  - name: "legacy_printf"
   - name: "connect_stack_common"
-  - name: "legacy_bootloader_interface"
+  - name: "bootloader_interface"
 source:
   - path: "sl_connect_sdk_btl-interface.c"
 include:

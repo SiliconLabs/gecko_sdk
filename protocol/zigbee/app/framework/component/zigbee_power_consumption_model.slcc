@@ -5,7 +5,7 @@ label: Power Consumption Model
 category: Zigbee|Cluster Library|Home Automation
 quality: production
 provides:
-   - name: "zigbee_power_consumption_model"
+  - name: zigbee_power_consumption_model
 config_file:
   - path: protocol/zigbee/app/framework/plugin/power-consumption-model/config/power-consumption-model-config.h
 source:
@@ -13,7 +13,7 @@ source:
 include:
   - path: protocol/zigbee/app/framework/plugin/power-consumption-model
     file_list:
-      - path: power-consumption-model.h  
+      - path: power-consumption-model.h
 template_contribution:
   - name: component_catalog
     value: zigbee_power_consumption_model

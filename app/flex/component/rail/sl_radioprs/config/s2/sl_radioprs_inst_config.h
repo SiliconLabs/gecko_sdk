@@ -15,14 +15,14 @@
 // <PRS_MODEML_DCLK=> Modem clock out
 // <PRS_MODEML_DOUT=> Modem data out
 // <PRS_MODEML_FRAMEDET=> Sync detected
-// <PRS_MODEML_FRAMESENT=> Sync sent
+// <PRS_MODEM_FRAMESENT=> Frame sent
 // <PRS_MODEM_PREDET=> Preamble detected
 // <PRS_MODEMH_PRESENT=> Preamble sent
 // <PRS_MODEMH_RSSIJUMP=> change in RSSI
 // <PRS_MODEMH_SYNCSENT=> Sync word sent
 // <PRS_MODEMH_EOF=> end of frame
-// <PRS_FRC_DCLK=> FRC DCLK
-// <PRS_FRC_DOUT=> FRC DOUT
+// <PRS_FRC_DCLK=> FRC clock out
+// <PRS_FRC_DOUT=> FRC data out
 // <i> Default: PRS_MODEML_DOUT
 #define RADIOPRS_INSTANCE_SOURCESEL PRS_MODEML_DOUT
 

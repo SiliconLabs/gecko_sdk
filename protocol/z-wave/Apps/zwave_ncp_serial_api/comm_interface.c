@@ -64,7 +64,7 @@ typedef struct
 } tx_frame_t;
 
 
-static comm_interface_t comm_interface;
+static comm_interface_t comm_interface = { 0 };
 comm_interface_frame_ptr const serial_frame = (comm_interface_frame_ptr)comm_interface.buffer;
 
 static uint8_t tx_data[COMM_INT_TX_BUFFER_SIZE];
@@ -87,10 +87,8 @@ static void set_expect_bytes(uint8_t level)
   vPortExitCritical();
 }
 
-static void receive_callback(const zpal_uart_handle_t handle, size_t available)
+static void receive_callback(__attribute__((unused)) const zpal_uart_handle_t handle, size_t available)
 {
-  UNUSED(handle);
-
   if (available >= comm_interface.expect_bytes)
   {
     comm_interface.expect_bytes = 0;
@@ -98,24 +96,20 @@ static void receive_callback(const zpal_uart_handle_t handle, size_t available)
   }
 }
 
-static void ack_timer_cb(SSwTimer *timer)
+static void ack_timer_cb(__attribute__((unused)) SSwTimer *timer)
 {
-  UNUSED(timer);
   comm_interface.ack_timeout = true;
   TriggerNotification(EAPPLICATIONEVENT_SERIALTIMEOUT);
 }
 
-static void byte_timer_cb(SSwTimer *timer)
+static void byte_timer_cb(__attribute__((unused)) SSwTimer *timer)
 {
-  UNUSED(timer);
   comm_interface.byte_timeout = true;
   TriggerNotification(EAPPLICATIONEVENT_SERIALTIMEOUT);
 }
 
-static void buffer_check_timer_cb(SSwTimer *timer)
+static void buffer_check_timer_cb(__attribute__((unused)) SSwTimer *timer)
 {
-  UNUSED(timer);
-
   if(zpal_uart_get_available(comm_interface.transport.handle))
   {
     TriggerNotification(EAPPLICATIONEVENT_SERIALDATARX);
@@ -153,7 +147,9 @@ static zpal_status_t comm_interface_transmit(transport_t *transport, const uint8
 
 void comm_interface_transmit_frame(uint8_t cmd, uint8_t type, const uint8_t *payload, uint8_t len, transmit_done_cb_t cb)
 {
-  tx_frame_t frame;
+  tx_frame_t frame = {
+    .sof = SOF
+  };
   static uint8_t _len, _type, _cmd, _checksum;
   static const uint8_t *_payload;
 
@@ -163,8 +159,6 @@ void comm_interface_transmit_frame(uint8_t cmd, uint8_t type, const uint8_t *pay
 
   comm_interface.byte_timeout = false;
   comm_interface.ack_timeout = false;
-
-  frame.sof = SOF;
 
   if (payload != NULL)
   {
@@ -187,7 +181,9 @@ void comm_interface_transmit_frame(uint8_t cmd, uint8_t type, const uint8_t *pay
     frame.len = _len + 3;
     frame.type = _type;
     frame.cmd = _cmd;
-    memcpy(frame.payload, _payload, _len);
+    if(_payload) {
+      memcpy(frame.payload, _payload, _len);
+    }
     frame.payload[_len] = _checksum;
   }
 

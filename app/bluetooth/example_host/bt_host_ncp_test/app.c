@@ -201,11 +201,6 @@ void app_init(int argc, char *argv[])
   }
   app_assert_status(sc);
   app_log_info("NCP host initialised." APP_LOG_NL);
-  app_log_info("Resetting NCP target..." APP_LOG_NL);
-  // Reset NCP to ensure it gets into a defined state.
-  // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
-
   app_log_info("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
 
   test_init(test_config);

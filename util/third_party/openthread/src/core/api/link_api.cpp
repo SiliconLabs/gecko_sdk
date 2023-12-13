@@ -395,9 +395,9 @@ bool otLinkIsCslEnabled(otInstance *aInstance) { return AsCoreType(aInstance).Ge
 
 bool otLinkIsCslSupported(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().IsCslSupported(); }
 
-uint8_t otLinkCslGetChannel(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().GetCslChannel(); }
+uint8_t otLinkGetCslChannel(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().GetCslChannel(); }
 
-otError otLinkCslSetChannel(otInstance *aInstance, uint8_t aChannel)
+otError otLinkSetCslChannel(otInstance *aInstance, uint8_t aChannel)
 {
     Error error = kErrorNone;
 
@@ -409,25 +409,39 @@ exit:
     return error;
 }
 
-uint16_t otLinkCslGetPeriod(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().GetCslPeriod(); }
-
-otError otLinkCslSetPeriod(otInstance *aInstance, uint16_t aPeriod)
+uint32_t otLinkGetCslPeriod(otInstance *aInstance)
 {
-    Error error = kErrorNone;
+    return Mac::Mac::CslPeriodToUsec(AsCoreType(aInstance).Get<Mac::Mac>().GetCslPeriod());
+}
 
-    VerifyOrExit((aPeriod == 0 || kMinCslPeriod <= aPeriod), error = kErrorInvalidArgs);
-    AsCoreType(aInstance).Get<Mac::Mac>().SetCslPeriod(aPeriod);
+otError otLinkSetCslPeriod(otInstance *aInstance, uint32_t aPeriod)
+{
+    Error    error = kErrorNone;
+    uint16_t periodInTenSymbolsUnit;
+
+    if (aPeriod == 0)
+    {
+        periodInTenSymbolsUnit = 0;
+    }
+    else
+    {
+        VerifyOrExit((aPeriod % kUsPerTenSymbols) == 0, error = kErrorInvalidArgs);
+        periodInTenSymbolsUnit = ClampToUint16(aPeriod / kUsPerTenSymbols);
+        VerifyOrExit(periodInTenSymbolsUnit >= kMinCslPeriod, error = kErrorInvalidArgs);
+    }
+
+    AsCoreType(aInstance).Get<Mac::Mac>().SetCslPeriod(periodInTenSymbolsUnit);
 
 exit:
     return error;
 }
 
-uint32_t otLinkCslGetTimeout(otInstance *aInstance)
+uint32_t otLinkGetCslTimeout(otInstance *aInstance)
 {
     return AsCoreType(aInstance).Get<Mle::MleRouter>().GetCslTimeout();
 }
 
-otError otLinkCslSetTimeout(otInstance *aInstance, uint32_t aTimeout)
+otError otLinkSetCslTimeout(otInstance *aInstance, uint32_t aTimeout)
 {
     Error error = kErrorNone;
 
@@ -446,3 +460,24 @@ otError otLinkSendEmptyData(otInstance *aInstance)
     return AsCoreType(aInstance).Get<MeshForwarder>().SendEmptyMessage();
 }
 #endif
+
+otError otLinkSetRegion(otInstance *aInstance, uint16_t aRegionCode)
+{
+    return AsCoreType(aInstance).Get<Mac::Mac>().SetRegion(aRegionCode);
+}
+
+otError otLinkGetRegion(otInstance *aInstance, uint16_t *aRegionCode)
+{
+    Error error;
+
+    if (aRegionCode == nullptr)
+    {
+        error = kErrorInvalidArgs;
+    }
+    else
+    {
+        error = AsCoreType(aInstance).Get<Mac::Mac>().GetRegion(*aRegionCode);
+    }
+
+    return error;
+}

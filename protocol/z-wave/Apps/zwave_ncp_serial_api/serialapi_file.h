@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <zpal_radio.h>
 #include <zpal_nvm.h>
+#include "cmds_management.h"
 
 #define FILE_ID_APPLICATIONSETTINGS       102
 #define FILE_ID_APPLICATIONCMDINFO        103
@@ -76,6 +77,14 @@ SaveApplicationRfRegion(zpal_radio_region_t rfRegion);
  */
 uint8_t
 ReadApplicationRfRegion(zpal_radio_region_t* rfRegion);
+
+uint8_t
+SaveApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType nodeIdBaseType);
+
+
+uint8_t
+ReadApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType* nodeIdBaseType);
+
 
 /**
  * @brief Writes the application Tx power configuration to file system

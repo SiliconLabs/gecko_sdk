@@ -1,4 +1,5 @@
 from pyradioconfig.parts.panther.calculators.calc_shaping import CALC_Shaping_panther
+import numpy as np
 
 class CALC_Shaping_lynx(CALC_Shaping_panther):
 
@@ -76,43 +77,67 @@ class CALC_Shaping_lynx(CALC_Shaping_panther):
 
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
-    def calc_shaping_misc(self, model):
-        self._reg_write(model.vars.MODEM_SHAPING2_COEFF9, 0)
-        self._reg_write(model.vars.MODEM_SHAPING2_COEFF10, 0)
-        self._reg_write(model.vars.MODEM_SHAPING2_COEFF11, 0)
-        self._reg_write(model.vars.MODEM_SHAPING3_COEFF12, 0)
-        self._reg_write(model.vars.MODEM_SHAPING3_COEFF13, 0)
-        self._reg_write(model.vars.MODEM_SHAPING3_COEFF14, 0)
-        self._reg_write(model.vars.MODEM_SHAPING3_COEFF15, 0)
-        self._reg_write(model.vars.MODEM_SHAPING4_COEFF16, 0)
-        self._reg_write(model.vars.MODEM_SHAPING4_COEFF17, 0)
-        self._reg_write(model.vars.MODEM_SHAPING4_COEFF18, 0)
-        self._reg_write(model.vars.MODEM_SHAPING4_COEFF19, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF20, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF21, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF22, 0)
-        self._reg_write(model.vars.MODEM_SHAPING5_COEFF23, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF24, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF25, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF26, 0)
-        self._reg_write(model.vars.MODEM_SHAPING6_COEFF27, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF28, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF29, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF30, 0)
-        self._reg_write(model.vars.MODEM_SHAPING7_COEFF31, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF32, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF33, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF34, 0)
-        self._reg_write(model.vars.MODEM_SHAPING8_COEFF35, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF36, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF37, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF38, 0)
-        self._reg_write(model.vars.MODEM_SHAPING9_COEFF39, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF40, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF41, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF42, 0)
-        self._reg_write(model.vars.MODEM_SHAPING10_COEFF43, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF44, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF45, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF46, 0)
-        self._reg_write(model.vars.MODEM_SHAPING11_COEFF47, 0)
+    def get_coeff_ceil(self, model):
+        # all filter taps are 8 bit signed registers
+        max_filter_taps = model.vars.max_filter_taps.value
+        coeff_ceil = np.empty(max_filter_taps)
+        # all filter taps are 8 bit signed registers
+        coeff_ceil.fill((2 ** (8 - 1)) - 1)
+        return coeff_ceil
+
+    def write_coeff_registers(self, model, coeff, shaping):
+
+        self._reg_write(model.vars.MODEM_SHAPING0_COEFF0, int(coeff[0]))
+        self._reg_write(model.vars.MODEM_SHAPING0_COEFF1, int(coeff[1]))
+        self._reg_write(model.vars.MODEM_SHAPING0_COEFF2, int(coeff[2]))
+        self._reg_write(model.vars.MODEM_SHAPING0_COEFF3, int(coeff[3]))
+        self._reg_write(model.vars.MODEM_SHAPING1_COEFF4, int(coeff[4]))
+        self._reg_write(model.vars.MODEM_SHAPING1_COEFF5, int(coeff[5]))
+        self._reg_write(model.vars.MODEM_SHAPING1_COEFF6, int(coeff[6]))
+        self._reg_write(model.vars.MODEM_SHAPING1_COEFF7, int(coeff[7]))
+        self._reg_write(model.vars.MODEM_SHAPING2_COEFF8, int(coeff[8]))
+        self._reg_write(model.vars.MODEM_SHAPING2_COEFF9, int(coeff[9]))
+        self._reg_write(model.vars.MODEM_SHAPING2_COEFF10, int(coeff[10]))
+        self._reg_write(model.vars.MODEM_SHAPING2_COEFF11, int(coeff[11]))
+        self._reg_write(model.vars.MODEM_SHAPING3_COEFF12, int(coeff[12]))
+        self._reg_write(model.vars.MODEM_SHAPING3_COEFF13, int(coeff[13]))
+        self._reg_write(model.vars.MODEM_SHAPING3_COEFF14, int(coeff[14]))
+        self._reg_write(model.vars.MODEM_SHAPING3_COEFF15, int(coeff[15]))
+        self._reg_write(model.vars.MODEM_SHAPING4_COEFF16, int(coeff[16]))
+        self._reg_write(model.vars.MODEM_SHAPING4_COEFF17, int(coeff[17]))
+        self._reg_write(model.vars.MODEM_SHAPING4_COEFF18, int(coeff[18]))
+        self._reg_write(model.vars.MODEM_SHAPING4_COEFF19, int(coeff[19]))
+        self._reg_write(model.vars.MODEM_SHAPING5_COEFF20, int(coeff[20]))
+        self._reg_write(model.vars.MODEM_SHAPING5_COEFF21, int(coeff[21]))
+        self._reg_write(model.vars.MODEM_SHAPING5_COEFF22, int(coeff[22]))
+        self._reg_write(model.vars.MODEM_SHAPING5_COEFF23, int(coeff[23]))
+        self._reg_write(model.vars.MODEM_SHAPING6_COEFF24, int(coeff[24]))
+        self._reg_write(model.vars.MODEM_SHAPING6_COEFF25, int(coeff[25]))
+        self._reg_write(model.vars.MODEM_SHAPING6_COEFF26, int(coeff[26]))
+        self._reg_write(model.vars.MODEM_SHAPING6_COEFF27, int(coeff[27]))
+        self._reg_write(model.vars.MODEM_SHAPING7_COEFF28, int(coeff[28]))
+        self._reg_write(model.vars.MODEM_SHAPING7_COEFF29, int(coeff[29]))
+        self._reg_write(model.vars.MODEM_SHAPING7_COEFF30, int(coeff[30]))
+        self._reg_write(model.vars.MODEM_SHAPING7_COEFF31, int(coeff[31]))
+        self._reg_write(model.vars.MODEM_SHAPING8_COEFF32, int(coeff[32]))
+        self._reg_write(model.vars.MODEM_SHAPING8_COEFF33, int(coeff[33]))
+        self._reg_write(model.vars.MODEM_SHAPING8_COEFF34, int(coeff[34]))
+        self._reg_write(model.vars.MODEM_SHAPING8_COEFF35, int(coeff[35]))
+        self._reg_write(model.vars.MODEM_SHAPING9_COEFF36, int(coeff[36]))
+        self._reg_write(model.vars.MODEM_SHAPING9_COEFF37, int(coeff[37]))
+        self._reg_write(model.vars.MODEM_SHAPING9_COEFF38, int(coeff[38]))
+        self._reg_write(model.vars.MODEM_SHAPING9_COEFF39, int(coeff[39]))
+        self._reg_write(model.vars.MODEM_SHAPING10_COEFF40, int(coeff[40]))
+        self._reg_write(model.vars.MODEM_SHAPING10_COEFF41, int(coeff[41]))
+        self._reg_write(model.vars.MODEM_SHAPING10_COEFF42, int(coeff[42]))
+        self._reg_write(model.vars.MODEM_SHAPING10_COEFF43, int(coeff[43]))
+        self._reg_write(model.vars.MODEM_SHAPING11_COEFF44, int(coeff[44]))
+        self._reg_write(model.vars.MODEM_SHAPING11_COEFF45, int(coeff[45]))
+        self._reg_write(model.vars.MODEM_SHAPING11_COEFF46, int(coeff[46]))
+        self._reg_write(model.vars.MODEM_SHAPING11_COEFF47, int(coeff[47]))
+
+        self._reg_write(model.vars.MODEM_CTRL0_SHAPING, shaping)
+
+    def calc_max_available_filter_taps(self, model):
+        # this is fixed for a family of parts
+        model.vars.max_filter_taps.value = 48

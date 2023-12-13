@@ -266,7 +266,7 @@ uint8_t sli_zigbee_af_ota_image_block_request_handler(EmberAfImageBlockRequestCa
   // shall respond to any Image Block Request command with an Image Block Response
   // command with a status of WAIT_FOR_DATA."
   if (emberGetDutyCycleState(&dcState) == EMBER_SUCCESS
-      && dcState >= EMBER_DUTY_CYCLE_LBT_LIMITED_THRESHOLD_REACHED) {
+      && dcState >= EMBER_DUTY_CYCLE_LBT_CRITICAL_THRESHOLD_REACHED) {
     callbackData->waitTimeSecondsResponse = emberAfPluginSubGhzServerSuspendZclMessagesStatus(callbackData->source);
     status = EMBER_ZCL_STATUS_WAIT_FOR_DATA;
   } else

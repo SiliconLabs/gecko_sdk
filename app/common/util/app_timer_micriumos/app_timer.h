@@ -56,7 +56,13 @@ typedef void (*app_timer_callback_t)(app_timer_t *timer, void *data);
  * Start timer or restart if it is running already.
  *
  * @param[in] timer Pointer to the timer.
- * @param[in] timeout_ms Timer timeout, in milliseconds.
+ * @param[in] timeout_ms Timer timeout, in milliseconds. Resolution is inversely
+ *                       proportional to the OS timer frequency that can be
+ *                       adjusted by the OSCfg_TmrTaskRate_Hz OS configuration
+ *                       parameter.
+ *                       Higher frequency leads to grater resolution. Setting
+ *                       OSCfg_TmrTaskRate_Hz to 100 Hz leads to 10 ms
+ *                       resolution.
  * @param[in] callback Callback function that is called when timeout expires.
  * @param[in] callback_data Pointer to user data that will be passed to callback.
  * @param[in] is_periodic Reload timer when it expires if true.

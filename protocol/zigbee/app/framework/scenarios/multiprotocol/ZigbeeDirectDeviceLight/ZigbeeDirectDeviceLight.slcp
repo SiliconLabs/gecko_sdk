@@ -1,63 +1,65 @@
-project_name: "ZigbeeDirectDeviceLight"
-label: "Zigbee - SoC ZigbeeDirectDeviceLight"
-package: "Zigbee"
-category: "Zigbee Application"
-quality: "production"
-
-description: >
-  This is a sample application demonstrating a Zigbee Direct ZDD as part of a light application using dynamic
-  multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
-author: "Silicon Laboratories, Inc." 
+project_name: ZigbeeDirectDeviceLight
+label: Zigbee - SoC ZigbeeDirectDeviceLight
+package: Zigbee
+category: Zigbee Application
+quality: production
+description: This is a sample application demonstrating a Zigbee Direct Device (ZDD) as part of a light application using dynamic multiprotocol (Zigbee + Bluetooth LE) and NVM3 for persistent storage.
+author: Silicon Laboratories, Inc.
 
 component:
-  - id: "cli"
+  - id: cli
     instance:
-    - example
-  - id: "zigbee_debug_print"
-  - id: "iostream_recommended_stream"
-  - id: "zigbee_pro_stack_non_default_mac"
-  - id: "zigbee_source_route"
-  - id: "zigbee_binding_table"
-  - id: "zigbee_stack_diagnostics"
-  - id: "bluetooth_stack"
-  - id: "gatt_configuration"
-  - id: "bluetooth_feature_system"
-  - id: "bluetooth_feature_scanner"
-  - id: "bluetooth_feature_legacy_advertiser"
-  - id: "bluetooth_feature_connection"
-  - id: "bluetooth_feature_gatt"
-  - id: "bluetooth_feature_gatt_server"
-  - id: "bluetooth_feature_sm"
-  - id: "zigbee_gp"
-  - id: "zigbee_install_code"
-  - id: "zigbee_zll"
-  - id: "zigbee_zcl_framework_core"
-  - id: "zigbee_application_bootloader"
-  - id: "zigbee_groups_server"
-  - id: "zigbee_identify"
-  - id: "zigbee_on_off"
-  - id: "zigbee_zll_on_off_server" 
-  - id: "zigbee_counters"
-  - id: "zigbee_find_and_bind_target"
-  - id: "zigbee_green_power_common"
-  - id: "zigbee_green_power_client"
-  - id: "zigbee_interpan"
-  - id: "zigbee_zll_commissioning_common"
-  - id: "zigbee_zll_commissioning_server"
-  - id: "zigbee_concentrator"
-  - id: "zigbee_address_table"
-  - id: "zigbee_network_creator"
-  - id: "zigbee_network_creator_security"
+      - example
+  - id: zigbee_debug_print
+  - id: iostream_recommended_stream
+  - id: zigbee_pro_stack_non_default_mac
+  - id: zigbee_source_route
+  - id: zigbee_stack_diagnostics
+  - id: bluetooth_stack
+  - id: gatt_configuration
+  - id: bluetooth_feature_system
+
+  # Use legacy scanner to only scan advertisements that use legacy advertising
+  # PDUs. Include bluetooth_feature_extended_scanner if scanning extended
+  # advertising PDUs is also required. That component is not included currently
+  # for minimizing the application size.
+  - id: bluetooth_feature_legacy_scanner
+
+  - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_connection
+  - id: bluetooth_feature_gatt
+  - id: bluetooth_feature_gatt_server
+  - id: bluetooth_feature_sm
+  - id: zigbee_gp
+  - id: zigbee_zll
+  - id: zigbee_zcl_framework_core
+  - id: zigbee_zcl_cli
+  - id: zigbee_core_cli
+  - id: zigbee_application_bootloader
+  - id: zigbee_groups_server
+  - id: zigbee_identify
+  - id: zigbee_on_off
+  - id: zigbee_zll_on_off_server
+  - id: zigbee_counters
+  - id: zigbee_find_and_bind_target
+  - id: zigbee_green_power_common
+  - id: zigbee_green_power_client
+  - id: zigbee_interpan
+  - id: zigbee_zll_commissioning_common
+  - id: zigbee_zll_commissioning_server
+  - id: zigbee_concentrator
+  - id: zigbee_address_table
+  - id: zigbee_network_creator
+  - id: zigbee_network_creator_security
   - id: zigbee_network_steering
-  - id: "zigbee_reporting"
-  - id: "zigbee_zll_identify_server"
-  - id: "zigbee_scenes"
-  - id: "zigbee_zll_scenes_server"
-  - id: "zigbee_basic"
-  - id: "zigbee_zll_utility_server"
-  - id: "zigbee_scan_dispatch"
-  - id: "zigbee_packet_validate"
-  - id: "zigbee_security_link_keys"
+  - id: zigbee_reporting
+  - id: zigbee_zll_identify_server
+  - id: zigbee_scenes
+  - id: zigbee_zll_scenes_server
+  - id: zigbee_basic
+  - id: zigbee_zll_utility_server
+  - id: zigbee_scan_dispatch
+  - id: zigbee_security_link_keys
   - id: zigbee_direct_zdd
   - id: zigbee_direct_security_p256
   - id: zigbee_direct_tunneling
@@ -78,11 +80,11 @@ configuration:
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
     condition:
-      - "iostream_usart"
+      - iostream_usart
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: eusartHwFlowControlCtsAndRts
     condition:
-      - "iostream_eusart"
+      - iostream_eusart
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
@@ -92,13 +94,13 @@ configuration:
   - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 1
     condition:
-      - "iostream_usart"
+      - iostream_usart
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 1
     condition:
-      - "iostream_eusart"
+      - iostream_eusart
   - name: SL_CLI_PROMPT_STRING
-    value:  "\"ZDDLight>\""
+    value: "\"ZDDLight>\""
   - name: SL_BT_CONFIG_USER_ADVERTISERS
     value: 3
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
@@ -107,6 +109,16 @@ configuration:
     value: 16384
   - name: SL_STACK_SIZE
     value: 1024
+    condition:
+      - freertos
+  - name: SL_STACK_SIZE
+    value: 512
+    condition:
+      - micriumos_kernel
+  # Timer RTOS task priority needs to be one more than SL_BT_RTOS_LINK_LAYER_TASK_PRIORITY
+  # BT uses event flags that require the timer task to be higher priority than all other RTOS tasks
+  - name: configTIMER_TASK_PRIORITY
+    value: 53
   - name: LIB_MEM_CFG_HEAP_SIZE
     value: 0
   - name: SL_CLI_HELP_DESCRIPTION_ENABLED
@@ -132,37 +144,40 @@ configuration:
   # Enable it to see app debug info and ZDD RX/TX packets in details
   - name: SL_ZIGBEE_DEBUG_APP_GROUP_ENABLED
     value: 0
+  - name: configMAX_TASK_NAME_LEN
+    value: 30
+
 
 define:
-  - name: "OS_CFG_COMPAT_INIT"
+  - name: OS_CFG_COMPAT_INIT
   # An example passcode to use for session key negotiation.
   # Customers specify their own passcode here.
-  - name: "SL_ZIGBEE_DIRECT_ZDD_DEFAULT_PASSCODE"
-    value: "{ 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }"
+  - name: SL_ZIGBEE_DIRECT_ZDD_DEFAULT_PASSCODE
+    value: '{ 0x01, 0x02, 0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }'
 
 source:
-  - path: "main.c"
-  - path: "app.c"
+  - path: main.c
+  - path: app.c
 
 config_file:
-  - path: "config/zcl/zcl_config.zap"
+  - path: config/zcl/zcl_config.zap
     file_id: zap_configuration_file_id
-    directory: "zcl"
+    directory: zcl
   - override:
       component: gatt_configuration
       file_id: gatt_configuration_file_id
-    path: "config/gatt_configuration.btconf"
-    directory: "btconf"
+    path: config/gatt_configuration.btconf
+    directory: btconf
 
 include:
-  - path: "./"
+  - path: ./
 
 tag:
   - prebuilt_demo
   - hardware:has:lcd
   - hardware:!shared:button:led
   - hardware:device:flash:512
-  - hardware:device:ram:64  
+  - hardware:device:ram:64
 
 readme:
   - path: ./readme.html
@@ -173,11 +188,11 @@ ui_hints:
       focus: false
 
 filter:
-  - name: "Wireless Technology"
-    value: ["Zigbee", "Bluetooth"]
-  - name: "Device Type"
-    value: ["SoC"]
-  - name: "Capability"
-    value: ["Multiprotocol"]
-  - name: "Project Difficulty"
-    value: ["Advanced"]
+  - name: Wireless Technology
+    value: [Zigbee, Bluetooth]
+  - name: Device Type
+    value: [SoC]
+  - name: Capability
+    value: [Multiprotocol]
+  - name: Project Difficulty
+    value: [Advanced]

@@ -10,6 +10,7 @@ requires:
   - name: device_has_radio
   - name: restrictions_profile_base
   - name: restrictions_profile_connect
+  - name: restrictions_profile_connect_ofdm
   - name: restrictions_profile_long_range
   - name: restrictions_profile_sun
   - name: restrictions_profile_wisun_fan_1_0

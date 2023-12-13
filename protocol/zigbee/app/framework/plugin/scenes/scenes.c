@@ -444,10 +444,22 @@ bool emberAfScenesClusterRecallSceneCallback(EmberAfClusterCommand *cmd)
   sl_zcl_scenes_cluster_recall_scene_command_t cmd_data;
   EmberAfSceneTableEntry sceneEntry;
   EmberAfStatus status;
+  uint16_t payloadOffset = cmd->payloadStartIndex;
 
   if (zcl_decode_scenes_cluster_recall_scene_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
     return false;
+  }
+
+  /** Note: Fields in the payload - 5 bytes in total
+   * uint16_t groupId;  // Ver.: always
+   * uint8_t sceneId;   // Ver.: always
+   * uint16_t transitionTime;  // Ver.: not always present, since version zcl-7.0-07-5123-07 or higer
+   * "When the command payload field not present or value equal to 0xFFFF" - from the spec 3.4.2.4.7.2
+   * So if Transition field is missing, we set transitionTime to 0xFFFF
+   */
+  if (cmd->bufLen < payloadOffset + 5) {
+    cmd_data.transitionTime = 0xFFFF;
   }
 
   emberAfScenesClusterPrintln("RX: RecallScene 0x%2x, 0x%x, 0x%2x",

@@ -1,0 +1,16 @@
+label: ZWave_SoC_SwitchOnOff_Solution
+description: >
+  Demonstrates Switch On/Off application combined with OTA bootloader. 
+  The Z-Wave certified Switch On/Off application shows a switch 
+  implementation that turns on any device that is connected to power. 
+  Examples include lights, appliances, and so on.
+quality: production
+project:
+  - path: ../../Apps/zwave_soc_switch_on_off/zwave_soc_switch_on_off.slcp
+    id: application
+    output: app
+  - path: ../../UCBootLoader/series1/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_switch_on_off_ws_postbuild

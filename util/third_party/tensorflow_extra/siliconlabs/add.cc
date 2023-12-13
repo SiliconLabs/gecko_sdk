@@ -201,7 +201,9 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   return kTfLiteOk;
 }
 
-TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node)
+{
+  TfLiteStatus status = kTfLiteOk;
   auto* params = reinterpret_cast<TfLiteAddParams*>(node->builtin_data);
 
   TFLITE_DCHECK(node->user_data != nullptr);
@@ -214,15 +216,16 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   if (output->type == kTfLiteFloat32) {
     EvalAdd(context, node, params, data, input1, input2, output);
   } else if (output->type == kTfLiteInt8) {
-    TF_LITE_ENSURE_OK(context, EvalAddQuantized(context, node, params, data,
-                                                input1, input2, output));
+    status = EvalAddQuantized(context, node, params, data,
+                              input1, input2, output);
+    TF_LITE_ENSURE_OK(context, status);
   } else {
     TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
                        TfLiteTypeGetName(output->type), output->type);
     return kTfLiteError;
   }
 
-  return kTfLiteOk;
+  return status;
 }
 
 }  // namespace add

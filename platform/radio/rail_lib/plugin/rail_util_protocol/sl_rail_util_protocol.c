@@ -46,7 +46,7 @@ static RAIL_Status_t sl_rail_util_protocol_config_proprietary(RAIL_Handle_t hand
   return RAIL_STATUS_NO_ERROR;
 }
 
-#if RAIL_SUPPORTS_2P4GHZ_BAND && SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
+#if RAIL_SUPPORTS_PROTOCOL_BLE && SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
 static RAIL_Status_t sl_rail_util_protocol_config_ble(RAIL_Handle_t handle,
                                                       sl_rail_util_protocol_type_t protocol)
 {
@@ -332,6 +332,16 @@ static RAIL_Status_t sl_rail_util_protocol_config_zwave(RAIL_Handle_t handle,
         status = RAIL_ZWAVE_ConfigRegion(handle,
                                          &RAIL_ZWAVE_REGION_US_LR_END_DEVICE);
         break;
+      case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR1: // EU, Long Range 1
+        status = RAIL_ZWAVE_ConfigRegion(handle, &RAIL_ZWAVE_REGION_EU_LR1);
+        break;
+      case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR2: // EU, Long Range 2
+        status = RAIL_ZWAVE_ConfigRegion(handle, &RAIL_ZWAVE_REGION_EU_LR2);
+        break;
+      case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR_END_DEVICE: // EU, LR End Device
+        status = RAIL_ZWAVE_ConfigRegion(handle,
+                                         &RAIL_ZWAVE_REGION_EU_LR_END_DEVICE);
+        break;
       default:
         status = RAIL_STATUS_INVALID_PARAMETER;
         break;
@@ -370,7 +380,7 @@ RAIL_Status_t sl_rail_util_protocol_config(RAIL_Handle_t handle,
   switch (protocol) {
     case SL_RAIL_UTIL_PROTOCOL_PROPRIETARY:
       return sl_rail_util_protocol_config_proprietary(handle);
-#if RAIL_SUPPORTS_2P4GHZ_BAND && SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
+#if RAIL_SUPPORTS_PROTOCOL_BLE && SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
     case SL_RAIL_UTIL_PROTOCOL_BLE_1MBPS:
     case SL_RAIL_UTIL_PROTOCOL_BLE_2MBPS:
     case SL_RAIL_UTIL_PROTOCOL_BLE_CODED_125KBPS:
@@ -405,6 +415,9 @@ RAIL_Status_t sl_rail_util_protocol_config(RAIL_Handle_t handle,
     case SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1: // United States, Long Range 1
     case SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2: // United States, Long Range 2
     case SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE: // US, LR End Device
+    case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR1: // European Union, Long Range 1
+    case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR2: // European Union, Long Range 2
+    case SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR_END_DEVICE: // EU, LR End Device
       return sl_rail_util_protocol_config_zwave(handle, protocol);
 #endif
 #if RAIL_SUPPORTS_PROTOCOL_SIDEWALK && SL_RAIL_UTIL_PROTOCOL_SIDEWALK_ENABLE

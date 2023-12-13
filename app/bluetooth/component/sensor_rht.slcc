@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_rht
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_rht.c
 include:
@@ -15,7 +14,7 @@ include:
     file_list:
       - path: sl_sensor_rht.h
 config_file:
-  - path: "config/sl_sensor_rht_config.h"
+  - path: config/sl_sensor_rht_config.h
     condition: [btmesh_stack]
 provides:
   - name: sensor_rht
@@ -24,6 +23,10 @@ requires:
   - name: si70xx_driver
   - name: i2cspm
   - name: app_assert
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: sensor_rht
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-rht

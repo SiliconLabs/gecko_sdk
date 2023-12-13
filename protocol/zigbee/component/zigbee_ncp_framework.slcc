@@ -5,7 +5,6 @@ category: Zigbee|NCP
 quality: production
 ui_hints:
   visibility: never
-
 description: This component declares all required NCP application framework released source and header common files, stubs, NCP weak definitions, and template files for NCP callbacks needed for the NCP application.
 
 provides:
@@ -32,8 +31,6 @@ include:
   - path: protocol/zigbee/app/util/ezsp
     file_list:
       - path: ezsp-protocol.h
-      - path: secure-ezsp-protocol.h
-      - path: secure-ezsp-types.h
       - path: ezsp-enum.h
       - path: ezsp-frame-utilities.h
   - path: protocol/zigbee/app/framework/util
@@ -53,13 +50,7 @@ source:
   - path: protocol/zigbee/app/xncp/xncp-stubs.c
     unless:
       - zigbee_xncp
-  - path: protocol/zigbee/app/em260/command-handlers-secure-ezsp-stub.c
-    unless:
-      - zigbee_ncp_secure_ezsp
-  - path: protocol/zigbee/app/util/ezsp/secure-ezsp-stub.c
-    unless:
-      - zigbee_ncp_secure_ezsp
- 
+
 define:
   - name: EMBER_AF_NCP
     value: 1
@@ -78,27 +69,28 @@ template_contribution:
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_ncp_init_callback
     priority: -8997
     unless:
-      - cmsis_rtos2    
+      - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_process_action
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_ncp_tick_callback
     unless:
       - cmsis_rtos2
-  # We have ash-ncp.c in legacy_ncp_ash.slcc and
-  # serial-interface-spi.c in zigbee_ncp_spi_source.slcc
+  # We have ash-ncp.c in legacy_ncp_ash.slcc
   # subscribing this is_ok_to_sleep handler. They are mutual exclusive
   # based on what serial communication we choose for NCP.
   - name: power_manager_handler
     value:
       event: is_ok_to_sleep
-      include: "serial-interface.h"
+      include: serial-interface.h
       handler: serialOkToSleep
+    unless:
+      - zigbee_ncp_spi
   - name: zigbee_stack_callback
     value:
       callback_type: counter
@@ -138,7 +130,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: mark_buffers
-      function_name: sli_zigbee_af_mark_buffers_callback      
+      function_name: sli_zigbee_af_mark_buffers_callback
   - name: zigbee_ncp_callback
     value:
       callback_type: set_configuration_value
@@ -162,7 +154,7 @@ template_contribution:
   - name: zigbee_ncp_callback
     value:
       callback_type: get_value
-      function_name: emberAfPluginEzspGetValueCommandCallback    
+      function_name: emberAfPluginEzspGetValueCommandCallback
 
 
 documentation:

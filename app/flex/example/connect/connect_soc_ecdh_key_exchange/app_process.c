@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include "app_log.h"
 #include "app_framework_common.h"
+#include "string.h"
 
 #include "app.h"
 #include "sl_connect_ecdh_key_exchange.h"

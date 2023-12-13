@@ -23,14 +23,7 @@ component:
   - id: app_log
   - id: app_assert
   - id: sl_flex_rail_802154_support
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
+  - id: simple_rail_assistance
 #------------Memory Protection Unit-------------------
   - id: mpu
 #---------------------- CLI --------------------------
@@ -51,6 +44,8 @@ requires:
 # Added for Safety for the EFF, but the sample app doesn't support it yet.
   - name: rail_util_eff
     condition: [hardware_board_has_eff]
+  - name: simple_button
+  - name: simple_led
 
 #---------------- RF band defines --------------------
 define:
@@ -123,7 +118,7 @@ configuration:
   - name: OS_CFG_TASK_PROFILE_EN
     value: "1"
 #-------------------- RAIL init ----------------------
-  - name: SL_RAIL_UTIL_BLE_SUPPORT_ENABLE
+  - name: SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
     value: "0"
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
     value: "1"
@@ -132,8 +127,6 @@ configuration:
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
     value: "1"
   - name: SL_RAIL_UTIL_INIT_EVENTS_INST0_ENABLE
-    value: "1"
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"

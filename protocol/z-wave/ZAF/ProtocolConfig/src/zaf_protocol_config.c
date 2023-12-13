@@ -15,7 +15,6 @@ ZW_WEAK const SVirtualSlaveNodeInfoTable_t VirtualSlaveNodeInfoTable = {
 
 /**
  * Set up security keys to request when joining a network.
- * These are taken from the config_app.h header file.
  */
 static const uint8_t SecureKeysRequested = ZAF_CONFIG_REQUESTED_SECURITY_KEYS;
 

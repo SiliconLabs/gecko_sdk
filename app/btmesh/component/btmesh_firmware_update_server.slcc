@@ -37,6 +37,7 @@ requires:
   - name: btmesh_stack
   - name: btmesh_blob_transfer_server
   - name: btmesh_stack_fw_update_server
+  - name: btmesh_stack_node
   - name: power_manager
   - name: app_timer
   - name: silabs_core_sl_malloc

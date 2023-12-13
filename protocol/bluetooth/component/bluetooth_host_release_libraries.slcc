@@ -1,0 +1,62 @@
+id: "bluetooth_host_release_libraries"
+label: "Bluetooth Low Energy Host Library"
+ui_hints:
+    visibility: never
+package: "Bluetooth"
+description: >
+  BLE host libraries to be used by the Bluetooth stack
+category: Bluetooth|Bluetooth Host (Stack)
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_common"
+  - name: "bluetooth_controller_libraries"
+provides:
+  - name: "bluetooth_host_libraries"
+  - name: "bluetooth_host_release_libraries"
+library:
+#EFR32XG1
+  - path: "lib/libbluetooth_host_efr32xg1_gcc_release.a"
+    condition: ["toolchain_gcc","device_sdid_80"]
+  - path: "lib/libbluetooth_host_efr32xg1_iar_release.a"
+    condition: ["toolchain_iar","device_sdid_80"]
+#EFR32XG12
+  - path: "lib/libbluetooth_host_efr32xg12_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg12"]
+  - path: "lib/libbluetooth_host_efr32xg12_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg12"]
+#EFR32XG13
+  - path: "lib/libbluetooth_host_efr32xg13_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg13"]
+  - path: "lib/libbluetooth_host_efr32xg13_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg13"]
+#EFR32XG14
+  - path: "lib/libbluetooth_host_efr32xg14_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg14"]
+  - path: "lib/libbluetooth_host_efr32xg14_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg14"]
+#EFR32XG21
+  - path: "lib/libbluetooth_host_efr32xg21_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg21"]
+  - path: "lib/libbluetooth_host_efr32xg21_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg21"]
+#EFR32XG22
+  - path: "lib/libbluetooth_host_efr32xg22_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg22"]
+  - path: "lib/libbluetooth_host_efr32xg22_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg22"]
+#EFR32XG24
+  - path: "lib/libbluetooth_host_efr32xg24_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg24"]
+  - path: "lib/libbluetooth_host_efr32xg24_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg24"]
+#EFR32XG27
+  - path: "lib/libbluetooth_host_efr32xg27_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg27"]
+  - path: "lib/libbluetooth_host_efr32xg27_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg27"]
+#EFR32XG28
+  - path: "lib/libbluetooth_host_efr32xg28_gcc_release.a"
+    condition: ["toolchain_gcc","device_generic_family_efr32xg28"]
+  - path: "lib/libbluetooth_host_efr32xg28_iar_release.a"
+    condition: ["toolchain_iar","device_generic_family_efr32xg28"]

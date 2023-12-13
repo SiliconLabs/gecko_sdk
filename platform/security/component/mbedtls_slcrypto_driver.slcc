@@ -56,7 +56,7 @@ source:
     condition: [mbedtls_sha_function, device_has_cryptoacc]
   # SI917 device
   - path: sl_component/sl_mbedtls_support/src/mbedtls_ccm.c
-    unless: [device]
+    condition: [device_si91x]
 include:
   - path: sl_component/sl_mbedtls_support/inc
     file_list:

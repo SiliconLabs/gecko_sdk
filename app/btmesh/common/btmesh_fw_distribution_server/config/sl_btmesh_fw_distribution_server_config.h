@@ -60,10 +60,10 @@
 // </e>
 
 // <o SL_BTMESH_FW_DIST_SERVER_MAX_NODE_LIST_SIZE_CFG_VAL> Max node list size
-// <1-65535:1>
-// <i> Default: 8
+// <1-1008:1>
+// <i> Default: 4
 // <i> Maximum number of firmware update server nodes which can participate in the distribution
-#define SL_BTMESH_FW_DIST_SERVER_MAX_NODE_LIST_SIZE_CFG_VAL   (8)
+#define SL_BTMESH_FW_DIST_SERVER_MAX_NODE_LIST_SIZE_CFG_VAL   (4)
 
 // <o SL_BTMESH_FW_DIST_SERVER_MULTICAST_THRESHOLD_DEFAULT_CFG_VAL> Default Multicast Threshold
 // <1-65535:1>

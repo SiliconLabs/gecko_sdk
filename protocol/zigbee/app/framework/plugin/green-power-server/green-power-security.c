@@ -60,11 +60,6 @@ typedef enum {
   DIRECTION_GPP_TO_GPD = 0x01
 } EmberGpdfDirection;
 
-extern void emberHmacAesHash(const uint8_t *key,
-                             const uint8_t *data,
-                             uint8_t dataLength,
-                             uint8_t *result);
-
 EmberAfStatus emberAfGreenPowerServerDeriveSharedKeyFromSinkAttribute(uint8_t * gpsSecurityKeyTypeAtrribute,
                                                                       EmberKeyData * gpSharedKeyAttribute,
                                                                       EmberGpAddress * gpdAddr);

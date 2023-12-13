@@ -4,8 +4,8 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 115
-          ram: 9
+          flash: 112
+          ram: 10
       board:
         rf_bands:
           - 2400|868
@@ -16,6 +16,6 @@ tag:
         io:
           allow_shared: false
           si4468: false
-          led: 2+
-          button: 2+
+          led: 1+
+          button: 1+
   

@@ -34,10 +34,11 @@
 #include <string.h>
 #include <assert.h>
 #include "sl_ftp.h"
-#include "socket.h"
-#include "sl_socket_config.h"
+#include "socket/socket.h"
 #include "cmsis_os2.h"
 #include "sl_wisun_app_core_util.h"
+#include "sl_wisun_types.h"
+#include "sl_wisun_api.h"
 #if SL_FTP_ENABLE_TFTP_PROTOCOL
 #include "sl_tftp_clnt.h"
 #endif
@@ -45,6 +46,8 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+#define IPV6_STR_BUF_SIZE    40U
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -83,6 +86,31 @@ bool sl_ftp_is_network_connected(void)
 }
 
 /***************************************************************************//**
+ * @brief FTP get global IP address
+ * @details Portable function
+ * @return Global address string representation
+ ******************************************************************************/
+const char * sl_ftp_get_global_addr(void)
+{
+  static char str[IPV6_STR_BUF_SIZE] = { 0U };
+  static in6_addr_t addr = { 0U };
+
+  // get current address
+  if (sl_wisun_get_ip_address(SL_WISUN_IP_ADDRESS_TYPE_GLOBAL, &addr) != SL_STATUS_OK) {
+    strncpy(str, SL_FTP_LOCAL_HOST_STR, IPV6_STR_BUF_SIZE);
+    return (const char *) str;
+  }
+
+  // get string
+  if (inet_ntop(AF_INET6, (const void *)&addr, str, IPV6_STR_BUF_SIZE) == NULL) {
+    strncpy(str, SL_FTP_LOCAL_HOST_STR, IPV6_STR_BUF_SIZE);
+  }
+
+  str[IPV6_STR_BUF_SIZE - 1] = '\0';
+  return (const char *) str;
+}
+
+/***************************************************************************//**
  * @brief FTP Close
  * @details Portable function
  * @param sockid Socket ID
@@ -102,7 +130,7 @@ int32_t sl_ftp_socket_close(int32_t sockid)
  ******************************************************************************/
 int32_t sl_ftp_tcp_socket_create(void)
 {
-  return socket(AF_WISUN, SOCK_STREAM, IPPROTO_TCP);
+  return socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_TCP);
 }
 
 /***************************************************************************//**
@@ -115,17 +143,17 @@ int32_t sl_ftp_tcp_socket_create(void)
  ******************************************************************************/
 int32_t sl_ftp_tcp_socket_connect(int32_t sockid, const char *host, uint16_t port)
 {
-  wisun_addr_t waddr = { 0U };
+  sockaddr_in6_t waddr = { 0U };
 
-  if (inet_pton(AF_WISUN, host,
-                &waddr.sin6_addr.s6_addr) == SOCKET_RETVAL_ERROR) {
+  if (inet_pton(AF_INET6, host,
+                &waddr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     return SOCKET_RETVAL_ERROR;
   }
 
-  waddr.sin6_family = AF_WISUN;
+  waddr.sin6_family = AF_INET6;
   waddr.sin6_port = port;
 
-  return connect(sockid, (const struct sockaddr *)&waddr, sizeof(wisun_addr_t));
+  return connect(sockid, (const struct sockaddr *)&waddr, sizeof(sockaddr_in6_t));
 }
 
 /***************************************************************************//**
@@ -157,9 +185,6 @@ int32_t sl_ftp_tcp_socket_recv(int32_t sockid, void *buff, uint32_t len)
 
 #if SL_FTP_ENABLE_TFTP_PROTOCOL
 
-_Static_assert(SL_SOCKET_BUFFER_SIZE >= (SL_TFTP_DATA_BLOCK_SIZE + sizeof(uint16_t) * 2UL),
-               "TFTP: Not enough socket buffer size. SL_SOCKET_BUFFER_SIZE >= (SL_TFTP_DATA_BLOCK_SIZE + 4)");
-
 /***************************************************************************//**
  * @brief TFTP udp socket create
  * @details Portable function
@@ -167,7 +192,7 @@ _Static_assert(SL_SOCKET_BUFFER_SIZE >= (SL_TFTP_DATA_BLOCK_SIZE + sizeof(uint16
  ******************************************************************************/
 int32_t sl_tftp_udp_socket_create(void)
 {
-  return socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+  return socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
 }
 
 /**************************************************************************//**
@@ -181,7 +206,7 @@ int32_t sl_tftp_udp_socket_create(void)
  *****************************************************************************/
 int32_t sl_tftp_udp_sendto(int32_t sockid, const void *buff, uint32_t len, const void *dest_addr)
 {
-  return sendto(sockid, buff, len, 0L, (const struct sockaddr *)dest_addr, sizeof(wisun_addr_t));
+  return sendto(sockid, buff, len, 0L, (const struct sockaddr *)dest_addr, sizeof(sockaddr_in6_t));
 }
 
 /**************************************************************************//**
@@ -195,7 +220,7 @@ int32_t sl_tftp_udp_sendto(int32_t sockid, const void *buff, uint32_t len, const
  *****************************************************************************/
 int32_t sl_tftp_udp_recvfrom(int32_t sockid, void *buff, uint32_t len, void *src_addr)
 {
-  socklen_t addr_len = sizeof(wisun_addr_t);
+  socklen_t addr_len = sizeof(sockaddr_in6_t);
   return recvfrom(sockid, buff, len, 0L, (struct sockaddr *)src_addr, &addr_len);
 }
 
@@ -204,24 +229,24 @@ void sl_tftp_udp_get_addr_bytes(const char *host,
                                 void * const dst,
                                 size_t dst_size)
 {
-  wisun_addr_t waddr = { 0U };
+  sockaddr_in6_t waddr = { 0U };
 
   if (dst == NULL || !dst_size) {
     return;
   }
 
-  if (inet_pton(AF_WISUN, host,
-                &waddr.sin6_addr.s6_addr) == SOCKET_RETVAL_ERROR) {
+  if (inet_pton(AF_INET6, host,
+                &waddr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     memset(dst, 0U, dst_size);
   }
 
-  waddr.sin6_family = AF_WISUN;
+  waddr.sin6_family = AF_INET6;
   waddr.sin6_port = port;
 
-  if (dst_size < sizeof(wisun_addr_t)) {
+  if (dst_size < sizeof(sockaddr_in6_t)) {
     memset(dst, 0U, dst_size);
   } else {
-    memcpy(dst, &waddr, sizeof(wisun_addr_t));
+    memcpy(dst, &waddr, sizeof(sockaddr_in6_t));
   }
 }
 

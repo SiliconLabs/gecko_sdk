@@ -17,8 +17,11 @@
 
 #include "app/framework/include/af.h"
 #include "app/framework/util/common.h"
+
+#ifdef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
 #include "app/framework/plugin/zll-commissioning-common/zll-commissioning.h"
 #include "app/framework/plugin/zll-commissioning-server/zll-commissioning-server.h"
+#endif // SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
 
 #include "zap-cluster-command-parser.h"
 
@@ -36,6 +39,40 @@ static uint16_t getMaxLength(void)
   }
   return maxLength;
 }
+
+#ifndef SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
+WEAK(uint8_t emberAfPluginZllCommissioningServerGroupIdentifierCountCallback(uint8_t endpoint))
+{
+  (void)endpoint;
+  return 0x00;
+}
+
+WEAK(bool emberAfPluginZllCommissioningServerGroupIdentifierCallback(uint8_t endpoint,
+                                                                     uint8_t index,
+                                                                     EmberAfPluginZllCommissioningGroupInformationRecord *record))
+{
+  (void)endpoint;
+  (void)index;
+  (void)record;
+  return false;
+}
+
+WEAK(uint8_t emberAfPluginZllCommissioningServerEndpointInformationCountCallback(uint8_t endpoint))
+{
+  (void)endpoint;
+  return 0x00;
+}
+
+WEAK(bool emberAfPluginZllCommissioningServerEndpointInformationCallback(uint8_t endpoint,
+                                                                         uint8_t index,
+                                                                         EmberAfPluginZllCommissioningEndpointInformationRecord *record))
+{
+  (void)endpoint;
+  (void)index;
+  (void)record;
+  return false;
+}
+#endif // !SL_CATALOG_ZIGBEE_ZLL_COMMISSIONING_SERVER_PRESENT
 
 bool emberAfZllCommissioningClusterGetGroupIdentifiersRequestCallback(EmberAfClusterCommand *cmd)
 {

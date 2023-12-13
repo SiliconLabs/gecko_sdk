@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ otPanId efr32GetDstPanId(otRadioFrame *aFrame);
  *
  * @retval  Pointer to start of 802.15.4 payload.
  */
-uint8_t* efr32GetPayload(otRadioFrame *aFrame);
+uint8_t *efr32GetPayload(otRadioFrame *aFrame);
 
 #ifdef __cplusplus
 } // extern "C"

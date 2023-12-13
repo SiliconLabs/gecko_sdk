@@ -444,28 +444,28 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
     /*
      * CC_CAL_HIGH = OTP_CCCAL_HIGH * 23.4375uA + 13.9mA
      */
-    cal_current_ua = (int8_t)otp_cccal_high * 23.4375 + 13900.0;
+    cal_current_ua = otp_cccal_high * 23.4375f + 13900.0f;
   } else {
     /*
      * CC_CAL_LOW = OTP_CCCAL_LOW * 1.5725uA = 0.87mA
      */
-    cal_current_ua = (int8_t)otp_cccal_low * 1.5725 + 870.0;
+    cal_current_ua = otp_cccal_low * 1.5725f + 870.0f;
   }
 
   switch (ccl_level) {
     case 0:
     case 4:
-      cal_current_ua = cal_current_ua * 0.5094;
+      cal_current_ua = cal_current_ua * 0.5094f;
       break;
 
     case 1:
     case 5:
-      cal_current_ua = cal_current_ua * 0.6352;
+      cal_current_ua = cal_current_ua * 0.6352f;
       break;
 
     case 2:
     case 6:
-      cal_current_ua = cal_current_ua * 0.802;
+      cal_current_ua = cal_current_ua * 0.802f;
       break;
   }
 
@@ -569,7 +569,7 @@ sl_status_t sli_coulomb_counter_hal_cal_adjust_em2_cpp(sli_coulomb_counter_outpu
   }
 
   if (factor != 0) {
-    factor = factor / 1000.0; /* convert back to original value. */
+    factor = factor / 1000.0f; /* convert back to original value. */
     output->cpp = output->cpp * factor;
 
     return SL_STATUS_OK;
@@ -596,7 +596,7 @@ sl_status_t sli_coulomb_counter_hal_cal_adjust_em2_cpp(sli_coulomb_counter_outpu
     float offset = (float)cpp_em2_adjustments[i][factor_index] - (float)(cpp_em2_adjustments[i][voltage_index]) * slope;
 
     factor = slope * (float)input_mv + offset;
-    factor = factor / 1000.0; /* values in array are stored multiplied by a thousand. */
+    factor = factor / 1000.0f; /* values in array are stored multiplied by a thousand. */
 
     output->cpp = output->cpp * factor;
 

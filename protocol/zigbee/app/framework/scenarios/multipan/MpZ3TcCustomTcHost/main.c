@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 {
 #ifndef EMBER_TEST
   {
-    // Initialize ezspProcessCommandOptions and gatewayBackchannelStart
+    // Initialize ezspProcessCommandOptions
     // for host apps running on hardware.
     int returnCode;
     if (emberAfMainStartCallback(&returnCode, argc, argv)) {

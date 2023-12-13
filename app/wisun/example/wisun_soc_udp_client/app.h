@@ -30,10 +30,15 @@
 
 #ifndef APP_H
 #define APP_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "sl_wisun_app_core.h"
+#include "sl_wisun_app_core_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -53,5 +58,9 @@
  * @param[in] args arguments
  *****************************************************************************/
 void app_task(void *args);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // APP_H

@@ -1,23 +1,21 @@
-project_name: "StandardizedRfTesting"
-label: "Zigbee - SoC StandardizedRfTesting"
-package: "Zigbee"
-category: "Zigbee Application"
-quality: "production"
-
-description: >
-  This is a pre-standardization implementation of Zigbee's RF testing standard. 
-  It utilizes the TIS (Total Isotropic Sensitivity)/ TRP (Total Radiated Power) 
-  testing interfaces and is optional for Zigbee certifications. This application adheres to the Zigbee RF Performance Test Spec v1.0.
-author: "Silicon Laboratories, Inc."
+project_name: StandardizedRfTesting
+label: Zigbee - SoC StandardizedRfTesting
+package: Zigbee
+category: Zigbee Application
+quality: production
+description: This is a pre-standardization implementation of Zigbee's RF testing standard. It utilizes the TIS (Total Isotropic Sensitivity)/ TRP (Total Radiated Power) testing interfaces and is optional for Zigbee certifications. This application adheres to the Zigbee RF Performance Test Spec v1.0.
+author: Silicon Laboratories, Inc.
 
 component:
   - id: cli
     instance:
-    - example
-  - id: "iostream_recommended_stream"
+      - example
+  - id: iostream_recommended_stream
   - id: zigbee_debug_print
   - id: zigbee_pro_stack
   - id: zigbee_zcl_framework_core
+  - id: zigbee_zcl_cli
+  - id: zigbee_core_cli
   - id: zigbee_mfglib
   - id: zigbee_app_framework_common
 
@@ -27,11 +25,11 @@ configuration:
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: usartHwFlowControlCtsAndRts
     condition:
-      - "iostream_usart"
+      - iostream_usart
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: eusartHwFlowControlCtsAndRts
     condition:
-      - "iostream_eusart"
+      - iostream_eusart
   - name: SL_CLI_MAX_INPUT_ARGUMENTS
     value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
@@ -39,7 +37,7 @@ configuration:
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
     value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_HA
   - name: SL_CLI_PROMPT_STRING
-    value:  "\"StandardizedRfTesting>\""
+    value: "\"StandardizedRfTesting>\""
   - name: NVM3_DEFAULT_NVM_SIZE
     value: 36864
     condition:
@@ -59,17 +57,17 @@ configuration:
     value: 1
 
 source:
-  - path: "main.c"
-  - path: "app.c"
+  - path: main.c
+  - path: app.c
 
 config_file:
-  - path: "config/StandardizedRfTesting_config.h"
-  - path: "config/zcl/zcl_config.zap"
+  - path: config/StandardizedRfTesting_config.h
+  - path: config/zcl/zcl_config.zap
     file_id: zap_configuration_file_id
-    directory: "zcl"
+    directory: zcl
 
 include:
-  - path: "./"
+  - path: ./
 
 readme:
   - path: ./readme.html
@@ -80,9 +78,9 @@ ui_hints:
       focus: false
 
 filter:
-  - name: "Wireless Technology"
-    value: ["Zigbee"]
-  - name: "Device Type"
-    value: ["SoC"]
-  - name: "Project Difficulty"
-    value: ["Beginner"]
+  - name: Wireless Technology
+    value: [Zigbee]
+  - name: Device Type
+    value: [SoC]
+  - name: Project Difficulty
+    value: [Beginner]

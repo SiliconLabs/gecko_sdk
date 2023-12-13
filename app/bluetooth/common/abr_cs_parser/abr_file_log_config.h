@@ -34,8 +34,8 @@
 #if defined(HOST_TOOLCHAIN) && (ABR_FILE_LOG_ENABLED == 1)
 
 // Defines the maximum number of events that shall be logged
-// (Default: 10)
-#define ABR_FILE_LOG_CFG_MAX_EVENTS                 10
+// (Default: 256)
+#define ABR_FILE_LOG_CFG_MAX_EVENTS                 256
 
 // Defines the maximum number of steps per event that shall be logged
 // by the abr_file_log module (Default: 50)
@@ -91,7 +91,9 @@
 #define ABR_FILE_LOG_CFG_BACKUP_POSTFIX             "_bkp"
 #endif
 
-//#define ABR_FILE_LOG_
+// Set how many times the logger should display re-occurring critical messages
+// e.g. "Logger is not functional!"
+#define ABR_FILE_LOG_MAX_CRITICAL_MESSAGE_DISPLAY   5
 
 #endif // defined(HOST_TOOLCHAIN) && (ABR_FILE_LOG_ENABLED == 1)
 #endif // ABR_FILE_LOG_CONFIG_H

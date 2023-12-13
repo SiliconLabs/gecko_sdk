@@ -33,8 +33,8 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
+#include "simple_rail_assistance.h"
 #include "em_chip.h"
-#include "app_log.h"
 #include "sl_cli.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)

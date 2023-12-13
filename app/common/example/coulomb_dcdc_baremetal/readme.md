@@ -1,6 +1,6 @@
 # Coulomb Counter DCDC Bare Metal Application
 
-This example application shows the use of EFR DCDC coulomb counter. See [ANXXXX: EFR32 Coulomb Counting](https://www.silabs.com/documents/public/application-notes/anxxxx-efr32-coulomb-counting.pdf) for more details about coulomb counter.
+This example application shows the use of EFR DCDC coulomb counter. See [AN1188: EFP01 Coulomb Counting](https://www.silabs.com/documents/public/application-notes/an1188-efp01-coulomb-counting.pdf) for more details about coulomb counter.
 
 The example demonstrates how to read coulomb counter total charge and store it in NVM3. This can be done in two different ways:
 

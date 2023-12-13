@@ -33,6 +33,7 @@ SL_WEAK uint16_t sli_zigbee_get_pan_id_conflict_count(void)
 }
 
 SL_WEAK sl_status_t sli_zigbee_zdo_handle_rsp_extended(uint16_t cluster_id,
+                                                       EmberApsFrame *apsFrame,
                                                        PacketHeader header,
                                                        uint8_t payload_index,
                                                        EmberNodeId source)

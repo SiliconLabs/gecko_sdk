@@ -44,6 +44,7 @@ class CALC_Demodulator(ICalculator):
         self._addModelVariable(model,'cost_total',     float, ModelVariableFormat.DECIMAL)
 
         self._addModelVariable(model, 'sample_freq_actual', float, ModelVariableFormat.DECIMAL)
+        self._addModelActual(model, 'adc_freq', int, ModelVariableFormat.DECIMAL)
 
         self._addModelVariable(model, 'src1_calcDenominator', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'src2_calcDenominator', int, ModelVariableFormat.DECIMAL)
@@ -1329,6 +1330,14 @@ class CALC_Demodulator(ICalculator):
         sample_freq_actual =  int(xtal_frequency / dec0 / dec1) * src1_ratio_actual * src2_ratio_actual
 
         model.vars.sample_freq_actual.value = sample_freq_actual
+
+    def calc_adc_freq_actual(self, model):
+        xtal_frequency_hz = model.vars.xtal_frequency_hz.value
+
+        # For series 1, ADC samples at Fs=Fhfxo
+        adc_freq_actual = xtal_frequency_hz
+
+        model.vars.adc_freq_actual.value = adc_freq_actual
 
     # Helper calculation for FW calulation of SRC1
     # These are phy specific calculations that is easier to do here

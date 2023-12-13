@@ -56,9 +56,9 @@ static uint8_t ble_lightState = DMP_UI_LIGHT_OFF;
 static uint8_t ble_lastEvent = DMP_UI_DIRECTION_INVALID;
 static uint8_t activeBleConnections = 0;
 
-static gatt_client_config_flag_t ble_lightState_config = gatt_disable;
-static gatt_client_config_flag_t ble_triggerSrc_config = gatt_disable;
-static gatt_client_config_flag_t ble_bleSrc_config = gatt_disable;
+static sl_bt_gatt_client_config_flag_t ble_lightState_config = sl_bt_gatt_disable;
+static sl_bt_gatt_client_config_flag_t ble_triggerSrc_config = sl_bt_gatt_disable;
+static sl_bt_gatt_client_config_flag_t ble_bleSrc_config = sl_bt_gatt_disable;
 
 static uint8_t SourceAddress[SOURCE_ADDRESS_LEN];
 
@@ -403,7 +403,7 @@ void zb_ble_dmp_notify_light(uint8_t lightState)
   ble_lightState = lightState;
   sl_status_t status;
 
-  if (ble_lightState_config == gatt_indication) {
+  if (ble_lightState_config == sl_bt_gatt_indication) {
     sl_zigbee_app_debug_println("zb_ble_dmp_notify_light: Light state = %d\r\n", lightState);
     /* Send notification/indication data */
     for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
@@ -427,7 +427,7 @@ void zb_ble_dmp_notify_trigger_source(uint8_t connection, uint8_t triggerSource)
 {
   sl_status_t status;
 
-  if (ble_triggerSrc_config == gatt_indication) {
+  if (ble_triggerSrc_config == sl_bt_gatt_indication) {
     sl_zigbee_app_debug_println("zb_ble_dmp_notify_trigger_source :Last event = %d\r\n",
                                 triggerSource);
     /* Send notification/indication data */
@@ -446,7 +446,7 @@ void zb_ble_dmp_notify_source_address(uint8_t connection)
 {
   sl_status_t status;
 
-  if (ble_triggerSrc_config == gatt_indication) {
+  if (ble_triggerSrc_config == sl_bt_gatt_indication) {
     /* Send notification/indication data */
     status = sl_bt_gatt_server_send_indication(connection,
                                                gattdb_source_address,
@@ -501,7 +501,7 @@ void BeaconAdvertisements(uint16_t devId)
   }
 
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_IBEACON],
-                                         advertiser_non_connectable);
+                                         sl_bt_advertiser_non_connectable);
   if (status != SL_STATUS_OK) {
     sl_zigbee_app_debug_println("Error iBeacon sl_bt_legacy_advertiser_start code: 0x%0x", status);
     return;
@@ -533,7 +533,7 @@ void BeaconAdvertisements(uint16_t devId)
   }
 
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_EDDYSTONE],
-                                         advertiser_non_connectable);
+                                         sl_bt_advertiser_non_connectable);
   if (status != SL_STATUS_OK) {
     sl_zigbee_app_debug_println("Error eddystone sl_bt_legacy_advertiser_start code: 0x%0x", status);
     return;
@@ -622,7 +622,7 @@ void enableBleAdvertisements(void)
   }
   /* Start advertising in user mode and enable connections*/
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_DEMO],
-                                         advertiser_connectable_scannable);
+                                         sl_bt_advertiser_connectable_scannable);
   if ( status ) {
     sl_zigbee_app_debug_println("sl_bt_legacy_advertiser_start ERROR : status = 0x%0X", status);
   } else {
@@ -640,8 +640,6 @@ void enableBleAdvertisements(void)
  */
 void sl_bt_on_event(sl_bt_msg_t* evt)
 {
-  halResetWatchdog();
-
   switch (SL_BT_MSG_ID(evt->header)) {
     /* This event indicates that a remote GATT client is attempting to read a value of an
      *  attribute from the local GATT database, where the attribute was defined in the GATT
@@ -684,6 +682,13 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       status = sl_bt_system_get_identity_address(&ble_address, &type);
       zb_ble_dmp_print_ble_address(ble_address.addr);
 
+      #define SCAN_WINDOW 5
+      #define SCAN_INTERVAL 10
+
+      status = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_active,
+                                            (uint16_t)SCAN_INTERVAL,
+                                            (uint16_t)SCAN_WINDOW);
+
       status = sl_bt_advertiser_create_set(&adv_handle[HANDLE_DEMO]);
       if (status) {
         sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%02x", status);
@@ -706,7 +711,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     case sl_bt_evt_gatt_server_characteristic_status_id: {
       sl_bt_evt_gatt_server_characteristic_status_t *StatusEvt =
         (sl_bt_evt_gatt_server_characteristic_status_t*) &(evt->data);
-      if (StatusEvt->status_flags == gatt_server_confirmation) {
+      if (StatusEvt->status_flags == sl_bt_gatt_server_confirmation) {
         sl_zigbee_app_debug_println(
           "characteristic= %d , GAT_SERVER_CLIENT_CONFIG_FLAG = %d\r\n",
           StatusEvt->characteristic, StatusEvt->client_config_flags);
@@ -715,13 +720,13 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         } else if (StatusEvt->characteristic == gattdb_trigger_source) {
           zb_ble_dmp_notify_source_address(StatusEvt->connection);
         }
-      } else if (StatusEvt->status_flags == gatt_server_client_config) {
+      } else if (StatusEvt->status_flags == sl_bt_gatt_server_client_config) {
         if (StatusEvt->characteristic == gattdb_light_state) {
-          ble_lightState_config = (gatt_client_config_flag_t)StatusEvt->client_config_flags;
+          ble_lightState_config = (sl_bt_gatt_client_config_flag_t)StatusEvt->client_config_flags;
         } else if (StatusEvt->characteristic == gattdb_trigger_source) {
-          ble_triggerSrc_config = (gatt_client_config_flag_t)StatusEvt->client_config_flags;
+          ble_triggerSrc_config = (sl_bt_gatt_client_config_flag_t)StatusEvt->client_config_flags;
         } else if (StatusEvt->characteristic == gattdb_source_address) {
-          ble_bleSrc_config = (gatt_client_config_flag_t)StatusEvt->client_config_flags;
+          ble_bleSrc_config = (sl_bt_gatt_client_config_flag_t)StatusEvt->client_config_flags;
         }
         sl_zigbee_app_debug_println(
           "SERVER : ble_lightState_config= %d , ble_triggerSrc_config = %d , ble_bleSrc_config = %d\r\n",
@@ -750,7 +755,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         activeBleConnections++;
         //preferred phy 1: 1M phy, 2: 2M phy, 4: 125k coded phy, 8: 500k coded phy
         //accepted phy 1: 1M phy, 2: 2M phy, 4: coded phy, ff: any
-        sl_bt_connection_set_preferred_phy(conn_evt->connection, test_phy_1m, 0xff);
+        sl_bt_connection_set_preferred_phy(conn_evt->connection, sl_bt_gap_phy_1m, 0xff);
         enableBleAdvertisements();
         sl_zigbee_app_debug_println("BLE connection opened");
         bleConnectionInfoTablePrintEntry(index);
@@ -787,17 +792,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         conn_evt->connection, conn_evt->reason, activeBleConnections);
     }
     break;
-#ifndef SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_SCANNER_PRESENT
-    case sl_bt_evt_scanner_scan_report_id: {
-      sl_bt_evt_scanner_scan_report_t *scan_evt =
-        (sl_bt_evt_scanner_scan_report_t*) &(evt->data);
-      sl_zigbee_app_debug_print("Scan response, address type=0x%02x",
-                                scan_evt->address_type);
-      zb_ble_dmp_print_ble_address(scan_evt->address.addr);
-      sl_zigbee_app_debug_println("");
-    }
-    break;
-#else
+
     case sl_bt_evt_scanner_legacy_advertisement_report_id: {
       sl_zigbee_app_debug_print("Scan response, address type=0x%02x",
                                 evt->data.evt_scanner_legacy_advertisement_report.address_type);
@@ -805,7 +800,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_zigbee_app_debug_println("");
     }
     break;
-#endif //SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_SCANNER_PRESENT
+
     case sl_bt_evt_connection_parameters_id: {
       sl_bt_evt_connection_parameters_t* param_evt =
         (sl_bt_evt_connection_parameters_t*) &(evt->data);

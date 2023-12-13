@@ -50,8 +50,8 @@ context_t;
 static uint8_t currentGroupId;
 static uint8_t associationGroupInfoGetEndpoint = 0;
 static report_status_t reportStatus = REPORT_STATUS_INACTIVE;
-static RECEIVE_OPTIONS_TYPE_EX rxOptions;
-static SSwTimer AGIReportSendTimer;
+static RECEIVE_OPTIONS_TYPE_EX rxOptions = { 0 };
+static SSwTimer AGIReportSendTimer = { 0 };
 static const cc_agi_config_t * p_config = NULL;
 
 /****************************************************************************/
@@ -93,9 +93,8 @@ ZW_WEAK const cc_agi_config_t * cc_agi_get_config(void)
   return &myAgi;
 }
 
-ZW_WEAK uint8_t cc_agi_config_get_group_count_by_endpoint(uint8_t endpoint)
+ZW_WEAK uint8_t cc_agi_config_get_group_count_by_endpoint(__attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
   return 0; // Lifeline will always exist, but is not included in this number.
 }
 
@@ -192,10 +191,8 @@ bool GetApplGroupCommandList(
 
 static bool SendAssoGroupInfoReport(void)
 {
-  ZW_APPLICATION_TX_BUFFER txBuf;
+  ZW_APPLICATION_TX_BUFFER txBuf = { 0 };
   zaf_tx_options_t tx_options;
-
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
 
   zaf_transport_rx_to_tx_options(&rxOptions, &tx_options);
 
@@ -206,7 +203,7 @@ static bool SendAssoGroupInfoReport(void)
   txBuf.ZW_AssociationGroupInfoReport1byteFrame.properties1 |= 0x01; // One report pr. group.
 
   VG_ASSOCIATION_GROUP_INFO_REPORT_VG* report = &txBuf.ZW_AssociationGroupInfoReport1byteFrame.variantgroup1;
-  
+
   ZAF_CC_AGI_CorrectGroupIdIfInvalid(rxOptions.destNode.endpoint, &currentGroupId);
 
   report->groupingIdentifier = currentGroupId;
@@ -230,19 +227,16 @@ Use this timer to delay the sending of the next AGI report after the mutex is re
 Since we cannot get a new tx buffer in the call back because the mutex is reserved
 */
 static void
-ZCB_AGIReportSendTimer(SSwTimer* pTimer)
+ZCB_AGIReportSendTimer(__attribute__((unused)) SSwTimer* pTimer)
 {
   SendAssoGroupInfoReport();
-  UNUSED(pTimer);
 }
-
 
 /*The AGI report call back we will send a report per association group
   if we seed to send AGI fro all the groups*/
 void
-ZCB_AGIReport(TRANSMISSION_RESULT * pTransmissionResult)
+ZCB_AGIReport(__attribute__((unused)) TRANSMISSION_RESULT * pTransmissionResult)
 {
-  UNUSED(pTransmissionResult);
   if (reportStatus == REPORT_STATUS_ALL_GROUPS)
   {
     if (currentGroupId++ < CC_AGI_groupCount_handler(associationGroupInfoGetEndpoint))
@@ -317,14 +311,12 @@ static received_frame_status_t
 CC_AGI_handler(
     RECEIVE_OPTIONS_TYPE_EX *rxOpt,
     ZW_APPLICATION_TX_BUFFER *pCmd,
-    uint8_t cmdLength,
+    __attribute__((unused)) uint8_t cmdLength,
     ZW_APPLICATION_TX_BUFFER *pFrameOut,
     uint8_t * pFrameOutLength)
 {
   size_t  length;
   uint8_t groupID;
-
-  UNUSED(cmdLength);
 
   if (true == Check_not_legal_response_job(rxOpt))
   {
@@ -365,7 +357,7 @@ CC_AGI_handler(
 
         pFrameOut->ZW_AssociationGroupNameReport1byteFrame.lengthOfName = (uint8_t)strlen(pGroupName);
 
-        /*The way the pFrameOutLength is calculated is to get the size of the struct, remove the last uint8_t byte name1/name2/name3 and 
+        /*The way the pFrameOutLength is calculated is to get the size of the struct, remove the last uint8_t byte name1/name2/name3 and
         and add the actual group name in bytes
         */
         *pFrameOutLength = (uint8_t)(sizeof(ZW_ASSOCIATION_GROUP_NAME_REPORT_1BYTE_FRAME)

@@ -12,11 +12,20 @@ component_root_path: util/third_party/mbedtls
 provides:
   - name: mbedtls_source
 
+requires:
+  # It's no longer possible to separate PSA Crypto from Mbed TLS now that it's
+  # being used under the hood. Mbed TLS does not put effort into guarding
+  # includes of PSA Crypto specific files in Mbed TLS, whether or not
+  # MBEDTLS_USE_PSA_CRYPTO is set or not.
+  - name: psa_crypto_common
+    condition: [trustzone_unaware]
+
 source:
   - path: library/constant_time.c
   - path: library/threading.c
   - path: library/platform.c
   - path: library/platform_util.c
+  - path: library/psa_util.c
 
 include:
   - path: include
@@ -36,6 +45,12 @@ include:
       - path: mbedtls/cipher.h
       - path: mbedtls/cmac.h
       - path: mbedtls/compat-2.x.h
+      - path: mbedtls/config_adjust_legacy_crypto.h
+      - path: mbedtls/config_adjust_legacy_from_psa.h
+      - path: mbedtls/config_adjust_psa_from_legacy.h
+      - path: mbedtls/config_adjust_psa_superset_legacy.h
+      - path: mbedtls/config_adjust_ssl.h
+      - path: mbedtls/config_adjust_x509.h
       - path: mbedtls/config_psa.h
       - path: mbedtls/constant_time.h
       - path: mbedtls/ctr_drbg.h
@@ -51,6 +66,7 @@ include:
       - path: mbedtls/gcm.h
       - path: mbedtls/hkdf.h
       - path: mbedtls/hmac_drbg.h
+      - path: mbedtls/lms.h
       - path: mbedtls/mbedtls_config.h
       - path: mbedtls/md.h
       - path: mbedtls/md5.h
@@ -62,6 +78,7 @@ include:
       - path: mbedtls/pk.h
       - path: mbedtls/pkcs12.h
       - path: mbedtls/pkcs5.h
+      - path: mbedtls/pkcs7.h
       - path: mbedtls/platform.h
       - path: mbedtls/platform_time.h
       - path: mbedtls/platform_util.h
@@ -72,6 +89,7 @@ include:
       - path: mbedtls/rsa.h
       - path: mbedtls/sha1.h
       - path: mbedtls/sha256.h
+      - path: mbedtls/sha3.h
       - path: mbedtls/sha512.h
       - path: mbedtls/ssl.h
       - path: mbedtls/ssl_cache.h
@@ -88,23 +106,32 @@ include:
 
   - path: library
     file_list:
+      - path: alignment.h
       - path: bn_mul.h
-      - path: bignum_internal.h
+      - path: base64_internal.h
+      - path: bignum_core.h
+      - path: bignum_mod.h
+      - path: bignum_mod_raw.h
+      - path: bignum_mod_raw_invasive.h
       - path: cipher_wrap.h
       - path: common.h
+      - path: constant_time_impl.h
       - path: constant_time_internal.h
-      - path: constant_time_invasive.h
       - path: ecp_internal_alt.h
       - path: ecp_invasive.h
       - path: entropy_poll.h
+      - path: lmots.h
+      - path: md_psa.h
       - path: md_wrap.h
       - path: mps_common.h
       - path: mps_error.h
       - path: mps_reader.h
       - path: mps_trace.h
       - path: padlock.h
+      - path: pk_internal.h
       - path: pk_wrap.h
       - path: pkwrite.h
+      - path: psa_util_internal.h
       - path: rsa_alt_helpers.h
       - path: ssl_debug_helpers.h
       - path: ssl_client.h

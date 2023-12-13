@@ -28,11 +28,11 @@ bool
 cc_color_switch_write(uint8_t color_component_id, s_colorComponent *color_component)
 {
   zpal_status_t status;
-  color_switch_data_t color_switch_data;
-
-  color_switch_data.endpoint = color_component->ep;
-  color_switch_data.current_value = ZAF_Actuator_GetCurrentValue(&color_component->obj);
-  color_switch_data.color_id = color_component->colorId;
+  color_switch_data_t color_switch_data = {
+    .endpoint = color_component->ep,
+    .current_value = ZAF_Actuator_GetCurrentValue(&color_component->obj),
+    .color_id = color_component->colorId
+  };
 
   status = ZAF_nvm_write(CC_COLOR_SWITCH_OFFSET(color_component_id), &color_switch_data, sizeof(color_switch_data_t));
 
@@ -43,7 +43,7 @@ bool
 cc_color_switch_read(uint8_t color_component_id, s_colorComponent *color_component)
 {
   zpal_status_t status;
-  color_switch_data_t color_switch_data;
+  color_switch_data_t color_switch_data = { 0 };
 
   status = ZAF_nvm_read(CC_COLOR_SWITCH_OFFSET(color_component_id), &color_switch_data, sizeof(color_switch_data_t));
   if (status != ZPAL_STATUS_OK) {

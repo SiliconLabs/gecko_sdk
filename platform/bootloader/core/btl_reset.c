@@ -26,8 +26,7 @@
 
 #if defined BOOTLOADER_ENABLE
 #if defined(__GNUC__)
-BootloaderResetCause_t rcause __attribute__((section(".bootloader_reset_section")));
-extern const BootloaderResetCause_t __ResetReasonStart__;
+extern uint32_t __ResetReasonStart__;
 #elif defined(__ICCARM__)
 #pragma section = "BOOTLOADER_RESET_REASON"
 #endif

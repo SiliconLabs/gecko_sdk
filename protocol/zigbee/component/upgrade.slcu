@@ -1,7 +1,7 @@
 upgrade:
   - sdk:
       id: gecko_sdk
-      version: "4.0.2"
+      version: 4.0.2
     component:
       - trigger: zigbee_multi_network_stub
         description: >
@@ -15,13 +15,13 @@ upgrade:
           - zigbee_multi_pan_stub
   - sdk:
       id: gecko_sdk
-      version: "4.1.1"
+      version: 4.1.1
     configuration:
       - script: protocol/zigbee/component/scripts/upgrade_zigbee_rtos_stack_size.lua
 
   - sdk:
       id: gecko_sdk
-      version: "4.2.0"
+      version: 4.2.0
     component:
       - trigger: zigbee_aes_psa
         description: >
@@ -42,7 +42,7 @@ upgrade:
           - zigbee_security_link_keys
   - sdk:
       id: gecko_sdk
-      version: "4.3.0"
+      version: 4.3.0
     component:
       - trigger: iostream_usart
         description: >
@@ -60,3 +60,34 @@ upgrade:
           - zigbee_debug_basic
         add:
           - iostream_recommended_stream
+  - sdk:
+      id: gecko_sdk
+      version: 4.4.0
+    configuration:
+      - name: EMBER_GP_PROXY_TABLE_TOKEN_SIZE
+        replacement: REMOVED_MACRO
+      - name: EMBER_GP_SINK_TABLE_TOKEN_SIZE
+        replacement: REMOVED_MACRO
+      - script: protocol/zigbee/component/scripts/upgrade_gp_table_token_size.lua
+    component:
+      - trigger: zigbee_end_device_bind
+        description: >
+          The zigbee_end_device_bind component has been deprecated.  No Action is needed.
+        remove:
+          - zigbee_end_device_bind
+      - trigger: zigbee_install_code
+        description: >
+          The zigbee_install_code component has been merged into the stack. No action is needed.
+        remove:
+          - zigbee_install_code
+      - trigger: zigbee_binding_table
+        description: >
+          The zigbee_binding_table component has been merged into the stack. No action is needed.
+        remove:
+          - zigbee_binding_table
+      - trigger: zigbee_packet_validate
+        description: >
+          The zigbee_packet_validate component has been merged into the stack. No action is needed.
+        remove:
+          - zigbee_packet_validate
+

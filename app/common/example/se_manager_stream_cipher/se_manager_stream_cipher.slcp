@@ -1,7 +1,7 @@
 project_name: se_manager_stream_cipher
 package: platform
 quality: production
-label: Platform - SE Manager Stream Cipher
+label: Platform Security - SoC SE Manager Stream Cipher
 description: >
   This example project demonstrates the stream cipher API of SE Manager.
 category: Example|Platform

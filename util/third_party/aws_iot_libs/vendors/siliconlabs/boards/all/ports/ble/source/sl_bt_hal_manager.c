@@ -109,7 +109,7 @@ static const BTCallbacks_t * pxBtManagerCallbacks = NULL;
  * @brief Default I/O capabilities used for @ref sl_bt_sm_configure().
  */
 #ifndef SL_BT_HAL_DEFAULT_IO_CAPABILITIES
-#define SL_BT_HAL_DEFAULT_IO_CAPABILITIES sm_io_capability_noinputnooutput
+#define SL_BT_HAL_DEFAULT_IO_CAPABILITIES sl_bt_sm_io_capability_noinputnooutput
 #endif
 #define SL_BT_DEFAULT_IO_CAPABILITIES ((uint8_t) SL_BT_HAL_DEFAULT_IO_CAPABILITIES)
 
@@ -612,27 +612,27 @@ static BTIOtypes_t prvSlIoCapabilitiesToBTIotypes( uint8_t ucIoCapabilities )
   BTIOtypes_t xIoTypes = eBTIONone;
   switch( ucIoCapabilities )
   {
-    case sm_io_capability_noinputnooutput:
+    case sl_bt_sm_io_capability_noinputnooutput:
       /* No IO. */
       xIoTypes = eBTIONone;
       break;
 
-    case sm_io_capability_displayonly:
+    case sl_bt_sm_io_capability_displayonly:
       /* No input, only display. */
       xIoTypes = eBTIODisplayOnly;
       break;
 
-    case sm_io_capability_displayyesno:
+    case sl_bt_sm_io_capability_displayyesno:
       /* Display + yes/no input. */
       xIoTypes = eBTIODisplayYesNo;
       break;
 
-    case sm_io_capability_keyboardonly:
+    case sl_bt_sm_io_capability_keyboardonly:
       /* Only input, keyboard. */
       xIoTypes = eBTIOKeyboardOnly;
       break;
 
-    case sm_io_capability_keyboarddisplay:
+    case sl_bt_sm_io_capability_keyboarddisplay:
       /* Keyboard and Display. */
       xIoTypes = eBTIOKeyboardDisplay;
       break;
@@ -913,32 +913,32 @@ static BTStatus_t prvSetIoCapabilities( const BTProperty_t * pxProperty )
   SILABS_BLE_LOG_FUNC_ENTRY_DEBUG( "xIoTypes=%d", ( int ) xIoTypes );
 
   /* Convert the type */
-  uint8_t ucIoCapabilities = sm_io_capability_noinputnooutput;
+  uint8_t ucIoCapabilities = sl_bt_sm_io_capability_noinputnooutput;
   switch( xIoTypes )
   {
     case eBTIONone:
       /* No IO. */
-      ucIoCapabilities = sm_io_capability_noinputnooutput;
+      ucIoCapabilities = sl_bt_sm_io_capability_noinputnooutput;
       break;
 
     case eBTIODisplayOnly:
       /* No input, only display. */
-      ucIoCapabilities = sm_io_capability_displayonly;
+      ucIoCapabilities = sl_bt_sm_io_capability_displayonly;
       break;
 
     case eBTIODisplayYesNo:
       /* Display + yes/no input. */
-      ucIoCapabilities = sm_io_capability_displayyesno;
+      ucIoCapabilities = sl_bt_sm_io_capability_displayyesno;
       break;
 
     case eBTIOKeyboardOnly:
       /* Only input, keyboard. */
-      ucIoCapabilities = sm_io_capability_keyboardonly;
+      ucIoCapabilities = sl_bt_sm_io_capability_keyboardonly;
       break;
 
     case eBTIOKeyboardDisplay:
       /* Keyboard and Display. */
-      ucIoCapabilities = sm_io_capability_keyboarddisplay;
+      ucIoCapabilities = sl_bt_sm_io_capability_keyboarddisplay;
       break;
 
     default:

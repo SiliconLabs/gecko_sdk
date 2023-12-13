@@ -282,6 +282,27 @@ void setTxPowerCommand(sl_cli_command_arg_t *arguments)
   emberSetRadioPower(dBm);
 }
 
+#ifdef SL_CATALOG_ZIGBEE_EZSP_SPI_PRESENT
+void setSleepMode(SL_CLI_COMMAND_ARG)
+{
+  uint8_t sleep_mode = sl_cli_get_argument_uint8(arguments, 0);
+  if (sleep_mode <= EZSP_FRAME_CONTROL_RESERVED_SLEEP) {
+    ezspSleepMode = sleep_mode;
+    ezspNop();
+  }
+}
+
+void wakeNcpUp(SL_CLI_COMMAND_ARG)
+{
+  // Wake ncp up then put it into idle state.
+  // This command is useful when sleepy SPI NCP is in deep sleep
+  // or power down mode that require an external interrupt to wake up
+  ezspWakeUp();
+  ezspSleepMode = EZSP_FRAME_CONTROL_IDLE;
+  ezspNop();
+}
+#endif // SL_CATALOG_ZIGBEE_EZSP_SPI_PRESENT
+
 #endif
 
 #ifdef SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT

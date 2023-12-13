@@ -1,13 +1,11 @@
 package: Zigbee
-description: Silicon Labs implementation of polling for end devices.  Note that the Poll
-  Control Server component sets the long and short poll intervals at startup.  If both
-  components are enabled, the long and short poll intervals set here will not be used.
+description: Silicon Labs implementation of polling for end devices.  Note that the Poll Control Server component sets the long and short poll intervals at startup.  If both components are enabled, the long and short poll intervals set here will not be used.
 label: End Device Support
 quality: production
 id: zigbee_end_device_support
 category: Zigbee|Utility
 provides:
-   - name: zigbee_end_device_support
+  - name: zigbee_end_device_support
 config_file:
   - path: protocol/zigbee/app/framework/plugin/end-device-support/config/end-device-support-config.h
 source:
@@ -49,7 +47,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: tick
-      function_name: emberAfPluginEndDeviceSupportTickCallback      
+      function_name: emberAfPluginEndDeviceSupportTickCallback
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
@@ -76,8 +74,8 @@ template_contribution:
       handler: emberAfPluginEndDeviceSupportPollCompletedCallbackCommand
       help: Sets whether the devices poll completed callback function is enabled.
       argument:
-      - type: int8
-        help: The value indicating whether the devices poll completed callback function is enabled
+        - type: int8
+          help: The value indicating whether the devices poll completed callback function is enabled
   - name: cli_command
     value:
       group: end-device-support
@@ -85,8 +83,8 @@ template_contribution:
       handler: emberAfPluginEndDeviceSupportForceShortPollCommand
       help: Sets whether the CLI forces the device to short poll.
       argument:
-      - type: int8
-        help: The value indicating whether the device should short poll
+        - type: int8
+          help: The value indicating whether the device should short poll
 
 documentation:
   docset: zigbee

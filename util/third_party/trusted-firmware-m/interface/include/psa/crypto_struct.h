@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -63,10 +63,10 @@ struct psa_hash_operation_s
 };
 
 #define PSA_HASH_OPERATION_INIT {0}
-static inline struct psa_hash_operation_s psa_hash_operation_init( void )
+static inline struct psa_hash_operation_s psa_hash_operation_init(void)
 {
     const struct psa_hash_operation_s v = PSA_HASH_OPERATION_INIT;
-    return( v );
+    return v;
 }
 
 struct psa_mac_operation_s
@@ -75,10 +75,10 @@ struct psa_mac_operation_s
 };
 
 #define PSA_MAC_OPERATION_INIT {0}
-static inline struct psa_mac_operation_s psa_mac_operation_init( void )
+static inline struct psa_mac_operation_s psa_mac_operation_init(void)
 {
     const struct psa_mac_operation_s v = PSA_MAC_OPERATION_INIT;
-    return( v );
+    return v;
 }
 
 struct psa_cipher_operation_s
@@ -87,10 +87,10 @@ struct psa_cipher_operation_s
 };
 
 #define PSA_CIPHER_OPERATION_INIT {0}
-static inline struct psa_cipher_operation_s psa_cipher_operation_init( void )
+static inline struct psa_cipher_operation_s psa_cipher_operation_init(void)
 {
     const struct psa_cipher_operation_s v = PSA_CIPHER_OPERATION_INIT;
-    return( v );
+    return v;
 }
 
 struct psa_aead_operation_s
@@ -99,10 +99,10 @@ struct psa_aead_operation_s
 };
 
 #define PSA_AEAD_OPERATION_INIT {0}
-static inline struct psa_aead_operation_s psa_aead_operation_init( void )
+static inline struct psa_aead_operation_s psa_aead_operation_init(void)
 {
     const struct psa_aead_operation_s v = PSA_AEAD_OPERATION_INIT;
-    return( v );
+    return v;
 }
 
 struct psa_key_derivation_s
@@ -111,10 +111,10 @@ struct psa_key_derivation_s
 };
 
 #define PSA_KEY_DERIVATION_OPERATION_INIT {0}
-static inline struct psa_key_derivation_s psa_key_derivation_operation_init( void )
+static inline struct psa_key_derivation_s psa_key_derivation_operation_init(void)
 {
     const struct psa_key_derivation_s v = PSA_KEY_DERIVATION_OPERATION_INIT;
-    return( v );
+    return v;
 }
 
 /* The type used internally for key sizes.
@@ -122,7 +122,7 @@ static inline struct psa_key_derivation_s psa_key_derivation_operation_init( voi
 typedef uint16_t psa_key_bits_t;
 /* The maximum value of the type used to represent bit-sizes.
  * This is used to mark an invalid key size. */
-#define PSA_KEY_BITS_TOO_LARGE ( (psa_key_bits_t) ( -1 ) )
+#define PSA_KEY_BITS_TOO_LARGE          ((psa_key_bits_t) -1)
 /* The maximum size of a key in bits.
  * Currently defined as the maximum that can be represented, rounded down
  * to a whole number of bytes.
@@ -132,111 +132,123 @@ typedef uint16_t psa_key_bits_t;
 #define PSA_MAX_KEY_BITS 0xfff8
 #endif
 
-#define PSA_KEY_ATTRIBUTES_INIT PSA_CLIENT_KEY_ATTRIBUTES_INIT
+/* On the client side, only some key attributes are visible.
+ * The server has a different definition of psa_key_attributes_s which
+ * maintains more attributes.
+ */
+#include "crypto_client_struct.h"
+struct psa_key_attributes_s {
+    struct psa_client_key_attributes_s client;
+};
 
-static inline struct psa_client_key_attributes_s psa_key_attributes_init( void )
+#define PSA_KEY_ATTRIBUTES_INIT {PSA_CLIENT_KEY_ATTRIBUTES_INIT}
+
+static inline struct psa_key_attributes_s psa_key_attributes_init(void)
 {
-    const struct psa_client_key_attributes_s v = PSA_KEY_ATTRIBUTES_INIT;
-    return( v );
+    const struct psa_key_attributes_s v = PSA_KEY_ATTRIBUTES_INIT;
+    return v;
 }
 
 static inline void psa_set_key_id(psa_key_attributes_t *attributes,
-                                  psa_key_id_t key)
+                                  mbedtls_svc_key_id_t key)
 {
-    psa_key_lifetime_t lifetime = attributes->lifetime;
+    psa_key_lifetime_t lifetime = attributes->client.lifetime;
 
-    attributes->id = key;
+    attributes->client.id = (psa_key_id_t)key;
 
-    if( PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
+    if (PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
-        attributes->lifetime =
+        attributes->client.lifetime =
             PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                 PSA_KEY_LIFETIME_PERSISTENT,
                 PSA_KEY_LIFETIME_GET_LOCATION(lifetime));
     }
 }
 
-static inline psa_key_id_t psa_get_key_id(
+static inline mbedtls_svc_key_id_t psa_get_key_id(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->id );
+    return (mbedtls_svc_key_id_t)attributes->client.id;
 }
 
 static inline void psa_set_key_lifetime(psa_key_attributes_t *attributes,
                                         psa_key_lifetime_t lifetime)
 {
-    attributes->lifetime = lifetime;
-    if(PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
+    attributes->client.lifetime = lifetime;
+    if (PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
-        attributes->id = 0;
+        attributes->client.id = 0;
     }
 }
 
 static inline psa_key_lifetime_t psa_get_key_lifetime(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->lifetime );
+    return attributes->client.lifetime;
 }
 
-static inline void psa_extend_key_usage_flags( psa_key_usage_t *usage_flags )
+static inline void psa_extend_key_usage_flags(psa_key_usage_t *usage_flags)
 {
-    if( *usage_flags & PSA_KEY_USAGE_SIGN_HASH )
+    if (*usage_flags & PSA_KEY_USAGE_SIGN_HASH) {
         *usage_flags |= PSA_KEY_USAGE_SIGN_MESSAGE;
+    }
 
-    if( *usage_flags & PSA_KEY_USAGE_VERIFY_HASH )
+    if (*usage_flags & PSA_KEY_USAGE_VERIFY_HASH) {
         *usage_flags |= PSA_KEY_USAGE_VERIFY_MESSAGE;
+    }
 }
 
 static inline void psa_set_key_usage_flags(psa_key_attributes_t *attributes,
                                            psa_key_usage_t usage_flags)
 {
-    psa_extend_key_usage_flags( &usage_flags );
-    attributes->usage = usage_flags;
+    psa_extend_key_usage_flags(&usage_flags);
+    attributes->client.usage = usage_flags;
 }
 
 static inline psa_key_usage_t psa_get_key_usage_flags(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->usage );
+    return attributes->client.usage;
 }
 
 static inline void psa_set_key_algorithm(psa_key_attributes_t *attributes,
                                          psa_algorithm_t alg)
 {
-    attributes->alg = alg;
+    attributes->client.alg = alg;
 }
 
 static inline psa_algorithm_t psa_get_key_algorithm(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->alg );
+    return attributes->client.alg;
 }
 
 static inline void psa_set_key_type(psa_key_attributes_t *attributes,
                                     psa_key_type_t type)
 {
-    attributes->type = type;
+    attributes->client.type = type;
 }
 
 static inline psa_key_type_t psa_get_key_type(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->type );
+    return attributes->client.type;
 }
 
 static inline void psa_set_key_bits(psa_key_attributes_t *attributes,
                                     size_t bits)
 {
-    if( bits > PSA_MAX_KEY_BITS )
-        attributes->bits = PSA_KEY_BITS_TOO_LARGE;
-    else
-        attributes->bits = bits;
+    if (bits > PSA_MAX_KEY_BITS) {
+        attributes->client.bits = PSA_KEY_BITS_TOO_LARGE;
+    } else {
+        attributes->client.bits = bits;
+    }
 }
 
 static inline size_t psa_get_key_bits(
     const psa_key_attributes_t *attributes)
 {
-    return( attributes->bits );
+    return attributes->client.bits;
 }
 
 #ifdef __cplusplus

@@ -124,7 +124,6 @@ include:
       - path: common/encoding.hpp
       - path: common/equatable.hpp
       - path: common/error.hpp
-      - path: common/extension.hpp
       - path: common/frame_builder.hpp
       - path: common/frame_data.hpp
       - path: common/heap.hpp
@@ -132,7 +131,6 @@ include:
       - path: common/heap_array.hpp
       - path: common/heap_data.hpp
       - path: common/heap_string.hpp
-      - path: common/instance.hpp
       - path: common/iterator_utils.hpp
       - path: common/linked_list.hpp
       - path: common/locator.hpp
@@ -186,6 +184,7 @@ include:
       - path: config/history_tracker.h
       - path: config/ip6.h
       - path: config/joiner.h
+      - path: config/link_metrics_manager.h
       - path: config/link_quality.h
       - path: config/link_raw.h
       - path: config/logging.h
@@ -218,6 +217,8 @@ include:
       - path: crypto/sha256.hpp
       - path: crypto/storage.hpp
       - path: diags/factory_diags.hpp
+      - path: instance/extension.hpp
+      - path: instance/instance.hpp
       - path: mac/channel_mask.hpp
       - path: mac/data_poll_handler.hpp
       - path: mac/data_poll_sender.hpp
@@ -273,6 +274,7 @@ include:
       - path: net/tcp6_ext.hpp
       - path: net/tcp6.hpp
       - path: net/udp6.hpp
+      - path: radio/max_power_table.hpp
       - path: radio/radio.hpp
       - path: radio/trel_interface.hpp
       - path: radio/trel_link.hpp
@@ -281,6 +283,7 @@ include:
       - path: thread/announce_begin_server.hpp
       - path: thread/announce_sender.hpp
       - path: thread/anycast_locator.hpp
+      - path: thread/child.hpp
       - path: thread/child_mask.hpp
       - path: thread/child_supervision.hpp
       - path: thread/child_table.hpp
@@ -303,6 +306,7 @@ include:
       - path: thread/mle_types.hpp
       - path: thread/mlr_manager.hpp
       - path: thread/mlr_types.hpp
+      - path: thread/neighbor.hpp
       - path: thread/neighbor_table.hpp
       - path: thread/network_data.hpp
       - path: thread/network_data_leader.hpp
@@ -317,13 +321,13 @@ include:
       - path: thread/network_diagnostic_tlvs.hpp
       - path: thread/panid_query_server.hpp
       - path: thread/radio_selector.hpp
+      - path: thread/router.hpp
       - path: thread/router_table.hpp
       - path: thread/src_match_controller.hpp
       - path: thread/thread_netif.hpp
       - path: thread/thread_tlvs.hpp
       - path: thread/time_sync_service.hpp
       - path: thread/tmf.hpp
-      - path: thread/topology.hpp
       - path: thread/uri_paths.hpp
       - path: thread/version.hpp
       - path: utils/channel_manager.hpp
@@ -332,6 +336,7 @@ include:
       - path: utils/heap.hpp
       - path: utils/history_tracker.hpp
       - path: utils/jam_detector.hpp
+      - path: utils/link_metrics_manager.hpp
       - path: utils/mesh_diag.hpp
       - path: utils/otns.hpp
       - path: utils/parse_cmdline.hpp
@@ -339,6 +344,9 @@ include:
       - path: utils/power_calibration.hpp
       - path: utils/slaac_address.hpp
       - path: utils/srp_client_buffers.hpp
+  - path: ../lib
+    file_list:
+      - path: platform/exit_code.h
   - path: ../../third_party/tcplp
     file_list:
       - path: bsdtcp/cc.h
@@ -349,6 +357,7 @@ include:
       - path: bsdtcp/sys/queue.h
       - path: bsdtcp/tcp.h
       - path: bsdtcp/tcp_const.h
+      - path: bsdtcp/tcp_fastopen.h
       - path: bsdtcp/tcp_fsm.h
       - path: bsdtcp/tcp_seq.h
       - path: bsdtcp/tcp_timer.h

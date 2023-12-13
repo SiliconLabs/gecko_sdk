@@ -36,11 +36,9 @@
 #include <string.h>
 #include "app.h"
 #include "sl_wisun_app_core_util.h"
-#include "socket.h"
-#include "sl_wisun_coap_meter.h"
-#include "sl_wisun_led_driver.h"
-#include "sl_string.h"
-#include "sl_wisun_coap_rhnd.h"
+#if !SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
+  #include "sl_wisun_meter.h"
+#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -57,7 +55,6 @@
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
-// static uint8_t recv_buff[SL_WISUN_COAP_METER_COLLECTOR_RECV_BUFF_SIZE] = { 0 };
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -72,7 +69,10 @@ void app_task(void *args)
   app_wisun_connect_and_wait();
 
   while (1) {
-    osDelay(1);
+#if !SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
+    sl_wisun_meter_process();
+#endif
+    app_wisun_dispatch_thread();
   }
 }
 

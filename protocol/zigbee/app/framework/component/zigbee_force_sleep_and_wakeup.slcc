@@ -5,7 +5,7 @@ label: Force sleep and wake up
 category: Zigbee
 quality: production
 provides:
-   - name: "zigbee_force_sleep_and_wakeup"
+  - name: zigbee_force_sleep_and_wakeup
 source:
   - path: protocol/zigbee/app/framework/plugin/force-sleep-wakeup/force-sleep-wakeup.c
 include:
@@ -15,6 +15,10 @@ include:
 template_contribution:
   - name: component_catalog
     value: zigbee_force_sleep_and_wakeup
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_zigbee_af_force_sleep_wakeup_init_callback
   - name: cli_command
     value:
       name: force-sleep

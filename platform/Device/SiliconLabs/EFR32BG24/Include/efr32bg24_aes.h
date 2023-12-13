@@ -450,4 +450,4 @@ typedef struct {
 /** @} End of group EFR32BG24_AES */
 /** @} End of group Parts */
 
-#endif /* EFR32BG24_AES_H */
+#endif // EFR32BG24_AES_H

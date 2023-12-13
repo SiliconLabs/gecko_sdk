@@ -1,87 +1,90 @@
-id: "zigbee_stack_unix"
-label: "Zigbee Stack Unix"
-package: "Zigbee"
-category: "Zigbee"
-quality: "production"
-description: "This plugin contains defines, source files, and include paths to build Zigbee apps against Linux."
+id: zigbee_stack_unix
+label: Zigbee Stack Unix
+package: Zigbee
+category: Zigbee
+quality: production
+description: This plugin contains defines, source files, and include paths to build Zigbee apps against Linux.
 
 provides:
-  - name: "zigbee_stack_unix"
-  - name: "zigbee_simulation_or_zigbee_stack_unix"
-  - name: "emlib_system"
+  - name: zigbee_stack_unix
+  - name: zigbee_simulation_or_zigbee_stack_unix
+  - name: emlib_system
     condition:
-     - "zigbee_stack_unix"
-  - name: "emlib_gpio"
+      - zigbee_stack_unix
+  - name: emlib_gpio
     condition:
-     - "zigbee_stack_unix"
-  - name: "emlib_common"
+      - zigbee_stack_unix
+  - name: lld_gpio
     condition:
-     - "zigbee_stack_unix"
-  - name: "emlib_core"
+      - zigbee_stack_unix
+  - name: emlib_common
     condition:
-     - "zigbee_stack_unix"
-  - name: "emlib_emu"
+      - zigbee_stack_unix
+  - name: emlib_core
     condition:
-     - "zigbee_stack_unix"
-  - name: "emlib_cmu"
+      - zigbee_stack_unix
+  - name: emlib_emu
     condition:
-     - "zigbee_stack_unix"
-  - name: "legacy_hal"
+      - zigbee_stack_unix
+  - name: emlib_cmu
     condition:
-     - "zigbee_stack_unix"
-  - name: "token_manager"
+      - zigbee_stack_unix
+  - name: legacy_hal
     condition:
-     - "zigbee_stack_unix"
-  - name: "rail_util_ant_div"
+      - zigbee_stack_unix
+  - name: token_manager
     condition:
-     - "zigbee_stack_unix"
-  - name: "rail_util_coex"
+      - zigbee_stack_unix
+  - name: rail_util_ant_div
     condition:
-     - "zigbee_stack_unix"    
-  - name: "rail_util_pti"
+      - zigbee_stack_unix
+  - name: rail_util_coex
     condition:
-     - "zigbee_stack_unix"
-  - name: "device_init_core"
+      - zigbee_stack_unix
+  - name: rail_util_pti
     condition:
-     - "zigbee_stack_unix"
-  - name: "sleeptimer"
+      - zigbee_stack_unix
+  - name: device_init_core
     condition:
-     - "zigbee_stack_unix"
-  - name: "device_host"
+      - zigbee_stack_unix
+  - name: sleeptimer
     condition:
-     - "zigbee_stack_unix"
-  - name: "device"
+      - zigbee_stack_unix
+  - name: device_host
     condition:
-     - "zigbee_stack_unix"
-  - name: "device_restricted"
+      - zigbee_stack_unix
+  - name: device
     condition:
-     - "zigbee_stack_unix"
-  - name: "mbedtls_entropy_source"
+      - zigbee_stack_unix
+  - name: device_restricted
     condition:
-     - "zigbee_stack_unix"
-  - name: "zigbee_debug_basic"
+      - zigbee_stack_unix
+  - name: mbedtls_entropy_source
     condition:
-     - "zigbee_stack_unix"
-  - name: "legacy_printf"
+      - zigbee_stack_unix
+  - name: zigbee_debug_basic
     condition:
-     - "zigbee_stack_unix"
+      - zigbee_stack_unix
+  - name: legacy_printf
+    condition:
+      - zigbee_stack_unix
 
 requires:
-  - name: "sl_system_init"
-  - name: "sl_system_process_action"
+  - name: sl_system_init
+  - name: sl_system_process_action
   - name: operating_system
   - name: zigbee_stack_unix_library
     condition:
-     - "zigbee_force_libraries"
-  - name: zigbee_stack_unix_implementation   
+      - zigbee_use_release_libraries
+  - name: zigbee_stack_unix_implementation
 
 recommends:
   - id: linux
   - id: zigbee_stack_unix_source
 
 library:
-  - system: "util"
-  - system: "stdc++"
+  - system: util
+  - system: stdc++
 
 include:
   - path: ./
@@ -108,7 +111,6 @@ include:
       - path: protocol/zigbee/app/zigbeed/zigbeed_configuration.h
       - path: protocol/zigbee/app/zigbeed/serial_adapter.h
       - path: protocol/zigbee/stack/framework/zigbee_debug_channel.h
-      - path: util/third_party/libcoap/include/coap/coap.h
   - file_list:
       - path: em_device.h
       - path: simulation_event_sc12.h
@@ -116,108 +118,111 @@ include:
       - path: simulation_gpio.h
       - path: simulation_sc.h
     path: platform/Device/SiliconLabs/simulation/Include/
-  - path: "./"
-  - path: "protocol/zigbee/stack"
-  - path: "protocol/zigbee/stack/framework"
-  - path: "platform/service/legacy_host/inc"
-  - path: "platform/service/legacy_common_ash/inc"
-  - path: "platform/service/legacy_ncp_ash/inc"
-  - path: "platform/service/token_manager/inc"
+  - path: ./
+  - path: protocol/zigbee/stack
+  - path: protocol/zigbee/stack/framework
+  - path: platform/service/legacy_host/inc
+  - path: platform/service/legacy_common_ash/inc
+  - path: platform/service/legacy_ncp_ash/inc
+  - path: platform/service/token_manager/inc
     file_list:
-    - path: sl_token_manufacturing_unix.h
-  - path: "platform/emlib/host/inc"
+      - path: sl_token_manufacturing_unix.h
+  - path: platform/emlib/host/inc
     file_list:
-    - path: "em_core.h"
+      - path: em_core.h
   - path: platform/service/legacy_hal/inc
     file_list:
-    - path: rijndael-alg-fst.h
-    - path: rijndael-api-fst.h
-    - path: security_unix.h
-    - path: platform-header.h
-    - path: random.h
+      - path: rijndael-alg-fst.h
+      - path: rijndael-api-fst.h
+      - path: security_unix.h
+      - path: platform-header.h
+      - path: random.h
 
 # used by zigbeed/simulator_stubs.c
-  - path: "platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc"
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
 
-  - path: "platform/common/inc"
+  - path: platform/common/inc
 
 # used by iostream_printf?
-  - path: "platform/service/iostream/inc"
+  - path: platform/service/iostream/inc
 
 # for openthread-config-generic.h
 # this is a platform-specific file generated by the OT build system,
 # and I just copied it over as a temporary workaround.  We should
 # move it in with lower-mac-spinel at the minimum.
-  - path: "protocol/zigbee/app/zigbeed"
+  - path: protocol/zigbee/app/zigbeed
 
 # for openthread/src/posix/platform
-  - path: "util/third_party/openthread/src"
+  - path: util/third_party/openthread/src
     file_list:
-    - path: posix/platform/radio.hpp
-    - path: posix/platform/radio_url.hpp
-    - path: posix/platform/resolver.hpp
-    - path: posix/platform/system.hpp
-    - path: posix/platform/mainloop.hpp
-    - path: posix/platform/daemon.hpp
-    - path: posix/platform/firewall.hpp
-    - path: posix/platform/infra_if.hpp
-    - path: posix/platform/udp.hpp
-    - path: lib/spinel/radio_spinel.hpp
-    - path: lib/spinel/multi_frame_buffer.hpp
-    - path: lib/spinel/openthread-spinel-config.h
-    - path: lib/spinel/radio_spinel_impl.hpp
-    - path: lib/spinel/spinel_decoder.hpp
-    - path: core/radio/max_power_table.hpp
-    - path: ncp/ncp_config.h
+      - path: core/common/code_utils.hpp
+      - path: core/common/encoding.hpp
+      - path: core/radio/max_power_table.hpp
+      - path: lib/spinel/multi_frame_buffer.hpp
+      - path: lib/spinel/openthread-spinel-config.h
+      - path: lib/spinel/radio_spinel.hpp
+      - path: lib/spinel/spi_frame.hpp
+      - path: lib/spinel/spinel_decoder.hpp
+      - path: ncp/ncp_config.h
+      - path: posix/platform/daemon.hpp
+      - path: posix/platform/firewall.hpp
+      - path: posix/platform/infra_if.hpp
+      - path: posix/platform/mainloop.hpp
+      - path: posix/platform/radio.hpp
+      - path: posix/platform/radio_url.hpp
+      - path: posix/platform/resolver.hpp
+      - path: posix/platform/system.hpp
+      - path: posix/platform/udp.hpp
 
 source:
 
 # Posix Stubs
-  - path: "protocol/zigbee/app/zigbeed/simulator_stubs.c"
-  - path: "protocol/zigbee/app/zigbeed/micro-stubs.c"
+  - path: protocol/zigbee/app/zigbeed/simulator_stubs.c
+  - path: protocol/zigbee/app/zigbeed/micro-stubs.c
 # implements emberSerial* functions for a posix target, opening a tty
 # possibly move file to something like:
 # platform/service/legacy_serial/ember-serial-posix.c
-  - path: "platform/service/token_manager/src/sl_token_def.c"
-  - path: "protocol/zigbee/app/zigbeed/serial_adapter.c"
-  - path: "platform/service/legacy_host/src/token.c"
-  - path: "platform/service/legacy_hal/src/rijndael-alg-fst.c"
-  - path: "platform/service/legacy_hal/src/rijndael-api-fst.c"
-  - path: "platform/service/legacy_hal/src/random.c"
-  - path: "platform/service/legacy_hal/src/system-timer.c"
-  - path: "platform/service/legacy_hal/src/crc.c"
+  - path: platform/service/token_manager/src/sl_token_def.c
+  - path: protocol/zigbee/app/zigbeed/serial_adapter.c
+  - path: platform/service/legacy_host/src/token.c
+  - path: platform/service/legacy_hal/src/rijndael-alg-fst.c
+  - path: platform/service/legacy_hal/src/rijndael-api-fst.c
+  - path: platform/service/legacy_hal/src/random.c
+  - path: platform/service/legacy_hal/src/system-timer.c
+  - path: platform/service/legacy_hal/src/crc.c
   # not brought in by default, since this component provides zigbee_debug_basic
-  - path: "protocol/zigbee/stack/framework/debug-stub.c"
+  - path: protocol/zigbee/stack/framework/debug-stub.c
 
 # OT source 
-  - path: "util/third_party/openthread/src/posix/platform/radio.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/radio_url.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/resolver.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/alarm.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/backtrace.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/entropy.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/system.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/memory.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/mainloop.cpp"
-  - path: "util/third_party/openthread/src/posix/platform/logging.cpp"
+  - path: util/third_party/openthread/src/lib/spinel/radio_spinel.cpp
+  - path: util/third_party/openthread/src/posix/platform/alarm.cpp
+  - path: util/third_party/openthread/src/posix/platform/backtrace.cpp
+  - path: util/third_party/openthread/src/posix/platform/entropy.cpp
+  - path: util/third_party/openthread/src/posix/platform/logging.cpp
+  - path: util/third_party/openthread/src/posix/platform/memory.cpp
+  - path: util/third_party/openthread/src/posix/platform/mainloop.cpp
+  - path: util/third_party/openthread/src/posix/platform/radio.cpp
+  - path: util/third_party/openthread/src/posix/platform/radio_url.cpp
+  - path: util/third_party/openthread/src/posix/platform/resolver.cpp
+  - path: util/third_party/openthread/src/posix/platform/system.cpp
 
 define:
   - name: UNIX_HOST
   - name: ZIGBEE_STACK_ON_HOST
   - name: ZIGBEE_PRO_COMPLIANCE_ON_HOST
     condition:
-      - "zigbee_pro_compliance"
+      - zigbee_pro_compliance
 
 # used in lots of places. in most places UNIX_HOST would be a better name,
 # but it would be a lot of work to refactor    
   - name: EMBER_TEST
-  
+
 # only used in platform/radio/mac/upper-mac.h and lower-mac.h to include phy.h
   - name: UNIX
-  
+
 # only used in micro-types.h
   - name: PHY_SIMULATION
-  
+
 # only used in app/framework/security/af-trust-center in reverse()
   - name: BOARD_SIMULATION
 
@@ -240,34 +245,36 @@ define:
 # running on the host so no bootloader
   - name: EZSP_NO_BOOTLOADER
     value: 1
-    
+
 # mbedtls_config_autogen.h
   - name: TEST_SUITE_MEMORY_BUFFER_ALLOC
 
   - name: CONFIGURATION_HEADER
-    value:  "\"../../../zigbeed/zigbeed_configuration.h\""
+    value: "\"../../../zigbeed/zigbeed_configuration.h\""
     unless:
-      - "zigbee_pro_compliance"
+      - zigbee_pro_compliance
 
 # TODO: Need to turn off optimizations to make it work on Linux
 toolchain_settings:
   - option: optimize
-    value: "none"
+    value: none
   - option: gcc_compiler_option
-    value: "-Wno-unused-parameter"
+    value: -Wno-unused-parameter
   - option: gcc_compiler_option
-    value: "-Wno-missing-field-initializers"
+    value: -Wno-missing-field-initializers
   - option: gcc_compiler_option
-    value: "-Wno-missing-braces"
+    value: -Wno-missing-braces
   - option: gcc_compiler_option
-    value: "-Werror"
+    value: -Werror
   # On Mac, clang 12 forces 64 bit compilation to error on violations of
   # implicit-function-declaration. We are not there yet in fixing all violations
   # (there is a PIT effort to catalog warnings and fix them), so for now, we
   # turn it off. This has not been an issue until now because 32 bit compilation
   # does not turn error on implicit references
   - option: gcc_compiler_option
-    value: "-Wno-error=implicit-function-declaration"
+    value: -Wno-error=implicit-function-declaration
+  - option: gcc_linker_option
+    value: -Wl,--start-group
 
 template_contribution:
   - name: component_catalog

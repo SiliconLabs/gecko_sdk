@@ -15,6 +15,12 @@ include:
     - path: "em_system_generic.h"
 provides:
   - name: emlib_system
+  - name: lld_system
+    condition: [device_series_0]
+  - name: lld_system
+    condition: [device_series_1]
+  - name: lld_system
+    condition: [device_series_2]
 requires:
   - name: device
   - name: emlib_common

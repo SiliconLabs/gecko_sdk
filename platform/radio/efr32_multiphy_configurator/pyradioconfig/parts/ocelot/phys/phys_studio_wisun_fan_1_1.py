@@ -196,3 +196,37 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
                                                'Wi-SUN FAN, JP 920-928 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
+
+
+    ### IN Region PHYs From Wi-SUN FAN 1.1 Spec###
+
+    # ChanPlanID 39
+    def PHY_WISUN_FAN_1v1_866MHz_Plan39_2FSK_1a_IN_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 17, 39, 100000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode1a (2FSK 50kbps mi=0.5), FEC')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    # ChanPlanID 40
+    def PHY_WISUN_FAN_1v1_866MHz_Plan40_2FSK_2a_IN_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 19, 40, 200000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    def PHY_WISUN_FAN_1v1_866MHz_Plan40_2FSK_3_IN_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 21, 40, 200000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode3 (2FSK 150kbps mi=0.5), FEC')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+
+    ### SG Region PHYs From Wi-SUN FAN 1.1 Spec###
+
+    # ChanPlanID 38
+    def PHY_WISUN_FAN_1v1_867MHz_Plan38_2FSK_4a_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 22, 38, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    def PHY_WISUN_FAN_1v1_867MHz_Plan38_2FSK_5_SG_FEC(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 24, 38, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode5 (2FSK 300kbps mi=0.5), FEC')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy

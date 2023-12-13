@@ -112,13 +112,18 @@ configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlHwUart
+    value: uartdrvFlowControlHw
     condition:
-      - brd4001a
+      - brd4002a
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlHw
+    condition:
+      - brd4001c
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
     unless:
-      - brd4001a
+      - brd4002a
+      - brd4001c
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:

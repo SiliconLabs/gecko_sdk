@@ -36,6 +36,7 @@
 #include "stack/include/ember-types.h"
 #include "stack/include/sl_zigbee_tlv_core.h"
 #include "stack/include/sl_zigbee_stack_specific_tlv.h"
+#include "stack/include/zigbee-security-manager.h"
 #include "zigbee_direct_tlv.h"
 #include "zigbee_direct_session_key_negotiation.h"
 #include "zigbee_direct_common.h"
@@ -459,7 +460,7 @@ void enableBleAdvertisements(void)
   }
   /* Start advertising in user mode and enable connections*/
   status = sl_bt_legacy_advertiser_start(adv_handle[HANDLE_ZIGBEE_DIRECT],
-                                         advertiser_connectable_scannable);
+                                         sl_bt_advertiser_connectable_scannable);
   if ( status ) {
     sl_zigbee_core_debug_println("sl_bt_legacy_advertiser_start ERROR : status = 0x%0X", status);
   } else {
@@ -513,6 +514,13 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_zigbee_core_debug_println("BLE hello: %s",
                                    (status == SL_STATUS_OK) ? "success" : "error");
 
+      #define SCAN_WINDOW 5
+      #define SCAN_INTERVAL 10
+
+      status = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_active,
+                                            (uint16_t)SCAN_INTERVAL,
+                                            (uint16_t)SCAN_WINDOW);
+
       status = sl_bt_system_get_identity_address(&ble_address, &type);
       zb_ble_dmp_print_ble_address(ble_address.addr);
 
@@ -543,7 +551,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         activeBleConnections++;
         //preferred phy 1: 1M phy, 2: 2M phy, 4: 125k coded phy, 8: 500k coded phy
         //accepted phy 1: 1M phy, 2: 2M phy, 4: coded phy, ff: any
-        sl_bt_connection_set_preferred_phy(conn_evt->connection, test_phy_1m, 0xff);
+        sl_bt_connection_set_preferred_phy(conn_evt->connection, sl_bt_gap_phy_1m, 0xff);
         enableBleAdvertisements();
         sl_zigbee_core_debug_println("BLE connection opened");
         bleConnectionInfoTablePrintEntry(index);
@@ -579,12 +587,10 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                                    conn_evt->connection, conn_evt->reason, activeBleConnections);
     }
     break;
-    case sl_bt_evt_scanner_scan_report_id: {
-      sl_bt_evt_scanner_scan_report_t *scan_evt =
-        (sl_bt_evt_scanner_scan_report_t*) &(evt->data);
+    case sl_bt_evt_scanner_legacy_advertisement_report_id: {
       sl_zigbee_core_debug_print("Scan response, address type=0x%x, address: ",
-                                 scan_evt->address_type);
-      zb_ble_dmp_print_ble_address(scan_evt->address.addr);
+                                 evt->data.evt_scanner_legacy_advertisement_report.address_type);
+      zb_ble_dmp_print_ble_address(evt->data.evt_scanner_legacy_advertisement_report.address.addr);
       sl_zigbee_core_debug_println("");
     }
     break;
@@ -657,11 +663,11 @@ static void sli_zigbee_zdd_manage_joiners_write(void)
         case 1:  // add provisional link key
           if ((sl_zigbee_tlv_search_buffer_payload_for_id(my_Buffer, 0, SL_ZIGBEE_DIRECT_TLV_JOINERS_IEEE_ADDRESS_TAG_ID, (sl_zigbee_tlv_t *) &sl_tlv_pointer5, tmp_len) == EMBER_SUCCESS)
               && (sl_zigbee_tlv_search_buffer_payload_for_id(my_Buffer, 0, SL_ZIGBEE_DIRECT_TLV_PROVISIONAL_LINK_KEY_TAG_ID, (sl_zigbee_tlv_t *) &sl_tlv_pointer6, tmp_len) == EMBER_SUCCESS)) {
-            EmberKeyData myKey;
+            sl_zb_sec_man_key_t myKey;
             EmberEUI64 my_Eui;
-            MEMCOPY(&myKey.contents, &sl_tlv_pointer6.value[0], EMBER_ENCRYPTION_KEY_SIZE);
+            MEMCOPY(&myKey.key, &sl_tlv_pointer6.value[0], EMBER_ENCRYPTION_KEY_SIZE);
             MEMCOPY(my_Eui, &sl_tlv_pointer5.value[0], EUI64_SIZE);
-            status =  emberAddTransientLinkKey(my_Eui, &myKey);
+            status =  sl_zb_sec_man_import_transient_key(my_Eui, &myKey);
             if (status == EMBER_SUCCESS) {
               myStatus = SL_ZIGBEE_DIRECT_STATUS_CODE_SUCCESS;
             } else {
@@ -730,7 +736,8 @@ static void sli_zigbee_zdd_join_network_write(void)
 
   sli_zigbee_direct_extract_data_from_tlvs_buf(my_Buffer, tmp_len);
   // this link key is also used for joining (with all attempts)
-  status = emberAddTransientLinkKey(wildcardEui, &sl_zigbee_direct_security_state.preconfiguredKey);
+  status = sl_zb_sec_man_import_transient_key(wildcardEui,
+                                              (sl_zb_sec_man_key_t*)&sl_zigbee_direct_security_state.preconfiguredKey);
   sl_zigbee_core_debug_println("Adding Link Key with status: %X", status);
 
   switch (joining_method) {
@@ -984,7 +991,6 @@ static uint8_t sl_generate_commissioning_status(uint8_t *data)
   uint32_t sl_channel_mask;
   uint16_t sl_pan_id;
   uint16_t sl_node_id;
-  EmberKeyStruct sl_current_key;
   EmberNodeType sl_my_nodetype;
   uint8_t sl_extended_pan_id[EXTENDED_PAN_ID_SIZE];
   EmberNetworkStatus sl_my_network_status = emberAfNetworkState();
@@ -1085,8 +1091,9 @@ static uint8_t sl_generate_commissioning_status(uint8_t *data)
     //Active Key Seq Number
     data[counter++] = SL_ZIGBEE_DIRECT_TLV_NETWORK_ACTIVE_KEY_SEQ_NUMBER_TAG_ID;
     data[counter++] = SL_ZIGBEE_DIRECT_TLV_NETWORK_ACTIVE_KEY_SEQ_NUMBER_MAX_LEN;
-    emberGetKey(EMBER_CURRENT_NETWORK_KEY, &sl_current_key);
-    data[counter++] = sl_current_key.sequenceNumber;
+    sl_zb_sec_man_network_key_info_t nwk_key_info;
+    sl_zb_sec_man_get_network_key_info(&nwk_key_info);
+    data[counter++] = nwk_key_info.network_key_sequence_number;
     //Trust Center Address
     data[counter++] = SL_ZIGBEE_DIRECT_TLV_TRUST_CENTER_ADDRESS_TAG_ID;
     data[counter++] = SL_ZIGBEE_DIRECT_TLV_TRUST_CENTER_ADDRESS_MAX_LEN;
@@ -1742,7 +1749,7 @@ uint32_t emberAfZigbeeDirectClusterServerCommandParse(sl_service_opcode_t opcode
         if (cmd->buffer[cmd->payloadStartIndex]) {
           sl_zigbee_core_debug_println("Enabling ZD Interface");
           sl_zigbee_direct_interface_state = 0x01;
-          sl_bt_legacy_advertiser_start(adv_handle[HANDLE_ZIGBEE_DIRECT], advertiser_connectable_scannable);
+          sl_bt_legacy_advertiser_start(adv_handle[HANDLE_ZIGBEE_DIRECT], sl_bt_advertiser_connectable_scannable);
         } else {
           sl_zigbee_core_debug_println("Disabling ZD Interface");
           sl_zigbee_direct_interface_state = 0x00;

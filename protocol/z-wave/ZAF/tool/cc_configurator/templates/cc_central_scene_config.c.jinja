@@ -54,7 +54,7 @@ cc_central_scene_t * cc_central_scene_config_get_scenes_attributes(void) {
   return scenes_attributes;
 }
 
-uint8_t cc_central_scene_config_get_number_of_scenes() {
+uint8_t cc_central_scene_config_get_number_of_scenes(void) {
 {% if 'number_of_scenes' in central_scene %}
   return {{central_scene.number_of_scenes}};
 {% else %}
@@ -67,7 +67,7 @@ uint8_t cc_central_scene_config_get_attribute_bitmask(uint8_t scene_number) {
   return scenes_attributes[scene_number - 1].scene_attributes;
 }
 
-uint8_t cc_central_scene_config_get_identical() {
+uint8_t cc_central_scene_config_get_identical(void) {
 {% if 'identical' in central_scene %}
   return {{central_scene.identical}};
 {% else %}

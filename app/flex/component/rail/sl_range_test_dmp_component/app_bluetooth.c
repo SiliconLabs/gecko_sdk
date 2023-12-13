@@ -315,7 +315,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       } else if (gattdb_radioMode == evt->data.evt_gatt_server_user_write_request.characteristic) {
         uint8_t tmp_value = range_test_settings.radio_mode;
         uint8_t update_needed = check_and_write_uint8_value(&(tmp_value), gattdb_radioMode_valid_range, 2, evt);
-        range_test_settings.radio_mode = tmp_value;
+        range_test_settings.radio_mode = (radio_modes_t)tmp_value;
         if (update_needed) {
           // backwards compatibiliy
           range_test_settings.radio_mode--;
@@ -423,13 +423,13 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       break;
 
     case sl_bt_evt_gatt_server_characteristic_status_id:
-      if (gatt_server_confirmation == evt->data.evt_gatt_server_characteristic_status.status_flags) {
+      if (sl_bt_gatt_server_confirmation == evt->data.evt_gatt_server_characteristic_status.status_flags) {
         remove_last_indication(evt->data.evt_gatt_server_characteristic_status.characteristic);
         indication_is_under_way = false;
-      } else if (gatt_server_client_config == evt->data.evt_gatt_server_characteristic_status.status_flags) {
+      } else if (sl_bt_gatt_server_client_config == evt->data.evt_gatt_server_characteristic_status.status_flags) {
         update_indication_enabled(
           evt->data.evt_gatt_server_characteristic_status.characteristic,
-          (evt->data.evt_gatt_server_characteristic_status.client_config_flags == gatt_indication));
+          (evt->data.evt_gatt_server_characteristic_status.client_config_flags == sl_bt_gatt_indication));
       }
       break;
     ///////////////////////////////////////////////////////////////////////////
@@ -718,14 +718,15 @@ void send_bluetooth_indications(void)
 void manage_bluetooth_restart(void)
 {
   if (ble_needs_restart) {
-    if ((range_test_measurement.packets_received_counter == range_test_settings.packets_repeat_number) && (receive_ended_state == 0)) {
+    uint16_t packets_received_counter_buff = range_test_measurement.packets_received_counter;
+    if ((packets_received_counter_buff == range_test_settings.packets_repeat_number) && (receive_ended_state == 0)) {
       receive_ended_state++;
       sl_sleeptimer_start_timer_ms(&recevie_end_timer, 500, receive_ended_callback, NULL, 0, 0);
     }
     if (receive_ended_state == 2) {
       advertise_received_data(range_test_measurement.rssi_latch_value,
-                              range_test_measurement.packets_received_counter,
-                              range_test_measurement.packets_received_counter);
+                              packets_received_counter_buff,
+                              packets_received_counter_buff);
       sl_sleeptimer_start_timer_ms(&recevie_end_timer, 500, receive_ended_callback, NULL, 0, 0);
     }
     if (receive_ended_state == 3) {

@@ -53,8 +53,8 @@
 
 #define NO_FLAGS              0       ///< No flags used for message
 #define IMMEDIATE             0       ///< Immediate transition time is 0 seconds
-#define NO_CALLBACK_DATA      (void *)NULL   // Callback has not parameters
-#define HIGH_PRIORITY         0              // High Priority
+#define NO_CALLBACK_DATA      NULL    // Callback has no parameters
+#define HIGH_PRIORITY         0       // High Priority
 
 /// current hue level
 static uint16_t current_hue = SL_BTMESH_HSL_SERVER_DEFAULT_HUE_CFG_VAL;

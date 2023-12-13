@@ -3,7 +3,6 @@ label: Application Framework Common
 package: Zigbee
 category: Zigbee|Utility
 quality: production
-
 description: This component declares all the required application framework globals, initializes the Zigbee stack and dispatches stack callbacks calls as needed to the application components.
 
 provides:
@@ -13,7 +12,7 @@ provides:
 config_file:
   - path: protocol/zigbee/app/framework/common/config/zigbee_sleep_config.h
   - path: protocol/zigbee/app/framework/common/config/zigbee_rtos_task_config.h
-    condition: 
+    condition:
       - cmsis_rtos2
 requires:
   - name: sl_system
@@ -36,15 +35,20 @@ requires:
     condition:
       - device_cortexm
   - name: cmsis_rtos2
-    condition: 
+    condition:
       - ot_stack
   - name: rail_mux
-    condition: 
+    condition:
       - ot_stack
   - name: zigbee_watchdog_periodic_refresh
-    condition: 
-      - cmsis_rtos2
+    condition:
       - legacy_hal_wdog
+  # Free RTOS Heap 3 implementation matches Micrium's the closest
+  # Generally, we default to Heap 4. Therefore, we explicitly set this
+  # to heap 3.
+  - name: freertos_heap_3
+    condition:
+      - freertos
 
 recommends:
   - id: zigbee_phy_2_4
@@ -100,14 +104,14 @@ define:
 # Example: -Wall, -Wextra. So there is no need to explicitly add them
 toolchain_settings:
   - option: gcc_compiler_option
-    value: "-Wno-unused-parameter"
+    value: -Wno-unused-parameter
   - option: gcc_compiler_option
-    value: "-Wno-missing-field-initializers"
+    value: -Wno-missing-field-initializers
   - option: gcc_compiler_option
-    value: "-Wno-missing-braces"
+    value: -Wno-missing-braces
     # turn on warnings as errors only when compiling from source
   - option: gcc_compiler_option
-    value: "-Werror"
+    value: -Werror
     condition:
       - zigbee_pro_stack_common_source
 
@@ -123,50 +127,50 @@ template_contribution:
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_stack_init_callback
     priority: -8999
     unless:
-      - cmsis_rtos2    
+      - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_init_callback
     priority: -8998
     unless:
-      - cmsis_rtos2    
+      - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_common_rtos_init_callback
     condition:
       - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_process_action
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_stack_tick_callback
     unless:
       - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_process_action
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_tick_callback
     unless:
       - cmsis_rtos2
   - name: event_handler
     value:
       event: stack_init
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_sleep_init
     priority: -8997
   - name: power_manager_handler
     value:
       event: is_ok_to_sleep
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_app_framework_is_ok_to_sleep
     condition:
       - power_manager
@@ -180,7 +184,7 @@ template_contribution:
   - name: power_manager_handler
     value:
       event: sleep_on_isr_exit
-      include: "zigbee_app_framework_common.h"
+      include: zigbee_app_framework_common.h
       handler: sli_zigbee_sleep_on_isr_exit
     condition:
       - power_manager
@@ -190,17 +194,17 @@ template_contribution:
     value:
       group: plugin
       name: idle-sleep
-      help: "Commands to control idling/sleeping of the device"
+      help: Commands to control idling/sleeping of the device
     condition:
       - power_manager
       - zigbee_zcl_framework_core
-  
+
   - name: cli_command
     value:
       group: idle-sleep
       name: status
       handler: emberAfPluginIdleSleepStatusCommand
-      help: "Display the sleep status"
+      help: Display the sleep status
     condition:
       - power_manager
       - zigbee_zcl_framework_core
@@ -210,9 +214,9 @@ template_contribution:
       group: idle-sleep
       name: force-awake
       handler: emberAfPluginIdleSleepStayAwakeCommand
-      help: "Set or clear force awake"
+      help: Set or clear force awake
       argument:
-      - type: uint8
+        - type: uint8
     condition:
       - power_manager
       - zigbee_zcl_framework_core
@@ -222,22 +226,22 @@ template_contribution:
       group: idle-sleep
       name: awake-when-not-joined
       handler: emberAfPluginIdleSleepAwakeWhenNotJoinedCommand
-      help: "Set or clear stay awake when not joined"
+      help: Set or clear stay awake when not joined
       argument:
-      - type: uint8
+        - type: uint8
     condition:
       - power_manager
       - zigbee_zcl_framework_core
-      
+
 tag:
-  - "idle-sleep"
-  - "rtos"
-  - "priority"
-  - "stack-size"
-  - "stay-awake-when-not-joined"
-  - "minimum-sleep-duration"
-  - "sleep-backoff"
-  - "button-stay-awake"
+  - idle-sleep
+  - rtos
+  - priority
+  - stack-size
+  - stay-awake-when-not-joined
+  - minimum-sleep-duration
+  - sleep-backoff
+  - button-stay-awake
 
 documentation:
   docset: zigbee

@@ -208,9 +208,8 @@ SL_PACK_END()
  *
  * Predefined FFN parameter sets for sl_wisun_set_connection_parameters().
  *
- * These parameter sets can be used either as-is to replicate the behavior of
- * sl_wisun_set_network_size(), or used as an initialization value for an
- * application-specific parameter set.
+ * These parameter sets can be used either as-is or used as an initialization
+ * value for an application-specific parameter set.
  *
  * @{
  ******************************************************************************/
@@ -268,7 +267,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_TEST = {
     .allow_skip = true
   },
   .rpl = {
-    .dis_max_delay_first_s = 1,
+    .dis_max_delay_first_s = 2,
     .dis_max_delay_s = 5,
     .init_parent_selection_s = 1,
     .etx_probe_period_max_s = 1,
@@ -345,7 +344,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_CERTIF = {
     .allow_skip = false
   },
   .rpl = {
-    .dis_max_delay_first_s = 1,
+    .dis_max_delay_first_s = 2,
     .dis_max_delay_s = 180,
     .init_parent_selection_s = 10,
     .etx_probe_period_max_s = 4,
@@ -422,7 +421,7 @@ static const sl_wisun_connection_params_t SL_WISUN_PARAMS_PROFILE_SMALL = {
     .allow_skip = true
   },
   .rpl = {
-    .dis_max_delay_first_s = 1,
+    .dis_max_delay_first_s = 2,
     .dis_max_delay_s = 180,
     .init_parent_selection_s = 10,
     .etx_probe_period_max_s = 4,

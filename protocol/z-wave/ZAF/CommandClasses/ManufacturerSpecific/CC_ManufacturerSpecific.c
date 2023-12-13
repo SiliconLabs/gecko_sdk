@@ -40,13 +40,11 @@ static received_frame_status_t
 CC_ManufacturerSpecific_handler(
     RECEIVE_OPTIONS_TYPE_EX *rxOpt,
     ZW_APPLICATION_TX_BUFFER *pFrameIn,
-    uint8_t cmdLength,
+    __attribute__((unused)) uint8_t cmdLength,
     ZW_APPLICATION_TX_BUFFER * pFrameOut,
     uint8_t * pLengthOut
 )
 {
-  UNUSED(cmdLength);
-
   if (true == Check_not_legal_response_job(rxOpt))
   {
     // None of the following commands support endpoint bit addressing.

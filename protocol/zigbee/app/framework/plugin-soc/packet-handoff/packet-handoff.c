@@ -168,7 +168,14 @@ EmberPacketAction emberPacketHandoffIncomingHandler(EmberZigbeePacketType packet
                                  index,
                                  flatPacket,
                                  packetLength);
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+      extern EmberMessageBuffer emTempHandoffHeader;
+      emTempHandoffHeader = packetBuffer;
+#endif
       act = emberAfIncomingPacketFilterCallback(packetType, flatPacket, &packetLength, data);
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+      emTempHandoffHeader = NULL_BUFFER;
+#endif
       if (act == EMBER_MANGLE_PACKET) {
         EmberStatus status = emberSetLinkedBuffersLength(packetBuffer,
                                                          packetLength + index);

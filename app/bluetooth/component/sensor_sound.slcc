@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_sound
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_sound.c
 include:
@@ -20,6 +19,7 @@ requires:
   - name: mic_driver
   - name: app_assert
   - name: sleeptimer
+  - name: board_control
 template_contribution:
   - name: event_handler
     value:
@@ -28,3 +28,6 @@ template_contribution:
       handler: sl_sensor_sound_step
   - name: component_catalog
     value: sensor_sound
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-sound

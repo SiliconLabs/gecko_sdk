@@ -18,9 +18,15 @@ requires:
 
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY
+    value: PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY 1
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR
+    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC 1
+  - name: psa_crypto_config
+    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_IMPORT 1
+  - name: psa_crypto_config
+    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_EXPORT 1
+  - name: psa_crypto_config
+    value: PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_GENERATE 1
 
 recommends:
   - id: psa_crypto_rsa_2048

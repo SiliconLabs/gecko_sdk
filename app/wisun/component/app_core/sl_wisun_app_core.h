@@ -44,8 +44,10 @@ extern "C" {
  * @{
  *****************************************************************************/
 
-#include "sl_wisun_trace_util.h"
-#include "sl_wisun_app_core_util.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "socket/socket.h"
+#include "sl_wisun_event_mgr.h"
 #include "sl_component_catalog.h"
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
   #include "sl_wisun_lfn_params_api.h"
@@ -92,15 +94,15 @@ typedef enum app_core_error_state_flag{
 /// Current address storage structure definition
 typedef struct current_addr {
   /// Link local address
-  sl_wisun_ip_address_t link_local;
+  in6_addr_t link_local;
   /// Global address
-  sl_wisun_ip_address_t global;
+  in6_addr_t global;
   /// Border Router address
-  sl_wisun_ip_address_t border_router;
+  in6_addr_t border_router;
   /// Primary Parent address
-  sl_wisun_ip_address_t primary_parent;
+  in6_addr_t primary_parent;
   /// Secondary Parent address
-  sl_wisun_ip_address_t secondary_parent;
+  in6_addr_t secondary_parent;
 } current_addr_t;
 
 /// Regulation thresholds
@@ -110,6 +112,22 @@ typedef struct regulation_thresholds {
   /// Alert thresholds
   int8_t alert_threshold;
 } regulation_thresholds_t;
+
+/// Application time statistic
+typedef struct app_core_time_stat {
+  /// Current ms
+  uint64_t curr_ms;
+  /// Last connected ms
+  uint64_t connected_ms;
+  /// Total connected ms
+  uint64_t tot_connected_ms;
+  /// Last disconnected ms
+  uint64_t disconnected_ms;
+  /// Total disconnected ms
+  uint64_t tot_disconnected_ms;
+  /// Connection counter
+  uint32_t conn_cnt;
+} app_core_time_stat_t;
 
 /** @} (end SL_WISUN_APP_CORE_API_TYPES) */
 // -----------------------------------------------------------------------------
@@ -203,6 +221,13 @@ bool app_wisun_get_regulation_thresholds(regulation_thresholds_t* thresholds_out
  *****************************************************************************/
 sl_wisun_join_state_t app_wisun_get_join_state(void);
 
+/**************************************************************************//**
+ * @brief Get time statistic
+ * @details Create a copy of time statistic storage with up-to-date values
+ * @param[out] tstat Time statistic structure
+ *****************************************************************************/
+void app_wisun_get_time_stat(app_core_time_stat_t * const tstat);
+
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
 
 /**************************************************************************//**
@@ -217,7 +242,7 @@ sl_wisun_device_type_t app_wisun_get_device_type(void);
  * @brief Get Wi-SUN LFN profile
  * @details Getter to get LFN profile.
  *          Device type can be SL_WISUN_LFN_PROFILE_TEST,
- *          SL_WISUN_LFN_PROFILE_BALANCED or SL_WISUN_LFN_PROFILE_BALANCED
+ *          SL_WISUN_LFN_PROFILE_BALANCED or SL_WISUN_LFN_PROFILE_ECO
  * @return sl_wisun_lfn_profile_t LFN profile.
  *****************************************************************************/
 sl_wisun_lfn_profile_t app_wisun_get_lfn_profile(void);

@@ -1,12 +1,11 @@
 package: Zigbee
-description: This component provides support for reading and manipulating counters that
-  record different events in the stack.
+description: This component provides support for reading and manipulating counters that record different events in the stack.
 label: Counters
 quality: production
 id: zigbee_counters
 category: Zigbee|Utility
 provides:
-   - name: zigbee_counters
+  - name: zigbee_counters
 config_file:
   - path: protocol/zigbee/app/framework/plugin/counters/config/counters-config.h
 source:
@@ -77,8 +76,8 @@ template_contribution:
       handler: emberAfPluginCounterPrintCounterTypeCommand
       help: Prints the value of this particular counter.
       argument:
-      - type: uint8
-        help: The counter type to print
+        - type: uint8
+          help: The counter type to print
   - name: cli_command
     value:
       group: counters
@@ -104,10 +103,10 @@ template_contribution:
       handler: emberAfPluginCountersSetThresholdCommand
       help: Sets a threshold value for a particular type of counter.
       argument:
-      - type: uint8
-        help: Type of counter
-      - type: uint16
-        help: Threshold Value
+        - type: uint8
+          help: Type of counter
+        - type: uint16
+          help: Threshold Value
   - name: cli_command
     value:
       group: counters

@@ -13,4 +13,10 @@ sl_status_t sl_btctrl_hci_uart_rtos_init(void);
  */
 void sl_btctrl_hci_uart_rtos_deinit(void);
 
+/**
+ * Get the available stack space of the HCI UART thread as determined
+ * by the stack watermark recorded during execution.
+ */
+uint8_t sl_btctrl_hci_uart_get_stack_space(uint32_t *stack_space);
+
 #endif

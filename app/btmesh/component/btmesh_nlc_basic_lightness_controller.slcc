@@ -1,0 +1,23 @@
+id: "btmesh_nlc_basic_lightness_controller"
+label: "Basic Lightness Controller Profile"
+package: "Btmesh"
+description: >
+  Basic Lightness Controller role in an NLC network. This component
+  includes other components needed for an SoC application to
+  act as a Basic Lightness Controller node in an NLC network, as
+  well as components providing the relevant metadata for the role.
+category: "Bluetooth Mesh|NLC"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_nlc_basic_lightness_controller"
+tag:
+  - No-Code
+
+provides:
+  - name: "btmesh_nlc_basic_lightness_controller"
+requires:
+  - name: "btmesh_nlc_basic_lightness_controller_profile_metadata"
+  - name: "btmesh_lc_server"
+  - name: "btmesh_scene_server"
+  - name: "btmesh_generic_server"
+recommends:
+  - id: "btmesh_generic_base"

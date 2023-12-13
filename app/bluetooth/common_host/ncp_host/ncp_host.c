@@ -220,7 +220,8 @@ int32_t ncp_host_peek(void)
     if (ret < 0) {
       return -1;
     }
-    msg_header = (uint8_t)(buf_ncp_raw.buf[0] & 0xff);
+    msg_header = (uint8_t)(buf_ncp_raw.buf[0] & 0xf8);
+    msg_len = 256 * (buf_ncp_raw.buf[0] & 0x07); // Get the high bits of the message length
     // Check if proper ncp header arrived
     if ((msg_header & (uint32_t)(~MSG_HEADER_MASK)) == sl_bgapi_dev_type_bt) {
       // If header seems to be ok, read length
@@ -232,7 +233,8 @@ int32_t ncp_host_peek(void)
       if (ret < 0) {
         return -1;
       }
-      msg_len = buf_ncp_raw.buf[1] + 2;
+      msg_len |= buf_ncp_raw.buf[1];
+      msg_len += 2;
       // Check if length will fit to buffer
       if (msg_len >= DEFAULT_HOST_BUFLEN - 2) {
         return -1;

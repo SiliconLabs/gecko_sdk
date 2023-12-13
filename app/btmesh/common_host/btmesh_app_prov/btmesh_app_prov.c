@@ -492,21 +492,23 @@ void handle_nodelist(void)
     case START: {
       // Check if any networks are present on the node on startup
       if (0 < networks_on_startup) {
-        sl_status_t sc;
-        app_log_info("Querying DDB list" APP_LOG_NEW_LINE);
-        sc = btmesh_prov_list_ddb_entries(&ddb_count);
-        if (SL_STATUS_OK != sc) {
-          app_log_error("Failed to list DDB entries" APP_LOG_NEW_LINE);
-          command_state = FINISHED;
-          break;
-        }
-        if (ddb_count == 0) {
-          // The count is synchronous, but individual nodes' info are sent
-          // via sl_btmesh_on_event
-          app_log_info("No nodes present in the network" APP_LOG_NEW_LINE);
-          command_state = FINISHED;
-        } else {
-          command_state = IN_PROGRESS;
+        if (true == db_ready) {
+          sl_status_t sc;
+          app_log_info("Querying DDB list" APP_LOG_NEW_LINE);
+          sc = btmesh_prov_list_ddb_entries(&ddb_count);
+          if (SL_STATUS_OK != sc) {
+            app_log_error("Failed to list DDB entries" APP_LOG_NEW_LINE);
+            command_state = FINISHED;
+            break;
+          }
+          if (ddb_count == 0) {
+            // The count is synchronous, but individual nodes' info are sent
+            // via sl_btmesh_on_event
+            app_log_info("No nodes present in the network" APP_LOG_NEW_LINE);
+            command_state = FINISHED;
+          } else {
+            command_state = IN_PROGRESS;
+          }
         }
       } else {
         app_log_info("No networks present on the device" APP_LOG_NEW_LINE);

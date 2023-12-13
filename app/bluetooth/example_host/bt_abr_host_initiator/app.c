@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
 #include "app.h"
 #include "ncp_host.h"
 #include "app_log.h"
@@ -42,22 +43,27 @@
 #include "sl_bt_api.h"
 #include "abr_initiator.h"
 #include "abr_file_log.h"
+#include "host_comm.h"
 
 // Optstring argument for getopt.
-#define OPTSTRING      NCP_HOST_OPTSTRING APP_LOG_OPTSTRING "hm:F:r"
+#define OPTSTRING      NCP_HOST_OPTSTRING APP_LOG_OPTSTRING HOST_COMM_CPC_OPTSTRING "hd:m:F:rw"
 
 // Usage info.
-#define USAGE          APP_LOG_NL "%s " NCP_HOST_USAGE APP_LOG_USAGE " [-m <mode>] [-F <Reflector_BLE_address>] [-r] [-h]" APP_LOG_NL
+#define USAGE          APP_LOG_NL "%s " NCP_HOST_USAGE APP_LOG_USAGE HOST_COMM_CPC_USAGE \
+  "\n[-d <json_log_directory>] [-m <mode>] [-F <Reflector_BLE_address>] [-r] [-w] [-h]" APP_LOG_NL
 
 // ABR Host Initiator options
 #define ABR_HOST_INITIATOR_OPTIONS                                              \
+  "    -d  JSON log directory.\n"                                               \
+  "        <log_directory>\n"                                                   \
   "    -m  HADM mode.\n"                                                        \
-  "        <mode>           Integer representing HADM mode, default: 2, RTP.\n" \
+  "        <mode>           Integer representing HADM mode, default: 2, PBR.\n" \
   "        1 : RTT\n"                                                           \
-  "        2 : RTP\n"                                                           \
+  "        2 : PBR\n"                                                           \
   "    -F  Reflector filter address.\n"                                         \
   "        <reflector_address>\n"                                               \
-  "    -r  Enable RSSI distance measurement\n"
+  "    -r  Enable RSSI distance measurement\n"                                  \
+  "    -w  Use wired antenna offset\n"
 
 // Options info.
 #define OPTIONS              \
@@ -65,12 +71,28 @@
   NCP_HOST_OPTIONS           \
   APP_LOG_OPTIONS            \
   ABR_HOST_INITIATOR_OPTIONS \
+  HOST_COMM_CPC_OPTIONS      \
   "    -h  Print this help message.\n"
+
+#define USECSPERSEC 1000000UL
+
+// Distance log file handles
+FILE *distance_log_file       = NULL;
+FILE *distance_log_file_rssi  = NULL;
+
+// Distance log file names
+#define DISTANCE_LOG_FILE       "distance.csv"
+#define DISTANCE_LOG_FILE_RSSI  "distance_rssi.csv"
 
 static abr_initiator_config_t initiator_config;
 
 static void abr_on_result(abr_rtl_result_t *result, void *user_data);
+static void abr_append_data_to_log_file(FILE *fp, const char *data);
+static void abr_open_log_files(void);
+static void abr_close_log_files(void);
 static uint8_t filter_address[ADR_LEN];
+static uint64_t measurement_counter;
+static struct timeval tv_start;
 
 /**************************************************************************//**
  * Application Init.
@@ -83,6 +105,10 @@ void app_init(int argc, char *argv[])
   int abr_mode;
   unsigned int address_cache[ADR_LEN];
   bool rssi_measurement_enabled;
+  bool use_antenna_wired_offset;
+
+  app_log_info("Silicon Labs ABR Initiator" APP_LOG_NL);
+  app_log_info("--------------------------" APP_LOG_NL);
 
   // Default parameters
   sc = abr_initiator_config_set_default(&initiator_config);
@@ -91,6 +117,7 @@ void app_init(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
   rssi_measurement_enabled = false;
+  use_antenna_wired_offset = false;
 
   for (uint8_t adr_iter = 0; adr_iter > ADR_LEN; adr_iter++) {
     address_cache[adr_iter] = 0;
@@ -105,6 +132,9 @@ void app_init(int argc, char *argv[])
         app_log(USAGE, argv[0]);
         app_log(OPTIONS);
         exit(EXIT_SUCCESS);
+      case 'd':
+        abr_file_log_set_dir(optarg);
+        break;
       case 'm':
         // Mode.
         // 1 - RTT
@@ -125,6 +155,9 @@ void app_init(int argc, char *argv[])
       case 'r':
         rssi_measurement_enabled = true;
         break;
+      case 'w':
+        use_antenna_wired_offset = true;
+        break;
       default:
         sc = ncp_host_set_option((char)opt, optarg);
         if (sc == SL_STATUS_NOT_FOUND) {
@@ -141,11 +174,9 @@ void app_init(int argc, char *argv[])
   switch (abr_mode) {
     case ABR_INITIATOR_MODE_RTT: // RTT
       initiator_config.mode = sl_bt_cs_mode_rtt;
-      initiator_config.submode = 0xff;
       break;
     case ABR_INITIATOR_MODE_PBR: // PBR
       initiator_config.mode = sl_bt_cs_mode_pbr;
-      initiator_config.submode = sl_bt_cs_mode_rtt;
       break;
     default:
       app_log_error("Invalid operation mode selected. "
@@ -155,6 +186,7 @@ void app_init(int argc, char *argv[])
   }
 
   initiator_config.rssi_measurement_enabled = rssi_measurement_enabled;
+  initiator_config.use_antenna_wired_offset = use_antenna_wired_offset;
 
   if (arg_adr_len == ADR_LEN) {
     for (uint8_t adr_iter = 0; adr_iter < ADR_LEN; adr_iter++) {
@@ -165,6 +197,13 @@ void app_init(int argc, char *argv[])
     app_log_info("Accepting any suitable reflector." APP_LOG_NL);
   }
 
+  // Log channel map
+  app_log_info("CS channel map:" APP_LOG_NL "    ");
+  for (uint32_t i = 0; i < initiator_config.channel_map_len; i++) {
+    app_log_append_info("0x%02x ", initiator_config.channel_map.data[i]);
+  }
+  app_log_append_info(APP_LOG_NL);
+
   // Initialize NCP connection.
   sc = ncp_host_init();
   if (sc == SL_STATUS_INVALID_PARAMETER) {
@@ -173,18 +212,11 @@ void app_init(int argc, char *argv[])
   }
   app_assert_status(sc);
   app_log_info("NCP host initialised." APP_LOG_NL);
-  app_log_info("Resetting NCP target..." APP_LOG_NL);
-  // Reset NCP to ensure it gets into a defined state.
-  // Once the chip successfully boots, boot event should be received.
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
-
   app_log_info("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
 
-  // rewrite the content of output distance file
-  FILE* output_distance_storage = fopen("distance.txt", "w");
-  fclose(output_distance_storage);
-
+  abr_open_log_files();
   abr_initiator_init(abr_on_result, &initiator_config);
+  measurement_counter = 0;
 }
 
 /**************************************************************************//**
@@ -204,7 +236,28 @@ void app_process_action(void)
  *****************************************************************************/
 void app_deinit(void)
 {
+  struct timeval tv_end;
+  int ret;
+  uint64_t run_time;
+  double measurements_frequency;
+
+  ret = gettimeofday(&tv_end, NULL);
+  abr_initiator_deinit();
   ncp_host_deinit();
+
+  if (ret == 0 && measurement_counter > 0) {
+    run_time = (tv_end.tv_sec - tv_start.tv_sec)
+               * USECSPERSEC + tv_end.tv_usec - tv_start.tv_usec;
+
+    if (run_time > 0) {
+      measurements_frequency =
+        (double)(USECSPERSEC * measurement_counter) / run_time;
+      app_log("Measurement frequency = %f\n", measurements_frequency);
+    }
+  }
+
+  abr_close_log_files();
+
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application deinit code here!                       //
   // This is called once during termination.                                 //
@@ -251,7 +304,6 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    address.addr[0]);
 
       abr_initiator_enable();
-
       break;
 
     default:
@@ -261,27 +313,94 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
   }
 }
 
-static void abr_append_data_to_log_file(const char* filename, float data)
+static void abr_append_data_to_log_file(FILE *fp, const char *data)
 {
-  FILE* logfile = fopen(filename, "a");
-  app_assert(logfile != NULL, "Failed to open file '%s'", filename);
-  fprintf(logfile, "%f\n", data);
-  fclose(logfile);
+  if (fp != NULL && data != NULL) {
+    fprintf(fp, "%s", data);
+    fflush(fp); // Flush file buffer to avoid data loss
+  }
+}
+
+static void abr_open_log_files(void)
+{
+  // Open empty files for distance results
+  distance_log_file = fopen(DISTANCE_LOG_FILE, "w");
+  if (distance_log_file != NULL) {
+    fprintf(distance_log_file, "distance,distance_likeliness\n");
+  } else {
+    app_log_error("Failed to open file '%s'" APP_LOG_NL, DISTANCE_LOG_FILE);
+  }
+
+  if (initiator_config.rssi_measurement_enabled) {
+    distance_log_file_rssi = fopen(DISTANCE_LOG_FILE_RSSI, "w");
+    if (distance_log_file_rssi != NULL) {
+      fprintf(distance_log_file_rssi, "rssi_distance\n");
+    } else {
+      app_log_error("Failed to open file '%s'" APP_LOG_NL, DISTANCE_LOG_FILE_RSSI);
+    }
+  }
+}
+
+static void abr_close_log_files(void)
+{
+  int ret;
+  if (distance_log_file != NULL) {
+    ret = fclose(distance_log_file);
+    if (ret != 0) {
+      app_log_error("Failed to close distance log file." APP_LOG_NL);
+    }
+  }
+  if (distance_log_file_rssi != NULL) {
+    ret = fclose(distance_log_file_rssi);
+    if (ret != 0) {
+      app_log_error("Failed to close RSSI distance log file." APP_LOG_NL);
+    }
+  }
 }
 
 static void abr_on_result(abr_rtl_result_t *result, void *user_data)
 {
+  int ret;
   (void) user_data;
-  app_log_info("Measurement result: %u mm",
+  char log_buff[100]; // File log buffer
+  size_t log_buff_size = sizeof(log_buff);
+
+  app_log_info("Measurement result: %u mm" APP_LOG_NL,
                (uint32_t)(result->distance * 1000.f));
 
+  app_log_info("Measurement likeliness: %f" APP_LOG_NL,
+               result->likeliness);
+
   if (initiator_config.rssi_measurement_enabled) {
-    app_log_append_info(" | RSSI distance: %u mm" APP_LOG_NL,
-                        (uint32_t)(result->rssi_distance * 1000.f));
-    abr_append_data_to_log_file("distance_rssi.txt", result->rssi_distance);
-  } else {
-    app_log_append_info(APP_LOG_NL);
+    app_log_info("RSSI distance: %u mm" APP_LOG_NL,
+                 (uint32_t)(result->rssi_distance * 1000.f));
+
+    memset(log_buff, 0, log_buff_size);
+    ret = snprintf(log_buff, log_buff_size, "%f\n", result->rssi_distance);
+    if (ret >= 0) {
+      abr_append_data_to_log_file(distance_log_file_rssi, log_buff);
+    } else {
+      app_log_error("Failed to write buffer used by file log!" APP_LOG_NL);
+    }
   }
 
-  abr_append_data_to_log_file("distance.txt", result->distance);
+  app_log_info("CS bit error rate: %u" APP_LOG_NL, result->cs_bit_error_rate);
+
+  memset(log_buff, 0, log_buff_size);
+  ret = snprintf(log_buff, log_buff_size, "%f,%f\n", result->distance, result->likeliness);
+  if (ret >= 0) {
+    abr_append_data_to_log_file(distance_log_file, log_buff);
+  } else {
+    app_log_error("Failed to write buffer used by file log!" APP_LOG_NL);
+  }
+
+  ret = 0;
+  if (measurement_counter == 0) {
+    // Get starting time
+    ret = gettimeofday(&tv_start, NULL);
+  }
+  measurement_counter++;
+  if (ret == -1) {
+    measurement_counter = 0;
+  }
 }

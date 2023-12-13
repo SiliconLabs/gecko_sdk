@@ -79,10 +79,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Data Types
 
-#define uartFlowControlNone  0
-#define uartFlowControlSoftware    0xFFFF
-#define UARTXON     0x11
-#define UARTXOFF    0x13
+#define uartFlowControlNone  0                     ///< uart flow control none
+#define uartFlowControlSoftware    0xFFFF          ///< uart flow control software
+#define UARTXON     0x11                           ///< uartx on
+#define UARTXOFF    0x13                           ///< uartx off
 
 /// @brief I/O Stream UART stream object
 typedef struct {

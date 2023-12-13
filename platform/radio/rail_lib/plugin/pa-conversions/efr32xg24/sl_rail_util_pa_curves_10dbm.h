@@ -38,20 +38,21 @@
 extern "C" {
 #endif
 
-#define RAIL_PA_CURVES_PIECEWISE_SEGMENTS (8U)
+#define RAIL_PA_CURVES_PIECEWISE_SEGMENTS (9U)
 #define RAIL_PA_CURVES_LP_VALUES (16U)
 
 #define RAIL_PA_CURVES_2P4_HP_VBAT_MAX_POWER      100
-#define RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER      -260
+#define RAIL_PA_CURVES_2P4_HP_VBAT_MIN_POWER      -300
 #define RAIL_PA_CURVES_2P4_HP_VBAT_CURVES \
-  { { 65535, 0, 0 },                      \
-    { 65535, 0, 0 },                      \
-    { 90, 1644, -90531 },                 \
-    { 38, 468, 1744 },                    \
-    { 21, 223, 11774 },                   \
-    { 11, 100, 11531 },                   \
-    { 7, 61, 9783 },                      \
-    { 3, 6, 3749 } }
+  { { 255, 100, 22 },                     \
+    { 90, 1960, -116460 },                \
+    { 36, 567, -7935 },                   \
+    { 22, 288, 6929 },                    \
+    { 16, 192, 9881 },                    \
+    { 11, 134, 10360 },                   \
+    { 8, 89, 9610 },                      \
+    { 6, 69, 8821 },                      \
+    { 4, 18, 5138 } }
 
 #define RAIL_PA_CURVES_2P4_LP_VBAT_MAX_POWER      0
 #define RAIL_PA_CURVES_2P4_LP_VBAT_MIN_POWER      -260

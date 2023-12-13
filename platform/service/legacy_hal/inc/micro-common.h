@@ -61,7 +61,7 @@ void halInternalDisableWatchDog(uint8_t magicKey);
  */
 bool halInternalWatchDogEnabled(void);
 
-void halResetWatchdog(void);
+void halResetWatchdog(void);                       ///< hal Reset Watchdog
 
 /**
  * @brief Change the CTUNE value. Involves switching to HFRCO and turning off

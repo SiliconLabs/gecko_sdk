@@ -1,9 +1,7 @@
 id: zigbee_secure_key_storage
 package: Zigbee
 label: Zigbee Secure Key Storage
-description: |-
-  This component will store keys in secure storage on the device by calling PSA APIs. This component also provides crypto routines that operate on PSA key identifiers rather than key values.
-  For this component to be backwards compatible (current images wishing to move their security keys into secure storage), the Zigbee Secure Key Storage Upgrade component must be included as well (this component does not include it by default).
+description: This component will store keys in secure storage on the device by calling PSA APIs. This component also provides crypto routines that operate on PSA key identifiers rather than key values. For this component to be backwards compatible (current images wishing to move their security keys into secure storage), the Zigbee Secure Key Storage Upgrade component must be included as well (this component does not include it by default).
 category: Zigbee|Utility
 quality: production
 
@@ -11,13 +9,16 @@ provides:
   - name: zigbee_key_storage
   - name: zigbee_secure_key_storage
   - name: zigbee_aes
-  - name: zigbee_ccm_star
 
 requires:
   - name: security_manager
   - name: psa_crypto_cipher_ecb
     condition:
       - device_cortexm
+  - name: zigbee_secure_key_storage_upgrade_common
+
+recommends:
+  - id: zigbee_secure_key_storage_upgrade
 
 source:
   - path: protocol/zigbee/stack/security/zigbee-security-manager-vault-support.c
@@ -40,19 +41,19 @@ template_contribution:
   - name: psa_key_slots
     value:
       name: psa_key_slots_zigbee_stack
-      count: "2 + 30"
+      count: 2 + 30
     condition:
       - zigbee_network_creator
   - name: psa_key_slots
     value:
       name: psa_key_slots_zigbee_stack
-      count: "2 + 30"
+      count: 2 + 30
     condition:
       - zigbee_network_steering
   - name: psa_key_slots
     value:
       name: psa_key_slots_zigbee_stack
-      count: "2 + 30"
+      count: 2 + 30
     condition:
       - zigbee_ncp
   - name: psa_key_slots

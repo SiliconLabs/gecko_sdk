@@ -157,7 +157,8 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE8       # Sub-GHz, 3 MHz, QNC
         elif modulation_type == model.vars.modulation_type.var_enum.BPSK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE6       # Sub-GHz, 2 MHz, QNC
-        elif modulation_type == model.vars.modulation_type.var_enum.OOK:
+        elif modulation_type == model.vars.modulation_type.var_enum.OOK or \
+                modulation_type == model.vars.modulation_type.var_enum.ASK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE4       # Sub-GHz, 500 kHz, QNC
         else:
             # Settings based on band and baudrate

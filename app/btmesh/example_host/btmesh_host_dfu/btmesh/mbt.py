@@ -28,7 +28,6 @@ import math
 from typing import Callable, ClassVar, Dict, List, Optional
 
 from bgapi.bglib import BGEvent, CommandFailedError
-
 from bgapix.bglibx import BGLibExtRetryParams
 from bgapix.slstatus import SlStatus
 
@@ -609,7 +608,7 @@ class BlobTransferClient(BtmeshComponent):
         blk_size = 2**blk_size_log
         on_mbt_bg_event(block_start_evt)
         while True:
-            self.send_chunks(blob, elem_index, on_mbt_bg_event)
+            self.send_chunks(blob, elem_index, retry_params, on_mbt_bg_event)
             blk_complete_evts = self.mbt_procedure(
                 self.lib.btmesh.mbt_client.query_block_status,
                 elem_index,
@@ -638,6 +637,7 @@ class BlobTransferClient(BtmeshComponent):
         self,
         blob: Blob,
         elem_index: int,
+        retry_params: Optional[BGLibExtRetryParams],
         on_mbt_bg_event: Optional[Callable[[BGEvent], None]],
     ):
         chunks_complete = False
@@ -653,8 +653,12 @@ class BlobTransferClient(BtmeshComponent):
                     start_pos = event.offset
                     end_pos = event.offset + event.length
                     logger.info(f"Send chunk [{start_pos},{end_pos})")
-                    self.lib.btmesh.mbt_client.send_chunk_request_rsp(
-                        elem_index, blob.data[start_pos:end_pos]
+                    self.lib.retry_until(
+                        self.lib.btmesh.mbt_client.send_chunk_request_rsp,
+                        elem_index,
+                        blob.data[start_pos:end_pos],
+                        retry_params=retry_params,
+                        retry_cmd_err_code=self.RETRY_CMD_ERR_CODES,
                     )
                 else:
                     chunks_complete = True

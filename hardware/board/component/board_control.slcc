@@ -69,4 +69,4 @@ template_contribution:
     priority: -4999
 documentation:
     docset: gecko-platform
-    document: hardware-board/api/group-board-control
+    document: platform-hardware-board/board-control

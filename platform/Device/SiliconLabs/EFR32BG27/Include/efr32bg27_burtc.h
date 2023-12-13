@@ -329,4 +329,4 @@ typedef struct {
 /** @} End of group EFR32BG27_BURTC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_BURTC_H */
+#endif // EFR32BG27_BURTC_H

@@ -32,9 +32,9 @@
  *
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <assert.h>
 
 #include "radio_extension.h"
 
@@ -45,8 +45,8 @@
 #ifndef SL_CATALOG_OT_SIMULATION_PRESENT
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
-#include "coexistence.h"
 #include "coexistence-802154.h"
+#include "coexistence.h"
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
@@ -362,8 +362,8 @@ otError otPlatRadioExtensionGetRequestPwmArgs(uint8_t *aPwmReq, uint8_t *aPwmDut
     VerifyOrExit(aPwmPeriodHalfMs != NULL, error = OT_ERROR_INVALID_ARGS);
     p = sl_rail_util_coex_get_request_pwm_args();
     VerifyOrExit(p != NULL, error = OT_ERROR_FAILED);
-    *aPwmReq = p->req;
-    *aPwmDutyCycle = p->dutyCycle;
+    *aPwmReq          = p->req;
+    *aPwmDutyCycle    = p->dutyCycle;
     *aPwmPeriodHalfMs = p->periodHalfMs;
 #else
     OT_UNUSED_VARIABLE(aPwmReq);
@@ -381,10 +381,7 @@ otError otPlatRadioExtensionSetRequestPwmArgs(uint8_t aPwmReq, uint8_t aPwmDutyC
     otError error = OT_ERROR_NONE;
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
-    sl_status_t status = sl_rail_util_coex_set_request_pwm(aPwmReq,
-                                                           NULL,
-                                                           aPwmDutyCycle,
-                                                           aPwmPeriodHalfMs);
+    sl_status_t status = sl_rail_util_coex_set_request_pwm(aPwmReq, NULL, aPwmDutyCycle, aPwmPeriodHalfMs);
     VerifyOrExit(status == SL_STATUS_OK, error = OT_ERROR_FAILED);
 #else
     OT_UNUSED_VARIABLE(aPwmReq);
@@ -399,7 +396,7 @@ exit:
 
 #if defined(SL_CATALOG_RAIL_UTIL_COEX_PRESENT) && SL_OPENTHREAD_COEX_COUNTER_ENABLE
 extern uint32_t efr32RadioCoexCounters[SL_RAIL_UTIL_COEX_EVENT_COUNT];
-extern void efr32RadioClearCoexCounters(void);
+extern void     efr32RadioClearCoexCounters(void);
 #endif
 
 otError otPlatRadioExtensionClearCoexCounters(void)
@@ -424,8 +421,9 @@ otError otPlatRadioExtensionGetCoexCounters(uint8_t aNumEntries, uint32_t aCoexC
     VerifyOrExit(aCoexCounters != NULL, error = OT_ERROR_INVALID_ARGS);
     _Static_assert((uint8_t)OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT == (uint8_t)SL_RAIL_UTIL_COEX_EVENT_COUNT,
                    "Coex counter mismatch.  OT_PLAT_RADIO_EXTENSION_COEX_EVENT_COUNT != SL_RAIL_UTIL_COEX_EVENT_COUNT");
-    #define COPY_COEX_COUNTER(counter) \
-        aCoexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_##counter] = efr32RadioCoexCounters[SL_RAIL_UTIL_COEX_EVENT_##counter]
+#define COPY_COEX_COUNTER(counter)                                \
+    aCoexCounters[OT_PLAT_RADIO_EXTENSION_COEX_EVENT_##counter] = \
+        efr32RadioCoexCounters[SL_RAIL_UTIL_COEX_EVENT_##counter]
     COPY_COEX_COUNTER(LO_PRI_REQUESTED);
     COPY_COEX_COUNTER(HI_PRI_REQUESTED);
     COPY_COEX_COUNTER(LO_PRI_DENIED);
@@ -461,7 +459,7 @@ exit:
 
 #ifdef SL_CATALOG_OPENTHREAD_TEST_CLI_PRESENT
 extern RAIL_IEEE802154_PtiRadioConfig_t efr32GetPtiRadioConfig(void);
-extern RAIL_Status_t efr32RadioSetCcaMode(uint8_t aMode);
+extern RAIL_Status_t                    efr32RadioSetCcaMode(uint8_t aMode);
 
 otError otPlatRadioExtensionGetPtiRadioConfig(uint16_t *radioConfig)
 {

@@ -85,35 +85,32 @@
 // <<< sl:start pin_tool >>>
 // <gpio> SL_CPC_DRV_SPI_INSTANCE_RX_IRQ
 // $[GPIO_SL_CPC_DRV_SPI_INSTANCE_RX_IRQ]
-#define SL_CPC_DRV_SPI_INSTANCE_RX_IRQ_PORT                gpioPortB
-#define SL_CPC_DRV_SPI_INSTANCE_RX_IRQ_PIN                 14
+#warning "CPC SPI IRQ not configured"
+// #define SL_CPC_DRV_SPI_INSTANCE_RX_IRQ_PORT                gpioPortB
+// #define SL_CPC_DRV_SPI_INSTANCE_RX_IRQ_PIN                 14
 // [GPIO_SL_CPC_DRV_SPI_INSTANCE_RX_IRQ]$
 
 // <usart signal=TX,RX,CLK,(CS)> SL_CPC_DRV_SPI_INSTANCE
 // $[USART_SL_CPC_DRV_SPI_INSTANCE]
-#define SL_CPC_DRV_SPI_INSTANCE_PERIPHERAL                 USART0
-#define SL_CPC_DRV_SPI_INSTANCE_PERIPHERAL_NO              0
-
-// USART TX
-#define SL_CPC_DRV_SPI_INSTANCE_TX_PORT                    gpioPortD
-#define SL_CPC_DRV_SPI_INSTANCE_TX_PIN                     13
-#define SL_CPC_DRV_SPI_INSTANCE_TX_LOC                     22
-
-// USART RX
-#define SL_CPC_DRV_SPI_INSTANCE_RX_PORT                    gpioPortD
-#define SL_CPC_DRV_SPI_INSTANCE_RX_PIN                     14
-#define SL_CPC_DRV_SPI_INSTANCE_RX_LOC                     20
-
-// USART CLK
-#define SL_CPC_DRV_SPI_INSTANCE_CLK_PORT                   gpioPortD
-#define SL_CPC_DRV_SPI_INSTANCE_CLK_PIN                    15
-#define SL_CPC_DRV_SPI_INSTANCE_CLK_LOC                    21
-
-// USART CS
-#define SL_CPC_DRV_SPI_INSTANCE_CS_PORT                    gpioPortB
-#define SL_CPC_DRV_SPI_INSTANCE_CS_PIN                     11
-#define SL_CPC_DRV_SPI_INSTANCE_CS_LOC                     3
-
+#warning "CPC USART peripheral not configured"
+// #define SL_CPC_DRV_SPI_INSTANCE_PERIPHERAL                 USART0
+// #define SL_CPC_DRV_SPI_INSTANCE_PERIPHERAL_NO              0
+//
+// #define SL_CPC_DRV_SPI_INSTANCE_TX_PORT                    gpioPortD
+// #define SL_CPC_DRV_SPI_INSTANCE_TX_PIN                     13
+// #define SL_CPC_DRV_SPI_INSTANCE_TX_LOC                     22
+//
+// #define SL_CPC_DRV_SPI_INSTANCE_RX_PORT                    gpioPortD
+// #define SL_CPC_DRV_SPI_INSTANCE_RX_PIN                     14
+// #define SL_CPC_DRV_SPI_INSTANCE_RX_LOC                     20
+//
+// #define SL_CPC_DRV_SPI_INSTANCE_CLK_PORT                   gpioPortD
+// #define SL_CPC_DRV_SPI_INSTANCE_CLK_PIN                    15
+// #define SL_CPC_DRV_SPI_INSTANCE_CLK_LOC                    21
+//
+// #define SL_CPC_DRV_SPI_INSTANCE_CS_PORT                    gpioPortB
+// #define SL_CPC_DRV_SPI_INSTANCE_CS_PIN                     11
+// #define SL_CPC_DRV_SPI_INSTANCE_CS_LOC                     3
 // [USART_SL_CPC_DRV_SPI_INSTANCE]$
 // <<< sl:end pin_tool >>>
 

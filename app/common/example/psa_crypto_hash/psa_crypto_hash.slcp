@@ -1,7 +1,7 @@
 project_name: psa_crypto_hash
 package: platform
 quality: production
-label: Platform - PSA Crypto Hash
+label: Platform Security - SoC PSA Crypto Hash
 description: >
   This example project demonstrates the hash API.
 category: Example|Platform

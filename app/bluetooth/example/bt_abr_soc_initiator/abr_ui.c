@@ -116,12 +116,16 @@ void abr_ui_write_text(char *str, uint8_t row)
                         true);
 }
 
-void abr_ui_print_distance(float distance, uint8_t row)
+void abr_ui_print_value(float value, uint8_t row, char *unit)
 {
+  char *unit_str = "";
+  if (unit != NULL) {
+    unit_str = unit;
+  }
   char buffer[BUFFER_SIZE];
-  uint32_t base = truncf(distance);
-  uint32_t ext = (distance - (float)base) * 100;
-  sprintf(buffer, "%lu.%02lum", base, ext);
+  uint32_t base = truncf(value);
+  uint32_t ext = (value - (float)base) * 100;
+  sprintf(buffer, "%lu.%02lu%s", base, ext, unit_str);
   abr_ui_write_text(buffer, row);
 }
 

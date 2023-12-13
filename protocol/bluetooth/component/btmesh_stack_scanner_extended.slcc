@@ -1,0 +1,21 @@
+id: "btmesh_stack_scanner_extended"
+label: "Standard Extended Scanner"
+package: "Btmesh"
+description: >
+  This component lets the Bluetooth Mesh stack make use of extended
+  advertisements. It uses Bluetooth extended scanner API.
+
+  Include this component if your mesh application needs extended
+  advertisements.  For standard-compliant mesh application you should
+  use the legacy scanner component instead.
+
+category: "Bluetooth Mesh|Scanner Types"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "bluetooth_feature_extended_scanner"
+provides:
+  - name: "btmesh_stack_scanner_extended"
+  - name: "btmesh_scanner"
+    allow_multiple: true

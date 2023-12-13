@@ -176,18 +176,6 @@ void emberAfPluginNetworkSteeringCompleteCallback(EmberStatus status,
                                                   uint8_t finalState)
 {
   sl_zigbee_app_debug_println("Join network complete: 0x%02X", status);
-
-  if (status != EMBER_SUCCESS) {
-    // Initialize our ZLL security now so that we are ready to be a touchlink
-    // target at any point.
-    status = emberAfZllSetInitialSecurityState();
-    if (status != EMBER_SUCCESS) {
-      sl_zigbee_app_debug_println("Error: cannot initialize ZLL security: 0x%02X", status);
-    }
-
-    status = emberAfPluginNetworkCreatorStart(false); // distributed
-    sl_zigbee_app_debug_println("Form network start: 0x%02X", status);
-  }
 }
 
 /** @brief Complete the network creation process.
@@ -305,3 +293,118 @@ void emberAfHalButtonIsrCallback(uint8_t button, uint8_t state)
   }
 }
 #endif // EBER_TEST
+
+#ifdef SL_CATALOG_BLUETOOTH_PRESENT
+
+//------------------------------------------------------------------------------
+// Bluetooth Event handler
+
+#include "zigbee_app_framework_event.h"
+#include "zigbee_app_framework_common.h"
+#include "sl_bluetooth.h"
+#include "sl_bluetooth_advertiser_config.h"
+#include "sl_bluetooth_connection_config.h"
+#include "sl_component_catalog.h"
+static uint8_t cli_adv_handle;
+void zb_ble_dmp_print_ble_address(uint8_t *address)
+{
+  sl_zigbee_app_debug_print("\nBLE address: [%02X %02X %02X %02X %02X %02X]\n",
+                            address[5], address[4], address[3],
+                            address[2], address[1], address[0]);
+}
+
+void sl_bt_on_event(sl_bt_msg_t* evt)
+{
+  switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_bt_evt_system_boot_id: {
+      bd_addr ble_address;
+      uint8_t type;
+      sl_status_t status = sl_bt_system_hello();
+      sl_zigbee_app_debug_println("BLE hello: %s",
+                                  (status == SL_STATUS_OK) ? "success" : "error");
+
+      #define SCAN_WINDOW 5
+      #define SCAN_INTERVAL 10
+
+      status = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_active,
+                                            (uint16_t)SCAN_INTERVAL,
+                                            (uint16_t)SCAN_WINDOW);
+
+      status = sl_bt_system_get_identity_address(&ble_address, &type);
+      zb_ble_dmp_print_ble_address(ble_address.addr);
+
+      status = sl_bt_advertiser_create_set(&cli_adv_handle);
+      if (status) {
+        sl_zigbee_app_debug_println("sl_bt_advertiser_create_set status 0x%02x", status);
+      }
+    }
+    break;
+
+    case sl_bt_evt_connection_opened_id: {
+      sl_zigbee_app_debug_println("sl_bt_evt_connection_opened_id \n");
+      sl_bt_evt_connection_opened_t *conn_evt =
+        (sl_bt_evt_connection_opened_t*) &(evt->data);
+      sl_bt_connection_set_preferred_phy(conn_evt->connection, sl_bt_test_phy_1m, 0xff);
+      sl_zigbee_app_debug_println("BLE connection opened");
+    }
+    break;
+    case sl_bt_evt_connection_phy_status_id: {
+      sl_bt_evt_connection_phy_status_t *conn_evt =
+        (sl_bt_evt_connection_phy_status_t *)&(evt->data);
+      // indicate the PHY that has been selected
+      sl_zigbee_app_debug_println("now using the %dMPHY\r\n",
+                                  conn_evt->phy);
+    }
+    break;
+    case sl_bt_evt_connection_closed_id: {
+      sl_bt_evt_connection_closed_t *conn_evt =
+        (sl_bt_evt_connection_closed_t*) &(evt->data);
+
+      sl_zigbee_app_debug_println(
+        "BLE connection closed, handle=0x%02x, reason=0x%02x",
+        conn_evt->connection, conn_evt->reason);
+    }
+    break;
+
+    case sl_bt_evt_scanner_legacy_advertisement_report_id: {
+      sl_zigbee_app_debug_print("Scan response, address type=0x%02x",
+                                evt->data.evt_scanner_legacy_advertisement_report.address_type);
+      zb_ble_dmp_print_ble_address(evt->data.evt_scanner_legacy_advertisement_report.address.addr);
+      sl_zigbee_app_debug_println("");
+    }
+    break;
+
+    case sl_bt_evt_connection_parameters_id: {
+      sl_bt_evt_connection_parameters_t* param_evt =
+        (sl_bt_evt_connection_parameters_t*) &(evt->data);
+      sl_zigbee_app_debug_println(
+        "BLE connection parameters are updated, handle=0x%02x, interval=0x%02x, latency=0x%02x, timeout=0x%02x, security=0x%02x, txsize=0x%02x",
+        param_evt->connection,
+        param_evt->interval,
+        param_evt->latency,
+        param_evt->timeout,
+        param_evt->security_mode,
+        param_evt->txsize);
+    }
+    break;
+
+    case sl_bt_evt_gatt_service_id: {
+      sl_bt_evt_gatt_service_t* service_evt =
+        (sl_bt_evt_gatt_service_t*) &(evt->data);
+      uint8_t i;
+      sl_zigbee_app_debug_println(
+        "GATT service, conn_handle=0x%02x, service_handle=0x%04x",
+        service_evt->connection, service_evt->service);
+      sl_zigbee_app_debug_print("UUID=[");
+      for (i = 0; i < service_evt->uuid.len; i++) {
+        sl_zigbee_app_debug_print("0x%04x ", service_evt->uuid.data[i]);
+      }
+      sl_zigbee_app_debug_println("]");
+    }
+    break;
+
+    default:
+      break;
+  }
+}
+#endif //SL_CATALOG_BLUETOOTH_PRESENT

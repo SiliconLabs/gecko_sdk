@@ -82,8 +82,6 @@ configuration:
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
     value: "1"
 #------------  RAIL init, Protocol -------------------

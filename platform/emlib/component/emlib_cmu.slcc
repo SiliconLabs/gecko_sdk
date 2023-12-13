@@ -16,6 +16,11 @@ include:
     - path: "sli_em_cmu.h"
 provides:
   - name: emlib_cmu
+    condition: [device_series_0]
+  - name: emlib_cmu
+    condition: [device_series_1]
+  - name: emlib_cmu
+    condition: [device_series_2]
 requires:
   - name: device
   - name: device_has_cmu
@@ -29,6 +34,7 @@ requires:
     condition: [device_has_syscfg]
   - name: enum
   - name: component_catalog
+  - name: status
 
 documentation:
   docset: gecko-platform

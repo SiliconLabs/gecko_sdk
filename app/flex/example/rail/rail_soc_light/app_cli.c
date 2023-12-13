@@ -35,7 +35,7 @@
 
 #include "sl_component_catalog.h"
 #include "em_chip.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_cli.h"
 #include "app_process.h"
 

@@ -34,6 +34,10 @@
 #include "sli_tz_ns_interface.h"
 #endif
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 /***************************************************************************//**
  * @addtogroup Interface Application Interface
  * @brief Application interface to the bootloader
@@ -718,5 +722,8 @@ __STATIC_INLINE bool bootloader_pointerValid(const void *ptr)
 
 /** @} (end addtogroup CommonInterface) */
 /** @} (end addtogroup Interface) */
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif // BTL_INTERFACE_H

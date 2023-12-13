@@ -1285,60 +1285,6 @@ __STATIC_INLINE void GPIO_Unlock(void)
   GPIO->LOCK = GPIO_LOCK_LOCKKEY_UNLOCK;
 }
 
-/*******************************************************************************
- ***********************   DEPRECATED PROTOTYPES   *****************************
- ***********************     (will be removed)     *****************************
- ******************************************************************************/
-
-/***************************************************************************//**
- * @brief
- *   Configure GPIO interrupt.
- *
- * @details
- *   If reconfiguring a GPIO interrupt that is already enabled, it is generally
- *   recommended to disable it first, see @ref GPIO_IntDisable().
- *
- *   The actual GPIO interrupt handler must be in place before enabling the
- *   interrupt.
- *
- *   Notice that any pending interrupt for the selected pin is cleared by this
- *   function.
- *
- * @deprecated
- *   Deprecated function. New code should use @ref GPIO_ExtIntConfig().
- *
- * @note
- *   A certain pin number can only be associated with one port; i.e., if GPIO
- *   interrupt 1 is assigned to port A/pin 1, then it is not possible to use
- *   pin 1 from any other ports for interrupts. Refer to the reference
- *   manual. On devices which implement GPIO_EXTIPINSEL registers a more
- *   flexible approach is possible, refer to @ref GPIO_ExtIntConfig().
- *
- * @param[in] port
- *   The port to associate with @p pin.
- *
- * @param[in] pin
- *   The pin number on the port ( == GPIO EXTI interrupt number).
- *
- * @param[in] risingEdge
- *   Set to true if interrupts will be enabled on rising edge, otherwise false.
- *
- * @param[in] fallingEdge
- *   Set to true if interrupts will be enabled on falling edge, otherwise false.
- *
- * @param[in] enable
- *   Set to true if interrupt will be enabled after configuration completed,
- *   false to leave disabled. See @ref GPIO_IntDisable() and @ref GPIO_IntEnable().
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void GPIO_IntConfig(GPIO_Port_TypeDef port,
-                                                              unsigned int pin,
-                                                              bool risingEdge,
-                                                              bool fallingEdge,
-                                                              bool enable)
-{
-  GPIO_ExtIntConfig(port, pin, pin, risingEdge, fallingEdge, enable);
-}
-
 /** @} (end addtogroup gpio) */
 
 #ifdef __cplusplus

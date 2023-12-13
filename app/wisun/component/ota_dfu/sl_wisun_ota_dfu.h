@@ -133,7 +133,6 @@ typedef union sl_wisun_ota_dfu_error_ctx {
 
 /** @} (end SL_WISUN_OTA_DFU_TYPES) */
 
-
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -159,6 +158,17 @@ sl_status_t sl_wisun_ota_dfu_start_fw_update(void);
  * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
  *****************************************************************************/
 sl_status_t sl_wisun_ota_dfu_stop_fw_update(void);
+
+#if !SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED
+/**************************************************************************//**
+ * @brief Reboot device.
+ * @details Reboot device with calling corresponding gecko bootloader
+ *          'bootloader_rebootAndInstall' API
+ *          This functions is available if auto-reboot mode is disabled.
+ * @return sl_status_t SL_STATUS_OK on success, otherwise SL_STATUS_FAIL
+ *****************************************************************************/
+sl_status_t sl_wisun_ota_dfu_reboot_and_install(void);
+#endif
 
 /**************************************************************************//**
  * @brief Get the status value.
@@ -197,7 +207,6 @@ bool sl_wisun_ota_dfu_get_fw_update_status_flag(const sl_wisun_ota_dfu_status_t 
  ******************************************************************************/
 void sl_wisun_ota_dfu_error_hnd(const sl_wisun_ota_dfu_error_code_t error_code,
                                 sl_wisun_ota_dfu_error_ctx_t * const ctx);
-
 
 /** @}*/
 

@@ -21,3 +21,6 @@ template_contribution:
       function: "sl_btctrl_alloc_periodic_scan(SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC);sl_btctrl_init_periodic_scan()"
       deinit: "sl_btctrl_alloc_periodic_scan(0)"
     priority: 10
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-sync

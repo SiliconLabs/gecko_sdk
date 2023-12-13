@@ -70,6 +70,7 @@ sl_status_t sli_mvp_ml_fully_connected_s8(const sli_mvp_ml_fully_connected_s8_pa
 
 static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fully_connected_s8_params_t *params)
 {
+  sl_status_t status;
   sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
 
   int32_t output_offset = params->output_offset;
@@ -265,10 +266,10 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_small_input(const sli_mvp_ml_fu
                         SLI_MVP_LOOP_INCRDIM(SLI_MVP_ARRAY(1), SLI_MVP_INCRDIM_ROW),
                         0);
 
-  sli_mvp_prog_execute(prog, true);
-  sl_math_mvp_clamp_i8(params->output, output_len, params->activation_min, params->activation_max);
-
-  return SL_STATUS_OK;
+  if ((status = sli_mvp_prog_execute(prog, true)) != SL_STATUS_OK) {
+    return status;
+  }
+  return sl_math_mvp_clamp_i8(params->output, output_len, params->activation_min, params->activation_max);
 }
 
 sl_status_t sli_mvp_ml_fully_connected_bias_convert(const int32_t *bias, float16_t *dst, size_t len)
@@ -333,6 +334,7 @@ bool sli_mvp_ml_fully_connected_s8_is_supported(const sli_mvp_ml_fully_connected
 
 static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fully_connected_s8_params_t *params)
 {
+  sl_status_t status;
   sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
 
   int32_t output_offset = params->output_offset;
@@ -487,11 +489,11 @@ static sl_status_t sli_mvp_ml_fully_connected_s8_large_input(const sli_mvp_ml_fu
       sli_mvp_prog_set_matrix(prog, SLI_MVP_ARRAY(1), (int8_t *)weight_row, input_type, n, m);
       sli_mvp_prog_set_vector(prog, SLI_MVP_ARRAY(3), output_ptr, SLI_MVP_DATATYPE_INT8, 1);
       sli_mvp_prog_set_reg_f16(prog, SLI_MVP_R5, bias_value);
-      sli_mvp_prog_execute(prog, true);
+      if ((status = sli_mvp_prog_execute(prog, true)) != SL_STATUS_OK) {
+        return status;
+      }
     }
   }
 
-  sl_math_mvp_clamp_i8(params->output, output_len, params->activation_min, params->activation_max);
-
-  return SL_STATUS_OK;
+  return sl_math_mvp_clamp_i8(params->output, output_len, params->activation_min, params->activation_max);
 }

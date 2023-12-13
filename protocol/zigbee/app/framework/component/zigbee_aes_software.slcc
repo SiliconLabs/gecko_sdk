@@ -5,10 +5,10 @@ quality: production
 id: zigbee_aes_software
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_aes"
-   - name: "zigbee_aes_software"
+  - name: zigbee_aes
+  - name: zigbee_aes_software
 requires:
-   - name: "mbedtls_aes"
+  - name: mbedtls_aes
 
 include:
   - path: protocol/zigbee/stack/platform/micro
@@ -25,16 +25,16 @@ source:
   - path: protocol/zigbee/stack/framework/aes-ecb.c
 
 define:
-  - name: "MBEDTLS_PLATFORM_FREE_MACRO"
-    value: "free"
-    unless: [lower_mac_spinel]
-  - name: "MBEDTLS_PLATFORM_CALLOC_MACRO"
-    value: "calloc"
-    unless: [lower_mac_spinel]
-  - name: "MBEDTLS_PLATFORM_C"
-    unless: [lower_mac_spinel]
-  - name: "MBEDTLS_PLATFORM_MEMORY"
-    unless: [lower_mac_spinel]
+  - name: MBEDTLS_PLATFORM_FREE_MACRO
+    value: free
+    unless: [zigbee_stack_unix]
+  - name: MBEDTLS_PLATFORM_CALLOC_MACRO
+    value: calloc
+    unless: [zigbee_stack_unix]
+  - name: MBEDTLS_PLATFORM_C
+    unless: [zigbee_stack_unix]
+  - name: MBEDTLS_PLATFORM_MEMORY
+    unless: [zigbee_stack_unix]
 
 template_contribution:
   - name: component_catalog

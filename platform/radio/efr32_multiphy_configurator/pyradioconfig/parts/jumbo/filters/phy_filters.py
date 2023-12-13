@@ -26,6 +26,7 @@ class PhyFilters(IPhyFilter):
                             'Phys_Velux',
                             'Phys_sim_tests',
                             'Phys_Internal',
+                            'Phys_Internal_WiSUN',
                         ]
 
     sim_tests_phy_groups = ['Phys_sim_tests']

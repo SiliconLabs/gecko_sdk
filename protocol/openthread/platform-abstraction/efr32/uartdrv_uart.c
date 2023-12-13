@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +32,42 @@
  *
  */
 
-
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
-#include <stddef.h>
-#include <string.h>
-#include "openthread-system.h"
-#include <openthread-core-config.h>
-#include "utils/code_utils.h"
-#include "utils/uart.h"
 #include "em_core.h"
-#include "uartdrv.h"
 #include "sl_uartdrv_instances.h"
 #include "sl_uartdrv_usart_vcom_config.h"
+#include "uartdrv.h"
+#include <openthread-core-config.h>
+#include <openthread-system.h>
+#include <stddef.h>
+#include <string.h>
+#include "utils/code_utils.h"
+#include "utils/uart.h"
 
 #include "ecode.h"
-#include "sl_sleeptimer.h"
-#include "sl_status.h"
-#include "platform-efr32.h"
 #include "em_gpio.h"
 #include "gpiointerrupt.h"
+#include "platform-efr32.h"
+#include "sl_sleeptimer.h"
+#include "sl_status.h"
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
 
-static unsigned int         sGpioIntContext = 0;
+static unsigned int sGpioIntContext = 0;
 
 static void gpioSerialWakeupCallback(uint8_t interrupt_no, void *context)
 {
-  unsigned int *pin = (unsigned int *)context;
+    unsigned int *pin = (unsigned int *)context;
 
-  (void)interrupt_no;
+    (void)interrupt_no;
 
-  if (*pin == SL_UARTDRV_USART_VCOM_RX_PIN) {
-      otSysEventSignalPending();
-  }
+    if (*pin == SL_UARTDRV_USART_VCOM_RX_PIN)
+    {
+        otSysEventSignalPending();
+    }
 }
 #endif // SL_CATALOG_KERNEL_PRESENT
 
@@ -79,10 +79,10 @@ enum
 // In order to reduce the probability of data loss due to disabled interrupts, we use
 // two duplicate receive buffers so we can always have one "active" receive request.
 #define RECEIVE_BUFFER_SIZE 128
-static uint8_t              sReceiveBuffer1[RECEIVE_BUFFER_SIZE];
-static uint8_t              sReceiveBuffer2[RECEIVE_BUFFER_SIZE];
-static uint8_t              lastCount = 0;
-static volatile bool        sTxComplete = false;
+static uint8_t       sReceiveBuffer1[RECEIVE_BUFFER_SIZE];
+static uint8_t       sReceiveBuffer2[RECEIVE_BUFFER_SIZE];
+static uint8_t       lastCount   = 0;
+static volatile bool sTxComplete = false;
 
 typedef struct ReceiveFifo_t
 {
@@ -108,7 +108,7 @@ static void receiveDone(UARTDRV_Handle_t aHandle, Ecode_t aStatus, uint8_t *aDat
     {
         memcpy(sReceiveFifo.mBuffer + sReceiveFifo.mTail, aData + lastCount, aCount - lastCount);
         sReceiveFifo.mTail = (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize;
-        lastCount = 0;
+        lastCount          = 0;
     }
 
     UARTDRV_Receive(aHandle, aData, aCount, receiveDone);
@@ -129,17 +129,15 @@ static void transmitDone(UARTDRV_Handle_t aHandle, Ecode_t aStatus, uint8_t *aDa
 
 static void processReceive(void)
 {
-    uint8_t *aData;
+    uint8_t        *aData;
     UARTDRV_Count_t aCount, remaining;
-    CORE_ATOMIC_SECTION(
-      UARTDRV_GetReceiveStatus(sl_uartdrv_usart_vcom_handle, &aData, &aCount, &remaining);
-      if (aCount > lastCount)
-      {
-          memcpy(sReceiveFifo.mBuffer + sReceiveFifo.mTail, aData + lastCount, aCount - lastCount);
-          sReceiveFifo.mTail = (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize;
-          lastCount = aCount;
-      }
-    )
+
+    CORE_ATOMIC_SECTION(UARTDRV_GetReceiveStatus(sl_uartdrv_usart_vcom_handle, &aData, &aCount, &remaining);
+                        if (aCount > lastCount) {
+                            memcpy(sReceiveFifo.mBuffer + sReceiveFifo.mTail, aData + lastCount, aCount - lastCount);
+                            sReceiveFifo.mTail = (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize;
+                            lastCount          = aCount;
+                        })
 
     // Copy tail to prevent multiple reads
     uint16_t tail = sReceiveFifo.mTail;
@@ -183,7 +181,7 @@ void efr32UartProcess(void)
 
 otError otPlatUartEnable(void)
 {
-    otError error  = OT_ERROR_NONE;
+    otError error = OT_ERROR_NONE;
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
     unsigned int intNo;
@@ -193,18 +191,16 @@ otError otPlatUartEnable(void)
     sGpioIntContext = SL_UARTDRV_USART_VCOM_RX_PIN;
     intNo = GPIOINT_CallbackRegisterExt(SL_UARTDRV_USART_VCOM_RX_PIN, gpioSerialWakeupCallback, &sGpioIntContext);
 
-
     otEXPECT_ACTION(intNo != INTERRUPT_UNAVAILABLE, error = OT_ERROR_FAILED);
 
-    GPIO_ExtIntConfig(SL_UARTDRV_USART_VCOM_RX_PORT,
-                      SL_UARTDRV_USART_VCOM_RX_PIN,
-                      intNo, false, true, true);
+    GPIO_ExtIntConfig(SL_UARTDRV_USART_VCOM_RX_PORT, SL_UARTDRV_USART_VCOM_RX_PIN, intNo, false, true, true);
 #endif
 
     sReceiveFifo.mHead = 0;
     sReceiveFifo.mTail = 0;
 
-    // When one receive request is completed, the other buffer is used for a separate receive request, issued immediately.
+    // When one receive request is completed, the other buffer is used for a separate receive request, issued
+    // immediately.
     UARTDRV_Receive(sl_uartdrv_usart_vcom_handle, sReceiveBuffer1, RECEIVE_BUFFER_SIZE, receiveDone);
     UARTDRV_Receive(sl_uartdrv_usart_vcom_handle, sReceiveBuffer2, RECEIVE_BUFFER_SIZE, receiveDone);
 
@@ -222,7 +218,7 @@ otError otPlatUartDisable(void)
 static void flushTimeoutAlarmCallback(sl_sleeptimer_timer_handle_t *aHandle, void *aData)
 {
     OT_UNUSED_VARIABLE(aHandle);
-    *(bool*)aData      = true;
+    *(bool *)aData = true;
 }
 
 otError otPlatUartFlush(void)
@@ -233,8 +229,11 @@ otError otPlatUartFlush(void)
     sl_sleeptimer_timer_handle_t flushTimer;
 
     // Start flush timeout timer
-    status = sl_sleeptimer_start_timer_ms(&flushTimer, OPENTHREAD_CONFIG_EFR32_UART_TX_FLUSH_TIMEOUT_MS,
-                                          flushTimeoutAlarmCallback, (void*)&flushTimedOut, 0,
+    status = sl_sleeptimer_start_timer_ms(&flushTimer,
+                                          OPENTHREAD_CONFIG_EFR32_UART_TX_FLUSH_TIMEOUT_MS,
+                                          flushTimeoutAlarmCallback,
+                                          (void *)&flushTimedOut,
+                                          0,
                                           SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
     otEXPECT_ACTION(status == SL_STATUS_OK, error = OT_ERROR_FAILED);
 
@@ -247,9 +246,9 @@ otError otPlatUartFlush(void)
     {
         // Check both peripheral status and queue depth
         transmitQueueDepth = UARTDRV_GetTransmitDepth(sl_uartdrv_usart_vcom_handle);
-        uartIdle           = (UARTDRV_GetPeripheralStatus(sl_uartdrv_usart_vcom_handle)
-                              & (UARTDRV_STATUS_TXIDLE | UARTDRV_STATUS_TXC));
-        uartFullyFlushed   = uartIdle && (transmitQueueDepth == 0);
+        uartIdle =
+            (UARTDRV_GetPeripheralStatus(sl_uartdrv_usart_vcom_handle) & (UARTDRV_STATUS_TXIDLE | UARTDRV_STATUS_TXC));
+        uartFullyFlushed = uartIdle && (transmitQueueDepth == 0);
     } while (!uartFullyFlushed && !flushTimedOut);
 
     sl_sleeptimer_stop_timer(&flushTimer);

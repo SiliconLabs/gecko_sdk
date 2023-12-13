@@ -52,12 +52,13 @@ uint8_t GetCommandResponse(SZwaveCommandStatusPackage *pCmdStatus, EZwaveCommand
 
 uint8_t IsPrimaryController(void)
 {
-  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();  
+  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();
   SZwaveCommandPackage cmdPackage = {
-      .eCommandType = EZWAVECOMMANDTYPE_IS_PRIMARY_CTRL};
+    .eCommandType = EZWAVECOMMANDTYPE_IS_PRIMARY_CTRL
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_IS_PRIMARY_CTRL))
   {
     return cmdStatus.Content.IsPrimaryCtrlStatus.result;
@@ -68,11 +69,13 @@ uint8_t IsPrimaryController(void)
 
 uint8_t GetControllerCapabilities(void)
 {
-  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();  
-  SZwaveCommandPackage cmdPackage = {.eCommandType = EZWAVECOMMANDTYPE_GET_CONTROLLER_CAPABILITIES};
+  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_GET_CONTROLLER_CAPABILITIES
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_GET_CONTROLLER_CAPABILITIES))
   {
     return cmdStatus.Content.GetControllerCapabilitiesStatus.result;
@@ -83,7 +86,7 @@ uint8_t GetControllerCapabilities(void)
 
 uint8_t QueueProtocolCommand(uint8_t *pCommand)
 {
-  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();  
+  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();
   // Put the Command on queue (and dont wait for it, queue must be empty)
   return (QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, pCommand, 0));
 }
@@ -100,16 +103,17 @@ uint8_t QueueProtocolCommand(uint8_t *pCommand)
 */
 void GetNodeInfo(uint16_t NodeId, t_ExtNodeInfo* pNodeInfo)
 {
-  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();  
+  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();
   SZwaveCommandPackage GetNodeInfoCommand = {
-      .eCommandType = EZWAVECOMMANDTYPE_NODE_INFO,
-      .uCommandParams.NodeInfo.NodeId = NodeId};
+    .eCommandType = EZWAVECOMMANDTYPE_NODE_INFO,
+    .uCommandParams.NodeInfo.NodeId = NodeId
+  };
 
   // Put the Command on queue (and dont wait for it, queue must be empty)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&GetNodeInfoCommand, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage NodeInfo;
+  SZwaveCommandStatusPackage NodeInfo = { 0 };
   if (GetCommandResponse(&NodeInfo, EZWAVECOMMANDSTATUS_NODE_INFO))
   {
     if (NodeInfo.Content.NodeInfoStatus.NodeId == NodeId)
@@ -132,7 +136,7 @@ void GetNodeInfo(uint16_t NodeId, t_ExtNodeInfo* pNodeInfo)
 */
 void Get_included_nodes(uint8_t* node_id_list)
 {
-  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();  
+  const SApplicationHandles *m_pAppHandles = ZAF_getAppHandle();
   SZwaveCommandPackage GetIncludedNodesCommand = {
       .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_INCLUDED_NODES};
 
@@ -140,7 +144,7 @@ void Get_included_nodes(uint8_t* node_id_list)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&GetIncludedNodesCommand, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage includedNodes;
+  SZwaveCommandStatusPackage includedNodes = { 0 };
   if (GetCommandResponse(&includedNodes, EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_NODES))
   {
     memcpy(node_id_list, (uint8_t*)includedNodes.Content.GetIncludedNodes.node_id_list, sizeof(NODE_MASK_TYPE));
@@ -161,7 +165,7 @@ void Get_included_nodes(uint8_t* node_id_list)
 */
 void Get_included_lr_nodes(uint8_t* node_id_list)
 {
-  const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();  
+  const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
   SZwaveCommandPackage GetIncludedNodesCommand = {
       .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_INCLUDED_LR_NODES
   };
@@ -170,7 +174,7 @@ void Get_included_lr_nodes(uint8_t* node_id_list)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&GetIncludedNodesCommand, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
   // Wait for protocol to handle command (it shouldn't take long)
-  SZwaveCommandStatusPackage includedNodes;
+  SZwaveCommandStatusPackage includedNodes = { 0 };
   if (GetCommandResponse(&includedNodes, EZWAVECOMMANDSTATUS_ZW_GET_INCLUDED_LR_NODES))
   {
     memcpy(node_id_list, (uint8_t*)includedNodes.Content.GetIncludedNodesLR.node_id_list, sizeof(LR_NODE_MASK_TYPE));
@@ -207,11 +211,12 @@ void TriggerNotification(EApplicationEvent event)
 void GetLongRangeChannel(uint8_t * channel_n, uint8_t *auto_channel_config)
 {
   const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {0};
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_GET_LR_CHANNEL;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_LR_CHANNEL
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   *auto_channel_config = 0;
   *channel_n = 0;
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_ZW_GET_LR_CHANNEL))
@@ -226,12 +231,13 @@ void GetLongRangeChannel(uint8_t * channel_n, uint8_t *auto_channel_config)
 bool SetLongRangeChannel(uint8_t channel)
 {
   const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {0};
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_SET_LR_CHANNEL;
-  cmdPackage.uCommandParams.SetLRChannel.value = channel;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_SET_LR_CHANNEL,
+    .uCommandParams.SetLRChannel.value = channel
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_ZW_SET_LR_CHANNEL))
   {
     return cmdStatus.Content.SetLRChannel.result;
@@ -244,9 +250,10 @@ bool SetLongRangeChannel(uint8_t channel)
 void SetLongRangeVirtualNodes(uint8_t bitmask)
 {
   const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {0};
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_SET_LR_VIRTUAL_IDS;
-  cmdPackage.uCommandParams.SetLRVirtualNodeIDs.value = bitmask;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_SET_LR_VIRTUAL_IDS,
+    .uCommandParams.SetLRVirtualNodeIDs.value = bitmask
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 }
@@ -254,8 +261,9 @@ void SetLongRangeVirtualNodes(uint8_t bitmask)
 uint8_t GetPTIConfig(void)
 {
   const SApplicationHandles * m_pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage cmdPackage = {0};
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_GET_PTI_CONFIG;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_PTI_CONFIG
+  };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(m_pAppHandles->pZwCommandQueue, (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
   SZwaveCommandStatusPackage cmdStatus;

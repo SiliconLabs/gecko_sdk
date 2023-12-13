@@ -54,6 +54,8 @@
 
 #define ESL_LIB_AP_CONTROL_EVT_OVERHEAD             sizeof(esl_lib_ap_control_evt_type_t)
 
+#define ESL_LIB_AP_CONTROL_ADV_INTERVAL             400 // Note: given in 0.625ms units - so this is 250ms
+
 #define PERIPHERAL_ROLE                             0
 
 #define CHECK(sc)                                                          \
@@ -71,7 +73,7 @@
   }
 
 typedef struct {
-  bool                       enabled;       // ESL AP Control Point enabked
+  bool                       initialized;   // ESL AP Control Point initialized
   uint16_t                   cp_handle;     // ESL AP Control Point handle
   uint16_t                   it_handle;     // ESL AP Image transfer handle
   esl_lib_ap_control_state_t state;         // ESL AP State
@@ -95,7 +97,7 @@ static sl_status_t send_event_from_storage(esl_lib_ap_control_evt_type_t evt_typ
 // Private variables
 
 static ap_control_t ap_control = {
-  .enabled      = false,
+  .initialized      = false,
   .cp_handle    = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
   .it_handle    = ESL_LIB_INVALID_CHARACTERISTIC_HANDLE,
   .state        = ESL_LIB_AP_CONTROL_STATE_DISCONNECTED,
@@ -321,7 +323,7 @@ sl_status_t esl_lib_ap_control_init(void)
   sc = sl_bt_gattdb_commit(session);
 
   if (sc == SL_STATUS_OK) {
-    ap_control.enabled = true;
+    ap_control.initialized = true;
     esl_lib_log_ap_control_debug("AP control initialized " APP_LOG_NL);
   } else {
     esl_lib_log_ap_control_error("AP control GATTDB commit failed = 0x%04x" APP_LOG_NL, sc);
@@ -334,7 +336,8 @@ sl_status_t esl_lib_ap_control_adv_enable(bool enable)
 {
   sl_status_t sc = SL_STATUS_OK;
 
-  if (!ap_control.enabled && enable) {
+  if (!ap_control.initialized && enable) {
+    // Lazy init the necessary GATT features
     sc = esl_lib_ap_control_init();
   }
 
@@ -343,28 +346,31 @@ sl_status_t esl_lib_ap_control_adv_enable(bool enable)
   if (enable) {
     esl_lib_log_ap_control_debug("Enabling advertising = %d" APP_LOG_NL, enable);
 
-    sc = sl_bt_advertiser_create_set(&ap_control.adv_handle);
-    CHECK(sc);
+    if (ap_control.adv_handle == SL_BT_INVALID_ADVERTISING_SET_HANDLE) {
+      sc = sl_bt_advertiser_create_set(&ap_control.adv_handle);
+      CHECK(sc);
+      sc = sl_bt_legacy_advertiser_generate_data(ap_control.adv_handle,
+                                                 sl_bt_advertiser_general_discoverable);
+      CHECK(sc);
+      sc = sl_bt_advertiser_set_timing(ap_control.adv_handle,
+                                       ESL_LIB_AP_CONTROL_ADV_INTERVAL,
+                                       ESL_LIB_AP_CONTROL_ADV_INTERVAL,
+                                       0,
+                                       0);
+      CHECK(sc);
+    }
 
-    sc = sl_bt_legacy_advertiser_generate_data(ap_control.adv_handle,
-                                               sl_bt_advertiser_general_discoverable);
-    CHECK(sc);
-
-    sc = sl_bt_advertiser_set_timing(ap_control.adv_handle,
-                                     160,
-                                     160,
-                                     0,
-                                     0);
-    CHECK(sc);
-
-    sc = sl_bt_legacy_advertiser_start(ap_control.adv_handle,
-                                       sl_bt_legacy_advertiser_connectable);
-    CHECK(sc);
+    if (ap_control.conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
+      // Enable advertising only if there's no active connection
+      sc = sl_bt_legacy_advertiser_start(ap_control.adv_handle,
+                                         sl_bt_legacy_advertiser_connectable);
+      CHECK(sc);
+    }
   } else {
     esl_lib_log_ap_control_debug("Disabling advertising = %d" APP_LOG_NL, enable);
     if (ap_control.adv_handle != SL_BT_INVALID_ADVERTISING_SET_HANDLE) {
-      sc = sl_bt_advertiser_stop(ap_control.adv_handle);
-      CHECK(sc);
+      // Demo advertising may not running at the moment (e.g. while connected) -> ignore the status
+      (void)sl_bt_advertiser_stop(ap_control.adv_handle);
       sc = sl_bt_advertiser_delete_set(ap_control.adv_handle);
       CHECK(sc);
       ap_control.adv_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
@@ -379,7 +385,7 @@ sl_status_t esl_lib_ap_control_response(esl_lib_long_array_t *data)
 {
   sl_status_t sc;
 
-  if (!ap_control.enabled) {
+  if (!ap_control.initialized) {
     return SL_STATUS_NOT_INITIALIZED;
   }
   if (data == NULL) {
@@ -406,7 +412,7 @@ sl_status_t esl_lib_ap_control_image_transfer_response(esl_lib_long_array_t *dat
 {
   sl_status_t sc;
 
-  if (!ap_control.enabled) {
+  if (!ap_control.initialized) {
     return SL_STATUS_NOT_INITIALIZED;
   }
 
@@ -435,7 +441,7 @@ void esl_lib_ap_control_on_bt_event(sl_bt_msg_t *evt)
   uint16_t size_sent = 0;
   bool subscribe = false;
 
-  if (!ap_control.enabled) {
+  if (!ap_control.initialized) {
     return;
   }
 
@@ -563,6 +569,10 @@ void esl_lib_ap_control_on_bt_event(sl_bt_msg_t *evt)
         (void)send_event(ESL_LIB_AP_CONTROL_EVT_STATUS,
                          sizeof(ap_control.state),
                          (uint8_t *)&ap_control.state);
+        if (ap_control.adv_handle != SL_BT_INVALID_ADVERTISING_SET_HANDLE) {
+          // Re-enable advertising unless the demo mode has been disabled by the user while being connected to the demo app
+          (void)esl_lib_ap_control_adv_enable(true);
+        }
       }
       break;
 

@@ -40,7 +40,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
 #include <inttypes.h>
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "sl_wisun_network_measurement_stat.h"
 // -----------------------------------------------------------------------------
@@ -76,6 +76,12 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
                                 const uint16_t meas_count,
                                 const uint16_t meas_packet_length);
 
+/**************************************************************************//**
+ * @brief Print node info
+ * @details Printing info about the border router and the neighbors
+ *****************************************************************************/
+void sl_wisun_print_node_info(void);
+
 #if defined(SL_CATALOG_GUI_PRESENT)
 /**************************************************************************//**
  * @brief Wi-SUN Network measurement
@@ -85,7 +91,7 @@ void sl_wisun_nwm_quick_measure(const sl_wisun_nwm_target_type_t meas_type,
  * @param[in] meas_packet_length Size of the measurement packet
  * @param[in] update_gui Flag to indicate if the GUI is to be updated
  *****************************************************************************/
-void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+void sl_wisun_nwm_measure(const sockaddr_in6_t * const remote_address,
                           const uint16_t meas_count,
                           const uint16_t meas_packet_length,
                           const bool update_gui);
@@ -97,11 +103,10 @@ void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
  * @param[in] meas_count Count of measurement
  * @param[in] meas_packet_length Size of the measurement packet
  *****************************************************************************/
-void sl_wisun_nwm_measure(const wisun_addr_t * const remote_address,
+void sl_wisun_nwm_measure(const sockaddr_in6_t * const remote_address,
                           const uint16_t meas_count,
                           const uint16_t meas_packet_length);
 #endif
-
 
 #ifdef __cplusplus
 }

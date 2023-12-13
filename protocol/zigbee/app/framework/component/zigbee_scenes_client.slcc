@@ -1,14 +1,11 @@
 package: Zigbee
-description: Silicon Labs implementation of the Scenes client cluster.  The component is only
-  intended to assist with debugging, as the implemented callbacks simply parse responses
-  from the Scenes server and print the results. Before production, this component
-  should be replaced with code that acts on the responses in an appropriate way.
+description: Silicon Labs implementation of the Scenes client cluster.  The component is only intended to assist with debugging, as the implemented callbacks simply parse responses from the Scenes server and print the results. Before production, this component should be replaced with code that acts on the responses in an appropriate way.
 id: zigbee_scenes_client
 label: Scenes Client Cluster
 category: Zigbee|Cluster Library|Common
 quality: production
 provides:
-   - name: "zigbee_scenes_client"
+  - name: zigbee_scenes_client
 source:
   - path: protocol/zigbee/app/framework/plugin/scenes-client/scenes-client.c
 include:
@@ -20,10 +17,10 @@ template_contribution:
     value: zigbee_scenes_client
   - name: cluster_service
     value:
-       cluster_id: "0x0005"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"
-       service_function: "emberAfScenesClusterClientCommandParse"
+      cluster_id: '0x0005'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfScenesClusterClientCommandParse
 
 documentation:
   docset: zigbee

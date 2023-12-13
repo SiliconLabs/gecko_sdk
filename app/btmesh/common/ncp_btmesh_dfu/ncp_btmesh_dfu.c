@@ -34,6 +34,7 @@
 #include "sl_bt_api.h"
 
 #include "ncp_btmesh_dfu.h"
+#include "sl_ncp.h"
 #include "sl_status.h"
 
 /// Maximum length of the version infromation
@@ -42,6 +43,33 @@
 #define CID_LENGTH            2
 /// Maximum length of firmware URI
 #define URI_MAX_LENGTH        255
+
+/// User command to set FWID
+#define USER_CMD_FWID_ID 'F'
+typedef struct {
+  uint8_t idx;
+  uint8_t len;
+  uint8_t data[];
+} cmd_fwid_t;
+
+/// User command to set FW URI
+#define USER_CMD_URI_ID 'U'
+typedef struct {
+  uint8_t type;
+  uint8_t idx;
+  uint8_t len;
+  uint8_t data[];
+} cmd_uri_t;
+
+PACKSTRUCT(struct user_cmd {
+  uint8_t hdr;
+  union {
+    cmd_fwid_t cmd_fwid;
+    cmd_uri_t cmd_uri;
+  } data;
+});
+
+typedef struct user_cmd user_cmd_t;
 
 /// Storage entry structure
 typedef PACKSTRUCT (struct storage_s {
@@ -182,4 +210,36 @@ sl_status_t sl_btmesh_ncp_dfu_set_uri(uint8_t idx,
   }
 
   return SL_STATUS_OK;
+}
+
+void sl_btmesh_ncp_dfu_handle_cmd(void *data, bool *cmd_handled)
+{
+  uint8array *cmd = (uint8array *)data;
+  user_cmd_t *user_cmd = (user_cmd_t *)cmd->data;
+
+  if (*cmd_handled == true) {
+    return;
+  }
+
+  switch (user_cmd->hdr) {
+    case USER_CMD_FWID_ID: {
+      sl_status_t sc = sl_btmesh_ncp_dfu_set_fwid(user_cmd->data.cmd_fwid.idx,
+                                                  user_cmd->data.cmd_fwid.len,
+                                                  user_cmd->data.cmd_fwid.data);
+      sl_ncp_user_cmd_message_to_target_rsp(sc, cmd->len, cmd->data);
+      *cmd_handled = true;
+      break;
+    }
+    case USER_CMD_URI_ID: {
+      sl_status_t sc = sl_btmesh_ncp_dfu_set_uri(user_cmd->data.cmd_uri.idx,
+                                                 user_cmd->data.cmd_uri.type,
+                                                 user_cmd->data.cmd_uri.len,
+                                                 user_cmd->data.cmd_uri.data);
+      sl_ncp_user_cmd_message_to_target_rsp(sc, cmd->len, cmd->data);
+      *cmd_handled = true;
+      break;
+    }
+    default:
+      break;
+  }
 }

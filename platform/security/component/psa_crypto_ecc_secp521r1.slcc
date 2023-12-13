@@ -22,7 +22,7 @@ requires:
     condition: [device_security_rot]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_521
+    value: PSA_WANT_ECC_SECP_R1_521 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_R1_521 1"
     condition: [mbedtls_ecc_secp521r1]

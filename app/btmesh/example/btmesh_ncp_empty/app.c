@@ -30,15 +30,8 @@
 #include "em_common.h"
 #include "sl_ncp.h"
 
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif // SL_COMPONENT_CATALOG_PRESENT
-
+#include "ncp_btmesh_user_cmd.h"
 #include "app.h"
-
-#ifdef SL_CATALOG_BTMESH_STACK_FW_UPDATE_SERVER_PRESENT
-#include "ncp_btmesh_dfu.h"
-#endif // SL_CATALOG_BTMESH_STACK_FW_UPDATE_SERVER_PRESENT
 
 /***************************************************************************//**
  * Application Init.
@@ -64,7 +57,7 @@ SL_WEAK void app_process_action(void)
 }
 
 /***************************************************************************//**
- * User command (message_to_target) handler callback.
+ * Application user command (message_to_target) handler callback.
  *
  * Handles user defined commands received from NCP host.
  * The user commands handled here are defined in app.h and are solely meant for
@@ -73,12 +66,11 @@ SL_WEAK void app_process_action(void)
  *
  * @note This overrides the dummy weak implementation.
  ******************************************************************************/
-void sl_ncp_user_cmd_message_to_target_cb(void *data)
+void sl_ncp_app_user_cmd_message_to_target_cb(void *data)
 {
   uint8array *cmd = (uint8array *)data;
-  user_cmd_t *user_cmd = (user_cmd_t *)cmd->data;
 
-  switch (user_cmd->hdr) {
+  switch (cmd->data[0]) {
     // -------------------------------
     // Example: user command 1.
     case USER_CMD_1_ID:
@@ -105,25 +97,6 @@ void sl_ncp_user_cmd_message_to_target_cb(void *data)
       // Example: sending back received command as an event.
       sl_ncp_user_evt_message_to_host(cmd->len, cmd->data);
       break;
-
-#ifdef SL_CATALOG_BTMESH_STACK_FW_UPDATE_SERVER_PRESENT
-    case USER_CMD_FWID_ID: {
-      sl_status_t sc = sl_btmesh_ncp_dfu_set_fwid(user_cmd->data.cmd_fwid.idx,
-                                                  user_cmd->data.cmd_fwid.len,
-                                                  user_cmd->data.cmd_fwid.data);
-      sl_ncp_user_cmd_message_to_target_rsp(sc, cmd->len, cmd->data);
-      break;
-    }
-
-    case USER_CMD_URI_ID: {
-      sl_status_t sc = sl_btmesh_ncp_dfu_set_uri(user_cmd->data.cmd_uri.idx,
-                                                 user_cmd->data.cmd_uri.type,
-                                                 user_cmd->data.cmd_uri.len,
-                                                 user_cmd->data.cmd_uri.data);
-      sl_ncp_user_cmd_message_to_target_rsp(sc, cmd->len, cmd->data);
-      break;
-    }
-#endif // SL_CATALOG_BTMESH_STACK_FW_UPDATE_SERVER_PRESENT
 
     // -------------------------------
     // Unknown user command.

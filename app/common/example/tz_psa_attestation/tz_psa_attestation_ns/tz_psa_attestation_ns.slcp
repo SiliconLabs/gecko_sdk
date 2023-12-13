@@ -1,7 +1,7 @@
 project_name: tz_psa_attestation_ns
 package: platform
 quality: production
-label: Platform - TrustZone PSA Attestation (Non-secure application)
+label: Platform Security - SoC TrustZone PSA Attestation (Non-secure application)
 description: >
   The Non-secure part of the application demonstrates how to generate PSA attestation token and print them in a human-readable format. The Non-secure application needs to build with the Secure application on a workspace (tz_psa_attestation_ws).
 category: Example|Platform

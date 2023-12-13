@@ -65,7 +65,8 @@ sl_status_t app_timer_start(app_timer_t *timer,
   sl_status_t sc;
   RTOS_ERR err;
   OS_RATE_HZ tick_rate;
-  OS_TICK delay, d_error, period;
+  OS_TICK delay;
+  OS_TICK period;
   OS_OPT opt;
 
   // Check input parameters.
@@ -76,10 +77,10 @@ sl_status_t app_timer_start(app_timer_t *timer,
   // Calculate timer period.
   tick_rate = OSTimeTickRateHzGet(&err);
   RTOS_ERROR_CHECK(err);
-  delay = (timeout_ms * tick_rate) / (OSTmrUpdateCnt * 1000);
-  d_error = (timeout_ms * tick_rate) % (OSTmrUpdateCnt * 1000);
-  if (d_error != 0) {
-    // The timer resolution is too small for the requested timeout.
+
+  delay = (timeout_ms * tick_rate + OSTmrUpdateCnt * 1000 - 1)
+          / (OSTmrUpdateCnt * 1000);
+  if (delay == 0) {
     return SL_STATUS_INVALID_PARAMETER;
   }
   period = is_periodic ? delay : 0;

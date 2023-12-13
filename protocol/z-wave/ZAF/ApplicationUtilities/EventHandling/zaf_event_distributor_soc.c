@@ -43,13 +43,6 @@ extern const zaf_event_distributor_cc_event_handler_map_latest_t __start__zaf_ev
 extern const zaf_event_distributor_cc_event_handler_map_latest_t __stop__zaf_event_distributor_cc_event_handler;
 #define cc_event_handler_stop __stop__zaf_event_distributor_cc_event_handler
 
-// The data used in the EventHandlerCC queue would be
-typedef struct {
-  const void* data;               ///< This must point to a global data
-  uint16_t command_class;
-  uint8_t event;
-} event_cc_t;
-
 /**
  * Callback type for zaf_event_distributor_cc_event_handler_for_each().
  *
@@ -58,23 +51,23 @@ typedef struct {
 typedef void (*cc_event_handler_invoker_callback_t)(zaf_event_distributor_cc_event_handler_map_latest_t const * const handler_entry, void* args);
 
 // Event distributor object
-static SEventDistributor g_EventDistributor;
+static SEventDistributor g_EventDistributor = { 0 };
 
 /**
  * The following four variables are used for the application event queue.
  */
-static SQueueNotifying m_AppEventNotifyingQueue;
-static StaticQueue_t m_AppEventQueueObject;
+static SQueueNotifying m_AppEventNotifyingQueue = { 0 };
+static StaticQueue_t m_AppEventQueueObject = { 0 };
 static uint8_t m_AppEventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_APP_QUEUE_SIZE];
-static QueueHandle_t m_AppEventQueue;
+static QueueHandle_t m_AppEventQueue = { 0 };
 
 /**
  * The following four variables are used for the command class event queue.
  */
-static SQueueNotifying m_CCEventNotifyingQueue;
-static StaticQueue_t m_CCEventQueueObject;
-static event_cc_t m_CCEventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_CC_QUEUE_SIZE];
-static QueueHandle_t m_CCEventQueue;
+static SQueueNotifying m_CCEventNotifyingQueue = { 0 };
+static StaticQueue_t m_CCEventQueueObject = { 0 };
+static event_cc_t m_CCEventQueueStorage[ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_CC_QUEUE_SIZE] = { { 0 } };
+static QueueHandle_t m_CCEventQueue = { 0 };
 
 static bool learnModeInProgress;
 static bool resetInProgress;
@@ -369,7 +362,7 @@ cc_handlers_for_each(cc_event_handler_invoker_callback_t callback, void* args)
 static void
 EventHandlerCC(void)
 {
-  event_cc_t event_cc;
+  event_cc_t event_cc = { 0 };
 
   while (xQueueReceive(m_CCEventQueue, (uint8_t*)(&event_cc), 0) == pdTRUE) {
     DPRINTF("CC:%d Event: %d\n", event_cc.command_class, event_cc.event);
@@ -381,7 +374,7 @@ EventHandlerCC(void)
  * Initialized all modules related to event queuing, task notifying and job registering.
  */
 static void
-EventQueueInit()
+EventQueueInit(void)
 {
   // Initialize Queue Notifier for events in the application.
   m_AppEventQueue = xQueueCreateStatic(
@@ -544,15 +537,13 @@ CC_DeviceResetLocally_done(TRANSMISSION_RESULT * pTransmissionResult)
 }
 
 ZW_WEAK void
-zaf_event_distributor_app_zw_rx(SZwaveReceivePackage *RxPackage)
+zaf_event_distributor_app_zw_rx(__attribute__((unused)) SZwaveReceivePackage *RxPackage)
 {
-  UNUSED(RxPackage);
 }
 
 ZW_WEAK void
-zaf_event_distributor_app_zw_command_status(SZwaveCommandStatusPackage *Status)
+zaf_event_distributor_app_zw_command_status(__attribute__((unused)) SZwaveCommandStatusPackage *Status)
 {
-  UNUSED(Status);
 }
 
 /* Register dummy entry to ensure that the section exists */

@@ -55,7 +55,7 @@ sl_status_t cte_bt_on_event_silabs(sl_bt_msg_t *evt)
       // Config the NCP on the target.
       // Filter out the scan response event
       user_data[0] = SL_NCP_EVT_FILTER_CMD_ADD_ID;
-      event = sl_bt_evt_scanner_scan_report_id;
+      event = sl_bt_evt_scanner_extended_advertisement_report_id;
       memcpy(&user_data[1], &event, SL_NCP_EVT_FILTER_CMD_ADD_LEN - 1);
 
       sc = sl_bt_user_manage_event_filter(SL_NCP_EVT_FILTER_CMD_ADD_LEN,

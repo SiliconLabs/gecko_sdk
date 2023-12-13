@@ -13,4 +13,8 @@ provides:
   - name: "wisun_test_certificates"
 
 config_file:
-  - path: "plugin/config/wisun_test_certificates.h"
+  - path: "plugin/config/sl_wisun_test_certificates.h"
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_test_certificates

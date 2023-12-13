@@ -137,11 +137,14 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
   data->op_params.stride_height   = params->stride_height;
   data->op_params.stride_width    = params->stride_width;
   data->op_params.padding         = params->padding == kTfLitePaddingSame;
+  // Dilation height and width are always 1 for transpose_conv.
+  data->op_params.dilation_height = 1;
+  data->op_params.dilation_width  = 1;
 
   int dummy_height, dummy_width;
   const auto padding = ComputePaddingHeightWidth(
                          params->stride_height, params->stride_width,
-                         1, 1, //dilation_rate_height and dilation_rate_width
+                         data->op_params.dilation_height, data->op_params.dilation_width,
                          data->op_params.input_height, data->op_params.input_width,
                          data->op_params.filter_height, data->op_params.filter_width,
                          params->padding,
@@ -174,7 +177,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
                                context, num_channels * sizeof(float16_t)));
       data->op_params.output_scaler = scaler_data;
       TF_LITE_ENSURE_STATUS(PopulateConvolutionQuantizationParams(
-        context, input, filter, output, kTfLiteActNone,
+        context, input, filter, output, params->activation,
         reinterpret_cast<int32_t*>(&data->op_params.output_activation_min),
         reinterpret_cast<int32_t*>(&data->op_params.output_activation_max),
         scaler_data, num_channels, SLI_MVP_ACCUMULATOR_MULTIPLIER));
@@ -190,7 +193,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
       int32_t dummy_output_multiplier;
       int dummy_output_shift;
       TF_LITE_ENSURE_STATUS(tflite::PopulateConvolutionQuantizationParams(
-        context, input, filter, bias, output, kTfLiteActNone,
+        context, input, filter, bias, output, params->activation,
         &dummy_output_multiplier, &dummy_output_shift,
         reinterpret_cast<int32_t*>(&data->op_params.output_activation_min),
         reinterpret_cast<int32_t*>(&data->op_params.output_activation_max),
@@ -246,9 +249,10 @@ TfLiteStatus eval_mvp_int8(TfLiteContext* context,
   data->op_params.output         = tflite::micro::GetTensorData<int8_t>(output);
   data->op_params.filter         = tflite::micro::GetTensorData<int8_t>(filter);
 
-  TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, sli_mvp_ml_transpose_conv2d_s8(&data->op_params));
+  sl_status_t status = sli_mvp_ml_transpose_conv2d_s8(&data->op_params);
+  TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, status);
 
-  return kTfLiteOk;
+  return status == SL_STATUS_OK ? kTfLiteOk : kTfLiteError;
 }
 
 TfLiteStatus eval_tflm_int8(TfLiteContext* context,
@@ -284,7 +288,7 @@ TfLiteStatus eval_tflm_int8(TfLiteContext* context,
                                        tflite::micro::GetTensorShape(filter),
                                        tflite::micro::GetTensorData<int8_t>(filter),
                                        tflite::micro::GetTensorShape(bias),
-                                       tflite::micro::GetTensorData<int32_t>(const_cast<TfLiteEvalTensor*>(bias)),
+                                       bias == nullptr ? nullptr : tflite::micro::GetTensorData<int32_t>(bias),
                                        tflite::micro::GetTensorShape(output),
                                        tflite::micro::GetTensorData<int8_t>(output),
                                        RuntimeShape(),

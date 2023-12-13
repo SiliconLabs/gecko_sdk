@@ -1,6 +1,70 @@
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType
 
 class sw_profile_outputs_common_ocelot(object):
+    # : Apps requested variables that need to be included in public studio log
+    studio_log_output_list = {
+        'base_frequency_actual': 'Actual Carrier Frequency [Hz]',
+        'if_frequency_hz_actual': 'Actual Intermediate Frequency [Hz]',
+        'synth_res_actual': 'Synthesizer Resolution [Hz]',
+        'baudrate': 'Desired Bitrate [bps]',
+        'tx_baud_rate_actual': 'Actual TX Baudrate [baud]',
+        'rx_baud_rate_actual': 'Actual RX Baudrate [baud]',
+        'tx_deviation_actual': 'Actual Deviation [Hz]',
+        'modulation_index': 'Target Modulation Index',
+        'modulation_index_actual': 'Actual Modulation Index',
+        'demod_select': 'Selected Demodulator',
+        'bandwidth_carson_hz': 'Carson Bandwidth [Hz]',
+        'demod_bandwidth_hz': 'Theoretical Required Demodulator Bandwidth [Hz]',
+        'rx_xtal_error_ppm': 'RX Crystal Accuracy [ppm]',
+        'tx_xtal_error_ppm': 'TX Crystal Accuracy [ppm]',
+        'bandwidth_actual': 'Pre Signal Lock RX Bandwidth [Hz]',
+        'lock_bandwidth_actual': 'Post Signal Lock RX Bandwidth [Hz]',
+        'rssi_adjust_db': 'Calculated RSSI Offset [dB]',
+        'rssi_period': "RSSI Measurement Period",
+        'oversampling_rate_actual': 'Actual Demodulator Oversampling Rate',
+        'iq_rate_actual': 'Raw Data Sampling Rate [sps]',
+        'delay_adc_to_demod_symbols': 'Signal Propagation Delay [symbol]',
+        'trecs_effective_syncword_len': 'Effective Syncword Length',
+        'trecs_effective_preamble_len': 'Effective Preamble Length',
+        'trecs_pre_bits_to_syncword': 'Number of Bits Used from Preamble to Syncword [bits]',
+        'preamble_string': 'Preamble Binary Pattern',
+        'syncword_string': 'Syncword Binary Pattern',
+        'lo_injection_side': 'Injection Side',
+        'trecs_syncword_timeout_us': 'TRECS syncword timeout [us]'
+    }
+
+    """
+        Builds studio log outputs into modem model
+    """
+    def buildStudioLogOutput(self, model, profile):
+
+        # : Apps requested variables that need to be included in public studio log
+        studio_log_output_list = self.studio_log_output_list
+
+        # : create missing ModelOutput as INFO type
+        for model_var_name, readable_name in studio_log_output_list.items():
+
+            # : check if duplicate exists in the profile output. If so, replace with log output defined above
+            for profile_output in profile.outputs:
+                if profile_output._var.name == model_var_name:
+                    profile.outputs.get_output(model_var_name).readable_name = readable_name
+
+            if not hasattr(profile.outputs, model_var_name):
+                if hasattr(model.vars, model_var_name):
+                    model_vars_attr = getattr(model.vars, model_var_name)
+                    profile.outputs.append(ModelOutput(model_vars_attr, '', ModelOutputType.INFO,
+                                                       readable_name=readable_name))
+
+        # : Set flag to True and display model output in Studio log
+        for var_name in model.profile.outputs.__dict__.keys():
+            model_attr = getattr(model.profile.outputs, var_name)
+            if 'ModelOutput' in str(type(model_attr)):
+                if var_name in studio_log_output_list.keys():
+                    model_attr.in_public_log = True
+
+                # : include all linked io vars in public log
+                if model_attr.output_type == ModelOutputType.LINKED_IO:
+                    model_attr.in_public_log = True
 
     def build_info_outputs(self, model, profile):
         profile.outputs.append(ModelOutput(model.vars.preamble_string, '', ModelOutputType.INFO,
@@ -8,14 +72,14 @@ class sw_profile_outputs_common_ocelot(object):
         profile.outputs.append(ModelOutput(model.vars.syncword_string, '', ModelOutputType.INFO,
                                            readable_name="Sync Word Binary Pattern"))
         profile.outputs.append(ModelOutput(model.vars.bandwidth_actual, '', ModelOutputType.INFO,
-                                           readable_name='Actual Bandwidth'))
+                                           readable_name='Pre-Signal-Lock BW'))
         profile.outputs.append(ModelOutput(model.vars.baudrate, '', ModelOutputType.INFO,
                                            readable_name='Desired baudrate'))
         profile.outputs.append(ModelOutput(model.vars.sample_freq_actual, '', ModelOutputType.INFO,
                                            readable_name='Actual sample frequency'))
         profile.outputs.append(ModelOutput(model.vars.frc_conv_decoder_buffer_size, '', ModelOutputType.SW_VAR,
                                            readable_name='Convolutional Decoder Buffer Size'))
-        profile.outputs.append(ModelOutput(model.vars.fec_enabled, '', ModelOutputType.INFO,
+        profile.outputs.append(ModelOutput(model.vars.fec_enabled, '', ModelOutputType.SW_VAR,
                                            readable_name='FEC enabled flag'))
 
     def build_ircal_outputs(self, model, profile):

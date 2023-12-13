@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_lux
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_lux.c
 include:
@@ -15,7 +14,7 @@ include:
     file_list:
       - path: sl_sensor_lux.h
 config_file:
-  - path: "config/sl_sensor_lux_config.h"
+  - path: config/sl_sensor_lux_config.h
     condition: [btmesh_stack]
 provides:
   - name: sensor_lux
@@ -24,6 +23,10 @@ requires:
   - name: veml6035_driver
   - name: i2cspm
   - name: app_assert
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: sensor_lux
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-lux

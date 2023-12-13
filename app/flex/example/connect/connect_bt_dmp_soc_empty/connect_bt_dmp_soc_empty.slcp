@@ -28,6 +28,7 @@ component:
   - id: iostream_retarget_stdio
 #-------------- Restriction rules -------------------
   - id: restrictions_profile_connect
+  - id: restrictions_profile_connect_ofdm
   - id: restrictions_profile_long_range
 
 #----------------- Require list ----------------------
@@ -68,7 +69,7 @@ readme:
 configuration:
 #----------------- OS --------------------------------
   - name: SL_STACK_SIZE
-    value: "4096"
+    value: "8192"
   - name: SL_HEAP_SIZE
     value: "16000"
     unless:
@@ -101,9 +102,8 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: "(1)"
 #----------------- Watchdog  -------------------------
-  - name: SL_LEGACY_HAL_DISABLE_WATCHDOG
-    value: "1"
-
+define:
+  - name: SL_CONNECT_DISABLE_WATCHDOG
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize

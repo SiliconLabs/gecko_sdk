@@ -143,6 +143,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
  ******************************************************************************/
 static struct pbuf * low_level_input(struct netif *netif, sl_wfx_received_ind_t* rx_buffer)
 {
+  (void) netif;
   struct pbuf *p = NULL;
   struct pbuf *q = NULL;
   uint16_t len = 0;

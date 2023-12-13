@@ -187,7 +187,10 @@ CC_Basic_Report_tx(
   uint8_t bValue,
   ZAF_TX_Callback_t callback)
 {
-  CMD_CLASS_GRP cmdGrp = {COMMAND_CLASS_BASIC, BASIC_REPORT};
+  CMD_CLASS_GRP cmdGrp = {
+    .cmdClass=COMMAND_CLASS_BASIC,
+    .cmd=BASIC_REPORT
+  };
 
   return cc_engine_multicast_request(
       pProfile,

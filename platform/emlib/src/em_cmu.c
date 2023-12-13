@@ -80,6 +80,7 @@
 #define CMU_MAX_FREQ_0WS_1V0              40000000UL
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
 // Maximum allowed core frequency vs. wait-states and vscale on flash accesses.
 #define CMU_MAX_FREQ_0WS_1V1              40000000UL
@@ -183,6 +184,7 @@ static uint16_t hfxo_precision = 0xFFFF;
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
 static int8_t ctuneDelta = 40; // Recommendation from analog team to counter the internal chip imbalance.
 #else
@@ -511,10 +513,20 @@ void CMU_ClkOutPinConfig(uint32_t           clkNo,
 {
   uint32_t tmp = 0U, mask;
 
-  EFM_ASSERT(clkNo <= 2U);
-  EFM_ASSERT(clkDiv <= 32U);
-  EFM_ASSERT(port <= 3U);
   EFM_ASSERT(pin <= 15U);
+
+  switch (clkNo) {
+    case 0:
+    case 1:
+      EFM_ASSERT((port == 2U) || (port == 3U));
+      break;
+    case 2:
+      EFM_ASSERT((port == 0U) || (port == 1U));
+      break;
+    default:
+      EFM_ASSERT(false);
+      break;
+  }
 
   switch (sel) {
     case cmuSelect_Disabled:
@@ -540,6 +552,7 @@ void CMU_ClkOutPinConfig(uint32_t           clkNo,
 #endif
 
     case cmuSelect_EXPCLK:
+      EFM_ASSERT((clkDiv > 0U) && (clkDiv <= 32U));
       tmp  = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFEXPCLK;
       break;
 
@@ -682,6 +695,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
 {
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -727,6 +741,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
     case cmuClock_TRACECLK:
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)      \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -744,6 +759,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
                           | ((div - 1U) << _CMU_TRACECLKCTRL_PRESC_SHIFT);
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)      \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -801,6 +817,10 @@ void CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable)
     reg = &CMU->CLKEN0;
   } else if (((unsigned)clock >> CMU_EN_REG_POS) == CMU_CLKEN1_EN_REG) {
     reg = &CMU->CLKEN1;
+#if defined(_CMU_CLKEN2_MASK)
+  } else if (((unsigned)clock >> CMU_EN_REG_POS) == CMU_CLKEN2_EN_REG) {
+    reg = &CMU->CLKEN2;
+#endif
   } else {
 #if defined(CRYPTOACC_PRESENT)
     reg = &CMU->CRYPTOACCCLKCTRL;
@@ -1017,6 +1037,10 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
     case cmuClock_TIMER6:
     case cmuClock_TIMER7:
 #endif
+#if TIMER_COUNT > 9
+    case cmuClock_TIMER8:
+    case cmuClock_TIMER9:
+#endif
 #if defined(KEYSCAN_PRESENT)
     case cmuClock_KEYSCAN:
 #endif
@@ -1219,6 +1243,10 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
     case cmuClock_TIMER5:
     case cmuClock_TIMER6:
     case cmuClock_TIMER7:
+#endif
+#if TIMER_COUNT > 9
+    case cmuClock_TIMER8:
+    case cmuClock_TIMER9:
 #endif
 #if defined(KEYSCAN_PRESENT)
     case cmuClock_KEYSCAN:
@@ -1512,6 +1540,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
 #endif
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
   && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -1646,6 +1675,10 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
     case cmuClock_TIMER5:
     case cmuClock_TIMER6:
     case cmuClock_TIMER7:
+#endif
+#if TIMER_COUNT > 9
+    case cmuClock_TIMER8:
+    case cmuClock_TIMER9:
 #endif
 #if defined(KEYSCAN_PRESENT)
     case cmuClock_KEYSCAN:
@@ -1944,6 +1977,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
     case cmuClock_TRACECLK:
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)      \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -1961,6 +1995,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)        \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
         case cmuSelect_SYSCLK:
@@ -1986,6 +2021,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
                           | tmp;
 #if (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)      \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)) \
       && defined(CoreDebug_DEMCR_TRCENA_Msk)
@@ -3064,6 +3100,7 @@ void CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit)
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)    \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
     //See [PM-3665] for details.
     if (hfxoInit->mode == cmuHfxoOscMode_ExternalSinePkDet) {
@@ -3248,6 +3285,10 @@ void CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Output_Select_TypeDef prs
  *   The desired tuning capacitance value. Each step corresponds to
  *   approximately 80fF. Min value is 0. Max value is 255.
  *
+ * @return
+ *   SL_STATUS_OK if initialization parameter is valid.
+ *   SL_STATUS_INVALID_PARAMETER if initialization parameter is invalid.
+ *
  * @note
  *   While the oscillator is running in steady operation state, it may be
  *   desirable to modify the tuning capacitance via CTUNEXIANA and CTUNEXOANA
@@ -3257,12 +3298,14 @@ void CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Output_Select_TypeDef prs
  *   registers. Sufficient wait time for settling, on the order of
  *   TIMEOUTSTEADY, should pass before new frequency measurement is taken.
  *****************************************************************************/
-void CMU_HFXOCTuneSet(uint32_t ctune)
+sl_status_t CMU_HFXOCTuneSet(uint32_t ctune)
 {
   uint32_t hfxoCtrlBkup = HFXO0->CTRL;
 
   // Make sure the given CTUNE value is within the allowable range
-  EFM_ASSERT(ctune <= (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT));
+  if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
 
   // Keep oscillator running, if it is enabled
   if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
@@ -3304,6 +3347,8 @@ void CMU_HFXOCTuneSet(uint32_t ctune)
   if (HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) {
     BUS_RegMaskedWrite(&HFXO0->CTRL, _HFXO_CTRL_FORCEEN_MASK, hfxoCtrlBkup);
   }
+
+  return SL_STATUS_OK;
 }
 
 /**************************************************************************//**
@@ -10877,12 +10922,6 @@ void CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit)
                             << _CMU_HFXOTIMEOUTCTRL_STARTUPTIMEOUT_SHIFT);
 
 #elif defined(_CMU_HFXOCTRL_MASK)
-  /* Verify that the deprecated autostart fields are not used,
-   * @ref CMU_HFXOAutostartEnable must be used instead. */
-  EFM_ASSERT(!(hfxoInit->autoStartEm01
-               || hfxoInit->autoSelEm01
-               || hfxoInit->autoStartSelOnRacWakeup));
-
   uint32_t tmp = CMU_HFXOCTRL_MODE_XTAL;
 
   /* AC coupled external clock not supported. */

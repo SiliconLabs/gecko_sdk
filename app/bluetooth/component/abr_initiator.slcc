@@ -14,6 +14,8 @@ include:
       - path: abr_initiator.h
       - path: abr_initiator_interface.h
       - path: abr_initiator_config.h
+config_file:
+  - path: config/abr_initiator_component_config.h
 source:
   - path: abr_initiator.c
   - path: abr_initiator_platform.c
@@ -25,15 +27,16 @@ requires:
   - name: bluetooth_stack
   - name: bluetooth_feature_power_control
   - name: bluetooth_feature_connection
-  - name: bluetooth_feature_scanner
+  - name: bluetooth_feature_extended_scanner
+  - name: bluetooth_feature_legacy_scanner
   - name: bluetooth_feature_gatt
   - name: power_manager
   - name: bluetooth_feature_cs
   - name: bluetooth_feature_cs_test
   - name: rtllib
   - name: abr_cs_parser
-
-
+  - name: abr_ras
+  - name: abr_ans
 provides:
   - name: abr_initiator
 template_contribution:
@@ -42,3 +45,8 @@ template_contribution:
       include: abr_initiator.h
       function: bt_on_event_initiator
     priority: 0
+  - name: event_handler
+    value:
+      event: internal_app_process_action
+      include: abr_initiator.h
+      handler: abr_initiator_step

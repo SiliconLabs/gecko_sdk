@@ -2,7 +2,7 @@ id: device_init_hfxo
 label: "High Frequency Crystal Oscillator (HFXO)"
 package: platform
 description: >
-  Instantiate the component for High Frequency Crystal Oscillator (HFXO) 
+  Instantiate the component for High Frequency Crystal Oscillator (HFXO)
   initialization based on the provided configuration.
 category: Services|Device Initialization|Peripherals
 quality: production
@@ -78,6 +78,9 @@ config_file:
   - path: config/s2/sdid220/sl_device_init_hfxo_config.h
     condition: [device_sdid_220]
     file_id: device_init_hfxo_config
+  - path: config/s2/sdid225/sl_device_init_hfxo_config.h
+    condition: [device_sdid_225]
+    file_id: device_init_hfxo_config
   - path: config/s2/sdid230/sl_device_init_hfxo_config.h
     condition: [device_sdid_230]
     file_id: device_init_hfxo_config
@@ -113,8 +116,11 @@ template_contribution:
       include: sl_device_init_hfxo.h
       handler: sl_device_init_hfxo
     priority: -9650
+    condition: [sl_system]
   - name: device_init_clocks_present
     value: hfxo
+  - name: component_catalog
+    value: device_init_hfxo
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-hfxo

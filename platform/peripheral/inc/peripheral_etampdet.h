@@ -32,13 +32,16 @@
 #define PERIPHERAL_ETAMPDET_H
 
 #include "em_device.h"
-#if defined(ETAMPDET_PRESENT)
 
-#include <stdbool.h>
+#if defined(ETAMPDET_PRESENT)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdbool.h>
+#include "peripheral_etampdet_compat.h"
+#include "sl_enum.h"
 
 /***************************************************************************//**
  * @addtogroup etampdet
@@ -50,16 +53,16 @@ extern "C" {
  ******************************************************************************/
 
 /** ETAMPDET channels. */
-typedef enum {
+SL_ENUM(sl_hal_etampdet_channel_t) {
   /** Channel 0. */
   channel_0 = 0,
 
   /** Channel 1. */
   channel_1,
-} sl_etampdet_channel_t;
+};
 
 /** ETAMPDET filter thresholds. */
-typedef enum {
+SL_ENUM(sl_hal_etampdet_channel_cnt_mismatch_threshold_t) {
   /** Raise detect flag after seeing 1 event before reset counter expire. */
   detect_filt_threshold_1 = _ETAMPDET_CNTMISMATCHMAX_CHNLCNTMISMATCHMAX0_DetectFilterThreshold1,
 
@@ -83,10 +86,10 @@ typedef enum {
 
   /** Raise detect flag after seeing 8 events before reset counter expire. */
   detect_filt_threshold_8 = _ETAMPDET_CNTMISMATCHMAX_CHNLCNTMISMATCHMAX0_DetectFilterThreshold8,
-} sl_etampdet_channel_cnt_mismatch_threshold_t;
+};
 
 /** ETAMPDET filter moving window size. */
-typedef enum {
+SL_ENUM(sl_hal_etampdet_channel_filt_win_size_t) {
   /** Detect filter moving window size 2. */
   detect_filt_win_size_2 = _ETAMPDET_CHNLFILTWINSIZE_CHNLFILTWINSIZE0_DetectFilterMovingWinSize2,
 
@@ -131,10 +134,10 @@ typedef enum {
 
   /** Detect filter moving window size 16. */
   detect_filt_win_size_16 = _ETAMPDET_CHNLFILTWINSIZE_CHNLFILTWINSIZE0_DetectFilterMovingWinSize16,
-} sl_etampdet_channel_filt_win_size_t;
+};
 
 /** ETAMPDET upper part of divider ripple counter. */
-typedef enum {
+SL_ENUM(sl_hal_etampdet_upper_clk_presc_t) {
   /** Ripple counter divider bypassed. */
   upper_clk_prescaler_bypass = _ETAMPDET_CLKPRESCVAL_UPPERPRESC_Bypass,
 
@@ -155,10 +158,10 @@ typedef enum {
 
   /** Divide by 64. */
   upper_clk_prescaler_divide_64 = _ETAMPDET_CLKPRESCVAL_UPPERPRESC_DivideBy64,
-} sl_etampdet_upper_clk_presc_t;
+};
 
 /** ETAMPDET lower part of divider binary counter. */
-typedef enum {
+SL_ENUM(sl_hal_etampdet_lower_clk_presc_t) {
   /** Divider is bypassed. */
   lower_clk_prescaler_bypass = _ETAMPDET_CLKPRESCVAL_LOWERPRESC_Bypass,
 
@@ -350,7 +353,7 @@ typedef enum {
 
   /** Divide by 64. */
   lower_clk_prescaler_divide_64 = _ETAMPDET_CLKPRESCVAL_LOWERPRESC_DivideBy64,
-} sl_etampdet_lower_clk_presc_t;
+};
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -362,13 +365,13 @@ typedef struct {
   uint32_t channel_seed_val;
 
   /** Channel id */
-  sl_etampdet_channel_t channel;
+  sl_hal_etampdet_channel_t channel;
 
   /** Channel Filter moving window size. */
-  sl_etampdet_channel_filt_win_size_t channel_filt_win_size;
+  sl_hal_etampdet_channel_filt_win_size_t channel_filt_win_size;
 
   /** Channel filter threshold value where a tamper detect will be triggered. */
-  sl_etampdet_channel_cnt_mismatch_threshold_t channel_cnt_mismatch;
+  sl_hal_etampdet_channel_cnt_mismatch_threshold_t channel_cnt_mismatch;
 
   /** Enable channel driving pad. */
   bool channel_pad_en;
@@ -382,16 +385,16 @@ typedef struct {
 
   /** Set to enable EM4 wakeup when channel tamper detect is set. */
   bool em4_wakeup_en;
-} sl_etampdet_config_channel_t;
+} sl_hal_etampdet_config_channel_t;
 
 /** ETAMPDET configuration structure. */
 typedef struct {
   /** Upper clock prescaler value. */
-  sl_etampdet_upper_clk_presc_t upper_clk_presc_val;
+  sl_hal_etampdet_upper_clk_presc_t upper_clk_presc_val;
 
   /** Lower clock prescaler value. */
-  sl_etampdet_lower_clk_presc_t lower_clk_presc_val;
-} sl_etampdet_config_t;
+  sl_hal_etampdet_lower_clk_presc_t lower_clk_presc_val;
+} sl_hal_etampdet_config_t;
 
 /** ETAMPDET default channel configuration. */
 #define ETAMPDET_CONFIG_CHANNEL_DEFAULT                                            \
@@ -422,29 +425,29 @@ typedef struct {
  *
  * @param[in] config  The pointer to the initialization structure.
  *
- * @note User should call @ref sl_etampdet_init_channel() for full initialization.
- *       This function should be called before @ref sl_etampdet_init_channel()
+ * @note User should call @ref sl_hal_etampdet_init_channel() for full initialization.
+ *       This function should be called before @ref sl_hal_etampdet_init_channel()
  *
  * @note The control registers setting of the GPIOs to be used by ETAMPDET
  *       should be at the default values to ensure that other clients
  *       are not accidentally driving the GPIOs that ETAMPDET is using.
  ******************************************************************************/
-void sl_etampdet_init(const sl_etampdet_config_t *config);
+void sl_hal_etampdet_init(const sl_hal_etampdet_config_t *config);
 
 /***************************************************************************//**
  * Initialize ETAMPDET channel.
  *
  * @param[in] config_channel  The pointer to the  channel initialization structure.
  *
- * @note User should call @ref sl_etampdet_init() for full initialization.
+ * @note User should call @ref sl_hal_etampdet_init() for full initialization.
  ******************************************************************************/
-void sl_etampdet_init_channel(const sl_etampdet_config_channel_t *config_channel);
+void sl_hal_etampdet_init_channel(const sl_hal_etampdet_config_channel_t *config_channel);
 
 /***************************************************************************//**
  * Wait for the ETAMPDET to complete all synchronization of register changes
  * and commands.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_wait_sync(void)
+__STATIC_INLINE void sl_hal_etampdet_wait_sync(void)
 {
   while (ETAMPDET->SYNCBUSY != 0U) {
     // Wait for all synchronizations to finish
@@ -454,7 +457,7 @@ __STATIC_INLINE void sl_etampdet_wait_sync(void)
 /***************************************************************************//**
  * Wait for the ETAMPDET to complete disabling procedure.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_wait_ready(void)
+__STATIC_INLINE void sl_hal_etampdet_wait_ready(void)
 {
 #if defined(ETAMPDET_EN_DISABLING)
   while ((ETAMPDET->EN & ETAMPDET_EN_DISABLING) || (ETAMPDET->SYNCBUSY != 0U)) {
@@ -470,10 +473,10 @@ __STATIC_INLINE void sl_etampdet_wait_ready(void)
 /***************************************************************************//**
  * Enable ETAMPDET.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_enable(void)
+__STATIC_INLINE void sl_hal_etampdet_enable(void)
 {
   // Wait for synchronization to complete if necessary
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   // Enable ETAMPDET
   ETAMPDET->EN_SET = ETAMPDET_EN_EN;
@@ -482,7 +485,7 @@ __STATIC_INLINE void sl_etampdet_enable(void)
 /***************************************************************************//**
  * Disable ETAMPDET.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_disable(void)
+__STATIC_INLINE void sl_hal_etampdet_disable(void)
 {
   if (ETAMPDET->EN != ETAMPDET_EN_EN) {
     return;
@@ -497,10 +500,10 @@ __STATIC_INLINE void sl_etampdet_disable(void)
  *
  * @param[in] channel  The channel number.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_load(sl_etampdet_channel_t channel)
+__STATIC_INLINE void sl_hal_etampdet_load(sl_hal_etampdet_channel_t channel)
 {
   // Wait for synchronization to complete if necessary
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   ETAMPDET->CMD |= ETAMPDET_CMD_CHNLLOAD0 << (channel * _ETAMPDET_CMD_CHNLSTART1_SHIFT);
 }
@@ -510,10 +513,10 @@ __STATIC_INLINE void sl_etampdet_load(sl_etampdet_channel_t channel)
  *
  * @param[in] channel  The channel number.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_start(sl_etampdet_channel_t channel)
+__STATIC_INLINE void sl_hal_etampdet_start(sl_hal_etampdet_channel_t channel)
 {
   // Wait for synchronization to complete if necessary
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   ETAMPDET->CMD |= ETAMPDET_CMD_CHNLSTART0 << (channel * _ETAMPDET_CMD_CHNLSTART1_SHIFT);
 }
@@ -523,10 +526,10 @@ __STATIC_INLINE void sl_etampdet_start(sl_etampdet_channel_t channel)
  *
  * @param[in] channel  The channel number.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_stop(sl_etampdet_channel_t channel)
+__STATIC_INLINE void sl_hal_etampdet_stop(sl_hal_etampdet_channel_t channel)
 {
   // Wait for synchronization to complete if necessary
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   ETAMPDET->CMD |= ETAMPDET_CMD_CHNLSTOP0 << (channel * _ETAMPDET_CMD_CHNLSTART1_SHIFT);
 }
@@ -536,7 +539,7 @@ __STATIC_INLINE void sl_etampdet_stop(sl_etampdet_channel_t channel)
  *
  * @param[in] interrupts  The interrupts flags to enable.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_enable_interrupts(uint32_t interrupts)
+__STATIC_INLINE void sl_hal_etampdet_enable_interrupts(uint32_t interrupts)
 {
   ETAMPDET->IEN_SET = interrupts;
 }
@@ -546,7 +549,7 @@ __STATIC_INLINE void sl_etampdet_enable_interrupts(uint32_t interrupts)
  *
  * @param[in] interrupts  The interrupts flags to disable.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_disable_interrupts(uint32_t interrupts)
+__STATIC_INLINE void sl_hal_etampdet_disable_interrupts(uint32_t interrupts)
 {
   ETAMPDET->IEN_CLR = interrupts;
 }
@@ -556,7 +559,7 @@ __STATIC_INLINE void sl_etampdet_disable_interrupts(uint32_t interrupts)
  *
  * @param[in] interrupts  The interrupts flags to set.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_set_interrupts(uint32_t interrupts)
+__STATIC_INLINE void sl_hal_etampdet_set_interrupts(uint32_t interrupts)
 {
   ETAMPDET->IF_SET = interrupts;
 }
@@ -566,7 +569,7 @@ __STATIC_INLINE void sl_etampdet_set_interrupts(uint32_t interrupts)
  *
  * @param[in] interrupts  The interrupts flags to clear.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_clear_interrupts(uint32_t interrupts)
+__STATIC_INLINE void sl_hal_etampdet_clear_interrupts(uint32_t interrupts)
 {
   ETAMPDET->IF_CLR = interrupts;
 }
@@ -580,7 +583,7 @@ __STATIC_INLINE void sl_etampdet_clear_interrupts(uint32_t interrupts)
  *          Returns a set of interrupt flags OR-ed together for multiple
  *          interrupt sources.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_etampdet_get_interrupts(void)
+__STATIC_INLINE uint32_t sl_hal_etampdet_get_interrupts(void)
 {
   return ETAMPDET->IF;
 }
@@ -596,7 +599,7 @@ __STATIC_INLINE uint32_t sl_etampdet_get_interrupts(void)
  *          - the enabled interrupt sources in ETAMPDET_IEN and
  *          - the pending interrupt flags ETAMPDET_IF.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_etampdet_get_enabled_interrupts(void)
+__STATIC_INLINE uint32_t sl_hal_etampdet_get_enabled_interrupts(void)
 {
   uint32_t ien = 0;
   ien = ETAMPDET->IEN;
@@ -610,7 +613,7 @@ __STATIC_INLINE uint32_t sl_etampdet_get_enabled_interrupts(void)
  *        ETAMPDET_CHNLSEEDVALx, ETAMPDET_CNTMISMATCHMAX, ETAMPDET_CHNLFILTWINSIZE,
  *        ETAMPDET_EM4WUEN and ETAMPDET_CLKPRESCVAL registers cannot be written to.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_lock(void)
+__STATIC_INLINE void sl_hal_etampdet_lock(void)
 {
   ETAMPDET->LOCK = ~ETAMPDET_LOCK_LOCKKEY_UNLOCK;
 }
@@ -620,7 +623,7 @@ __STATIC_INLINE void sl_etampdet_lock(void)
  *
  * @note  When ETAMPDET registers are unlocked, registers are writable.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_unlock(void)
+__STATIC_INLINE void sl_hal_etampdet_unlock(void)
 {
   ETAMPDET->LOCK = ETAMPDET_LOCK_LOCKKEY_UNLOCK;
 }
@@ -630,7 +633,7 @@ __STATIC_INLINE void sl_etampdet_unlock(void)
  *
  * @return  Current STATUS register value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_etampdet_get_status(void)
+__STATIC_INLINE uint32_t sl_hal_etampdet_get_status(void)
 {
   return ETAMPDET->STATUS;
 }
@@ -645,7 +648,7 @@ __STATIC_INLINE uint32_t sl_etampdet_get_status(void)
  * @note  It is recommended to get the random seed value using TRNG (True random
  *        Number Generator) peripheral.
  ******************************************************************************/
-__STATIC_INLINE void sl_etampdet_set_seed_value(uint32_t seed_value, sl_etampdet_channel_t channel)
+__STATIC_INLINE void sl_hal_etampdet_set_seed_value(uint32_t seed_value, sl_hal_etampdet_channel_t channel)
 {
   if (channel == channel_0) {
     ETAMPDET->CHNLSEEDVAL0 = seed_value;
@@ -661,7 +664,7 @@ __STATIC_INLINE void sl_etampdet_set_seed_value(uint32_t seed_value, sl_etampdet
  *
  * @return  The seed value of the channel.
  ******************************************************************************/
-__STATIC_INLINE uint32_t sl_etampdet_get_seed_value(sl_etampdet_channel_t channel)
+__STATIC_INLINE uint32_t sl_hal_etampdet_get_seed_value(sl_hal_etampdet_channel_t channel)
 {
   if (channel == channel_0) {
     return ETAMPDET->CHNLSEEDVAL0;

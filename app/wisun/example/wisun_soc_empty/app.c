@@ -35,7 +35,7 @@
 #include "app.h"
 #include "sl_wisun_api.h"
 #ifdef SL_CATALOG_WISUN_APP_CORE_PRESENT
-  #include "sl_wisun_app_core.h"
+  #include "sl_wisun_app_core_util.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void app_task(void *args)
     ///////////////////////////////////////////////////////////////////////////
     // Put your application code here!                                       //
     ///////////////////////////////////////////////////////////////////////////
-    osDelay(1);
+    app_wisun_dispatch_thread();
   }
 }
 

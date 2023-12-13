@@ -126,9 +126,9 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         #Calculate the LNAMIXRFATT values based on band
 
         if rf_band == model.vars.rf_band.var_enum.BAND_2400:
-            lnamixrfatt = [0, 42, 95, 163, 393, 642, 922, 1388, 1905, 2485, 3431, 4443, 5725, 7343, 9654, 12456,
-                           16383, 7160, 9180, 11700, 14800, 16383, 16383]
-            pnindexmax = 16
+            lnamixrfatt = [0, 102, 365, 659, 1084, 1658, 2390, 3180, 4293, 5726, 7527, 9894, 12920, 16383, 16383, 16383,
+                           16383, 16383, 16383, 16383, 16383, 16383, 16383]
+            pnindexmax = 14
         elif rf_band == model.vars.rf_band.var_enum.BAND_915 or rf_band == model.vars.rf_band.var_enum.BAND_868:
             lnamixrfatt = [0, 63, 141, 238, 502, 940, 1269, 1942, 2526, 3484, 4547, 6035, 7678, 9973, 12989, 16383,
                            5630, 7160, 9180, 11700, 14800, 16383, 16383]

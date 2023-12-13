@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_CLI_SETTINGS_H__
 #define __SL_WISUN_CLI_SETTINGS_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -218,5 +222,9 @@ sl_status_t app_settings_get_integer(char *value_str,
 sl_status_t app_settings_get_ip_address(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // __SL_WISUN_CLI_SETTINGS_H__

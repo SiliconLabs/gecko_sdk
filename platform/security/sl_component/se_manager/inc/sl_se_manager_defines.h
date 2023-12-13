@@ -469,6 +469,10 @@ extern "C" {
 /// Initial values for AES-GCM streaming context struct @ref sl_se_gcm_streaming_context_t
 #define SL_SE_GCM_STREAMING_INIT_DEFAULT     { NULL, 0, 0, { 0 }, { 0 }, \
                                                { 0 }, 0, 0 }
+
+/// Block size for the AES
+#define SL_SE_AES_BLOCK_SIZE   (16u)
+
 /// @} (end addtogroup sl_se_manager_cipher)
 
 /// @addtogroup sl_se_manager_hash

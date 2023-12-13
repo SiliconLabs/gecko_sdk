@@ -17,6 +17,7 @@
 #include "sli_cpc.h"
 #include "sl_cpc.h"
 #include <time.h>
+#include <assert.h>
 #include "stack/include/ember.h"
 #include "ncp-cpc-interface.h"
 #include "csp-format.h"
@@ -79,7 +80,6 @@ static void cpc_read_command(uint8_t endpoint_id, void *arg)
   if (status != SL_STATUS_OK) {
     //do something
   } else if (!connected) {
-    connected = true;
     sl_cpc_free_rx_buffer(read_array);
   } else {
     sli_connect_ncp_process_incoming_api_command(read_array);
@@ -100,6 +100,13 @@ static void cpc_error_cb(uint8_t endpoint_id, void *arg)
   }
 }
 
+static void cpc_on_connect_cb(uint8_t endpoint_id, void *arg)
+{
+  (void) endpoint_id;
+  (void) arg;
+  connected = true;
+}
+
 void sli_connect_cpc_send_command(uint8_t *command, uint16_t length)
 {
   //message queue is managed by CPC
@@ -116,6 +123,7 @@ void sli_connect_cpc_send_command(uint8_t *command, uint16_t length)
 #if defined(SL_CATALOG_CPC_SECURITY_PRESENT)
 uint64_t sl_cpc_security_on_unbind_request(bool is_link_encrypted)
 {
+  (void)is_link_encrypted;
   return SL_CPC_SECURITY_OK_TO_UNBIND;
 }
 #endif
@@ -164,10 +172,18 @@ bool connect_cpc_open_endpoint(void)
   status = sl_cpc_set_endpoint_option(&connect_endpoint_handle,
                                       SL_CPC_ENDPOINT_ON_ERROR,
                                       (void*)cpc_error_cb);
+  if (status != SL_STATUS_OK) {
+    return false;
+  }
+
+  status = sl_cpc_set_endpoint_option(&connect_endpoint_handle,
+                                      SL_CPC_ENDPOINT_ON_CONNECT,
+                                      (void *)cpc_on_connect_cb);
   return(status == SL_STATUS_OK);
 }
 
 void connect_stack_cpc_init(void)
 {
   assert(connect_cpc_open_endpoint());
+  emberNcpSetLongMessagesUse(false);
 }

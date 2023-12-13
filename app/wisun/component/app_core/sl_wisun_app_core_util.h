@@ -31,6 +31,9 @@
 #ifndef SL_WISUN_APP_CORE_UTIL_H
 #define SL_WISUN_APP_CORE_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -38,9 +41,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "sl_wisun_types.h"
-#include "sl_wisun_app_core.h"
 #include "sl_status.h"
+#include "sl_wisun_app_core.h"
 #include "cmsis_os2.h"
+#include "sl_wisun_config.h"
+#include "sl_wisun_app_core_util_config.h"
+#include "app_project_info.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -52,12 +58,6 @@
     printf("[%s] Exit: %d\n",                             \
            osThreadGetName(osThreadGetId()), (exitcode)); \
     osThreadTerminate(osThreadGetId());                   \
-  } while (0)
-
-/// Milli sec sleep (wrapper)
-#define msleep(milis) \
-  do {                \
-    osDelay((milis)); \
   } while (0)
 
 /// Assert POSIX API result with thread exit
@@ -101,6 +101,13 @@ void app_wisun_project_info_init(const char * app_name);
 void app_wisun_project_info_print(const bool json_format);
 
 /**************************************************************************//**
+ * @brief Get Wi-SUN Project info
+ * @details Get a constant instance of internal Wi-SUN project info
+ * @return app_project_info_t * Project info
+ *****************************************************************************/
+const app_project_info_t * app_wisun_project_info_get(void);
+
+/**************************************************************************//**
  * @brief Wait for the connection.
  * @details This function doesn't call the app_wisun_network_connect() function.
  *          The function provides a delay loop with optional heart beat printing
@@ -124,6 +131,17 @@ void app_wisun_connect_and_wait(void);
  *****************************************************************************/
 bool app_wisun_network_is_connected(void);
 
+/**************************************************************************//**
+ * @brief Thread dispatch function
+ * @details For low power LFN mode, the delay value is 'APP_THREAD_LP_DISPATCH_MS',
+ *          for FFN mode, the delay is 1ms
+ *****************************************************************************/
+void app_wisun_dispatch_thread(void);
+
 /** @}*/
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // SL_WISUN_APP_UTIL_H

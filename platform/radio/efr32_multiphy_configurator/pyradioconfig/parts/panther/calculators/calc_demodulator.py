@@ -29,7 +29,14 @@ class CALC_Demodulator_panther(CALC_Demodulator_nixi):
         # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi) use fxo here.
         model.vars.fxo_or_fdec8.value = model.vars.rx_synth_freq_actual.value / 64.0 # Panther-unique
 
+    def calc_adc_freq_actual(self, model):
+        fxo_or_fdec8 = model.vars.fxo_or_fdec8.value
 
+        # For 2.4G series 2 parts, Fadc is based on divided down synth
+        # Fixed div8 block is immediately after IFADC output
+        adc_freq_actual = int(round(fxo_or_fdec8 * 8))
+
+        model.vars.adc_freq_actual.value = adc_freq_actual
 
     def calc_src12_bit_widths(self, model):
         # Note Panther will overload this to reflect its different architecture and use 8, 15
@@ -94,7 +101,7 @@ class CALC_Demodulator_panther(CALC_Demodulator_nixi):
         
         if flag_using_Viterbi_demod and not flag_using_BLELR:
             # Head and tail bits of syncword
-            viterbi_demod_expect_patt_head_tail = int((((syncword0 >> 32) & 1)<<2)  | ((syncword0 & 1)<<1))
+            viterbi_demod_expect_patt_head_tail = (syncword0 & 1)<<1
             model.vars.viterbi_demod_expect_patt_head_tail.value = viterbi_demod_expect_patt_head_tail
         else:
             # set to default reset value

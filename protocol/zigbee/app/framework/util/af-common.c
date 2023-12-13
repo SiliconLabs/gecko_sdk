@@ -82,7 +82,9 @@ static CallbackTableEntry messageSentCallbacks[EMBER_AF_MESSAGE_SENT_CALLBACK_TA
 // this variable would also have to declare it const in order to function
 // correctly, which is not the case (e.g. emberFindKeyTableEntry()).
 const EmberEUI64 emberAfNullEui64 = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+extern sl_zigbee_event_t emberAfPluginTestHarnessZ3OpenNetworkEvent;
+#endif
 //------------------------------------------------------------------------------
 // Forward declarations
 
@@ -186,6 +188,10 @@ void sli_zigbee_af_incoming_message_handler(EmberIncomingMessageType type,
   }
 }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+uint8_t currentSentMessageTag;
+#endif
+
 // This is called from sli_zigbee_af_message_sent_callback() in af-soc.c or af-host.c
 void sli_zigbee_af_message_sent_handler(EmberOutgoingMessageType type,
                                         uint16_t indexOrDestination,
@@ -200,7 +206,9 @@ void sli_zigbee_af_message_sent_handler(EmberOutgoingMessageType type,
     emberAfAppPrint("%ptx %x, ", "ERROR: ", status);
     printMessage(type, apsFrame, messageLength, messageContents);
   }
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  currentSentMessageTag = messageTag;
+#endif
   callback = getMessageSentCallback(messageTag);
   invalidateMessageSentCallbackEntry(messageTag);
 
@@ -647,6 +655,12 @@ void sli_zigbee_af_print_status(const char * task,
 EmberStatus emberAfPermitJoin(uint8_t duration,
                               bool broadcastMgmtPermitJoin)
 {
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  if (duration) {
+    // The test harness needs to set up the correct link key
+    sl_zigbee_event_set_active(&emberAfPluginTestHarnessZ3OpenNetworkEvent);
+  }
+#endif
   // Permit joining forever is bad behavior, so we want to limit
   // this.  If 254 is not enough a re-broadcast should be done later.
   if (duration == EMBER_AF_PERMIT_JOIN_FOREVER) {
@@ -893,9 +907,6 @@ bool sli_zigbee_af_process_zdo(EmberNodeId sender,
       emberAfZdoPrint("RX: %p Desc Resp", "Match");
       emberAfZdoPrintln(", Matches: %d", message[4]);
       break;
-    case END_DEVICE_BIND_RESPONSE:
-      emberAfZdoPrintln("RX: End dev bind response, status=%x", message[1]);
-      break;
     case END_DEVICE_ANNOUNCE:
       emberAfZdoPrintln("Device Announce: 0x%2x",
                         (uint16_t)(message[1]) + (uint16_t)(message[2] << 8));
@@ -1073,7 +1084,8 @@ static EmberStatus send(EmberOutgoingMessageType type,
   // If the Sub-GHz client is present and currently in the "suspended" state,
   // block any outgoing message unless it comes from the Sub-GHz client itself.
   if (emberAfPluginSubGhzClientIsSendingZclMessagesSuspended()
-      && apsFrame->clusterId != ZCL_SUB_GHZ_CLUSTER_ID) {
+      && apsFrame->clusterId != ZCL_SUB_GHZ_CLUSTER_ID
+      && apsFrame->clusterId != ZCL_OTA_BOOTLOAD_CLUSTER_ID) {
     return EMBER_TRANSMISSION_SUSPENDED;
   }
 #endif // SL_CATALOG_ZIGBEE_SUB_GHZ_CLIENT_PRESENT

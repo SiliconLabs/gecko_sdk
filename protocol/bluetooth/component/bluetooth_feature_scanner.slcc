@@ -40,3 +40,6 @@ template_contribution:
     value:
       function: sl_btctrl_init_scan_ext()
     priority: 8
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-scanner

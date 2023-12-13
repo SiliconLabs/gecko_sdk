@@ -12,7 +12,7 @@ class RM_Peripheral_SUNOQPSK(Base_RM_Peripheral):
         super(RM_Peripheral_SUNOQPSK, self).__init__(rmio, label,
             0xB500FC00, 'SUNOQPSK',
             u"",
-            ['LRSWKOFDM', 'SUNFSK', 'SUNOFDM'])
+            ['CW', 'LEGOQPSK', 'LRSWKOFDM', 'SUNFSK', 'SUNOFDM'])
         self.CFG1 = RM_Register_SUNOQPSK_CFG1(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG1'] = self.CFG1
         self.CFG2 = RM_Register_SUNOQPSK_CFG2(self.zz_rmio, self.zz_label)

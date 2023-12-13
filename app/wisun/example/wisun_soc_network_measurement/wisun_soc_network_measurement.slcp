@@ -9,6 +9,7 @@ component:
 # for wisun stack and default components
   - id: "segger_rtt"
   - id: "wisun_stack"
+  - id: "wisun_stack_lfn"
   - id: "wisun_stack_debug"
   - id: "sl_system"
   - id: "device_init"
@@ -25,7 +26,6 @@ component:
 # radio config
   - id: "wisun_full_radioconf"
 # SDK components
-  - id: "sl_wisun_lfn_device_support"
   - id: "sl_wisun_trace_util"
   - id: "sl_wisun_app_core"
   - id: "sl_wisun_app_setting"
@@ -80,6 +80,9 @@ configuration:
   - name: "SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE"
     value: "128"
     condition: [iostream_eusart]
+  - name: "SL_IOSTREAM_LEUART_VCOM_RX_BUFFER_SIZE"
+    value: "128"
+    condition: [iostream_leuart]
   - name: "OS_CFG_APP_HOOKS_EN"
     value: "1"
     condition: [micriumos_kernel]
@@ -106,8 +109,6 @@ configuration:
     value: "1024"
   - name: "SL_WISUN_PING_PACKET_INTERVAL"
     value: "1"
-  - name: "SL_SOCKET_BUFFER_SIZE"
-    value: "2048"
   - name: "WISUN_NETWORK_SIZE"
     value: "SL_WISUN_NETWORK_SIZE_SMALL"
   - name: "APP_PROJECT_INFO_WISUN_VERSION_ENABLED"
@@ -115,14 +116,31 @@ configuration:
   - name: "APP_PROJECT_INFO_MBEDTLS_VERSION_ENABLED"
     value: "1"
 
-#------------- RFFPLL init ----------------
+  # LFN related peripheral and energy saver setup
+  - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [iostream_eusart,wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
+    value: 9600
+    condition: [iostream_eusart,wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY
+    value: 0
+    condition: [iostream_eusart,wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [iostream_eusart,wisun_low_power]
+  - name: SL_IOSTREAM_LEUART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0
+    condition: [iostream_leuart,wisun_low_power]
+    
+  # RFFPLL init
   - name: SL_DEVICE_INIT_RFFPLL_BAND
     value: "1"
     condition:
       - "device_sdid_220"
       - "hardware_board_default_rf_band_470"
     
-#--------------------- SDK memory configuration ------------------------
+  # SDK memory configuration
   - name: "SL_HEAP_SIZE"
     value: "0x17000"
   - name: "SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE"
@@ -134,9 +152,17 @@ configuration:
   - name: "SL_DISPLAY_STACK_SIZE_WORD"
     value: "384"
   - name: "SL_WISUN_PING_STACK_SIZE_WORD"
-    value: "512"
+    value: "256"
   - name: "SL_IPERF_STACK_SIZE_WORD"
-    value: "512"
+    value: "256"
+
+# SDK Application version
+  - name: APP_PROJECT_INFO_APP_VERSION_MAJOR
+    value: 2
+  - name: APP_PROJECT_INFO_APP_VERSION_MINOR
+    value: 0
+  - name: APP_PROJECT_INFO_APP_VERSION_PATCH
+    value: 0
 
 readme:
   - path: ../../documentation/example/wisun_soc_network_measurement/readme.md

@@ -31,6 +31,10 @@
 #ifndef SL_APP_OS_STAT_H
 #define SL_APP_OS_STAT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -39,10 +43,6 @@
 #include "sl_cmsis_os2_common.h"
 #include "sl_status.h"
 #include "app_os_stat_config.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

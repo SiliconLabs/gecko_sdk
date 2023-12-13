@@ -82,7 +82,11 @@ uint16_t unpack_packet(uint8_t *rx_destination, const RAIL_RxPacketInfo_t *packe
                                                            rx_destination);
   if (print_packet_info) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    #if defined(RAIL0_CHANNEL_GROUP_1_PHY_STUDIO_CONNECT_915MHZ_SUN_FSK_10KBPS)
+    app_log_info("Connect SUN_FSK Package is ready, %d bytes payload read with %d fcsType and %d whitening\n ", payload_size, fcsType, whitening);
+    #else
     app_log_info("WISUN_FSK Package is ready, %d bytes payload read with %d fcsType and %d whitening\n ", payload_size, fcsType, whitening);
+    #endif
     #endif
   }
   return payload_size;
@@ -114,7 +118,11 @@ void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16_t leng
   #endif
   if (print_packet_info) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    #if defined(RAIL0_CHANNEL_GROUP_1_PHY_STUDIO_CONNECT_915MHZ_SUN_FSK_10KBPS)
+    app_log_info("Connect SUN_FSK Package is ready, %d bytes written with %d fcsType and %d whitening\n ", bytes_writen_in_fifo, fcsType, whitening);
+    #else
     app_log_info("WISUN_FSK Package is ready, %d bytes written with %d fcsType and %d whitening\n ", bytes_writen_in_fifo, fcsType, whitening);
+    #endif
     #endif
   }
 }
@@ -138,7 +146,11 @@ uint16_t unpack_packet(uint8_t *rx_destination,
                                                                    rx_destination);
   if (print_packet_info) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    #if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_CONNECT_OFDM)
+    app_log_info("Connect_OFDM Package is ready, %d bytes payload read with %d rate and %d scrambler\n ", payload_size, rate, scrambler);
+    #else
     app_log_info("WISUN_OFDM Package is ready, %d bytes payload read with %d rate and %d scrambler\n ", payload_size, rate, scrambler);
+    #endif
     #endif
   }
   return payload_size;
@@ -179,7 +191,11 @@ void prepare_package(RAIL_Handle_t rail_handle, uint8_t *out_data, uint16_t leng
   #endif
   if (print_packet_info) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
+    #if defined(RAIL0_CHANNEL_GROUP_1_PROFILE_CONNECT_OFDM)
+    app_log_info("Connect_OFDM Package is ready, %d bytes written with %d rate and %d scrambler\n ", bytes_writen_in_fifo, rate, scrambler);
+    #else
     app_log_info("WISUN_OFDM Package is ready, %d bytes written with %d rate and %d scrambler\n ", bytes_writen_in_fifo, rate, scrambler);
+    #endif
     #endif
   }
 }

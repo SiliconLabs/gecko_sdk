@@ -19,9 +19,9 @@ requires:
     condition: [device_security_rot]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_CHACHA20
+    value: PSA_WANT_KEY_TYPE_CHACHA20 1
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_STREAM_CIPHER
+    value: PSA_WANT_ALG_STREAM_CIPHER 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
     condition: [mbedtls_chachapoly]

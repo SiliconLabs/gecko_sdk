@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,8 @@
 
 #ifndef SLEEP_H_
 #define SLEEP_H_
+
+#include <stdbool.h>
 
 void sl_ot_sleep_init(void);
 bool sl_ot_is_ok_to_sleep(void);

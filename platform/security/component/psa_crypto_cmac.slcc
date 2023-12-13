@@ -14,7 +14,7 @@ requires:
     condition: [device_series_0]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CMAC
+    value: PSA_WANT_ALG_CMAC 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CMAC 1"
     condition: [mbedtls_cmac]

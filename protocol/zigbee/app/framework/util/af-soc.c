@@ -309,27 +309,6 @@ uint8_t emberAfGetAddressIndex(void)
   return EMBER_NULL_ADDRESS_TABLE_INDEX;
 }
 
-EmberStatus emberAfSendEndDeviceBind(uint8_t endpoint)
-{
-  EmberStatus status;
-  EmberApsOption options = ((EMBER_AF_DEFAULT_APS_OPTIONS
-                             | EMBER_APS_OPTION_SOURCE_EUI64)
-                            & ~EMBER_APS_OPTION_RETRY);
-
-  status = emberAfPushEndpointNetworkIndex(endpoint);
-  if (status != EMBER_SUCCESS) {
-    return status;
-  }
-
-  emberAfZdoPrintln("send %x %2x", endpoint, options);
-  status = emberEndDeviceBindRequest(endpoint, options);
-  emberAfZdoPrintln("done: %x.", status);
-  emberAfZdoFlush();
-
-  (void) emberAfPopNetworkIndex();
-  return status;
-}
-
 uint8_t emberGetEndpoint(uint8_t index)
 {
   return sli_zigbee_af_get_endpoint(index);

@@ -28,10 +28,8 @@ cc_multilevel_sensor_{{_instance}}_interface_deinit(void)
 }
 
 ZW_WEAK bool
-cc_multilevel_sensor_{{_instance}}_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_{{_instance}}_interface_read_value(__attribute__((unused)) sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(o_result);
-  UNUSED(i_scale);
   return false;
 }
 {% endfor %}

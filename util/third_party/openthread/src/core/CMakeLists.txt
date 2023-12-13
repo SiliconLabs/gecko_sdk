@@ -106,7 +106,6 @@ set(COMMON_SOURCES
     common/heap.cpp
     common/heap_data.cpp
     common/heap_string.cpp
-    common/instance.cpp
     common/log.cpp
     common/message.cpp
     common/notifier.cpp
@@ -129,6 +128,7 @@ set(COMMON_SOURCES
     crypto/sha256.cpp
     crypto/storage.cpp
     diags/factory_diags.cpp
+    instance/instance.cpp
     mac/channel_mask.cpp
     mac/data_poll_handler.cpp
     mac/data_poll_sender.cpp
@@ -195,6 +195,7 @@ set(COMMON_SOURCES
     thread/announce_begin_server.cpp
     thread/announce_sender.cpp
     thread/anycast_locator.cpp
+    thread/child.cpp
     thread/child_supervision.cpp
     thread/child_table.cpp
     thread/csl_tx_scheduler.cpp
@@ -215,6 +216,7 @@ set(COMMON_SOURCES
     thread/mle_tlvs.cpp
     thread/mle_types.cpp
     thread/mlr_manager.cpp
+    thread/neighbor.cpp
     thread/neighbor_table.cpp
     thread/network_data.cpp
     thread/network_data_leader.cpp
@@ -229,12 +231,12 @@ set(COMMON_SOURCES
     thread/network_diagnostic_tlvs.cpp
     thread/panid_query_server.cpp
     thread/radio_selector.cpp
+    thread/router.cpp
     thread/router_table.cpp
     thread/src_match_controller.cpp
     thread/thread_netif.cpp
     thread/time_sync_service.cpp
     thread/tmf.cpp
-    thread/topology.cpp
     thread/uri_paths.cpp
     utils/channel_manager.cpp
     utils/channel_monitor.cpp
@@ -242,6 +244,7 @@ set(COMMON_SOURCES
     utils/heap.cpp
     utils/history_tracker.cpp
     utils/jam_detector.cpp
+    utils/link_metrics_manager.cpp
     utils/mesh_diag.cpp
     utils/otns.cpp
     utils/parse_cmdline.cpp
@@ -262,7 +265,6 @@ set(RADIO_COMMON_SOURCES
     common/binary_search.cpp
     common/error.cpp
     common/frame_builder.cpp
-    common/instance.cpp
     common/log.cpp
     common/random.cpp
     common/string.cpp
@@ -274,6 +276,7 @@ set(RADIO_COMMON_SOURCES
     crypto/crypto_platform.cpp
     crypto/storage.cpp
     diags/factory_diags.cpp
+    instance/instance.cpp
     mac/link_raw.cpp
     mac/mac_frame.cpp
     mac/mac_types.cpp

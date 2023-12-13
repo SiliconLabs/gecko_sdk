@@ -16,6 +16,7 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         self._addModelVariable(model,'trecs_pre_bits_to_syncword',int,ModelVariableFormat.DECIMAL,desc='Number of preamble bits to move to syncword with TRECS'	)
         self._addModelVariable(model, 'trecs_effective_preamble_len', int, ModelVariableFormat.DECIMAL,desc='TRECS preamble length minus bits shifted to syncword')
         self._addModelVariable(model, 'trecs_effective_syncword_len', int, ModelVariableFormat.DECIMAL,desc='TRECS syncword length plus bits shifted from preamble')
+        self._addModelVariable(model, 'trecs_syncword_timeout_us', float, ModelVariableFormat.DECIMAL, desc='TRECS syncword timeout in us')
 
     # define constants
     MIN_COST_THD_FULL = 600 # threshold for min cost function when using full 32 bit search (sync or preamble)
@@ -731,3 +732,9 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
 
     def calc_realtimcfe_extenschbyp_reg(self, model):
         self._reg_write(model.vars.MODEM_REALTIMCFE_EXTENSCHBYP, 1) # Enable the extended search bypass as workaround for PGOCELOT-5342
+
+    def calc_trecs_syncword_timeout_us(self, model):
+        frmschtime = model.vars.MODEM_FRMSCHTIME_FRMSCHTIME.value
+        baudrate = model.vars.baudrate.value
+
+        model.vars.trecs_syncword_timeout_us.value = frmschtime / baudrate * 1e6

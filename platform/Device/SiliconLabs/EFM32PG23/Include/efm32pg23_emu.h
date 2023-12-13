@@ -769,4 +769,4 @@ typedef struct {
 /** @} End of group EFM32PG23_EMU */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_EMU_H */
+#endif // EFM32PG23_EMU_H

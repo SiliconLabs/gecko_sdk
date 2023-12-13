@@ -121,16 +121,12 @@
 #define  FAILED_NODE_REMOVE_PROCESS_BUSY    4 /* The removing process is busy */
 #define  FAILED_NODE_REMOVE_FAIL            5 /* The removing process could not */
                                               /* be started */
-
-#ifndef HOST_SECURITY_INCLUDED
 #define ZW_FAILED_NODE_REMOVE_STARTED       0 /* The removing/replacing failed node process started */
 #define ZW_NOT_PRIMARY_CONTROLLER           (1 << NOT_PRIMARY_CONTROLLER)
 #define ZW_NO_CALLBACK_FUNCTION             (1 << NO_CALLBACK_FUNCTION)
 #define ZW_FAILED_NODE_NOT_FOUND            (1 << FAILED_NODE_NOT_FOUND)
 #define ZW_FAILED_NODE_REMOVE_PROCESS_BUSY  (1 << FAILED_NODE_REMOVE_PROCESS_BUSY)
 #define ZW_FAILED_NODE_REMOVE_FAIL          (1 << FAILED_NODE_REMOVE_FAIL)
-#endif
-
 /* ZW_RemoveFailedNode and ZW_ReplaceFailedNode callback status definitions */
 #define ZW_NODE_OK                          0 /* The node is working properly (removed from the failed nodes list ) */
 
@@ -177,7 +173,7 @@
 /* Z-Wave Long Range Channel */
 #define ZW_LR_CHANNEL_A                         0x01
 #define ZW_LR_CHANNEL_B                         0x02
-#define ZW_LR_CHANNEL_AUTO                      0xFE
+#define ZW_LR_CHANNEL_AUTO                      0xFF
 
 /* ZW_GetRoutingInfo() options */
 #define GET_ROUTING_INFO_REMOVE_BAD             0x80

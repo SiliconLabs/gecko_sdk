@@ -1,19 +1,18 @@
 package: Zigbee
-description: This component provides common utility functions that are used by the client
-  and server of the Calendar Cluster.
+description: This component provides common utility functions that are used by the client and server of the Calendar Cluster.
 label: Calendar Common
 quality: production
 id: zigbee_calendar_common
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_calendar_common"
+  - name: zigbee_calendar_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/calendar-common/config/calendar-common-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/calendar-common/calendar-common.c
   - path: protocol/zigbee/app/framework/plugin/calendar-common/calendar-common-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/calendar-common
     file_list:
@@ -37,8 +36,8 @@ template_contribution:
       handler: emberAfPluginCalendarCommonSelectCommand
       help: Selects a calendar to be printed.
       argument:
-      - type: uint8
-        help: The index of the calendar to be selected.
+        - type: uint8
+          help: The index of the calendar to be selected.
   - name: cli_group
     value:
       group: calendar-common
@@ -93,20 +92,20 @@ template_contribution:
       handler: emberAfPluginCalendarCommonLoadSimpleCalendarCommand
       help: Loads the Simple Calendar defined in Appendix D.1 in the SE 1.2 Test specification.
       argument:
-      - type: uint8
-        help: The index in the internal calendar table where this calendar is to be stored
-      - type: uint32
-        help: The provider ID
-      - type: uint32
-        help: The issuer event ID
-      - type: uint32
-        help: The issuer calendar ID
-      - type: uint32
-        help: The time when this calendar is to be considered active
-      - type: uint8
-        help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
-      - type: string
-        help: The calendar name
+        - type: uint8
+          help: The index in the internal calendar table where this calendar is to be stored
+        - type: uint32
+          help: The provider ID
+        - type: uint32
+          help: The issuer event ID
+        - type: uint32
+          help: The issuer calendar ID
+        - type: uint32
+          help: The time when this calendar is to be considered active
+        - type: uint8
+          help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
+        - type: string
+          help: The calendar name
   - name: cli_command
     value:
       group: calendar-common
@@ -114,20 +113,20 @@ template_contribution:
       handler: emberAfPluginCalendarCommonLoadEnhancedCalendarCommand
       help: Loads the Enhanced Calendar defined in Appendix D.2 in the SE 1.2 Test specification.
       argument:
-      - type: uint8
-        help: The index in the internal calendar table where this calendar is to be stored
-      - type: uint32
-        help: The provider ID
-      - type: uint32
-        help: The issuer event ID
-      - type: uint32
-        help: The issuer calendar ID
-      - type: uint32
-        help: The time when this calendar is to be considered active
-      - type: uint8
-        help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
-      - type: string
-        help: The calendar name
+        - type: uint8
+          help: The index in the internal calendar table where this calendar is to be stored
+        - type: uint32
+          help: The provider ID
+        - type: uint32
+          help: The issuer event ID
+        - type: uint32
+          help: The issuer calendar ID
+        - type: uint32
+          help: The time when this calendar is to be considered active
+        - type: uint8
+          help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
+        - type: string
+          help: The calendar name
   - name: cli_command
     value:
       group: calendar-common
@@ -135,20 +134,20 @@ template_contribution:
       handler: emberAfPluginCalendarCommonLoadFlatCalendarCommand
       help: Loads the Flat Calendar defined in Appendix D.3 in the SE 1.2 Test specification.
       argument:
-      - type: uint8
-        help: The index in the internal calendar table where this calendar is to be stored
-      - type: uint32
-        help: The provider ID
-      - type: uint32
-        help: The issuer event ID
-      - type: uint32
-        help: The issuer calendar ID
-      - type: uint32
-        help: The time when this calendar is to be considered active
-      - type: uint8
-        help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
-      - type: string
-        help: The calendar name
+        - type: uint8
+          help: The index in the internal calendar table where this calendar is to be stored
+        - type: uint32
+          help: The provider ID
+        - type: uint32
+          help: The issuer event ID
+        - type: uint32
+          help: The issuer calendar ID
+        - type: uint32
+          help: The time when this calendar is to be considered active
+        - type: uint8
+          help: The type Del=0x00, Rec=0x01, DelAndRec=0x02, Friendly=0x03, Aux=0x04
+        - type: string
+          help: The calendar name
   - name: cli_command
     value:
       group: calendar-common
@@ -156,8 +155,8 @@ template_contribution:
       handler: emberAfPluginCalendarCommonLoadSimpleSpecialDaysCommand
       help: Loads the Simple Special Days defined in Appendix D.4 in the SE 1.2 Test specification.
       argument:
-      - type: uint8
-        help: The index in the internal calendar table where the special days are to be stored
+        - type: uint8
+          help: The index in the internal calendar table where the special days are to be stored
   - name: cli_command
     value:
       group: calendar-common
@@ -165,8 +164,8 @@ template_contribution:
       handler: emberAfPluginCalendarCommonLoadEnhancedSpecialDaysCommand
       help: Loads the Simple Special Days defined in Appendix D.5 in the SE 1.2 Test specification.
       argument:
-      - type: uint8
-        help: The index in the internal calendar table where the special days are to be stored
+        - type: uint8
+          help: The index in the internal calendar table where the special days are to be stored
   - name: cli_command
     value:
       group: calendar-common
@@ -174,16 +173,16 @@ template_contribution:
       handler: emberAfCalendarCommonCliSetCalInfo
       help: Manually sets local calendar information.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: string
-      - type: uint8
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: string
+        - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: calendar-common
@@ -191,15 +190,15 @@ template_contribution:
       handler: emberAfCalendarCommonCliAddCalInfo
       help: Adds calendar information.
       argument:
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint32
-      - type: uint8
-      - type: string
-      - type: uint8
-      - type: uint8
-      - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint32
+        - type: uint8
+        - type: string
+        - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: calendar-common
@@ -207,11 +206,11 @@ template_contribution:
       handler: emberAfCalendarCommonCliSetDayProfInfo
       help: Manually sets local calendars day profiles information.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint16
-      - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint16
+        - type: uint8
   - name: cli_command
     value:
       group: calendar-common
@@ -219,15 +218,15 @@ template_contribution:
       handler: emberAfCalendarCommonCliSetWeekProfInfo
       help: Manually sets local calendars week profiles information.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
-      - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: calendar-common
@@ -235,10 +234,10 @@ template_contribution:
       handler: emberAfCalendarCommonCliSetSeasonsInfo
       help: Manually sets local calendars seasons information.
       argument:
-      - type: uint8
-      - type: uint8
-      - type: uint32
-      - type: uint8
+        - type: uint8
+        - type: uint8
+        - type: uint32
+        - type: uint8
 documentation:
   docset: zigbee
   document: zigbee-af-api/calendar-common

@@ -60,6 +60,7 @@ extern void emberAfPluginTestHarnessZ3OpenNetworkEventHandler(sl_zigbee_event_t 
 extern void emberAfPluginTestHarnessZ3ResetKeyEventHandler(sl_zigbee_event_t * event);
 extern void emberAfPluginTestHarnessZ3ZdoSendEventHandler(sl_zigbee_event_t * event);
 extern void emberAfPluginTestHarnessZ3ZllStuffEventHandler(sl_zigbee_event_t * event);
+extern void emberAfPluginTestHarnessZ3ResetEventHandler(sl_zigbee_event_t * event);
 #endif //SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
 
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -562,7 +563,7 @@ uint8_t emberAfGetOpenNetworkDurationSec(void);
  *
  * @param metadata EmberAfAttributeMetadata* to consider.
  */
-#define emberAfAttributeIsTokenized(metadata) (((metadata)->mask & ATTRIBUTE_MASK_TOKENIZE) != 0)
+#define emberAfAttributeIsTokenized(metadata) (metadata != NULL && (((metadata)->mask & ATTRIBUTE_MASK_TOKENIZE) != 0))
 
 /**
  * @brief Return true if the attribute is saved in external storage.
@@ -596,12 +597,20 @@ uint8_t emberAfGetOpenNetworkDurationSec(void);
 // master array of all defined endpoints
 extern EmberAfDefinedEndpoint sli_zigbee_af_endpoints[];
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+// Master array of all zigbee PRO networks - not 'const', since the
+// node type may be changed at run-time.
+extern sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[];
+
+// The current zigbee PRO network or NULL.
+extern sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network;
+#else
 // Master array of all Zigbee PRO networks.
 extern const sli_zigbee_af_zigbee_pro_network sli_zigbee_af_zigbee_pro_networks[];
 
 // The current Zigbee PRO network or NULL.
 extern const sli_zigbee_af_zigbee_pro_network *sli_zigbee_af_current_zigbee_pro_network;
-
+#endif
 // True if the current network is a Zigbee PRO network.
 #define sli_zigbee_af_pro_is_current_network() (sli_zigbee_af_current_zigbee_pro_network != NULL)
 #endif
@@ -1543,11 +1552,6 @@ EmberStatus emberAfSendInterPan(EmberPanId panId,
                                 EmberAfProfileId profileId,
                                 uint16_t messageLength,
                                 uint8_t* messageBytes);
-
-/**
- * @brief Send end device binding request.
- */
-EmberStatus emberAfSendEndDeviceBind(uint8_t endpoint);
 
 /**
  * @brief Send the command prepared with emberAfFill.... macro.

@@ -16,9 +16,9 @@ include:
     file_list:
       - path: code_utils.h
       - path: link_metrics.h
-      - path: logging_rtt.h
       - path: mac_frame.h
       - path: settings.h
+      - path: uart_rtt.h
   - path: protocol/openthread/platform-abstraction/efr32
     file_list:
       - path: ieee802154mac.h
@@ -36,16 +36,14 @@ include:
 source:
       - path: util/third_party/openthread/examples/platforms/utils/debug_uart.c
       - path: util/third_party/openthread/examples/platforms/utils/link_metrics.cpp
-      - path: util/third_party/openthread/examples/platforms/utils/logging_rtt.c
       - path: util/third_party/openthread/examples/platforms/utils/mac_frame.cpp
       - path: util/third_party/openthread/examples/platforms/utils/settings_ram.c
+      - path: util/third_party/openthread/examples/platforms/utils/uart_rtt.c
       - path: protocol/openthread/platform-abstraction/efr32/soft_source_match_table.c
       - path: protocol/openthread/platform-abstraction/efr32/alarm.c
       - path: protocol/openthread/platform-abstraction/efr32/diag.c
       - path: protocol/openthread/platform-abstraction/efr32/entropy.c
       - path: protocol/openthread/platform-abstraction/efr32/flash.c
-      - path: protocol/openthread/platform-abstraction/efr32/logging.c
-        unless: ["matter_integration"]
       - path: protocol/openthread/platform-abstraction/efr32/memory.c
         unless: ["matter_integration"]      
       - path: protocol/openthread/platform-abstraction/efr32/misc.c
@@ -55,3 +53,8 @@ source:
       - path: protocol/openthread/platform-abstraction/efr32/radio_extension.c
       - path: protocol/openthread/platform-abstraction/efr32/startup-gcc.c
       - path: protocol/openthread/platform-abstraction/efr32/system.c
+define:
+      - name: SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
+        value: 1
+        condition:
+        - "device_family_efr32mg1"

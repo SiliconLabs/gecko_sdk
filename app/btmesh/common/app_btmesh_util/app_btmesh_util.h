@@ -92,6 +92,7 @@
    + SL_BTMESH_FRIEND_LOGGING_CFG_VAL                     \
    + SL_BTMESH_FW_DIST_SERVER_LOGGING_CFG_VAL             \
    + SL_BTMESH_FW_UPDATE_SERVER_LOGGING_CFG_VAL           \
+   + SL_BTMESH_GENERIC_LEVEL_CLIENT_EXT_LOGGING_CFG_VAL   \
    + SL_BTMESH_GENERIC_ONOFF_SERVER_LOGGING_CFG_VAL       \
    + SL_BTMESH_HSL_SERVER_LOGGING_CFG_VAL                 \
    + SL_BTMESH_IV_UPDATE_LOGGING_CFG_VAL                  \
@@ -271,6 +272,14 @@
  ******************************************************************************/
 #define SL_PROG_TO_PCT_INT(_target, _progress) \
   (((_progress) * 100) / (_target) )
+
+/***************************************************************************//**
+ * Calculates how many elements an array contains
+ *
+ * @param array
+ * @retval The length of the array
+ ******************************************************************************/
+#define SL_ARRAY_LENGTH(array) (sizeof(array) / sizeof((array)[0]))
 
 /***************************************************************************//**
  * Silicon Laboratories Company ID as integer

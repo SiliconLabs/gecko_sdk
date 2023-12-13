@@ -288,13 +288,18 @@ typedef struct {
   /** Clock selection. */
   TIMER_ClkSel_TypeDef      clkSel;
 
-#if defined(TIMER_CTRL_X2CNT) && (defined(TIMER_CTRL_ATI) || defined(TIMER_CFG_ATI))
+#if defined(TIMER_CTRL_X2CNT) && (defined(TIMER_CTRL_ATI) || defined(TIMER_CFG_ATI)) \
+  && (defined(TIMER_CTRL_RSSCOIST) || defined(TIMER_CFG_RSSCOIST))
   /** 2x Count mode, counter increments/decrements by 2, meant for PWM mode. */
   bool                      count2x;
 
   /** ATI (Always Track Inputs) makes CCPOL always track
    * the polarity of the inputs. */
   bool                      ati;
+
+  /** Reload-Start Sets COIST
+   * When enabled, compare output is set to COIST value on a Reload-Start event. */
+  bool                      rssCoist;
 #endif
 
   /** Action on falling input edge. */
@@ -325,7 +330,8 @@ typedef struct {
 } TIMER_Init_TypeDef;
 
 /** Default configuration for TIMER initialization structure. */
-#if defined(TIMER_CTRL_X2CNT) && (defined(TIMER_CTRL_ATI) || defined(TIMER_CFG_ATI))
+#if defined(TIMER_CTRL_X2CNT) && (defined(TIMER_CTRL_ATI) || defined(TIMER_CFG_ATI)) \
+  && (defined(TIMER_CTRL_RSSCOIST) || defined(TIMER_CFG_RSSCOIST))
 #if (defined(TIMER_CTRL_DISSYNCOUT) || defined(TIMER_CFG_DISSYNCOUT))
 #define TIMER_INIT_DEFAULT                                                            \
   {                                                                                   \
@@ -335,6 +341,7 @@ typedef struct {
     timerClkSelHFPerClk,  /* Select HFPER / HFPERB clock. */                          \
     false,                /* Not 2x count mode. */                                    \
     false,                /* No ATI. */                                               \
+    false,                /* No RSSCOIST. */                                          \
     timerInputActionNone, /* No action on falling input edge. */                      \
     timerInputActionNone, /* No action on rising input edge. */                       \
     timerModeUp,          /* Up-counting. */                                          \
@@ -353,6 +360,7 @@ typedef struct {
     timerClkSelHFPerClk,  /* Select HFPER / HFPERB clock. */                          \
     false,                /* Not 2x count mode. */                                    \
     false,                /* No ATI. */                                               \
+    false,                /* No RSSCOIST. */                                          \
     timerInputActionNone, /* No action on falling input edge. */                      \
     timerInputActionNone, /* No action on rising input edge. */                       \
     timerModeUp,          /* Up-counting. */                                          \
@@ -603,6 +611,12 @@ __STATIC_INLINE bool TIMER_Valid(const TIMER_TypeDef *ref)
 #if defined(TIMER7)
          || (ref == TIMER7)
 #endif
+#if defined(TIMER8)
+         || (ref == TIMER8)
+#endif
+#if defined(TIMER9)
+         || (ref == TIMER9)
+#endif
 #if defined(WTIMER0)
          || (ref == WTIMER0)
 #endif
@@ -660,6 +674,12 @@ __STATIC_INLINE bool TIMER_SupportsDTI(const TIMER_TypeDef *ref)
 #endif
 #if defined(TIMER7_DTI) && (TIMER7_DTI == 1)
          || (ref == TIMER7)
+#endif
+#if defined(TIMER8_DTI) && (TIMER8_DTI == 1)
+         || (ref == TIMER8)
+#endif
+#if defined(TIMER9_DTI) && (TIMER9_DTI == 1)
+         || (ref == TIMER9)
 #endif
 #if defined(WTIMER0)
          || (ref == WTIMER0)

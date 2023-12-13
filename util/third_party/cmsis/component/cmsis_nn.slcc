@@ -1,0 +1,42 @@
+id: cmsis_nn
+label: CMSIS-NN
+package: platform
+description: CMSIS-NN neural network kernels for Cortex-M
+category: CMSIS|NN
+quality: production
+root_path: util/third_party/cmsis
+provides:
+  - name: cmsis_nn
+other_file:
+  - path: nn/LICENSE.txt
+include:
+  - path: nn
+  - path: nn/Include
+    file_list:
+      - path: arm_nn_math_types.h
+      - path: arm_nn_tables.h
+      - path: arm_nn_types.h
+      - path: arm_nnfunctions.h
+      - path: arm_nnsupportfunctions.h
+      - path: Internal/arm_nn_compiler.h
+library:
+  - path: lib/gcc/cortex-m0plus/libcmsis-nn.a
+    condition:
+      - toolchain_gcc
+      - cortexm0plus
+  - path: lib/gcc/cortex-m3/libcmsis-nn.a
+    condition:
+      - toolchain_gcc
+      - cortexm3
+  - path: lib/gcc/cortex-m33/libcmsis-nn.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+  - path: lib/gcc/cortex-m4/libcmsis-nn.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+  - path: lib/iar/cortex-m33/libcmsis-nn.a
+    condition:
+      - toolchain_iar
+      - cortexm33

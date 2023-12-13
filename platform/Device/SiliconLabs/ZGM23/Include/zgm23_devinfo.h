@@ -1005,4 +1005,4 @@ typedef struct {
 /** @} End of group ZGM23_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* ZGM23_DEVINFO_H */
+#endif // ZGM23_DEVINFO_H

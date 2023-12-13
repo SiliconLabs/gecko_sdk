@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,27 +32,27 @@
  *
  */
 
-#include "em_device.h"
+#include "ieee802154-packet-utils.hpp"
 #include "em_chip.h"
 #include "em_core.h"
-#include "sli_protocol_crypto.h"
+#include "em_device.h"
 #include "sl_packet_utils.h"
-#include "ieee802154-packet-utils.hpp"
+#include "sli_protocol_crypto.h"
 
 #include <assert.h>
-#include "mac/mac_frame.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "crypto/aes_ccm.hpp"
+#include "mac/mac_frame.hpp"
 
 using namespace ot;
 using namespace Crypto;
 
-void TxSecurityProcessing::Init(uint32_t         aHeaderLength,
-                        uint32_t         aPlainTextLength,
-                        uint8_t          aTagLength,
-                        const void       *aNonce,
-                        uint8_t          aNonceLength)
+void TxSecurityProcessing::Init(uint32_t    aHeaderLength,
+                                uint32_t    aPlainTextLength,
+                                uint8_t     aTagLength,
+                                const void *aNonce,
+                                uint8_t     aNonceLength)
 {
     const uint8_t *nonceBytes  = reinterpret_cast<const uint8_t *>(aNonce);
     uint8_t        blockLength = 0;
@@ -61,7 +61,8 @@ void TxSecurityProcessing::Init(uint32_t         aHeaderLength,
     uint8_t        i;
 
     // Tag length must be even and within [kMinTagLength, kMaxTagLength]
-    OT_ASSERT(((aTagLength & 0x1) == 0) && (Crypto::AesCcm::kMinTagLength <= aTagLength) && (aTagLength <= Crypto::AesCcm::kMaxTagLength));
+    OT_ASSERT(((aTagLength & 0x1) == 0) && (Crypto::AesCcm::kMinTagLength <= aTagLength)
+              && (aTagLength <= Crypto::AesCcm::kMaxTagLength));
 
     L = 0;
 
@@ -95,8 +96,8 @@ void TxSecurityProcessing::Init(uint32_t         aHeaderLength,
     // setup initial block
 
     // write flags
-    mBlock[0] = (static_cast<uint8_t>((aHeaderLength != 0) << 6) | static_cast<uint8_t>(((aTagLength - 2) >> 1) << 3) |
-                 static_cast<uint8_t>(L - 1));
+    mBlock[0] = (static_cast<uint8_t>((aHeaderLength != 0) << 6) | static_cast<uint8_t>(((aTagLength - 2) >> 1) << 3)
+                 | static_cast<uint8_t>(L - 1));
 
     // write nonce
     memcpy(&mBlock[1], nonceBytes, aNonceLength);
@@ -111,11 +112,7 @@ void TxSecurityProcessing::Init(uint32_t         aHeaderLength,
     }
 
     // encrypt initial block
-    sli_aes_crypt_ecb_radio(true,
-                            mKey,
-                            kKeyBits,
-                            mBlock,
-                            mBlock);
+    sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mBlock, mBlock);
 
     // process header
     if (aHeaderLength > 0)
@@ -163,11 +160,7 @@ void TxSecurityProcessing::Header(const void *aHeader, uint32_t aHeaderLength)
     {
         if (mBlockLength == sizeof(mBlock))
         {
-            sli_aes_crypt_ecb_radio(true,
-                            mKey,
-                            kKeyBits,
-                            mBlock,
-                            mBlock);
+            sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mBlock, mBlock);
 
             mBlockLength = 0;
         }
@@ -182,11 +175,7 @@ void TxSecurityProcessing::Header(const void *aHeader, uint32_t aHeaderLength)
         // process remainder
         if (mBlockLength != 0)
         {
-            sli_aes_crypt_ecb_radio(true,
-                                    mKey,
-                                    kKeyBits,
-                                    mBlock,
-                                    mBlock);
+            sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mBlock, mBlock);
         }
 
         mBlockLength = 0;
@@ -213,11 +202,7 @@ void TxSecurityProcessing::Payload(void *aPlainText, void *aCipherText, uint32_t
                 }
             }
 
-            sli_aes_crypt_ecb_radio(true,
-                                    mKey,
-                                    kKeyBits,
-                                    mCtr,
-                                    mCtrPad);
+            sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mCtr, mCtrPad);
 
             mCtrLength = 0;
         }
@@ -227,11 +212,7 @@ void TxSecurityProcessing::Payload(void *aPlainText, void *aCipherText, uint32_t
 
         if (mBlockLength == sizeof(mBlock))
         {
-            sli_aes_crypt_ecb_radio(true,
-                                    mKey,
-                                    kKeyBits,
-                                    mBlock,
-                                    mBlock);
+            sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mBlock, mBlock);
 
             mBlockLength = 0;
         }
@@ -245,11 +226,7 @@ void TxSecurityProcessing::Payload(void *aPlainText, void *aCipherText, uint32_t
     {
         if (mBlockLength != 0)
         {
-            sli_aes_crypt_ecb_radio(true,
-                                    mKey,
-                                    kKeyBits,
-                                    mBlock,
-                                    mBlock);
+            sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mBlock, mBlock);
         }
 
         // reset counter
@@ -263,11 +240,7 @@ void TxSecurityProcessing::Finalize(void *aTag)
 
     OT_ASSERT(mPlainTextCur == mPlainTextLength);
 
-    sli_aes_crypt_ecb_radio(true,
-                            mKey,
-                            kKeyBits,
-                            mCtr,
-                            mCtrPad);
+    sli_aes_crypt_ecb_radio(true, mKey, kKeyBits, mCtr, mCtrPad);
 
     for (int i = 0; i < mTagLength; i++)
     {
@@ -281,11 +254,11 @@ void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aE
     OT_UNUSED_VARIABLE(aFrame);
     OT_UNUSED_VARIABLE(aExtAddress);
 #else
-    uint32_t      frameCounter = 0;
-    uint8_t       tagLength;
-    uint8_t       securityLevel;
-    uint8_t       nonce[Crypto::AesCcm::kNonceSize];
-    Mac::TxFrame *aTxFrame = static_cast<Mac::TxFrame *>(aFrame);
+    uint32_t             frameCounter = 0;
+    uint8_t              tagLength;
+    uint8_t              securityLevel;
+    uint8_t              nonce[Crypto::AesCcm::kNonceSize];
+    Mac::TxFrame        *aTxFrame = static_cast<Mac::TxFrame *>(aFrame);
     TxSecurityProcessing packetSecurityHandler;
 
     VerifyOrExit(aTxFrame->GetSecurityEnabled());
@@ -293,12 +266,19 @@ void efr32PlatProcessTransmitAesCcm(otRadioFrame *aFrame, const otExtAddress *aE
     SuccessOrExit(aTxFrame->GetSecurityLevel(securityLevel));
     SuccessOrExit(aTxFrame->GetFrameCounter(frameCounter));
 
-    Crypto::AesCcm::GenerateNonce(*static_cast<const Mac::ExtAddress *>(aExtAddress), frameCounter, securityLevel, nonce);
+    Crypto::AesCcm::GenerateNonce(*static_cast<const Mac::ExtAddress *>(aExtAddress),
+                                  frameCounter,
+                                  securityLevel,
+                                  nonce);
 
     tagLength = aTxFrame->GetFooterLength() - aTxFrame->GetFcsSize();
 
     packetSecurityHandler.SetKey(aFrame->mInfo.mTxInfo.mAesKey->mKeyMaterial.mKey.m8);
-    packetSecurityHandler.Init(aTxFrame->GetHeaderLength(), aTxFrame->GetPayloadLength(), tagLength, nonce, sizeof(nonce));
+    packetSecurityHandler.Init(aTxFrame->GetHeaderLength(),
+                               aTxFrame->GetPayloadLength(),
+                               tagLength,
+                               nonce,
+                               sizeof(nonce));
     packetSecurityHandler.Header(aTxFrame->GetHeader(), aTxFrame->GetHeaderLength());
     packetSecurityHandler.Payload(aTxFrame->GetPayload(), aTxFrame->GetPayload(), aTxFrame->GetPayloadLength());
     packetSecurityHandler.Finalize(aTxFrame->GetFooter());
@@ -319,7 +299,7 @@ otPanId efr32GetDstPanId(otRadioFrame *aFrame)
 {
     otPanId aPanId = 0xFFFF;
 
-    if(static_cast<Mac::RxFrame *>(aFrame)->IsDstPanIdPresent())
+    if (static_cast<Mac::RxFrame *>(aFrame)->IsDstPanIdPresent())
     {
         static_cast<Mac::RxFrame *>(aFrame)->GetDstPanId(aPanId);
     }
@@ -327,7 +307,7 @@ otPanId efr32GetDstPanId(otRadioFrame *aFrame)
     return aPanId;
 }
 
-uint8_t* efr32GetPayload(otRadioFrame *aFrame)
+uint8_t *efr32GetPayload(otRadioFrame *aFrame)
 {
     uint8_t *payload = static_cast<Mac::RxFrame *>(aFrame)->GetPayload();
     return payload;

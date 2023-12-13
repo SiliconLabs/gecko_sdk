@@ -361,11 +361,11 @@ typedef struct {
 #define SYSCFG_IEN_FRCRAMERR2B_DEFAULT                        (_SYSCFG_IEN_FRCRAMERR2B_DEFAULT << 29)       /**< Shifted mode DEFAULT for SYSCFG_IEN         */
 
 /* Bit fields for SYSCFG CHIPREVHW */
-#define _SYSCFG_CHIPREVHW_RESETVALUE                          0x00010011UL                                /**< Default value for SYSCFG_CHIPREVHW          */
+#define _SYSCFG_CHIPREVHW_RESETVALUE                          0x00010012UL                                /**< Default value for SYSCFG_CHIPREVHW          */
 #define _SYSCFG_CHIPREVHW_MASK                                0xFF0FFFFFUL                                /**< Mask for SYSCFG_CHIPREVHW                   */
 #define _SYSCFG_CHIPREVHW_PARTNUMBER_SHIFT                    0                                           /**< Shift value for SYSCFG_PARTNUMBER           */
 #define _SYSCFG_CHIPREVHW_PARTNUMBER_MASK                     0xFFFUL                                     /**< Bit mask for SYSCFG_PARTNUMBER              */
-#define _SYSCFG_CHIPREVHW_PARTNUMBER_DEFAULT                  0x00000011UL                                /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
+#define _SYSCFG_CHIPREVHW_PARTNUMBER_DEFAULT                  0x00000012UL                                /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
 #define SYSCFG_CHIPREVHW_PARTNUMBER_DEFAULT                   (_SYSCFG_CHIPREVHW_PARTNUMBER_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_MINOR_SHIFT                         12                                          /**< Shift value for SYSCFG_MINOR                */
 #define _SYSCFG_CHIPREVHW_MINOR_MASK                          0xF000UL                                    /**< Bit mask for SYSCFG_MINOR                   */
@@ -774,4 +774,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_SYSCFG_H */
+#endif // EFR32ZG28_SYSCFG_H

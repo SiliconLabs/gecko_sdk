@@ -110,7 +110,7 @@ static TfLiteTensor* sl_tflite_micro_input_tensor = nullptr;
  ******************************************************************************/
 static TfLiteTensor* sl_tflite_micro_output_tensor = nullptr;
 
-bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflite::MicroOpResolver &opcode_resolver, size_t* estimated_size)
+sl_status_t sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflite::MicroOpResolver &opcode_resolver, size_t* estimated_size)
 {
   size_t upper_limit = sl_memory_get_heap_region().size - 8 * 1024;
   size_t lower_limit = 2048;
@@ -178,14 +178,14 @@ bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflit
     *estimated_size = 0;
 
     // Return false if we failed to find a working buffer size
-    return false;
+    return SL_STATUS_ALLOCATION_FAILED;
   }
 
   // Add some additional memory for any padding or invoking the context.GetTensor() APIs.
   last_working_buffer_size += 256;
 
   *estimated_size = last_working_buffer_size;
-  return true;
+  return SL_STATUS_OK;
 }
 uint8_t *sl_tflite_micro_allocate_tensor_arena(size_t arena_size, uint8_t** tensor_arena)
 {
@@ -231,7 +231,7 @@ static void init(void)
 
   #if (ARENA_SIZE == -1) // Use arena size which is calculated runtime
 
-  if (!sl_tflite_micro_estimate_arena_size(model, opcode_resolver, &arena_size)) {
+  if (sl_tflite_micro_estimate_arena_size(model, opcode_resolver, &arena_size) != SL_STATUS_OK) {
     TF_LITE_REPORT_ERROR(sl_tflite_micro_error_reporter, "Error: Failed to estimate arena size");
     while (1);
   }

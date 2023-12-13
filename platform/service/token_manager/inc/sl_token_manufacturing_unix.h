@@ -61,23 +61,7 @@
 #define CURRENT_MFG_TOKEN_VERSION 0x02FD //MSB is version, LSB is complement
 
 #ifdef DEFINETYPES
-typedef uint16_t tokTypeMfgNvdataVersion;
-typedef uint8_t tokTypeMfgEui64[8];
-typedef uint8_t tokTypeMfgEui64Hash[8];
-typedef uint8_t tokTypeMfgString[16];
-typedef uint8_t tokTypeMfgRadioBandsSupported;
-typedef int8_t tokTypeMfgRadioCrystalOffset;
-typedef uint8_t tokTypeMfgBoardName[16];
-typedef uint16_t tokTypeMfgManufId;
-typedef uint8_t tokTypeMfgBootloadAesKey[16];
-typedef uint8_t tokTypeMfgEzspStorage[8];
-typedef uint16_t tokTypeMfgAshConfig;
-typedef uint16_t tokTypeMfgCcaThreshold;
-// Network join key with max length of 32 bytes
-typedef struct {
-  uint8_t joinKey[32];
-  uint16_t joinKeyLength;
-} tokTypeMfgThreadJoinKey;
+#include "sl_token_manufacturing_generic.h"
 #endif //DEFINETYPES
 
 #ifdef DEFINETOKENS

@@ -418,4 +418,4 @@ typedef struct {
 #define GPIO_P_DIN_DIN_DEFAULT                         (_GPIO_P_DIN_DIN_DEFAULT << 0)   /**< Shifted mode DEFAULT for GPIO_P_DIN         */
 /** @} End of group Parts */
 
-#endif /* GPIO_PORT_H */
+#endif // GPIO_PORT_H

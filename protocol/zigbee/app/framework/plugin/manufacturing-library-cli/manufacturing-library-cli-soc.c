@@ -55,13 +55,13 @@ static uint8_t   sendBuff[MAX_BUFFER_SIZE + 1];
 #define MIN_CLI_MESSAGE_SIZE 3
 #define MAX_CLI_MESSAGE_SIZE 16
 
-sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent;
-#define checkSendCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckSendCompleteEvent)
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event);
+sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent;
+#define checkReceiveCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent)
+void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event);
 
 static uint16_t savedPacketCount = 0;
 
-#define CHECK_SEND_COMPLETE_DELAY_QS 2
+#define CHECK_RECEIVE_COMPLETE_DELAY_QS 2
 
 // -----------------------------------------------------------------------------
 // Forward Declarations
@@ -105,24 +105,24 @@ void sli_zigbee_af_manufacturing_library_cli_init_callback(uint8_t init_level)
 {
   (void)init_level;
 
-  sl_zigbee_event_init(checkSendCompleteEventControl,
-                       emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler);
+  sl_zigbee_event_init(checkReceiveCompleteEventControl,
+                       emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler);
 }
 
 // This is unfortunate but there is no callback indicating when sending is complete
 // for all packets.  So we must create a timer that checks whether the packet count
 // has increased within the last second.
 
-void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee_event_t * event)
+void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event)
 {
-  sl_zigbee_event_set_inactive(checkSendCompleteEventControl);
+  sl_zigbee_event_set_inactive(checkReceiveCompleteEventControl);
   if (!inReceivedStream) {
     return;
   }
 
   if (savedPacketCount == mfgTotalPacketCounter) {
     inReceivedStream = false;
-    emberAfCorePrintln("%p Send Complete %d packets",
+    emberAfCorePrintln("%p Receive Complete %d packets",
                        PLUGIN_NAME,
                        mfgCurrentPacketCounter);
     emberAfCorePrintln("First packet: lqi %d, rssi %d, len %d",
@@ -132,8 +132,8 @@ void emberAfPluginManufacturingLibraryCliCheckSendCompleteEventHandler(sl_zigbee
     mfgCurrentPacketCounter = 0;
   } else {
     savedPacketCount = mfgTotalPacketCounter;
-    sl_zigbee_event_set_delay_qs(checkSendCompleteEventControl,
-                                 CHECK_SEND_COMPLETE_DELAY_QS);
+    sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
+                                 CHECK_RECEIVE_COMPLETE_DELAY_QS);
   }
 }
 
@@ -180,7 +180,7 @@ static void mfglibRxHandler(uint8_t *packet,
     savedLinkQuality = linkQuality;
     savedPktLength = *packet;
     MEMMOVE(savedPkt, (packet + 1), savedPktLength);
-    sl_zigbee_event_set_active(checkSendCompleteEventControl);
+    sl_zigbee_event_set_active(checkReceiveCompleteEventControl);
   }
 }
 

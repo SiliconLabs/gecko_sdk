@@ -297,9 +297,9 @@ typedef struct {
   union {
     uint8_t longAddress[EUI64_SIZE];
     uint16_t shortAddress;
-  } addr;
+  } addr;                                          ///< addr
 
-  EmberMacAddressMode mode;
+  EmberMacAddressMode mode;                        ///< mode
 } EmberMacAddress;
 
 /**
@@ -475,27 +475,27 @@ struct EventQueue_s;
  */
 
 typedef const struct {
-  struct EventQueue_s *queue;           // the queue this event goes on
-  void (*handler)(struct Event_s *);    // called when the event fires
-  void (*marker)(struct Event_s *);     // marking fuction, can be NULL
-  const char *name;                     // event name for debugging purposes
+  struct EventQueue_s *queue;           ///< the queue this event goes on
+  void (*handler)(struct Event_s *);    ///< called when the event fires
+  void (*marker)(struct Event_s *);     ///< marking fuction, can be NULL
+  const char *name;                     ///< event name for debugging purposes
 } EventActions;
 
 typedef struct Event_s {
-  EventActions *actions;                // static data
+  EventActions *actions;                ///< static data
 
   // For internal use only, but the 'next' field must be initialized
   // to NULL.
-  struct Event_s *next;
-  uint32_t timeToExecute;
+  struct Event_s *next;                            ///< next
+  uint32_t timeToExecute;                          ///< time To Execute
 } Event;
 
 /** @brief An event queue is currently just a list of events ordered by
  * execution time.
  */
 typedef struct EventQueue_s {
-  Event *isrEvents;
-  Event *events;
+  Event *isrEvents;                                ///< isr Events
+  Event *events;                                   ///< events
 } EventQueue;
 
 /** @brief Control structure for events.

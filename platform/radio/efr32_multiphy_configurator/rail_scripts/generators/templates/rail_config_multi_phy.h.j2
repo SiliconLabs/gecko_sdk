@@ -94,14 +94,6 @@ typedef struct {{struct_name}} {
 {% endif %}
 {%- endfor %}
 
-{%- if multiPhyConfig.commonStructures.stackInfoEntries.items() %}
-#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-{%- for stackName, stackInfoEntry in multiPhyConfig.commonStructures.stackInfoEntries.items() %}
-extern const uint8_t {{stackName}}[{{stackInfoEntry|length}}];
-{%- endfor %}
-#endif // RADIO_CONFIG_ENABLE_STACK_INFO
-{% endif %}
-
 {{- "\n" -}}
 #endif // __{{filename|upper}}_H__
 {{- "\n" -}}

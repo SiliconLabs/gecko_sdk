@@ -9,6 +9,7 @@ quality: production
 component:
   - id: ot_stack_mtd
   - id: ot_cli_source
+  - id: ot_crash_handler
   - id: uartdrv_usart
     instance:
       - vcom
@@ -52,6 +53,18 @@ configuration:
     value: 4608
   - name: OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     value: 1
+  - name: OPENTHREAD_CONFIG_LOG_OUTPUT
+    value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 768
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 128
+    condition: [ot_rtt_log, device_family_efr32mg1]
+  - name: BUFFER_SIZE_DOWN
+    value: 0
+    condition: [ot_rtt_log]
 
 tag:
   - prebuilt_demo

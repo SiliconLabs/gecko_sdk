@@ -63,7 +63,7 @@ int sli_zigbee_watchdog_tickle(void)
 bool sli_zigbee_are_keys_authorized_by_default(void)
 {
   // By default without the CBKE library we assume that all keys added
-  // (via emberSetInitialSecurityState() or emberAddOrUpdateKeyTableEntry())
+  // (via emberSetInitialSecurityState() or sl_zb_sec_man_import_link_key())
   // are authorized for APS data messages.
   return sli_zigbee_keys_authorized_by_default;         // true
 }

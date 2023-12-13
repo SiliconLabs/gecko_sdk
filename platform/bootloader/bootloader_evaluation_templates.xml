@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-apploader/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -23,7 +23,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-apploader/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -38,7 +38,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-spi-ezsp/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -53,7 +53,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-spi-ezsp/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -68,7 +68,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-bgapi/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -83,7 +83,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-bgapi/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -98,7 +98,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-xmodem/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>
@@ -113,7 +113,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-xmodem/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="EVALUATION"/>

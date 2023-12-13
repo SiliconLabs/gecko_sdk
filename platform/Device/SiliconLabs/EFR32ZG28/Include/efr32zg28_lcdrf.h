@@ -101,4 +101,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_LCDRF */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_LCDRF_H */
+#endif // EFR32ZG28_LCDRF_H

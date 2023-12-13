@@ -200,6 +200,9 @@ void emberAfPluginNetworkCreatorSecurityZigbeeKeyEstablishmentCallback(EmberEUI6
 #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 }
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+extern bool sl_zigbee_af_network_creator_security_get_key_callback(EmberKeyData * keyData);
+#endif
 // -----------------------------------------------------------------------------
 // API
 
@@ -250,11 +253,20 @@ EmberStatus emberAfPluginNetworkCreatorSecurityStart(bool centralizedNetwork)
   }
 #endif // defined(EMBER_AF_HAS_COORDINATOR_NETWORK) || defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT)
 
-  // Generate a random network key.
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  if (!sl_zigbee_af_network_creator_security_get_key_callback(&state.networkKey)) {
+    // Generate a random network key if the user did not provide a key
+    status = emberAfGenerateRandomKey(&(state.networkKey));
+    if (status != EMBER_SUCCESS) {
+      goto kickout;
+    }
+  }
+#else
   status = emberAfGenerateRandomKey(&(state.networkKey));
   if (status != EMBER_SUCCESS) {
     goto kickout;
   }
+#endif
 
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_ZDD_PRESENT
   sli_zigbee_zdd_update_keys(&state);
@@ -389,14 +401,19 @@ static void openNetworkNetworkEventHandler(sl_zigbee_event_t * event)
   }
 
 #if defined(EZSP_HOST)
-  EzspDecisionBitmask policy = (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS);
+  EzspDecisionId decision;
+  EmberStatus eszpStatus = ezspGetPolicy(EZSP_TRUST_CENTER_POLICY,
+                                         &decision);
+  if (eszpStatus == EZSP_SUCCESS && !(decision & EZSP_DECISION_DEFER_JOINS)) {
+    EzspDecisionBitmask policy = (EZSP_DECISION_ALLOW_JOINS | EZSP_DECISION_ALLOW_UNSECURED_REJOINS);
 #if defined(BDB_JOIN_USES_INSTALL_CODE_KEY)
-  policy |= EZSP_DECISION_JOINS_USE_INSTALL_CODE_KEY;
+    policy |= EZSP_DECISION_JOINS_USE_INSTALL_CODE_KEY;
 #endif // BDB_JOIN_USES_INSTALL_CODE_KEY
-  emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
-                       policy,
-                       "Trust Center Policy",
-                       "Allow preconfigured key joins");
+    emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
+                         policy,
+                         "Trust Center Policy",
+                         "Allow preconfigured key joins");
+  }
 #else // !EZSP_HOST
   zaTrustCenterSetJoinPolicy(EMBER_USE_PRECONFIGURED_KEY);
 #endif // EZSP_HOST

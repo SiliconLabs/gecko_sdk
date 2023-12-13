@@ -26,7 +26,7 @@
 #endif
 
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
-extern EmberEvent sli_zigbee_leave_event;
+  #include "app/framework/plugin/zll-commissioning-common/zll-commissioning-common.h"
 #endif
 
 uint8_t sli_zigbee_af_cli_network_index = EMBER_AF_DEFAULT_NETWORK_INDEX;
@@ -84,13 +84,15 @@ void networkPermitJoinCommand(sl_cli_command_arg_t *arguments)
 // network leave
 void networkLeaveCommand(sl_cli_command_arg_t *arguments)
 {
-  EmberStatus status;
-  status = emberLeaveNetwork();
+  EmberStatus status = EMBER_SUCCESS;
 #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
-  // Complete the leave immediately without the usual delay.
-  emberEventSetActive(&sli_zigbee_leave_event);
+  // The ZTT scripts just do 'network leave', which means that ZLL tokens
+  // never get cleared if the leave fails. This way will ensure that they
+  // do, and that other NV data (attributes, scenes, etc.) gets reset.
+  emberAfZllResetToFactoryNew();
+#else
+  status = emberLeaveNetwork();
 #endif
-  UNUSED_VAR(status);
   sl_zigbee_core_debug_print("%s 0x%02X\n", "leave", status);
 }
 
@@ -105,7 +107,7 @@ void networkRejoinCommand(sl_cli_command_arg_t *arguments)
   EmberStatus status = emberFindAndRejoinNetworkWithReason(haveCurrentNetworkKey,
                                                            channelMask,
                                                            EMBER_AF_REJOIN_DUE_TO_CLI_COMMAND);
-  emberAfAppPrintln("%p 0x%x", "rejoin", status);
+  sl_zigbee_app_debug_println("%s 0x%02x", "rejoin", status);
 }
 
 void networkRejoinDiffDeviceTypeCommand(sl_cli_command_arg_t *arguments)
@@ -116,7 +118,7 @@ void networkRejoinDiffDeviceTypeCommand(sl_cli_command_arg_t *arguments)
   EmberStatus status = emberFindAndRejoinNetworkWithNodeType(haveCurrentNetworkKey,
                                                              channelMask,
                                                              emberNodeType);
-  emberAfAppPrintln("%p 0x%x", "rejoinDiffDeviceType", status);
+  sl_zigbee_app_debug_println("%s 0x%x", "rejoinDiffDeviceType", status);
 }
 
 // network extpanid <8 BYTES>
@@ -126,7 +128,7 @@ void networkExtendedPanIdCommand(sl_cli_command_arg_t *arguments)
   emberAfSetFormAndJoinExtendedPanIdCallback(sli_zigbee_af_extended_pan_id);
   emberAfAppPrint("ext. PAN ID: ");
   emberAfAppDebugExec(emberAfPrintBigEndianEui64(sli_zigbee_af_extended_pan_id));
-  emberAfAppPrintln("");
+  sl_zigbee_app_debug_println("");
 }
 
 // check pjoin status
@@ -134,31 +136,31 @@ void networkCheckPjoinCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t open_duration = emberAfGetOpenNetworkDurationSec();
   if (open_duration > 0) {
-    emberAfAppPrintln("NWK open: %u sec", open_duration);
+    sl_zigbee_app_debug_println("NWK open: %u sec", open_duration);
   } else {
-    emberAfAppPrintln("NWK closed");
+    sl_zigbee_app_debug_println("NWK closed");
   }
 }
 
 void findJoinableNetworkCommand(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = emberAfStartSearchForJoinableNetwork();
-  emberAfCorePrintln("find joinable: 0x%X", status);
+  sl_zigbee_core_debug_println("find joinable: 0x%02X", status);
 }
 
 void findUnusedPanIdCommand(sl_cli_command_arg_t *arguments)
 {
   EmberStatus status = emberAfFindUnusedPanIdAndForm();
-  emberAfCorePrintln("find unused: 0x%X", status);
+  sl_zigbee_core_debug_println("find unused: 0x%02X", status);
 }
 
 void networkChangeChannelCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t channel = sl_cli_get_argument_uint8(arguments, 0);
   EmberStatus status = emberChannelChangeRequest(channel);
-  emberAfAppPrintln("Changing to channel %d: 0x%X",
-                    channel,
-                    status);
+  sl_zigbee_app_debug_println("Changing to channel %d: 0x%02X",
+                              channel,
+                              status);
 }
 
 // is defined to either 1 or 0 as a UC configuration.
@@ -169,7 +171,7 @@ void networkInitCommand(sl_cli_command_arg_t *arguments)
     EMBER_AF_CUSTOM_NETWORK_INIT_OPTIONS   // EmberNetworkInitBitmask value
   };
   EmberStatus status = emberNetworkInit(&networkInitStruct);
-  emberAfAppPrintln("Network Init returned: 0x%X", status);
+  sl_zigbee_app_debug_println("Network Init returned: 0x%02X", status);
 }
 #else
 void networkInitCommand(sl_cli_command_arg_t *arguments)
@@ -181,7 +183,7 @@ void networkSetCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t index = sl_cli_get_argument_uint8(arguments, 0);
   if (EMBER_SUPPORTED_NETWORKS <= index) {
-    emberAfCorePrintln("invalid network index");
+    sl_zigbee_core_debug_println("invalid network index");
     return;
   }
   sli_zigbee_af_cli_network_index = index;
@@ -191,9 +193,9 @@ void networkIdCommand(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
   emberAfGetEui64(eui64);
-  emberAfCorePrint("Short ID: 0x%2X, EUI64: ", emberAfGetNodeId());
+  sl_zigbee_core_debug_println("Short ID: 0x%04X, EUI64: ", emberAfGetNodeId());
   emberAfPrintBigEndianEui64(eui64);
-  emberAfCorePrintln(", Pan ID: 0x%2X", emberAfGetPanId());
+  sl_zigbee_core_debug_println(", Pan ID: 0x%04X", emberAfGetPanId());
 }
 
 void networkMultiPhyStartCommand(sl_cli_command_arg_t *arguments)
@@ -211,12 +213,12 @@ void networkMultiPhyStartCommand(sl_cli_command_arg_t *arguments)
   status = emberMultiPhyStart(PHY_INDEX_PRO2PLUS, page, channel, power, optionsMask);
 
   if (status == EMBER_SUCCESS) {
-    emberAfCorePrintln("Started multi-phy interface");
+    sl_zigbee_core_debug_println("Started multi-phy interface");
   } else {
-    emberAfCorePrintln("Failed to %s %s 0x%X",
-                       "start",
-                       "multi-phy interface",
-                       status);
+    sl_zigbee_core_debug_println("Failed to %s %s 0x%02X",
+                                 "start",
+                                 "multi-phy interface",
+                                 status);
   }
 }
 
@@ -225,14 +227,14 @@ void networkMultiPhyStopCommand(sl_cli_command_arg_t *arguments)
   uint8_t status = emberMultiPhyStop(PHY_INDEX_PRO2PLUS);
 
   if (status == EMBER_SUCCESS) {
-    emberAfCorePrintln("Terminated %s 0x%X",
-                       "multi-phy interface",
-                       status);
+    sl_zigbee_core_debug_println("Terminated %s 0x%02X",
+                                 "multi-phy interface",
+                                 status);
   } else {
-    emberAfCorePrintln("Failed to %s %s 0x%X",
-                       "stop",
-                       "multi-phy interface",
-                       status);
+    sl_zigbee_core_debug_println("Failed to %s %s 0x%02X",
+                                 "stop",
+                                 "multi-phy interface",
+                                 status);
   }
 }
 
@@ -241,9 +243,9 @@ void changeKeepAliveModeCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t keepAliveMode = sl_cli_get_argument_uint8(arguments, 0);
   if (!emberSetKeepAliveMode(keepAliveMode)) {
-    emberAfAppPrintln("Keep alive support enabled.");
+    sl_zigbee_app_debug_println("Keep alive support enabled.");
   } else {
-    emberAfAppPrintln("failed to set keep alive mode.");
+    sl_zigbee_app_debug_println("failed to set keep alive mode.");
   }
 }
 
@@ -251,8 +253,8 @@ void networkChangeChildTimeoutOptionMaskCommand(sl_cli_command_arg_t *arguments)
 {
   uint16_t mask = sl_cli_get_argument_uint16(arguments, 0);
   if (!emberSetChildTimeoutOptionMask(mask)) {
-    emberAfAppPrintln("successfully set the child timeout option mask.");
+    sl_zigbee_app_debug_println("successfully set the child timeout option mask.");
   } else {
-    emberAfAppPrintln("failed to set the child timeout option mask.");
+    sl_zigbee_app_debug_println("failed to set the child timeout option mask.");
   }
 }

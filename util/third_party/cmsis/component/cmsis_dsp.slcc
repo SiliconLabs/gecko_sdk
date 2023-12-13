@@ -1,0 +1,86 @@
+id: cmsis_dsp
+label: CMSIS-DSP
+package: platform
+description: CMSIS-DSP compute library for Cortex-M
+category: CMSIS|DSP
+quality: production
+root_path: util/third_party/cmsis
+provides:
+  - name: cmsis_dsp
+requires:
+  - name: cmsis_core
+other_file:
+  - path: dsp/LICENSE
+include:
+  - path: dsp/Include
+    file_list:
+      - path: arm_common_tables.h
+      - path: arm_common_tables_f16.h
+      - path: arm_const_structs.h
+      - path: arm_const_structs_f16.h
+      - path: arm_helium_utils.h
+      - path: arm_math.h
+      - path: arm_math_f16.h
+      - path: arm_math_memory.h
+      - path: arm_math_types.h
+      - path: arm_math_types_f16.h
+      - path: arm_mve_tables.h
+      - path: arm_mve_tables_f16.h
+      - path: arm_vec_math.h
+      - path: arm_vec_math_f16.h
+  - path: dsp/Include/dsp
+    file_list:
+      - path: basic_math_functions.h
+      - path: basic_math_functions_f16.h
+      - path: bayes_functions.h
+      - path: bayes_functions_f16.h
+      - path: complex_math_functions.h
+      - path: complex_math_functions_f16.h
+      - path: controller_functions.h
+      - path: controller_functions_f16.h
+      - path: debug.h
+      - path: distance_functions.h
+      - path: distance_functions_f16.h
+      - path: fast_math_functions.h
+      - path: fast_math_functions_f16.h
+      - path: filtering_functions.h
+      - path: filtering_functions_f16.h
+      - path: interpolation_functions.h
+      - path: interpolation_functions_f16.h
+      - path: matrix_functions.h
+      - path: matrix_functions_f16.h
+      - path: matrix_utils.h
+      - path: none.h
+      - path: quaternion_math_functions.h
+      - path: statistics_functions.h
+      - path: statistics_functions_f16.h
+      - path: support_functions.h
+      - path: support_functions_f16.h
+      - path: svm_defines.h
+      - path: svm_functions.h
+      - path: svm_functions_f16.h
+      - path: transform_functions.h
+      - path: transform_functions_f16.h
+      - path: utils.h
+      - path: window_functions.h
+library:
+  - path: lib/gcc/cortex-m0plus/libCMSISDSP.a
+    condition:
+      - toolchain_gcc
+      - cortexm0plus
+  - path: lib/gcc/cortex-m3/libCMSISDSP.a
+    condition:
+      - toolchain_gcc
+      - cortexm3
+  - path: lib/gcc/cortex-m33/libCMSISDSP.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+  - path: lib/gcc/cortex-m4/libCMSISDSP.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+  - path: lib/iar/cortex-m33/libCMSISDSP.a
+    condition:
+      - toolchain_iar
+      - cortexm33

@@ -96,6 +96,7 @@ def event_factory(evt_code: elw.esl_lib_evt_type_t, evt_data: elw.esl_lib_evt_da
         EventConnectionOpened,
         EventBondingData,
         EventBondingFinished,
+        EventPawrConfig,
         EventPawrStatus,
         EventPawrResponse,
         EventPawrDataRequest,
@@ -372,6 +373,11 @@ class EventPawrStatus():
     def __repr__(self) -> str:
         return f'{self.evt_code}, {self.pawr_handle:#x}, {self.enabled}, {self.configured}, {self.config.adv_interval.min}, {self.config.adv_interval.max}, {self.config.subevent.count}, {self.config.subevent.interval}, {self.config.response_slot.delay}, {self.config.response_slot.spacing}, {self.config.response_slot.count}'
 
+class EventPawrConfig(EventPawrStatus):
+    '''Wrapper for esl_lib_evt_pawr_config_t'''
+    evt_code = EventType(elw.ESL_LIB_EVT_PAWR_CONFIG)
+    pass
+
 class EventPawrResponse():
     '''Wrapper for esl_lib_evt_pawr_response_t'''
     evt_code = EventType(elw.ESL_LIB_EVT_PAWR_RESPONSE)
@@ -435,10 +441,17 @@ class EventGeneral():
 
 class CommandFailedError(Exception):
     '''ESL Library command failed'''
+    def __init__(self, message: str, sl_status = None) -> None:
+        self.sl_status = sl_status
+        self.message = message
+    def __repr__(self) -> str:
+        return self.message
+    __str__ = __repr__
 
 class Lib():
     '''ESL library running in its own process'''
     def __init__(self, config):
+        ap_logger.addLogLevel(ap_logger.LEVELS["TRACE"], 'TRACE')
         self.config = config
         self.event_queue = mp.Queue()
         self._command_lock = mp.Lock()
@@ -465,7 +478,7 @@ class Lib():
             """Logging callback for ESL lib instance"""
             filter_events = []
             LOG_LEVEL_DICT = {
-                elw.ESL_LIB_LOG_LEVEL_DEBUG: self.log.debug,
+                elw.ESL_LIB_LOG_LEVEL_DEBUG: self.log.trace,
                 elw.ESL_LIB_LOG_LEVEL_INFO: self.log.info,
                 elw.ESL_LIB_LOG_LEVEL_WARNING: self.log.warning,
                 elw.ESL_LIB_LOG_LEVEL_ERROR: self.log.error,
@@ -474,7 +487,8 @@ class Lib():
             if ap_logger.logLevel() > ap_logger.LEVELS["NOTSET"]: # Note: The lowest log level becomes extra verbose, completely flooding the CLI!
                 filter_events = [b"PAwR response, data status = 255", b"Tag found", b"characteristic", b"tag info"]
             if not any(flt in log for flt in filter_events):
-                LOG_LEVEL_DICT[level]("[%s] %s in %s() @ %d:%s ", module, log.rstrip(), function, line, file)
+                with ap_logger.lock:
+                    LOG_LEVEL_DICT[level]("[%s] %s in %s() @ %d:%s ", module, log.rstrip(), function, line, file)
 
         log_func = elw.esl_lib_log_callback_t(log)
         elw.esl_lib_start(self.config, on_event_func, log_func)
@@ -503,7 +517,7 @@ class Lib():
             except BrokenPipeError as err:
                 raise CommandFailedError('Lib process terminated unexpectedly') from err
             if result[0]:
-                raise CommandFailedError(f'{command[1:]} failed {get_enum("SL_STATUS_", result[0])}')
+                raise CommandFailedError(f'{command[1:]} failed with result: {get_enum("SL_STATUS_", result[0])}', result[0])
             return result
 
     def stop(self, timeout=3):
@@ -520,7 +534,7 @@ class Lib():
     def scan_configure(self,
                        active_mode: bool=False,
                        interval_ms: float=10.0,
-                       window_ms: float=10.0,
+                       window_ms: float=8.75,
                        scanning_phy: int=SCAN_PHY_1M,
                        discover_mode: int=SCAN_DISCOVER_GENERIC):
         '''Public wrapper for esl_lib_scan_configure'''
@@ -530,13 +544,13 @@ class Lib():
     def _scan_configure(self,
                         active_mode: bool=False,
                         interval_ms: float=10.0,
-                        window_ms: float=10.0,
+                        window_ms: float=8.75,
                         scanning_phy: int=SCAN_PHY_1M,
                         discover_mode: int=SCAN_DISCOVER_GENERIC):
         '''Internal wrapper for esl_lib_scan_configure'''
         parameters = elw.esl_lib_scan_parameters_t(mode=active_mode,
-                                                   interval=int(interval_ms / 0.625),
-                                                   window=int(window_ms / 0.625),
+                                                   interval=round(interval_ms / 0.625),
+                                                   window=round(window_ms / 0.625),
                                                    scanning_phy=scanning_phy,
                                                    discover_mode=discover_mode)
         status = elw.esl_lib_scan_configure(byref(parameters))
@@ -680,8 +694,8 @@ class Lib():
 
     def pawr_configure(self,
                        pawr_handle,
-                       adv_interval_min=elw.ESL_LIB_PERIODIC_ADV_MIN_INTERVAL_DEFAULT,
-                       adv_interval_max=elw.ESL_LIB_PERIODIC_ADV_MAX_INTERVAL_DEFAULT,
+                       adv_interval_min=elw.ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT,
+                       adv_interval_max=elw.ESL_LIB_PAWR_MAX_INTERVAL_DEFAULT,
                        subevent_count=elw.ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT,
                        subevent_interval=elw.ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT,
                        response_slot_delay=elw.ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT,

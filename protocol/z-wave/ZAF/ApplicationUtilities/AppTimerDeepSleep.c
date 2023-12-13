@@ -22,7 +22,7 @@
  * timers during Deep Sleep. Other retention registers used for Deep Sleep persistent
  * app timers are defined as offsets from this value.
  */
-#define FIRST_APP_TIMER_RETENTION_REGISTER        16
+#define FIRST_APP_TIMER_RETENTION_REGISTER        (ZPAL_RETENTION_REGISTER_PROTOCOL_RESERVED_COUNT + 0)
 
 /** Retention register to use for persisting the task tick value at power down */
 #define TASKTICK_AT_POWERDOWN_RETENTION_REGISTER  (FIRST_APP_TIMER_RETENTION_REGISTER + 0)
@@ -40,7 +40,11 @@
  */
 #define TIMER_VALUES_BEGIN_RETENTION_REGISTER     (FIRST_APP_TIMER_RETENTION_REGISTER + 2)
 
-#define MAX_NUM_PERSISTENT_APP_TIMERS 6 // Do not increase. We have 8 retention registers allocated for ZAF/App timers. And 2 are used for admin purpose
+/**
+ * We have 8 retention registers allocated for ZAF/App timers.
+ * 6 for persistent timers and 2 are for admin purpose.
+ */
+STATIC_ASSERT(APP_TIMER_RETENTION_REGISTER_RESERVED_COUNT == 8, STATIC_ASSERT_FAILED_retention_register_count);
 
 /**
  * On wakeup from Deep Sleep, if the difference between expected timeout of an

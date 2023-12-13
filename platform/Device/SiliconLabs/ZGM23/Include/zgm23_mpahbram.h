@@ -239,4 +239,4 @@ typedef struct {
 /** @} End of group ZGM23_MPAHBRAM */
 /** @} End of group Parts */
 
-#endif /* ZGM23_MPAHBRAM_H */
+#endif // ZGM23_MPAHBRAM_H

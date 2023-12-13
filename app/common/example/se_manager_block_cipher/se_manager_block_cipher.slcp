@@ -1,7 +1,7 @@
 project_name: se_manager_block_cipher
 package: platform
 quality: production
-label: Platform - SE Manager Block Cipher
+label: Platform Security - SoC SE Manager Block Cipher
 description: >
   This example project demonstrates the block cipher API of SE Manager.
 category: Example|Platform

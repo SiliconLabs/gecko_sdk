@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ASCII"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="ot-cli-ftd-tz-workspace" label="ot-cli-ftd-tz-workspace" description="Workspace to build trustzone enabled ot-cli-ftd application and accompanying bootloader.&#xA;">
+    <properties key="namespace" value="template.solution.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-ftd-tz.slcw"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-cli/trustzone/ot-cli-ftd-tz.slcw"/>
+    <properties key="readmeFiles" value="sample-apps/ot-tz-secure-app/README.md"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4406a brd4411a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg21.* .*efr32mg24.* .*mgm21.* .*mgm24.* .*rm21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <properties key="solutionProjects" value="protocol.openthread.sample-apps.ot-tz-secure-app.ot-tz-secure-application.slcp protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp platform.bootloader.sample-apps.workspaces.Series-2.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+  </descriptors>
+  <descriptors name="ot-cli-mtd-tz-workspace" label="ot-cli-mtd-tz-workspace" description="Workspace to build trustzone enabled ot-cli-mtd application and accompanying bootloader.&#xA;">
+    <properties key="namespace" value="template.solution.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-mtd-tz.slcw"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-cli/trustzone/ot-cli-mtd-tz.slcw"/>
+    <properties key="readmeFiles" value="sample-apps/ot-tz-secure-app/README.md"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4197a brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4337a brd4406a brd4411a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32mg21.* .*efr32mg24.* .*mgm21.* .*mgm24.* .*rm21.*"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
+    <properties key="toolchainCompatibility" value="gcc"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <properties key="solutionProjects" value="protocol.openthread.sample-apps.ot-tz-secure-app.ot-tz-secure-application.slcp protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp platform.bootloader.sample-apps.workspaces.Series-2.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
+  </descriptors>
+  <descriptors name="ot-cli-ftd-tz-ns" label="OpenThread - SoC CLI (FTD) (TrustZone)" description="This is a variant of the openthread FTD CLI application with trustzone awareness enabled.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-cli/trustzone/ot-cli-ftd-tz-ns.slcp"/>
+    <properties key="readmeFiles" value="sample-apps/ot-cli/README.md sample-apps/ot-cli/trustzone/README.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+  </descriptors>
+  <descriptors name="ot-cli-mtd-tz-ns" label="OpenThread - SoC CLI (MTD) (TrustZone)" description="This is a variant of the openthread MTD CLI application with trustzone awareness enabled.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-cli/trustzone/ot-cli-mtd-tz-ns.slcp"/>
+    <properties key="readmeFiles" value="sample-apps/ot-cli/README.md sample-apps/ot-cli/trustzone/README.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+  </descriptors>
+  <descriptors name="ot-tz-secure-application" label="Sample project for TrustZone Secure Key Library" description="This is a trustzone enabled application used to manage security operations from trustzone aware OpenThread applications.&#xA;">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="protocol.openthread.sample-apps.ot-tz-secure-app.ot-tz-secure-application.slcp"/>
+    <properties key="projectFilePaths" value="sample-apps/ot-tz-secure-app/ot-tz-secure-application.slcp"/>
+    <properties key="readmeFiles" value="sample-apps/ot-tz-secure-app/README.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar segger"/>
+    <properties key="category" value="OpenThread Examples"/>
+    <properties key="quality" value="EVALUATION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+  </descriptors>
+</model:MDescriptors>

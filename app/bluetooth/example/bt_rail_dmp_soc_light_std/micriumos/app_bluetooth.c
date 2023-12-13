@@ -1145,12 +1145,12 @@ static void enable_ble_advertisements(void)
   if (demo.conn_bluetooth_in_use >= SL_BT_CONFIG_MAX_CONNECTIONS) {
     // Start general advertising and disable connections.
     sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                       sl_bt_advertiser_non_connectable); // non-connectable
+                                       sl_bt_legacy_advertiser_non_connectable); // non-connectable
     app_assert_status(sc);
   } else {
     // Start general advertising and enable connections.
     sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                       sl_bt_advertiser_connectable_scannable); // connectable
+                                       sl_bt_legacy_advertiser_connectable); // connectable
 
     app_assert_status(sc);
   }

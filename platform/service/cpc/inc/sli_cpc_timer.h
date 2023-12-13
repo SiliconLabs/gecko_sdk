@@ -49,19 +49,7 @@
  ******************************************************************************/
 #if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
 typedef sl_sleeptimer_timer_handle_t sli_cpc_timer_handle_t;
-#else
-typedef struct cpc_timer_handle sli_cpc_timer_handle_t;
 #endif
-
-/***************************************************************************//**
- * Typedef for the user supplied callback function which is called when
- * a timer expires.
- *
- * @param handle The timer handle.
- *
- * @param data An extra parameter for the user application.
- ******************************************************************************/
-typedef void (*sli_cpc_timer_callback_t)(sli_cpc_timer_handle_t *handle, void *data);
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,7 +107,7 @@ uint64_t cpc_timer_get_tick_count64(void);
  ******************************************************************************/
 sl_status_t cpc_timer_start_timer(sli_cpc_timer_handle_t *handle,
                                   uint32_t timeout,
-                                  sli_cpc_timer_callback_t callback,
+                                  void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                   void *callback_data);
 
 /**************************************************************************//**
@@ -135,7 +123,7 @@ sl_status_t cpc_timer_start_timer(sli_cpc_timer_handle_t *handle,
  *****************************************************************************/
 sl_status_t cpc_timer_start_timer_ms(sli_cpc_timer_handle_t *handle,
                                      uint32_t timeout_ms,
-                                     sli_cpc_timer_callback_t callback,
+                                     void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                      void *callback_data);
 
 /***************************************************************************//**
@@ -151,7 +139,7 @@ sl_status_t cpc_timer_start_timer_ms(sli_cpc_timer_handle_t *handle,
  ******************************************************************************/
 sl_status_t cpc_timer_restart_timer(sli_cpc_timer_handle_t *handle,
                                     uint32_t timeout,
-                                    sli_cpc_timer_callback_t callback,
+                                    void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                     void *callback_data);
 
 /***************************************************************************//**
@@ -162,6 +150,15 @@ sl_status_t cpc_timer_restart_timer(sli_cpc_timer_handle_t *handle,
  * @return SL_STATUS_OK if successful.
  ******************************************************************************/
 sl_status_t cpc_timer_stop_timer(sli_cpc_timer_handle_t *handle);
+
+/***************************************************************************//**
+ * Delays for the specified number of milliseconds.
+ *
+ * @param delay_ms Delay in milliseconds.
+ *
+ * @return SL_STATUS_OK if successful.
+ ******************************************************************************/
+sl_status_t cpc_timer_delay_millisecond(uint32_t delay_ms);
 #endif
 
 /***************************************************************************//**
@@ -243,7 +240,7 @@ static inline uint64_t sli_cpc_timer_get_tick_count64(void)
  ******************************************************************************/
 static inline sl_status_t sli_cpc_timer_start_timer(sli_cpc_timer_handle_t *handle,
                                                     uint32_t timeout,
-                                                    sli_cpc_timer_callback_t callback,
+                                                    void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                                     void *callback_data)
 {
 #if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
@@ -274,7 +271,7 @@ static inline sl_status_t sli_cpc_timer_start_timer(sli_cpc_timer_handle_t *hand
  *****************************************************************************/
 static inline sl_status_t sli_cpc_timer_start_timer_ms(sli_cpc_timer_handle_t *handle,
                                                        uint32_t timeout_ms,
-                                                       sli_cpc_timer_callback_t callback,
+                                                       void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                                        void *callback_data)
 {
 #if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
@@ -304,7 +301,7 @@ static inline sl_status_t sli_cpc_timer_start_timer_ms(sli_cpc_timer_handle_t *h
  ******************************************************************************/
 static inline sl_status_t sli_cpc_timer_restart_timer(sli_cpc_timer_handle_t *handle,
                                                       uint32_t timeout,
-                                                      sli_cpc_timer_callback_t callback,
+                                                      void (*callback)(sli_cpc_timer_handle_t *handle, void *data),
                                                       void *callback_data)
 {
 #if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
@@ -335,6 +332,20 @@ static inline sl_status_t sli_cpc_timer_stop_timer(sli_cpc_timer_handle_t *handl
   return sl_sleeptimer_stop_timer((sl_sleeptimer_timer_handle_t *)handle);
 #else
   return cpc_timer_stop_timer(handle);
+#endif
+}
+
+/***************************************************************************//**
+ * Delays for the specified number of milliseconds.
+ *
+ * @param delay_ms Delay in milliseconds.
+ ******************************************************************************/
+static inline void sli_cpc_timer_delay_millisecond(uint16_t delay_ms)
+{
+#if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
+  sl_sleeptimer_delay_millisecond(delay_ms);
+#else
+  cpc_timer_delay_millisecond((uint32_t)delay_ms);
 #endif
 }
 

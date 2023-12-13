@@ -416,7 +416,7 @@ void setRxOptions(sl_cli_command_arg_t *args)
                 "storeCrc:%s,ignoreCrcErrors:%s,enableDualSync:%s,"
                 "trackAborted:%s,removeAppendedInfo:%s,rxAntenna:%s,"
                 "frameDet:%s,skipDCCal:%s,skipSynthCal:%s,rxChannelSwitching:%s,"
-                "fastRx2Rx:%s",
+                "fastRx2Rx:%s,collisionDetection:%s",
                 (rxOptions & RAIL_RX_OPTION_STORE_CRC) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_IGNORE_CRC_ERRORS) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_ENABLE_DUALSYNC) ? "True" : "False",
@@ -427,7 +427,8 @@ void setRxOptions(sl_cli_command_arg_t *args)
                 (rxOptions & RAIL_RX_OPTION_SKIP_DC_CAL) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_SKIP_SYNTH_CAL) ? "True" : "False",
                 (rxOptions & RAIL_RX_OPTION_CHANNEL_SWITCHING) ? "True" : "False",
-                (rxOptions & RAIL_RX_OPTION_FAST_RX2RX) ? "True" : "False");
+                (rxOptions & RAIL_RX_OPTION_FAST_RX2RX) ? "True" : "False",
+                (rxOptions & RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION) ? "On" : "Off");
 }
 
 void setTxTone(sl_cli_command_arg_t *args)

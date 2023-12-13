@@ -2056,22 +2056,6 @@ EmberStatus ezspGetCurrentSecurityState(
   return sendStatus;
 }
 
-EmberStatus ezspGetKey(
-  EmberKeyType keyType,
-  EmberKeyStruct *keyStruct)
-{
-  EmberStatus status;
-  startCommand(EZSP_GET_KEY);
-  appendInt8u(keyType);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    fetchEmberKeyStruct(keyStruct);
-    return status;
-  }
-  return sendStatus;
-}
-
 void ezspExportKey(
   sl_zb_sec_man_context_t *context,
   sl_zb_sec_man_key_t *key,
@@ -2102,42 +2086,6 @@ sl_status_t ezspImportKey(
   return sendStatus;
 }
 
-EmberStatus ezspGetKeyTableEntry(
-  uint8_t index,
-  EmberKeyStruct *keyStruct)
-{
-  EmberStatus status;
-  startCommand(EZSP_GET_KEY_TABLE_ENTRY);
-  appendInt8u(index);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    fetchEmberKeyStruct(keyStruct);
-    return status;
-  }
-  return sendStatus;
-}
-
-EmberStatus ezspSetKeyTableEntry(
-  uint8_t index,
-  EmberEUI64 address,
-  bool linkKey,
-  EmberKeyData *keyData)
-{
-  EmberStatus status;
-  startCommand(EZSP_SET_KEY_TABLE_ENTRY);
-  appendInt8u(index);
-  appendInt8uArray(8, address);
-  appendInt8u(linkKey);
-  appendEmberKeyData(keyData);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
-  }
-  return sendStatus;
-}
-
 uint8_t ezspFindKeyTableEntry(
   EmberEUI64 address,
   bool linkKey)
@@ -2152,24 +2100,6 @@ uint8_t ezspFindKeyTableEntry(
     return index;
   }
   return 255;
-}
-
-EmberStatus ezspAddOrUpdateKeyTableEntry(
-  EmberEUI64 address,
-  bool linkKey,
-  EmberKeyData *keyData)
-{
-  EmberStatus status;
-  startCommand(EZSP_ADD_OR_UPDATE_KEY_TABLE_ENTRY);
-  appendInt8uArray(8, address);
-  appendInt8u(linkKey);
-  appendEmberKeyData(keyData);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
-  }
-  return sendStatus;
 }
 
 EmberStatus ezspSendTrustCenterLinkKey(
@@ -2242,22 +2172,6 @@ EmberStatus ezspUpdateTcLinkKey(
   return sendStatus;
 }
 
-EmberStatus ezspAddTransientLinkKey(
-  EmberEUI64 partner,
-  EmberKeyData *transientKey)
-{
-  EmberStatus status;
-  startCommand(EZSP_ADD_TRANSIENT_LINK_KEY);
-  appendInt8uArray(8, partner);
-  appendEmberKeyData(transientKey);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
-  }
-  return sendStatus;
-}
-
 void ezspClearTransientLinkKeys(void)
 {
   startCommand(EZSP_CLEAR_TRANSIENT_LINK_KEYS);
@@ -2265,38 +2179,6 @@ void ezspClearTransientLinkKeys(void)
   if (sendStatus == EZSP_SUCCESS) {
     EZSP_ASH_TRACE("%s(): sendCommand() error: 0x%x", __func__, sendStatus);
   }
-}
-
-EmberStatus ezspGetTransientLinkKey(
-  EmberEUI64 eui,
-  EmberTransientKeyData *transientKeyData)
-{
-  EmberStatus status;
-  startCommand(EZSP_GET_TRANSIENT_LINK_KEY);
-  appendInt8uArray(8, eui);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    fetchEmberTransientKeyData(transientKeyData);
-    return status;
-  }
-  return sendStatus;
-}
-
-EmberStatus ezspGetTransientKeyTableEntry(
-  uint8_t index,
-  EmberTransientKeyData *transientKeyData)
-{
-  EmberStatus status;
-  startCommand(EZSP_GET_TRANSIENT_KEY_TABLE_ENTRY);
-  appendInt8u(index);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    fetchEmberTransientKeyData(transientKeyData);
-    return status;
-  }
-  return sendStatus;
 }
 
 sl_status_t ezspGetNetworkKeyInfo(
@@ -3518,68 +3400,16 @@ void ezspGpTranslationTableClear(void)
   }
 }
 
-//------------------------------------------------------------------------------
-// Secure EZSP Frames
-//------------------------------------------------------------------------------
-
-EzspStatus ezspSetSecurityKey(
-  EmberKeyData *key,
-  SecureEzspSecurityType securityType)
+uint8_t ezspGpSinkTableGetNumberOfActiveEntries(void)
 {
-  EzspStatus status;
-  startCommand(EZSP_SET_SECURITY_KEY);
-  appendEmberKeyData(key);
-  appendInt32u(securityType);
+  uint8_t number_of_entries;
+  startCommand(EZSP_GP_SINK_TABLE_GET_NUMBER_OF_ACTIVE_ENTRIES);
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
+    number_of_entries = fetchInt8u();
+    return number_of_entries;
   }
-  return sendStatus;
-}
-
-EzspStatus ezspSetSecurityParameters(
-  SecureEzspSecurityLevel securityLevel,
-  SecureEzspRandomNumber *hostRandomNumber,
-  SecureEzspRandomNumber *returnNcpRandomNumber)
-{
-  EzspStatus status;
-  startCommand(EZSP_SET_SECURITY_PARAMETERS);
-  appendInt8u(securityLevel);
-  appendSecureEzspRandomNumber(hostRandomNumber);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    fetchSecureEzspRandomNumber(returnNcpRandomNumber);
-    return status;
-  }
-  return sendStatus;
-}
-
-EzspStatus ezspResetToFactoryDefaults(void)
-{
-  EzspStatus status;
-  startCommand(EZSP_RESET_TO_FACTORY_DEFAULTS);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    return status;
-  }
-  return sendStatus;
-}
-
-EzspStatus ezspGetSecurityKeyStatus(
-  SecureEzspSecurityType *returnSecurityType)
-{
-  EzspStatus status;
-  startCommand(EZSP_GET_SECURITY_KEY_STATUS);
-  EzspStatus sendStatus = sendCommand();
-  if (sendStatus == EZSP_SUCCESS) {
-    status = fetchInt8u();
-    *returnSecurityType = fetchInt32u();
-    return status;
-  }
-  return sendStatus;
+  return 0;
 }
 
 //------------------------------------------------------------------------------

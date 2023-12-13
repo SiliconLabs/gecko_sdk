@@ -20,9 +20,11 @@ class PhysStudioWisunFan1v1Jumbo(IPhy):
                             phy_name=phy_name)
 
         # Wi-SUN Inputs
-        phy.profile_inputs.wisun_phy_mode_id_select.value = wisun_fan_channel_params.wisun_phy_mode_id_select
+        phy.profile_inputs.wisun_phy_mode_id_select.value = model.vars.wisun_phy_mode_id_select.var_enum(
+            wisun_fan_channel_params.wisun_phy_mode_id_select)
         phy.profile_inputs.wisun_reg_domain.value = getattr(model.vars.wisun_reg_domain.var_enum, wisun_fan_channel_params.wisun_reg_domain)
-        phy.profile_inputs.wisun_channel_plan_id.value = wisun_fan_channel_params.wisun_channnel_plan_id
+        phy.profile_inputs.wisun_channel_plan_id.value = model.vars.wisun_channel_plan_id.var_enum(
+            wisun_fan_channel_params.wisun_channnel_plan_id)
 
         # Default xtal frequency of 38.4MHz
         self._set_xtal_frequency(model, phy)
@@ -194,3 +196,36 @@ class PhysStudioWisunFan1v1Jumbo(IPhy):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
+
+    ### IN Region PHYs From Wi-SUN FAN 1.1 Spec###
+
+    # ChanPlanID 39
+    def PHY_WISUN_FAN_1v1_866MHz_Plan39_2FSK_1a_IN(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 1, 39, 100000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode1a (2FSK 50kbps mi=0.5)')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    # ChanPlanID 40
+    def PHY_WISUN_FAN_1v1_866MHz_Plan40_2FSK_2a_IN(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 3, 40, 200000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode2a (2FSK 100kbps mi=0.5)')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    def PHY_WISUN_FAN_1v1_866MHz_Plan40_2FSK_3_IN(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('IN', 5, 40, 200000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode3 (2FSK 150kbps mi=0.5)')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+
+    ### SG Region PHYs From Wi-SUN FAN 1.1 Spec###
+
+    # ChanPlanID 38
+    def PHY_WISUN_FAN_1v1_867MHz_Plan38_2FSK_4a_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 6, 38, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode4a (2FSK 200kbps mi=0.5)')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+    def PHY_WISUN_FAN_1v1_867MHz_Plan38_2FSK_5_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsJumbo('SG', 8, 38, 400000, 866300000, 'Wi-SUN FAN, SG 865-867 MHz, Mode5 (2FSK 300kbps mi=0.5)')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy

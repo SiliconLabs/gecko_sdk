@@ -1,26 +1,28 @@
-id: "gatt_configuration"
-label: "Static GATT Database and Configuration"
-package: "Bluetooth"
+id: gatt_configuration
+label: Static GATT Database and Configuration
+package: Bluetooth
 description: >
   Adds a basic, static GATT database. It can be customized by the GATT Configurator tool.
   It is compatible with the Dynamic GATT feature <bluetooth_feature_dynamic_gattdb> - static and dynamic GATT databases can co-exist.
   It will also provide the GATT Configurator tool.
 category: Bluetooth|Application|GATT Services
-quality: "production"
-root_path: "app/bluetooth/common/gatt_configuration"
+quality: production
+root_path: app/bluetooth/common/gatt_configuration
 tag:
   - No-Code
-
 config_file:
-  - path: "gatt_configuration.btconf"
+  - path: gatt_configuration.btconf
     file_id: gatt_configuration_file_id
-    directory: "btconf"
+    directory: btconf
 provides:
-  - name: "gatt_configuration"
-  - name: "bluetooth_gatt_database"
+  - name: gatt_configuration
+  - name: bluetooth_gatt_database
     allow_multiple: true
 requires:
-  - name: "bluetooth_gattdb_definition"
+  - name: bluetooth_gattdb_definition
 template_contribution:
   - name: component_catalog
     value: gatt_configuration
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-configuration

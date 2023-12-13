@@ -27,10 +27,10 @@
  *
  ******************************************************************************/
 
+#include <assert.h>
 #include "ota-unicast-bootloader-server-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "ota-unicast-bootloader-server.h"
 #include "ota-unicast-bootloader-server-internal.h"
@@ -133,7 +133,7 @@ EmberAfOtaUnicastBootloaderStatus emberAfPluginUnicastBootloaderServerInitiateRe
   stackErrorsCount = 0;
   currentTargetErrorsCount = 0;
   currentImageTagOrServerStatus = imageTag;
-  currentImageSizeOrBootloadTimeMs = halCommonGetInt32uMillisecondTick()
+  currentImageSizeOrBootloadTimeMs = emberGetInt32uMillisecondTick()
                                      + bootloadDelayMs;
   internalState = STATE_OTA_SERVER_BOOTLOAD_REQUEST_UNICAST_INTERVAL;
   emberEventControlSetActive(emAfPluginOtaUnicastBootloaderServerEventControl);
@@ -572,7 +572,7 @@ static uint32_t getTotalSegmentsCount(void)
 static void requestTargetForBootload(void)
 {
   uint8_t message[EMBER_OTA_UNICAST_BOOTLOADER_PROTOCOL_BOOTLOAD_REQ_HEADER_LENGTH];
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   EmberStatus status;
   uint32_t delayMs;
 

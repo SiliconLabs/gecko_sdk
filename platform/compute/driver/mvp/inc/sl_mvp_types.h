@@ -40,10 +40,6 @@ extern "C" {
  * @{
  ******************************************************************************/
 
-typedef struct {
-  int dim[4];
-} sli_shape_t;
-
 #if !defined(SLI_MVP_ADDR_REG_TYPE)
 #define SLI_MVP_ADDR_REG_TYPE uint32_t
 #endif

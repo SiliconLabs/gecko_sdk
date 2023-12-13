@@ -27,10 +27,18 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
 #include "sli_cpc_crc.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_EMLIB_CORE_PRESENT)
 #include "em_cmu.h"
 #include "em_gpcrc.h"
+#else
+#include "mcu.h"
+#endif
 
 #ifdef CPC_TEST_WITH_INVALID_CRC
 #include "stdio.h"

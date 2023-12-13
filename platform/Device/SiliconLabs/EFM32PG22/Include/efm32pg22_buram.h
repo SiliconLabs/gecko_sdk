@@ -77,4 +77,4 @@ typedef struct {
 /** @} End of group EFM32PG22_BURAM */
 /** @} End of group Parts */
 
-#endif /* EFM32PG22_BURAM_H */
+#endif // EFM32PG22_BURAM_H

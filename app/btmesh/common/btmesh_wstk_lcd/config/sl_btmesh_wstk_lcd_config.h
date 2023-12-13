@@ -130,6 +130,16 @@
 
 // </h>
 
+// <h> Scene Client
+
+// <o SL_BTMESH_WSTK_LCD_ROW_CURRENT_SCENE_CFG_VAL> Row for Current Scene
+// <i> Default: 5
+// <1-9:1>
+// <i> LCD on WSTKs have 9 rows. Out of these the Current Scene will be printed in the row specified here.
+#define SL_BTMESH_WSTK_LCD_ROW_CURRENT_SCENE_CFG_VAL   (5)
+
+// </h>
+
 // <h> Firmware Update
 
 // <o SL_BTMESH_WSTK_LCD_ROW_FW_UPDATE_STATUS_CFG_VAL> Firmware Update Status

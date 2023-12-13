@@ -3,21 +3,20 @@ label: Manufacturing Library
 package: Zigbee
 category: Zigbee|Utility
 quality: production
-
 description: Manufacturing Library (mfglib) utility. Provides functions that assist in radio testing and calibration.
 
 provides:
-  - name: "zigbee_mfglib"
-  - name: "zigbee_mfglib_feature"
+  - name: zigbee_mfglib
+  - name: zigbee_mfglib_feature
 
 requires:
-  - name: "zigbee_mfglib_implementation"
-  - name: "zigbee_mfglib_library"
+  - name: zigbee_mfglib_implementation
+  - name: zigbee_mfglib_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
 
 recommends:
-  - id: "zigbee_mfglib_source"
+  - id: zigbee_mfglib_library_internal
 
 include:
   - path: protocol/zigbee/stack/include

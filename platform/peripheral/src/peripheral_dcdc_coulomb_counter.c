@@ -51,11 +51,11 @@ static int prs_channel = -1;
 /***************************************************************************//**
  * Initializes DCDC_COULOMB_COUNTER module.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_init(const sl_dcdc_coulomb_counter_config_t *p_config)
+void sl_hal_dcdc_coulomb_counter_init(const sl_hal_dcdc_coulomb_counter_config_t *p_config)
 {
   if (DCDC->CCCTRL & _DCDC_CCCTRL_CCEN_MASK) {
     /* Disable COULOMB_COUNTER_INTERNAL module. */
-    sl_dcdc_coulomb_counter_disable();
+    sl_hal_dcdc_coulomb_counter_disable();
   }
 
   /* Set configuration. */
@@ -68,7 +68,7 @@ void sl_dcdc_coulomb_counter_init(const sl_dcdc_coulomb_counter_config_t *p_conf
 /***************************************************************************//**
  * Disables DCDC_COULOMB_COUNTER module.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_disable(void)
+void sl_hal_dcdc_coulomb_counter_disable(void)
 {
   /* Quick exit if the DCDC_COULOMB_COUNTER and is already disabled. */
   if ((DCDC->CCCTRL & _DCDC_CCCTRL_CCEN_MASK) == 0U) {
@@ -77,7 +77,7 @@ void sl_dcdc_coulomb_counter_disable(void)
 
   /* Stop counting if running. */
   if (DCDC->CCSTATUS & _DCDC_CCSTATUS_CCRUNNING_MASK) {
-    sl_dcdc_coulomb_counter_stop();
+    sl_hal_dcdc_coulomb_counter_stop();
   }
 
   /* Disable module. */
@@ -91,9 +91,9 @@ void sl_dcdc_coulomb_counter_disable(void)
  * @note As a guideline, using the default DC-DC settings, the DC-DC may
  * produce up to 60,000-70,000 pulses per second for every mA of load current.
  ******************************************************************************/
-uint32_t sl_dcdc_coulomb_counter_get_count(sl_dcdc_coulomb_counter_emode_t emode)
+uint32_t sl_hal_dcdc_coulomb_counter_get_count(sl_hal_dcdc_coulomb_counter_emode_t emode)
 {
-  if (emode == SL_DCDC_COULOMB_COUNTER_EM0) {
+  if (emode == SL_HAL_DCDC_COULOMB_COUNTER_EM0) {
     return DCDC->CCEM0CNT;
   } else {
     return DCDC->CCEM2CNT;
@@ -106,7 +106,7 @@ uint32_t sl_dcdc_coulomb_counter_get_count(sl_dcdc_coulomb_counter_emode_t emode
  * @note The coulomb counter should be calibrated to determine the
  * charge per pulse, both for EM0/1 and for EM2/3 settings of the DC-DC.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_cal_init(sl_dcdc_coulomb_counter_calibration_config_t config)
+void sl_hal_dcdc_coulomb_counter_cal_init(sl_hal_dcdc_coulomb_counter_calibration_config_t config)
 {
   CMU_ClockEnable(cmuClock_PRS, true);
 
@@ -132,8 +132,8 @@ void sl_dcdc_coulomb_counter_cal_init(sl_dcdc_coulomb_counter_calibration_config
   CMU_CalibrateCont(false);
 
   /* Enable the desired calibration load. */
-  sl_dcdc_coulomb_counter_set_cal_load_level(config.cal_emode, config.cal_load_level);
-  sl_dcdc_coulomb_counter_enable_cal_load();
+  sl_hal_dcdc_coulomb_counter_set_cal_load_level(config.cal_emode, config.cal_load_level);
+  sl_hal_dcdc_coulomb_counter_enable_cal_load();
 
   /* Wait for at least one DC-DC pulse to settle DC-DC. */
   DCDC->IF_CLR = DCDC_IF_REGULATION;
@@ -149,7 +149,7 @@ void sl_dcdc_coulomb_counter_cal_init(sl_dcdc_coulomb_counter_calibration_config
 /***************************************************************************//**
  * Starts DCDC_COULOMB_COUNTER calibration sequence.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_cal_start(void)
+void sl_hal_dcdc_coulomb_counter_cal_start(void)
 {
   /* Start the up counter. */
   CMU_CalibrateStart();
@@ -158,18 +158,18 @@ void sl_dcdc_coulomb_counter_cal_start(void)
 /***************************************************************************//**
  * Stops DCDC_COULOMB_COUNTER calibration sequence.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_cal_stop(void)
+void sl_hal_dcdc_coulomb_counter_cal_stop(void)
 {
   CMU_CalibrateStop();
 
-  sl_dcdc_coulomb_counter_disable_cal_load();
+  sl_hal_dcdc_coulomb_counter_disable_cal_load();
 }
 
 /***************************************************************************//**
  * Sets the calibration load level.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_set_cal_load_level(sl_dcdc_coulomb_counter_emode_t emode,
-                                                sl_dcdc_coulomb_counter_calibration_load_level_t load_level)
+void sl_hal_dcdc_coulomb_counter_set_cal_load_level(sl_hal_dcdc_coulomb_counter_emode_t emode,
+                                                    sl_hal_dcdc_coulomb_counter_calibration_load_level_t load_level)
 {
   /* Set load level. */
   DCDC->CCCALCTRL = (DCDC->CCCALCTRL & ~(_DCDC_CCCALCTRL_CCLVL_MASK))
@@ -177,7 +177,7 @@ void sl_dcdc_coulomb_counter_set_cal_load_level(sl_dcdc_coulomb_counter_emode_t 
 
   EMU_DCDCSync(_DCDC_SYNCBUSY_MASK);
   /* Adjust DCDC when calibrating for EM2. */
-  if (emode == SL_DCDC_COULOMB_COUNTER_EM2) {
+  if (emode == SL_HAL_DCDC_COULOMB_COUNTER_EM2) {
     /* Forces DCDC to use EM23CTRL0.IPKVAL peak current settings in EM0. */
     DCDC->CCCALCTRL_SET = DCDC_CCCALCTRL_CCCALEM2;
   } else {
@@ -188,7 +188,7 @@ void sl_dcdc_coulomb_counter_set_cal_load_level(sl_dcdc_coulomb_counter_emode_t 
 /***************************************************************************//**
  * Enables the calibration load.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_enable_cal_load(void)
+void sl_hal_dcdc_coulomb_counter_enable_cal_load(void)
 {
   DCDC->CCCALCTRL_SET = DCDC_CCCALCTRL_CCLOADEN;
 }
@@ -196,7 +196,7 @@ void sl_dcdc_coulomb_counter_enable_cal_load(void)
 /***************************************************************************//**
  * Disables the calibration load.
  ******************************************************************************/
-void sl_dcdc_coulomb_counter_disable_cal_load(void)
+void sl_hal_dcdc_coulomb_counter_disable_cal_load(void)
 {
   DCDC->CCCALCTRL_CLR = DCDC_CCCALCTRL_CCLOADEN;
 }
@@ -205,47 +205,47 @@ void sl_dcdc_coulomb_counter_disable_cal_load(void)
  * Gets the calibration load current from the stored value
  * in DEVINFO as measured during production testing.
  ******************************************************************************/
-uint16_t sl_dcdc_coulomb_counter_get_cal_load_current(sl_dcdc_coulomb_counter_calibration_load_level_t load_level)
+uint16_t sl_hal_dcdc_coulomb_counter_get_cal_load_current(sl_hal_dcdc_coulomb_counter_calibration_load_level_t load_level)
 {
   uint16_t ccload = 0U;
 
   switch (load_level) {
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD0:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD0:
       ccload = (DEVINFO->CCLOAD10 & _DEVINFO_CCLOAD10_CCLOAD0_MASK)
                >> _DEVINFO_CCLOAD10_CCLOAD0_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD1:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD1:
       ccload = (DEVINFO->CCLOAD10 & _DEVINFO_CCLOAD10_CCLOAD1_MASK)
                >> _DEVINFO_CCLOAD10_CCLOAD1_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD2:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD2:
       ccload = (DEVINFO->CCLOAD32 & _DEVINFO_CCLOAD32_CCLOAD2_MASK)
                >> _DEVINFO_CCLOAD32_CCLOAD2_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD3:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD3:
       ccload = (DEVINFO->CCLOAD32 & _DEVINFO_CCLOAD32_CCLOAD3_MASK)
                >> _DEVINFO_CCLOAD32_CCLOAD3_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD4:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD4:
       ccload = (DEVINFO->CCLOAD54 & _DEVINFO_CCLOAD54_CCLOAD4_MASK)
                >> _DEVINFO_CCLOAD54_CCLOAD4_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD5:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD5:
       ccload = (DEVINFO->CCLOAD54 & _DEVINFO_CCLOAD54_CCLOAD5_MASK)
                >> _DEVINFO_CCLOAD54_CCLOAD5_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD6:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD6:
       ccload = (DEVINFO->CCLOAD76 & _DEVINFO_CCLOAD76_CCLOAD6_MASK)
                >> _DEVINFO_CCLOAD76_CCLOAD6_SHIFT;
       break;
 
-    case SL_DCDC_COULOMB_COUNTER_CAL_LOAD7:
+    case SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD7:
       ccload = (DEVINFO->CCLOAD76 & _DEVINFO_CCLOAD76_CCLOAD7_MASK)
                >> _DEVINFO_CCLOAD76_CCLOAD7_SHIFT;
       break;
@@ -266,7 +266,7 @@ uint16_t sl_dcdc_coulomb_counter_get_cal_load_current(sl_dcdc_coulomb_counter_ca
  * @note A high-frequency oscillator source of known frequency (fHF)
  * is used to time pulses from the DC-DC and establish the charge per pulse.
  ******************************************************************************/
-uint32_t sl_dcdc_coulomb_counter_get_cal_reference_freq(void)
+uint32_t sl_hal_dcdc_coulomb_counter_get_cal_reference_freq(void)
 {
   uint32_t freq = 0U;
   uint8_t upsel = _CMU_CALCTRL_UPSEL_DISABLED;

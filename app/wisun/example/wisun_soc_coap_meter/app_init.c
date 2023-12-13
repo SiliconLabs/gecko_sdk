@@ -34,7 +34,6 @@
 #include <assert.h>
 #include <string.h>
 #include "app_init.h"
-#include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_coap_meter.h"
@@ -95,6 +94,7 @@ void app_init(void)
   // Init meter collector
   sl_wisun_coap_meter_init();
 
+#if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
   // Init sensor all
   coap_resource.data.uri_path          = SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH;
   coap_resource.data.resource_type     = SL_WISUN_COAP_METER_RESOURCE_RT_ALL;
@@ -134,6 +134,15 @@ void app_init(void)
   coap_resource.auto_response          = sl_wisun_coap_meter_led_toggle_response_cb;
   coap_resource.discoverable           = true;
   assert(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
+#else
+  // Init sensor all
+  coap_resource.data.uri_path          = SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH;
+  coap_resource.data.resource_type     = SL_WISUN_COAP_METER_RESOURCE_RT_ALL;
+  coap_resource.data.interface         = SL_WISUN_COAP_METER_RESOURCE_IF_SENSOR;
+  coap_resource.auto_response          = NULL;
+  coap_resource.discoverable           = true;
+  assert(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
+#endif
 
   /* Register callbacks */
   app_wisun_em_custom_callback_register(SL_WISUN_MSG_CONNECTED_IND_ID,

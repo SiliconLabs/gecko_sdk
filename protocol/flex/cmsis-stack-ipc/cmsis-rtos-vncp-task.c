@@ -29,14 +29,12 @@
 // Define module name for Power Manager debuging feature.
 #define CURRENT_MODULE_NAME    "FLEX_RTOS_VNCP_TASK"
 
-#include PLATFORM_HEADER
+#include <assert.h>
 #include "cmsis-rtos-ipc-config.h"
 #include "sl_component_catalog.h"
 
 #include "stack/include/ember.h"
 #include "stack/core/sli-connect-api.h"
-
-#include "hal.h"
 
 #include "app_framework_common.h"
 

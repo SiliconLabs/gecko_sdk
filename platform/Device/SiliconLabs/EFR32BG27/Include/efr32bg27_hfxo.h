@@ -460,4 +460,4 @@ typedef struct {
 /** @} End of group EFR32BG27_HFXO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_HFXO_H */
+#endif // EFR32BG27_HFXO_H

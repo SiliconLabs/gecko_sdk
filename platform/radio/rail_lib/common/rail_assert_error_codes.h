@@ -217,7 +217,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_CALCULATOR_NOT_SUPPORTED = 82,
   /** Invalid binary image was loaded onto the sequencer */
   RAIL_ASSERT_INVALID_SEQUENCER_IMAGE = 83,
-  /** No image selected to be loaded onto the sequencer */
+  /** No common or protocol image selected to be loaded onto the sequencer */
   RAIL_ASSERT_MISSING_SEQUENCER_IMAGE = 84,
   /** Software modem image invalid or missing */
   RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE = 85,
@@ -422,7 +422,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*81*/ "Failed to complete DMA write",                                             \
     /*82*/ "RAIL does not support this Radio Calculator configuration",                \
     /*83*/ "Invalid binary image loaded on sequencer",                                 \
-    /*84*/ "No image selected to be loaded on sequencer",                              \
+    /*84*/ "No common or protocol image selected to be loaded onto the sequencer",     \
     /*85*/ "Software modem image invalid or missing",                                  \
 }
 

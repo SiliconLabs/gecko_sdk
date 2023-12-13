@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
@@ -41,74 +41,28 @@
 #include "psa/crypto_sizes.h"
 #include "psa/crypto_struct.h"
 
-#if defined(PSA_WANT_ALG_ECDSA)               \
-  && (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY) )
 #include "sx_ecdsa_alg.h"
 #include "sx_ecc_keygen_alg.h"
 #include "sx_trng.h"
 #include "sx_errors.h"
 #include "cryptolib_types.h"
 #include <string.h>
-#endif
 
-/**
- * \brief Sign a hash or short message with a private key.
- *
- * Note that to perform a hash-and-sign signature algorithm, you must
- * first calculate the hash by calling psa_hash_setup(), psa_hash_update()
- * and psa_hash_finish(). Then pass the resulting hash as the \p hash
- * parameter to this function. You can use #PSA_ALG_SIGN_GET_HASH(\p alg)
- * to determine the hash algorithm to use.
- *
- * \param handle                Handle to the key to use for the operation.
- *                              It must be an asymmetric key pair.
- * \param alg                   A signature algorithm that is compatible with
- *                              the type of \p handle.
- * \param[in] hash              The hash or message to sign.
- * \param hash_length           Size of the \p hash buffer in bytes.
- * \param[out] signature        Buffer where the signature is to be written.
- * \param signature_size        Size of the \p signature buffer in bytes.
- * \param[out] signature_length On success, the number of bytes
- *                              that make up the returned signature value.
- *
- * \retval #PSA_SUCCESS
- * \retval #PSA_ERROR_INVALID_HANDLE
- * \retval #PSA_ERROR_NOT_PERMITTED
- * \retval #PSA_ERROR_BUFFER_TOO_SMALL
- *         The size of the \p signature buffer is too small. You can
- *         determine a sufficient buffer size by calling
- *         #PSA_SIGN_OUTPUT_SIZE(\c key_type, \c key_bits, \p alg)
- *         where \c key_type and \c key_bits are the type and bit-size
- *         respectively of \p handle.
- * \retval #PSA_ERROR_NOT_SUPPORTED
- * \retval #PSA_ERROR_INVALID_ARGUMENT
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_HARDWARE_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- * \retval #PSA_ERROR_STORAGE_FAILURE
- * \retval #PSA_ERROR_INSUFFICIENT_ENTROPY
- * \retval #PSA_ERROR_BAD_STATE
- *         The library has not been previously initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
-psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *attributes,
-                                                 const uint8_t *key_buffer,
-                                                 size_t key_buffer_size,
-                                                 psa_algorithm_t alg,
-                                                 const uint8_t *hash,
-                                                 size_t hash_length,
-                                                 uint8_t *signature,
-                                                 size_t signature_size,
-                                                 size_t *signature_length)
+// -----------------------------------------------------------------------------
+// Driver entry points
+
+psa_status_t sli_cryptoacc_transparent_sign_hash(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *hash,
+  size_t hash_length,
+  uint8_t *signature,
+  size_t signature_size,
+  size_t *signature_length)
 {
-#if defined(PSA_WANT_ALG_ECDSA) && defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)                                    \
-  || defined(PSA_WANT_ECC_SECP_R1_224)                                     \
-  || defined(PSA_WANT_ECC_SECP_R1_256)                                     \
-  || defined(PSA_WANT_ECC_SECP_K1_256))
+#if defined(SLI_PSA_DRIVER_FEATURE_ECDSA)
 
   // Argument check.
   if (attributes == NULL
@@ -143,7 +97,7 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
   sx_ecc_curve_t *curve = NULL;
 
   switch (key_bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+    #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
     case 192:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve = (sx_ecc_curve_t*)&sx_ecc_curve_p192;
@@ -151,8 +105,8 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+    #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+    #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
     case 224:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve = (sx_ecc_curve_t*)&sx_ecc_curve_p224;
@@ -160,18 +114,18 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+    #endif // SLI_PSA_DRIVER_FEATURE_P224R1
     case 256:
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+      #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve = (sx_ecc_curve_t*)&sx_ecc_curve_p256;
       } else
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+      #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+      #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
       if (curve_type == PSA_ECC_FAMILY_SECP_K1) {
         curve = (sx_ecc_curve_t*)&sx_ecc_curve_p256k1;
       } else
-#endif // PSA_WANT_ECC_SECP_K1_256
+      #endif // SLI_PSA_DRIVER_FEATURE_P256K1
       {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -209,7 +163,7 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_KEY_PAIR && PSA_WANT_ECC_*
+#else // SLI_PSA_DRIVER_FEATURE_ECDSA
 
   (void) attributes;
   (void) key_buffer;
@@ -223,61 +177,20 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_KEY_PAIR && PSA_WANT_ECC_*
+#endif // SLI_PSA_DRIVER_FEATURE_ECDSA
 }
 
-/**
- * \brief Verify the signature a hash or short message using a public key.
- *
- * Note that to perform a hash-and-sign signature algorithm, you must
- * first calculate the hash by calling psa_hash_setup(), psa_hash_update()
- * and psa_hash_finish(). Then pass the resulting hash as the \p hash
- * parameter to this function. You can use #PSA_ALG_SIGN_GET_HASH(\p alg)
- * to determine the hash algorithm to use.
- *
- * \param handle            Handle to the key to use for the operation.
- *                          It must be a public key or an asymmetric key pair.
- * \param alg               A signature algorithm that is compatible with
- *                          the type of \p handle.
- * \param[in] hash          The hash or message whose signature is to be
- *                          verified.
- * \param hash_length       Size of the \p hash buffer in bytes.
- * \param[in] signature     Buffer containing the signature to verify.
- * \param signature_length  Size of the \p signature buffer in bytes.
- *
- * \retval #PSA_SUCCESS
- *         The signature is valid.
- * \retval #PSA_ERROR_INVALID_HANDLE
- * \retval #PSA_ERROR_NOT_PERMITTED
- * \retval #PSA_ERROR_INVALID_SIGNATURE
- *         The calculation was perfomed successfully, but the passed
- *         signature is not a valid signature.
- * \retval #PSA_ERROR_NOT_SUPPORTED
- * \retval #PSA_ERROR_INVALID_ARGUMENT
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_HARDWARE_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- * \retval #PSA_ERROR_STORAGE_FAILURE
- * \retval #PSA_ERROR_BAD_STATE
- *         The library has not been previously initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
-psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *attributes,
-                                                   const uint8_t *key_buffer,
-                                                   size_t key_buffer_size,
-                                                   psa_algorithm_t alg,
-                                                   const uint8_t *hash,
-                                                   size_t hash_length,
-                                                   const uint8_t *signature,
-                                                   size_t signature_length)
+psa_status_t sli_cryptoacc_transparent_verify_hash(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  psa_algorithm_t alg,
+  const uint8_t *hash,
+  size_t hash_length,
+  const uint8_t *signature,
+  size_t signature_length)
 {
-#if defined(PSA_WANT_ALG_ECDSA) && defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY) \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)                                      \
-  || defined(PSA_WANT_ECC_SECP_R1_224)                                       \
-  || defined(PSA_WANT_ECC_SECP_R1_256)                                       \
-  || defined(PSA_WANT_ECC_SECP_K1_256))
+#if defined(SLI_PSA_DRIVER_FEATURE_ECDSA)
 
   // Argument check.
   if (attributes == NULL
@@ -289,15 +202,6 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  if (signature_length == 0) {
-    return PSA_ERROR_INVALID_SIGNATURE;
-  }
-
-  // Check the requested algorithm is ECDSA with randomized k.
-  if (!PSA_ALG_IS_RANDOMIZED_ECDSA(alg)) {
-    return PSA_ERROR_NOT_SUPPORTED;
-  }
-
   psa_key_type_t key_type = psa_get_key_type(attributes);
   psa_ecc_family_t curve_type = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
   size_t key_bits = psa_get_key_bits(attributes);
@@ -306,15 +210,29 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
+  if (PSA_ALG_IS_RSA_PSS(alg) || PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg)) {
+    // We shouldn't have a RSA-type alg for a ECC key.
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (!PSA_ALG_IS_ECDSA(alg)) {
+    // We only support ECDSA.
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
   if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
     return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (signature_length == 0) {
+    return PSA_ERROR_INVALID_SIGNATURE;
   }
 
   uint32_t curve_flags = 0;
   sx_ecc_curve_t *curve_ptr = NULL;
 
   switch (key_bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+    #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
     case 192:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve_ptr = (sx_ecc_curve_t*)&sx_ecc_curve_p192;
@@ -323,8 +241,8 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+    #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+    #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
     case 224:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve_ptr = (sx_ecc_curve_t*)&sx_ecc_curve_p224;
@@ -333,20 +251,20 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+    #endif // SLI_PSA_DRIVER_FEATURE_P224R1
     case 256:
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+      #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve_ptr = (sx_ecc_curve_t*)&sx_ecc_curve_p256;
         curve_flags = sx_ecc_curve_p256.pk_flags;
       } else
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+      #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+      #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
       if (curve_type == PSA_ECC_FAMILY_SECP_K1) {
         curve_ptr = (sx_ecc_curve_t*)&sx_ecc_curve_p256k1;
         curve_flags = sx_ecc_curve_p256k1.pk_flags;
       } else
-#endif // PSA_WANT_ECC_SECP_K1_256
+      #endif // SLI_PSA_DRIVER_FEATURE_P256K1
       {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -405,7 +323,7 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_KEY_PAIR && PSA_WANT_ECC_*
+#else // SLI_PSA_DRIVER_FEATURE_ECDSA
 
   (void) attributes;
   (void) key_buffer;
@@ -418,7 +336,7 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_KEY_PAIR && PSA_WANT_ECC_*
+#endif // SLI_PSA_DRIVER_FEATURE_ECDSA
 }
 
-#endif // defined(CRYPTOACC_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_VSE

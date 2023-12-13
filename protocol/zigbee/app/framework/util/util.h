@@ -325,4 +325,48 @@ uint8_t emberAfGetChannelFrom8bitEncodedChanPg(uint8_t chanPg);
  */
 uint8_t emberAfMake8bitEncodedChanPg(uint8_t page, uint8_t channel);
 
+/* @brief Suppress all automatic responses from specified cluster.
+ *
+ * @param cluster - cluster id
+ * @param serverClient - server (0) or client (1)
+ *
+ * @return EMBER_ZCL_STATUS_SUCCESS if successful, EMBER_ZCL_STATUS_INSUFFICIENT_SPACE
+ * if no room in command table
+ */
+EmberAfStatus emberAfSetSuppressCluster(uint16_t clusterId, bool isClientCluster);
+
+/* @brief Gets current suppression state for specified cluster.
+ *
+ * @param cluster - cluster id
+ * @param serverClient - server (0) or client (1)
+ *
+ * @return TRUE if cluster responses are being suppressed
+ */
+bool emberAfGetSuppressCluster(uint16_t clusterId, bool isClientCluster);
+
+/* @brief Suppress all automatic responses from specified cluster command.
+ *
+ * @param cluster - cluster id
+ * @param serverClient - server (0) or client (1)
+ * @param command - command id
+ *
+ * @return EMBER_ZCL_STATUS_SUCCESS if successful, EMBER_ZCL_STATUS_INSUFFICIENT_SPACE
+ * if no room in command table
+ */
+EmberAfStatus emberAfSetSuppressCommand(uint16_t clusterId, bool serverClient, uint8_t commandId);
+
+/* @brief Gets current suppression state for specified command.
+ *
+ * @param cluster - cluster id
+ * @param serverClient - server (0) or client (1)
+ * @param command - command id
+ *
+ * @return TRUE if command responses are being suppressed
+ */
+bool emberAfGetSuppressCommand(uint16_t clusterId, bool serverClient, uint8_t commandId);
+
+/* @brief Print cluster/command suppression table.
+ */
+void emberAfPrintSuppressionTable(void);
+
 #endif // __AF_UTIL_H__

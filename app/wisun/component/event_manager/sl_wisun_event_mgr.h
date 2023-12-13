@@ -31,11 +31,16 @@
 #ifndef __SL_WISUN_EVENT_MGR_H__
 #define __SL_WISUN_EVENT_MGR_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "sl_status.h"
 #include "sl_wisun_events.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -188,5 +193,16 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt);
  * @param[in] evt event ptr
  *****************************************************************************/
 void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Wi-SUN LFN Wake up event handler
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SL_WISUN_EVENT_MGR_H__ */

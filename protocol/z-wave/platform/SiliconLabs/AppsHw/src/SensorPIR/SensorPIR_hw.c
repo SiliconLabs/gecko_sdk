@@ -142,14 +142,12 @@ void app_hw_init(void)
 }
 
 uint8_t
-CC_Battery_BatteryGet_handler(uint8_t endpoint)
+CC_Battery_BatteryGet_handler(__attribute__((unused)) uint8_t endpoint)
 {
   uint32_t VBattery;
   uint8_t  accurateLevel;
   uint8_t  roundedLevel;
   uint8_t reporting_decrements;
-
-  UNUSED(endpoint);
 
   /*
    * Simple example how to use the ADC to measure the battery voltage

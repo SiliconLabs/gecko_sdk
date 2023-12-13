@@ -1,6 +1,6 @@
 
 #include "tensorflow/lite/kernels/internal/reference/pooling.h"
-#include "CMSIS/NN/Include/arm_nnfunctions.h"
+#include "Include/arm_nnfunctions.h"
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
@@ -30,13 +30,13 @@ struct OpData {
 
 }  // namespace
 
-
 void* Init(TfLiteContext* context, const char* buffer, size_t length)
 {
+  (void)buffer;
+  (void)length;
   TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   return context->AllocatePersistentBuffer(context, sizeof(OpData));
 }
-
 
 TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node)
 {
@@ -174,6 +174,7 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
   TFLITE_DCHECK(node->user_data    != nullptr);
   TFLITE_DCHECK(node->builtin_data != nullptr);
 
+  sl_status_t status = SL_STATUS_OK;
   OpData* data = static_cast<OpData*>(node->user_data);
   const TfLiteEvalTensor* input  = tflite::micro::GetEvalInput(context, node, kInputTensor);
   TfLiteEvalTensor*       output = tflite::micro::GetEvalOutput(context, node, kOutputTensor);
@@ -184,9 +185,8 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
 
   if (data->supported == kMvp) {
     // Use MVP accelerated kernel.
-    TF_LITE_ENSURE_EQ(context,
-                      SL_STATUS_OK,
-                      sli_mvp_ml_average_pooling_s8(&data->op_params));
+    status = sli_mvp_ml_average_pooling_s8(&data->op_params);
+    TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, status);
 
   } else if (data->supported == kCmsisNN) {
     // Use CMSIS-NN optimized kernel.
@@ -227,8 +227,8 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
         arm_avgpool_s8(&ctx, &pool_params, &input_dims,
                        data->op_params.input, &filter_dims,
                        &output_dims,
-                       data->op_params.output),
-        ARM_CMSIS_NN_SUCCESS);
+                       data->op_params.output), ARM_CMSIS_NN_SUCCESS);
+
   } else if (data->supported == kTFLMrefF32) {
     // Use TFLM reference kernel.
     tflite::PoolParams op_params;
@@ -250,7 +250,7 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node)
     return kTfLiteError;
   }
 
-  return kTfLiteOk;
+  return status == SL_STATUS_OK ? kTfLiteOk : kTfLiteError;
 }
 
 TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
@@ -258,6 +258,7 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
   TFLITE_DCHECK(node->user_data    != nullptr);
   TFLITE_DCHECK(node->builtin_data != nullptr);
 
+  sl_status_t status = SL_STATUS_OK;
   OpData* data = static_cast<OpData*>(node->user_data);
   const TfLiteEvalTensor* input  = tflite::micro::GetEvalInput(context, node, kInputTensor);
   TfLiteEvalTensor*       output = tflite::micro::GetEvalOutput(context, node, kOutputTensor);
@@ -268,9 +269,8 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
 
   if (data->supported == kMvp) {
     // Use MVP accelerated kernel.
-    TF_LITE_ENSURE_EQ(context,
-                      SL_STATUS_OK,
-                      sli_mvp_ml_max_pooling_s8(&data->op_params));
+    status = sli_mvp_ml_max_pooling_s8(&data->op_params);
+    TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, status);
 
   } else if (data->supported == kCmsisNN) {
     // Use CMSIS-NN optimized kernel.
@@ -308,8 +308,8 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
         arm_max_pool_s8(&ctx, &pool_params, &input_dims,
                         data->op_params.input, &filter_dims,
                         &output_dims,
-                        data->op_params.output),
-        ARM_CMSIS_NN_SUCCESS);
+                        data->op_params.output), ARM_CMSIS_NN_SUCCESS);
+
   } else if (data->supported == kTFLMrefF32) {
     // Use TFLM reference kernel.
     tflite::PoolParams op_params;
@@ -331,7 +331,7 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node)
     return kTfLiteError;
   }
 
-  return kTfLiteOk;
+  return status == SL_STATUS_OK ? kTfLiteOk : kTfLiteError;
 }
 
 }  // namespace pooling

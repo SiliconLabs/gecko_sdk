@@ -33,12 +33,10 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
-#include "app_assert.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "rail.h"
 #include "app_process.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
 #include "sl_flex_rail_package_assistant.h"
 #include "sl_flex_rail_config.h"
 #include "sl_flex_rail_channel_selector.h"
@@ -350,13 +348,9 @@ static void handle_received_packet(RAIL_Handle_t rail_handle)
     uint16_t packet_size = 0;
     // Check the packet status if this RX is an ACK for our last TX
     if (packet_details.isAck) {
-#if defined(SL_CATALOG_LED1_PRESENT)
-      sl_led_toggle(&sl_led_led1);
-#else
-      sl_led_toggle(&sl_led_led0);
-#endif
+      toggle_send_led();
     } else {
-      sl_led_toggle(&sl_led_led0);
+      toggle_receive_led();
       packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
     }
     rail_status = RAIL_ReleaseRxPacket(rail_handle, rx_packet_handle);

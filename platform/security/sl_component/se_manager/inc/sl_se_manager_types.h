@@ -312,6 +312,8 @@ typedef struct {
   sl_se_debug_status_t debug_status;
   /// Secure boot enabled.
   bool secure_boot_enabled;
+  /// Active mode enabled.
+  bool active_mode_enabled;
   /// Recorded tamper status. Reset on status read.
   uint32_t tamper_status;
   /// Currently active tamper sources.

@@ -66,10 +66,10 @@ HIDDEN void fn_timer_callback(struct RAIL_MultiTimer *tmr,
   fn_operation_in_progress(RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS \
                            | RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK)
 
-// (If no lock is active || lock acquired by current context_index )
-#define check_lock_permissions(context_index)                     \
-  (!fn_operation_in_progress(RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE) \
-   || fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE) )
+// ( no lock is active || lock acquired by current context_index )
+#define check_lock_permissions(context_index)                      \
+  ((!fn_operation_in_progress(RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE) \
+    || fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_LOCK_ACTIVE)) )
 //------------------------------------------------------------------------------
 // Globals
 
@@ -255,7 +255,7 @@ sl_status_t sli_rail_mux_lock_radio(RAIL_Handle_t railHandle)
 
   RAIL_MUX_ENTER_CRITICAL();
   // Is lock currently active, but for a different protocol
-  if ( !check_lock_permissions(context_index)) {
+  if ( !check_lock_permissions(context_index) || (tx_in_progress() && (fn_get_active_tx_context_index() != context_index) )) {
     ret_val = SL_STATUS_FAIL;
   } else {
     // LOCK CAN BE GRANTED
@@ -324,8 +324,12 @@ RAIL_Status_t sl_rail_mux_ConfigEvents(RAIL_Handle_t railHandle,
   uint8_t i;
 
   uint8_t context_index = fn_get_context_index(railHandle);
-  assert(context_index < SUPPORTED_PROTOCOL_COUNT);
-
+  if (context_index >= SUPPORTED_PROTOCOL_COUNT) {
+    assert(context_index < SUPPORTED_PROTOCOL_COUNT);
+    // It will never return from here as long as assert is present.
+    // This is to take care of gcc-12 warning -Werror=array-bounds promoted to error.
+    return RAIL_STATUS_INVALID_PARAMETER;
+  }
   updated_protocol_events = (protocol_context[context_index].events & ~mask);
   updated_protocol_events |= (mask & events);
 
@@ -579,6 +583,13 @@ RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle)
   (void)railHandle;
 
   return RAIL_IEEE802154_Config2p4GHzRadio(mux_rail_handle);
+}
+
+RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle)
+{
+  (void)railHandle;
+
+  return RAIL_IEEE802154_Config2p4GHzRadio2Mbps(mux_rail_handle);
 }
 
 RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv(RAIL_Handle_t railHandle)
@@ -1624,6 +1635,18 @@ RAIL_Status_t sl_rail_mux_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
   (void) railHandle;
   return RAIL_IEEE802154_SetRxToEnhAckTx(mux_rail_handle, pRxToEnhAckTx);
 }
+#ifdef HIGH_SPEED_PHY
+#define not_high_bw_packet() (packet_details.channel <= 26)
+#define high_bw_packet() (packet_details.channel > 26)
+static uint8_t high_bw_phy_index = 0xFF;
+void sl_rail_mux_set_high_bw_phy_index(RAIL_Handle_t railHandle)
+{
+  high_bw_phy_index = fn_get_context_index(railHandle);
+}
+#else // !HIGH_SPEED_PHY
+#define not_high_bw_packet() true
+#define high_bw_packet() false
+#endif //HIGH_SPEED_PHY
 
 HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
@@ -1644,14 +1667,16 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
                                       rx_packet_handle,
                                       &packet_details) == RAIL_STATUS_NO_ERROR);
     //need to read phy header (1 byte) + framecontrol (2 bytes)
-    uint8_t macHdr[EMBER_MAC_HEADER_SEQUENCE_NUMBER_OFFSET];
-    uint8_t *rxPacket = macHdr;
-    assert(RAIL_PeekRxPacket(mux_rail_handle,
-                             rx_packet_handle,
-                             macHdr,
-                             sizeof(macHdr),
-                             0) == sizeof(macHdr));
-    is_beacon = sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_BEACON;
+    if (not_high_bw_packet()) {
+      uint8_t macHdr[EMBER_MAC_HEADER_SEQUENCE_NUMBER_OFFSET];
+      uint8_t *rxPacket = macHdr;
+      assert(RAIL_PeekRxPacket(mux_rail_handle,
+                               rx_packet_handle,
+                               macHdr,
+                               sizeof(macHdr),
+                               0) == sizeof(macHdr));
+      is_beacon = sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_BEACON;
+    }
   }
 
   if (events & RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND) {
@@ -1671,30 +1696,35 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
       if (i != active_tx_protocol_index) {
         enabled_events &= ~RAIL_EVENTS_TX_COMPLETION;
       } else {
-        uint16_t unused_tail = protocol_context[i].fifo_tx_info.tx_size - protocol_context[i].fifo_tx_info.tx_init_length;
-        uint16_t unused = RAIL_GetTxFifoSpaceAvailable(mux_rail_handle);
-        if (unused > unused_tail) {
-          uint16_t unused_head = unused - unused_tail;
-          memmove(protocol_context[i].fifo_tx_info.data_ptr,
-                  protocol_context[i].fifo_tx_info.data_ptr + unused_head,
-                  protocol_context[i].fifo_tx_info.tx_size - unused);
-        }
+        // Note: In case of repeated transmissions, we do not want to mess with
+        // buffers as this may cause corruption with the next packet. Wait until all
+        // packets are sent
+        if ( !RAIL_GetTxPacketsRemaining(mux_rail_handle) ) {
+          uint16_t unused_tail = protocol_context[i].fifo_tx_info.tx_size - protocol_context[i].fifo_tx_info.tx_init_length;
+          uint16_t unused = RAIL_GetTxFifoSpaceAvailable(mux_rail_handle);
+          if (unused > unused_tail) {
+            uint16_t unused_head = unused - unused_tail;
+            memmove(protocol_context[i].fifo_tx_info.data_ptr,
+                    protocol_context[i].fifo_tx_info.data_ptr + unused_head,
+                    protocol_context[i].fifo_tx_info.tx_size - unused);
+          }
 
-        protocol_context[i].fifo_tx_info.tx_init_length =
-          protocol_context[i].fifo_tx_info.tx_size - unused;
+          protocol_context[i].fifo_tx_info.tx_init_length =
+            protocol_context[i].fifo_tx_info.tx_size - unused;
 
-        if (!RAIL_GetTxPacketsRemaining(mux_rail_handle)) {
-          fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS, false);
-          fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED, false);
-        }
-        if (!(enabled_events & RAIL_EVENT_TX_PACKET_SENT)) {
-          // Any event other than a successful packet sent would unset the wait
-          // for ack flag.
-          fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
-        }
+          if (!RAIL_GetTxPacketsRemaining(mux_rail_handle)) {
+            fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS, false);
+            fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED, false);
+          }
+          if (!(enabled_events & RAIL_EVENT_TX_PACKET_SENT)) {
+            // Any event other than a successful packet sent would unset the wait
+            // for ack flag.
+            fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
+          }
 
-        if (!tx_in_progress()) {
-          start_pending_tx = true;
+          if (!tx_in_progress()) {
+            start_pending_tx = true;
+          }
         }
       }
     }
@@ -1722,29 +1752,48 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
       // The protocol is currently on a different channel or idling or the
       // packet did not satisfy any of the protocol filtering: we mask out the
       // RAIL_EVENT_RX_PACKET_RECEIVED event.
-      if (rx_channel != protocol_context[i].channel
-          // MAC acks and beacons do not contain any addressing information
-          // Do not check for filterMask on Rx packets that are acks or beacons
-          || (!packet_details.isAck && !is_beacon && (rx_info.filterMask & protocol_context[i].addr_filter_mask_802154) == 0)
-          || (packet_details.isAck && (i != active_tx_protocol_index)) ) {
-        enabled_events &= ~RAIL_EVENT_RX_PACKET_RECEIVED;
-      } else {
-        if (packet_details.isAck) {
-          fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
-          start_pending_tx = true;
+      if ( not_high_bw_packet() ) {
+        if ( (rx_channel != protocol_context[i].channel && (!packet_details.isAck || rx_channel != protocol_context[i].csma_tx_info.channel))
+             // MAC acks and beacons do not contain any addressing information
+             // Do not check for filterMask on Rx packets that are acks or beacons
+             || (!packet_details.isAck && !is_beacon && (rx_info.filterMask & protocol_context[i].addr_filter_mask_802154) == 0)
+             || (packet_details.isAck && (i != active_tx_protocol_index)) ) {
+          enabled_events &= ~RAIL_EVENT_RX_PACKET_RECEIVED;
+        } else {
+          if (packet_details.isAck) {
+            fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
+            start_pending_tx = true;
+          }
         }
       }
+      #ifdef HIGH_SPEED_PHY
+      else if (high_bw_phy_index != 0xFF) {
+        protocol_context[high_bw_phy_index].rail_config->eventsCallback(&protocol_context[high_bw_phy_index],
+                                                                        enabled_events);
+        enabled_events &= ~RAIL_EVENT_RX_PACKET_RECEIVED;
+        break; // Call the packet received callback for high_bw_phy packet only once
+      }
+      #endif //HIGH_SPEED_PHY
     }
 
     // Deal with ACK timeout after possible RX completion in case RAIL
     // notifies us of the ACK and the timeout simultaneously -- we want
     // the ACK to win over the timeout.
-    if (enabled_events & (RAIL_EVENT_RX_ACK_TIMEOUT | RAIL_EVENT_CONFIG_UNSCHEDULED)) {
+    if (enabled_events & (RAIL_EVENT_RX_ACK_TIMEOUT)) {
       if ( i != active_tx_protocol_index) {
-        enabled_events &= ~(RAIL_EVENT_RX_ACK_TIMEOUT | RAIL_EVENT_CONFIG_UNSCHEDULED);
+        enabled_events &= ~(RAIL_EVENT_RX_ACK_TIMEOUT);
       } else if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK)) {
         fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
         start_pending_tx = true;
+      }
+    }
+
+    if (enabled_events & RAIL_EVENT_CONFIG_UNSCHEDULED) {
+      if (fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK)) {
+        fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK, false);
+      }
+      if ( fn_get_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS)) {
+        fn_set_context_flag_by_index(i, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS, false);
       }
     }
 
@@ -2047,4 +2096,20 @@ void sl_rail_mux_update_active_radio_config(void)
   if (rx_channel != INVALID_CHANNEL) {
     RAIL_StartRx(mux_rail_handle, rx_channel, NULL);
   }
+}
+
+RAIL_Status_t sl_rail_mux_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHandle,
+                                                            bool enable)
+{
+  return RAIL_IEEE802154_EnableDataFramePending(mux_rail_handle, enable);
+}
+
+uint16_t sl_rail_mux_GetTxPacketsRemaining(RAIL_Handle_t railHandle)
+{
+  return(RAIL_GetTxPacketsRemaining(mux_rail_handle));
+}
+
+void sl_rail_mux_ResetFifo(RAIL_Handle_t railHandle, bool txFifo, bool rxFifo)
+{
+  RAIL_ResetFifo(mux_rail_handle, txFifo, rxFifo);
 }

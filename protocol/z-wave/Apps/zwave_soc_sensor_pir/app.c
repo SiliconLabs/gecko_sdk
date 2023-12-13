@@ -62,8 +62,6 @@
  */
 #define BASIC_SET_TIMEOUT         10000
 
-static zpal_pm_handle_t radio_power_lock;
-
 static uint8_t supportedEvents = NOTIFICATION_EVENT_HOME_SECURITY_MOTION_DETECTION_UNKNOWN_LOCATION;
 
 // Timer
@@ -94,11 +92,9 @@ void ZCB_EventJobsTimer(SSwTimer *pTimer);
  * @brief See description for function prototype in ZW_basis_api.h.
  */
 ZW_APPLICATION_STATUS
-ApplicationInit(EResetReason_t eResetReason)
+ApplicationInit(__attribute__((unused)) EResetReason_t eResetReason)
 {
   SRadioConfig_t* RadioConfig;
-
-  UNUSED(eResetReason);
 
   DPRINT("Enabling watchdog\n");
   zpal_enable_watchdog(true);
@@ -199,8 +195,6 @@ ApplicationTask(SApplicationHandles* pAppHandles)
    * It will access the app handles */
   AppTimerDeepSleepPersistentRegister(&EventJobsTimer, false, ZCB_EventJobsTimer);  // register for event jobs timeout event
 
-  radio_power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
-
   resetReason = GetResetReason();
 
   /* Check the battery level.
@@ -272,7 +266,6 @@ zaf_event_distributor_app_event_manager(const uint8_t event)
       (void) CC_Battery_LevelReport_tx(NULL, ENDPOINT_ROOT, NULL);
       break;
     case EVENT_APP_TRANSITION_TO_ACTIVE:
-      zpal_pm_stay_awake(radio_power_lock, 0);
       DPRINT("\r\n");
       DPRINT("\r\n      *!*!**!*!**!*!**!*!**!*!**!*!**!*!**!*!*");
       DPRINT("\r\n      *!*!*       PIR EVENT ACTIVE       *!*!*");
@@ -294,7 +287,6 @@ zaf_event_distributor_app_event_manager(const uint8_t event)
       DPRINT("\r\n      *!*!*      PIR EVENT INACTIVE      *!*!*");
       DPRINT("\r\n      *!*!**!*!**!*!**!*!**!*!**!*!**!*!**!*!*");
       DPRINT("\r\n");
-      zpal_pm_cancel(radio_power_lock);
       break;
     case EVENT_APP_USERTASK_DATA_ACQUISITION_READY:
       DPRINT("\r\nMainApp: Data Acquisition UserTask started and ready!");
@@ -307,7 +299,7 @@ zaf_event_distributor_app_event_manager(const uint8_t event)
   }
 }
 
-void 
+void
 zaf_nvm_app_reset(void)
 {
   AppTimerDeepSleepPersistentResetStorage();
@@ -319,10 +311,8 @@ zaf_nvm_app_reset(void)
  * @param pTimer Timer connected to this method
  */
 void
-ZCB_EventJobsTimer(SSwTimer *pTimer)
+ZCB_EventJobsTimer(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
-
   cc_agi_group_t const * const agiTableRootDeviceGroups = cc_agi_get_rootdevice_groups();
 
   DPRINTF("\r\nTimer callback: ZCB_EventJobsTimer() pTimer->Id=%d", pTimer->Id);

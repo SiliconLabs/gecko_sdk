@@ -121,8 +121,6 @@ extern "C" {
 #define sl_btmesh_cmd_node_init_oob_id                                   0x05140028
 #define sl_btmesh_cmd_node_set_ivrecovery_mode_id                        0x06140028
 #define sl_btmesh_cmd_node_get_ivrecovery_mode_id                        0x07140028
-#define sl_btmesh_cmd_node_get_statistics_id                             0x09140028
-#define sl_btmesh_cmd_node_clear_statistics_id                           0x0a140028
 #define sl_btmesh_cmd_node_set_net_relay_delay_id                        0x0b140028
 #define sl_btmesh_cmd_node_get_net_relay_delay_id                        0x0c140028
 #define sl_btmesh_cmd_node_get_ivupdate_state_id                         0x0d140028
@@ -167,8 +165,6 @@ extern "C" {
 #define sl_btmesh_rsp_node_init_oob_id                                   0x05140028
 #define sl_btmesh_rsp_node_set_ivrecovery_mode_id                        0x06140028
 #define sl_btmesh_rsp_node_get_ivrecovery_mode_id                        0x07140028
-#define sl_btmesh_rsp_node_get_statistics_id                             0x09140028
-#define sl_btmesh_rsp_node_clear_statistics_id                           0x0a140028
 #define sl_btmesh_rsp_node_set_net_relay_delay_id                        0x0b140028
 #define sl_btmesh_rsp_node_get_net_relay_delay_id                        0x0c140028
 #define sl_btmesh_rsp_node_get_ivupdate_state_id                         0x0d140028
@@ -789,7 +785,7 @@ typedef struct sl_btmesh_evt_node_key_updated_s sl_btmesh_evt_node_key_updated_t
 /**
  * @addtogroup sl_btmesh_evt_node_heartbeat sl_btmesh_evt_node_heartbeat
  * @{
- * @brief Indicates reception of heartbeat message
+ * @brief Indicates reception of heartbeat message.
  */
 
 /** @brief Identifier of the heartbeat event */
@@ -812,7 +808,7 @@ typedef struct sl_btmesh_evt_node_heartbeat_s sl_btmesh_evt_node_heartbeat_t;
 /**
  * @addtogroup sl_btmesh_evt_node_heartbeat_start sl_btmesh_evt_node_heartbeat_start
  * @{
- * @brief Indicates start of heartbeat reception
+ * @brief Indicates start of heartbeat reception.
  */
 
 /** @brief Identifier of the heartbeat_start event */
@@ -835,7 +831,7 @@ typedef struct sl_btmesh_evt_node_heartbeat_start_s sl_btmesh_evt_node_heartbeat
 /**
  * @addtogroup sl_btmesh_evt_node_heartbeat_stop sl_btmesh_evt_node_heartbeat_stop
  * @{
- * @brief Indicates end of heartbeat reception
+ * @brief Indicates end of heartbeat reception.
  */
 
 /** @brief Identifier of the heartbeat_stop event */
@@ -857,7 +853,7 @@ typedef struct sl_btmesh_evt_node_heartbeat_stop_s sl_btmesh_evt_node_heartbeat_
 /**
  * @addtogroup sl_btmesh_evt_node_beacon_received sl_btmesh_evt_node_beacon_received
  * @{
- * @brief Indicates reception of the secure network beacon
+ * @brief Indicates reception of the secure network beacon.
  */
 
 /** @brief Identifier of the beacon_received event */
@@ -1292,32 +1288,6 @@ sl_status_t sl_btmesh_node_get_ivrecovery_mode(uint8_t *mode);
 
 /***************************************************************************//**
  *
-
- *
- * @param[in] max_statistics_size Size of output buffer passed in @p statistics
- * @param[out] statistics_len On return, set to the length of output data
- *   written to @p statistics
- * @param[out] statistics Raw statistics data
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_btmesh_node_get_statistics(size_t max_statistics_size,
-                                          size_t *statistics_len,
-                                          uint8_t *statistics);
-
-/***************************************************************************//**
- *
-
- *
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_btmesh_node_clear_statistics();
-
-/***************************************************************************//**
- *
  * Set the network relay delay interval.
  *
  * This parameter determines the time a relay waits until it relays a network
@@ -1573,7 +1543,9 @@ sl_status_t sl_btmesh_node_get_key(uint8_t type,
 
 /***************************************************************************//**
  *
- * Get a list of networks supported by the node.
+ * Get a list of networks supported by the node. This is a deprecated function.
+ * Please use @ref sl_btmesh_node_get_key_count and @ref sl_btmesh_node_get_key
+ * instead.
  *
  * @param[in] max_networks_size Size of output buffer passed in @p networks
  * @param[out] networks_len On return, set to the length of output data written
@@ -1584,7 +1556,7 @@ sl_status_t sl_btmesh_node_get_key(uint8_t type,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_node_get_networks(size_t max_networks_size,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_get_networks(size_t max_networks_size,
                                         size_t *networks_len,
                                         uint8_t *networks);
 
@@ -2117,7 +2089,7 @@ sl_status_t sl_btmesh_node_set_proxy_service_uuid(uint16_t uuid);
 /**
  * @addtogroup sl_btmesh_evt_prov_initialized sl_btmesh_evt_prov_initialized
  * @{
- * @brief Provisioner is initialized and operational
+ * @brief Provisioner is initialized and operational.
  */
 
 /** @brief Identifier of the initialized event */
@@ -2386,7 +2358,7 @@ typedef struct sl_btmesh_evt_prov_ddb_list_s sl_btmesh_evt_prov_ddb_list_t;
 /**
  * @addtogroup sl_btmesh_evt_prov_uri sl_btmesh_evt_prov_uri
  * @{
- * @brief URI advertisement received from a nearby device
+ * @brief URI advertisement received from a nearby device.
  */
 
 /** @brief Identifier of the uri event */
@@ -6048,8 +6020,6 @@ sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
 #define sl_btmesh_cmd_test_get_local_heartbeat_subscription_id           0x15220028
 #define sl_btmesh_cmd_test_get_local_heartbeat_publication_id            0x16220028
 #define sl_btmesh_cmd_test_set_local_heartbeat_publication_id            0x17220028
-#define sl_btmesh_cmd_test_set_local_config_id                           0x18220028
-#define sl_btmesh_cmd_test_get_local_config_id                           0x19220028
 #define sl_btmesh_cmd_test_add_local_key_id                              0x1a220028
 #define sl_btmesh_cmd_test_remove_local_key_id                           0x1b220028
 #define sl_btmesh_cmd_test_update_local_key_id                           0x1c220028
@@ -6108,8 +6078,6 @@ sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
 #define sl_btmesh_rsp_test_get_local_heartbeat_subscription_id           0x15220028
 #define sl_btmesh_rsp_test_get_local_heartbeat_publication_id            0x16220028
 #define sl_btmesh_rsp_test_set_local_heartbeat_publication_id            0x17220028
-#define sl_btmesh_rsp_test_set_local_config_id                           0x18220028
-#define sl_btmesh_rsp_test_get_local_config_id                           0x19220028
 #define sl_btmesh_rsp_test_add_local_key_id                              0x1a220028
 #define sl_btmesh_rsp_test_remove_local_key_id                           0x1b220028
 #define sl_btmesh_rsp_test_update_local_key_id                           0x1c220028
@@ -6395,9 +6363,9 @@ sl_status_t sl_btmesh_test_get_ivupdate_test_mode(uint8_t *mode);
 /***************************************************************************//**
  *
  * Set the delay in milliseconds between sending consecutive segments of a
- * segmented message. The default value is 0. Note that this command needs to be
- * called before @ref sl_btmesh_node_init or @ref sl_btmesh_prov_init for the
- * settings to take effect.
+ * segmented message. This is a deprecated function. Please use @ref
+ * sl_btmesh_sar_config_server_set_sar_transmitter and @ref
+ * sl_btmesh_sar_config_server_set_sar_receiver instead.
  *
  * @param[in] delay Number of milliseconds to delay each segment after the
  *   first. Must be equal to or less than 160.
@@ -6405,7 +6373,7 @@ sl_status_t sl_btmesh_test_get_ivupdate_test_mode(uint8_t *mode);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_test_set_segment_send_delay(uint8_t delay);
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_segment_send_delay(uint8_t delay);
 
 /***************************************************************************//**
  *
@@ -6820,65 +6788,6 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
 
 /***************************************************************************//**
  *
- * <b>Deprecated</b> . Use the following commands instead:
- *   - @ref sl_btmesh_test_set_beacon for setting secure network beacon state
- *   - @ref sl_btmesh_test_set_default_ttl for setting default TTL state
- *   - @ref sl_btmesh_test_set_friend for setting friend state
- *   - @ref sl_btmesh_test_set_gatt_proxy for setting GATT proxy state
- *   - @ref sl_btmesh_test_set_identity for setting node identity state
- *   - @ref sl_btmesh_test_set_nettx for setting network transmit state
- *   - @ref sl_btmesh_test_set_relay for setting relay and relay retransmit
- *     state
- *
- * Set a state to a value in the local Configuration Server model. Use for
- * testing and debugging purposes only.
- *
- * @param[in] id Enum @ref sl_btmesh_node_config_state_t. The State to modify
- * @param[in] netkey_index Network key index; ignored for node-wide states
- * @param[in] value_len Length of data in @p value
- * @param[in] value The new value
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
-                                            uint16_t netkey_index,
-                                            size_t value_len,
-                                            const uint8_t* value);
-
-/***************************************************************************//**
- *
- * <b>Deprecated</b> . Use the following commands instead:
- *   - @ref sl_btmesh_test_get_beacon for setting secure network beacon state
- *   - @ref sl_btmesh_test_get_default_ttl for setting default TTL state
- *   - @ref sl_btmesh_test_get_friend for setting friend state
- *   - @ref sl_btmesh_test_get_gatt_proxy for setting GATT proxy state
- *   - @ref sl_btmesh_test_get_identity for setting node identity state
- *   - @ref sl_btmesh_test_get_nettx for setting network transmit state
- *   - @ref sl_btmesh_test_get_relay for setting relay and relay retransmit
- *     state
- *
- * Get the value of a state in the Configuration Server model. Use this for
- * testing and debugging purposes only.
- *
- * @param[in] id Enum @ref sl_btmesh_node_config_state_t. The state to read
- * @param[in] netkey_index Network key index; ignored for node-wide states
- * @param[in] max_data_size Size of output buffer passed in @p data
- * @param[out] data_len On return, set to the length of output data written to
- *   @p data
- * @param[out] data Raw binary value
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
-                                            uint16_t netkey_index,
-                                            size_t max_data_size,
-                                            size_t *data_len,
-                                            uint8_t *data);
-
-/***************************************************************************//**
- *
  * Add a network or application key locally.
  *
  * @param[in] key_type Enum @ref sl_btmesh_test_key_type_t. 0 for network key, 1
@@ -6936,8 +6845,9 @@ sl_status_t sl_btmesh_test_update_local_key(uint8_t key_type,
 /***************************************************************************//**
  *
  * Change the transport layer segmentation and reassembly configuration values.
- * This command must be issued before initializing the Mesh stack or the changes
- * will not take effect.
+ * This is a deprecated function. Please use @ref
+ * sl_btmesh_sar_config_server_set_sar_transmitter and @ref
+ * sl_btmesh_sar_config_server_set_sar_receiver instead.
  *
  * @param[in] incomplete_timer_ms Maximum timeout before a transaction expires,
  *   regardless of other parameters. Value is in milliseconds. Default = 10000
@@ -6957,7 +6867,7 @@ sl_status_t sl_btmesh_test_update_local_key(uint8_t key_type,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_test_set_sar_config(uint32_t incomplete_timer_ms,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_sar_config(uint32_t incomplete_timer_ms,
                                           uint32_t pending_ack_base_ms,
                                           uint32_t pending_ack_mul_ms,
                                           uint32_t wait_for_ack_base_ms,
@@ -7104,10 +7014,10 @@ sl_status_t sl_btmesh_test_get_local_model_app_bindings(uint16_t elem_index,
  *
  * @param[in] address Source address to check
  * @param[out] seq Stored sequence number for the address; not a valid value if
- *   the result is not bg_err_success.
+ *   the result is not SL_STATUS_OK.
  * @param[out] seq_ivindex IV index in use at the time the sequence number was
  *   stored in the replay protection list; not a valid value if result is not
- *   bg_err_success.
+ *   SL_STATUS_OK.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -8301,7 +8211,7 @@ typedef struct sl_btmesh_evt_config_client_bindings_list_end_s sl_btmesh_evt_con
  * @{
  * @brief Status event for @ref sl_btmesh_config_client_get_model_pub, @ref
  * sl_btmesh_config_client_set_model_pub, @ref
- * sl_btmesh_config_client_set_model_pub_va commands
+ * sl_btmesh_config_client_set_model_pub_va commands.
  */
 
 /** @brief Identifier of the model_pub_status event */
@@ -22255,6 +22165,144 @@ sl_status_t sl_btmesh_silabs_config_server_get_network_pdu(uint16_t *max_size);
 
 /** @} */ // end addtogroup sl_btmesh_silabs_config_server
 
+/**
+ * @addtogroup sl_btmesh_diagnostic Bluetooth Mesh Diagnostic Utilities
+ * @{
+ *
+ * @brief Bluetooth Mesh Diagnostic Utilities
+ *
+ * Diagnostic Utilities. It provides the functionality that assist with
+ * diagnosing problems.
+ */
+
+/* Command and Response IDs */
+#define sl_btmesh_cmd_diagnostic_init_id                                 0x006c0028
+#define sl_btmesh_cmd_diagnostic_deinit_id                               0x016c0028
+#define sl_btmesh_cmd_diagnostic_enable_relay_id                         0x026c0028
+#define sl_btmesh_cmd_diagnostic_disable_relay_id                        0x036c0028
+#define sl_btmesh_cmd_diagnostic_get_relay_id                            0x046c0028
+#define sl_btmesh_cmd_diagnostic_get_statistics_id                       0x056c0028
+#define sl_btmesh_cmd_diagnostic_clear_statistics_id                     0x066c0028
+#define sl_btmesh_rsp_diagnostic_init_id                                 0x006c0028
+#define sl_btmesh_rsp_diagnostic_deinit_id                               0x016c0028
+#define sl_btmesh_rsp_diagnostic_enable_relay_id                         0x026c0028
+#define sl_btmesh_rsp_diagnostic_disable_relay_id                        0x036c0028
+#define sl_btmesh_rsp_diagnostic_get_relay_id                            0x046c0028
+#define sl_btmesh_rsp_diagnostic_get_statistics_id                       0x056c0028
+#define sl_btmesh_rsp_diagnostic_clear_statistics_id                     0x066c0028
+
+/**
+ * @addtogroup sl_btmesh_evt_diagnostic_relay sl_btmesh_evt_diagnostic_relay
+ * @{
+ * @brief Event for each relayed or proxied message
+ */
+
+/** @brief Identifier of the relay event */
+#define sl_btmesh_evt_diagnostic_relay_id                                0x006c00a8
+
+/***************************************************************************//**
+ * @brief Data structure of the relay event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_diagnostic_relay_s
+{
+  uint16_t destination_address; /**< Message destination address */
+  uint16_t source_address;      /**< Message source address */
+  int8_t   rssi;                /**< RSSI value of the relayed message. Units:
+                                     dBm. */
+  uint8_t  ttl;                 /**< Time-to-Live value of the relayed or
+                                     proxied message */
+});
+
+typedef struct sl_btmesh_evt_diagnostic_relay_s sl_btmesh_evt_diagnostic_relay_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_diagnostic_relay
+
+/***************************************************************************//**
+ *
+ * Initialize Diagnostic Utilities.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_init();
+
+/***************************************************************************//**
+ *
+ * Deinitialize Diagnostic Utilities. After this call it cannot be used until it
+ * is initialized again. See @ref sl_btmesh_diagnostic_init.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_deinit();
+
+/***************************************************************************//**
+ *
+ * Enable event sending for each relayed or proxied message. NOTE: On NCP target
+ * this can saturate the NCP PHY interface. An alternative for this is @ref
+ * sl_btmesh_diagnostic_get_relay
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_btmesh_evt_diagnostic_relay
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_enable_relay();
+
+/***************************************************************************//**
+ *
+ * Disable event sending for each relayed or proxied message.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_disable_relay();
+
+/***************************************************************************//**
+ *
+ * Get relayed or proxied message counter, which is a counter incremented for
+ * each relayed or proxied message.
+ *
+ * @param[out] relay_counter Relayed or proxied message counter.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_get_relay(uint32_t *relay_counter);
+
+/***************************************************************************//**
+ *
+ * Get Bluetooth mesh stack statistics data counters.
+ *
+ * @param[in] max_statistics_size Size of output buffer passed in @p statistics
+ * @param[out] statistics_len On return, set to the length of output data
+ *   written to @p statistics
+ * @param[out] statistics Raw statistics data counter array.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_get_statistics(size_t max_statistics_size,
+                                                size_t *statistics_len,
+                                                uint8_t *statistics);
+
+/***************************************************************************//**
+ *
+ * Clear Bluetooth mesh stack statistics data counters.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_diagnostic_clear_statistics();
+
+/** @} */ // end addtogroup sl_btmesh_diagnostic
+
 
 /***************************************************************************//**
  * @addtogroup sl_btmesh_common_types BTMESH Common Types
@@ -22511,6 +22559,7 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_silabs_config_server_tx_changed_t              evt_silabs_config_server_tx_changed; /**< Data field for silabs_config_server tx_changed event*/
     sl_btmesh_evt_silabs_config_server_model_option_changed_t    evt_silabs_config_server_model_option_changed; /**< Data field for silabs_config_server model_option_changed event*/
     sl_btmesh_evt_silabs_config_server_network_pdu_changed_t     evt_silabs_config_server_network_pdu_changed; /**< Data field for silabs_config_server network_pdu_changed event*/
+    sl_btmesh_evt_diagnostic_relay_t                             evt_diagnostic_relay; /**< Data field for diagnostic relay event*/
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;
 });

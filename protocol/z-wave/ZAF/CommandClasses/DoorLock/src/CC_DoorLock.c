@@ -45,7 +45,7 @@ static void prepare_configuration_report(ZW_APPLICATION_TX_BUFFER *pTxBuffer);
 
 static void CC_DoorLock_configuration_report_stx(zaf_tx_options_t *tx_options, void* pData);
 static void CC_DoorLock_operation_report_stx(zaf_tx_options_t *tx_options, void* pData);
-static uint8_t operation_report_condition_get();
+static uint8_t operation_report_condition_get(void);
 
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
@@ -71,7 +71,7 @@ static uint8_t remaining_duration = 0;
 
 /// Used when the change was triggered by local action.
 /// In that case existing RX data must be cleared so that all Lifeline destinations are informed
-static inline void doorlock_clear_rxopt()
+static inline void doorlock_clear_rxopt(void)
 {
   memset(&door_lock_rx_option, 0, sizeof(RECEIVE_OPTIONS_TYPE_EX));
 }
@@ -87,7 +87,7 @@ static inline bool is_mode_valid(door_lock_mode_t mode)
  * @return DOOR_MODE_SECURED if bolt is locked, DOOR_MODE_UNSECURE otherwize
  */
 static door_lock_mode_t
-getCurrentMode()
+getCurrentMode(void)
 {
   return door_lock_hw_bolt_is_unlocked() ? DOOR_MODE_UNSECURE : DOOR_MODE_SECURED;
 }
@@ -112,7 +112,7 @@ SaveStatus(void)
  *
  * @param pData Pointer to the data that will be included in the Capabilities Report frame.
  */
-static void 
+static void
 CC_DoorLock_CapabilitiesGet_handler(cc_door_lock_capabilities_report_t* pData)
 {
   pData->reserved = 0; // Reserved fields must be set to zero.
@@ -138,7 +138,7 @@ CC_DoorLock_CapabilitiesGet_handler(cc_door_lock_capabilities_report_t* pData)
  * The following stuff can be configured:
  * - Operation type: Constant operation
  * - Outside door handles mode: Handle 1 can be enabled or disabled *
- * 
+ *
  * @param pData Pointer to the data in the Configuration Set frame.
  *
  * @return CMD_HANDLER_RETURN_CODE
@@ -162,9 +162,11 @@ e_cmd_handler_return_code_t CC_DoorLock_ConfigurationSet_handler(cc_door_lock_co
       // Already at final state
       return E_CMD_HANDLER_RETURN_CODE_NO_CHANGE;
     }
-    door_lock_data.insideDoorHandleMode  = inside_handles_to_set;
-    door_lock_data.outsideDoorHandleMode = outside_handles_to_set;
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+    door_lock_data.insideDoorHandleMode  = inside_handles_to_set & 0x0f;
+    door_lock_data.outsideDoorHandleMode = outside_handles_to_set & 0x0f;
+#pragma GCC diagnostic pop
     SaveStatus();
     return E_CMD_HANDLER_RETURN_CODE_HANDLED;
   }
@@ -217,7 +219,7 @@ static received_frame_status_t CC_DoorLock_handler(
       }
 
       remaining_duration = cc_door_lock_mode_hw_change(
-          input->frame->ZW_DoorLockOperationSetV2Frame.doorLockMode); 
+          input->frame->ZW_DoorLockOperationSetV2Frame.doorLockMode);
       output->duration = remaining_duration;
 
       /* If the change was made, save rx options for later use */
@@ -287,8 +289,7 @@ static received_frame_status_t CC_DoorLock_handler(
 
       output->frame->ZW_DoorLockCapabilitiesReport1byteV4Frame.cmdClass = COMMAND_CLASS_DOOR_LOCK_V4;
       output->frame->ZW_DoorLockCapabilitiesReport1byteV4Frame.cmd = DOOR_LOCK_CAPABILITIES_REPORT_V4;
-      cc_door_lock_capabilities_report_t capabilities_report;
-      memset((uint8_t *)&capabilities_report, 0x00, sizeof(capabilities_report));
+      cc_door_lock_capabilities_report_t capabilities_report = { 0 };
       CC_DoorLock_CapabilitiesGet_handler(&capabilities_report);
       output->frame->ZW_DoorLockCapabilitiesReport1byteV4Frame.properties1 = 1 & SUPPORTED_OPERATIONS_LENGTH_BITMASK; // Length fixed to 1
       uint8_t *ptr = &output->frame->ZW_DoorLockCapabilitiesReport1byteV4Frame.supportedOperationTypeBitMask1;
@@ -320,7 +321,7 @@ static received_frame_status_t CC_DoorLock_handler(
  * @return bitmask encoded by requirement CC:0062.04.03.11.006
  */
 static uint8_t
-operation_report_condition_get()
+operation_report_condition_get(void)
 {
   uint8_t condition = 0;
 
@@ -382,7 +383,7 @@ static void prepare_configuration_report(ZW_APPLICATION_TX_BUFFER *pTxBuffer)
 
   pTxBuffer->ZW_DoorLockConfigurationReportV4Frame.cmdClass = COMMAND_CLASS_DOOR_LOCK_V4;
   pTxBuffer->ZW_DoorLockConfigurationReportV4Frame.cmd = DOOR_LOCK_CONFIGURATION_REPORT_V4;
-  cc_door_lock_configuration_t configuration;
+  cc_door_lock_configuration_t configuration = { 0 };
   CC_DoorLock_ConfigurationGet_handler(&configuration);
   pTxBuffer->ZW_DoorLockConfigurationReportV4Frame.operationType = configuration.type;
   pTxBuffer->ZW_DoorLockConfigurationReportV4Frame.properties1 =
@@ -413,12 +414,11 @@ static void basic_set_mapper(ZW_APPLICATION_TX_BUFFER* pFrame)
 /*
  * Maps Basic Get/Report to CC Door Lock in accordance with DT:01.11.0004.1.
  */
-static void basic_get_mapper(uint8_t endpoint,
+static void basic_get_mapper(__attribute__((unused)) uint8_t endpoint,
                              uint8_t * p_current_value,
                              uint8_t * p_target_value,
                              uint8_t * p_duration)
 {
-  UNUSED(endpoint); // Ignore endpoint as this implementation of CC Door Lock doesn't support endpoints.
   *p_current_value = (getCurrentMode() == DOOR_MODE_UNSECURE) ? 0x00 : 0xFF;
 
   /*
@@ -466,7 +466,7 @@ static void reset(void)
 static void init(void)
 {
   bool status;
-  cc_door_lock_data_t savedDoorLock;
+  cc_door_lock_data_t savedDoorLock = { 0 };
 
   cc_door_lock_migrate();
 
@@ -499,7 +499,7 @@ static void init(void)
  * and triggers Supervision Report if required
  */
 static void
-cc_door_lock_operation_set_done()
+cc_door_lock_operation_set_done(void)
 {
   SaveStatus();
 
@@ -524,18 +524,18 @@ cc_door_lock_operation_set_done()
        0); // durationRemaining should always be 0 at this point
 }
 
-static void 
-CC_DoorLock_operation_report_stx(zaf_tx_options_t *tx_options, void* pData)
+static void
+CC_DoorLock_operation_report_stx(zaf_tx_options_t *tx_options, __attribute__((unused)) void* pData)
 {
-  UNUSED(pData);
   DPRINTF("* %s() *\n"
       "\ttxOpt.src = %d\n"
       "\ttxOpt.options %#02x\n",
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
+  ZW_APPLICATION_TX_BUFFER txBuf = { 0 };
   prepare_operation_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_DOOR_LOCK_OPERATION_REPORT_V4_FRAME),
@@ -543,18 +543,18 @@ CC_DoorLock_operation_report_stx(zaf_tx_options_t *tx_options, void* pData)
                           tx_options);
 }
 
-static void 
-CC_DoorLock_configuration_report_stx(zaf_tx_options_t *tx_options, void* pData)
+static void
+CC_DoorLock_configuration_report_stx(zaf_tx_options_t *tx_options, __attribute__((unused)) void* pData)
 {
-  UNUSED(pData);
   DPRINTF("* %s() *\n"
       "\ttxOpt.src = %d\n"
       "\ttxOpt.options %#02x\n",
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
+  ZW_APPLICATION_TX_BUFFER txBuf = { 0 };
   prepare_configuration_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_DOOR_LOCK_CONFIGURATION_REPORT_V4_FRAME),
@@ -577,9 +577,8 @@ static uint8_t get_inside_outside_door_handle_mode(door_lock_mode_t mode)
   return (uint8_t)((outsideDoorHandleMode << 4) | insideDoorHandleMode);
 }
 
-void CC_DoorLock_SetOutsideDoorHandleState(cc_door_lock_handle_t handle)
+void CC_DoorLock_SetOutsideDoorHandleState(__attribute__((unused)) cc_door_lock_handle_t handle)
 {
-  UNUSED(handle); // Only one handle is supported
   DPRINTF("Set outsideDoorHandleState %d\r\n", handle);
 
   // Handle pressed
@@ -597,9 +596,8 @@ void CC_DoorLock_SetOutsideDoorHandleState(cc_door_lock_handle_t handle)
   }
 }
 
-void CC_DoorLock_ClearOutsideDoorHandleState(cc_door_lock_handle_t handle)
+void CC_DoorLock_ClearOutsideDoorHandleState(__attribute__((unused)) cc_door_lock_handle_t handle)
 {
-  UNUSED(handle); // Only one handle is supported
   DPRINTF("Clear outsideDoorHandleState %d\r\n", handle);
 
   // Handle released
@@ -617,7 +615,7 @@ void CC_DoorLock_ClearOutsideDoorHandleState(cc_door_lock_handle_t handle)
   }
 }
 
-static void 
+static void
 CC_DoorLock_Toggle(void)
 {
   // We don't care about return value here, because there is no Supervision Report after local change
@@ -632,21 +630,18 @@ CC_DoorLock_Toggle(void)
 }
 
 ZW_WEAK void
-cc_door_lock_handle_set(bool pressed)
+cc_door_lock_handle_set(__attribute__((unused)) bool pressed)
 {
-  UNUSED(pressed);
 }
 
 ZW_WEAK void
-cc_door_lock_bolt_set(bool locked)
+cc_door_lock_bolt_set(__attribute__((unused)) bool locked)
 {
-  UNUSED(locked);
 }
 
 ZW_WEAK void
-cc_door_lock_latch_set(bool opened)
+cc_door_lock_latch_set(__attribute__((unused)) bool opened)
 {
-  UNUSED(opened);
 }
 
 ZW_WEAK uint8_t
@@ -658,17 +653,17 @@ cc_door_lock_mode_hw_change(door_lock_mode_t mode)
   return 2; // dummy value
 }
 
-ZW_WEAK bool door_lock_hw_bolt_is_unlocked()
+ZW_WEAK bool door_lock_hw_bolt_is_unlocked(void)
 {
   return true;
 }
 
-ZW_WEAK bool door_lock_hw_latch_is_closed()
+ZW_WEAK bool door_lock_hw_latch_is_closed(void)
 {
   return true;
 }
 
-ZW_WEAK bool door_lock_hw_handle_is_pressed()
+ZW_WEAK bool door_lock_hw_handle_is_pressed(void)
 {
   return false;
 }
@@ -679,10 +674,8 @@ ZW_WEAK bool door_lock_hw_handle_is_pressed()
 REGISTER_CC_V5(COMMAND_CLASS_DOOR_LOCK, DOOR_LOCK_VERSION_V4, CC_DoorLock_handler, basic_set_mapper, basic_get_mapper, lifeline_reporting, 0, init, reset);
 
 static void
-door_lock_event_handler(const uint8_t event, const void *data)
+door_lock_event_handler(const uint8_t event, __attribute__((unused)) const void *data)
 {
-  UNUSED(data);
-
   switch (event) {
     case CC_DOOR_LOCK_CODE_EVENT_TOGGLE:
       CC_DoorLock_Toggle();

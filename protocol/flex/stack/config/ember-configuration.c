@@ -33,14 +33,14 @@
  *
  ******************************************************************************/
 
-#include "em_common.h"
+#include "em_device.h"
 
 #include "stack/include/ember.h"
 #include "stack/include/error.h"
 
 #include "stack/config/ember-configuration-defaults.h"
 
-PGM uint8_t emTaskCount = EMBER_TASK_COUNT;
+const uint8_t emTaskCount = EMBER_TASK_COUNT;
 EmberTaskControl emTasks[EMBER_TASK_COUNT];
 
 // Configurable stack parameters.

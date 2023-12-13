@@ -40,6 +40,7 @@
 // NOTE for emberAesHashSimple
 #include "stack/include/aes-mmo.h"
 
+#include "stack/include/zigbee-security-manager.h"
 /// operation specific
 // NOTE the below procedures are specific to the underlying key agreement scheme
 // [ECDHE-PSK] Elliptic Curve Diffie-Hellman Ephemeral (with PSK salting)
@@ -80,12 +81,6 @@ void sl_zb_sec_man_hmac_sha_256(
   uint8_t *data,
   uint8_t data_len,
   uint8_t *result);
-
-// NOTE need emberHmacAesHash without pulling in all of security.h
-extern void emberHmacAesHash(const uint8_t *key,
-                             const uint8_t *data,
-                             uint8_t dataLength,
-                             uint8_t *result);
 
 // NOTE here's a wrapper function for providing rng to crypto calls
 static int f_rng_wrapper(void *prng, unsigned char *out, size_t num)
@@ -645,7 +640,12 @@ static sl_status_t speke_derive_link_key(sli_zb_sec_man_dlk_ecc_context_t *dlk_e
   // run the secret through KDF with input {1}
   uint8_t data[1] = { 1 };
   if (dlk_ecc_ctx->config.hash_id == DLK_ECC_HASH_AES_MMO_128) {
-    emberHmacAesHash(dlk_ecc_ctx->secret, data, 1, dlk_ecc_ctx->derived_key);
+    sl_zb_sec_man_context_t context;
+    sl_zb_sec_man_init_context(&context);
+    context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
+    sl_zb_sec_man_import_key(&context, (sl_zb_sec_man_key_t*)&(dlk_ecc_ctx->secret));
+    sl_zb_sec_man_load_key_context(&context);
+    sl_zb_sec_man_hmac_aes_mmo(data, 1, dlk_ecc_ctx->derived_key);
   } else if (dlk_ecc_ctx->config.hash_id == DLK_ECC_HASH_SHA_256) {
     uint8_t sha_digest[SHA_HASH_DIGEST_LENGTH];
     sl_zb_sec_man_hmac_sha_256(dlk_ecc_ctx->secret, MAX_SHARED_SECRET_LEN, data, 1, sha_digest);

@@ -31,11 +31,15 @@
 #ifndef __SL_WISUN_COLLECTOR_H__
 #define __SL_WISUN_COLLECTOR_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
 
-#include "socket.h"
+#include "socket/socket.h"
 #include "sli_wisun_meter_collector.h"
 #include "sl_wisun_collector_config.h"
 #include "sl_status.h"
@@ -61,14 +65,14 @@ int32_t sl_wisun_collector_get_shared_socket(void);
  * @brief Init collector component.
  * @details Call the common meter-collector init and set collector callback
  *****************************************************************************/
-void sl_wisun_collector_init();
+void sl_wisun_collector_init(void);
 
 /**************************************************************************//**
  * @brief Inherit common handler.
  * @details Function should be called in CoAP Collector init to inherit callbacks
  * @param[in,out] hnd Handler
  *****************************************************************************/
-void sl_wisun_collector_inherit_common_hnd(sl_wisun_collector_hnd_t *hnd);
+void sl_wisun_collector_inherit_common_hnd(sl_wisun_collector_hnd_t * const hnd);
 
 /**************************************************************************//**
  * @brief Init common resources.
@@ -78,49 +82,98 @@ void sl_wisun_collector_init_common_resources(void);
 
 /**************************************************************************//**
  * @brief Register Meter.
- * @details Add meter to the meter storage to handle in measurement loop
+ * @details Add meter to the meter storage
  * @param[in] meter_addr meter address structure
  * @return SL_STATUS_OK meter has been successfully added
  * @return SL_STATUS_ALREADY_EXISTS meter had already been added
  * @return SL_STATUS_FAIL on error
  *****************************************************************************/
-sl_status_t sl_wisun_collector_register_meter(const wisun_addr_t *meter_addr);
+sl_status_t sl_wisun_collector_register_meter(const sockaddr_in6_t * const meter_addr);
 
 /**************************************************************************//**
- * @brief Register Meter.
- * @details Add meter to the meter storage to handle in measurement loop
+ * @brief Remove Meter.
+ * @details Remove registered meter from the registered meter storage
  * @param[in] meter_addr meter address structure
- * @return SL_STATUS_OK meter has been successfully added
+ * @return SL_STATUS_OK meter has been successfully removed
  * @return SL_STATUS_FAIL on error
  *****************************************************************************/
-sl_status_t sl_wisun_collector_remove_meter(const wisun_addr_t *meter_addr);
+sl_status_t sl_wisun_collector_remove_meter(const sockaddr_in6_t * const meter_addr);
+
+/**************************************************************************//**
+ * @brief Send async request.
+ * @details Send async request to the given Meter
+ * @param[in] meter_addr meter address structure
+ * @return SL_STATUS_OK async request has been successfully sent
+ * @return SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_send_async_request(const sockaddr_in6_t * const meter_addr);
+
+/**************************************************************************//**
+* @brief Set async measurement request.
+* @details This request is sent to get
+*          measurement data from the meter
+* @param[in] req  Measurement request
+******************************************************************************/
+void sl_wisun_collector_set_async_measurement_request(const sl_wisun_meter_request_t * const req);
+
+/**************************************************************************//**
+* @brief Set registration request.
+* @details This request is sent to register the collector to a meter
+* @param[in] req  Registration request
+******************************************************************************/
+void sl_wisun_collector_set_registration_request(const sl_wisun_meter_request_t * const req);
+
+/**************************************************************************//**
+* @brief Set remove request.
+* @details This request is sent to remove the collector from a meter
+* @param[in] req  Registration request
+******************************************************************************/
+void sl_wisun_collector_set_removal_request(const sl_wisun_meter_request_t * const req);
+
+/**************************************************************************//**
+ * @brief Print Meters.
+ * @details Print registered and async meters
+ *****************************************************************************/
+void sl_wisun_collector_print_meters(void);
+
+/**************************************************************************//**
+ * @brief Get async meter by address.
+ * @details Returns a pointer to the meter entry with the given address
+ * @param[in] meter_addr meter address structure
+ * @return Pointer to the meter entry with the given address
+ *****************************************************************************/
+sl_wisun_meter_entry_t *sl_wisun_collector_get_async_meter_entry_by_address(const sockaddr_in6_t * const meter_addr);
+
+/**************************************************************************//**
+ * @brief Get registered meter by address.
+ * @details Returns a pointer to the meter entry with the given address
+ * @param[in] meter_addr meter address structure
+ * @return Pointer to the meter entry with the given address
+ *****************************************************************************/
+sl_wisun_meter_entry_t *sl_wisun_collector_get_registered_meter_entry_by_address(const sockaddr_in6_t * const meter_addr);
 
 /**************************************************************************//**
  * @brief Get Meter by address.
- * @details Create a meter entry copy to the destination by address
+ * @details Returns a pointer to the meter entry with the given address
  * @param[in] meter_addr meter address structure
- * @param[in,out] dest_meter destination meter entry
- * @return SL_STATUS_OK meter has been successfully copied
- * @return SL_STATUS_FAIL on error
+ * @return Pointer to the meter entry with the given address
  *****************************************************************************/
-sl_status_t sl_wisun_collector_get_meter(const wisun_addr_t *meter_addr,
-                                         sl_wisun_meter_entry_t * const dest_meter);
+sl_wisun_meter_entry_t *sl_wisun_collector_get_meter(const sockaddr_in6_t * const meter_addr);
 
 /**************************************************************************//**
- * @brief Compare byte address.
- * @details byte comparison for addresses
- * @param[in] addr1 address 1
- * @param[in] addr2 address 2
- * @return true if addresses has been matched
- * @return false if addresses has not been matched
+ * @brief Collector send request
+ * @details Collector send request
+ * @param[in] sockid The socket used for sending
+ * @param[in] addr Meter address
+ * @param[in] req The request to send
+ * @return SL_STATUS_OK On success
+ * @return SL_STATUS_FAIL On failure
  *****************************************************************************/
-bool sl_wisun_collector_compare_address(const wisun_addr_t *addr1, const wisun_addr_t *addr2);
-
-/**************************************************************************//**
- * @brief Measurement loop.
- * @details iterate registered meters, send request token and
- *          read the measurement packets
- *****************************************************************************/
-void sl_wisun_collector_measurement_request_loop(void);
+sl_status_t sl_wisun_collector_send_request(const int32_t sockid,
+                                            const sockaddr_in6_t *addr,
+                                            const sl_wisun_meter_request_t * const req);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

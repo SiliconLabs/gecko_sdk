@@ -44,4 +44,4 @@ template_contribution:
     value: "simple_led_{{instance}}"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-simple-led
+    document: platform-driver/simple-led

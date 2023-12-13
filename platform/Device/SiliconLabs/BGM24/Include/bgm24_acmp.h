@@ -651,4 +651,4 @@ typedef struct {
 /** @} End of group BGM24_ACMP */
 /** @} End of group Parts */
 
-#endif /* BGM24_ACMP_H */
+#endif // BGM24_ACMP_H

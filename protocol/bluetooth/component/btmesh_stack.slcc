@@ -157,6 +157,10 @@ template_contribution:
   - name: bluetooth_on_event
     value:
       function: sl_btmesh_bgapi_listener
+  - name: btmesh_advertisers
+    value:
+      name: nonconnectable
+      count: 3
 requires:
   - name: "sl_system"
   - name: "device_init"
@@ -164,8 +168,9 @@ requires:
   - name: "bluetooth_stack"
   - name: "bluetooth_feature_system"
   - name: "bluetooth_feature_gap"
-  - name: "bluetooth_feature_scanner"
-  - name: "btmesh_advertiser"
+  - name: "btmesh_nonconnectable_advertiser"
+  - name: "btmesh_scanner"
+  - name: "bluetooth_feature_central_connection"
   - name: "emlib"
   - name: "sleeptimer"
   - name: "nvm3_lib"
@@ -175,6 +180,7 @@ requires:
   - name: "btmesh_stack_health_server"
   - name: "dcd_configuration"
 recommends:
-  - id: btmesh_stack_advertiser_deprecated
+  - id: btmesh_stack_advertiser_legacy
+  - id: btmesh_stack_scanner_legacy
 provides:
   - name: "btmesh_stack"

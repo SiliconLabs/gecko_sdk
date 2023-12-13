@@ -14,6 +14,6 @@ requires:
   - name: psa_crypto_hmac
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_HKDF
+    value: PSA_WANT_ALG_HKDF 1
 documentation:
   url: https://armmbed.github.io/mbed-crypto/html/api/ops/kdf.html#c.PSA_ALG_HKDF

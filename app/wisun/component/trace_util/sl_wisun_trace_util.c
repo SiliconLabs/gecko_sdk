@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include "sl_sleeptimer.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_types.h"
 #include "rail_config.h"
@@ -86,6 +87,10 @@
 /// PHY mode minimum value
 #define PHY_MODE_MAX_VAL                 8U
 
+/// MAC address srting length
+#define MAC_ADDR_STR_LEN \
+  ((SL_WISUN_MAC_ADDRESS_SIZE * 2) + SL_WISUN_MAC_ADDRESS_SIZE - 1)
+
 /// Allocate phy list element and return on error macro function
 #define __alloc_phy_list_element_and_check(__dst_ptr, __phy_cfg_ptr) \
   do {                                                               \
@@ -94,6 +99,24 @@
       return NULL;                                                   \
     }                                                                \
   } while (0)
+
+/// Length of the timestamp buffer
+#define TIMESTAMP_BUF_LEN     32U
+
+/// Time stamp format string
+#define TIMESTAMP_FORMAT  "%03d-%02d:%02d:%02d"
+
+/// Milisecs in Secs
+#define MS_IN_SEC         1000U
+
+/// Secs in Day
+#define SEC_IN_DAY        86400U
+
+/// Secs in Hour
+#define SEC_IN_HOUR       3600U
+
+/// Secs in Minute
+#define SEC_IN_MINUTE     60U
 
 /// PHY type enumeration
 typedef enum phy_type {
@@ -542,6 +565,28 @@ const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg)
   return (const char *) str;
 }
 
+const char *app_wisun_mac_addr_to_str(const sl_wisun_mac_address_t *mac_addr)
+{
+  char *buf = NULL;
+
+  buf = app_wisun_malloc(MAC_ADDR_STR_LEN + 1);
+  if (buf == NULL) {
+    return NULL;
+  }
+
+  snprintf(buf, MAC_ADDR_STR_LEN + 1,
+           "%.2X:%.2X:%.2X:%.2X:%.2X:%.2X:%.2X:%.2X",
+           mac_addr->address[0],
+           mac_addr->address[1],
+           mac_addr->address[2],
+           mac_addr->address[3],
+           mac_addr->address[4],
+           mac_addr->address[5],
+           mac_addr->address[6],
+           mac_addr->address[7]);
+  return (const char *)buf;
+}
+
 #if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
 const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_wisun_network_size_t nw_size)
 {
@@ -568,6 +613,42 @@ const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_
   }
 }
 #endif
+
+void app_wisun_trace_util_timestamp_init(const uint64_t time_ms,
+                                         sl_wisun_trace_util_time_t * const time)
+{
+  uint64_t remaining_seconds = 0U;
+
+  time->tot_milisecs = time_ms;
+
+  remaining_seconds = time_ms / MS_IN_SEC;
+  time->days = (uint16_t)(remaining_seconds / SEC_IN_DAY);
+
+  remaining_seconds -= (time->days * SEC_IN_DAY);
+  time->hours = (uint8_t)(remaining_seconds / SEC_IN_HOUR);
+
+  remaining_seconds -= (time->hours * SEC_IN_HOUR);
+  time->minutes = (uint8_t)(remaining_seconds / SEC_IN_MINUTE);
+
+  remaining_seconds -= (time->minutes * SEC_IN_MINUTE);
+  time->seconds = (uint8_t)remaining_seconds;
+}
+
+const char *app_wisun_trace_util_time_to_str(const sl_wisun_trace_util_time_t * const time)
+{
+  char *str = NULL;
+
+  str = app_wisun_malloc(TIMESTAMP_BUF_LEN);
+
+  if (str == NULL) {
+    return NULL;
+  }
+
+  (void) snprintf(str, TIMESTAMP_BUF_LEN, TIMESTAMP_FORMAT,
+                  time->days, time->hours, time->minutes, time->seconds);
+
+  return (const char *) str;
+}
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions

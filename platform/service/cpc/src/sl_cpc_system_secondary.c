@@ -63,10 +63,14 @@
 
 #define CPC_PACKED_ENDPOINT_PRESENT 0   // Not yet implemented
 
-#define SLI_CPC_PROPERTY_LENGTH_MAX   (SLI_CPC_SYSTEM_COMMAND_BUFFER_SIZE    \
-                                       - sizeof(sli_cpc_system_cmd_header_t) \
+#define SLI_CPC_PROPERTY_LENGTH_MAX   (SLI_CPC_SYSTEM_COMMAND_BUFFER_SIZE \
+                                       - sizeof(sli_cpc_system_cmd_t)     \
                                        - sizeof(sli_cpc_system_property_cmd_t))
-
+// On write complete argument magic words
+#define ON_WRITE_COMPLETE_RESET       0xDEADBEEF
+#define ON_WRITE_COMPLETE_CONNECT     0xCAFEBABE
+#define ON_WRITE_COMPLETE_SHUTDOWN    0xBEEFBABE
+#define ON_WRITE_COMPLETE_EP_ID_MASK  0xFF
 /*******************************************************************************
  ***************************  GLOBAL VARIABLES   ********************************
  ******************************************************************************/
@@ -77,7 +81,11 @@ extern sli_cpc_drv_capabilities_t sli_cpc_driver_capabilities;
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
+static sli_cpc_system_primary_version_t primary_version;
+
 static bool restart_flag = false;
+
+static bool reset_sequence_done = false;
 
 static uint32_t enter_irq_end_ms;
 static sli_cpc_timer_handle_t enter_irq_timer;
@@ -116,7 +124,11 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
 static sl_status_t open_endpoint(void);
 static void on_system_ep_error(sl_cpc_user_endpoint_id_t endpoint_id);
 
+sl_status_t send_endpoint_state(uint8_t endpoint_id, sl_cpc_endpoint_state_t state);
+
+#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
 static void send_reset_reason(void);
+#endif
 
 static void on_poll(uint8_t endpoint_id,
                     void *arg,
@@ -148,7 +160,7 @@ static sl_status_t open_endpoint(void)
 {
   sl_status_t status;
 
-  status = sli_cpc_open_service_endpoint(&system_ep, SL_CPC_ENDPOINT_SYSTEM, SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE, 1);
+  status = sli_cpc_open_service_endpoint(&system_ep, SL_CPC_ENDPOINT_SYSTEM, SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE, 1);
   if (status == SL_STATUS_ALREADY_EXISTS) {
     return SL_STATUS_ALREADY_INITIALIZED;
   } else if (status != SL_STATUS_OK) {
@@ -190,6 +202,14 @@ static sl_status_t open_endpoint(void)
   return SL_STATUS_OK;
 }
 
+/***************************************************************************/ /**
+ * Returns the state of the reset sequence
+ ******************************************************************************/
+bool sli_cpc_reboot_is_sequence_done(void)
+{
+  return reset_sequence_done;
+}
+
 /***************************************************************************//**
  * Process the system endpoint
  ******************************************************************************/
@@ -228,15 +248,31 @@ void sli_cpc_system_process(void)
 }
 
 /***************************************************************************//**
+ * Start CPC System
+ ******************************************************************************/
+sl_status_t sli_cpc_system_start(void)
+{
+  sl_status_t status;
+  status = open_endpoint();
+  if (status != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    return status;
+  }
+#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+  send_reset_reason();
+#endif
+  return status;
+}
+
+/***************************************************************************//**
  * Initialize CPC System
  ******************************************************************************/
 sl_status_t sli_cpc_system_init(void)
 {
-  sl_status_t status = open_endpoint();
-
-  send_reset_reason();
-
-  return status;
+#if defined(SLI_CPC_DEVICE_UNDER_TEST)
+  reset_sequence_done = true;
+#endif
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************//**
@@ -297,56 +333,87 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
                                void *arg,
                                sl_status_t status)
 {
+  uint32_t magic;
+  uint8_t cmd_ep_id;
   (void) endpoint_id;
-  (void) status;
 
   // Unnumbered ACK has no payload
   if (buffer != NULL) {
     sli_cpc_free_command_buffer(buffer);
   }
 
-  if ((uint32_t) arg == 0xDEADBEEF) {
+  magic = (uint32_t)arg;
+
+  if (magic == ON_WRITE_COMPLETE_RESET) {
+    // status is irrelevant, the MCU will reset in cpc_system_reset.
     cpc_system_reset(prop_bootloader_reboot_mode);
+  } else if ((magic & ~ON_WRITE_COMPLETE_EP_ID_MASK)
+             == (ON_WRITE_COMPLETE_CONNECT & ~ON_WRITE_COMPLETE_EP_ID_MASK)) {
+    cmd_ep_id = magic & ON_WRITE_COMPLETE_EP_ID_MASK;
+
+    sli_cpc_remote_connected(cmd_ep_id, status);
+  } else if ((magic & ~ON_WRITE_COMPLETE_EP_ID_MASK)
+             == (ON_WRITE_COMPLETE_SHUTDOWN & ~ON_WRITE_COMPLETE_EP_ID_MASK)) {
+    cmd_ep_id = magic & ON_WRITE_COMPLETE_EP_ID_MASK;
+
+    // status is irrelevant. If remote failed to ACK the final disconnection message,
+    // go to disconnected state regardless.
+    sli_cpc_endpoint_disconnected(cmd_ep_id);
   }
 }
 
-/***************************************************************************//**
- * Endpoint was closed, notify the host
- ******************************************************************************/
-sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id)
+sl_status_t send_endpoint_state(uint8_t endpoint_id, sl_cpc_endpoint_state_t state)
 {
-  sl_status_t status;
-  sli_cpc_system_cmd_t *tx_command;
   sli_cpc_system_property_cmd_t *tx_prop_command;
   sl_cpc_endpoint_state_t *ep_state;
+  sli_cpc_system_cmd_t *tx_command;
+  sl_status_t status;
 
   status = sli_cpc_get_system_command_buffer(&tx_command);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
-  tx_command->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
-
-  tx_command->header.seq = 0;
+  tx_command->command_id = CMD_SYSTEM_PROP_VALUE_IS;
+  tx_command->seq = 0;
+  tx_command->length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
 
   tx_prop_command = (sli_cpc_system_property_cmd_t*)(tx_command->payload);
-
   tx_prop_command->property_id = EP_ID_TO_PROPERTY_STATE(endpoint_id);
 
   ep_state = (sl_cpc_endpoint_state_t *)tx_prop_command->payload;
-
-  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
-
-  *ep_state = SL_CPC_STATE_CLOSING;
+  *ep_state = state;
 
   status = sl_cpc_write(&system_ep,
                         (void *)tx_command,
-                        sizeof(sli_cpc_system_cmd_header_t) + tx_command->header.length,
-                        0,
+                        SIZEOF_SYSTEM_COMMAND(tx_command),
+                        SL_CPC_FLAG_NO_BLOCK,
                         NULL);
-  EFM_ASSERT(status == SL_STATUS_OK); // Ignore Error
+  return status;
+}
 
-  return SL_STATUS_OK;
+/***************************************************************************//**
+ * Endpoint was opened, notify the host/primary
+ ******************************************************************************/
+sl_status_t sli_cpc_send_opening_notification(uint8_t endpoint_id)
+{
+  return send_endpoint_state(endpoint_id, SL_CPC_STATE_OPEN);
+}
+
+/***************************************************************************//**
+ * Endpoint connection was terminated, notify the host
+ ******************************************************************************/
+sl_status_t sli_cpc_send_terminate_notification(uint8_t endpoint_id)
+{
+  return send_endpoint_state(endpoint_id, SL_CPC_STATE_CLOSED);
+}
+
+/***************************************************************************//**
+ * Endpoint is requesting a shutdown, notify the host
+ ******************************************************************************/
+sl_status_t sli_cpc_send_shutdown_request(uint8_t endpoint_id)
+{
+  return send_endpoint_state(endpoint_id, SL_CPC_STATE_DISCONNECTED);
 }
 
 /***************************************************************************//**
@@ -438,6 +505,7 @@ SL_WEAK sl_cpc_system_status_t cpc_get_reset_reason(void)
 /***************************************************************************//**
  * Send reset reason
  ******************************************************************************/
+#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
 static void send_reset_reason(void)
 {
   sl_status_t status;
@@ -448,10 +516,10 @@ static void send_reset_reason(void)
   status = sli_cpc_get_system_command_buffer(&tx_command);
   EFM_ASSERT(status == SL_STATUS_OK);
 
-  tx_command->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
+  tx_command->command_id = CMD_SYSTEM_PROP_VALUE_IS;
 
   /* Seq is irrelevant in u-frame information */
-  tx_command->header.seq = 0;
+  tx_command->seq = 0;
 
   tx_prop_command = (sli_cpc_system_property_cmd_t*)(tx_command->payload);
 
@@ -461,16 +529,18 @@ static void send_reset_reason(void)
 
   *tx_prop_last_status = cpc_get_reset_reason();
 
-  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_system_status_t);
 
   status = sl_cpc_write(&system_ep,
                         (void *)tx_command,
-                        sizeof(sli_cpc_system_cmd_header_t) + tx_command->header.length,
-                        SL_CPC_FLAG_UNNUMBERED_INFORMATION,
+                        SIZEOF_SYSTEM_COMMAND(tx_command),
+                        SL_CPC_FLAG_NO_BLOCK | SL_CPC_FLAG_UNNUMBERED_INFORMATION,
                         NULL);
 
   EFM_ASSERT(status == SL_STATUS_OK); //Ignore error
+  SL_CPC_JOURNAL_RECORD_INFO("Sent reset reason", 0);
 }
+#endif
 
 /*******************************************************************************
  ***************************  PROPERTY-GET HANDLERS  ***************************
@@ -492,13 +562,13 @@ static void on_property_get_last_status(sli_cpc_system_cmd_t *tx_command)
   prop_cmd_buff->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(prop_cmd_buff->payload)) = STATUS_OK;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /***************************************************************************//**
  * Command ID:  CMD_PROPERTY_GET
  * Property ID: PROP_PROTOCOL_VERSION
- *   Ship the hardcoded major and minor version number back to the primary.
+ *   Ship the hardcoded protocol version number back to the primary.
  ******************************************************************************/
 static void on_property_get_protocol_version(sli_cpc_system_cmd_t *tx_command)
 {
@@ -508,7 +578,7 @@ static void on_property_get_protocol_version(sli_cpc_system_cmd_t *tx_command)
   prop_cmd_buff->property_id = PROP_PROTOCOL_VERSION;
   prop_cmd_buff->payload[0] = SLI_CPC_PROTOCOL_VERSION;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint8_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint8_t);
 }
 
 /***************************************************************************//**
@@ -529,7 +599,7 @@ static void on_property_get_secondary_cpc_version(sli_cpc_system_cmd_t *tx_comma
   version[1] = SL_GSDK_MINOR_VERSION;
   version[2] = SL_GSDK_PATCH_VERSION;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + (3 * sizeof(uint32_t));
+  tx_command->length = sizeof(sli_cpc_property_id_t) + (3 * sizeof(uint32_t));
 }
 
 /***************************************************************************//**
@@ -550,7 +620,7 @@ static void on_property_get_secondary_app_version(sli_cpc_system_cmd_t *tx_comma
   app_version_len = app_version_len > SLI_CPC_PROPERTY_LENGTH_MAX ? SLI_CPC_PROPERTY_LENGTH_MAX : app_version_len;
   memcpy(prop_cmd_buff->payload, app_version, app_version_len);
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + app_version_len;
+  tx_command->length = sizeof(sli_cpc_property_id_t) + app_version_len;
 }
 
 /***************************************************************************//**
@@ -572,7 +642,7 @@ static void on_property_get_capabilities(sli_cpc_system_cmd_t *tx_command)
                   + SLI_CPC_ENDPOINT_GPIO_ENABLED * CPC_CAPABILITIES_GPIO_ENDPOINT_MASK
                   + sli_cpc_driver_capabilities.uart_flowcontrol * CPC_CAPABILITIES_UART_FLOW_CONTROL_MASK;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -590,7 +660,7 @@ static void on_property_get_rx_capabilities(sli_cpc_system_cmd_t *tx_command)
   rx_capability = (uint16_t *)(prop_cmd_buff->payload);
   *rx_capability = SL_CPC_RX_PAYLOAD_MAX_LENGTH;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint16_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint16_t);
 }
 
 /***************************************************************************//**
@@ -608,7 +678,7 @@ static void on_property_get_fc_validation_value(sli_cpc_system_cmd_t *tx_command
   flow_control_validation_value = (uint32_t *)(prop_cmd_buff->payload);
   *flow_control_validation_value = fc_validation_value;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -626,7 +696,7 @@ static void on_property_get_bus_bitrate_value(sli_cpc_system_cmd_t *tx_command)
   bus_bitrate_value = (uint32_t *)(prop_cmd_buff->payload);
   *bus_bitrate_value = sli_cpc_drv_get_bus_bitrate();
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -644,7 +714,7 @@ static void on_property_get_bus_max_bitrate_value(sli_cpc_system_cmd_t *tx_comma
   bus_max_bitrate_value = (uint32_t *)(prop_cmd_buff->payload);
   *bus_max_bitrate_value = sli_cpc_drv_get_bus_max_bitrate();
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -699,9 +769,10 @@ static void on_property_get_bootloader_info(sli_cpc_system_cmd_t *tx_command)
 #else
   infos[0] = (uint32_t)SL_CPC_BOOTLOADER_NONE;
   infos[1] = 0xFFFFFFFF;
+  infos[2] = 0xFFFFFFFF;
 #endif // SL_CPC_HAS_BOOTLOADER_SUPPORT
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + 3 * sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + 3 * sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -719,7 +790,7 @@ static void on_property_get_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_comm
   mode = (sli_cpc_system_reboot_mode_t*)(tx_property->payload);
   *mode = prop_bootloader_reboot_mode;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sli_cpc_system_reboot_mode_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sli_cpc_system_reboot_mode_t);
 }
 
 /***************************************************************************//**
@@ -743,7 +814,7 @@ static void on_property_get_security_state(sli_cpc_system_cmd_t *tx_command)
   *security_state = STATUS_UNIMPLEMENTED;
 #endif
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint32_t);
 }
 
 /***************************************************************************//**
@@ -767,7 +838,7 @@ static void on_property_get_endpoint_state(sli_cpc_system_cmd_t *tx_command,
 
   *reply_ep_state = sl_cpc_get_endpoint_state(&dummy_ep);
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_endpoint_state_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_endpoint_state_t);
 }
 
 /***************************************************************************//**
@@ -791,7 +862,7 @@ static void on_property_get_endpoint_encryption(sli_cpc_system_cmd_t *tx_command
   reply_ep_encryption = (bool*) reply_prop_cmd_buff->payload;
   *reply_ep_encryption = sl_cpc_get_endpoint_encryption(&dummy_ep);
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(bool);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(bool);
 }
 
 /***************************************************************************//**
@@ -826,7 +897,7 @@ static void on_property_get_endpoint_states(sli_cpc_system_cmd_t *tx_command)
     reply_ep_states[i] = (ep2_state << 4) | ep1_state;
   }
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + (SL_CPC_ENDPOINT_MAX_COUNT * sizeof(uint8_t) / 2);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + (SL_CPC_ENDPOINT_MAX_COUNT * sizeof(uint8_t) / 2);
 }
 
 /***************************************************************************//**
@@ -843,7 +914,7 @@ static void on_property_get_core_debug_counters(sli_cpc_system_cmd_t *tx_command
   memcpy(reply_prop_cmd_buff->payload, &sl_cpc_core_debug.core_counters, sizeof(sl_cpc_core_debug_counters_t));
 
   reply_prop_cmd_buff->property_id = PROP_CORE_DEBUG_COUNTERS;
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_core_debug_counters_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_core_debug_counters_t);
 }
 #endif
 
@@ -861,7 +932,7 @@ static void on_property_get_set_not_found(sli_cpc_system_cmd_t *tx_command)
   tx_property_cmd->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(tx_property_cmd->payload)) = STATUS_PROP_NOT_FOUND;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /***************************************************************************//**
@@ -869,23 +940,46 @@ static void on_property_get_set_not_found(sli_cpc_system_cmd_t *tx_command)
  * Property ID: PROP_ENDPOINT_STATE_x
  *   The primary notifies the secondary of an endpoint state change
  ******************************************************************************/
-static void on_property_set_state(uint8_t endpoint_id,
-                                  sli_cpc_system_cmd_t *tx_command,
-                                  sli_cpc_system_cmd_t *rx_command)
+static void on_property_set_endpoint_state(uint8_t endpoint_id,
+                                           sli_cpc_system_cmd_t *tx_command,
+                                           sli_cpc_system_cmd_t *rx_command,
+                                           void **on_write_complete_arg)
 {
+  sli_cpc_system_property_cmd_t *tx_prop_command = (sli_cpc_system_property_cmd_t*)(tx_command->payload);
   sli_cpc_system_property_cmd_t *rx_prop_command = (sli_cpc_system_property_cmd_t*)(rx_command->payload);
-
   sl_cpc_endpoint_state_t *ep_state = (sl_cpc_endpoint_state_t *)rx_prop_command->payload;
+  uint32_t magic;
+  sl_status_t status;
 
-  tx_command->header.length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
-
-  sli_cpc_system_property_cmd_t *tx_property_command;
-  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
-  tx_command->header.length = sizeof(sli_cpc_property_id_t);
-  tx_property_command->property_id = EP_ID_TO_PROPERTY_STATE(endpoint_id);
+  tx_command->length = sizeof(sli_cpc_system_property_cmd_t) + sizeof(sl_cpc_endpoint_state_t);
+  tx_prop_command->property_id = EP_ID_TO_PROPERTY_STATE(endpoint_id);
 
   if (*ep_state == SL_CPC_STATE_CLOSING || *ep_state == SL_CPC_STATE_CLOSED) {
-    sli_cpc_remote_disconnected(endpoint_id);
+    // Terminate notification.
+    sli_cpc_remote_terminated(endpoint_id, (sl_cpc_endpoint_state_t *)tx_prop_command->payload);
+  } else if (*ep_state == SL_CPC_STATE_CONNECTED) {
+    // Connection request.
+    status = sli_cpc_remote_connecting(endpoint_id, (sl_cpc_endpoint_state_t *)tx_prop_command->payload);
+    if (status == SL_STATUS_OK) {
+      // Only notify the core that the connect command has finished when it
+      // is accepted.
+      magic = (ON_WRITE_COMPLETE_CONNECT & ~ON_WRITE_COMPLETE_EP_ID_MASK) | endpoint_id;
+      *on_write_complete_arg = (void*)magic;
+    }
+  } else if (*ep_state == SL_CPC_STATE_DISCONNECTED) {
+    // Shutdown request
+    status = sli_cpc_remote_shutdown(endpoint_id, (sl_cpc_endpoint_state_t *)tx_prop_command->payload);
+    if (status == SL_STATUS_OK) {
+      // endpoint successfully shutdown, go to DISCONNECTED on write completed
+      magic = (ON_WRITE_COMPLETE_SHUTDOWN & ~ON_WRITE_COMPLETE_EP_ID_MASK) | endpoint_id;
+      *on_write_complete_arg = (void *)magic;
+    }
+  } else {
+    // Unsupported endpoint state
+    EFM_ASSERT(false);
+    tx_command->length = sizeof(sli_cpc_property_id_t);
+    tx_prop_command->property_id = PROP_LAST_STATUS;
+    *((sl_cpc_system_status_t*)(tx_prop_command->payload)) = STATUS_INVALID_ARGUMENT;
   }
 }
 
@@ -905,7 +999,7 @@ static void on_property_set_uframe_processing(sli_cpc_system_cmd_t *tx_command,
 
   tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property_command->property_id = PROP_UFRAME_PROCESSING;
-  tx_command->header.length = sizeof(sli_cpc_property_id_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t);
 }
 
 /***************************************************************************//**
@@ -930,7 +1024,28 @@ static void on_property_set_enter_irq(sli_cpc_system_cmd_t *tx_command,
 
   tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
   tx_property_command->property_id = PROP_ENTER_IRQ;
-  tx_command->header.length = sizeof(sli_cpc_property_id_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t);
+}
+
+/***************************************************************************//**
+ * Command ID:  CMD_PROPERTY_SET:
+ * Property ID: PROP_PRIMARY_VERSION_VALUE
+ *   The primary sets its version.
+ ******************************************************************************/
+static void on_property_set_primary_version_value(sli_cpc_system_cmd_t *tx_command,
+                                                  sli_cpc_system_cmd_t *rx_command)
+{
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  sli_cpc_system_property_cmd_t *rx_property_command;
+  const sli_cpc_system_primary_version_t *primary_version_payload;
+
+  rx_property_command = (sli_cpc_system_property_cmd_t*) rx_command->payload;
+  primary_version_payload = (sli_cpc_system_primary_version_t*) rx_property_command->payload;
+  memcpy(&primary_version, primary_version_payload, sizeof(sli_cpc_system_primary_version_t));
+
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  tx_property_command->property_id = PROP_PRIMARY_VERSION_VALUE;
+  tx_command->length = sizeof(sli_cpc_property_id_t);
 }
 
 /***************************************************************************//**
@@ -951,7 +1066,7 @@ static void on_property_set_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_comm
   rx_mode = (sli_cpc_system_reboot_mode_t*) rx_property_command->payload;
   tx_mode = (sli_cpc_system_reboot_mode_t*) tx_property_command->payload;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t);
 
   switch (*rx_mode) {
     case REBOOT_APPLICATION:
@@ -959,7 +1074,7 @@ static void on_property_set_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_comm
       prop_bootloader_reboot_mode = REBOOT_APPLICATION;
       tx_property_command->property_id = PROP_BOOTLOADER_REBOOT_MODE;
       *tx_mode = REBOOT_APPLICATION;
-      tx_command->header.length += sizeof(sli_cpc_system_reboot_mode_t);
+      tx_command->length += sizeof(sli_cpc_system_reboot_mode_t);
       break;
 
     case REBOOT_BOOTLOADER:
@@ -973,7 +1088,7 @@ static void on_property_set_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_comm
       *tx_mode = REBOOT_APPLICATION; // Reply that we stay in reboot application mode
 #endif
       tx_property_command->property_id = PROP_BOOTLOADER_REBOOT_MODE;
-      tx_command->header.length += sizeof(sli_cpc_system_reboot_mode_t);
+      tx_command->length += sizeof(sli_cpc_system_reboot_mode_t);
       break;
 
     default:
@@ -981,9 +1096,30 @@ static void on_property_set_bootloader_reboot_mode(sli_cpc_system_cmd_t *tx_comm
       // PROP_LAST_STATUS::STATUS_INVALID_ARGUMENT instead
       tx_property_command->property_id = PROP_LAST_STATUS;
       *((sl_cpc_system_status_t*)(tx_property_command->payload)) = STATUS_INVALID_ARGUMENT;
-      tx_command->header.length += sizeof(sl_cpc_system_status_t);
+      tx_command->length += sizeof(sl_cpc_system_status_t);
       break;
   }
+}
+
+static void on_property_set_tx_capability(sli_cpc_system_cmd_t *tx_command,
+                                          sli_cpc_system_cmd_t *rx_command)
+{
+  sli_cpc_system_property_cmd_t *tx_property_command;
+  sli_cpc_system_property_cmd_t *rx_property_command;
+  uint16_t* rx_capability;
+  uint16_t* tx_capability;
+
+  tx_property_command = (sli_cpc_system_property_cmd_t*) tx_command->payload;
+  rx_property_command = (sli_cpc_system_property_cmd_t*) rx_command->payload;
+  rx_capability = (uint16_t*) rx_property_command->payload;
+  tx_capability = (uint16_t*) tx_property_command->payload;
+
+  tx_property_command->property_id = PROP_TX_CAPABILITY;
+  *tx_capability = *rx_capability;
+
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(uint16_t);
+
+  sli_cpc_set_remote_tx_max_payload_length(*rx_capability);
 }
 
 /***************************************************************************//**
@@ -997,7 +1133,7 @@ static void on_property_set_read_only(sli_cpc_system_cmd_t *tx_command)
   tx_property_cmd->property_id = PROP_LAST_STATUS;
   *((sl_cpc_system_status_t*)(tx_property_cmd->payload)) = STATUS_INVALID_COMMAND_FOR_PROP;
 
-  tx_command->header.length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
+  tx_command->length = sizeof(sli_cpc_property_id_t) + sizeof(sl_cpc_system_status_t);
 }
 
 /*******************************************************************************
@@ -1013,9 +1149,9 @@ static void on_property_set_read_only(sli_cpc_system_cmd_t *tx_command)
 static void on_noop(sli_cpc_system_cmd_t *noop,
                     uint32_t *reply_data_length)
 {
-  noop->header.command_id = CMD_SYSTEM_NOOP;
-  noop->header.length = 0;
-  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + noop->header.length;
+  noop->command_id = CMD_SYSTEM_NOOP;
+  noop->length = 0;
+  *reply_data_length = SIZEOF_SYSTEM_COMMAND(noop);
 }
 
 /***************************************************************************//**
@@ -1062,21 +1198,21 @@ static void on_reset(sli_cpc_system_cmd_t *reset,
   sl_cpc_system_status_t *reset_status;
 
   reset_status = (sl_cpc_system_status_t*)(reset->payload);
-  reset->header.command_id = CMD_SYSTEM_RESET;
+  reset->command_id = CMD_SYSTEM_RESET;
 
-  reset->header.length = sizeof(sl_cpc_system_status_t);
-  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reset->header.length;
+  reset->length = sizeof(sl_cpc_system_status_t);
+  *reply_data_length = SIZEOF_SYSTEM_COMMAND(reset);
 
   *reset_status = cpc_secondary_on_reset_request(prop_bootloader_reboot_mode);
 
-  // Set on_write_complete argument to 0xDEADBEEF. This will
+  // Set on_write_complete argument to ON_WRITE_COMPLETE_RESET. This will
   // indicate to the on_write_complete callback to reset the device.
   // We need to postpone the reset to after the
   // write completion.
   if (*reset_status == STATUS_OK) {
     // The reset will be able to occurre in the mode requested, provide a
     // magic number to the callback so it knows it has to reset the device
-    *on_write_complete_arg = (void*)0xDEADBEEF;
+    *on_write_complete_arg = (void*)ON_WRITE_COMPLETE_RESET;
   } else {
     // The reset won't occur, don't tell the callback to reset
     *on_write_complete_arg = 0;
@@ -1096,7 +1232,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
   sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
 
   // Reply to a PROPERTY-GET with a PROPERTY-IS
-  reply->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
+  reply->command_id = CMD_SYSTEM_PROP_VALUE_IS;
 
   // Populate the reply command buffer according to the property_id
   switch (rx_property_cmd->property_id) {
@@ -1114,6 +1250,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
 
     case PROP_SECONDARY_APP_VERSION:
       on_property_get_secondary_app_version(reply);
+      reset_sequence_done = true;
       break;
 
     case PROP_CAPABILITIES:
@@ -1178,7 +1315,7 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
       break;
   }
 
-  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_length = SIZEOF_SYSTEM_COMMAND(reply);
 }
 
 /***************************************************************************//**
@@ -1189,19 +1326,20 @@ static void on_property_get(sli_cpc_system_cmd_t *rx_command,
  ******************************************************************************/
 static void on_property_set(sli_cpc_system_cmd_t* rx_command,
                             sli_cpc_system_cmd_t *reply,
-                            uint32_t * reply_data_length)
+                            uint32_t * reply_data_length,
+                            void **on_write_complete_arg)
 {
   sli_cpc_system_property_cmd_t *rx_property_cmd;
 
   rx_property_cmd = (sli_cpc_system_property_cmd_t*)(rx_command->payload);
 
   // Reply to a PROPERTY-GET with a PROPERTY-IS
-  reply->header.command_id = CMD_SYSTEM_PROP_VALUE_IS;
+  reply->command_id = CMD_SYSTEM_PROP_VALUE_IS;
 
   // Populate the reply command buffer according to the property_id
   if (rx_property_cmd->property_id >= PROP_ENDPOINT_STATE_0
       && rx_property_cmd->property_id <= PROP_ENDPOINT_STATE_255) {
-    on_property_set_state(PROPERTY_ID_TO_EP_ID(rx_property_cmd->property_id), reply, rx_command);
+    on_property_set_endpoint_state(PROPERTY_ID_TO_EP_ID(rx_property_cmd->property_id), reply, rx_command, on_write_complete_arg);
   } else {
     switch (rx_property_cmd->property_id) {
       case PROP_LAST_STATUS:
@@ -1220,6 +1358,10 @@ static void on_property_set(sli_cpc_system_cmd_t* rx_command,
         on_property_set_bootloader_reboot_mode(reply, rx_command);
         break;
 
+      case PROP_TX_CAPABILITY:
+        on_property_set_tx_capability(reply, rx_command);
+        break;
+
       case PROP_UFRAME_PROCESSING:
         on_property_set_uframe_processing(reply, rx_command);
         break;
@@ -1228,13 +1370,17 @@ static void on_property_set(sli_cpc_system_cmd_t* rx_command,
         on_property_set_enter_irq(reply, rx_command);
         break;
 
+      case PROP_PRIMARY_VERSION_VALUE:
+        on_property_set_primary_version_value(reply, rx_command);
+        break;
+
       default:
         on_property_get_set_not_found(reply);
         break;
     }
   }
 
-  *reply_data_length = sizeof(sli_cpc_system_cmd_header_t) + reply->header.length;
+  *reply_data_length = SIZEOF_SYSTEM_COMMAND(reply);
 }
 
 /***************************************************************************//**
@@ -1265,7 +1411,7 @@ static void on_poll(uint8_t endpoint_id,
     return; // Drop packet
   }
   // Make sure the length of the payload from the command matches the returned length.
-  if (rx_command->header.length != (poll_data_length - sizeof(sli_cpc_system_cmd_header_t))) {
+  if (rx_command->length != (poll_data_length - (sizeof(sli_cpc_system_cmd_t) - PAYLOAD_LENGTH_MAX))) {
     EFM_ASSERT(false);
     return; // Drop packet
   }
@@ -1284,12 +1430,12 @@ static void on_poll(uint8_t endpoint_id,
 
   // Assign the sequence number of the request to the reply so the primary can
   // route it back to the right request.
-  tx_command->header.seq = rx_command->header.seq;
+  tx_command->seq = rx_command->seq;
 
   // Only the reset can be a u-frame (non encrypted)
   if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
     sli_cpc_system_property_cmd_t *rx_property_cmd = (sli_cpc_system_property_cmd_t *)rx_command->payload;
-    switch (rx_command->header.command_id) {
+    switch (rx_command->command_id) {
       case CMD_SYSTEM_RESET:
         on_reset((sli_cpc_system_cmd_t *)*reply_data, reply_data_length, on_write_complete_arg);
         break;
@@ -1308,8 +1454,10 @@ static void on_poll(uint8_t endpoint_id,
         break;
 
       case CMD_SYSTEM_PROP_VALUE_SET:
-        if (rx_property_cmd->property_id == PROP_BOOTLOADER_REBOOT_MODE) {
-          on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
+        if (rx_property_cmd->property_id == PROP_BOOTLOADER_REBOOT_MODE
+            || rx_property_cmd->property_id == PROP_TX_CAPABILITY
+            || rx_property_cmd->property_id == PROP_PRIMARY_VERSION_VALUE) {
+          on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length, on_write_complete_arg);
         }
         break;
 
@@ -1318,7 +1466,7 @@ static void on_poll(uint8_t endpoint_id,
         return; // Drop packet
     }
   } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
-    switch (rx_command->header.command_id) {
+    switch (rx_command->command_id) {
       case CMD_SYSTEM_NOOP:
         on_noop((sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
         break;
@@ -1328,7 +1476,7 @@ static void on_poll(uint8_t endpoint_id,
         break;
 
       case CMD_SYSTEM_PROP_VALUE_SET:
-        on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length);
+        on_property_set(rx_command, (sli_cpc_system_cmd_t *)*reply_data, reply_data_length, on_write_complete_arg);
         break;
 
       default:

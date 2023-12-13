@@ -35,7 +35,7 @@
 #include "sl_component_catalog.h"
 #include "app_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
+#include "simple_rail_assistance.h"
 #include "sl_wmbus_support.h"
 #include "wmbus_sample_frame.h"
 #include "em_emu.h"
@@ -135,7 +135,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
 #endif
       break;
     case S_TX_DONE:
-      sl_led_toggle(&sl_led_led0);
+      toggle_send_led();
       //let's setup the time for the next tx.
       /*
        * from EN13757-4:
@@ -190,7 +190,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
         .start = last_tx_end_time + WMBUS_getMeterLimitedAccRxStart(false) - response_delay_safety_margin,
         .startMode = RAIL_TIME_ABSOLUTE,
         // end RX just before the next TX, 2ms safety gap
-        .end = last_tx_start_time + wmbus_app_period_acc - 2e3,
+        .end = last_tx_start_time + wmbus_app_period_acc - 2000,
         .endMode = RAIL_TIME_ABSOLUTE,
         .rxTransitionEndSchedule = 0,  // stay in scheduled RX on reception
         .hardWindowEnd = 0,            // extend RX window if we're receiving
@@ -244,7 +244,7 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle, RAIL_Events_t events)
 
   if ( events & RAIL_EVENTS_RX_COMPLETION ) {
     if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
-      sl_led_toggle(&sl_led_led1);
+      toggle_receive_led();
     }
     switch (get_wmbus_accessibility()) {
       case WMBUS_ACCESSIBILITY_LIMITED_ACCESS:

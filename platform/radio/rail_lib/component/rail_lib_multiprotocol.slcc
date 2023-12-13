@@ -6,6 +6,9 @@ category: Platform|Radio
 quality: production
 requires:
   - name: rail_lib
+  - name: rail_util_built_in_phys
+    condition:
+      - device_init
 provides:
   - name: rail_lib_multiprotocol # specific tag
   - name: rail_lib_Xprotocol # generic tag

@@ -24,7 +24,10 @@
 #include "network-steering.h"
 #include "find-and-bind-target.h"
 #include "zll-commissioning.h"
-
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+#include "green-power-server.h"
+#include "green-power-common.h"
+#endif //SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 #if defined(SL_CATALOG_ZIGBEE_MULTIRAIL_DEMO_PRESENT)
 #include "multirail-demo.h"
 #endif // SL_CATALOG_ZIGBEE_MULTIRAIL_DEMO_PRESENT
@@ -314,6 +317,54 @@ void emberAfRadioNeedsCalibratingCallback(void)
 {
   sl_mac_calibrate_current_channel();
 }
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+
+// Finds and returns the Gp Controlable application endpoint in the APS group
+static uint16_t findAppEndpointGroupId(uint8_t endpoint)
+{
+  for (uint8_t i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
+    EmberBindingTableEntry binding;
+    if (emberGetBinding(i, &binding) == EMBER_SUCCESS
+        && binding.type == EMBER_MULTICAST_BINDING
+        && binding.local == endpoint) {
+      uint16_t groupId = (binding.identifier[1] << 8) | binding.identifier[0];
+      return groupId;
+    }
+  }
+  return 0;
+}
+
+// This implementation is targeting the test spec (4.3.4.1)
+// where it uses the same group for Gp endpoint and application endpoints.
+// to read the groupId of the operational endpoint and use that groupId
+// to add the GP endpoint for groupcast notifications.
+void emberAfPluginGreenPowerServerPreSinkPairingCallback(GpCommDataSaved *commissioningGpd)
+{
+  if (commissioningGpd->preSinkCbSource == GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION) {
+    return;
+  }
+  // Set up the grouplist incase it did not have one, supply default values.
+  uint8_t *count = commissioningGpd->groupList;
+  uint8_t *grouplist = commissioningGpd->groupList + 1;
+  *count = 0;
+  uint8_t totalEndpointCount = emberGetEndpointCount();
+  for (uint8_t i = 0; i < totalEndpointCount && grouplist < (commissioningGpd->groupList + GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING); i++) {
+    uint8_t endpoint = emberGetEndpoint(i);
+    if (endpoint != 0xff // A valid application endpoint value.
+        && isCommissioningAppEndpoint(endpoint)) {
+      uint16_t groupId = findAppEndpointGroupId(endpoint);
+      if (0 != groupId) {
+        (*count)++;
+        MEMCOPY(grouplist, &groupId, sizeof(groupId));
+        grouplist += sizeof(groupId);
+        uint16_t alias = sli_zigbee_af_gpd_alias(&(commissioningGpd->addr));
+        MEMCOPY(grouplist, &alias, sizeof(alias));
+        grouplist += sizeof(alias);
+      }
+    }
+  }
+}
+#endif //SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
 
 #if defined(SL_CATALOG_ZIGBEE_MULTIRAIL_DEMO_PRESENT)
 static void appGpScheduleOutgoingGpdf(EmberZigbeePacketType packetType,

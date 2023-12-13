@@ -1,16 +1,13 @@
 package: Zigbee
-description: Silicon Labs implementation of the demand response load control cluster including
-  the load control event table for scheduling and triggering load control events.
-  This component contains the client side of the DRLC cluster only.  It requires extending
-  to integrate the software and hardware pieces that will reduce load.
+description: Silicon Labs implementation of the demand response load control cluster including the load control event table for scheduling and triggering load control events. This component contains the client side of the DRLC cluster only.  It requires extending to integrate the software and hardware pieces that will reduce load.
 label: Demand Response Load Control Cluster Client
 quality: evaluation
 id: zigbee_drlc
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: zigbee_drlc
+  - name: zigbee_drlc
 requires:
-   - name: zigbee_esi_management
+  - name: zigbee_esi_management
 config_file:
   - path: protocol/zigbee/app/framework/plugin/drlc/config/drlc-config.h
 source:
@@ -40,10 +37,10 @@ template_contribution:
       function_name: sli_zigbee_af_demand_response_load_control_cluster_dsa_sign_callback
   - name: cluster_service
     value:
-       cluster_id: "0x0701"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emberAfDemandResponseLoadControlClusterClientCommandParse"      
+      cluster_id: '0x0701'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfDemandResponseLoadControlClusterClientCommandParse
   - name: cluster_functions
     value:
       cluster_name: DemandResponseLoadControl
@@ -67,10 +64,10 @@ template_contribution:
       handler: emberAfPluginDrlcOptCommand
       help: Modifies the entry in the clients load control event table to opt in for a scheduled load control event.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The ID of the event that the user is opting in or out of
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The ID of the event that the user is opting in or out of
   - name: cli_command
     value:
       group: opt
@@ -78,10 +75,10 @@ template_contribution:
       handler: emberAfPluginDrlcOptCommand
       help: Modifies the entry in the clients load control event table to opt out of a scheduled load control event.
       argument:
-      - type: uint8
-        help: The relevant endpoint
-      - type: uint32
-        help: The ID of the event that the user is opting in or out of
+        - type: uint8
+          help: The relevant endpoint
+        - type: uint32
+          help: The ID of the event that the user is opting in or out of
   - name: cli_command
     value:
       group: drlc
@@ -89,8 +86,8 @@ template_contribution:
       handler: emberAfPluginDrlcPrintCommand
       help: Prints the Demand Response Load Control Table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: drlc
@@ -98,8 +95,8 @@ template_contribution:
       handler: emberAfPluginDrlcClearCommand
       help: Clears the load control event table.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
 
 documentation:
   docset: zigbee

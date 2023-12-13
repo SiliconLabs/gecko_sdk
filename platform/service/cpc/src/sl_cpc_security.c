@@ -410,7 +410,7 @@ static void on_security_error(uint8_t endpoint_id, void *arg)
 
   EFM_ASSERT(endpoint_id == SL_CPC_ENDPOINT_SECURITY);
 
-  if (sl_cpc_get_endpoint_state(&security_ep) != SL_CPC_STATE_OPEN) {
+  if (sl_cpc_get_endpoint_state(&security_ep) != SL_CPC_STATE_CONNECTED) {
     security_endpoint_in_error = true;
   }
 }
@@ -463,7 +463,7 @@ static void send_request(sli_cpc_security_protocol_cmd_t *request)
 
   status = sl_cpc_write(&security_ep, request,
                         request->len + SLI_SECURITY_PROTOCOL_HEADER_LENGTH,
-                        0,
+                        SL_CPC_FLAG_NO_BLOCK,
                         (void *)on_security_write_completed);
   EFM_ASSERT(status == SL_STATUS_OK); // Should not happen
   (void)status;
@@ -481,7 +481,7 @@ static void send_response(sli_cpc_security_protocol_cmd_t *response)
 
   status = sl_cpc_write(&security_ep, response,
                         response->len + SLI_SECURITY_PROTOCOL_HEADER_LENGTH,
-                        0,
+                        SL_CPC_FLAG_NO_BLOCK,
                         (void *)on_security_write_completed);
   EFM_ASSERT(status == SL_STATUS_OK); // Should not happen
   (void)status;

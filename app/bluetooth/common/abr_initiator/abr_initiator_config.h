@@ -33,11 +33,7 @@
 
 #include <stdbool.h>
 #include "sl_bt_api.h"
-#ifndef JS_BUILDER_ACTIVE
 #include "sl_rtl_clib_api.h"
-#else
-#include "sl_rtl_clib_hadm_api.h"
-#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,7 +48,27 @@ extern "C" {
                                  0x46, 0xf7, 0xff, 0x70, 0x9e, 0xb9, 0xbb };
 #define INITIATOR_CHARACTERISTIC_UUID { 0x91, 0xbe, 0x18, 0xa4, 0x22, 0x3c, 0x49, 0x9b, \
                                         0x03, 0x43, 0x91, 0x13, 0xec, 0x95, 0x9f, 0x92 };
+// RAS Service
+// bbb99e70-fff7-46cf-abc7-2d32c71820f3
+#define RAS_SERVICE_UUID { 0xf3, 0x20, 0x18, 0xc7, 0x32, 0x2d, 0xc7, 0xab, 0xcf, \
+                           0x46, 0xf7, 0xff, 0x70, 0x9e, 0xb9, 0xbb };
+// RAS Control Point Characteristic
+// 929f95ec-1391-4303-9b49-3c22a418be89
+#define RAS_CONTROL_POINT_CHARACTERISTIC_UUID { 0x89, 0xbe, 0x18, 0xa4, 0x22, 0x3c, 0x49, 0x9b, \
+                                                0x03, 0x43, 0x91, 0x13, 0xec, 0x95, 0x9f, 0x92 };
+// RAS Procedure Enable Data Characteristic
+// 929f95ec-1391-4303-9b49-3c22a418be90
+#define RAS_PROCEDURE_ENABLE_DATA_CHARACTERISTIC_UUID { 0x90, 0xbe, 0x18, 0xa4, 0x22, 0x3c, 0x49, 0x9b, \
+                                                        0x03, 0x43, 0x91, 0x13, 0xec, 0x95, 0x9f, 0x92 };
+// RAS Subevent Ranging Data Characteristic
+// 929f95ec-1391-4303-9b49-3c22a418be91
+#define RAS_SE_RANGING_DATA_CHARACTERISTIC_UUID { 0x91, 0xbe, 0x18, 0xa4, 0x22, 0x3c, 0x49, 0x9b, \
+                                                  0x03, 0x43, 0x91, 0x13, 0xec, 0x95, 0x9f, 0x92 };
 #define INITIATOR_DEVICE_NAME "ABR Example"
+
+#define SUBMODE_NOT_USED 0xff
+
+#define ABR_MAX_ANT_COUNT    4
 
 /*******************************************************************************
  ********************************  TYPEDEFS  ***********************************
@@ -67,9 +83,9 @@ typedef sl_bt_gap_phy_coding_t abr_phy_t;
 // UI modes
 typedef enum {
   ABR_INITIATOR_MODE_DYNAMIC = 0,
-  ABR_INITIATOR_MODE_RTT = 1,
-  ABR_INITIATOR_MODE_PBR = 2
-} abr_mode_t;
+  ABR_INITIATOR_MODE_RTT = sl_bt_cs_mode_rtt,
+  ABR_INITIATOR_MODE_PBR = sl_bt_cs_mode_pbr
+} abr_initiator_mode_t;
 
 // Discovery state
 typedef enum {
@@ -81,9 +97,17 @@ typedef enum {
 
 /// RTL library calculation result type
 typedef struct {
+  uint8_t connection;                   ///< Connection handle
   float distance;                       ///< Calculated distance
+  float likeliness;                     ///< Calculated distance likeliness
   float rssi_distance;                  ///< Distance calculated with RSSI values
+  uint8_t cs_bit_error_rate;            ///< CS bit error rate
 } abr_rtl_result_t;
+
+typedef struct {
+  uint8_t offset_count;
+  int16_t offset_value[ABR_MAX_ANT_COUNT];
+} abr_antenna_offset_t;
 
 /***************************************************************************//**
  * Initiator result callback type
@@ -139,6 +163,10 @@ typedef struct {
   sl_rtl_abr_libitem rtl_handle;
   abr_result_cb_t result_cb;
   bool rssi_measurement_enabled;
+  sl_bt_cs_channel_map_t channel_map;
+  uint32_t channel_map_len;
+  bool use_antenna_wired_offset;
+  abr_antenna_offset_t antenna_offset;
 } abr_initiator_config_t;
 
 /*******************************************************************************

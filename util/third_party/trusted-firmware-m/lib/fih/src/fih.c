@@ -98,6 +98,15 @@ uint8_t fih_delay_random(void)
     volatile int32_t ret = TFM_HAL_ERROR_GENERIC;
     uint8_t rand_value = 0xFF;
 
+    /* Repeat random generation to mitigate instruction skip */
+    ret = tfm_hal_random_generate(&rand_value, sizeof(rand_value));
+    if (ret != TFM_HAL_SUCCESS) {
+        FIH_PANIC;
+    }
+    ret = tfm_hal_random_generate(&rand_value, sizeof(rand_value));
+    if (ret != TFM_HAL_SUCCESS) {
+        FIH_PANIC;
+    }
     ret = tfm_hal_random_generate(&rand_value, sizeof(rand_value));
     if (ret != TFM_HAL_SUCCESS) {
         FIH_PANIC;

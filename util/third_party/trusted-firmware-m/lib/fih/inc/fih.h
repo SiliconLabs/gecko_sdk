@@ -1,16 +1,17 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __FAULT_INJECTION_HARDENING_H__
-#define __FAULT_INJECTION_HARDENING_H__
+#ifndef __TFM_FIH_H__
+#define __TFM_FIH_H__
 
 #include <stddef.h>
 #include <stdint.h>
 #include "sl_fault_injection_hardening_cfg.h"
+
 /*
  * Fault injection mitigation library.
  *
@@ -41,9 +42,9 @@
  * or JOP attacks.
  *
  * FIH_ENABLE_DELAY causes random delays. This makes it hard to cause faults
- * precisely. It requires an RNG. An mbedtls integration is provided in
- * fault_injection_hardening_delay_mbedtls.h, but any RNG that has an entropy
- * source can be used by implementing the fih_delay_random_uchar function.
+ * precisely. It requires an RNG. A simple example using SysTick as entropy
+ * source is provided in tfm_fih_rng.h, but any RNG that has an entropy
+ * source can be used by implementing the fih_delay_random function.
  *
  * The basic call pattern is:
  *
@@ -483,6 +484,13 @@ void fih_cfi_decrement(void);
         return ret; \
     } while (0)
 
+/*
+ * FIH return type macro changes the function return types to fih_int.
+ * All functions that need to be protected by FIH and called via FIH_CALL must
+ * return a fih_int type.
+ */
+#define FIH_RET_TYPE(type)    fih_int
+
 #else /* TFM_FIH_PROFILE_ON */
 typedef int32_t fih_int;
 
@@ -497,11 +505,13 @@ typedef int32_t fih_int;
 
 #define fih_int_encode(x)     (x)
 
+#define fih_int_encode_zero_equality(x) ((x) == 0 ? 0 : 1)
+
 #define fih_eq(x, y)          ((x) == (y))
 
 #define fih_not_eq(x, y)      ((x) != (y))
 
-#define fih_delay_init()
+#define fih_delay_init()      (0)
 #define fih_delay()
 
 #define FIH_CALL(f, ret, ...) \
@@ -512,6 +522,12 @@ typedef int32_t fih_int;
 #define FIH_RET(ret) \
     do { \
         return ret; \
+    } while (0)
+
+#define FIH_RET_TYPE(type)    type
+
+#define FIH_PANIC do { \
+        while(1) {}; \
     } while (0)
 
 #define FIH_CFI_STEP_INIT(x)
@@ -526,4 +542,4 @@ typedef int32_t fih_int;
 }
 #endif /* __cplusplus */
 
-#endif /* __FAULT_INJECTION_HARDENING_H__ */
+#endif /* __TFM_FIH_H__ */

@@ -223,4 +223,4 @@ typedef struct {
 /** @} End of group EFM32PG23_HFRCO */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_HFRCO_H */
+#endif // EFM32PG23_HFRCO_H

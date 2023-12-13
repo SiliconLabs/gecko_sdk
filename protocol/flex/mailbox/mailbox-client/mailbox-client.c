@@ -27,10 +27,11 @@
  *
  ******************************************************************************/
 
+#include <string.h>
+#include <assert.h>
 #include "mailbox-client-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "mailbox-client.h"
 
@@ -281,9 +282,9 @@ static EmberStatus sendAddMessageCommand(EmberNodeId server,
   emberStoreLowHighInt16u(message + EMBER_MAILBOX_PROTOCOL_ADD_MESSAGE_DESTINATION_OFFSET,
                           destination);
 
-  MEMCOPY(message + EMBER_MAILBOX_PROTOCOL_ADD_MESSAGE_PAYLOAD_OFFSET,
-          payload,
-          payloadLength);
+  memcpy(message + EMBER_MAILBOX_PROTOCOL_ADD_MESSAGE_PAYLOAD_OFFSET,
+         payload,
+         payloadLength);
 
   return emberMessageSend(server,
                           EMBER_AF_PLUGIN_MAILBOX_CLIENT_MAILBOX_ENDPOINT,

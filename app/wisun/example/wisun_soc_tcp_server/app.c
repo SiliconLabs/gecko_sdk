@@ -57,15 +57,15 @@
 void app_task(void *args)
 {
   static char buff[SL_WISUN_TCP_SERVER_BUFF_SIZE] = { 0U };
-  static wisun_addr_t srv_addr_tcp                = { 0U };
-  static wisun_addr_t clnt_addr_tcp               = { 0U };
+  static sockaddr_in6_t srv_addr_tcp              = { 0U };
+  static sockaddr_in6_t clnt_addr_tcp             = { 0U };
   socklen_t len                                   = 0UL;
   int32_t sockd_tcp_srv                           = SOCKET_INVALID_ID;
   int32_t sockd_tcp_clnt                          = SOCKET_INVALID_ID;
   int32_t r                                       = SOCKET_RETVAL_ERROR;
   bool client_connected                           = false;
   const char *ip_str                              = NULL;
-
+  bool print_prompt                               = true;
   (void) args;
 
   // connect to the wisun network
@@ -73,11 +73,11 @@ void app_task(void *args)
   printf("[Port: %u]\n", SL_WISUN_TCP_SERVER_PORT);
 
   // creating socket
-  sockd_tcp_srv = socket(AF_WISUN, SOCK_STREAM, IPPROTO_TCP);
+  sockd_tcp_srv = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
   assert_res(sockd_tcp_srv, "TCP server socket()");
 
   // fill the server address structure
-  srv_addr_tcp.sin6_family = AF_WISUN;
+  srv_addr_tcp.sin6_family = AF_INET6;
   srv_addr_tcp.sin6_addr = in6addr_any;
   srv_addr_tcp.sin6_port = htons(SL_WISUN_TCP_SERVER_PORT);
 
@@ -93,7 +93,10 @@ void app_task(void *args)
 
   // waiting for connection request
   while (1) {
-    printf("[Waiting for connection request]\n");
+    if (print_prompt) {
+      printf("[Waiting for connection request]\n");
+      print_prompt = false;
+    }
     sockd_tcp_clnt = accept(sockd_tcp_srv, (struct sockaddr *)&clnt_addr_tcp, &len);
     if (sockd_tcp_clnt != SOCKET_INVALID_ID) {
       client_connected = true;
@@ -107,12 +110,13 @@ void app_task(void *args)
       r = recv(sockd_tcp_clnt, buff, SL_WISUN_TCP_SERVER_BUFF_SIZE - 1, 0);
       switch (r) {
         case -1:
-          msleep(1);
+          app_wisun_dispatch_thread();
           continue;
         case 0: // scoket closed, EOF
           printf("[Socket closing: %ld]\n", sockd_tcp_clnt);
           close(sockd_tcp_clnt);
           client_connected = false;
+          print_prompt = true;
           break;
         default: // default behaviour
           buff[r] = 0;
@@ -127,7 +131,7 @@ void app_task(void *args)
           break;
       }
       // dispatch thread
-      msleep(1);
+      app_wisun_dispatch_thread();
     }
   }
 }

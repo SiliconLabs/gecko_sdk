@@ -56,7 +56,7 @@
 #include "common/new.hpp"
 #include "lib/spinel/spinel.h"
 
-#if OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
+#if OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE
 
 using ot::Spinel::SpinelInterface;
 
@@ -69,28 +69,28 @@ namespace Posix {
 
 volatile sig_atomic_t CpcInterfaceImpl::sCpcResetReq = false;
 
-CpcInterfaceImpl::CpcInterfaceImpl(SpinelInterface::ReceiveFrameCallback aCallback,
-                           void *                                aCallbackContext,
-                           SpinelInterface::RxFrameBuffer &      aFrameBuffer)
-    : mReceiveFrameCallback(aCallback)
-    , mReceiveFrameContext(aCallbackContext)
-    , mReceiveFrameBuffer(aFrameBuffer)
+CpcInterfaceImpl::CpcInterfaceImpl(const Url::Url &aRadioUrl)
+    : mReceiveFrameCallback(nullptr)
+    , mReceiveFrameContext(nullptr)
+    , mReceiveFrameBuffer(nullptr)
+    , mRadioUrl(aRadioUrl)
     , mSockFd(-1)
 {
     memset(&mInterfaceMetrics, 0, sizeof(mInterfaceMetrics));
-    mInterfaceMetrics.mRcpInterfaceType = OT_POSIX_RCP_BUS_VENDOR;
+    mInterfaceMetrics.mRcpInterfaceType = kSpinelInterfaceTypeVendor;
     mCpcBusSpeed                        = kCpcBusSpeed;
 }
 
-otError CpcInterfaceImpl::Init(const Url::Url &aRadioUrl)
+otError CpcInterfaceImpl::Init(ReceiveFrameCallback aCallback,
+                               void *aCallbackContext,
+                               RxFrameBuffer &aFrameBuffer)
 {
     otError     error = OT_ERROR_NONE;
     const char *value;
-    OT_UNUSED_VARIABLE(aRadioUrl);
 
     VerifyOrExit(mSockFd == -1, error = OT_ERROR_ALREADY);
 
-    if (cpc_init(&mHandle, aRadioUrl.GetPath(), false, HandleSecondaryReset) != 0)
+    if (cpc_init(&mHandle, mRadioUrl.GetPath(), false, HandleSecondaryReset) != 0)
     {
         otLogCritPlat("CPC init failed. Ensure radio-url argument has the form 'spinel+cpc://cpcd_0?iid=<1..3>'");
         DieNow(OT_EXIT_FAILURE);
@@ -104,12 +104,16 @@ otError CpcInterfaceImpl::Init(const Url::Url &aRadioUrl)
         error = OT_ERROR_FAILED;
     }
 
-    if ((value = aRadioUrl.GetValue("cpc-bus-speed")))
+    if ((value = mRadioUrl.GetValue("cpc-bus-speed")))
     {
         mCpcBusSpeed = static_cast<uint32_t>(atoi(value));
     }
 
     otLogCritPlat("mCpcBusSpeed = %d", mCpcBusSpeed);
+
+    mReceiveFrameCallback = aCallback;
+    mReceiveFrameContext = aCallbackContext;
+    mReceiveFrameBuffer = &aFrameBuffer;
 
 exit:
     return error;
@@ -182,9 +186,9 @@ void CpcInterfaceImpl::Read(uint64_t aTimeoutUs)
             }
             for (uint16_t i = 0; i < bufferLen; i++)
             {
-                if (!mReceiveFrameBuffer.CanWrite(1) || (mReceiveFrameBuffer.WriteByte(*(ptr++)) != OT_ERROR_NONE))                  
+                if (!mReceiveFrameBuffer->CanWrite(1) || (mReceiveFrameBuffer->WriteByte(*(ptr++)) != OT_ERROR_NONE))
                 {
-                    mReceiveFrameBuffer.DiscardFrame();    
+                    mReceiveFrameBuffer->DiscardFrame();
                     return;
                 }
             }
@@ -346,9 +350,9 @@ void CpcInterfaceImpl::SendResetResponse(void)
 
     for (int i = 0; i < kResetCMDSize; ++i)
     {
-        if (mReceiveFrameBuffer.CanWrite(sizeof(uint8_t)))
+        if (mReceiveFrameBuffer->CanWrite(sizeof(uint8_t)))
         {
-            IgnoreError(mReceiveFrameBuffer.WriteByte(mResetResponse[i]));
+            IgnoreError(mReceiveFrameBuffer->WriteByte(mResetResponse[i]));
         }
     }
 
@@ -361,16 +365,18 @@ void CpcInterfaceImpl::SendResetResponse(void)
 
 static OT_DEFINE_ALIGNED_VAR(sCpcInterfaceImplRaw, sizeof(CpcInterfaceImpl), uint64_t);
 
-VendorInterface::VendorInterface(SpinelInterface::ReceiveFrameCallback aCallback,
-                           void *                                aCallbackContext,
-                           SpinelInterface::RxFrameBuffer &      aFrameBuffer)
+VendorInterface::VendorInterface(const Url::Url &aRadioUrl)
 {
-    new (&sCpcInterfaceImplRaw) CpcInterfaceImpl(aCallback, aCallbackContext, aFrameBuffer);
+    new (&sCpcInterfaceImplRaw) CpcInterfaceImpl(aRadioUrl);
 }
 
-otError VendorInterface::Init(const Url::Url &aRadioUrl)
+otError VendorInterface::Init(ReceiveFrameCallback aCallback,
+                              void                *aCallbackContext,
+                              RxFrameBuffer       &aFrameBuffer)
 {
-    return reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->Init(aRadioUrl);
+    return reinterpret_cast<CpcInterfaceImpl*>(&sCpcInterfaceImplRaw)->Init(aCallback,
+                                                                            aCallbackContext,
+                                                                            aFrameBuffer);
 }
 
 uint32_t VendorInterface::GetBusSpeed(void) const
@@ -420,4 +426,4 @@ const otRcpInterfaceMetrics *VendorInterface::GetRcpInterfaceMetrics(void) const
 
 } // namespace Posix
 } // namespace ot
-#endif // OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
+#endif // OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE

@@ -3,12 +3,7 @@ label: Stack Token Interface
 package: Zigbee
 category: Zigbee|Utility
 quality: production
-
-description: This component provides token interface wrappers. This component can be used on
-             an NCP node for the connected host to access the tokes using the APIs in this
-             component.This component is useful for a NCP-Host backup and restore use-case
-             where host reads and saves all the tokens from the connected NCP and restores
-             back on a new NCP hardware.
+description: This component provides token interface wrappers. This component can be used on an NCP node for the connected host to access the tokes using the APIs in this component.This component is useful for a NCP-Host backup and restore use-case where host reads and saves all the tokens from the connected NCP and restores back on a new NCP hardware.
 
 provides:
   - name: zigbee_token_interface

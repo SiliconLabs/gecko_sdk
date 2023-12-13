@@ -241,11 +241,11 @@ bool sl_iperf_test_add(sl_iperf_test_t * const test)
   return _os_status_to_bool(status);
 }
 
-bool sl_iperf_test_get(sl_iperf_test_t * const test)
+bool sl_iperf_test_get(sl_iperf_test_t * const test, const uint32_t timeout_ms)
 {
   osStatus_t status = osError;
   uint8_t msg_prio = 0U;
-  status = osMessageQueueGet(_iperf_test_res_msg_queue, (void *)test, &msg_prio, osWaitForever);
+  status = osMessageQueueGet(_iperf_test_res_msg_queue, (void *)test, &msg_prio, timeout_ms);
   return _os_status_to_bool(status);
 }
 
@@ -262,7 +262,7 @@ __STATIC_INLINE void _iperf_mutex_release(void)
 /// Thread function declaration
 static void _iperf_thr_fnc(void * args)
 {
-  sl_iperf_test_t test = { 0 };
+  static sl_iperf_test_t test = { 0 };
   sl_iperf_test_t *pt  = &test;
   uint8_t msg_prio     =   0;
   osStatus_t status    = osError;

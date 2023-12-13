@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,9 @@
 
 #if OPENTHREAD_CONFIG_PLATFORM_FLASH_API_ENABLE // Use OT NV system
 
+#include "em_msc.h"
 #include <string.h>
 #include <openthread/instance.h>
-#include "em_msc.h"
 
 #define FLASH_PAGE_NUM 2
 #define FLASH_DATA_END_ADDR (FLASH_BASE + FLASH_SIZE)
@@ -103,16 +103,16 @@ void otPlatFlashRead(otInstance *aInstance, uint8_t aSwapIndex, uint32_t aOffset
 
 #elif defined(SL_CATALOG_NVM3_PRESENT) // Defaults to Silabs nvm3 system
 
+#include "nvm3_default.h"
+#include <string.h>
 #include <openthread/platform/settings.h>
 #include "common/code_utils.hpp"
 #include "common/logging.hpp"
-#include "nvm3_default.h"
-#include <string.h>
 
-#define NVM3KEY_DOMAIN_OPENTHREAD  0x20000U
+#define NVM3KEY_DOMAIN_OPENTHREAD 0x20000U
 #define NUM_INDEXED_SETTINGS \
     OPENTHREAD_CONFIG_MLE_MAX_CHILDREN // Indexed key types are only supported for kKeyChildInfo (=='child table').
-#define ENUM_NVM3_KEY_LIST_SIZE 4 // List size used when enumerating nvm3 keys.
+#define ENUM_NVM3_KEY_LIST_SIZE 4      // List size used when enumerating nvm3 keys.
 
 static otError          addSetting(uint16_t aKey, const uint8_t *aValue, uint16_t aValueLength);
 static nvm3_ObjectKey_t makeNvm3ObjKey(uint16_t otSettingsKey, int index);
@@ -126,13 +126,18 @@ void otPlatSettingsInit(otInstance *aInstance, const uint16_t *aSensitiveKeys, u
     OT_UNUSED_VARIABLE(aSensitiveKeysLength);
 
     // Only call nmv3_open if it has not been opened yet.
-    if (nvm3_defaultHandle->hasBeenOpened) {
+    if (nvm3_defaultHandle->hasBeenOpened)
+    {
         nvmOpenedByOT = false; // OT is not allowed to close NVM
-    } else {
+    }
+    else
+    {
         if (mapNvm3Error(nvm3_open(nvm3_defaultHandle, nvm3_defaultInit)) != OT_ERROR_NONE)
         {
             otLogDebgPlat("Error initializing nvm3 instance");
-        } else {
+        }
+        else
+        {
             nvmOpenedByOT = true;
         }
     }
@@ -141,7 +146,8 @@ void otPlatSettingsInit(otInstance *aInstance, const uint16_t *aSensitiveKeys, u
 void otPlatSettingsDeinit(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
-    if (nvmOpenedByOT && nvm3_defaultHandle->hasBeenOpened) {
+    if (nvmOpenedByOT && nvm3_defaultHandle->hasBeenOpened)
+    {
         nvm3_close(nvm3_defaultHandle);
         nvmOpenedByOT = false;
     }
@@ -167,7 +173,10 @@ otError otPlatSettingsGet(otInstance *aInstance, uint16_t aKey, int aIndex, uint
     {
         // Get the next nvm3 key list.
         nvm3_ObjectKey_t keys[ENUM_NVM3_KEY_LIST_SIZE]; // List holds the next set of nvm3 keys.
-        size_t           objCnt = nvm3_enumObjects(nvm3_defaultHandle, keys, ENUM_NVM3_KEY_LIST_SIZE, nvm3Key,
+        size_t           objCnt = nvm3_enumObjects(nvm3_defaultHandle,
+                                         keys,
+                                         ENUM_NVM3_KEY_LIST_SIZE,
+                                         nvm3Key,
                                          makeNvm3ObjKey(aKey, NUM_INDEXED_SETTINGS));
         for (size_t i = 0; i < objCnt; ++i)
         {
@@ -252,7 +261,7 @@ otError otPlatSettingsDelete(otInstance *aInstance, uint16_t aKey, int aIndex)
 
     OT_UNUSED_VARIABLE(aInstance);
 
-    otError err;
+    otError          err;
     nvm3_ObjectKey_t nvm3Key  = makeNvm3ObjKey(aKey, 0); // The base nvm3 key value.
     bool             idxFound = false;
     int              idx      = 0;
@@ -261,7 +270,10 @@ otError otPlatSettingsDelete(otInstance *aInstance, uint16_t aKey, int aIndex)
     {
         // Get the next nvm3 key list.
         nvm3_ObjectKey_t keys[ENUM_NVM3_KEY_LIST_SIZE]; // List holds the next set of nvm3 keys.
-        size_t           objCnt = nvm3_enumObjects(nvm3_defaultHandle, keys, ENUM_NVM3_KEY_LIST_SIZE, nvm3Key,
+        size_t           objCnt = nvm3_enumObjects(nvm3_defaultHandle,
+                                         keys,
+                                         ENUM_NVM3_KEY_LIST_SIZE,
+                                         nvm3Key,
                                          makeNvm3ObjKey(aKey, NUM_INDEXED_SETTINGS));
         for (size_t i = 0; i < objCnt; ++i)
         {

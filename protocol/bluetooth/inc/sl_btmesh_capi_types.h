@@ -578,6 +578,9 @@ typedef enum {
     and should be sent out with TTL=0 */
 #define MESH_MESSAGE_FLAG_TTL0  0x04
 
+/** Message is a result of unsolicited periodic publishing */
+#define MESH_MESSAGE_FLAG_PERIODIC 0x08
+
 /** Message is segmented in transport layer,
  *  can be used to force the use of transport layer segmentation */
 #define MESH_MESSAGE_FLAG_SEGTRANS 0x10
@@ -714,16 +717,14 @@ typedef enum {
   mesh_instr_net_pdu_dropped_invalid_src = 0x01,
   mesh_instr_net_pdu_dropped_invalid_dst = 0x02,
   mesh_instr_net_pdu_dropped_internal_error = 0x03,
+  mesh_instr_net_pdu_dropped_reason_last
 } mesh_instr_net_pdu_dropped_reason_t;
-/** Number of instrumentation errors for dropping a network PDU */
-#define mesh_instr_net_pdu_dropped_reasons 4
 
 /** Instrumentation result codes for not handling a network PDU */
 typedef enum {
   mesh_instr_net_pdu_not_handled_not_for_me = 0x00,
+  mesh_instr_net_pdu_not_handled_reason_last
 } mesh_instr_net_pdu_not_handled_reason_t;
-/** Number of instrumentation errors for not handling a network PDU */
-#define mesh_instr_net_pdu_not_handled_reasons 1
 
 /** Instrumentation result codes for not relaying a network PDU */
 typedef enum {
@@ -731,18 +732,16 @@ typedef enum {
   mesh_instr_net_pdu_not_relayed_hop_limit = 0x01,
   mesh_instr_net_pdu_not_relayed_out_of_memory = 0x02,
   mesh_instr_net_pdu_not_relayed_internal_error = 0x03,
+  mesh_instr_net_pdu_not_relayed_reason_last
 } mesh_instr_net_pdu_not_relayed_reason_t;
-/** Number of instrumentation errors for not relaying a network PDU */
-#define mesh_instr_net_pdu_not_relayed_reasons 4
 
 /** Instrumentation result codes for not sending a network PDU */
 typedef enum {
   mesh_instr_net_pdu_not_sent_out_of_memory = 0x00,
   mesh_instr_net_pdu_not_sent_internal_error = 0x01,
   mesh_instr_net_pdu_not_sent_hop_limit = 0x02,
+  mesh_instr_net_pdu_not_sent_reason_last
 } mesh_instr_net_pdu_not_sent_reason_t;
-/** Number of instrumentation errors for not sending a network PDU */
-#define mesh_instr_net_pdu_not_sent_reasons 3
 
 /** Instrumentation result codes for not handling a transport PDU */
 typedef enum {
@@ -755,25 +754,22 @@ typedef enum {
   mesh_instr_trans_pdu_not_handled_out_of_recv = 0x06,
   mesh_instr_trans_pdu_not_handled_out_of_memory = 0x07,
   mesh_instr_trans_pdu_not_handled_header_mismatch = 0x08,
+  mesh_instr_trans_pdu_not_handled_reason_last
 } mesh_instr_trans_pdu_not_handled_reason_t;
-/** Number of instrumentation errors for not handling a transport PDU */
-#define mesh_instr_trans_pdu_not_handled_reasons 9
 
 /** Instrumentation result codes for not sending a transport layer acknowledgement */
 typedef enum {
   mesh_instr_trans_ack_not_sent_out_of_memory = 0x00,
   mesh_instr_trans_ack_not_sent_internal_error = 0x01,
+  mesh_instr_trans_ack_not_sent_reason_last
 } mesh_instr_trans_ack_not_sent_reason_t;
-/** Number of instrumentation errors for not sending transport layer acknowledgement */
-#define mesh_instr_trans_receiver_ack_not_sent_reasons 2
 
 /** Instrumentation result codes for not handling a transport layer acknowledgement */
 typedef enum {
   mesh_instr_trans_ack_not_handled_not_found = 0x00,
   mesh_instr_trans_ack_not_handled_non_cumulative = 0x01,
+  mesh_instr_trans_ack_not_handled_reason_last
 } mesh_instr_trans_ack_not_handled_reason_t;
-/** Number of instrumentation errors for not handling transport layer acknowledgement */
-#define mesh_instr_trans_sender_ack_not_handled_reasons 2
 
 /** Instrumentation result codes for receiving a transport layer message */
 typedef enum {
@@ -781,18 +777,16 @@ typedef enum {
   mesh_instr_trans_receive_incomplete = 0x01,
   mesh_instr_trans_receive_sender_cancelled = 0x02,
   mesh_instr_trans_receive_receiver_cancelled = 0x03,
+  mesh_instr_trans_receive_status_last
 } mesh_instr_trans_receive_status_t;
-/** Number of instrumentation errors for transport layer message reception */
-#define mesh_instr_trans_receiver_receive_reasons 3
 
 /** Instrumentation result codes for not sending a transport layer PDU */
 typedef enum {
   mesh_instr_trans_pdu_not_sent_wrong_state = 0x00,
   mesh_instr_trans_pdu_not_sent_out_of_memory = 0x01,
   mesh_instr_trans_pdu_not_sent_internal_error = 0x02,
+  mesh_instr_trans_pdu_not_sent_reason_last
 } mesh_instr_trans_pdu_not_sent_reason_t;
-/** Number of instrumentation errors for not sending transport layer PDU */
-#define mesh_instr_trans_sender_pdu_not_sent_reasons 3
 
 /** Instrumentation result codes for not sending a transport layer SDU */
 typedef enum {
@@ -802,9 +796,8 @@ typedef enum {
   mesh_instr_trans_sdu_not_sent_wrong_state = 0x03,
   mesh_instr_trans_sdu_not_sent_out_of_memory = 0x04,
   mesh_instr_trans_sdu_not_sent_internal_error = 0x05,
+  mesh_instr_trans_sdu_not_sent_reason_last
 } mesh_instr_trans_sdu_not_sent_reason_t;
-/** Number of instrumentation errors for not sending transport layer SDU */
-#define mesh_instr_trans_sender_sdu_not_sent_reasons 6
 
 /** Instrumentation result codes for sending a transport layer message */
 typedef enum {
@@ -814,9 +807,8 @@ typedef enum {
   mesh_instr_trans_send_out_of_memory = 0x03,
   mesh_instr_trans_send_internal_error = 0x04,
   mesh_instr_trans_send_sender_cancelled = 0x05,
+  mesh_instr_trans_send_status_last
 } mesh_instr_trans_send_status_t;
-/** Number of instrumentation errors for transport layer message sending */
-#define mesh_instr_trans_sender_send_reasons 5
 
 /** Mesh stack statistics counters */
 typedef struct {
@@ -825,35 +817,35 @@ typedef struct {
   /** Network decryption success counter */
   uint32_t net_pdu_decrypted;
   /** Network PDU dropped counter */
-  uint32_t net_pdu_dropped[mesh_instr_net_pdu_dropped_reasons];
+  uint32_t net_pdu_dropped[mesh_instr_net_pdu_dropped_reason_last];
   /** Network PDU handled counter */
   uint32_t net_pdu_handled;
   /** Network PDU not handled counter */
-  uint32_t net_pdu_not_handled[mesh_instr_net_pdu_not_handled_reasons];
+  uint32_t net_pdu_not_handled[mesh_instr_net_pdu_not_handled_reason_last];
   /** Network PDU relayed counter */
   uint32_t net_pdu_relayed;
   /** Network PDU not relayed counter */
-  uint32_t net_pdu_not_relayed[mesh_instr_net_pdu_not_relayed_reasons];
+  uint32_t net_pdu_not_relayed[mesh_instr_net_pdu_not_relayed_reason_last];
   /** Network PDU sent counter */
   uint32_t net_pdu_sent;
   /** Network PDU not sent counter */
-  uint32_t net_pdu_not_sent[mesh_instr_net_pdu_not_sent_reasons];
+  uint32_t net_pdu_not_sent[mesh_instr_net_pdu_not_sent_reason_last];
 
   /** Transport PDU processed counter */
   uint32_t trans_pdu_handled;
   /** Transport PDU not handled counter */
-  uint32_t trans_pdu_not_handled[mesh_instr_trans_pdu_not_handled_reasons];
+  uint32_t trans_pdu_not_handled[mesh_instr_trans_pdu_not_handled_reason_last];
 
   /** Transport SDU reception started counter */
   uint32_t trans_receiver_start;
   /** Transport SDU reception ended counter */
-  uint32_t trans_receiver_cleanup[mesh_instr_trans_receiver_receive_reasons];
+  uint32_t trans_receiver_cleanup[mesh_instr_trans_receive_status_last];
   /** Transport SDU received counter */
   uint32_t trans_receiver_recv;
   /** Transport acknowledgement sent counter */
   uint32_t trans_receiver_ack_sent;
   /** Transport acknowledgement not sent counter */
-  uint32_t trans_receiver_ack_not_sent[mesh_instr_trans_receiver_ack_not_sent_reasons];
+  uint32_t trans_receiver_ack_not_sent[mesh_instr_trans_ack_not_sent_reason_last];
   /** Transport receive timer set counter */
   uint32_t trans_receiver_timer_set;
   /** Transport receive timer expired counter */
@@ -864,27 +856,24 @@ typedef struct {
   /** Transport sender out of resources counter */
   uint32_t trans_sender_table_full;
   /** Transport sender ended counter */
-  uint32_t trans_sender_cleanup[mesh_instr_trans_sender_send_reasons];
+  uint32_t trans_sender_cleanup[mesh_instr_trans_send_status_last];
   /** Transport acknowledgement handled counter */
   uint32_t trans_sender_ack_handled;
   /** Transport acknowledgement not handled counter */
-  uint32_t trans_sender_ack_not_handled[mesh_instr_trans_sender_ack_not_handled_reasons];
+  uint32_t trans_sender_ack_not_handled[mesh_instr_trans_ack_not_handled_reason_last];
   /** Transport PDU sent counter */
   uint32_t trans_sender_pdu_sent;
   /** Transport PDU not sent counter */
-  uint32_t trans_sender_pdu_not_sent[mesh_instr_trans_sender_pdu_not_sent_reasons];
+  uint32_t trans_sender_pdu_not_sent[mesh_instr_trans_pdu_not_sent_reason_last];
   /** Transport SDU sent counter */
   uint32_t trans_sender_sdu_sent;
   /** Transport SDU not sent counter */
-  uint32_t trans_sender_sdu_not_sent[mesh_instr_trans_sender_sdu_not_sent_reasons];
+  uint32_t trans_sender_sdu_not_sent[mesh_instr_trans_sdu_not_sent_reason_last];
   /** Transport sender timer set counter */
   uint32_t trans_sender_timer_set;
   /** Transport sender timer expired counter */
   uint32_t trans_sender_timer_expired;
 } mesh_statistics_t;
-
-/** Pointer to current mesh statistics */
-extern mesh_statistics_t *mesh_stats;
 
 /** Instrumentation result codes for not sending an advertisement */
 typedef enum {
@@ -903,18 +892,6 @@ typedef enum {
 
 /** Convert pointer to integer */
 #define MESH_P2I(p) ((uintptr_t)(p))
-
-/** Scheduled callback function.
-    A scheduled callback will be called by
-    the platform once a request made by the mesh stack, by calling
-    mesh_platform_callback_schedule() has expired. */
-typedef void (*mesh_scheduled_cb_fn)(uint32_t handle, void *ctx);
-
-/** Scheduled callback function. for non-cancellable events
-    A scheduled callback will be called by
-    the platform once a request made by the mesh stack, by calling
-    mesh_platform_callback_schedule_event() has expired. */
-typedef void (*mesh_scheduled_event_cb_fn)(uint32_t event, void *ctx);
 
 /** Stack diagnostic event types */
 typedef enum {

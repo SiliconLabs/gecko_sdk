@@ -1224,4 +1224,4 @@
 #define PRS_SMCTRL_SOFTM10                                     (PRS_ASYNC_SMCTRL_SOFTM10)
 #define PRS_SMCTRL_SOFTM11                                     (PRS_ASYNC_SMCTRL_SOFTM11)
 
-#endif /* EFR32FG25_PRS_SIGNALS_H */
+#endif // EFR32FG25_PRS_SIGNALS_H

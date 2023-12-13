@@ -32,6 +32,14 @@
  * @addtogroup green-power-common
  * @{
  */
+#define GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS                    0x00
+#define GREEN_POWER_SERVER_RAW_GPD_PROCESS_IN_APP_ENDPOINTS       0xFD
+#define GREEN_POWER_SERVER_RESERVED_ENDPOINTS                     0xFD
+#define GREEN_POWER_SERVER_SINK_DERIVES_ENDPOINTS                 0xFE
+#define GREEN_POWER_SERVER_ALL_SINK_ENDPOINTS                     0xFF
+
+#define GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT  1
+#define GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT  240
 
 #define EMBER_AF_GP_GPD_CHANNEL_REQUEST_CHANNEL_TOGGLING_BEHAVIOR_RX_CHANNEL_NEXT_ATTEMPT (0x0F)
 #define EMBER_AF_GP_GPD_CHANNEL_REQUEST_CHANNEL_TOGGLING_BEHAVIOR_RX_CHANNEL_SECOND_NEXT_ATTEMPT (0xF0)
@@ -105,7 +113,11 @@
 #define emberAfGreenPowerMobileCap(options)          (!((((options) & GP_PAIRING_OPTIONS_GPD_FIXED) >> EMBER_AF_GP_PAIRING_OPTION_GPD_FIXED_OFFSET) & 0x01))
 #define emberAfGreenPowerPortableCap(options)     ((((options) & GP_PAIRING_OPTIONS_GPD_FIXED) >> 7) & 0x01)
 #define emberAfGreenPowerSecurityKeyType(options) ((((options) & GP_PAIRING_OPTIONS_SECURITY_KEY_TYPE) >> 11) & 0x07)
-
+#define emberAfGreenPowerCheckReturnOfPutDataInResponse(ret) \
+  ({  if ((ret) == NULL) {                                   \
+        return 0;                                            \
+      }                                                      \
+   })                                                        \
 /** @brief as the proxy table response status present in enum.h, this is for the sink
  *
  */

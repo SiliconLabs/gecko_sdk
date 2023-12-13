@@ -127,24 +127,8 @@ extern "C" {
         .maxPowerDbm = RAIL_PA_CURVES_SUBGIG_MAX_POWER_DDBM,                   \
         .conversion = { .mappingTable = &RAIL_curvesSubgig[0] },               \
       },                                                                       \
-      { /* Dummy power settings for RAIL_TX_POWER_MODE_SUBGIG_HIGHEST */       \
-        .algorithm = RAIL_PA_ALGORITHM_DBM_POWERSETTING_MAPPING_TABLE,         \
-        .segments = 0U,                                                        \
-        .step = RAIL_PA_CURVES_SUBGIG_CURVES_STEP_DDBM,                        \
-        .minPowerDbm = RAIL_PA_CURVES_SUBGIG_MIN_POWER_DDBM,                   \
-        .maxPowerDbm = RAIL_PA_CURVES_SUBGIG_MAX_POWER_DDBM,                   \
-        .conversion = { .mappingTable = &RAIL_curvesSubgig[0] },               \
-      },                                                                       \
       /* OFDM Mapping Table */                                                 \
       {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_DBM_POWERSETTING_MAPPING_TABLE,         \
-        .segments = 0U,                                                        \
-        .step = RAIL_PA_CURVES_OFDM_CURVES_STEP_DDBM,                          \
-        .minPowerDbm = RAIL_PA_CURVES_OFDM_MIN_POWER_DDBM,                     \
-        .maxPowerDbm = RAIL_PA_CURVES_OFDM_MAX_POWER_DDBM,                     \
-        .conversion = { .mappingTable = &RAIL_curvesOFDM[0] },                 \
-      },                                                                       \
-      { /* Dummy power settings for RAIL_TX_POWER_MODE_OFDM_PA */              \
         .algorithm = RAIL_PA_ALGORITHM_DBM_POWERSETTING_MAPPING_TABLE,         \
         .segments = 0U,                                                        \
         .step = RAIL_PA_CURVES_OFDM_CURVES_STEP_DDBM,                          \

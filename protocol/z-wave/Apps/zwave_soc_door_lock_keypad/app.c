@@ -50,11 +50,9 @@ void ZCB_BatteryCheckTimerCallback(SSwTimer *pTimer);
 /**
  * @brief See description for function prototype in ZW_basis_api.h.
  */
-ZW_APPLICATION_STATUS ApplicationInit(EResetReason_t eResetReason)
+ZW_APPLICATION_STATUS ApplicationInit(__attribute__((unused)) EResetReason_t eResetReason)
 {
   SRadioConfig_t* RadioConfig;
-
-  UNUSED(eResetReason);
 
   DPRINT("Enabling watchdog\n");
   zpal_enable_watchdog(true);
@@ -185,10 +183,8 @@ zaf_event_distributor_app_event_manager(const uint8_t event)
  * @param pTimer Timer object assigned to this function
  */
 void
-ZCB_BatteryCheckTimerCallback(SSwTimer *pTimer)
+ZCB_BatteryCheckTimerCallback(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
-
   /* Send a battery level report to the lifeline  */
   if (false == zaf_event_distributor_enqueue_app_event(EVENT_APP_PERIODIC_BATTERY_CHECK_TRIGGER))
   {

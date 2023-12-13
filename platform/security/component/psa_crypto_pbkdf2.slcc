@@ -1,41 +1,30 @@
 id: psa_crypto_pbkdf2
 package: platform
-label: PBKDF2
+label: PBKDF2-HMAC
 description: >-
-  This component provides support for key derivation using PBKDF2 through a Silicon
-  Labs custom API integrated into PSA Crypto. PBKDF2 based on AES_CMAC_PRF_128 is only
-  supported on EFRxG23/EFMxG23 and newer devices. The builtin PBKDF2 implementation of
-  PSA Crypto is not yet available.
+  PSA Crypto support for PBKDF2 using HMAC as the PRF.
 category: Platform|Security|PSA Crypto|Key Derivation
 quality: production
+
 provides:
+  - name: psa_crypto_pbkdf2_hmac
+
+  # The ID and 'primary provide' of this component is 'psa_crypto_pbkdf2' for
+  # historical reasons. This component used to enable both HMAC- and CMAC based
+  # PRFs for use in the SL-custom API for one-shot key derivation
+  # (sl_psa_key_derivation_single_shot()). Now that PSA Crypto implements
+  # PBKDF2, there is a need to differentiate between the two PRFs for code size
+  # reasons. Since PKBDF2-HMAC is the most common use case, this component
+  # continues to enable that variant.
   - name: psa_crypto_pbkdf2
+
 requires:
   - name: psa_crypto
-  - name: device_series_2
-  - name: device_security_vault
-    condition: [device_has_semailbox]
-  - name: device_security_rot
-    condition: [device_has_cryptoacc]
-    
+  - name: psa_crypto_hmac
+
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_HMAC
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_205]
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_210]
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_215]
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_220]
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_230]
-  - name: psa_crypto_config
-    value: PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128
-    condition: [device_sdid_235]
+    value: PSA_WANT_ALG_PBKDF2_HMAC 1
+
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_ALG_PBKDF2_HMAC 1"

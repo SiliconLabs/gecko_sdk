@@ -28,8 +28,12 @@
  *
  ******************************************************************************/
 #include "sl_wisun_config.h"
+#include "sl_component_catalog.h"
 
-{% if config.allowedChannels is not none and only_radio is sameas false %}
+#if defined(SL_CATALOG_WISUN_STACK_PRESENT) ||   \
+    defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+
+{% if config.allowedChannels is not none %}
 //! Wi-SUN Allow channel list
 const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask = {
     .mask = {
@@ -104,14 +108,11 @@ const wisun_config_mac_list_t wisun_config_mac_deny_list = {
 {%- endif -%}
 {%- endif -%}
 {% if config.modeSwitchPhys is not none %}
-{% if (config.modeSwitchPhys|length > 0) and (config.modeSwitchPhys is not none) %}
+{% if config.modeSwitchPhys|length > 0 %}
 //! Wi-SUN Mode Switch PHYs
 const uint8_t wisun_config_ms_phys[WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER] = {
-  {% for phy in config.modeSwitchPhys -%}
-  {{ phy['phyModeId'] }}{%- if loop.index0 < loop.length - 1 -%}{{", "}}{%- endif -%}
-  {%- endfor %}
+  {{config.modeSwitchPhyModeIds|join(', ')}}
 };
-
 {%- endif -%}
 {%- endif -%}
 {% if config.devicePrivateKey is not none %}
@@ -152,4 +153,6 @@ const uint8_t wisun_config_ca_certificate[] = {
 "{{config.caCertificate}}"
 {%- endif %}
 };
-{%- endif -%}
+{%- endif %}
+
+#endif

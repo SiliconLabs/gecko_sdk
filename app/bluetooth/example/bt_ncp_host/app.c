@@ -125,7 +125,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       app_assert_status(sc);
       // Start advertising and enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       #if defined(SL_CATALOG_WAKE_LOCK_PRESENT)
       // Signal other controller that it can go to sleep
@@ -152,7 +152,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Restart advertising after client has disconnected.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       #if defined(SL_CATALOG_WAKE_LOCK_PRESENT)
       // Signal other controller that it can go to sleep

@@ -2,7 +2,7 @@ id: device_init_dcdc
 label: "DC-DC Converter"
 package: platform
 description: >
-  Instantiate the component for DC-DC converter initialization based on the 
+  Instantiate the component for DC-DC converter initialization based on the
   provided component configuration.
 category: Services|Device Initialization|Peripherals
 quality: production
@@ -35,6 +35,16 @@ config_file:
     file_id: device_init_dcdc_config
     condition: [device_sdid_220]
     unless: [device_pa_14dbm]
+  - path: config/s2/sdid225/10dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_225, device_pa_10dbm]
+  - path: config/s2/sdid225/20dbm/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_225, device_pa_20dbm]
+  - path: config/s2/sl_device_init_dcdc_config.h
+    file_id: device_init_dcdc_config
+    condition: [device_sdid_225]
+    unless: [device_pa_10dbm, device_pa_20dbm]
   - path: config/s2/sdid230/buck/sl_device_init_dcdc_config.h
     file_id: device_init_dcdc_config
     condition: [device_sdid_230, device_dcdc_buck]
@@ -63,6 +73,7 @@ config_file:
         device_sdid_210,
         device_sdid_215,
         device_sdid_220,
+        device_sdid_225,
         device_sdid_230,
         device_sdid_235,
       ]
@@ -88,6 +99,9 @@ template_contribution:
       include: sl_device_init_dcdc.h
       handler: sl_device_init_dcdc
     priority: -9800
+    condition: [sl_system]
+  - name: component_catalog
+    value: device_init_dcdc
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-dcdc

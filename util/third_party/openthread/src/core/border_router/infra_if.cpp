@@ -37,9 +37,9 @@
 
 #include "border_router/routing_manager.hpp"
 #include "common/as_core_type.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/logging.hpp"
+#include "instance/instance.hpp"
 #include "net/icmp6.hpp"
 
 namespace ot {
@@ -60,7 +60,6 @@ Error InfraIf::Init(uint32_t aIfIndex)
     Error error = kErrorNone;
 
     VerifyOrExit(!mInitialized, error = kErrorInvalidState);
-    VerifyOrExit(aIfIndex > 0, error = kErrorInvalidArgs);
 
     mIfIndex     = aIfIndex;
     mInitialized = true;
@@ -193,5 +192,18 @@ extern "C" void otPlatInfraIfDiscoverNat64PrefixDone(otInstance        *aInstanc
 
 } // namespace BorderRouter
 } // namespace ot
+
+//---------------------------------------------------------------------------------------------------------------------
+
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_MOCK_PLAT_APIS_ENABLE
+OT_TOOL_WEAK bool otPlatInfraIfHasAddress(uint32_t, const otIp6Address *) { return false; }
+
+OT_TOOL_WEAK otError otPlatInfraIfSendIcmp6Nd(uint32_t, const otIp6Address *, const uint8_t *, uint16_t)
+{
+    return OT_ERROR_FAILED;
+}
+
+OT_TOOL_WEAK otError otPlatInfraIfDiscoverNat64Prefix(uint32_t) { return OT_ERROR_FAILED; }
+#endif
 
 #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE

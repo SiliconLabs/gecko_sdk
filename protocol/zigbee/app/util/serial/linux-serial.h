@@ -33,5 +33,4 @@ void emberSerialCleanup(void);
 int emberSerialGetInputFd(uint8_t port);
 void emberSerialSendReadyToRead(uint8_t port);
 
-// For users of app/util/serial/command-interpreter.h
 /** @} END addtogroup */

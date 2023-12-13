@@ -383,4 +383,4 @@ typedef struct {
 /** @} End of group FGM23_KEYSCAN */
 /** @} End of group Parts */
 
-#endif /* FGM23_KEYSCAN_H */
+#endif // FGM23_KEYSCAN_H

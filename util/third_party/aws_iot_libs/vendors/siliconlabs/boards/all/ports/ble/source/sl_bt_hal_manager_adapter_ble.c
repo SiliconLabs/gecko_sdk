@@ -433,7 +433,7 @@ static BTStatus_t prvAdvEventPropsToSlAdvConnectableMode(
   {
     case BTAdvInd:
       /* Undirected connectable scannable */
-      *pucSlBtConnectableMode = sl_bt_advertiser_connectable_scannable;
+      *pucSlBtConnectableMode = sl_bt_legacy_advertiser_connectable;
       status = eBTStatusSuccess;
       break;
 
@@ -444,7 +444,7 @@ static BTStatus_t prvAdvEventPropsToSlAdvConnectableMode(
 
     case BTAdvNonconnInd:
       /* Non-connectable non-scannable */
-      *pucSlBtConnectableMode = sl_bt_advertiser_non_connectable;
+      *pucSlBtConnectableMode = sl_bt_legacy_advertiser_non_connectable;
       status = eBTStatusSuccess;
       break;
 
@@ -2541,8 +2541,8 @@ static BTStatus_t prvMultiAdvSetInstRawData( uint8_t ucAdapterIf,
   /* Advertisement is started when the scan response is set, or immediately when
   the advertiser is not scannable */
   bool bIsScannable =
-    ( pxAdapterIf->ucAdvConnectableMode == sl_bt_advertiser_connectable_scannable ) ||
-    ( pxAdapterIf->ucAdvConnectableMode == sl_bt_advertiser_scannable_non_connectable );
+    ( pxAdapterIf->ucAdvConnectableMode == sl_bt_legacy_advertiser_connectable ) ||
+    ( pxAdapterIf->ucAdvConnectableMode == sl_bt_legacy_advertiser_scannable );
   if( bSetScanRsp || ( !bIsScannable ) )
   {
     /* Start advertising with user-defined data */

@@ -26,7 +26,6 @@
 #include "app/util/ezsp/serial-interface.h"
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "app/util/serial/linux-serial.h"
-#include "app/framework/plugin-host/gateway/gateway-support.h"
 #include "gateway-config.h"
 
 #include "app/framework/plugin-host/file-descriptor-dispatch/file-descriptor-dispatch.h"
@@ -53,8 +52,6 @@
 static const char* debugLabel = "gateway-debug";
 static const bool debugOn = false;
 
-static const char cliPrompt[] = "foo";//was ZA_PROMPT;
-
 //------------------------------------------------------------------------------
 // External Declarations
 
@@ -69,51 +66,17 @@ static void ezspSerialPortCallback(EzspSerialPortEvent event, int fileDescriptor
 //------------------------------------------------------------------------------
 // Functions
 
-static EmberStatus gatewayBackchannelStart(void)
-{
-  if (backchannelEnable) {
-    if (EMBER_SUCCESS != backchannelStartServer(SERIAL_PORT_CLI)) {
-      fprintf(stderr,
-              "Fatal: Failed to start backchannel services for CLI.\n");
-      return EMBER_ERR_FATAL;
-    }
-
-    if (EMBER_SUCCESS != backchannelStartServer(SERIAL_PORT_RAW)) {
-      fprintf(stderr,
-              "Fatal: Failed to start backchannel services for RAW data.\n");
-      return EMBER_ERR_FATAL;
-    }
-  }
-  return EMBER_SUCCESS;
-}
-
-void gatewayBackchannelStop(void)
-{
-  if (backchannelEnable) {
-    backchannelStopServer(SERIAL_PORT_CLI);
-    backchannelStopServer(SERIAL_PORT_RAW);
-  }
-}
-
 bool emberAfMainStartCallback(int* returnCode,
                               int argc,
                               char** argv)
 {
   debugPrint("gatewaitInit()");
 
-  // This will process EZSP command-line options as well as determine
-  // whether the backchannel should be turned on.
+  // This will process EZSP command-line options
   if (!ezspProcessCommandOptions(argc, argv)) {
     *returnCode = EMBER_ERR_FATAL;
     return true;
   }
-
-  *returnCode = gatewayBackchannelStart();
-  if (*returnCode != EMBER_SUCCESS) {
-    return true;
-  }
-
-  emberSerialSetPrompt(cliPrompt);
 
   return false;
 }

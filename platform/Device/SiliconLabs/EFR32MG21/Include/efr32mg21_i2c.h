@@ -741,4 +741,4 @@ typedef struct {
 /** @} End of group EFR32MG21_I2C */
 /** @} End of group Parts */
 
-#endif /* EFR32MG21_I2C_H */
+#endif // EFR32MG21_I2C_H

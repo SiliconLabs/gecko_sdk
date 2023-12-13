@@ -37,7 +37,7 @@ user_code_report_t;
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
 
-static s_CC_userCode_data_t userCodeData;
+static s_CC_userCode_data_t userCodeData = { 0 };
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -245,8 +245,10 @@ JOB_STATUS CC_UserCode_SupportReport(
   uint8_t userCodeLen,
   VOID_CALLBACKFUNC(pCallback)(TRANSMISSION_RESULT * pTransmissionResult))
 {
-  CMD_CLASS_GRP cmdGrp = {COMMAND_CLASS_USER_CODE, USER_CODE_REPORT};
-  user_code_report_t user_code_report;
+  CMD_CLASS_GRP cmdGrp = {
+    .cmdClass = COMMAND_CLASS_USER_CODE,
+    .cmd = USER_CODE_REPORT
+  };
 
   if ((0 == userIdentifier) || IS_NULL(pUserCode) ||
       (userCodeLen > USERCODE_MAX_LEN) || (userCodeLen < USERCODE_MIN_LEN) ||
@@ -255,8 +257,11 @@ JOB_STATUS CC_UserCode_SupportReport(
     return JOB_STATUS_BUSY;
   }
 
-  user_code_report.userIdentifier = userIdentifier;
-  user_code_report.userIdStatus = userIdStatus;
+  user_code_report_t user_code_report = {
+    .userIdentifier = userIdentifier,
+    .userIdStatus = userIdStatus
+  };
+
   memcpy(user_code_report.userCode, pUserCode, userCodeLen);
 
   return cc_engine_multicast_request(
@@ -269,7 +274,7 @@ JOB_STATUS CC_UserCode_SupportReport(
       pCallback);
 }
 
-static void 
+static void
 CC_UserCode_report_stx(zaf_tx_options_t *tx_options, void* pData)
 {
   DPRINTF("* %s() *\n"
@@ -279,13 +284,13 @@ CC_UserCode_report_stx(zaf_tx_options_t *tx_options, void* pData)
 
   /* Prepare payload for report */
   size_t len;
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
   s_CC_userCode_data_t *pUserCodeData = (s_CC_userCode_data_t*)pData;
 
-  txBuf.ZW_UserCodeReport1byteFrame.cmdClass = COMMAND_CLASS_USER_CODE;
-  txBuf.ZW_UserCodeReport1byteFrame.cmd = USER_CODE_REPORT;
-  txBuf.ZW_UserCodeReport1byteFrame.userIdentifier = pUserCodeData->userIdentifier;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_UserCodeReport1byteFrame.cmdClass = COMMAND_CLASS_USER_CODE,
+    .ZW_UserCodeReport1byteFrame.cmd = USER_CODE_REPORT,
+    .ZW_UserCodeReport1byteFrame.userIdentifier = pUserCodeData->userIdentifier
+  };
 
   if(false == CC_UserCode_getId_handler(
       pUserCodeData->userIdentifier,
@@ -307,9 +312,10 @@ CC_UserCode_report_stx(zaf_tx_options_t *tx_options, void* pData)
     DPRINTF("%s(): CC_UserCode_Report_handler() failed. \n", __func__);
     return;
   }
+  tx_options->use_supervision = true;
 
-  (void) zaf_transport_tx((uint8_t *)&txBuf, 
-                          sizeof(ZW_USER_CODE_REPORT_1BYTE_FRAME) + len - 1, 
+  (void) zaf_transport_tx((uint8_t *)&txBuf,
+                          sizeof(ZW_USER_CODE_REPORT_1BYTE_FRAME) + len - 1,
                           ZAF_TSE_TXCallback, tx_options);
 }
 
@@ -319,19 +325,17 @@ CC_UserCode_Set_handler(
   USER_ID_STATUS id,
   uint8_t* pUserCode,
   uint8_t len,
-  uint8_t endpoint)
+  __attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
   uint8_t i;
   bool status;
-  SUserCode userCodeData;
+  SUserCode userCodeData = { 0 };
 
   // Make sure identifier is valid
   if (identifier > CC_USER_CODE_MAX_IDS) {
     return E_CMD_HANDLER_RETURN_CODE_HANDLED;
   }
 
-  memset(&userCodeData, 0, sizeof(userCodeData));
   // it is possible to remove all user codes at once when identifier == 0
   if (identifier == 0) {
     if (id == USER_ID_AVAILABLE) {
@@ -364,11 +368,10 @@ bool
 CC_UserCode_getId_handler(
   uint8_t identifier,
   USER_ID_STATUS* pId,
-  uint8_t endpoint)
+  __attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
   bool status;
-  SUserCode userCodeData;
+  SUserCode userCodeData = { 0 };
 
   status = CC_UserCode_Read(identifier, &userCodeData);
   ASSERT(status);
@@ -382,11 +385,10 @@ CC_UserCode_Report_handler(
   uint8_t identifier,
   uint8_t* pUserCode,
   size_t * pLen,
-  uint8_t endpoint)
+  __attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
   bool status;
-  SUserCode userCodeData;
+  SUserCode userCodeData = { 0 };
 
   status = CC_UserCode_Read(identifier, &userCodeData);
   ASSERT(status);
@@ -412,9 +414,10 @@ CC_UserCode_reset_data(void)
   uint8_t defaultUserCode[] = CC_USER_CODE_DEFAULT;
   bool status;
 
-  SUserCode userCodeDefaultData;
-  userCodeDefaultData.user_id_status = USER_ID_OCCUPIED;
-  userCodeDefaultData.userCodeLen = sizeof(defaultUserCode);
+  SUserCode userCodeDefaultData = {
+    .user_id_status = USER_ID_OCCUPIED,
+    .userCodeLen = sizeof(defaultUserCode)
+  };
   memcpy(userCodeDefaultData.userCode, defaultUserCode, userCodeDefaultData.userCodeLen);
 
   status = CC_UserCode_Write(1, &userCodeDefaultData);
@@ -432,10 +435,8 @@ CC_UserCode_reset_data(void)
 }
 
 uint8_t
-CC_UserCode_UsersNumberReport_handler(uint8_t endpoint)
+CC_UserCode_UsersNumberReport_handler(__attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
-
   return CC_USER_CODE_MAX_IDS;
 }
 
@@ -443,7 +444,7 @@ static bool
 CC_UserCode_Validate(uint8_t identifier, const uint8_t *pCode, uint8_t len)
 {
   bool status;
-  SUserCode userCodeData;
+  SUserCode userCodeData ={ 0 };
 
   status = CC_UserCode_Read(identifier, &userCodeData);
   ASSERT(status);
@@ -459,25 +460,19 @@ CC_UserCode_Validate(uint8_t identifier, const uint8_t *pCode, uint8_t len)
 }
 
 ZW_WEAK void
-CC_UserCode_Migrate()
+CC_UserCode_Migrate(void)
 {
 }
 
 ZW_WEAK bool
-CC_UserCode_Write(uint8_t identifier, SUserCode *userCodeData)
+CC_UserCode_Write(__attribute__((unused)) uint8_t identifier, __attribute__((unused)) SUserCode *userCodeData)
 {
-  UNUSED(identifier);
-  UNUSED(userCodeData);
-
   return true;
 }
 
 ZW_WEAK bool
-CC_UserCode_Read(uint8_t identifier, SUserCode *userCodeData)
+CC_UserCode_Read(__attribute__((unused)) uint8_t identifier, __attribute__((unused)) SUserCode *userCodeData)
 {
-  UNUSED(identifier);
-  UNUSED(userCodeData);
-
   return true;
 }
 

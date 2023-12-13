@@ -24,7 +24,7 @@ class calc_fpll_sol(calc_fpll_ocelot):
             enum_name='FpllBandEnum',
             enum_desc='RF Frequency Planning Band Selection',
             member_data=[
-                ['BAND_928', 0, '928 to 960 MHz'],
+                ['BAND_928', 0, '922.3 to 960 MHz'],
                 ['BAND_9xx', 1, '902 to 933 MHz'],
                 ['BAND_896', 2, '896 to 901 MHz'],
                 ['BAND_863', 3, '863 to 876 MHz'],
@@ -118,9 +118,9 @@ class calc_fpll_sol(calc_fpll_ocelot):
                 divn = 85
                 divy = 17
             else: #BAND_928
-                divx = 7
-                divn = 117
-                divy = 23
+                divx = 6
+                divn = 100
+                divy = 20
         elif xtal_frequency_hz == 39e6:
             if fpll_band == fpll_band_enum.BAND_450:
                 divx = 7
@@ -147,9 +147,9 @@ class calc_fpll_sol(calc_fpll_ocelot):
                 divn = 100
                 divy = 20
             else: #BAND_928
-                divx = 6
-                divn = 99
-                divy = 20
+                divx = 7
+                divn = 115
+                divy = 23
         elif xtal_frequency_hz == 40e6:
             if fpll_band == fpll_band_enum.BAND_450:
                 divx = 5

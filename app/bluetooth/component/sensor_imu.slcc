@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_imu
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_imu.c
 include:
@@ -19,6 +18,10 @@ provides:
 requires:
   - name: imu_driver
   - name: app_assert
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: sensor_imu
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-imu

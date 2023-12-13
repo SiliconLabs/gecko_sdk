@@ -33,30 +33,11 @@ EmberStatus sli_zigbee_get_key_table_entry(uint8_t index, EmberKeyStruct *result
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 
-EmberStatus emberGetKeyTableEntry(uint8_t index, EmberKeyStruct *result)
-{
-  (void)index;
-  (void)result;
-  return EMBER_LIBRARY_NOT_PRESENT;
-}
-
 uint8_t emberFindKeyTableEntry(EmberEUI64 address, bool linkKey)
 {
   (void)address;
   (void)linkKey;
   return 0xFF;
-}
-
-EmberStatus emberSetKeyTableEntry(uint8_t index,
-                                  EmberEUI64 address,
-                                  bool linkKey,
-                                  EmberKeyData* keyData)
-{
-  (void)index;
-  (void)address;
-  (void)linkKey;
-  (void)keyData;
-  return EMBER_LIBRARY_NOT_PRESENT;
 }
 
 EmberStatus sli_zigbee_af_set_key_table_entry(bool erase,
@@ -66,16 +47,6 @@ EmberStatus sli_zigbee_af_set_key_table_entry(bool erase,
   (void)erase;
   (void)index;
   (void)keyStruct;
-  return EMBER_LIBRARY_NOT_PRESENT;
-}
-
-EmberStatus emberAddOrUpdateKeyTableEntry(EmberEUI64 address,
-                                          bool linkKey,
-                                          EmberKeyData* keyData)
-{
-  (void)address;
-  (void)linkKey;
-  (void)keyData;
   return EMBER_LIBRARY_NOT_PRESENT;
 }
 

@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "em_device.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
@@ -50,16 +50,16 @@
 #include "cryptolib_types.h"
 #include <string.h>
 
-psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *attributes,
-                                                    uint8_t *key_buffer,
-                                                    size_t key_buffer_size,
-                                                    size_t *key_length)
+// -----------------------------------------------------------------------------
+// Driver entry points
+
+psa_status_t sli_cryptoacc_transparent_generate_key(
+  const psa_key_attributes_t *attributes,
+  uint8_t *key_buffer,
+  size_t key_buffer_size,
+  size_t *key_length)
 {
-#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)     \
-  || defined(PSA_WANT_ECC_SECP_R1_224)      \
-  || defined(PSA_WANT_ECC_SECP_R1_256)      \
-  || defined(PSA_WANT_ECC_SECP_K1_256))
+#if defined(SLI_PSA_DRIVER_FEATURE_ECC)
 
   // Argument check.
   if (attributes == NULL
@@ -92,7 +92,7 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
   // Grab the correct order for the requested curve
   block_t n = NULL_blk;
   switch (key_bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+    #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
     case 192:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         // The order n is stored as the second element in the curve-parameter tuple
@@ -104,8 +104,8 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+    #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+    #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
     case 224:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         n = block_t_convert(sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize),
@@ -114,21 +114,21 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+    #endif // SLI_PSA_DRIVER_FEATURE_P224R1
     case 256:
       switch (curve_type) {
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+        #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
         case PSA_ECC_FAMILY_SECP_R1:
           n = block_t_convert(sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize),
                               sx_ecc_curve_p256.bytesize);
           break;
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+        #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+        #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
         case PSA_ECC_FAMILY_SECP_K1:
           n = block_t_convert(sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize),
                               sx_ecc_curve_p256k1.bytesize);
           break;
-#endif // PSA_WANT_ECC_SECP_R1_256
+        #endif // SLI_PSA_DRIVER_FEATURE_P256R1
       }
       break;
     default:
@@ -160,7 +160,7 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_KEY_TYPE_ECC_KEY_PAIR  && PSA_WANT_ECC_*
+#else // SLI_PSA_DRIVER_FEATURE_ECC
 
   (void) attributes;
   (void) key_buffer;
@@ -169,22 +169,18 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif  // PSA_WANT_KEY_TYPE_ECC_KEY_PAIR  && PSA_WANT_ECC_*
+#endif  // SLI_PSA_DRIVER_FEATURE_ECC
 }
 
-psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attributes_t *attributes,
-                                                         const uint8_t *key_buffer,
-                                                         size_t key_buffer_size,
-                                                         uint8_t *data,
-                                                         size_t data_size,
-                                                         size_t *data_length)
+psa_status_t sli_cryptoacc_transparent_export_public_key(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  uint8_t *data,
+  size_t data_size,
+  size_t *data_length)
 {
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)         \
-  || defined(PSA_WANT_ECC_SECP_R1_224)          \
-  || defined(PSA_WANT_ECC_SECP_R1_256)          \
-  || defined(PSA_WANT_ECC_SECP_K1_256))
+#if defined(SLI_PSA_DRIVER_FEATURE_ECC)
 
   // Argument check.
   if (attributes == NULL
@@ -227,7 +223,7 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
   block_t *domain_ptr = NULL;
   uint32_t curve_flags = 0;
   switch (key_bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+    #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
     case 192:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve_flags = sx_ecc_curve_p192.pk_flags;
@@ -236,8 +232,8 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+    #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+    #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
     case 224:
       if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
         curve_flags = sx_ecc_curve_p224.pk_flags;
@@ -246,21 +242,21 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
         return PSA_ERROR_NOT_SUPPORTED;
       }
       break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+    #endif // SLI_PSA_DRIVER_FEATURE_P224R1
     case 256:
       switch (curve_type) {
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+        #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
         case PSA_ECC_FAMILY_SECP_R1:
           curve_flags = sx_ecc_curve_p256.pk_flags;
           domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
           break;
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+        #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+        #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
         case PSA_ECC_FAMILY_SECP_K1:
           curve_flags = sx_ecc_curve_p256k1.pk_flags;
           domain_ptr = (block_t*)&sx_ecc_curve_p256k1.params;
           break;
-#endif // PSA_WANT_ECC_SECP_K1_256
+        #endif // SLI_PSA_DRIVER_FEATURE_P256K1
       }
       break;
     default:
@@ -290,7 +286,7 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
 
   return PSA_SUCCESS;
 
-#else // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+#else // SLI_PSA_DRIVER_FEATURE_ECC
 
   (void) attributes;
   (void) key_buffer;
@@ -301,23 +297,19 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+#endif // SLI_PSA_DRIVER_FEATURE_ECC
 }
 
-psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *attributes,
-                                                  const uint8_t *data,
-                                                  size_t data_length,
-                                                  uint8_t *key_buffer,
-                                                  size_t key_buffer_size,
-                                                  size_t *key_buffer_length,
-                                                  size_t *bits)
+psa_status_t sli_cryptoacc_transparent_import_key(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *data,
+  size_t data_length,
+  uint8_t *key_buffer,
+  size_t key_buffer_size,
+  size_t *key_buffer_length,
+  size_t *bits)
 {
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && (defined(PSA_WANT_ECC_SECP_R1_192)         \
-  || defined(PSA_WANT_ECC_SECP_R1_224)          \
-  || defined(PSA_WANT_ECC_SECP_R1_256)          \
-  || defined(PSA_WANT_ECC_SECP_K1_256))
+#if defined(SLI_PSA_DRIVER_FEATURE_ECC)
 
   // Argument check.
   if (attributes == NULL
@@ -341,7 +333,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) { // Private key.
+  if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {     // Private key.
     void *modulus_ptr = NULL;
     *bits = psa_get_key_bits(attributes);
 
@@ -355,7 +347,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
     }
 
     switch (*bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+      #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
       case 192:
         if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
           // The order n is stored as the second element in the curve-parameter tuple
@@ -366,8 +358,8 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
           return PSA_ERROR_NOT_SUPPORTED;
         }
         break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+      #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+      #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
       case 224:
         if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
           modulus_ptr = sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize);
@@ -375,19 +367,19 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
           return PSA_ERROR_NOT_SUPPORTED;
         }
         break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+      #endif // SLI_PSA_DRIVER_FEATURE_P224R1
       case 256:
         switch (curve_type) {
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+          #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
           case PSA_ECC_FAMILY_SECP_R1:
             modulus_ptr = sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize);
             break;
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+          #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+          #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
           case PSA_ECC_FAMILY_SECP_K1:
             modulus_ptr = sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize);
             break;
-#endif // PSA_WANT_ECC_SECP_K1_256
+          #endif // SLI_PSA_DRIVER_FEATURE_P256K1
         }
         break;
       default:
@@ -397,7 +389,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
     status = sli_psa_validate_ecc_weierstrass_privkey(data,
                                                       modulus_ptr,
                                                       data_length);
-  } else { // Public key.
+  } else {     // Public key.
     block_t *domain_ptr = NULL;
     uint32_t curve_flags = 0;
 
@@ -410,7 +402,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
     *bits = (data_length - 1) * 8 / 2;
 
     switch (*bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
+      #if defined(SLI_PSA_DRIVER_FEATURE_P192R1)
       case 192:
         if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
           curve_flags = sx_ecc_curve_p192.pk_flags;
@@ -419,8 +411,8 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
           return PSA_ERROR_NOT_SUPPORTED;
         }
         break;
-#endif // PSA_WANT_ECC_SECP_R1_192
-#if defined(PSA_WANT_ECC_SECP_R1_224)
+      #endif // SLI_PSA_DRIVER_FEATURE_P192R1
+      #if defined(SLI_PSA_DRIVER_FEATURE_P224R1)
       case 224:
         if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
           curve_flags = sx_ecc_curve_p224.pk_flags;
@@ -429,21 +421,21 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
           return PSA_ERROR_NOT_SUPPORTED;
         }
         break;
-#endif // PSA_WANT_ECC_SECP_R1_224
+      #endif // SLI_PSA_DRIVER_FEATURE_P224R1
       case 256:
         switch (curve_type) {
-#if defined(PSA_WANT_ECC_SECP_R1_256)
+          #if defined(SLI_PSA_DRIVER_FEATURE_P256R1)
           case PSA_ECC_FAMILY_SECP_R1:
             curve_flags = sx_ecc_curve_p256.pk_flags;
             domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
             break;
-#endif // PSA_WANT_ECC_SECP_R1_256
-#if defined(PSA_WANT_ECC_SECP_K1_256)
+          #endif // SLI_PSA_DRIVER_FEATURE_P256R1
+          #if defined(SLI_PSA_DRIVER_FEATURE_P256K1)
           case PSA_ECC_FAMILY_SECP_K1:
             curve_flags = sx_ecc_curve_p256k1.pk_flags;
             domain_ptr = (block_t*)&sx_ecc_curve_p256k1.params;
             break;
-#endif // PSA_WANT_ECC_SECP_K1_256
+          #endif // SLI_PSA_DRIVER_FEATURE_P256K1
         }
         break;
       default:
@@ -482,7 +474,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
 
   return status;
 
-#else // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+#else // SLI_PSA_DRIVER_FEATURE_ECC
 
   (void) attributes;
   (void) data;
@@ -494,7 +486,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
 
   return PSA_ERROR_NOT_SUPPORTED;
 
-#endif // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+#endif // SLI_PSA_DRIVER_FEATURE_ECC
 }
 
-#endif // defined(CRYPTOACC_PRESENT)
+#endif // SLI_MBEDTLS_DEVICE_VSE

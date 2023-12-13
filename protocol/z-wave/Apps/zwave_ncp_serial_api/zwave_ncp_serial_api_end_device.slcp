@@ -5,7 +5,7 @@ description: >
   The Serial Application Programming Interface (Serial API) allows a host to communicate with a
   Z-Wave chip. The host may be PC or a less powerful embedded host CPU, e.g., in a remote control
   or in a gateway device.
-  
+
   The Serial API End Device allows the user to create a product with a host application with different
   capabilites than the Z-Wave device, such as drive a high performance display, but does not require
   the Z-Wave Controller role.
@@ -23,6 +23,7 @@ component:
   - id: zw_api_serialapi
   - id: zw_api_controller
   - id: zw_dcdc_override
+  - id: ZW_MIGRATION_FROM_7_20
   # Platform
   - id: emlib_letimer
   - id: emlib_timer
@@ -30,7 +31,7 @@ component:
   - id: gpiointerrupt
   - id: sl_system
   - id: device_init
-  - id: mpu # disable execution from RAM  
+  - id: mpu # disable execution from RAM
 source:
   - path: app_node_info.c
   - path: cmd_handlers_invoker.c
@@ -77,13 +78,6 @@ config_file:
     file_id: zaf_config
     condition: [device_series_2]
 configuration:
-  # Version numbers are equal to SDK_VERSION_MAJOR, SDK_VERSION_MINOR, SDK_VERSION_PATCH
-  - name: APP_VERSION
-    value: 7
-  - name: APP_REVISION
-    value: 20
-  - name: APP_PATCH
-    value: 2
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED

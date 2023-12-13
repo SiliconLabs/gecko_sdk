@@ -40,6 +40,10 @@
 
 extern uint8_t sli_zigbee_af_cli_network_index;
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+extern void sli_get_ztt_version_number_string(char *versionString);
+#endif
+
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
 void  sli_get_pti_radio_config(sl_cli_command_arg_t *arguments)
 {
@@ -103,6 +107,7 @@ void sli_cli_post_cmd_hook(sl_cli_command_arg_t* arguments)
 #endif // SL_CATALOG_KERNEL_PRESENT
 }
 
+#if !defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT || defined EMBER_TEST
 static void printMfgString(void)
 {
   uint8_t mfgString[MFG_STRING_MAX_LENGTH + 1];
@@ -112,6 +117,7 @@ static void printMfgString(void)
   // most strings are literals or constants in flash and use '%p'.
   sl_zigbee_core_debug_print("MFG String: %s", mfgString);
 }
+#endif
 
 static void printPacketBuffers(void)
 {
@@ -226,6 +232,15 @@ void blackListCommand(sl_cli_command_arg_t *arguments)
 }
 #endif
 
+#if defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT && !defined EMBER_TEST
+// ZTT Firmware application version - displayed on LCD (for WSTK) and for "info" command.
+
+void sli_get_ztt_version_number_string(char *versionString)
+{
+  MEMCOPY(versionString, ZTT_FIRMWARE_APPLICATION_VERSION, strlen(ZTT_FIRMWARE_APPLICATION_VERSION));
+}
+#endif
+
 void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
@@ -234,8 +249,13 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
   EmberEUI64 myEui64;
   EmberNetworkParameters networkParams;
   uint8_t numPhyInterfaces;
-
+#if defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT && !defined EMBER_TEST
+  char versionString[10] = { 0 };
+  sli_get_ztt_version_number_string(versionString);
+  sl_zigbee_app_debug_println("Silicon Labs ZTT Firmware Application v%p", versionString);
+#else
   printMfgString();
+#endif
   sl_zigbee_core_debug_println("AppBuilder MFG Code: 0x%04X", EMBER_AF_MANUFACTURER_CODE);
   emberAfGetEui64(myEui64);
   emberAfGetNetworkParameters(&nodeTypeResult, &networkParams);
@@ -289,7 +309,9 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
   emberAfAppFlush();
   #endif // EZSP_HOST
 
+#if !defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
   sli_zigbee_af_cli_version_command();
+#endif
 
   sl_zigbee_core_debug_print("nodeType [");
   if (nodeTypeResult != 0xFF) {

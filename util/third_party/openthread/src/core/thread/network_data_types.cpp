@@ -33,7 +33,7 @@
 
 #include "network_data_types.hpp"
 
-#include "common/instance.hpp"
+#include "instance/instance.hpp"
 #include "thread/network_data_tlvs.hpp"
 
 namespace ot {
@@ -184,6 +184,11 @@ uint8_t ExternalRouteConfig::ConvertToTlvFlags(void) const
         flags |= HasRouteEntry::kNat64Flag;
     }
 
+    if (mAdvPio)
+    {
+        flags |= HasRouteEntry::kAdvPioFlag;
+    }
+
     flags |= (RoutePreferenceToValue(mPreference) << HasRouteEntry::kPreferenceOffset);
 
     return flags;
@@ -208,6 +213,7 @@ void ExternalRouteConfig::SetFrom(Instance            &aInstance,
 void ExternalRouteConfig::SetFromTlvFlags(uint8_t aFlags)
 {
     mNat64      = ((aFlags & HasRouteEntry::kNat64Flag) != 0);
+    mAdvPio     = ((aFlags & HasRouteEntry::kAdvPioFlag) != 0);
     mPreference = RoutePreferenceFromValue(aFlags >> HasRouteEntry::kPreferenceOffset);
 }
 

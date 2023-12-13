@@ -239,4 +239,4 @@ typedef struct {
 /** @} End of group EFR32FG23_MPAHBRAM */
 /** @} End of group Parts */
 
-#endif /* EFR32FG23_MPAHBRAM_H */
+#endif // EFR32FG23_MPAHBRAM_H

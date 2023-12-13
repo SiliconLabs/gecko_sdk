@@ -252,4 +252,4 @@ typedef struct {
 /** @} End of group BGM21_SEMAILBOX_SE */
 /** @} End of group Parts */
 
-#endif /* BGM21_SEMAILBOX_H */
+#endif // BGM21_SEMAILBOX_H

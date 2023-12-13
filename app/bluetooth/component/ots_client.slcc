@@ -9,7 +9,6 @@ quality: evaluation
 root_path:  app/bluetooth/common/ots
 tag:
   - Low-Code
-
 source:
   - path: src/sl_bt_ots_client.c
   - path: src/sl_bt_ots_common.c
@@ -57,3 +56,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: sl_bt_ots_client.h
       handler: sli_bt_ots_client_sleep_on_isr_exit
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ots-client

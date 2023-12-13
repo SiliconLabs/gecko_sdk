@@ -5,15 +5,15 @@ quality: production
 id: zigbee_manufacturing_library_ota
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_manufacturing_library_ota"
+  - name: zigbee_manufacturing_library_ota
 requires:
-   - name: "zigbee_manufacturing_library_cli"
+  - name: zigbee_manufacturing_library_cli
 source:
   - path: protocol/zigbee/app/framework/plugin-soc/manufacturing-library-ota/manufacturing-library-ota.c
 include:
   - path: protocol/zigbee/app/framework/plugin-soc/manufacturing-library-ota
     file_list:
-      - path: manufacturing-library-ota-plugin.h  
+      - path: manufacturing-library-ota-plugin.h
 template_contribution:
   - name: component_catalog
     value: zigbee_manufacturing_library_ota

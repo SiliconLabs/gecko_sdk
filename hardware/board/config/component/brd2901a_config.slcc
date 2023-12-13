@@ -36,14 +36,14 @@
     path: brd2901a/sl_cpc_drv_secondary_spi_usart_mikroe_config.h
   - override:
       component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_secondary_uart_eusart_config
+      file_id: cpc_drv_uart_eusart_config
       instance: vcom
-    path: brd2901a/sl_cpc_drv_secondary_uart_eusart_vcom_config.h
+    path: brd2901a/sl_cpc_drv_uart_eusart_vcom_config.h
   - override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: vcom
-    path: brd2901a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
+    path: brd2901a/sl_cpc_drv_uart_usart_vcom_config.h
   - override:
       component: i2cspm
       file_id: i2cspm_config

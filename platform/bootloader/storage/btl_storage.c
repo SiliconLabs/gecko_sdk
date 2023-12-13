@@ -35,6 +35,11 @@ MISRAC_DISABLE
 MISRAC_ENABLE
 #endif
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 // --------------------------------
 // Prototypes
 
@@ -215,3 +220,6 @@ static int32_t installImageFromSlot(int32_t slotId)
 
   return BOOTLOADER_OK;
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

@@ -21,6 +21,7 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             member_data=[
                 ['MODE1', 0, 'RX Mode 1'],
                 ['MODE2', 1, 'RX Mode 2'],
+                ['MODE3', 2, 'RX Mode 3']
             ])
         model.vars.synth_rx_mode_actual.var_enum = model.vars.synth_rx_mode.var_enum
 
@@ -31,6 +32,7 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             member_data=[
                 ['NORMAL', 0, 'Normal Operation Mode (Recommended)'],
                 ['BLE_LR', 1, 'BLE Longrange Mode'],
+                ['FAST', 2, 'Fast Settling Mode'],
             ])
 
         # : Modify tx synth modes from Ocelot
@@ -57,6 +59,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
         if synth_settling_mode == model.vars.synth_settling_mode.var_enum.BLE_LR:
             model.vars.synth_rx_mode.value = model.vars.synth_rx_mode.var_enum.MODE1
+        elif synth_settling_mode == model.vars.synth_settling_mode.var_enum.FAST:
+            model.vars.synth_rx_mode.value = model.vars.synth_rx_mode.var_enum.MODE3
         else:
             model.vars.synth_rx_mode.value = model.vars.synth_rx_mode.var_enum.MODE2
 
@@ -67,7 +71,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         # Set FSK and OQPSK settings based on baudrate
         if modulation_type == model.vars.modulation_type.var_enum.FSK2 \
                 or modulation_type == model.vars.modulation_type.var_enum.FSK4 \
-                or modulation_type == model.vars.modulation_type.var_enum.OQPSK:
+                or modulation_type == model.vars.modulation_type.var_enum.OQPSK \
+                or modulation_type == model.vars.modulation_type.var_enum.MSK :
             if baudrate > 1250e3:
                 model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE4  # 3 MHz
             elif baudrate > 1000e3:
@@ -81,7 +86,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE4  # 3 MHz
         elif modulation_type == model.vars.modulation_type.var_enum.BPSK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE3  # 2.5 MHz
-        elif modulation_type == model.vars.modulation_type.var_enum.OOK:
+        elif modulation_type == model.vars.modulation_type.var_enum.OOK \
+                or modulation_type == model.vars.modulation_type.var_enum.ASK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE1  # 1000 kHz
 
     # overwrite this function from Ocelot to make VCODIV the default clock for ADC
@@ -131,31 +137,33 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         # BLK_SYNTH_RX_LP_BW_250KHZ.csv (NORMAL mode)
 
         rx_mode_settings = {
-            'SYNTH.LPFCTRL2RX.CASELRX':         [1,   1],
-            'SYNTH.LPFCTRL2RX.CAVALRX':         [22,  16],
-            'SYNTH.LPFCTRL2RX.CZSELRX':         [1,   1],
-            'SYNTH.LPFCTRL2RX.CZVALRX':         [254, 229],
-            'SYNTH.LPFCTRL2RX.CFBSELRX':        [0,   0],
-            'SYNTH.LPFCTRL2RX.LPFGNDSWENRX':    [0,   0],
-            'SYNTH.LPFCTRL2RX.MODESELRX':       [0,   0],
-            'SYNTH.LPFCTRL1RX.OP1BWRX':         [0,   0],
-            'SYNTH.LPFCTRL1RX.OP1COMPRX':       [7,   7],
-            'SYNTH.LPFCTRL1RX.RFBVALRX':        [0,   0],
-            'SYNTH.LPFCTRL1RX.RPVALRX':         [7,   7],
-            'SYNTH.LPFCTRL1RX.RZVALRX':         [12,  13],
-            'SYNTH.LPFCTRL2RX.LPFSWENRX':       [1,   1],
-            'SYNTH.LPFCTRL2RX.LPFINCAPRX':      [2,   2],
-            'SYNTH.DSMCTRLRX.MASHORDERRX':      [1,   1],
-            'SYNTH.DSMCTRLRX.LSBFORCERX':       [1,   1],
-            'SYNTH.DSMCTRLRX.DSMMODERX':        [1,   1],
-            'SYNTH.DSMCTRLRX.DITHERDACRX':      [0,   0],
-            'SYNTH.DSMCTRLRX.DITHERDSMOUTPUTRX':[0,   0],
-            'SYNTH.DSMCTRLRX.DITHERDSMINPUTRX': [0,   0],
-            'RAC.SYMMDCTRL.SYMMDMODERX':        [4,   4],
-            'RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX': [1,   1],
-            'RAC.SYEN.SYCHPLPENRX':             [1,   1],
-            'RAC.SYTRIM0.SYCHPREPLICACURRADJ':  [1,   1],
-            'RAC.SYTRIM0.SYCHPSRCENRX':         [0,   0]
+            'SYNTH.LPFCTRL2RX.CASELRX':         [1,   1,   1],
+            'SYNTH.LPFCTRL2RX.CAVALRX':         [22,  16,  8],
+            'SYNTH.LPFCTRL2RX.CZSELRX':         [1,   1,   1],
+            'SYNTH.LPFCTRL2RX.CZVALRX':         [254, 229, 70],
+            'SYNTH.LPFCTRL2RX.CFBSELRX':        [0,   0,   0],
+            'SYNTH.LPFCTRL2RX.LPFGNDSWENRX':    [0,   0,   0],
+            'SYNTH.LPFCTRL2RX.MODESELRX':       [0,   0,   0],
+            'SYNTH.LPFCTRL1RX.OP1BWRX':         [0,   0,   5],
+            'SYNTH.LPFCTRL1RX.OP1COMPRX':       [7,   7,   13],
+            'SYNTH.LPFCTRL1RX.RFBVALRX':        [0,   0,   0],
+            'SYNTH.LPFCTRL1RX.RPVALRX':         [7,   7,   0],
+            'SYNTH.LPFCTRL1RX.RZVALRX':         [12,  13,  3],
+            'SYNTH.LPFCTRL2RX.LPFSWENRX':       [1,   1,   1],
+            'SYNTH.LPFCTRL2RX.LPFINCAPRX':      [2,   2,   2],
+            'SYNTH.DSMCTRLRX.MASHORDERRX':      [1,   1,   0],
+            'SYNTH.DSMCTRLRX.LSBFORCERX':       [1,   1,   0],
+            'SYNTH.DSMCTRLRX.DSMMODERX':        [1,   1,   0],
+            'SYNTH.DSMCTRLRX.DITHERDACRX':      [0,   0,   3],
+            'SYNTH.DSMCTRLRX.DITHERDSMOUTPUTRX':[0,   0,   7],
+            'SYNTH.DSMCTRLRX.DITHERDSMINPUTRX': [0,   0,   1],
+            'RAC.SYMMDCTRL.SYMMDMODERX':        [4,   4,   2],
+            'RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX': [1,   1,   1],
+            'RAC.SYEN.SYCHPLPENRX':             [1,   1,   0],
+            'RAC.SYTRIM0.SYCHPREPLICACURRADJ':  [1,   1,   1],
+            'RAC.SYTRIM0.SYCHPSRCENRX':         [0,   0,   1],
+            'SYNTH.DSMCTRLRX.DEMMODERX':        [0,   0,   1],
+            'RAC.SYTRIM0.SYCHPLEVPSRCRX':       [0,   0,   7]
         }
 
         self._reg_write(model.vars.SYNTH_LPFCTRL2RX_CASELRX,          rx_mode_settings['SYNTH.LPFCTRL2RX.CASELRX'][ind] )
@@ -186,6 +194,11 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         self._reg_write(model.vars.RAC_SYEN_SYCHPLPENRX,              rx_mode_settings['RAC.SYEN.SYCHPLPENRX'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ,   rx_mode_settings['RAC.SYTRIM0.SYCHPREPLICACURRADJ'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPSRCENRX,          rx_mode_settings['RAC.SYTRIM0.SYCHPSRCENRX'][ind])
+
+        # : Following registers are added due to BW 1.5 MHz fast mode setting
+        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1862
+        self._reg_write(model.vars.SYNTH_DSMCTRLRX_DEMMODERX,         rx_mode_settings['SYNTH.DSMCTRLRX.DEMMODERX'][ind])
+        self._reg_write(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCRX,        rx_mode_settings['RAC.SYTRIM0.SYCHPLEVPSRCRX'][ind])
 
     def calc_tx_mode_reg(self, model):
 
@@ -342,14 +355,15 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
     def calc_clkmult_div_reg(self, model):
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
-        ifadc_halfrate = model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value
+        adc_mode = model.vars.adc_rate_mode.value
 
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
-            if ifadc_halfrate == 0:
-                # adc_full_speed from dpll_utils.py (xo * 8); 8 = 48 / (3 * 2)
+            if adc_mode == model.vars.adc_rate_mode.var_enum.FULLRATE:
+                # adc_full_speed from dpll_utils.py (xo * 8); 8 = 16 / (2 * 2)
+                # DCO frequency lowered to avoid issue at Hot
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, 1)
-                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 48)
-                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 3)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 32)
+                self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 2)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, 1)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, 1)
             else:

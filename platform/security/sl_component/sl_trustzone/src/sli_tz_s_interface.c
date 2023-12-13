@@ -156,7 +156,8 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
     return ECODE_NVM3_ERR_PARAMETER;
   }
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id,
+                                  ECODE_NVM3_ERR_PARAMETER);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_NVM3_MAX_SID) {
@@ -167,7 +168,8 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
   nvm3_Init_t init_copy = { 0 };
   if (NVM3_FUNCTION_HAS_INIT_STRUCT_PARAM(function_id)) {
     // The init struct is passed in in_vec[1] for all functions using it.
-    SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1], nvm3_Init_t);
+    SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1], nvm3_Init_t,
+                                    ECODE_NVM3_ERR_PARAMETER);
 
     // Copy the nvm3_Init_t structure into secure RAM in order to make sure that
     // the pointers we're verifying are not modified after we have performed our
@@ -188,7 +190,8 @@ int32_t sli_tz_s_interface_dispatch_nvm3(sli_tz_invec in_vec[],
     // The handle struct is passed in in_vec[1] for all functions using it
     // (with the exception of sli_tz_nvm3_open() since it's used as an output
     // there). We don't reach here for that function, though.
-    SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1], nvm3_Handle_t);
+    SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1], nvm3_Handle_t,
+                                    ECODE_NVM3_ERR_PARAMETER);
 
     // We don't need to check the values contained in the handle in case it is
     // the default instance (since that lives in secure RAM which we know the
@@ -247,7 +250,8 @@ int32_t sli_tz_s_interface_dispatch_its(psa_invec in_vec[],
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id,
+                                  PSA_ERROR_INVALID_ARGUMENT);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_ITS_MAX_SID) {
@@ -278,7 +282,8 @@ int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id,
+                                  SL_STATUS_INVALID_PARAMETER);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_SE_MANAGER_MAX_SID) {
@@ -287,7 +292,8 @@ int32_t sli_tz_s_interface_dispatch_se_manager(sli_tz_invec in_vec[],
 
   // The context struct is passed in in_vec[1] for all functions.
   SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[1],
-                                  sl_se_command_context_t);
+                                  sl_se_command_context_t,
+                                  SL_STATUS_INVALID_PARAMETER);
 
   // Operate on a fresh sl_se_command_context_t structure in secure RAM in order
   // to make sure that the pointers we're installing into it are not modified by
@@ -319,7 +325,8 @@ int32_t sli_tz_s_interface_dispatch_attestation(psa_invec in_vec[],
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id);
+  SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec_copy.in_vec[0], sli_tz_fn_id,
+                                  PSA_ERROR_INVALID_ARGUMENT);
 
   sli_tz_fn_id function_id = *((sli_tz_fn_id *)iovec_copy.in_vec[0].base);
   if (function_id >= SLI_TZ_SERVICE_ATTESTATION_MAX_SID) {

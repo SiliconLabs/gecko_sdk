@@ -3,7 +3,7 @@
     "name": "selectLimit",
     "arguments": {
       "id": "ProfilSelector",
-      "enabled": ["Sidewalk"],
+      "enabled": ["sidewalk"]
     }
   }
 ]

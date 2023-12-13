@@ -58,8 +58,6 @@ int main(void)
   while (1) {
     // Do not remove this call: Silicon Labs components process action routine
     // must be called from the super loop.
-    app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
-
     sl_system_process_action();
 
     // Application process.

@@ -628,4 +628,4 @@ typedef struct {
 /** @} End of group EFR32MR21_CMU */
 /** @} End of group Parts */
 
-#endif /* EFR32MR21_CMU_H */
+#endif // EFR32MR21_CMU_H

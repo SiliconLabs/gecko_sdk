@@ -34,15 +34,16 @@ typedef struct {
   uint8_t uc_dwell_interval_ms;
   uint32_t bc_interval_ms;
   uint8_t bc_dwell_interval_ms;
-  uint8_t gtk[4][16];
+  uint8_t gtks[4][16];
+  uint8_t lgtks[3][16];
   uint8_t gtk_set;
-  uint8_t gak[4][16];
-  uint8_t lfn_gak[3][16];
+  uint8_t gaks[4][16];
+  uint8_t lgaks[3][16];
   uint8_t state;
-  uint8_t channel_spacing;
+  uint16_t channel_spacing; // channel spacing in kHz
   uint16_t number_of_channels;
-  uint32_t ch0_frequency;
-  char allowed_channels[APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1];
+  uint32_t ch0_frequency; // Channel 0 center frequency in kHz
+  char allowed_channels[APP_UTIL_PRINTABLE_DATA_MAX_LENGTH + 1];
   uint8_t trace_filter[SL_WISUN_FILTER_BITFIELD_SIZE];
   uint8_t regulation;
   uint8_t chan_plan_id;
@@ -55,6 +56,9 @@ typedef struct {
   uint16_t protocol_id;
   uint16_t channel_id;
   uint8_t lfn_profile;
+  uint8_t crc_type;
+  uint8_t preamble_length;
+  uint8_t stf_length;
 } app_settings_wisun_t;
 
 typedef struct {
@@ -76,6 +80,10 @@ typedef struct {
 extern app_settings_wisun_t app_settings_wisun;
 extern app_settings_ping_t app_settings_ping;
 extern app_settings_app_t app_settings_app;
+
+#if SLI_WISUN_DISABLE_SECURITY
+extern uint32_t app_security_state;
+#endif
 
 sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask);
 

@@ -1,9 +1,9 @@
 id: zigbee_ble_event_handler
 package: Zigbee
-label: "BLE Event handler sample implementation"
-category: "Zigbee|Zigbee 3.0"
-quality: "production"
-description: "Sample Bluetooth LE (BLE) Event handler code for Zigbee-BLE DMP examples."
+label: BLE Event handler sample implementation
+category: Zigbee|Zigbee 3.0
+quality: production
+description: Sample Bluetooth LE (BLE) Event handler code for Zigbee-BLE DMP examples.
 
 provides:
   - name: zigbee_ble_event_handler
@@ -12,18 +12,18 @@ requires:
   - name: bluetooth_stack
 
 source:
-  - path: "protocol/zigbee/app/framework/scenarios/multiprotocol/common/sl_ble_event_handler.c"
+  - path: protocol/zigbee/app/framework/scenarios/multiprotocol/common/sl_ble_event_handler.c
     project:
       transfer_ownership: true
 
 include:
-  - path: "protocol/zigbee/app/framework/scenarios/multiprotocol/common/"
+  - path: protocol/zigbee/app/framework/scenarios/multiprotocol/common/
     file_list:
-      - path: "sl_ble_event_handler.h"
+      - path: sl_ble_event_handler.h
 
-  - path: "protocol/zigbee/app/framework/scenarios/multiprotocol/common/"
+  - path: protocol/zigbee/app/framework/scenarios/multiprotocol/common/
     file_list:
-      - path: "sl_dmp_ui_stub.h"
+      - path: sl_dmp_ui_stub.h
 
 template_contribution:
   - name: component_catalog

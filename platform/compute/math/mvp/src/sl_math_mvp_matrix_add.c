@@ -89,19 +89,16 @@ sl_status_t sl_math_mvp_matrix_add_f16(const sl_math_matrix_f16_t *input_a,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  sli_math_mvp_matrix_add_f16(input_a->data, input_b->data, output->data,
-                              rows, cols, data_type);
-  sli_mvp_cmd_wait_for_completion();
-
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return sli_math_mvp_matrix_add_f16(input_a->data, input_b->data, output->data,
+                                     rows, cols, data_type);
 }
 
-void sli_math_mvp_matrix_add_f16(const float16_t *input_a,
-                                 const float16_t *input_b,
-                                 float16_t *output,
-                                 size_t num_rows,
-                                 size_t num_cols,
-                                 sli_mvp_datatype_t data_type)
+sl_status_t sli_math_mvp_matrix_add_f16(const float16_t *input_a,
+                                        const float16_t *input_b,
+                                        float16_t *output,
+                                        size_t num_rows,
+                                        size_t num_cols,
+                                        sli_mvp_datatype_t data_type)
 {
   uint32_t rows, cols;
 
@@ -142,7 +139,9 @@ void sli_math_mvp_matrix_add_f16(const float16_t *input_a,
     sli_mvp_pb_postloop_incr_dim(p, vector_z, SLI_MVP_INCRDIM_HEIGHT);
   }
   sli_mvp_pb_end_loop(p);
-  sli_mvp_pb_execute_program(p);
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
 #else
 
   sli_mvp_cmd_enable();
@@ -182,4 +181,6 @@ void sli_math_mvp_matrix_add_f16(const float16_t *input_a,
   // Start program.
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
 #endif
+
+  return sli_mvp_cmd_wait_for_completion();
 }

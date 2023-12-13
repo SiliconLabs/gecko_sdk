@@ -36,6 +36,7 @@
 #include "sl_status.h"
 #include "sl_wisun_connection_params_api.h"
 #include "sl_wisun_lfn_params_api.h"
+#include "socket/socket.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,52 +102,6 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt);
  */
 
 /**************************************************************************//**
- * Set the size of the Wi-SUN network.
- *
- * @param[in] size Size of the network
- *   - #SL_WISUN_NETWORK_SIZE_SMALL: less than 100 nodes
- *   - #SL_WISUN_NETWORK_SIZE_MEDIUM: 100 to 800 nodes
- *   - #SL_WISUN_NETWORK_SIZE_LARGE: 800 and above.
- *   - #SL_WISUN_NETWORK_SIZE_TEST: a few nodes
- *   - #SL_WISUN_NETWORK_SIZE_CERTIFICATION: Wi-SUN FAN certification mode
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function sets the size of the network. The value adjusts
- * internal behavior, such as timing parameters, to optimize device behavior
- * in regard to the network size. The device will function with any setting but
- * may exhibit non-optimal behavior. Setting the size too large may cause slow
- * connection speeds and increased latency. Conversely, a value too small may
- * cause increased network traffic. When configuring the stack for Wi-SUN FAN
- * certification, ::SL_WISUN_NETWORK_SIZE_CERTIFICATION setting should be used.
- * ::SL_WISUN_NETWORK_SIZE_TEST is intended for development time use, providing
- * faster initial connectivity over network performance.
- *
- * @deprecated This function will be removed in the future versions of the
- * Wi-SUN stack. See #sl_wisun_set_connection_parameters() for a replacement.
- *****************************************************************************/
-sl_status_t sl_wisun_set_network_size(sl_wisun_network_size_t size) SL_DEPRECATED_API_SDK_4_2;
-
-/**************************************************************************//**
- * Initiate a connection to a Wi-SUN network.
- *
- * @param[in] name Name of the Wi-SUN network as a zero-terminated string
- * @param[in] reg_domain Regulatory domain of the Wi-SUN network
- * @param[in] op_class Operating class of the Wi-SUN network
- * @param[in] op_mode Operating mode of the Wi-SUN network
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function initiates connection to a Wi-SUN network. Completion of the
- * request is indicated with a #SL_WISUN_MSG_CONNECTED_IND_ID event.
- *
- * @deprecated This function will be removed in the future versions of the
- * Wi-SUN stack. See sl_wisun_join() for a replacement.
- *****************************************************************************/
-sl_status_t sl_wisun_connect(const uint8_t *name,
-                             sl_wisun_regulatory_domain_t reg_domain,
-                             sl_wisun_operating_class_t op_class,
-                             sl_wisun_operating_mode_t op_mode) SL_DEPRECATED_API_SDK_4_2;
-
-/**************************************************************************//**
  * Initiate a connection to a Wi-SUN network.
  *
  * @param[in] name Name of the Wi-SUN network as a zero-terminated string
@@ -171,168 +126,7 @@ sl_status_t sl_wisun_join(const uint8_t *name, sl_wisun_phy_config_t *phy_config
  * @return SL_STATUS_OK if successful, an error code otherwise.
  *****************************************************************************/
 sl_status_t sl_wisun_get_ip_address(sl_wisun_ip_address_type_t address_type,
-                                    sl_wisun_ip_address_t *address);
-
-/**************************************************************************//**
- * Open a socket.
- *
- * @param[in] protocol Protocol type of the socket
- * @param[out] socket_id ID of the opened socket
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function opens a socket. Up to 10 sockets may be open at any
- * given time, including those opened implicitly via
- * sl_wisun_accept_on_socket().
- *****************************************************************************/
-sl_status_t sl_wisun_open_socket(sl_wisun_socket_protocol_t protocol,
-                                 sl_wisun_socket_id_t *socket_id);
-
-/**************************************************************************//**
- * Close a socket.
- *
- * @param[in] socket_id ID of the socket
- * @return SL_STATUS_OK if successful, an error code otherwise
- *****************************************************************************/
-sl_status_t sl_wisun_close_socket(sl_wisun_socket_id_t socket_id);
-
-/**************************************************************************//**
- * Write data to an unconnected socket.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] remote_address IP address of the remote peer
- * @param[in] remote_port Port number of the remote peer
- * @param[in] data_length Amount of data to write
- * @param[in] data Pointer to the data
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function initiates a data transmission to a remote peer and can only
- * be used on an unconnected UDP or ICMP socket. Completion of the transmission
- * is indicated with a #SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID event. The function
- * takes a copy of the data, so the caller may free the resource when the function
- * returns.
- *****************************************************************************/
-sl_status_t sl_wisun_sendto_on_socket(sl_wisun_socket_id_t socket_id,
-                                      const sl_wisun_ip_address_t *remote_address,
-                                      uint16_t remote_port,
-                                      uint16_t data_length,
-                                      const uint8_t *data);
-
-/**************************************************************************//**
- * Set a TCP socket to listening state.
- *
- * @param[in] socket_id ID of the socket
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function sets a TCP socket to listening state, allowing it to act as
- * a server socket, i.e., to receive connection requests from clients.
- * Connection requests are indicated with
- * #SL_WISUN_MSG_SOCKET_CONNECTION_AVAILABLE_IND_ID events and accepted using
- * sl_wisun_accept_on_socket(). This function can only be used on an unconnected
- * TCP socket.
- *****************************************************************************/
-sl_status_t sl_wisun_listen_on_socket(sl_wisun_socket_id_t socket_id);
-
-/**************************************************************************//**
- * Accept a pending connection request on a TCP socket.
- *
- * @param[in] socket_id ID of the socket on listening state
- * @param[out] remote_socket_id ID of the new connected socket
- * @param[out] remote_address IP address of the remote peer
- * @param[out] remote_port Port number of the remote peer
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function accepts a pending connection request from a remote peer and
- * creates a new connected TCP socket for the connection. To decline a
- * connection request, the request must be accepted and then closed using
- * sl_wisun_close_socket(). The function can only be used on a TCP socket in
- * listening state.
- *****************************************************************************/
-sl_status_t sl_wisun_accept_on_socket(sl_wisun_socket_id_t socket_id,
-                                      sl_wisun_socket_id_t *remote_socket_id,
-                                      sl_wisun_ip_address_t *remote_address,
-                                      uint16_t *remote_port);
-
-/**************************************************************************//**
- * Initiate a connection from a socket to a remote peer socket.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] remote_address IP address of the remote peer
- * @param[in] remote_port Port number of the remote peer
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function initiates a connection from a local socket to to a remote peer
- * socket. The result of the connection is indicated with a
- * #SL_WISUN_MSG_SOCKET_CONNECTED_IND_ID event. Connecting a socket is
- * mandatory for TCP client sockets but may be also used on other types of
- * sockets. A connected socket can only receive and transmit data with the
- * designated peer. This function can only be used on an unconnected TCP or
- * UDP socket.
- *****************************************************************************/
-sl_status_t sl_wisun_connect_socket(sl_wisun_socket_id_t socket_id,
-                                    const sl_wisun_ip_address_t *remote_address,
-                                    uint16_t remote_port);
-
-/**************************************************************************//**
- * Bind a socket to a specific local address and/or a port number.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] local_address Local IP address to use on the socket. NULL if not bound.
- * @param[in] local_port Local port number to use on the socket. Zero if not bound.
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function binds the local address and/or the port of a socket. When the
- * local address is bound, the socket will only accept traffic sent to the
- * specified address and the transmitted packets will use the address as the
- * source address. If not bound, the socket will accept data sent to any valid
- * address of the device. The source address is selected by the stack.
- * Binding the local port number sets the port number for received and
- * transmitted packets. If not bound, the stack will select a port number
- * automatically. This function can only be used on an unconnected TCP or UDP
- * socket. Once bound to a specific address and/or port, the value cannot
- * be changed.
- *****************************************************************************/
-sl_status_t sl_wisun_bind_socket(sl_wisun_socket_id_t socket_id,
-                                 const sl_wisun_ip_address_t *local_address,
-                                 uint16_t local_port);
-
-/**************************************************************************//**
- * Write data to a connected socket.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] data_length Amount of data to write
- * @param[in] data Pointer to the data
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function initiates transmission of data to a connected remote peer and
- * can only be used on a connected socket. Completion of the transmission is
- * indicated with a #SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID event. The function
- * takes a copy of the data, so the caller may free the resource when the function
- * returns.
- *****************************************************************************/
-sl_status_t sl_wisun_send_on_socket(sl_wisun_socket_id_t socket_id,
-                                    uint16_t data_length,
-                                    const uint8_t *data);
-
-/**************************************************************************//**
- * Read data from a socket.
- *
- * @param[in] socket_id ID of the socket
- * @param[out] remote_address IP address of the remote peer
- * @param[out] remote_port Port number of the remote peer
- * @param[in,out] data_length Amount of data to read on input, amount of data read on output
- * @param[in] data Pointer to where the read data is stored
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function reads buffered data from a socket. When reading data from a
- * UDP or ICMP socket, the entire packet must be read. Any data left unread is
- * discarded after this call. TCP sockets allow reading only a part of the
- * buffered data.
- *****************************************************************************/
-sl_status_t sl_wisun_receive_on_socket(sl_wisun_socket_id_t socket_id,
-                                       sl_wisun_ip_address_t *remote_address,
-                                       uint16_t *remote_port,
-                                       uint16_t *data_length,
-                                       uint8_t *data);
+                                    in6_addr_t *address);
 
 /**************************************************************************//**
  * Disconnect from the Wi-SUN network.
@@ -401,6 +195,7 @@ sl_status_t sl_wisun_set_device_private_key(uint16_t key_options,
  *   - #SL_WISUN_STATISTICS_TYPE_WISUN: Wi-SUN statistics
  *   - #SL_WISUN_STATISTICS_TYPE_NETWORK: 6LoWPAN/IP stack statistics
  *   - #SL_WISUN_STATISTICS_TYPE_REGULATION: Regional regulation statistics
+ *   - #SL_WISUN_STATISTICS_TYPE_HEAP: Heap usage statistics
  * @param[out] statistics Set of statistics read
  * @return SL_STATUS_OK if successful, an error code otherwise.
  *
@@ -410,24 +205,6 @@ sl_status_t sl_wisun_set_device_private_key(uint16_t key_options,
  *****************************************************************************/
 sl_status_t sl_wisun_get_statistics(sl_wisun_statistics_type_t statistics_type,
                                     sl_wisun_statistics_t *statistics);
-
-/**************************************************************************//**
- * Set a socket option.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] option Socket option to set
- *   - #SL_WISUN_SOCKET_OPTION_EVENT_MODE: Event mode
- *   - #SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP: Multicast group
- *   - #SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT: Tx buffer limit
- *   - #SL_WISUN_SOCKET_OPTION_EDFE_MODE: Enable/disable EDFE mode
- *   - #SL_WISUN_SOCKET_OPTION_UNICAST_HOP_LIMIT: Socket unicast hop limit
- *   - #SL_WISUN_SOCKET_OPTION_MULTICAST_HOP_LIMIT: Socket multicast hop limit
- * @param[in] option_data Socket option specific data
- * @return SL_STATUS_OK if successful, an error code otherwise
- *****************************************************************************/
-sl_status_t sl_wisun_set_socket_option(sl_wisun_socket_id_t socket_id,
-                                       sl_wisun_socket_option_t option,
-                                       const sl_wisun_socket_option_data_t *option_data);
 
 /**************************************************************************//**
  * Set the maximum TX power.
@@ -440,25 +217,6 @@ sl_status_t sl_wisun_set_socket_option(sl_wisun_socket_id_t socket_id,
  * will never exceed the given value.
  *****************************************************************************/
 sl_status_t sl_wisun_set_tx_power(int8_t tx_power);
-
-/**************************************************************************//**
- * Set a channel plan.
- *
- * @param[in] ch0_frequency Frequency of the first channel in kHz
- * @param[in] number_of_channels Number of channels
- * @param[in] channel_spacing Spacing between the channels
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function sets an application-specific channel plan for use in the
- * following connections. By default, the channel plan is set indirectly based
- * on the regulatory domain and the operating class given in sl_wisun_connect().
- *
- * @deprecated This function will be removed in the future versions of the
- * Wi-SUN stack. See sl_wisun_join() for a replacement.
- *****************************************************************************/
-sl_status_t sl_wisun_set_channel_plan(uint32_t ch0_frequency,
-                                      uint16_t number_of_channels,
-                                      sl_wisun_channel_spacing_t channel_spacing) SL_DEPRECATED_API_SDK_4_2;
 
 /**************************************************************************//**
  * Set a mask of operating channels.
@@ -481,10 +239,16 @@ sl_status_t sl_wisun_set_allowed_channel_mask(const sl_wisun_channel_mask_t *cha
 /**************************************************************************//**
  * Set a mask of operating channels.
  *
- * This macro provides backwards compatibility to an older version of a renamed
- * function.
+ * @param[in] channel_mask Mask of operating channels
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * This function sets a mask of channels the device is allowed to operate in
+ * for unicast frequency hopping. By default, all channels in the channel plan
+ * are allowed. The mask can only be used to further restrict the channels.
+ * Channels outside the channel plan or channels internally excluded are
+ * ignored. This mask will be used in the following connections.
  *****************************************************************************/
-#define sl_wisun_set_channel_mask sl_wisun_set_allowed_channel_mask
+sl_status_t sl_wisun_set_channel_mask(const sl_wisun_channel_mask_t *channel_mask);
 
 /**************************************************************************//**
  * Add a MAC address to the list of allowed addresses.
@@ -521,21 +285,6 @@ sl_status_t sl_wisun_allow_mac_address(const sl_wisun_mac_address_t *address);
  * children, and neighbors.
  *****************************************************************************/
 sl_status_t sl_wisun_deny_mac_address(const sl_wisun_mac_address_t *address);
-
-/**************************************************************************//**
- * Get a socket option.
- *
- * @param[in] socket_id ID of the socket
- * @param[in] option Socket option to get
- *   - #SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT: Send buffer limit
- * @param[out] option_data Socket option specific data
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function retrieves the value of a socket option.
- *****************************************************************************/
-sl_status_t sl_wisun_get_socket_option(sl_wisun_socket_id_t socket_id,
-                                       sl_wisun_socket_option_t option,
-                                       sl_wisun_socket_option_data_t *option_data);
 
 /**************************************************************************//**
  * Get the current join state.
@@ -763,8 +512,9 @@ sl_status_t sl_wisun_config_mode_switch(uint8_t mode,
  *                             non-configured neighbors.
  * @return SL_STATUS_OK if successful, an error code otherwise
  *****************************************************************************/
-#define sl_wisun_set_mode_switch(mode, phy_mode_id, neighbor_address) \
-                   sl_wisun_config_mode_switch(mode, phy_mode_id, neighbor_address, false)
+sl_status_t sl_wisun_set_mode_switch(uint8_t mode,
+                                     uint8_t phy_mode_id,
+                                     const sl_wisun_mac_address_t *neighbor_address);
 
 /**************************************************************************//**
  * Configure the FFN parameter set.
@@ -815,6 +565,20 @@ sl_status_t sl_wisun_get_pom_ie(uint8_t *phy_mode_id_count,
                                 uint8_t *is_mdr_command_capable);
 
 /**************************************************************************//**
+ * Get the Wi-SUN stack version.
+ *
+ * @param[out] major Wi-SUN stack version major
+ * @param[out] minor Wi-SUN stack version minor
+ * @param[out] patch Wi-SUN stack version patch
+ * @param[out] build Build number, set to 0 in public versions
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_get_stack_version(uint8_t *major,
+                                       uint8_t *minor,
+                                       uint8_t *patch,
+                                       uint16_t *build);
+
+/**************************************************************************//**
  * Configure the LFN parameter set.
  *
  * @param[in] params Parameter set to use
@@ -847,10 +611,58 @@ sl_status_t sl_wisun_set_lfn_support(uint8_t lfn_limit);
  *   - **false**: PTI is disabled
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
- * This functions sets Packet Trace Interface (PTI) state. PTI is enabled
+ * This function sets Packet Trace Interface (PTI) state. PTI is enabled
  * by default.
  *****************************************************************************/
 sl_status_t sl_wisun_set_pti_state(bool pti_state);
+
+/**************************************************************************//**
+ * Trigger the transmission of a frame (FAN Discovery, RPL).
+ *
+ * @param[in] frame_type Type of frame
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
+ * No frame is transmitted if the associated Trickle timer is not started, if
+ * exists.
+ *****************************************************************************/
+sl_status_t sl_wisun_trigger_frame(sl_wisun_frame_type_t frame_type);
+
+/**************************************************************************//**
+ * Set the security state.
+ *
+ * @param[in] security_state Security state
+ *   - **0**: Security is disabled
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_set_security_state(uint32_t security_state);
+
+/**************************************************************************//**
+ * Get the Wi-SUN network information.
+ *
+ * @param[out] network_info Pointer to network information
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_get_network_info(sl_wisun_network_info_t *network_info);
+
+/**************************************************************************//**
+ * Get RPL information.
+ *
+ * @param[out] rpl_info Pointer to RPL information
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_get_rpl_info(sl_wisun_rpl_info_t *rpl_info);
+
+/**************************************************************************//**
+ * Get the mask of channels excluded from channel plan
+ *
+ * @param[in] type Type of channel mask
+ * @param[out] channel_mask Pointer to mask
+ * @param[out] channel_count Number of channels in mask
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_get_excluded_channel_mask(sl_wisun_channel_mask_type_t type,
+                                               sl_wisun_channel_mask_t *channel_mask,
+                                               uint8_t *channel_count);
 
 /** @} (end SL_WISUN_API) */
 

@@ -60,9 +60,9 @@ uint16_t halCommonCrc16(uint8_t newByte, uint16_t prevResult);
 uint32_t halCommonCrc32(uint8_t newByte, uint32_t prevResult);
 
 // Commonly used initial and expected final CRC32 values
-#define INITIAL_CRC             0xFFFFFFFFL
-#define CRC32_START             INITIAL_CRC
-#define CRC32_END               0xDEBB20E3L  // For CRC32 POLYNOMIAL run LSB-MSB
+#define INITIAL_CRC             0xFFFFFFFFL        ///< initial crc
+#define CRC32_START             INITIAL_CRC        ///< crc32 start
+#define CRC32_END               0xDEBB20E3L  ///< For CRC32 POLYNOMIAL run LSB-MSB
 
 /** @} (end addtogroup crc) */
 /** @} (end addtogroup legacyhal) */

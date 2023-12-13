@@ -3,7 +3,6 @@ label: Zigbee Direct Tunneling Functionality
 package: Zigbee
 category: Zigbee|Zigbee Direct ZDD
 quality: evaluation
-
 description: Zigbee Direct Tunneling functionality
 
 config_file:
@@ -22,9 +21,9 @@ requires:
 include:
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_tunneling/
     file_list:
-    - path: zigbee_direct_tunneling.h
+      - path: zigbee_direct_tunneling.h
 
-source:  
+source:
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_tunneling/zigbee_direct_tunneling.c
 
 template_contribution:

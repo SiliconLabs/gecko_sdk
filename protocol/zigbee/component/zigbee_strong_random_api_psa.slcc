@@ -6,11 +6,11 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-   - name: "zigbee_strong_random"
-   - name: "zigbee_strong_random_api_psa"
+  - name: zigbee_strong_random
+  - name: zigbee_strong_random_api_psa
 
 requires:
-   - name: "psa_crypto"
+  - name: psa_crypto
 
 source:
   - path: protocol/zigbee/stack/framework/strong-random-api.c

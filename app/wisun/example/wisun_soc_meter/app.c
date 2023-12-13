@@ -34,7 +34,7 @@
 #include <assert.h>
 #include <string.h>
 #include "sl_wisun_app_core_util.h"
-#include "socket.h"
+#include "socket/socket.h"
 #include "app.h"
 #include "sl_wisun_meter.h"
 
@@ -69,7 +69,7 @@ void app_task(void *args)
 
   while (1) {
     sl_wisun_meter_process();
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 

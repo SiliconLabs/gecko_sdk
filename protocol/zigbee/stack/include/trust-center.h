@@ -122,6 +122,19 @@ EmberStatus sli_zigbee_send_alternate_network_key_to_address(EmberNodeId targetS
   sli_zigbee_send_alternate_network_key_to_address((shortAddr), (longAddr), (key))
 #endif
 
+/**
+ * @brief Set the timeout value for transient device table in milliseconds
+ * @param timeout timeout value. Acceptable range 10000-65535
+ * @return
+ */
+sl_status_t sl_zigbee_set_transient_device_table_timeout_ms(uint16_t timeout);
+
+/**
+ * @brief Get the timeout value of transient device table in milliseconds
+ * @return an uint16_t value that indicates the timeout value
+ */
+uint16_t sl_zigbee_get_transient_device_table_timeout_ms(void);
+
 /** @brief Send the network key
  *  to the target device. The APS command will be encrypted using
  *  the device's current APS link key. The call fails if no

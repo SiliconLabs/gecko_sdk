@@ -531,4 +531,4 @@ typedef struct {
 /** @} End of group EFM32PG23_LETIMER */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_LETIMER_H */
+#endif // EFM32PG23_LETIMER_H

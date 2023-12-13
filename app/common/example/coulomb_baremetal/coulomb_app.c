@@ -154,6 +154,10 @@ static sl_status_t coulomb_calibrate(bool verbose)
        * Restore peak current to its original value. If using the EFP, that
        * means restore BK_IPK.
        */
+    } else if (calib_status == SL_COULOMB_COUNTER_CALIBRATION_DONE) {
+      /*
+       * Calibration completed.
+       */
     } else {
       calib_status = sl_coulomb_counter_calibrate_wait();
     }
@@ -185,7 +189,7 @@ void coulomb_app_get(void)
   sl_coulomb_counter_read(&mask);
   total_charge = sl_coulomb_counter_get_total_charge();
   printf("Coulombs consumed since last boot: \r\n");
-  printf("%f \r\n", total_charge);
+  printf("%f \r\n", (double)total_charge);
 }
 
 /***************************************************************************//**
@@ -258,7 +262,7 @@ void coulomb_app_get_total(void)
   err = nvm3_readData(NVM3_DEFAULT_HANDLE, key_total, buffer, len);
   if (ECODE_NVM3_OK == err) {
     float *value = (float *) buffer;
-    printf("Total coulombs consumed over device's lifetime: %f\r\n", value[0]);
+    printf("Total coulombs consumed over device's lifetime: %f\r\n", (double)value[0]);
   } else {
     printf("Error reading data\r\n");
   }
@@ -278,7 +282,7 @@ void coulomb_app_update_total(void)
   CORE_ENTER_CRITICAL();
 
   if (ECODE_NVM3_OK == update_total()) {
-    printf("Update total value to: %f\r\n", total_charge);
+    printf("Update total value to: %f\r\n", (double)total_charge);
   } else {
     printf("Error updating data\r\n");
   }

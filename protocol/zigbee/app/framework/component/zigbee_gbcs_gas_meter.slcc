@@ -5,20 +5,20 @@ quality: production
 id: zigbee_gbcs_gas_meter
 category: Zigbee|Great Britain Companion Specification
 provides:
-   - name: "zigbee_gbcs_gas_meter"
+  - name: zigbee_gbcs_gas_meter
 requires:
-   - name: "zigbee_key_establishment"
-   - name: "zigbee_tunneling_client"
-   - name: "zigbee_gbcs_compatibility"
-   - name: "zigbee_gbcs_device_log"
-   - name: "zigbee_gbz_message_controller"
+  - name: zigbee_key_establishment
+  - name: zigbee_tunneling_client
+  - name: zigbee_gbcs_compatibility
+  - name: zigbee_gbcs_device_log
+  - name: zigbee_gbz_message_controller
 config_file:
   - path: protocol/zigbee/app/framework/plugin/gbcs-gas-meter/config/gbcs-gas-meter-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/gbcs-gas-meter/gbcs-gas-meter.c
   - path: protocol/zigbee/app/framework/plugin/gbcs-gas-meter/gbcs-gas-meter-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/gbcs-gas-meter
     file_list:
@@ -28,10 +28,10 @@ template_contribution:
     value: zigbee_gbcs_gas_meter
   - name: cluster_service
     value:
-       cluster_id: "0x0702"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "sli_zigbee_af_gbcs_gas_meter_simple_metering_cluster_server_command_parse"
+      cluster_id: '0x0702'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: sli_zigbee_af_gbcs_gas_meter_simple_metering_cluster_server_command_parse
   - name: zigbee_af_callback
     value:
       callback_type: event_init

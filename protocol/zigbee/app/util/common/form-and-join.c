@@ -437,7 +437,7 @@ static EmberStatus startSecondInterface(void)
   const uint8_t page = emberAfGetPageFrom8bitEncodedChanPg(channelCache);
   const uint8_t channel = emberAfGetChannelFrom8bitEncodedChanPg(channelCache);
 
-  emberAfAppPrint("Starting 2nd interface on page %x, channel %x ",
+  emberAfAppPrint("Starting 2nd interface on page %d, channel %02d ",
                   page,
                   channel);
 

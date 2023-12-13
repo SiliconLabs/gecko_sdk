@@ -44,9 +44,8 @@ static SCommandClassSet_t m_CCSet;
 static void ZAF_FLiRS_StayAwake(void);
 static void portable_controller_stay_awake(void);
 
-static bool invoke_init(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
+static bool invoke_init(CC_handler_map_latest_t const * const p_cc_entry, __attribute__((unused)) zaf_cc_context_t context)
 {
-  UNUSED(context);
   if (NULL != p_cc_entry->init)
   {
     p_cc_entry->init();
@@ -152,9 +151,8 @@ void ZAF_Init(TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles)
   zaf_event_distributor_init();
 }
 
-static bool invoke_reset(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
+static bool invoke_reset(CC_handler_map_latest_t const * const p_cc_entry, __attribute__((unused)) zaf_cc_context_t context)
 {
-  UNUSED(context);
   if (NULL != p_cc_entry->reset)
   {
     p_cc_entry->reset();
@@ -184,7 +182,7 @@ static void portable_controller_stay_awake(void) {
   zpal_pm_stay_awake(ZAF_getPowerLock(), PM_STAY_AWAKE_DURATION_LEARN_MODE);
 }
 
-TaskHandle_t ZAF_getAppTaskHandle()
+TaskHandle_t ZAF_getAppTaskHandle(void)
 {
   ASSERT(m_AppTaskHandle);
   return m_AppTaskHandle;

@@ -182,6 +182,30 @@ template_contribution:
       help: "Connect to a Wi-SUN network using radio conf ids: w ji"
       shortcuts:
         - name: "ji"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_fsk"
+      handler: "app_join_custom_fsk"
+      help: "Connect to a Wi-SUN network using custom FSK PHY settings: w jcf"
+      shortcuts:
+        - name: "jcf"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_ofdm"
+      handler: "app_join_custom_ofdm"
+      help: "Connect to a Wi-SUN network using custom OFDM PHY settings: w jcof"
+      shortcuts:
+        - name: "jcof"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_oqpsk"
+      handler: "app_join_custom_oqpsk"
+      help: "Connect to a Wi-SUN network using custom OQPSK PHY settings: w jcoq"
+      shortcuts:
+        - name: "jcoq"
 
   - name: "cli_command"
     value:
@@ -204,7 +228,6 @@ template_contribution:
           help: "Remote address"
         - type: uint16opt
           help: "packet size in byte"
-
   - name: "cli_command"
     value:
       group: "wisun"
@@ -425,6 +448,17 @@ template_contribution:
           help: "neighbor MAC address (optional)"
     condition:
       - "cli"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "trigger"
+      handler: "app_trigger_frame"
+      help: "Trigger the transmission of a frame"
+      shortcuts:
+        - name: "tx"
+      argument:
+        - type: string
+          help: "frame type"
 
 # -------------------------------
   - name: "cli_group"

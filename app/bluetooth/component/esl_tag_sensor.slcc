@@ -19,14 +19,12 @@ quality: production
 root_path: app/bluetooth/common/esl_tag_sensor
 tag:
   - Custom-Code
-
 config_file:
   - path: config/esl_tag_sensor.xml
     file_id: esl_tag_sensor_characteristics
     directory: btconf
   - path: config/esl_tag_sensor_config.h
     file_id: esl_tag_sensor_config
-
 include:
   - path: ./inc
     file_list:
@@ -34,26 +32,23 @@ include:
   - path: ../../../../protocol/bluetooth/ble_mesh/include
     file_list:
       - path: sl_btmesh_device_properties.h  # to re-use Mesh Property IDs
-
 source:
   - path: src/esl_tag_sensor.c
-
 provides:
   - name: esl_tag_sensor
-
 requires:
   - name: esl_tag_core
-
 template_contribution:
   - name: bluetooth_on_event
     value:
       include: esl_tag_sensor.h
       function: esl_sensor_bt_on_event
     priority: -8998  # must be put before esl_core_bt_on_event!
-
 validation_library:
   - path: ../../../common/validation/autonumber_common.lua
     name: autonumber_common
-
 validation_helper:
-  - path: "config/validator.lua"
+  - path: config/validator.lua
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/esl-tag-sensor

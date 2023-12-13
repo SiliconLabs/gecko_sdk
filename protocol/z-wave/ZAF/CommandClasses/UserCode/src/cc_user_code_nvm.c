@@ -50,7 +50,7 @@ CC_UserCode_Read(uint8_t identifier, SUserCode *userCodeData)
 }
 
 void
-CC_UserCode_Migrate()
+CC_UserCode_Migrate(void)
 {
   #ifdef ZW_MIGRATION_TO_7_19
   uint8_t i;

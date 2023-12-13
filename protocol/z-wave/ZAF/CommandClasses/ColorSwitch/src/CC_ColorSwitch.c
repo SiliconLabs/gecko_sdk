@@ -34,7 +34,7 @@ static void CC_ColorSwitch_report_stx(zaf_tx_options_t *tx_options, void* pData)
  * Optional. Can be used as single cb function for all colors. Defined in the app.
  * Called when change takes place in driver and app needs to update LED status
  */
-ZW_WEAK void cc_color_switch_refresh_cb()
+ZW_WEAK void cc_color_switch_refresh_cb(void)
 {
 }
 
@@ -320,7 +320,7 @@ static s_colorComponent* findColorComponentByColorID(uint8_t colorId, uint8_t en
 }
 
 /**
- * 
+ *
  * Returns color component index in the array s_colorComponents given by actuator object
  * @param[in] pObj Pointer to actuator object
  * @return int16_t -1 if not found else the index in the array
@@ -350,9 +350,9 @@ static void CC_ColorSwitch_ColorChanged_cb(s_Actuator *pObj)
 {
   s_colorComponent *color;
   int16_t color_component_id;
-  
+
   color_component_id = findColorComponentIndexByObj(pObj);
-  
+
   color = &pColorComponents[color_component_id];
   // We ended up here so it must be that current value has changed. Inform the app about it.
   if(NULL != color->cb)
@@ -387,7 +387,7 @@ static void CC_ColorSwitch_ColorChanged_cb(s_Actuator *pObj)
     {
       if(color->rxOpt.bSupervisionActive && color->rxOpt.statusUpdate && !is_multicast(&color->rxOpt))
       {
-        zaf_tx_options_t tx_options;
+        zaf_tx_options_t tx_options = { 0 };
         zaf_transport_rx_to_tx_options(&color->rxOpt, &tx_options);
         // Send Supervision Report Success if not triggered with a multicast.
         CmdClassSupervisionReportSend(&tx_options,
@@ -400,7 +400,7 @@ static void CC_ColorSwitch_ColorChanged_cb(s_Actuator *pObj)
   }
 }
 
-static void 
+static void
 CC_ColorSwitch_report_stx(zaf_tx_options_t *tx_options, void* pData)
 {
   DPRINTF("* %s() *\n"
@@ -408,19 +408,18 @@ CC_ColorSwitch_report_stx(zaf_tx_options_t *tx_options, void* pData)
       "\ttxOpt.options %#02x\n",
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
-  /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
   s_colorComponent *color = (s_colorComponent *)pData;
   DPRINTF("Sending report for colorId: %u\n", color->colorId);
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_SwitchColorReportV3Frame.cmdClass = COMMAND_CLASS_SWITCH_COLOR,
+    .ZW_SwitchColorReportV3Frame.cmd = SWITCH_COLOR_REPORT_V3,
+    .ZW_SwitchColorReportV3Frame.colorComponentId = color->colorId,
+    .ZW_SwitchColorReportV3Frame.currentValue = ZAF_Actuator_GetCurrentValue(&color->obj),
+    .ZW_SwitchColorReportV3Frame.targetValue = ZAF_Actuator_GetTargetValue(&color->obj),
+    .ZW_SwitchColorReportV3Frame.duration = ZAF_Actuator_GetDurationRemaining(&color->obj)
+  };
 
-  txBuf.ZW_SwitchColorReportV3Frame.cmdClass = COMMAND_CLASS_SWITCH_COLOR;
-  txBuf.ZW_SwitchColorReportV3Frame.cmd = SWITCH_COLOR_REPORT_V3;
-  txBuf.ZW_SwitchColorReportV3Frame.colorComponentId = color->colorId;
-  txBuf.ZW_SwitchColorReportV3Frame.currentValue = ZAF_Actuator_GetCurrentValue(&color->obj);
-  txBuf.ZW_SwitchColorReportV3Frame.targetValue = ZAF_Actuator_GetTargetValue(&color->obj);
-  txBuf.ZW_SwitchColorReportV3Frame.duration = ZAF_Actuator_GetDurationRemaining(&color->obj);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_SWITCH_COLOR_REPORT_V3_FRAME),

@@ -159,19 +159,14 @@ static otError startAdvertisingCommand(void *context, uint8_t argc, char *argv[]
     // result, the advertiser will advertise with empty data payload if
     // sl_bt_legacy_advertiser_generate_data has not been called.
     if (discoverableMode <= sl_bt_advertiser_general_discoverable) {
-      if (discoverableMode == sl_bt_advertiser_broadcast) {
-        // The value sl_bt_advertiser_broadcast (3) is identical to
-        // sl_bt_advertiser_non_discoverable in the context of generating
-        // advertising data. And sl_bt_advertiser_broadcast is invalid in
-        // sl_bt_legacy_advertiser_generate_data
-        discoverableMode = sl_bt_advertiser_non_discoverable;
-      }
       status = sl_bt_legacy_advertiser_generate_data(handle, discoverableMode);
       if (status == SL_STATUS_OK) {
           otCliOutputFormat("Generate advertising data success\r\n");
       } else {
           otCliOutputFormat("Generate advertising data error: 0x%04x\r\n", status);
       }
+    } else {
+      otCliOutputFormat("WRANING: Invalid discoverable mode: 0x%02x\r\n", discoverableMode);
     }
     /* End of advertising discoverable mode handling */
 

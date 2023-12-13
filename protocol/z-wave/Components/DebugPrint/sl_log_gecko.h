@@ -54,12 +54,6 @@ extern "C" {
 #define sl_log_critical(tag, fmtstr, ...)   DPRINT(tag); DPRINT(" (UNIFY) "); DPRINTF(fmtstr, ##__VA_ARGS__); DPRINT("\n")
 #define sl_log(tag, level, fmtstr, ...)     DPRINT(tag); DPRINT(" (UNIFY) "); DPRINTF(fmtstr, ##__VA_ARGS__); DPRINT("\n")
 
-// PRINTF is used in some UIC files.
-#ifdef PRINTF
- #undef PRINTF
- #define PRINTF(...)                         DPRINT(tag); DPRINT(" (UNIFY) "); DPRINTF(__VA_ARGS__); DPRINT("\n")
-#endif
-
 /*****************************************************************************
  *                             API FUNCTIONS
  ****************************************************************************/

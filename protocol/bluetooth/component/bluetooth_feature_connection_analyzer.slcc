@@ -1,0 +1,18 @@
+id: "bluetooth_feature_connection_analyzer"
+label: "Bluetooth connection analyzer"
+package: "Bluetooth"
+description: >
+  The component provides functionality to capture and analyze the packets on a
+  Bluetooth connection.
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Additional Features
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_controller"
+config_file:
+  - path: "config/sl_bluetooth_connection_analyzer_config.h"
+provides:
+  - name: "bluetooth_feature_connection_analyzer"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_connection_analyzer

@@ -21,10 +21,10 @@
 /**
 * AppTimer is a singleton, thus containing own object.
 */
-SAppTimer g_AppTimer;
+SAppTimer g_AppTimer = { 0 };
 /**
  * Variable used by the AppTimerDeepSleep
- * 
+ *
  * It indicates if the timers have been loaded thus allowing the retention
  * registers to be modified
  */
@@ -103,8 +103,7 @@ void AppTimerStopAll(void)
 }
 
 ZW_WEAK ESwTimerStatus 
-AppTimerDeepSleepPersistentStop(SSwTimer* pTimer)
+AppTimerDeepSleepPersistentStop(__attribute__((unused)) SSwTimer* pTimer)
 {
-  UNUSED(pTimer);
   return ESWTIMER_STATUS_SUCCESS;
 }

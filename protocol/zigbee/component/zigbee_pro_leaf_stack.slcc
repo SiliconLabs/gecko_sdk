@@ -3,7 +3,6 @@ label: Pro Leaf Stack
 package: Zigbee
 category: Zigbee|Stack|Pro Core
 quality: production
-
 description: The Zigbee PRO Stack support for end devices. It includes stubs for parent and routing code, since end devices do not need this functionality.
 
 provides:
@@ -15,11 +14,11 @@ requires:
   - name: zigbee_pro_leaf_stack_implementation
   - name: zigbee_pro_leaf_stack_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_stack_common
 
 recommends:
-  - id: zigbee_pro_leaf_stack_source
+  - id: zigbee_pro_leaf_stack_library_internal
 
 config_file:
   - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_leaf_stack_config.h

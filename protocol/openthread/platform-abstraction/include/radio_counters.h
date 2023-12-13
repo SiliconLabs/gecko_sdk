@@ -59,6 +59,20 @@ typedef struct efr32RadioCounters
     uint32_t mRailEventsEnhAckTxFailed;
     uint32_t mRailEventsScheduledTxTriggeredCount;
     uint32_t mRailEventsScheduledTxStartedCount;
+    union { 
+        // Allow for reuse / overloading of fields for various debugging
+        uint32_t m32;
+        uint16_t m16[2];
+        uint8_t  m8[4]; // see defines below for suggested subfield usage
+    } mRadioDebugData;
 } efr32RadioCounters;
 
+// Offsets for use with Radio Debug Data subfields
+enum
+{
+    RX_DEBUG_COUNTER0 = 0,
+    RX_DEBUG_COUNTER1,
+    TX_DEBUG_COUNTER0,
+    TX_DEBUG_COUNTER1
+};
 #endif // RADIO_COUNTERS_H_

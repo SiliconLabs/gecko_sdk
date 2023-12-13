@@ -88,9 +88,14 @@ static void memset_operation_context(uint32_t index)
         mem_size = sizeof(psa_hash_operation_t);
         break;
 #endif
-#ifndef TFM_CRYPTO_HASH_MODULE_DISABLED
+#ifndef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
     case TFM_CRYPTO_KEY_DERIVATION_OPERATION:
         mem_size = sizeof(psa_key_derivation_operation_t);
+        break;
+#endif
+#ifndef TFM_CRYPTO_PAKE_MODULE_DISABLED
+    case TFM_CRYPTO_PAKE_OPERATION:
+        mem_size = sizeof(psa_pake_operation_t);
         break;
 #endif
     case TFM_CRYPTO_OPERATION_NONE:

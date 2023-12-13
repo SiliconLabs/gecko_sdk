@@ -13,6 +13,7 @@
   - name: hardware_board
   - name: hardware_board_stk
   - name: hardware_board_from_stk
+  - name: hardware_board_from_efm32zg-stk3200a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_hfxo_freq_24mhz
   - name: hardware_board_has_hfxo
@@ -39,6 +40,8 @@
     value: '"BRD2010B"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 24000000
 - tag:
   - board:pn:BRD2010
   - board:variant:B

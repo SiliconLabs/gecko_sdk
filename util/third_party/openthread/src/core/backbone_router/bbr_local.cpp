@@ -36,10 +36,10 @@
 #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
 
 #include "common/code_utils.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/random.hpp"
+#include "instance/instance.hpp"
 #include "thread/mle_types.hpp"
 #include "thread/thread_netif.hpp"
 
@@ -54,6 +54,7 @@ Local::Local(Instance &aInstance)
     , mState(kStateDisabled)
     , mMlrTimeout(kDefaultMlrTimeout)
     , mReregistrationDelay(kDefaultRegistrationDelay)
+    , mRegistrationTimeout(0)
     , mSequenceNumber(Random::NonCrypto::GetUint8() % 127)
     , mRegistrationJitter(kDefaultRegistrationJitter)
     , mIsServiceAdded(false)
@@ -61,7 +62,7 @@ Local::Local(Instance &aInstance)
     mDomainPrefixConfig.GetPrefix().SetLength(0);
 
     // Primary Backbone Router Aloc
-    mBackboneRouterPrimaryAloc.InitAsThreadOriginRealmLocalScope();
+    mBackboneRouterPrimaryAloc.InitAsThreadOriginMeshLocal();
     mBackboneRouterPrimaryAloc.GetAddress().GetIid().SetToLocator(Mle::kAloc16BackboneRouterPrimary);
 
     // All Network Backbone Routers Multicast Address.
@@ -87,7 +88,7 @@ void Local::SetEnabled(bool aEnable)
     {
         SetState(kStateSecondary);
         AddDomainPrefixToNetworkData();
-        IgnoreError(AddService());
+        IgnoreError(AddService(kDecideBasedOnState));
     }
     else
     {
@@ -163,7 +164,7 @@ Error Local::SetConfig(const Config &aConfig)
     {
         Get<Notifier>().Signal(kEventThreadBackboneRouterLocalChanged);
 
-        IgnoreError(AddService());
+        IgnoreError(AddService(kDecideBasedOnState));
     }
 
 exit:
@@ -171,18 +172,22 @@ exit:
     return error;
 }
 
-Error Local::AddService(bool aForce)
+Error Local::AddService(RegisterMode aMode)
 {
     Error                                            error = kErrorInvalidState;
     NetworkData::Service::BackboneRouter::ServerData serverData;
 
     VerifyOrExit(mState != kStateDisabled && Get<Mle::Mle>().IsAttached());
 
-    VerifyOrExit(aForce /* if register by force */ ||
-                 !Get<BackboneRouter::Leader>().HasPrimary() /* if no available Backbone Router service */ ||
-                 Get<BackboneRouter::Leader>().GetServer16() == Get<Mle::MleRouter>().GetRloc16()
-                 /* If the device itself should be BBR. */
-    );
+    switch (aMode)
+    {
+    case kDecideBasedOnState:
+        VerifyOrExit(!Get<BackboneRouter::Leader>().HasPrimary() ||
+                     Get<BackboneRouter::Leader>().GetServer16() == Get<Mle::MleRouter>().GetRloc16());
+        break;
+    case kForceRegistration:
+        break;
+    }
 
     serverData.SetSequenceNumber(mSequenceNumber);
     serverData.SetReregistrationDelay(mReregistrationDelay);
@@ -248,16 +253,15 @@ void Local::HandleBackboneRouterPrimaryUpdate(Leader::State aState, const Config
     // Wait some jitter before trying to Register.
     if (aConfig.mServer16 == Mac::kShortAddrInvalid)
     {
-        uint8_t delay = 1;
+        mRegistrationTimeout = 1;
 
         if (!Get<Mle::MleRouter>().IsLeader())
         {
-            delay += Random::NonCrypto::GetUint8InRange(0, mRegistrationJitter < 255 ? mRegistrationJitter + 1
-                                                                                     : mRegistrationJitter);
+            mRegistrationTimeout +=
+                Random::NonCrypto::GetUint16InRange(0, static_cast<uint16_t>(mRegistrationJitter) + 1);
         }
 
-        // Here uses the timer resource in Mle.
-        Get<Mle::MleRouter>().SetBackboneRouterRegistrationDelay(delay);
+        Get<TimeTicker>().RegisterReceiver(TimeTicker::kBbrLocal);
     }
     else if (aConfig.mServer16 != Get<Mle::MleRouter>().GetRloc16())
     {
@@ -272,10 +276,7 @@ void Local::HandleBackboneRouterPrimaryUpdate(Leader::State aState, const Config
         mMlrTimeout          = aConfig.mMlrTimeout;
         SequenceNumberIncrease();
         Get<Notifier>().Signal(kEventThreadBackboneRouterLocalChanged);
-        if (AddService(true /* Force registration to refresh and restore Primary state */) == kErrorNone)
-        {
-            Get<NetworkData::Notifier>().HandleServerDataUpdated();
-        }
+        IgnoreError(AddService(kForceRegistration));
     }
     else
     {
@@ -284,6 +285,30 @@ void Local::HandleBackboneRouterPrimaryUpdate(Leader::State aState, const Config
 
 exit:
     return;
+}
+
+void Local::HandleTimeTick(void)
+{
+    // Delay registration while router role transition is pending
+    // (i.e., device may soon switch from REED to router role).
+
+    VerifyOrExit(!Get<Mle::MleRouter>().IsRouterRoleTransitionPending());
+
+    if (mRegistrationTimeout > 0)
+    {
+        mRegistrationTimeout--;
+
+        if (mRegistrationTimeout == 0)
+        {
+            IgnoreError(AddService(kDecideBasedOnState));
+        }
+    }
+
+exit:
+    if (mRegistrationTimeout == 0)
+    {
+        Get<TimeTicker>().UnregisterReceiver(TimeTicker::kBbrLocal);
+    }
 }
 
 Error Local::GetDomainPrefix(NetworkData::OnMeshPrefixConfig &aConfig)
@@ -339,20 +364,13 @@ exit:
     return error;
 }
 
-void Local::ApplyMeshLocalPrefix(void)
+void Local::ApplyNewMeshLocalPrefix(void)
 {
     VerifyOrExit(IsEnabled());
 
     Get<BackboneTmfAgent>().UnsubscribeMulticast(mAllNetworkBackboneRouters);
     mAllNetworkBackboneRouters.SetMulticastNetworkPrefix(Get<Mle::MleRouter>().GetMeshLocalPrefix());
     Get<BackboneTmfAgent>().SubscribeMulticast(mAllNetworkBackboneRouters);
-
-    if (IsPrimary())
-    {
-        Get<ThreadNetif>().RemoveUnicastAddress(mBackboneRouterPrimaryAloc);
-        mBackboneRouterPrimaryAloc.GetAddress().SetPrefix(Get<Mle::MleRouter>().GetMeshLocalPrefix());
-        Get<ThreadNetif>().AddUnicastAddress(mBackboneRouterPrimaryAloc);
-    }
 
 exit:
     return;

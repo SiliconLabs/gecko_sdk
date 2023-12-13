@@ -89,7 +89,7 @@ static void enable_i2c_pins(sl_efp_handle_t handle, bool enable)
     handle->init_data.i2c_peripheral->ROUTEPEN |= I2C_ROUTEPEN_SDAPEN | I2C_ROUTEPEN_SCLPEN;
 #elif defined(_SILICON_LABS_32B_SERIES_2)
     GPIO->I2CROUTE[handle->i2c_peripheral_index].ROUTEEN |= GPIO_I2C_ROUTEEN_SDAPEN
-                                                         | GPIO_I2C_ROUTEEN_SCLPEN;
+                                                            | GPIO_I2C_ROUTEEN_SCLPEN;
 #endif
   } else {
     handle->in_direct_mode = true;
@@ -102,10 +102,10 @@ static void enable_i2c_pins(sl_efp_handle_t handle, bool enable)
     init_data.i2c_instance->ROUTE &= ~(I2C_ROUTE_SDAPEN | I2C_ROUTE_SCLPEN);
 #elif defined(_SILICON_LABS_32B_SERIES_1)
     handle->init_data.i2c_peripheral->ROUTEPEN &= ~(I2C_ROUTEPEN_SDAPEN
-                                                  | I2C_ROUTEPEN_SCLPEN);
+                                                    | I2C_ROUTEPEN_SCLPEN);
 #elif defined(_SILICON_LABS_32B_SERIES_2)
     GPIO->I2CROUTE[handle->i2c_peripheral_index].ROUTEEN &= ~(GPIO_I2C_ROUTEEN_SDAPEN
-                                                            | GPIO_I2C_ROUTEEN_SCLPEN);
+                                                              | GPIO_I2C_ROUTEEN_SCLPEN);
 #endif
 
     // Disable I2C module and clock to save energy.
@@ -242,13 +242,12 @@ void EMU_EFPEM23PostsleepHook(void)
 void EMU_EFPEM23PresleepHook(void)
 {
   if (host_efp != NULL) {
-
     CORE_ENTER_CRITICAL();
 
     if ((host_efp->init_data.em_transition_mode == efp_em_transition_mode_gpio_bitbang)
-     || (host_efp->init_data.em_transition_mode == efp_em_transition_mode_i2c)) {
+        || (host_efp->init_data.em_transition_mode == efp_em_transition_mode_i2c)) {
       sl_efp_enter_em2(host_efp);
-    } else if(host_efp->init_data.em_transition_mode == efp_em_transition_mode_emu) {
+    } else if (host_efp->init_data.em_transition_mode == efp_em_transition_mode_emu) {
       if (!host_efp->in_direct_mode) {
         sl_efp_enable_direct_mode(host_efp);
       }
@@ -277,7 +276,6 @@ void EMU_EFPEM4PresleepHook(void)
 {
   if (host_efp != NULL) {
     if (host_efp->init_data.em_transition_mode == efp_em_transition_mode_emu) {
-
       if (!host_efp->in_direct_mode) {
         sl_efp_enable_direct_mode(host_efp);
       }
@@ -318,10 +316,10 @@ sl_status_t sl_efp_enable_direct_mode(sl_efp_handle_t handle)
   }
 
   ret_val = sl_efp_write_register_field(handle,
-                                      EFP01_EM_CRSREG_CTRL,
-                                      1 << _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_SHIFT,
-                                      _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_MASK,
-                                      _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_SHIFT);
+                                        EFP01_EM_CRSREG_CTRL,
+                                        1 << _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_SHIFT,
+                                        _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_MASK,
+                                        _EFP01_EM_CRSREG_CTRL_DIRECT_MODE_EN_SHIFT);
 
   if (handle->init_data.em_transition_mode == efp_em_transition_mode_gpio_bitbang) {
     enable_i2c_pins(handle, false);
@@ -553,8 +551,8 @@ sl_status_t sl_efp_emu_ldo_enable(sl_efp_handle_t handle, bool enable)
     }
     return SL_STATUS_OK;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-    SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_PROTECTED_REGISTER |
-                                              SE_COMMAND_OPTION_WRITE);
+    SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_PROTECTED_REGISTER
+                                              | SE_COMMAND_OPTION_WRITE);
     SE_addParameter(&command, 0x4000408c);    // Address
     SE_addParameter(&command, 1 << 14);       // Mask
     if (enable) {
@@ -578,7 +576,6 @@ sl_status_t sl_efp_emu_ldo_enable(sl_efp_handle_t handle, bool enable)
     EFM_ASSERT(false);
     return SL_STATUS_NOT_SUPPORTED;
 #endif
-
   } else {
     return SL_STATUS_FAIL; // This is not a host EFP instance.
   }
@@ -703,7 +700,7 @@ sl_status_t sl_efp_init(sl_efp_handle_t handle, const sl_efp_init_data_t *init)
   }
 
 #if defined(EMU_CTRL_EFPDRVDVDD)
-    EMU_EFPDriveDvddSet(true);
+  EMU_EFPDriveDvddSet(true);
 #endif
 
   // Configure GPIO pin as EFP IRQ input.
@@ -716,7 +713,7 @@ sl_status_t sl_efp_init(sl_efp_handle_t handle, const sl_efp_init_data_t *init)
 #if defined(EMU_CTRL_EFPDRVDVDD)
     if (init->irq_pin_mode == efp_irq_pin_emu) {
       if (ret_val == SL_STATUS_OK) {
-          GPIO_PinModeSet(init->irq_port, init->irq_pin, gpioModeInput, 1);
+        GPIO_PinModeSet(init->irq_port, init->irq_pin, gpioModeInput, 1);
       }
 
       /* Get and clear all pending EMU EFP interrupts */
@@ -748,8 +745,8 @@ sl_status_t sl_efp_init(sl_efp_handle_t handle, const sl_efp_init_data_t *init)
 
   // Prepare for "direct mode" EM transitions.
   if ((init->em_transition_mode == efp_em_transition_mode_gpio_bitbang
-    || init->em_transition_mode == efp_em_transition_mode_emu)
-    && (ret_val == SL_STATUS_OK)) {
+       || init->em_transition_mode == efp_em_transition_mode_emu)
+      && (ret_val == SL_STATUS_OK)) {
     ret_val = sl_efp_enable_direct_mode(handle);
   }
 
@@ -843,7 +840,7 @@ static sl_status_t sl_efp_decouple_handoff(sl_efp_handle_t handle, uint8_t bk_ir
   // Turn off internal EFR32 LDO regulator.
   ret_val = sl_efp_emu_ldo_enable(handle, false);
 
-  if (ret_val != SL_STATUS_OK){
+  if (ret_val != SL_STATUS_OK) {
     return ret_val;
   }
 
@@ -1030,7 +1027,7 @@ sl_status_t sl_efp_read_register_field(sl_efp_handle_t handle,
  ******************************************************************************/
 sl_status_t sl_efp_reset(sl_efp_handle_t handle)
 {
-  return sl_efp_write_register(handle,EFP01_CMD, _EFP01_CMD_RESET_MASK);
+  return sl_efp_write_register(handle, EFP01_CMD, _EFP01_CMD_RESET_MASK);
 }
 
 /***************************************************************************//**
@@ -1046,7 +1043,7 @@ sl_status_t sl_efp_reset(sl_efp_handle_t handle)
  ******************************************************************************/
 sl_status_t sl_efp_reset_to_default(sl_efp_handle_t handle)
 {
-  return sl_efp_write_register(handle,EFP01_CMD, _EFP01_CMD_OTP_REREAD_MASK);
+  return sl_efp_write_register(handle, EFP01_CMD, _EFP01_CMD_OTP_REREAD_MASK);
 }
 
 /***************************************************************************//**
@@ -1070,8 +1067,8 @@ sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
     return SL_STATUS_OK;
   }
   handle->init_data.em_transition_mode = mode;
-  if (mode == efp_em_transition_mode_gpio_bitbang ||
-      mode == efp_em_transition_mode_emu) {
+  if (mode == efp_em_transition_mode_gpio_bitbang
+      || mode == efp_em_transition_mode_emu) {
     // We need to reconfigure direct mode when passing from EMU mode to gpio mode
     // and vice versa.
     handle->in_direct_mode = false;
@@ -1148,11 +1145,11 @@ sl_status_t sl_efp_set_voa_em23_ipk(sl_efp_handle_t handle, uint8_t ipk)
  *
  * @deprecated
  ******************************************************************************/
-sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh)
+SL_DEPRECATED_API_SDK_4_4 sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
+                                                                       unsigned int current_ma,
+                                                                       unsigned int vddb_mv,
+                                                                       unsigned int voa_mv,
+                                                                       unsigned int inductor_nh)
 {
   long l;
   float f;
@@ -1191,11 +1188,11 @@ sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
  *
  * @deprecated
  ******************************************************************************/
-sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int voa_mv,
-                                             unsigned int inductor_nh)
+SL_DEPRECATED_API_SDK_4_4 sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
+                                                                       unsigned int current_ma,
+                                                                       unsigned int vddb_mv,
+                                                                       unsigned int voa_mv,
+                                                                       unsigned int inductor_nh)
 {
   long l;
   float f;
@@ -1320,11 +1317,11 @@ sl_status_t sl_efp_set_vob_em01_ipk(sl_efp_handle_t handle, uint8_t ipk)
  *
  * @deprecated
  ******************************************************************************/
-sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh)
+SL_DEPRECATED_API_SDK_4_4 sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
+                                                                       unsigned int current_ma,
+                                                                       unsigned int vddb_mv,
+                                                                       unsigned int vob_mv,
+                                                                       unsigned int inductor_nh)
 {
   long l;
   float f;
@@ -1411,11 +1408,11 @@ sl_status_t sl_efp_set_vob_em23_ipk(sl_efp_handle_t handle, uint8_t ipk)
  *
  * @deprecated
  ******************************************************************************/
-sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
-                                             unsigned int current_ma,
-                                             unsigned int vddb_mv,
-                                             unsigned int vob_mv,
-                                             unsigned int inductor_nh)
+SL_DEPRECATED_API_SDK_4_4 sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
+                                                                       unsigned int current_ma,
+                                                                       unsigned int vddb_mv,
+                                                                       unsigned int vob_mv,
+                                                                       unsigned int inductor_nh)
 {
   long l;
   float f;

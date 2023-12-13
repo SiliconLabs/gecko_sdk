@@ -145,7 +145,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       // Start advertising and enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
 
       if (sc == SL_STATUS_OK) {
@@ -384,7 +384,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
         // Restart advertising.
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                           sl_bt_advertiser_connectable_scannable);
+                                           sl_bt_legacy_advertiser_connectable);
         app_log_status_error(sc);
 
         if (sc == SL_STATUS_OK) {

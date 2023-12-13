@@ -9,19 +9,15 @@
 #include "DebugPrint.h"
 
 ZW_WEAK bool
-cc_color_switch_write(uint8_t color_component_id, s_colorComponent *color_component)
+cc_color_switch_write(__attribute__((unused)) uint8_t color_component_id,
+                      __attribute__((unused)) s_colorComponent *color_component)
 {
-  UNUSED(color_component_id);
-  UNUSED(color_component);
-
   return false;
 }
 
 ZW_WEAK bool
-cc_color_switch_read(uint8_t color_component_id, s_colorComponent *color_component)
+cc_color_switch_read( __attribute__((unused)) uint8_t color_component_id,
+                      __attribute__((unused)) s_colorComponent *color_component)
 {
-  UNUSED(color_component_id);
-  UNUSED(color_component);
-
   return false;
 }

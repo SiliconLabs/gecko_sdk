@@ -268,9 +268,25 @@ psa_status_t set_parameters(bool root, mbedtls_md_type_t hash_alg)
 /***************************************************************************//**
  * Set the serial number for a certificate.
  ******************************************************************************/
-psa_status_t set_serial(void)
+psa_status_t set_serial(bool root)
 {
-  print_error_cycle(mbedtls_x509write_crt_set_serial(&write_cert, &serial));
+  if (root) {
+    unsigned char* root_cert_serial_no;
+    root_cert_serial_no = (unsigned char*) root_cert_serial;
+
+    print_error_cycle(
+      mbedtls_x509write_crt_set_serial_raw(&write_cert,
+                                           root_cert_serial_no,
+                                           sizeof(root_cert_serial_no)));
+  } else {
+    unsigned char* device_cert_serial_no;
+    device_cert_serial_no = (unsigned char*) device_cert_serial;
+
+    print_error_cycle(
+      mbedtls_x509write_crt_set_serial_raw(&write_cert,
+                                           device_cert_serial_no,
+                                           sizeof(device_cert_serial_no)));
+  }
 }
 
 /***************************************************************************//**

@@ -6,9 +6,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader.slcw"/>
     <properties key="projectFilePaths" value="sample-apps/workspaces/bootloader-apploader/bootloader-apploader.slcw"/>
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-apploader/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4329a brd4330a brd4331a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg28.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -22,9 +22,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.workspaces.bootloader-spi-ezsp.bootloader-spi-ezsp.slcw"/>
     <properties key="projectFilePaths" value="sample-apps/workspaces/bootloader-spi-ezsp/bootloader-spi-ezsp.slcw"/>
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-spi-ezsp/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2603a brd4110b brd4111b brd4115a brd4115b brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2603a brd4110b brd4111b brd4115a brd4115b brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403b brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -32,15 +32,15 @@
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="platform.bootloader.sample-apps.workspaces.bootloader-spi-ezsp.bootloader-spi-ezsp-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-spi-ezsp.bootloader-spi-ezsp-nonsecure.slcp"/>
   </descriptors>
-  <descriptors name="bootloader-uart-bgapi-workspace" label="bootloader-uart-bgapi-workspace" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together. &#xA;">
+  <descriptors name="bootloader-uart-bgapi-workspace" label="bootloader-uart-bgapi-workspace" description="TrustZone is used to split into a Secure and Non-Secure bootloader. This workspace contains the secure and non-secure part of the bootloader and builds them together.&#xA;">
     <properties key="namespace" value="template.solution.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.workspaces.bootloader-uart-bgapi.bootloader-uart-bgapi.slcw"/>
     <properties key="projectFilePaths" value="sample-apps/workspaces/bootloader-uart-bgapi/bootloader-uart-bgapi.slcw"/>
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-bgapi/readme.md"/>
-    <properties key="boardCompatibility" value="brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -54,9 +54,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.workspaces.bootloader-uart-xmodem.bootloader-uart-xmodem.slcw"/>
     <properties key="projectFilePaths" value="sample-apps/workspaces/bootloader-uart-xmodem/bootloader-uart-xmodem.slcw"/>
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-xmodem/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -72,7 +72,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-spi-ezsp/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4202a brd4203a brd4207a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4300a brd4300b brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13p.* .*mgm1.* .*mgm12.* .*mgm13.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -85,9 +85,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-ble.bootloader-storage-internal-ble.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-ble/bootloader-storage-internal-ble.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-ble/readme.md"/>
-    <properties key="boardCompatibility" value="brd2207a brd2500a brd2501a brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300a brd4300b brd4301a brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2207a brd2500a brd2500b brd2501a brd2501b brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300a brd4300b brd4301a brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg12b.* .*efm32pg12b.* .*efm32pg1b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*mgm1.* .*mgm12.* .*mgm13.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -102,7 +102,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-1536k/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -117,7 +117,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-1920k/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value=""/>
     <properties key="quality" value="PRODUCTION"/>
@@ -132,7 +132,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-2048k/readme.md"/>
     <properties key="boardCompatibility" value="brd2204a brd2204c brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -145,9 +145,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-single-352k.bootloader-storage-internal-single-352k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-352k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201c brd4201d brd4202a brd4203a brd4207a brd4209a brd4253a brd4254a brd4255a brd4256a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd2501b brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201c brd4201d brd4202a brd4203a brd4207a brd4209a brd4253a brd4254a brd4255a brd4256a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm13.* .*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*mgm12.* .*mgm13.* .*wgm160.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -160,9 +160,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-single-512k.bootloader-storage-internal-single-512k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-single-512k/bootloader-storage-internal-single-512k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-512k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201c brd4201d brd4202a brd4203a brd4207a brd4209a brd4253a brd4254a brd4255a brd4256a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd2501b brd4103a brd4104a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201c brd4201d brd4202a brd4203a brd4207a brd4209a brd4253a brd4254a brd4255a brd4256a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm13.* .*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*mgm12.* .*mgm13.* .*wgm160.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -175,9 +175,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-single-768k.bootloader-storage-internal-single-768k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-single-768k/bootloader-storage-internal-single-768k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-768k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd2501b brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32fg12p.* .*efr32mg12p.* .*mgm12.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -190,9 +190,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-single-lzma.bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-single-lzma/bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single-lzma/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd2501b brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32fg12p.* .*efr32mg12p.* .*mgm12.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -205,9 +205,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal-single/readme.md"/>
-    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2204a brd2204c brd2207a brd2501a brd2501b brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32fg12p.* .*efr32mg12p.* .*mgm12.* .*wgm160.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -220,9 +220,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-internal.bootloader-storage-internal.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-storage-internal/bootloader-storage-internal.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-internal/readme.md"/>
-    <properties key="boardCompatibility" value="brd2207a brd2501a brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2207a brd2501a brd2501b brd4103a brd4161a brd4162a brd4163a brd4164a brd4166a brd4170a brd4172a brd4172b brd4173a brd4190a brd4253a brd4254a brd4304a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efm32gg12b.* .*efm32pg12b.* .*efr32bg12p.* .*efr32fg12p.* .*efr32mg12p.* .*mgm12.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -237,14 +237,14 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-spiflash-sfdp-single/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4203a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300b brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13p.* .*mgm1.* .*mgm12.* .*mgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
-  <descriptors name="bootloader-storage-spiflash-single-1024k" label="Bootloader - SoC SPI Flash Storage (single image with slot size of 1024k)" description="This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1024 kB. This can be configured on the &quot;Storage&quot; tab.&#xA;">
+  <descriptors name="bootloader-storage-spiflash-single-1024k" label="Bootloader - SoC SPI Flash Storage (single image with slot size of 1024kB)" description="This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1024 kB. This can be configured on the &quot;Storage&quot; tab.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-storage-spiflash-single-1024k.bootloader-storage-spiflash-single-1024k.slcp"/>
@@ -252,7 +252,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-spiflash-single-1024k/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4203a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300b brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13p.* .*mgm1.* .*mgm12.* .*mgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -267,7 +267,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-spiflash-single/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4203a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300b brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13p.* .*mgm1.* .*mgm12.* .*mgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -282,7 +282,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-storage-spiflash/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4203a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300b brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg12b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13p.* .*mgm1.* .*mgm12.* .*mgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -297,7 +297,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-uart-bgapi/readme.md"/>
     <properties key="boardCompatibility" value="brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300a brd4300b brd4301a brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*mgm1.* .*mgm12.* .*mgm13.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -310,9 +310,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-1.bootloader-uart-xmodem.bootloader-uart-xmodem.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-1/bootloader-uart-xmodem/bootloader-uart-xmodem.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-1/bootloader-uart-xmodem/readme.md"/>
-    <properties key="boardCompatibility" value="brd2102a brd2102b brd2204a brd2204c brd2207a brd2500a brd2501a brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300a brd4300b brd4301a brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2102a brd2102b brd2204a brd2204c brd2207a brd2500a brd2500b brd2501a brd2501b brd4100a brd4101a brd4101b brd4103a brd4104a brd4150a brd4150b brd4150c brd4151a brd4152a brd4153a brd4154a brd4155a brd4158a brd4159a brd4161a brd4162a brd4163a brd4164a brd4165b brd4166a brd4167a brd4168a brd4169a brd4169b brd4170a brd4172a brd4172b brd4173a brd4174a brd4174b brd4175a brd4190a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a brd4250a brd4250b brd4251a brd4251b brd4251d brd4252a brd4253a brd4254a brd4255a brd4256a brd4257a brd4257b brd4258a brd4258b brd4259a brd4261a brd4262a brd4262b brd4300a brd4300b brd4301a brd4302a brd4303a brd4304a brd4305a brd4305c brd4305d brd4305e brd4306a brd4306b brd4306c brd4306d brd4321a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm1.* .*bgm13.* .*efm32gg11b.* .*efm32gg12b.* .*efm32pg12b.* .*efm32pg1b.* .*efm32tg11b.* .*efr32bg12p.* .*efr32bg13p.* .*efr32bg1b.* .*efr32bg1p.* .*efr32fg12p.* .*efr32fg13p.* .*efr32fg14p.* .*efr32fg1p.* .*efr32mg12p.* .*efr32mg13p.* .*efr32mg14p.* .*efr32mg1p.* .*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*mgm1.* .*mgm12.* .*mgm13.* .*wgm160.* .*zgm13.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -325,9 +325,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-apploader.bootloader-apploader.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-apploader/bootloader-apploader.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-apploader/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4329a brd4330a brd4331a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg28.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -340,9 +340,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-spi-ezsp.bootloader-spi-ezsp.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-spi-ezsp/bootloader-spi-ezsp.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-spi-ezsp/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2603a brd4110b brd4111b brd4115a brd4115b brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2602a brd2603a brd4110b brd4111b brd4115a brd4115b brd4171a brd4176a brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4308a brd4308b brd4308c brd4308d brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403b brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -355,9 +355,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single-1536k.bootloader-storage-internal-single-1536k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single-1536k/bootloader-storage-internal-single-1536k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-1536k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4198a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4316a brd4317a brd4318a brd4319a brd4335a brd4337a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4198a brd4198b brd4199b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4316a brd4317a brd4318a brd4319a brd4335a brd4337a brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm24.* .*efr32bg24.* .*efr32fg25.* .*efr32mg24.* .*mgm24.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -372,7 +372,7 @@
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-1920k/readme.md"/>
     <properties key="boardCompatibility" value="brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32fg25.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value=""/>
     <properties key="quality" value="PRODUCTION"/>
@@ -385,9 +385,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single-352k.bootloader-storage-internal-single-352k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-352k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -400,9 +400,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single-512k.bootloader-storage-internal-single-512k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single-512k/bootloader-storage-internal-single-512k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-512k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -415,9 +415,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single-768k.bootloader-storage-internal-single-768k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single-768k/bootloader-storage-internal-single-768k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-768k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2602a brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm24.* .*efm32pg28.* .*efr32bg21.* .*efr32bg24.* .*efr32bg27.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg24.* .*efr32mg27.* .*efr32zg28.* .*mgm21.* .*mgm24.* .*rm21.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -430,9 +430,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single-lzma.bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single-lzma/bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single-lzma/readme.md"/>
-    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm24.* .*efm32pg28.* .*efr32bg21.* .*efr32bg24.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg24.* .*efr32zg28.* .*mgm21.* .*mgm24.* .*rm21.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -445,9 +445,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-internal-single/readme.md"/>
-    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2506a brd2601a brd2601b brd2703a brd2704a brd2705a brd2902a brd2903a brd2904a brd2905a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4199b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm24.* .*efm32pg28.* .*efr32bg21.* .*efr32bg24.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg24.* .*efr32zg28.* .*mgm21.* .*mgm24.* .*rm21.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -460,24 +460,24 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-spiflash-sfdp-single.bootloader-storage-spiflash-sfdp-single.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-spiflash-sfdp-single/bootloader-storage-spiflash-sfdp-single.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-spiflash-sfdp-single/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm22.* .*bgm24.* .*efm32pg22.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
-  <descriptors name="bootloader-storage-spiflash-single-1024k" label="Bootloader - SoC SPI Flash Storage (single image with slot size of 1024k)" description="This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1024 kB. This can be configured on the &quot;Storage&quot; tab.&#xA;">
+  <descriptors name="bootloader-storage-spiflash-single-1024k" label="Bootloader - SoC SPI Flash Storage (single image with slot size of 1024kB)" description="This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1024 kB. This can be configured on the &quot;Storage&quot; tab.&#xA;">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-spiflash-single-1024k.bootloader-storage-spiflash-single-1024k.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-spiflash-single-1024k/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm22.* .*bgm24.* .*efm32pg22.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -490,9 +490,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-spiflash-single.bootloader-storage-spiflash-single.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-spiflash-single/bootloader-storage-spiflash-single.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-spiflash-single/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm22.* .*bgm24.* .*efm32pg22.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -505,9 +505,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-storage-spiflash.bootloader-storage-spiflash.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-storage-spiflash/bootloader-storage-spiflash.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-storage-spiflash/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2601a brd2601b brd2602a brd2603a brd4110a brd4110b brd4111a brd4111b brd4115a brd4115b brd4171a brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4194a brd4198a brd4198b brd4199b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4310a brd4311a brd4311b brd4312a brd4316a brd4317a brd4318a brd4328a brd4335a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm22.* .*bgm24.* .*efm32pg22.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -520,9 +520,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-uart-bgapi.bootloader-uart-bgapi.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-uart-bgapi/bootloader-uart-bgapi.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-bgapi/readme.md"/>
-    <properties key="boardCompatibility" value="brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -535,9 +535,9 @@
     <properties key="solutionReferenceId" value="platform.bootloader.sample-apps.Series-2.bootloader-uart-xmodem.bootloader-uart-xmodem.slcp"/>
     <properties key="projectFilePaths" value="sample-apps/Series-2/bootloader-uart-xmodem/bootloader-uart-xmodem.slcp"/>
     <properties key="readmeFiles" value="sample-apps/Series-2/bootloader-uart-xmodem/readme.md"/>
-    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2503a brd2503b brd2504a brd2506a brd2600a brd2601a brd2601b brd2602a brd2603a brd2703a brd2704a brd2705a brd2900a brd2901a brd2902a brd2903a brd2904a brd2905a brd4108a brd4109a brd4110a brd4110b brd4111a brd4111b brd4113a brd4115a brd4115b brd4171a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4182a brd4183a brd4183b brd4183c brd4184a brd4184b brd4185a brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4191a brd4194a brd4195a brd4195b brd4196a brd4196b brd4198a brd4198b brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4263a brd4263b brd4263c brd4264a brd4264b brd4264c brd4265a brd4265b brd4270a brd4270b brd4271a brd4272a brd4273a brd4274a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4310a brd4311a brd4311b brd4312a brd4314a brd4316a brd4317a brd4318a brd4319a brd4328a brd4329a brd4330a brd4331a brd4332a brd4335a brd4337a brd4400a brd4400b brd4400c brd4401a brd4401b brd4401c brd4402a brd4402b brd4403a brd4403b brd4406a brd4411a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*bgm24.* .*efm32pg22.* .*efm32pg23.* .*efm32pg28.* .*efr32bg21.* .*efr32bg22.* .*efr32bg24.* .*efr32bg27.* .*efr32fg22.* .*efr32fg23.* .*efr32fg25.* .*efr32fg28.* .*efr32mg21.* .*efr32mg22.* .*efr32mg24.* .*efr32mg27.* .*efr32mr21.* .*efr32zg23.* .*efr32zg28.* .*fgm23.* .*mgm21.* .*mgm22.* .*mgm24.* .*rm21.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -552,7 +552,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/Series-1/bootloader-storage-internal-single/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -567,7 +567,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/Series-2/bootloader-storage-internal-single/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -582,7 +582,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-apploader/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -597,7 +597,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-apploader/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -612,7 +612,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-spi-ezsp/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -627,7 +627,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-spi-ezsp/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -642,7 +642,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-bgapi/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -657,7 +657,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-bgapi/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -672,7 +672,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-xmodem/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -687,7 +687,7 @@
     <properties key="readmeFiles" value="sample-apps/workspaces/bootloader-uart-xmodem/readme.md"/>
     <properties key="boardCompatibility" value="com.silabs.board.none"/>
     <properties key="partCompatibility" value="none"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>

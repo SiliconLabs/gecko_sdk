@@ -43,6 +43,9 @@
 #define CBKE_OPERATION_GENERATE_SECRET_283K1 3
 
 #if defined(SL_CATALOG_ZIGBEE_TEST_HARNESS_PRESENT)
+
+#define TEST_HARNESS_PRINT_NAME "TestHarness"
+
 extern EmberEventControl sli_zigbee_af_key_establishment_test_harness_eventControl;
 
 extern uint16_t sli_zigbee_af_key_establishment_test_harness_generate_key_time;

@@ -32,6 +32,7 @@
 #include "em_common.h"
 
 #include "sl_status.h"
+#include "sl_sleeptimer.h"
 
 #include "sl_bluetooth.h"
 #include "sl_bt_api.h"
@@ -62,8 +63,8 @@
 #ifdef SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
 #include "sl_btmesh_wstk_lcd.h"
 #endif // SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
-/// Callback has not parameters
-#define NO_CALLBACK_DATA               (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA               NULL
 /// Timeout for Blinking LED during provisioning
 #define APP_LED_BLINKING_TIMEOUT       250
 /// Length of the display name buffer
@@ -201,48 +202,6 @@ static void set_device_name(uuid_128 *uuid)
 }
 
 /***************************************************************************//**
- * Configuration of segmentation and reassembly
- ******************************************************************************/
-static void set_sar_config(void)
-{
-  sl_status_t sc;
-  // The SAR transmitter configuration getter and setter functions don't require
-  // initialization call and it is not mandatory to have SAR Configuration Server
-  // in the Device Composition Data.
-  // These are necessary only to handle SAR Config messages.
-  uint8_t segment_interval_step;
-  uint8_t unicast_retrans_count;
-  uint8_t unicast_retrans_wo_progress_count;
-  uint16_t unicast_retrans_interval_step;
-  uint16_t unicast_retrans_interval_increment;
-  uint8_t multicast_retrans_count;
-  uint16_t multicast_retrans_interval_step;
-  // Get the current SAR Configuration Server Transmitter state to modify
-  // the critical parameter only and keep the default values of others.
-  sc = sl_btmesh_sar_config_server_get_sar_transmitter(&segment_interval_step,
-                                                       &unicast_retrans_count,
-                                                       &unicast_retrans_wo_progress_count,
-                                                       &unicast_retrans_interval_step,
-                                                       &unicast_retrans_interval_increment,
-                                                       &multicast_retrans_count,
-                                                       &multicast_retrans_interval_step);
-  app_assert_status_f(sc, "Failed to get SAR Tx Config");
-  // The BLOB Transfer procedure has a high-level retransmission logic which
-  // detects missing chunks and retransmits the missing ones.
-  // The retransmissions are disabled in Lower Transport layer because it slows
-  // down the BLOB Transfer significantly.
-  multicast_retrans_count = 0;
-  sc = sl_btmesh_sar_config_server_set_sar_transmitter(segment_interval_step,
-                                                       unicast_retrans_count,
-                                                       unicast_retrans_wo_progress_count,
-                                                       unicast_retrans_interval_step,
-                                                       unicast_retrans_interval_increment,
-                                                       multicast_retrans_count,
-                                                       multicast_retrans_interval_step);
-  app_assert_status_f(sc, "Failed to set SAR Tx Config");
-}
-
-/***************************************************************************//**
  * Handles button press and does a factory reset
  *
  * @return true if there is no button press
@@ -344,7 +303,6 @@ void sl_btmesh_provisionee_on_init(sl_status_t result)
     sl_status_t sc = sl_btmesh_node_get_uuid(&uuid);
     app_assert_status_f(sc, "Failed to get UUID");
     set_device_name(&uuid);
-    set_sar_config();
   }
 }
 
@@ -366,6 +324,15 @@ void sl_btmesh_on_node_provisioning_started(uint16_t result)
   app_assert_status_f(sc, "Failed to start periodic timer");
 
   app_show_btmesh_node_provisioning_started(result);
+}
+
+// Called when the Provisioning fails
+void sl_btmesh_on_node_provisioning_failed(uint16_t result)
+{
+  app_show_btmesh_node_provisioning_failed(result);
+  // Small delay before reboot
+  sl_sleeptimer_delay_millisecond(2000);
+  sl_bt_system_reset(0);
 }
 
 // Called when the Provisioning finishes successfully

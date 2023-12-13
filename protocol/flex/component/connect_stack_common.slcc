@@ -15,7 +15,14 @@ requires:
   - name: "device_supports_connect"
   - name: "connect_stack_common_implementation"
   - name: "connect_app_framework_common"
-  - name: "legacy_hal"
+  - name: "sl_common"
+  - name: emlib_rmu
+  - name: emlib_wdog
+    condition:
+      - "device_has_wdog"
+  - name: "power_manager"
+    condition:
+      - "hardware_board"
   - name: "token_manager"
   - name: "rail_lib"
   - name: "rail_util_pa"
@@ -56,13 +63,39 @@ include:
       - path: "packet-buffer.h"
       - path: "stack-info.h"
       - path: "radio-stream.h"
+  - path: "stack/framework/"
+    file_list:
+      - path: "sli-connect-random.h"
+      - path: "sl-connect-power-manager.h"
+        condition:
+          - "power_manager"
   - path: "stack/core"
     file_list:
       - path: "sli-connect-api.h"
+      - path: "sli-connect-interrupt-manipulation.h"
+      - path: "sli-connect-token.h"
+      - path: "sl-connect-watchdog.h"
+  - path: ../../platform/service/legacy_hal/inc/
+    file_list:
+      - path: platform-header.h
 source:
       - path: "stack/config/ember-configuration.c"
       - path: "stack/config/stack-stubs.c"
       - path: "stack/config/stack-callback-stubs.c"
+      - path: "stack/framework/sli-connect-random.c"
+      - path: "stack/framework/sl-connect-power-manager.c"
+        condition:
+          - "power_manager"
+      - path: "stack/core/sl-connect-watchdog.c"
+        condition:
+          - device_has_wdog
+        unless:
+          - legacy_hal
+      - path: "stack/core/sli-connect-token.c"
+        condition:
+          - emlib_msc
+        unless:
+          - legacy_hal
       - path: "stack/core/sli-connect-api.c"
         unless:
           - connect_cmsis_stack_ipc
@@ -70,6 +103,10 @@ config_file:
   - path: "stack/config/component_config/stack-common-config.h"
 define:
   - name: "EMBER_STACK_CONNECT"
+  - name: "PLATFORM_HEADER"
+    value: "\"platform-header.h\""
+    condition:
+      - device
 template_contribution:
   - name: component_catalog
     value: connect_stack_common
@@ -77,6 +114,27 @@ template_contribution:
     value: "APPLICATION_TYPE_FLEX"
     condition:
       - bootloader_interface
+  - name: event_handler
+    value:
+      event: service_init
+      include: sl-connect-watchdog.h
+      handler: sl_connect_watchdog_init
+    unless:
+       - legacy_hal
+  - name: power_manager_handler
+    value:
+      event: is_ok_to_sleep
+      include: sl-connect-power-manager.h
+      handler: sl_connect_is_ok_to_sleep
+    unless:
+       - legacy_hal
+  - name: power_manager_handler
+    value:
+      event: sleep_on_isr_exit
+      include: sl-connect-power-manager.h
+      handler: sl_connect_sleep_on_isr_exit
+    unless:
+       - legacy_hal
 
 documentation:
   docset: connect-stack

@@ -29,6 +29,7 @@ include:
 
 requires:
   - name: "sl_string"
+  - name: "sleeptimer"
 
 ui_hints:
   visibility: never  

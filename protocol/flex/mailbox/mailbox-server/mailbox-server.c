@@ -27,10 +27,10 @@
  *
  ******************************************************************************/
 
+#include <string.h>
 #include "mailbox-server-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "mailbox-server.h"
 
@@ -234,7 +234,7 @@ static uint8_t getFreeEntryIndex(void)
 // Updates the plugin event to fire when the closest packet in time expires.
 static void updateNextPacketToExpire(void)
 {
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   uint32_t nextTimeoutMs = MAX_INT32U_VALUE;
   uint8_t i;
 
@@ -307,9 +307,9 @@ static EmberAfMailboxStatus addMessage(EmberNodeId source,
     return EMBER_MAILBOX_STATUS_MESSAGE_NO_BUFFERS;
   }
 
-  MEMCOPY(emberGetBufferPointer(packetTable[entryIndex].packetBuffer),
-          message,
-          messageLength);
+  memcpy(emberGetBufferPointer(packetTable[entryIndex].packetBuffer),
+         message,
+         messageLength);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosReleaseBufferSystemMutex();
@@ -323,7 +323,7 @@ static EmberAfMailboxStatus addMessage(EmberNodeId source,
                                           : 0));
   packetTable[entryIndex].tag = tag;
   packetTable[entryIndex].timeoutTimeMs =
-    (halCommonGetInt32uMillisecondTick()
+    (emberGetInt32uMillisecondTick()
      + EMBER_AF_PLUGIN_MAILBOX_SERVER_PACKET_TIMEOUT_S * 1000);
 
   updateNextPacketToExpire();
@@ -340,7 +340,7 @@ static uint8_t messageLookupByDestinationAndOptions(EmberNodeId destination,
                                                     bool secured,
                                                     bool *moreMessages)
 {
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   uint32_t timeoutMs = MAX_INT32U_VALUE;
   uint8_t retIndex = 0xFF;
   uint8_t i;
@@ -477,9 +477,9 @@ static void sendDataMessageCommand(uint8_t entryIndex, bool messagePending)
 
   messageLength = emberGetBufferLength(packetTable[entryIndex].packetBuffer);
 
-  MEMCOPY(message + EMBER_MAILBOX_PROTOCOL_DATA_MESSAGE_PAYLOAD_OFFSET,
-          emberGetBufferPointer(packetTable[entryIndex].packetBuffer),
-          messageLength);
+  memcpy(message + EMBER_MAILBOX_PROTOCOL_DATA_MESSAGE_PAYLOAD_OFFSET,
+         emberGetBufferPointer(packetTable[entryIndex].packetBuffer),
+         messageLength);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosReleaseBufferSystemMutex();

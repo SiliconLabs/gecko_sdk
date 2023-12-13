@@ -143,4 +143,9 @@ WEAK(void emberGpSinkTableSetSecurityFrameCounterWrapper(uint8_t index,
 {
 }
 
+WEAK(uint8_t emberGpSinkTableGetNumberOfActiveEntriesWrapper(void))
+{
+  return 0;
+}
+
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_GP_STACK == 1)

@@ -151,6 +151,18 @@ public:
     void RemoveBorderRouter(uint16_t aRloc16, MatchMode aMatchMode);
 
     /**
+     * Updates Commissioning Data in Network Data.
+     *
+     * @param[in]  aData        A pointer to the Commissioning Data.
+     * @param[in]  aDataLength  The length of @p aData.
+     *
+     * @retval kErrorNone     Successfully updated the Commissioning Data.
+     * @retval kErrorNoBufs   Insufficient space to add the Commissioning Data.
+     *
+     */
+    Error SetCommissioningData(const void *aData, uint8_t aDataLength);
+
+    /**
      * Synchronizes internal 6LoWPAN Context ID Set with recently obtained Thread Network Data.
      *
      * Note that this method should be called only by the Leader once after reset.
@@ -182,6 +194,9 @@ public:
 
 private:
     static constexpr uint32_t kMaxNetDataSyncWait = 60 * 1000; // Maximum time to wait for netdata sync in msec.
+
+    static constexpr uint8_t kMinServiceId = 0x00;
+    static constexpr uint8_t kMaxServiceId = 0x0f;
 
     class ChangedFlags
     {
@@ -326,9 +341,9 @@ private:
     UpdateStatus UpdateService(ServiceTlv &aService);
     UpdateStatus UpdateTlv(NetworkDataTlv &aTlv, const NetworkDataTlv *aSubTlvs);
 
-    void SendCommissioningGetResponse(const Coap::Message    &aRequest,
-                                      uint16_t                aLength,
-                                      const Ip6::MessageInfo &aMessageInfo);
+    Error UpdateCommissioningData(uint16_t aDataLength, CommissioningDataTlv *&aDataTlv);
+    Error SetCommissioningData(const Message &aMessage);
+
     void SendCommissioningSetResponse(const Coap::Message     &aRequest,
                                       const Ip6::MessageInfo  &aMessageInfo,
                                       MeshCoP::StateTlv::State aState);

@@ -18,7 +18,7 @@ class Calc_Freq_Offset_Comp_Bobcat(CALC_Freq_Offset_Comp_ocelot):
         oversampling_rate_actual = model.vars.oversampling_rate_actual.value
 
         # : Calculate based on parallel window size if antenna diversity parallel correlator is enabled
-        if enable_parallel_correlation:
+        if enable_parallel_correlation and demod_sel != model.vars.demod_select.var_enum.COHERENT:
             adpcwndsizechip = model.vars.antdiv_adpcwndsize.value
             exp = adpcwndsizechip * oversampling_rate_actual / 128.0
             diff_min = 9999.0

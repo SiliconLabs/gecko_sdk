@@ -96,7 +96,7 @@ static int parse_tls_point(const uint8_t **ibuf, size_t *ilen, size_t *rlen,
       break;
     case 0x05:
       // We don't support compressed points...
-      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
     default:
       return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
   }
@@ -784,6 +784,21 @@ int mbedtls_ecjpake_derive_secret(mbedtls_ecjpake_context *ctx,
     *olen = 0;
     return MBEDTLS_ERR_ECP_VERIFY_FAILED;
   }
+}
+
+int mbedtls_ecjpake_write_shared_key(mbedtls_ecjpake_context *ctx,
+                                     unsigned char *buf, size_t len, size_t *olen,
+                                     int (*f_rng)(void *, unsigned char *, size_t),
+                                     void *p_rng)
+{
+  (void)ctx;
+  (void)buf;
+  (void)len;
+  (void)olen;
+  (void)f_rng;
+  (void)p_rng;
+
+  return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
 }
 
 void mbedtls_ecjpake_free(mbedtls_ecjpake_context *ctx)

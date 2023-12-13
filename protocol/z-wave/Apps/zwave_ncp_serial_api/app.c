@@ -45,6 +45,8 @@
 #endif
 #include "ZAF_AppName.h"
 
+#include <assert.h>
+
 /* Basic level definitions */
 #define BASIC_ON 0xFF
 #define BASIC_OFF 0x00
@@ -110,7 +112,7 @@ typedef struct _request_queue_
   CALLBACK_ELEMENT requestQueue[MAX_CALLBACK_QUEUE];
 } REQUEST_QUEUE;
 
-REQUEST_QUEUE callbackQueue;
+REQUEST_QUEUE callbackQueue = {0};
 
 typedef struct _request_unsolicited_queue_
 {
@@ -120,7 +122,7 @@ typedef struct _request_unsolicited_queue_
   CALLBACK_ELEMENT requestQueue[MAX_UNSOLICITED_QUEUE];
 } REQUEST_UNSOLICITED_QUEUE;
 
-REQUEST_UNSOLICITED_QUEUE commandQueue;
+REQUEST_UNSOLICITED_QUEUE commandQueue = {0};
 
 eSerialAPISetupNodeIdBaseType nodeIdBaseType = SERIAL_API_SETUP_NODEID_BASE_TYPE_DEFAULT;
 
@@ -266,6 +268,7 @@ Request(
     callbackQueue.requestQueue[callbackQueue.requestIn].wCmd = cmd;
     if (len > (uint8_t)BUF_SIZE_TX)
     {
+      ASSERT((uint8_t)BUF_SIZE_TX >= len);
       len = (uint8_t)BUF_SIZE_TX;
     }
     callbackQueue.requestQueue[callbackQueue.requestIn].wLen = len;
@@ -306,6 +309,7 @@ RequestUnsolicited(
     commandQueue.requestQueue[commandQueue.requestIn].wCmd = cmd;
     if (len > (uint8_t)BUF_SIZE_TX)
     {
+      ASSERT((uint8_t)BUF_SIZE_TX >= len);
       len = (uint8_t)BUF_SIZE_TX;
     }
     commandQueue.requestQueue[commandQueue.requestIn].wLen = len;
@@ -486,6 +490,7 @@ appFileSystemInit(void)
     ReadApplicationTxPowerlevel(&RadioConfig->iTxPowerLevelMax, &RadioConfig->iTxPowerLevelAdjust);
     ReadApplicationMaxLRTxPwr(&RadioConfig->iTxPowerLevelMaxLR);
     ReadApplicationEnablePTI(&RadioConfig->radio_debug_enable);
+    ReadApplicationNodeIdBaseType(&nodeIdBaseType);
   }
   else
   {
@@ -512,6 +517,7 @@ appFileSystemInit(void)
     SaveApplicationMaxLRTxPwr(RadioConfig->iTxPowerLevelMaxLR);
 
     SaveApplicationEnablePTI(RadioConfig->radio_debug_enable);
+    SaveApplicationNodeIdBaseType(SERIAL_API_SETUP_NODEID_BASE_TYPE_DEFAULT);
   }
 
   ZAF_AppName_Write();
@@ -835,9 +841,8 @@ PopCommandQueue(void)
  * @param pTimer Timer connected to this method
  */
 void
-ZCB_WakeupTimeout(SSwTimer *pTimer)
+ZCB_WakeupTimeout(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
   DPRINT("ZCB_WakeupTimeout\n");
 }
 
@@ -984,9 +989,8 @@ ApplicationInit(
 **
 **--------------------------------------------------------------------------*/
 void /*RET Nothing                  */
-ApplicationCommandHandler(void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
+ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
 {
-  UNUSED(pSubscriberContext);
   ZW_APPLICATION_TX_BUFFER *pCmd = (ZW_APPLICATION_TX_BUFFER *)&pRxPackage->uReceiveParams.Rx.Payload;
   uint8_t cmdLength = pRxPackage->uReceiveParams.Rx.iLength;
   RECEIVE_OPTIONS_TYPE *rxOpt = &pRxPackage->uReceiveParams.Rx.RxOptions;
@@ -1256,9 +1260,8 @@ ZW_WEAK const void * SerialAPI_get_uart_config_ext(void)
 
 #ifdef USB_SUSPEND_SUPPORT
 
-ZW_WEAK void SerialAPI_set_usb_supend_callback(SerialAPI_hw_usb_suspend_callback_t callback)
+ZW_WEAK void SerialAPI_set_usb_supend_callback(__attribute__((unused)) SerialAPI_hw_usb_suspend_callback_t callback)
 {
-  UNUSED(callback);
 }
 
 ZW_WEAK void SerialAPI_hw_usb_suspend_handler(void)

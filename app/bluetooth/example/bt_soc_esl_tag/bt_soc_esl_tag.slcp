@@ -22,6 +22,7 @@ component:
   - id: gatt_service_device_information
   - id: bootloader_interface
   - id: component_catalog
+  - id: board_control
   - id: mpu
   - id: in_place_ota_dfu
   - id: sl_memory

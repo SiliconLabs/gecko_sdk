@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_xg24-rb4115b
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo_freq_39mhz
@@ -48,6 +49,8 @@
     value: '"BRD4115B"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

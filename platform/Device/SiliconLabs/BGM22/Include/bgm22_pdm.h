@@ -360,4 +360,4 @@ typedef struct {
 /** @} End of group BGM22_PDM */
 /** @} End of group Parts */
 
-#endif /* BGM22_PDM_H */
+#endif // BGM22_PDM_H

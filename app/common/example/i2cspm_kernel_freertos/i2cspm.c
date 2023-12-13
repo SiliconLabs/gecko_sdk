@@ -163,10 +163,14 @@ static uint32_t decode_temp(uint8_t* read_register)
 
   // Formula to decode read Temperature from the Si7021 Datasheet
   tempValue = ((uint32_t) read_register[0] << 8) + (read_register[1] & 0xfc);
-  actual_temp = (((tempValue) * 175.72) / 65536) - 46.85;
+  actual_temp = (((tempValue) * 175.72f) / 65536) - 46.85f;
 
   // Round the temperature to an integer value
-  rounded_temp = (uint32_t)(actual_temp + 0.5 - (actual_temp < 0));
+  if (actual_temp < 0) {
+    rounded_temp = (uint32_t)(actual_temp - 0.5f);
+  } else {
+    rounded_temp = (uint32_t)(actual_temp + 0.5f);
+  }
 
   return rounded_temp;
 }

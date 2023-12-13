@@ -223,7 +223,7 @@ float sl_coulomb_counter_get_charge(sl_coulomb_counter_output_mask_t outputs_mas
    *  Number of Pulses = reg * 2^
    */
   power = 16 - 2 * handle.prescaler;
-  total = total * pow(2, power);
+  total = total * (float)pow(2, power);
 #endif
 
   return total;

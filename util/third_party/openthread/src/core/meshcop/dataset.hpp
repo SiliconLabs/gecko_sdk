@@ -200,7 +200,7 @@ public:
          * MUST be used when Active Timestamp component is present in the Dataset, otherwise its behavior is
          * undefined.
          *
-         * @returns The Active Timestamp in the Dataset.
+         * @param[out] aTimestamp  A reference to output the Active Timestamp in the Dataset.
          *
          */
         void GetActiveTimestamp(Timestamp &aTimestamp) const { aTimestamp.SetFromTimestamp(mActiveTimestamp); }
@@ -231,7 +231,7 @@ public:
          * MUST be used when Pending Timestamp component is present in the Dataset, otherwise its behavior
          * is undefined.
          *
-         * @returns The Pending Timestamp in the Dataset.
+         * @param[out] aTimestamp  A reference to output the Pending Timestamp in the Dataset.
          *
          */
         void GetPendingTimestamp(Timestamp &aTimestamp) const { aTimestamp.SetFromTimestamp(mPendingTimestamp); }
@@ -770,6 +770,9 @@ public:
      *
      * @tparam ValueType    The type of TLV's Value.
      *
+     * Specializations of this template method are provided for `uint16_t` and `uint32_t` types which ensure big-endian
+     * encoding is used.
+     *
      * @param[in] aType     The TLV Type.
      * @param[in] aValue    The TLV Value (of type `ValueType`).
      *
@@ -780,6 +783,9 @@ public:
     template <typename ValueType> Error SetTlv(Tlv::Type aType, const ValueType &aValue)
     {
         static_assert(!TypeTraits::IsPointer<ValueType>::kValue, "ValueType must not be a pointer");
+        static_assert(!TypeTraits::IsSame<ValueType, uint16_t>::kValue, "Specialization must be used for uint16_t");
+        static_assert(!TypeTraits::IsSame<ValueType, uint32_t>::kValue, "Specialization must be used for uint32_t");
+        static_assert(!TypeTraits::IsSame<ValueType, uint64_t>::kValue, "Specialization must be used for uint64_t");
 
         return SetTlv(aType, &aValue, sizeof(ValueType));
     }

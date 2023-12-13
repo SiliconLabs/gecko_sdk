@@ -383,4 +383,4 @@ typedef struct {
 /** @} End of group EFR32BG24_KEYSCAN */
 /** @} End of group Parts */
 
-#endif /* EFR32BG24_KEYSCAN_H */
+#endif // EFR32BG24_KEYSCAN_H

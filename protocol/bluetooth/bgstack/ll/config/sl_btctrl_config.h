@@ -25,6 +25,11 @@
 // <i> Define the maximum number of connection events since the previous Number Of Completed Packets HCI event to trigger reporting of any unreported completed ACL packets.
 #define SL_BT_CONTROLLER_COMPLETED_PACKETS_EVENTS_TIMEOUT     (3)
 
+// <o SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS> Maximum number of queued advertisement reports <1-255>
+// <i> Default: 10
+// <i> Define the maximum number of queued advertisement reports. Additional advertisement reports are dropped.
+#define SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS     (10)
+
 // </h> Bluetooth Controller Configuration
 
 // <<< end of configuration section >>>

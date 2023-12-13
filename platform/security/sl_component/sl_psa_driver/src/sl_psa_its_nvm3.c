@@ -28,6 +28,11 @@
  *
  ******************************************************************************/
 
+// The psa_driver_wrappers.h file that we're including here assumes that it has
+// access to private struct members. Define this here in order to avoid
+// compilation errors.
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+
 // -------------------------------------
 // Includes
 

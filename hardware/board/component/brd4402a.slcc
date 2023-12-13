@@ -10,6 +10,7 @@
 - provides:
   - name: brd4402a
   - name: hardware_board_from_stk
+  - name: hardware_board_from_xg22-rb4402a
 - recommends:
   - id: brd4402a_a02
 - ui_hints:

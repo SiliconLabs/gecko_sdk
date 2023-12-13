@@ -4,16 +4,18 @@ package: OpenThread
 description:  >
   This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
 category: OpenThread Examples
-quality: production
+quality: experimental
 
 component:
   - id: ot_stack_ftd
   - id: ot_ncp_source
+  - id: ot_crash_handler
   - id: uartdrv_usart
     instance:
       - vcom
   - id: rail_util_pti
   - id: bootloader_interface
+  - id: ot_rtt_log
 
 include:
   - path: .
@@ -34,6 +36,18 @@ configuration:
     value: 1
   - name: SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
     value: 1
+  - name: OPENTHREAD_CONFIG_LOG_OUTPUT
+    value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 768
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 128
+    condition: [ot_rtt_log, device_family_efr32mg1]
+  - name: BUFFER_SIZE_DOWN
+    value: 0
+    condition: [ot_rtt_log]
 
 tag:
   - prebuilt_demo

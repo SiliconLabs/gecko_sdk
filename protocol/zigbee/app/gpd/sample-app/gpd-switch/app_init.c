@@ -23,9 +23,6 @@ void app_init(void)
   // Initialise NV
   emberGpdNvInit();
 
-  // Initialise timer for rxOffset timing during rxAfterTx
-  emberGpdLeTimerInit();
-
   // Initialise Radio
   emberGpdRadioInit();
 
@@ -34,24 +31,4 @@ void app_init(void)
 
   //Initialise the Gpd
   (void)emberGpdInit();
-}
-
-void emberGpdLeTimerInit(void)
-{
-  // For Low Energy Timing the sleep timer is used , which uses RTC/RTCC
-  // Ensure the clock is enabled.
-
-#if defined _SILICON_LABS_32B_SERIES_2
-#if defined RTCC_PRESENT
-  // Setting RTCC clock source
-  CMU_ClockSelectSet(cmuClock_RTCCCLK, cmuSelect_LFRCO);
-#endif // RTCC_PRESENT
-#elif defined _SILICON_LABS_32B_SERIES_1
-  // Turn on the clock for the RTCC
-  CMU_ClockEnable(cmuClock_HFLE, true);
-  CMU_CLOCK_SELECT_SET(LFE, LFRCO);
-#endif
-#if defined RTCC_PRESENT
-  CMU_ClockEnable(cmuClock_RTCC, true);
-#endif
 }

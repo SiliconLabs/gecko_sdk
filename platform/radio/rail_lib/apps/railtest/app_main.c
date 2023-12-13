@@ -79,6 +79,10 @@
 #include "sl_rail_util_timing_test.h"
 #endif
 
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+#include "railapp_hadm.h"
+#endif
+
 _Static_assert(sizeof(RailAppEvent_t) <= 44,
                "Adjust BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX per sizeof(RailAppEvent_t) growth");
 
@@ -528,8 +532,8 @@ void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
   (void)expectedTimeOfEvent;
   (void)cbArg;
 
-  if (modeSwitchState == TX_ON_NEW_PHY) {
-    restartModeSwitchSequence();
+  if ((modeSwitchState == TX_MS_PACKET) || (modeSwitchState == TX_ON_NEW_PHY)) {
+    restartModeSwitchSequence(false);
   }
   if (modeSwitchState == RX_ON_NEW_PHY) {
     if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
@@ -541,20 +545,30 @@ void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
   }
 }
 
-void restartModeSwitchSequence(void)
+void restartModeSwitchSequence(bool applyDelay)
 {
-  // Re-start sequence: switch back on base channel
-  if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
-      == RAIL_STATUS_NO_ERROR) {
-    changeChannel(modeSwitchBaseChannel);
-    // Write MS PHR in txData
-    txData[0] = MSphr[0];
-    txData[1] = MSphr[1];
-    modeSwitchState = TX_MS_PACKET;
-    // Send MS packet
-    txCount = 1;
-    pendPacketTx();
-    sendPacketIfPending(); // txCount is decremented in this function
+  txCountAfterModeSwitchId = 0;
+  // Start timer if needed
+  if ((modeSwitchDelayUs > 0) && applyDelay) {
+    RAIL_SetMultiTimer(&modeSwitchMultiTimer,
+                       modeSwitchDelayUs,
+                       RAIL_TIME_DELAY,
+                       &RAILCb_ModeSwitchMultiTimerExpired,
+                       NULL);
+  } else {
+    // Re-start sequence: switch back on base channel
+    if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
+        == RAIL_STATUS_NO_ERROR) {
+      changeChannel(modeSwitchBaseChannel);
+      // Write MS PHR in txData
+      txData[0] = MSphr[0];
+      txData[1] = MSphr[1];
+      modeSwitchState = TX_MS_PACKET;
+      // Send MS packet
+      txCount = 1;
+      pendPacketTx();
+      sendPacketIfPending(); // txCount is decremented in this function
+    }
   }
 }
 
@@ -569,6 +583,55 @@ void endModeSwitchSequence(void)
   modeSwitchBaseChannel = 0xFFFFU;
   modeSwitchNewChannel = 0xFFFFU;
   setNextAppMode(NONE, NULL);
+}
+
+void scheduleNextModeSwitchTx(bool MSPktSent)
+{
+  if (MSPktSent) {
+    internalTransmitCounter++;
+    // previousTxAppendedInfo.isAck already initialized false
+    previousTxAppendedInfo.timeSent.totalPacketBytes = txDataLen;
+    (void) RAIL_GetTxPacketDetailsAlt2(railHandle, &previousTxAppendedInfo);
+    (void) (*txTimePosition)(railHandle, &previousTxAppendedInfo);
+  }
+  if (txCountAfterModeSwitchId == 0) {     // Scheduled packet was MS packet
+    if (MSPktSent && (RAIL_IsValidChannel(railHandle, modeSwitchNewChannel)
+                      == RAIL_STATUS_NO_ERROR)) {
+      changeChannel(modeSwitchNewChannel);
+      modeSwitchState = TX_ON_NEW_PHY;
+    }
+
+    // Restore first 2 bytes overwritten by Mode Switch PHR
+    txData[0] = txData_2B[0];
+    txData[1] = txData_2B[1];
+
+    if (MSPktSent && (txCountAfterModeSwitch != 0)) {
+      // Send next packets asap
+      txCount = txCountAfterModeSwitch;
+      pendPacketTx();
+      sendPacketIfPending();   // txCount is decremented in this function
+      txCountAfterModeSwitchId++;
+    } else {
+      modeSwitchSequenceId++;
+      if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
+        restartModeSwitchSequence(true);
+      } else {
+        endModeSwitchSequence();
+      }
+    }
+  } else {
+    if (txCountAfterModeSwitchId < txCountAfterModeSwitch) {   // Scheduled packet was not the last data packet to be tx
+      txCountAfterModeSwitchId++;
+      scheduleNextTx();
+    } else {
+      modeSwitchSequenceId++;
+      if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
+        restartModeSwitchSequence(true);
+      } else {
+        endModeSwitchSequence();
+      }
+    }
+  }
 }
 #endif
 
@@ -632,6 +695,12 @@ static void RAILCb_RssiAverageDone(RAIL_Handle_t railHandle)
 // Override weak function called by callback RAILCb_AssertFailed.
 void sl_rail_util_on_assert_failed(RAIL_Handle_t railHandle, uint32_t errorCode)
 {
+#ifdef _SILICON_LABS_32B_SERIES_1
+  // On Series 1, we want to ignore the assert for mismatched crystal frequnecies
+  if (errorCode == RAIL_ASSERT_INVALID_XTAL_FREQUENCY) {
+    return;
+  }
+#endif
   (void)railHandle;
   static const char* railErrorMessages[] = RAIL_ASSERT_ERROR_MESSAGES;
   const char *errorMessage = "Unknown";
@@ -686,6 +755,12 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   }
   if (events & (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT)) {
     counters.syncDetect++;
+    if (events & RAIL_EVENT_RX_SYNC1_DETECT) {
+      counters.syncDetect1++;
+    }
+    if (events & RAIL_EVENT_RX_SYNC2_DETECT) {
+      counters.syncDetect2++;
+    }
     rxFifoPrep();
     if (printRxFreqOffsetData) {
       rxFreqOffset = RAIL_GetRxFreqOffset(railHandle);
@@ -866,31 +941,31 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     txRepeatCount = 0;
     newTxError = true;
     failPackets++;
-    scheduleNextTx();
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
+    if ((modeSwitchState == TX_MS_PACKET) || (modeSwitchState == TX_ON_NEW_PHY)) { // Packet has been sent in a MS context
+      scheduleNextModeSwitchTx(false);
+    } else
+ #endif
+    {
+      scheduleNextTx();
+    }
 
     // Increment counters for TX events
     if (events & RAIL_EVENT_TX_ABORTED) {
       counters.userTxAborted++;
     }
     if (events & RAIL_EVENT_TX_BLOCKED) {
+#ifdef SL_CATALOG_HADM_CLI_PRESENT
+      RAILCb_TxBlockedHadm(railHandle);
+#endif
       counters.userTxBlocked++;
     }
     if (events & RAIL_EVENT_TX_UNDERFLOW) {
       counters.userTxUnderflow++;
     }
-#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY_SIZE)
-    if (modeSwitchState == TX_MS_PACKET) {
-      // Restore first 2 bytes overwritten by Mode Switch PHR
-      txData[0] = txData_2B[0];
-      txData[1] = txData_2B[1];
-
-      modeSwitchState = IDLE;
-      modeSwitchDelayUs = 0;
-      modeSwitchBaseChannel = 0xFFFFU;
-      modeSwitchNewChannel = 0xFFFFU;
-      setNextAppMode(NONE, NULL);
+    if (events & RAIL_EVENT_TX_CHANNEL_BUSY) {
+      counters.txChannelBusy++;
     }
- #endif
   }
   // Put this here too so that we do these things twice
   // in the case that an ack and a non ack have completed
@@ -1074,12 +1149,23 @@ void printNewTxError(void)
 
   if (newTxError) {
     newTxError = false;
-    if (lastTxStatus & (RAIL_EVENT_TX_UNDERFLOW | RAIL_EVENT_TX_ABORTED)) {
+    if (lastTxStatus & (RAIL_EVENT_TX_UNDERFLOW)) {
       if (logLevel & ASYNC_RESPONSE) {
         paramLastTxStatus = lastTxStatus;
         responsePrint("txPacket",
                       "txStatus:Error,"
-                      "errorReason:Tx underflow or abort,"
+                      "errorReason:Tx underflow,"
+                      "errorCode:0x%x%08x",
+                      (uint32_t)(paramLastTxStatus >> 32),
+                      (uint32_t)(paramLastTxStatus));
+      }
+    }
+    if (lastTxStatus & (RAIL_EVENT_TX_ABORTED)) {
+      if (logLevel & ASYNC_RESPONSE) {
+        paramLastTxStatus = lastTxStatus;
+        responsePrint("txPacket",
+                      "txStatus:Error,"
+                      "errorReason:Tx abort,"
                       "errorCode:0x%x%08x",
                       (uint32_t)(paramLastTxStatus >> 32),
                       (uint32_t)(paramLastTxStatus));
@@ -1117,7 +1203,6 @@ void printNewTxError(void)
                       (uint32_t)(paramLastTxStatus >> 32),
                       (uint32_t)(paramLastTxStatus));
       }
-      counters.txChannelBusy++;
     }
     if (lastTxStatus & RAIL_EVENT_TX_CHANNEL_CLEAR) {
       if (logLevel & ASYNC_RESPONSE) {
@@ -1248,9 +1333,13 @@ void sendPacketIfPending(void)
       txRepeatCount = 0;
       if (txCancelMode == RAIL_STOP_MODES_NONE) {
         RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
+      } else if (txCancelMode >= 4U) {
+        RAIL_IdleMode_t idleMode = (RAIL_IdleMode_t) (txCancelMode - 4U);
+        RAIL_Idle(railHandle, idleMode, true);
       } else {
         RAIL_StopTx(railHandle, txCancelMode);
       }
+      scheduleNextTx(); // callback may not fire, so fake it
     }
   }
 }

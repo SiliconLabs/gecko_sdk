@@ -10,7 +10,7 @@ class RM_Peripheral_RFCRC_S(Base_RM_Peripheral):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_RFCRC_S, self).__init__(rmio, label,
-            0xA8010000, 'RFCRC_S',
+            0xA0210000, 'RFCRC_S',
             u"",
             [])
         self.IPVERSION = RM_Register_RFCRC_S_IPVERSION(self.zz_rmio, self.zz_label)

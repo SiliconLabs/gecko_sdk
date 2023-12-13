@@ -87,4 +87,9 @@
   #define TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
 #endif
 
+// PAKE module
+#if !defined(PSA_WANT_ALG_JPAKE)
+  #define TFM_CRYPTO_PAKE_MODULE_DISABLED
+#endif
+
 #endif // SLI_PSA_TFM_TRANSLATION_H

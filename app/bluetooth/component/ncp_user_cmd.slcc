@@ -21,3 +21,6 @@ provides:
 requires:
   - name: silabs_core_sl_malloc
   - name: app_timer
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp-user-cmd

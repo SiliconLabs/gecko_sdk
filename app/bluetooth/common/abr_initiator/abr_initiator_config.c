@@ -30,13 +30,14 @@
 
 #include "sl_bt_api.h"
 #include "abr_initiator_config.h"
+#include "abr_initiator_component_config.h"
 
 sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
 {
-  // Main mode. mode_2: RTP, mode_1: RTT
+  // Main mode. mode_2: PBR, mode_1: RTT
   config->mode =                        sl_bt_cs_mode_pbr;
-  // Submode
-  config->submode =                     sl_bt_cs_mode_rtt;
+  // Submode. Not used.
+  config->submode =                     SUBMODE_NOT_USED;
   // Minimum suggested duration for each ABR subevent in microseconds. Range: 0x01 to 0xFFFFFF
   config->min_subevent_len =            1;
   // Maximum suggested duration for each ABR subevent in microseconds. Range: 0x01 to 0xFFFFFF
@@ -51,12 +52,14 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   config->scan_window =                 16;
   // Minimum duration in number of connection events between consecutive measurement procedure.
   // Range: 0x01 to 0xFF
-  config->min_interval =                5;
+  config->min_interval =                ABR_INITIATOR_MIN_CS_INTERVAL;
   // Maximum duration in number of connection events between consecutive measurement procedure.
   // Range: 0x01 to 0xFF
-  config->max_interval =                5;
+  config->max_interval =                ABR_INITIATOR_MAX_CS_INTERVAL;
   // Procedure execution number
-  config->max_procedure_count =         1;
+  // Value: 0. Free running
+  // Value: 1. Start new procedure after one finished.
+  config->max_procedure_count =         0;
   // Scanning PHY
   config->scan_phy =                    sl_bt_gap_phy_coding_1m_uncoded;
   // Connection PHY
@@ -64,9 +67,9 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   // Only one channel is supported
   config->config_id =                   1;
   // Range: 0x02 to 0xA0
-  config->min_main_mode_steps =         0xff;
+  config->min_main_mode_steps =         3;
   // Range: 0x02 to 0xA0
-  config->max_main_mode_steps =         0xff;
+  config->max_main_mode_steps =         5;
   // The number of main mode steps taken from the end of the last ABR subevent
   // to be repeated at the beginning of the current ABR subevent directly after
   // the last Mode 0 step of that event. Range: 0x01 to 0x03
@@ -82,7 +85,7 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   // Range: 0x0001 to 0xFFFF
   config->max_procedure_duration =      0xffff;
   // Transmit power delta, in signed dB.
-  config->tx_pwr_delta =                0x80;
+  config->tx_pwr_delta =                0x00;
   // Antenna configuration index. Range: 0x01 to 0x07
   config->antenna_config =              0;
   // BT address for filtering reflectors
@@ -111,7 +114,7 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   // Antenna identifier to be used for ABR
   config->cs_sync_antenna =             1;
   // Connection maximum TX power in dBm
-  config->tx_power_requested_max_dbm =  10;
+  config->tx_power_requested_max_dbm =  20;
   // Connection minimum TX power in dBm
   config->tx_power_requested_min_dbm =  -10;
   // RTT type
@@ -122,18 +125,22 @@ sl_status_t abr_initiator_config_set_default(abr_initiator_config_t *config)
   config->ch3c_shape =                  sl_bt_cs_ch3c_shape_hat;
   // Companion signal enable/disable.
   config->companion_signal_enable =     sl_bt_cs_companion_signal_status_disable;
+  // Wired or wireless offset. Default is wireless.
+  config->use_antenna_wired_offset =    false;
+  // Channel map length
+  #define CHANNEL_MAP_LEN sizeof(config->channel_map.data) / sizeof(config->channel_map.data[0])
+  config->channel_map_len = CHANNEL_MAP_LEN;
+  // Channel map
+  const uint8_t channel_map_data[CHANNEL_MAP_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+  memcpy(config->channel_map.data, channel_map_data, config->channel_map_len);
 
-  switch (config->mode) {
-    case sl_bt_cs_mode_rtt: // RTT
-      config->submode = 0xff;
-      break;
-    case sl_bt_cs_mode_pbr: // Phase based
-      config->submode = sl_bt_cs_mode_rtt;
-      break;
-    default:
-      return SL_STATUS_INVALID_PARAMETER;
-      break;
-  }
+  // NOTE: the RTL library doesn't support anything else besides all
+  // 80 channels (excluding advertising channels) enabled as of yet - that's why the config is overridden here.
+  // This part should be deleted once RTL supports arbitrary channel mapping.
+  // Exclude advertising channels 0, 1, 23, 24, 25, 77, 78, 79
+  const uint8_t fixed_channel_config[CHANNEL_MAP_LEN] = { 0xFC, 0xFF, 0x7F, 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x1F };
+  memcpy(config->channel_map.data, fixed_channel_config, CHANNEL_MAP_LEN);
+  config->rtl_handle = NULL;
 
   return SL_STATUS_OK;
 }

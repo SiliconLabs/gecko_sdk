@@ -42,12 +42,10 @@ static received_frame_status_t
 CC_Battery_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength,
+  __attribute__((unused)) uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER *pFrameOut,
-  uint8_t * pFrameOutLength)  
+  uint8_t * pFrameOutLength)
 {
-  UNUSED(cmdLength);
-
   if (pCmd->ZW_Common.cmd == BATTERY_GET)
   {
     if (true == Check_not_legal_response_job(rxOpt))
@@ -119,23 +117,24 @@ CC_Battery_LevelReport_tx(
   uint8_t sourceEndpoint,
   VOID_CALLBACKFUNC(pCbFunc)(TRANSMISSION_RESULT * pTransmissionResult))
 {
-  CMD_CLASS_GRP cmdGrp = {COMMAND_CLASS_BATTERY, BATTERY_REPORT};
+  CMD_CLASS_GRP cmdGrp = {
+    .cmdClass=COMMAND_CLASS_BATTERY,
+    .cmd=BATTERY_REPORT
+  };
   uint8_t battLevel = CC_Battery_BatteryGet_handler(sourceEndpoint);
 
   if(JOB_STATUS_SUCCESS == cc_engine_multicast_request(pProfile, sourceEndpoint, &cmdGrp, &battLevel, 1, false, pCbFunc)) {
     BatteryData.lastReportedBatteryLevel = battLevel;
-    cc_battery_write(&BatteryData);    
+    cc_battery_write(&BatteryData);
     return true;
   } else {
     return false;
   }
 }
 
-ZW_WEAK uint8_t 
-CC_Battery_BatteryGet_handler(uint8_t endpoint)
+ZW_WEAK uint8_t
+CC_Battery_BatteryGet_handler(__attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
-
   return (uint8_t)CMD_CLASS_BATTERY_LEVEL_FULL;
 }
 

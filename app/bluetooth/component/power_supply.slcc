@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/power_supply
 tag:
   - No-Code
-
 source:
   - path: sl_power_supply.c
 include:
@@ -28,6 +27,10 @@ requires:
   - name: emlib_iadc
     condition:
       - device_has_iadc
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: power_supply
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/power-supply

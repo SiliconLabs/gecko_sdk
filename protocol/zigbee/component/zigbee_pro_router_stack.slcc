@@ -3,7 +3,6 @@ label: Pro Router Stack
 package: Zigbee
 category: Zigbee|Stack|Pro Core
 quality: evaluation
-
 description: The main Zigbee PRO Stack component for routers only for parsing, processing, generating and managing the Zigbee PRO stack messages and functionality.  It includes stubs for code only needed on end devices or coordinators.
 
 provides:
@@ -15,14 +14,14 @@ requires:
   - name: zigbee_pro_router_stack_implementation
   - name: zigbee_pro_router_stack_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_stack_common
   - name: lower_mac_spinel
     condition:
       - zigbee_stack_unix
 
 recommends:
-  - id: zigbee_pro_router_stack_source
+  - id: zigbee_pro_router_stack_library_internal
 
 config_file:
   - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_stack_config.h

@@ -26,6 +26,9 @@ config_file:
   - path: "config/eusart/s2/sl_uartdrv_eusart_{{instance}}_config.h"
     file_id: uartdrv_eusart_config
     condition: [device_series_2]
+  - path: "config/eusart/s3/sl_uartdrv_eusart_{{instance}}_config.h"
+    file_id: uartdrv_eusart_config
+    condition: [device_series_3]
 provides:
   - name: "uartdrv_instance"
     allow_multiple: true

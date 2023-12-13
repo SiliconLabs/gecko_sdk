@@ -142,6 +142,7 @@
   - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
+  - id: silabs_core_sl_malloc
 - requires:
   - name: cmsis_core
 - template_contribution:

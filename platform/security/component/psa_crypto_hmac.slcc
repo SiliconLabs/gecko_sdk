@@ -14,11 +14,14 @@ requires:
     condition: [device_series_0]
   - name: mbedtls_hmac
     condition: [device_series_1]
+  - name: sl_si91x_psa_hmac
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_HMAC
+    value: PSA_WANT_ALG_HMAC 1
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_HMAC
+    value: PSA_WANT_KEY_TYPE_HMAC 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_HMAC 1"
     condition: [mbedtls_hmac]

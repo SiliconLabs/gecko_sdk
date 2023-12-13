@@ -68,6 +68,18 @@
 #endif
 
 /**
+ * @def OPENTHREAD_SPINEL_CONFIG_RCP_TIME_SYNC_INTERVAL
+ *
+ * This setting configures the interval (in units of microseconds) for host-rcp
+ * time sync. The host will recalculate the time offset between host and RCP
+ * every interval.
+ *
+ */
+#ifndef OPENTHREAD_SPINEL_CONFIG_RCP_TIME_SYNC_INTERVAL
+#define OPENTHREAD_SPINEL_CONFIG_RCP_TIME_SYNC_INTERVAL (60 * 1000 * 1000)
+#endif
+
+/**
  * @def OPENTHREAD_SPINEL_CONFIG_TX_WAIT_TIME_SECS
  *
  * Defines the Tx wait duration in seconds.

@@ -9,15 +9,13 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
-ZW_WEAK bool cc_central_scene_read(central_scene_configuration_t* pConfig)
+ZW_WEAK bool cc_central_scene_read(__attribute__((unused)) central_scene_configuration_t* pConfig)
 {
-  UNUSED(pConfig);
   return true;
 }
 
-ZW_WEAK bool cc_central_scene_write(const central_scene_configuration_t* pConfig)
+ZW_WEAK bool cc_central_scene_write(__attribute__((unused)) const central_scene_configuration_t* pConfig)
 {
-  UNUSED(pConfig);
   return true;
 }
 

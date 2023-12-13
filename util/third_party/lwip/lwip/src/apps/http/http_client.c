@@ -130,6 +130,11 @@ typedef enum ehttpc_parse_state {
   HTTPC_PARSE_RX_DATA
 } httpc_parse_state_t;
 
+#if defined(__ICCARM__)
+/* Suppress warnings 'typedef name has already been declared (with same type)' originating with IAR Embedded Workbench */
+#pragma diag_suppress=Pe301
+#endif
+
 typedef struct _httpc_state
 {
   struct altcp_pcb* pcb;
@@ -151,6 +156,10 @@ typedef struct _httpc_state
   char* uri;
 #endif
 } httpc_state_t;
+
+#if defined(__ICCARM__)
+#pragma diag_default=Pe301
+#endif
 
 /** Free http client state and deallocate all resources within */
 static err_t

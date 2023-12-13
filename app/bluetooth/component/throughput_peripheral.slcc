@@ -13,13 +13,12 @@ quality: production
 root_path: app/bluetooth/common/throughput_peripheral
 tag:
   - No-Code
-
 include:
   - path: .
     file_list:
       - path: throughput_peripheral.h
 config_file:
-  - path: "config/throughput_peripheral_config.h"
+  - path: config/throughput_peripheral_config.h
   - path: throughput_peripheral.xml
     directory: btconf
 source:
@@ -43,7 +42,6 @@ requires:
   - name: app_timer
   - name: sleeptimer
   - name: throughput_ui
-
 recommends:
   - id: app_timer
   - id: throughput_ui_log
@@ -75,11 +73,11 @@ template_contribution:
   - name: cli_group
     value:
       name: throughput_peripheral
-      help: "Throughput Peripheral"
+      help: Throughput Peripheral
       shortcuts:
         - name: peripheral
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: throughput_peripheral
@@ -87,9 +85,9 @@ template_contribution:
       handler: cli_throughput_peripheral_stop
       shortcuts:
         - name: x
-      help: "Stops transmission"
+      help: Stops transmission
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: throughput_peripheral
@@ -97,12 +95,12 @@ template_contribution:
       handler: cli_throughput_peripheral_start
       shortcuts:
         - name: s
-      help: "Starts transmission"
+      help: Starts transmission
       argument:
       - type: uint8
         help: "Type: 1: notification, 2: indication"
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: throughput_peripheral
@@ -110,17 +108,16 @@ template_contribution:
       handler: cli_throughput_peripheral_status
       shortcuts:
         - name: t
-      help: "Prints current status"
-
+      help: Prints current status
   - name: cli_group
     value:
       group: throughput_peripheral
       name: mode
-      help: "Mode"
+      help: Mode
       shortcuts:
         - name: m
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: mode
@@ -128,14 +125,14 @@ template_contribution:
       handler: cli_throughput_peripheral_mode_set
       shortcuts:
         - name: s
-      help: "Set transmission mode"
+      help: Set transmission mode
       argument:
       - type: uint8
         help: "Mode: 0:Continous, 1:Fixed size, 2: Fixed time"
       - type: uint32
-        help: "Value to set (in case of fixed time/size)"
+        help: Value to set (in case of fixed time/size)
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: mode
@@ -145,16 +142,16 @@ template_contribution:
         - name: g
       help: "Get transmission mode, 0:Continous, 1:Fixed size, 2: Fixed time"
     condition:
-      - "cli"
+      - cli
   - name: cli_group
     value:
       group: throughput_peripheral
       name: power
-      help: "Power settings"
+      help: Power settings
       shortcuts:
         - name: p
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: power
@@ -162,16 +159,16 @@ template_contribution:
       handler: cli_throughput_tx_power_set
       shortcuts:
         - name: s
-      help: "Set power"
+      help: Set power
       argument:
       - type: int16
-        help: "Power in dBm"
+        help: Power in dBm
       - type: uint8
-        help: "Enable adaptive power control"
+        help: Enable adaptive power control
       - type: uint8
-        help: "Enable deep sleep"
+        help: Enable deep sleep
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: power
@@ -179,18 +176,18 @@ template_contribution:
       handler: cli_throughput_tx_power_get
       shortcuts:
         - name: g
-      help: "Read power settings"
+      help: Read power settings
     condition:
-      - "cli"
+      - cli
   - name: cli_group
     value:
       group: throughput_peripheral
       name: data
-      help: "Data settings"
+      help: Data settings
       shortcuts:
         - name: d
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: data
@@ -198,16 +195,16 @@ template_contribution:
       handler: cli_throughput_peripheral_data_set
       shortcuts:
         - name: s
-      help: "Set data sizes"
+      help: Set data sizes
       argument:
       - type: uint8
-        help: "Maximum MTU size"
+        help: Maximum MTU size
       - type: uint8
-        help: "Indication transfer size"
+        help: Indication transfer size
       - type: uint8
-        help: "Notification transfer size"
+        help: Notification transfer size
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: data
@@ -215,6 +212,9 @@ template_contribution:
       handler: cli_throughput_peripheral_data_get
       shortcuts:
         - name: g
-      help: "Read data settings"
+      help: Read data settings
     condition:
-      - "cli"
+      - cli
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/throughput-peripheral

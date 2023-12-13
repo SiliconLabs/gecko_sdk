@@ -17,20 +17,20 @@
 
 /***************************************************************************//**
  * @addtogroup legacyhal
- * @{
+ *  @{
  ******************************************************************************/
 
 /** @addtogroup diagnostics Diagnostics
  * @brief Crash and watchdog diagnostic functions.
  *
  * See diagnostic.h for source code.
- *@{
+ *  @{
  */
 
 #ifndef DIAGNOSTIC_H
 #define DIAGNOSTIC_H
 
-// Define the reset reasons that should print out detailed crash data.
+/// @brief Define the reset reasons that should print out detailed crash data.
 #define RESET_CRASH_REASON_MASK ((1 << RESET_UNKNOWN)    \
                                  | (1 << RESET_WATCHDOG) \
                                  | (1 << RESET_CRASH)    \
@@ -38,18 +38,19 @@
                                  | (1 << RESET_FAULT)    \
                                  | (1 << RESET_FATAL))
 
+/// @brief Define Hal assert information type
 typedef struct {
-  const char * file;
-  uint32_t     line;
+  const char * file;                               ///< file
+  uint32_t     line;                               ///< line
 } HalAssertInfoType;
 
-// note that assertInfo and dmaProt are written just before a forced reboot
+/// @brief note that assertInfo and dmaProt are written just before a forced reboot
 typedef union {
-  HalAssertInfoType assertInfo;
-  struct { uint32_t channel; uint32_t address; } dmaProt;
+  HalAssertInfoType assertInfo;                    ///< assertInfo
+  struct { uint32_t channel; uint32_t address; } dmaProt;                                            ///< dmaProt
 } HalCrashSpecificDataType;
 
-// Define crash registers as structs so a debugger can display their bit fields
+/// @brief Define crash registers as structs so a debugger can display their bit fields
 typedef union {
   struct {
     uint32_t EXCPT          : 9;  // B0-8
@@ -62,11 +63,12 @@ typedef union {
     uint32_t C              : 1;  // B29
     uint32_t Z              : 1;  // B30
     uint32_t N              : 1;  // B31
-  } bits;
+  } bits;                                          ///< bits
 
-  uint32_t word;
+  uint32_t word;                                   ///< word
 } HalCrashxPsrType;
 
+/// @brief  Define crash registers as structs so a debugger can display their bit fields
 typedef union {
   struct {
     uint32_t VECTACTIVE     : 9;  // B0-8
@@ -83,9 +85,9 @@ typedef union {
     uint32_t PENDSVSET      : 1;  // B28
     uint32_t                : 2;  // B29-30
     uint32_t NMIPENDSET     : 1;  // B31
-  } bits;
+  } bits;                                          ///< bits
 
-  uint32_t word;
+  uint32_t word;                                   ///< word
 } HalCrashIcsrType;
 
 typedef union {

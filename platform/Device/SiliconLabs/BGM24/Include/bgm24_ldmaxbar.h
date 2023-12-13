@@ -93,4 +93,4 @@ typedef struct {
 /** @} End of group BGM24_LDMAXBAR */
 /** @} End of group Parts */
 
-#endif /* BGM24_LDMAXBAR_H */
+#endif // BGM24_LDMAXBAR_H

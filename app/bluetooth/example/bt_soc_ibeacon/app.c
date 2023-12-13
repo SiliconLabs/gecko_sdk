@@ -203,6 +203,6 @@ static void bcn_setup_adv_beaconing(void)
 
   // Start advertising in user mode and disable connections.
   sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                     sl_bt_advertiser_non_connectable);
+                                     sl_bt_legacy_advertiser_non_connectable);
   app_assert_status(sc);
 }

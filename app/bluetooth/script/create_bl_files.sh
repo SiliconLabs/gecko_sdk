@@ -48,8 +48,11 @@ fi
 # output path of the OTA and UART DFU gbl files
 PATH_GBL="${PATH_PROJ}/output_gbl"
 
-# out file path 
-PATH_OUT=`find ${PATH_PROJ} -type f \( -iname ${FILE_EXTENSION_GCC} -or -iname ${FILE_EXTENSION_IAR} \) -exec echo {} \;`
+# out file path
+PATH_OUT=`find ${PATH_PROJ} -type f \( -iname ${FILE_EXTENSION_GCC} \) -exec echo {} \;`
+if [[ -z ${PATH_OUT} ]]; then
+  PATH_OUT=`find ${PATH_PROJ} -type f \( -iname ${FILE_EXTENSION_IAR} \) -exec echo {} \;`
+fi
 
 if [[ -z ${PATH_OUT} ]]; then
   echo "Error: neither ${FILE_EXTENSION_GCC} nor ${FILE_EXTENSION_IAR} found"
@@ -142,7 +145,7 @@ else
   "${COMMANDER}" gbl create "${PATH_GBL}/${OTA_APPLO_NAME}.gbl" --app "${PATH_GBL}/${OTA_APPLO_NAME}.srec"
 fi
 
-echo 
+echo
 echo "**********************************************************************"
 echo "Creating ${OTA_APPLI_NAME}.gbl for OTA"
 echo "**********************************************************************"
@@ -212,7 +215,7 @@ if [[ -f $GBL_SIGING_KEY_FILE ]]; then
     cp "${PATH_GBL}/${OTA_APPLI_NAME}-signed.srec" "${PATH_GBL}/${UARTDFU_FULL_NAME}-signed.srec"
   fi
   "${COMMANDER}" gbl create "${PATH_GBL}/${UARTDFU_FULL_NAME}-signed.gbl" --app "${PATH_GBL}/${UARTDFU_FULL_NAME}-signed.srec" --sign ${GBL_SIGING_KEY_FILE}
-  
+
   # create signed and encrypted GBL file for if both sign-key and encrypt-key file exist
   if [[ -f $GBL_ENCRYPT_KEY_FILE ]]; then
     echo

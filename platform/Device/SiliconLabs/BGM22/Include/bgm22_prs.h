@@ -1316,4 +1316,4 @@ typedef struct {
 /** @} End of group BGM22_PRS */
 /** @} End of group Parts */
 
-#endif /* BGM22_PRS_H */
+#endif // BGM22_PRS_H

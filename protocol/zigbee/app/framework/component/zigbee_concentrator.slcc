@@ -1,23 +1,20 @@
 package: Zigbee
-description: Code that handles periodically broadcasting a many-to-one-route-request
-  (MTORR) so that the device will act as a concentrator (sink) in the network. Note
-  NCP/SoC source route table size can now be defined as part of the source routing
-  library.
+description: Code that handles periodically broadcasting a many-to-one-route-request (MTORR) so that the device will act as a concentrator (sink) in the network. Note NCP/SoC source route table size can now be defined as part of the source routing library.
 label: Concentrator Support
 quality: production
 id: zigbee_concentrator
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_concentrator"
+  - name: zigbee_concentrator
 requires:
-   - name: "zigbee_source_route"
+  - name: zigbee_source_route
 config_file:
   - path: protocol/zigbee/app/framework/plugin/concentrator/config/concentrator-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/concentrator/concentrator-support.c
   - path: protocol/zigbee/app/framework/plugin/concentrator/concentrator-support-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/concentrator
     file_list:
@@ -75,8 +72,8 @@ template_contribution:
       handler: emberAfPluginConcentratorSetRouterBehaviorCommand
       help: This command allows the user to set the router behavior for this component. The argument values come from concentrator-support.h in the enum with members starting with EMBER_AF_PLUGIN_CONCENTRATOR_ROUTER_BEHAVIOR_.
       argument:
-      - type: uint8
-        help: The value of an EMBER_AF_PLUGIN_CONCENTRATOR_ROUTER_BEHAVIOR_ enum member  
+        - type: uint8
+          help: The value of an EMBER_AF_PLUGIN_CONCENTRATOR_ROUTER_BEHAVIOR_ enum member
 
 documentation:
   docset: zigbee

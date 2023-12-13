@@ -1,7 +1,7 @@
 project_name: se_manager_attestation
 package: platform
 quality: production
-label: Platform - SE Manager Attestation
+label: Platform Security - SoC SE Manager Attestation
 description: >
   This example project demonstrates how to get attestation tokens using the SE Manager Attestation API and printing them in a human-readable format.
 category: Example|Platform

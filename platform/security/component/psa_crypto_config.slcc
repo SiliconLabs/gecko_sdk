@@ -11,7 +11,7 @@ provides:
   - name: psa_crypto_config
 
 include:
-  
+
   - path: config
     file_list:
       - path: sli_psa_acceleration.h
@@ -71,86 +71,86 @@ template_contribution:
   # selected mbedtls_xxx components for inclusion, we need to translate that
   # here.
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_SHA_1
+    value: PSA_WANT_ALG_SHA_1 1
     condition: [ mbedtls_sha1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_SHA_224
+    value: PSA_WANT_ALG_SHA_224 1
     condition: [ mbedtls_sha256 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_SHA_256
+    value: PSA_WANT_ALG_SHA_256 1
     condition: [ mbedtls_sha256 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_SHA_384
+    value: PSA_WANT_ALG_SHA_384 1
     condition: [ mbedtls_sha512 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_SHA_512
+    value: PSA_WANT_ALG_SHA_512 1
     condition: [ mbedtls_sha512 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_MD5
+    value: PSA_WANT_ALG_MD5 1
     condition: [ mbedtls_md5 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CCM
+    value: PSA_WANT_ALG_CCM 1
     condition: [ mbedtls_ccm ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_GCM
+    value: PSA_WANT_ALG_GCM 1
     condition: [ mbedtls_gcm ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CMAC
+    value: PSA_WANT_ALG_CMAC 1
     condition: [ mbedtls_cmac ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CFB
+    value: PSA_WANT_ALG_CFB 1
     condition: [ mbedtls_cipher_cfb ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CHACHA20_POLY1305
+    value: PSA_WANT_ALG_CHACHA20_POLY1305 1
     condition: [ mbedtls_chachapoly ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CTR
+    value: PSA_WANT_ALG_CTR 1
     condition: [ mbedtls_cipher_ctr ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CBC_NO_PADDING
+    value: PSA_WANT_ALG_CBC_NO_PADDING 1
     condition: [ mbedtls_cipher_cbc ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CBC_PKCS7
+    value: PSA_WANT_ALG_CBC_PKCS7 1
     condition: [ mbedtls_cipher_padding_pkcs7 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_ECB_NO_PADDING
+    value: PSA_WANT_ALG_ECB_NO_PADDING 1
     condition: [ mbedtls_aes ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_XTS
+    value: PSA_WANT_ALG_XTS 1
     condition: [ mbedtls_cipher_xts ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_ECDSA
+    value: PSA_WANT_ALG_ECDSA 1
     condition: [ mbedtls_ecdsa ]
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_ECDH
+    value: PSA_WANT_ALG_ECDH 1
     condition: [ mbedtls_ecdh ]
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_ECC_KEY_PAIR
+    value: PSA_WANT_KEY_TYPE_ECC_KEY_PAIR 1
     condition: [ mbedtls_ecc ]
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY
+    value: PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY 1
     condition: [ mbedtls_ecc ]
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_AES
+    value: PSA_WANT_KEY_TYPE_AES 1
     condition: [ mbedtls_aes ]
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_CHACHA20
+    value: PSA_WANT_KEY_TYPE_CHACHA20 1
     condition: [ mbedtls_chachapoly ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_192
+    value: PSA_WANT_ECC_SECP_R1_192 1
     condition: [ mbedtls_ecc_secp192r1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_224
+    value: PSA_WANT_ECC_SECP_R1_224 1
     condition: [ mbedtls_ecc_secp224r1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_256
+    value: PSA_WANT_ECC_SECP_R1_256 1
     condition: [ mbedtls_ecc_secp256r1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_384
+    value: PSA_WANT_ECC_SECP_R1_384 1
     condition: [ mbedtls_ecc_secp384r1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_521
+    value: PSA_WANT_ECC_SECP_R1_521 1
     condition: [ mbedtls_ecc_secp521r1 ]
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_MONTGOMERY_255
+    value: PSA_WANT_ECC_MONTGOMERY_255 1
     condition: [ mbedtls_ecc_curve25519 ]

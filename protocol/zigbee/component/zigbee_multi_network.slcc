@@ -3,8 +3,7 @@ label: Multi network
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
-description: "Provides the ability for a single device to be on multiple networks and time-sharing between them.  The device can be a coordinator/router on only one network, but a sleepy end device on another network. See AN724: Designing for Multiple Networks on a Single Zigbee Chip for more information."
+description: 'Provides the ability for a single device to be on multiple networks and time-sharing between them.  The device can be a coordinator/router on only one network, but a sleepy end device on another network. See AN724: Designing for Multiple Networks on a Single Zigbee Chip for more information.'
 
 provides:
   - name: zigbee_multi_network
@@ -13,10 +12,10 @@ requires:
   - name: zigbee_multi_network_implementation
   - name: zigbee_multi_network_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
 
 recommends:
-  - id: zigbee_multi_network_source
+  - id: zigbee_multi_network_library_internal
 
 include:
   - path: protocol/zigbee/stack/include

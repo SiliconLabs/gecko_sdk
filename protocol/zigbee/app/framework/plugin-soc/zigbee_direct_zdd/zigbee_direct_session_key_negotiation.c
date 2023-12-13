@@ -33,6 +33,7 @@
 #include "stack/include/sl_zigbee_tlv_core.h"
 #include "stack/include/sl_zigbee_stack_specific_tlv.h"
 #include "stack/include/sl_zigbee_dlk_negotiation.h"
+#include "stack/include/zigbee-security-manager.h"
 #include "stack/include/sl_zigbee_security_manager_dlk_ecc.h"
 #include "stack/include/zigbee-device-stack.h"
 #include "zigbee_direct_session_key_negotiation.h"
@@ -103,7 +104,7 @@ static Buffer constructKeyNegotiationTlvPayload(Buffer payload,
 
   //tlvindex has no meaning, we are just appending
   sl_zigbee_app_debug_println("Old size %X plus %X", emberMessageBufferLength(payload), sl_zigbee_tlv_get_length(&ourPointTlv));
-  if (sl_zigbee_tlv_concat_to_buffer(&payload, tlvIndex, (sl_zigbee_tlv_t *) &ourPointTlv) == EMBER_SUCCESS) {
+  if (sl_zigbee_tlv_concat_to_buffer(&payload, tlvIndex, (sl_zigbee_tlv_t *) &ourPointTlv) == SL_STATUS_OK) {
     // if is key negotiation request, we need to include the selected key negotiation method
     // NOTE the latest revision of the spec mandates that both the request and response include
     // the selected key negotiation method
@@ -111,10 +112,7 @@ static Buffer constructKeyNegotiationTlvPayload(Buffer payload,
     sl_zigbee_app_debug_println("Appended public point tlv, new size %X", emberMessageBufferLength(payload));
 
     if (status != EMBER_NOT_JOINED) {
-      EmberKeyStruct current_key;
-
       sl_zigbee_app_debug_println("Appending nwk sequence no tlv");
-      emberGetKey(EMBER_CURRENT_NETWORK_KEY, &current_key);
     }
   } else {
     sl_zigbee_core_debug_println("Error appending tlv");
@@ -431,7 +429,7 @@ sl_status_t sli_zigbee_handle_incoming_dlk_negotiation_request(Buffer message,
     uint16_t currentTransientKeyTimeoutS = emberTransientKeyTimeoutS;
     emberTransientKeyTimeoutS = EMBER_TRANSIENT_KEY_SESSION_TIMEOUT_VAL;
     // store session key
-    emberAddTransientLinkKey(*peerEuiData, &keyResult);
+    sl_zb_sec_man_import_transient_key(*peerEuiData, (sl_zb_sec_man_key_t*)&keyResult);
     // reset emberTransientKeyTimeoutS
     emberTransientKeyTimeoutS = currentTransientKeyTimeoutS;
   } else {

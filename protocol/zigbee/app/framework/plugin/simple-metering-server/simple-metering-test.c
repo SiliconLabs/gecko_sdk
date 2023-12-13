@@ -111,7 +111,6 @@ void afTestMeterSetConsumptionRate(uint16_t rate, uint8_t endpoint)
 {
   emberAfSimpleMeteringClusterPrintln("TM: set consumption rate %2x", rate);
   meterConsumptionRate = rate;
-  //setMeteringConsumptionRate(rate,endpoint);
 }
 
 void afTestMeterSetConsumptionVariance(uint16_t variance)

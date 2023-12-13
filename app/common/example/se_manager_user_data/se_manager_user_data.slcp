@@ -1,7 +1,7 @@
 project_name: se_manager_user_data
 package: platform
 quality: production
-label: Platform - SE Manager User Data
+label: Platform Security - SoC SE Manager User Data
 description: >
   This example project demonstrates the user data API of SE Manager.
 category: Example|Platform

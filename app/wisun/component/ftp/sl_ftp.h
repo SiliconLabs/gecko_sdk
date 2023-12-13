@@ -121,6 +121,13 @@ void sl_ftp_delay_ms(const uint32_t delay_ms);
 bool sl_ftp_is_network_connected(void);
 
 /***************************************************************************//**
+ * @brief FTP get global IP address
+ * @details Portable function
+ * @return Global address string representation
+ ******************************************************************************/
+const char * sl_ftp_get_global_addr(void);
+
+/***************************************************************************//**
  * @brief FTP Close
  * @details Portable function
  * @param sockid Socket ID
@@ -211,6 +218,16 @@ __STATIC_INLINE void sl_tftp_delay_ms(const uint32_t delay_ms)
 __STATIC_INLINE bool sl_tftp_is_network_connected(void)
 {
   return sl_ftp_is_network_connected();
+}
+
+/***************************************************************************//**
+ * @brief TFTP get global IP address
+ * @details Portable function
+ * @return Global address string representation
+ ******************************************************************************/
+__STATIC_INLINE const char * sl_tftp_get_global_addr(void)
+{
+  return sl_ftp_get_global_addr();
 }
 
 /***************************************************************************//**

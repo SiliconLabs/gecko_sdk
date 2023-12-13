@@ -62,7 +62,7 @@ jobs:
       # of OMR prefix and Domain prefix is not deterministic.
       BORDER_ROUTING: 0
     steps:
-    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         submodules: true
     - name: Build OTBR Docker
@@ -156,6 +156,13 @@ jobs:
             packet_verification: 2
             nat64: 0
             description: ""
+          - otbr_mdns: "avahi"
+            otbr_trel: 0
+            cert_scripts: ./tests/scripts/thread-cert/border_router/*.py
+            packet_verification: 1
+            nat64: 0
+            use_core_firewall: 1
+            description: "core firewall"
     name: BR ${{ matrix.description }} (${{ matrix.otbr_mdns }}, TREL=${{matrix.otbr_trel}})
     env:
       REFERENCE_DEVICE: 1
@@ -172,7 +179,11 @@ jobs:
       NAT64: ${{ matrix.nat64 }}
       MAX_JOBS: 3
     steps:
-    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - name: Set firewall environment variables
+      if: ${{ matrix.use_core_firewall }}
+      run: |
+        echo "FIREWALL=0" >> $GITHUB_ENV
     - name: Build OTBR Docker
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -223,7 +234,7 @@ jobs:
     - thread-border-router
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
         submodules: true
     - name: Bootstrap

@@ -264,7 +264,7 @@ uint32_t AssociationGetSinglecastNodeCount(void);
  *
  * @return Address of an association.
  */
-destination_info_t * AssociationGetNextSinglecastDestination();
+destination_info_t * AssociationGetNextSinglecastDestination(void);
 
 /**
  * Returns the number of endpoint destinations in the active node association list.

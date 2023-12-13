@@ -28,13 +28,12 @@
 #include "trust-center-nwk-key-update-periodic-config.h"
 sl_zigbee_event_t emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent;
 #define myEvent (&emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent)
+// Use the event data member to keep track of the remaing time
+#define remainingTimeInMinutes (emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent.data)
 void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_t * event);
 
-// All delays are converted into milliseconds. Ensure that the converted millisecond value
-// is under EMBER_MAX_EVENT_DELAY_MS
-#if KEY_UPDATE_PERIOD_MINUTES > (EMBER_MAX_EVENT_DELAY_MS / 60000)
-  #error "Error: Configured key update period is too large"
-#endif
+// All delays are converted into milliseconds, the max delay in minutes converted to millisecond
+#define EMBER_MAX_EVENT_DELAY_MINUTES ((EMBER_MAX_EVENT_DELAY_MS / 60000))
 
 // *****************************************************************************
 
@@ -42,9 +41,18 @@ extern EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void);
 
 static void scheduleNextUpdate(void)
 {
-  sl_zigbee_event_set_delay_minutes(myEvent, KEY_UPDATE_PERIOD_MINUTES);
-  emberAfAppPrintln("Next NWK key update in %d minutes",
-                    KEY_UPDATE_PERIOD_MINUTES);
+  if (remainingTimeInMinutes == 0) {
+    remainingTimeInMinutes = KEY_UPDATE_PERIOD_MINUTES;
+    emberAfAppPrintln("Next NWK key update in %d minutes",
+                      KEY_UPDATE_PERIOD_MINUTES);
+  }
+  if (remainingTimeInMinutes > EMBER_MAX_EVENT_DELAY_MINUTES) {
+    remainingTimeInMinutes -= EMBER_MAX_EVENT_DELAY_MINUTES;
+    sl_zigbee_event_set_delay_minutes(myEvent, EMBER_MAX_EVENT_DELAY_MINUTES);
+  } else if (remainingTimeInMinutes > 0) {
+    sl_zigbee_event_set_delay_minutes(myEvent, remainingTimeInMinutes);
+    remainingTimeInMinutes = 0;
+  }
 }
 
 void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_t * event)
@@ -55,9 +63,10 @@ void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_
   // didn't complete, a subsequent key update attempt may help recover this and
   // finish the previous one.  This also handles the reboot case where
   // the TC may have rebooted while in the middle of the key update.
-
-  EmberStatus status = emberAfTrustCenterStartNetworkKeyUpdate();
-  emberAfAppPrintln("Starting NWK Key update, status: 0x%X", status);
+  if (remainingTimeInMinutes == 0) {
+    EmberStatus status = emberAfTrustCenterStartNetworkKeyUpdate();
+    sl_zigbee_app_debug_println("Starting NWK Key update, status: 0x%02X", status);
+  }
   scheduleNextUpdate();
 }
 

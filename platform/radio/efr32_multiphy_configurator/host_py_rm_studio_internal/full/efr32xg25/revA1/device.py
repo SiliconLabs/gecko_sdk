@@ -45,6 +45,8 @@ from . RFCRC_S import *
 from . RFFPLL0_NS import *
 from . RFFPLL0_S import *
 from . SEQ import *
+from . SMCTRL_NS import *
+from . SMCTRL_S import *
 from . SUNFSK import *
 from . SUNOFDM import *
 from . SUNOQPSK import *
@@ -127,7 +129,7 @@ class RM_Device_EFR32XG25XFULL_RevA1(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_EFR32XG25XFULL_RevA1, self).__init__(rmio, label,
             'EFR32XG25XFULL',
-            RM_SVD_Info('EFR32XG25XFULL_SEQ.svd', 'c967b105f2845e3f854fdbf6a0cffc11'))
+            RM_SVD_Info('EFR32XG25XFULL_SEQ.svd', 'd59e5043053446f77536497055bdc71a'))
 
         self.AGC_NS = RM_Peripheral_AGC_NS(self.zz_rmio, self.zz_label)
         self.zz_pdict['AGC_NS'] = self.AGC_NS
@@ -169,6 +171,10 @@ class RM_Device_EFR32XG25XFULL_RevA1(Base_RM_Device):
         self.zz_pdict['RFFPLL0_S'] = self.RFFPLL0_S
         self.SEQ = RM_Peripheral_SEQ(self.zz_rmio, self.zz_label)
         self.zz_pdict['SEQ'] = self.SEQ
+        self.SMCTRL_NS = RM_Peripheral_SMCTRL_NS(self.zz_rmio, self.zz_label)
+        self.zz_pdict['SMCTRL_NS'] = self.SMCTRL_NS
+        self.SMCTRL_S = RM_Peripheral_SMCTRL_S(self.zz_rmio, self.zz_label)
+        self.zz_pdict['SMCTRL_S'] = self.SMCTRL_S
         self.SUNFSK = RM_Peripheral_SUNFSK(self.zz_rmio, self.zz_label)
         self.zz_pdict['SUNFSK'] = self.SUNFSK
         self.SUNOFDM = RM_Peripheral_SUNOFDM(self.zz_rmio, self.zz_label)
@@ -193,6 +199,7 @@ class RM_Device_EFR32XG25XFULL_RevA1(Base_RM_Device):
             self.RAC = self.RAC_S
             self.RFCRC = self.RFCRC_S
             self.RFFPLL0 = self.RFFPLL0_S
+            self.SMCTRL = self.SMCTRL_S
             self.SYNTH = self.SYNTH_S
             self.TXFRONT = self.TXFRONT_S
             pass
@@ -205,6 +212,7 @@ class RM_Device_EFR32XG25XFULL_RevA1(Base_RM_Device):
             self.RAC = self.RAC_NS
             self.RFCRC = self.RFCRC_NS
             self.RFFPLL0 = self.RFFPLL0_NS
+            self.SMCTRL = self.SMCTRL_NS
             self.SYNTH = self.SYNTH_NS
             self.TXFRONT = self.TXFRONT_NS
             pass

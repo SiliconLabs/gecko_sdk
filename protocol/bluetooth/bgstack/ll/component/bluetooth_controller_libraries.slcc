@@ -1,0 +1,58 @@
+id: bluetooth_controller_libraries
+label: Bluetooth Low Energy Controller Library
+ui_hints:
+    visibility: never
+package: Bluetooth
+description: |-
+  BLE controller libraries to be used by a Bluetooth stack
+
+category: Bluetooth|Bluetooth LE Controller (Link Layer)
+quality: production
+root_path: protocol/bluetooth/bgstack/ll
+provides:
+  - name: bluetooth_controller_libraries
+requires:
+  - name: bluetooth_common
+  - name: bluetooth_crypto
+  - name: device_supports_bluetooth
+  - name: emlib
+  - name: rail_lib
+  - name: rail_util_pa
+  - name: rail_util_built_in_phys
+library:
+  - path: lib/libbluetooth_controller_efr32xg1_gcc_release.a
+    condition: [device_sdid_80, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg12_gcc_release.a
+    condition: [device_sdid_84, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg13_gcc_release.a
+    condition: [device_sdid_89, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg14_gcc_release.a
+    condition: [device_sdid_95, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg21_gcc_release.a
+    condition: [device_sdid_200, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg22_gcc_release.a
+    condition: [device_sdid_205, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg24_gcc_release.a
+    condition: [device_sdid_215, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg27_gcc_release.a
+    condition: [device_sdid_230, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg28_gcc_release.a
+    condition: [device_sdid_235, toolchain_gcc]
+  - path: lib/libbluetooth_controller_efr32xg1_iar_release.a
+    condition: [device_sdid_80, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg12_iar_release.a
+    condition: [device_sdid_84, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg13_iar_release.a
+    condition: [device_sdid_89, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg14_iar_release.a
+    condition: [device_sdid_95, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg21_iar_release.a
+    condition: [device_sdid_200, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg22_iar_release.a
+    condition: [device_sdid_205, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg24_iar_release.a
+    condition: [device_sdid_215, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg27_iar_release.a
+    condition: [device_sdid_230, toolchain_iar]
+  - path: lib/libbluetooth_controller_efr32xg28_iar_release.a
+    condition: [device_sdid_235, toolchain_iar]

@@ -138,6 +138,34 @@ psa_status_t sl_sec_man_get_key_attributes(psa_key_id_t          sl_psa_key_id,
 psa_status_t sl_sec_man_destroy_key(psa_key_id_t sl_psa_key_id);
 
 /**
+ * Make a copy a key stored in the ITS.
+ *
+ * This API can be used to make copies of a key in ITS.
+ * This API can also be used to change the key attributes of a existing key.
+ *
+ * If the source and destination key ids are the same, a copy of the original
+ * key will be made with new additional attributes.
+ *
+ * If the source and destination keyids are different, a copy of source key is
+ * made, and new attributes additional attributes, and the keyId of new key will
+ * be returned.
+ *
+ * @note /ref psa_copy_key() only supports unwrapped source keys.
+ * This API will fail if the sl_psa_source_key_id is wrapped.
+ * @note There are restrictions on what attributes can be changed. Refer to /ref psa_copy_key()
+ *
+ * @param[in]       sl_psa_source_key_id            Key ID of the source key.
+ * @param[in]       sl_psa_key_attributes           New key attributes to be added.
+ * @param[inout]    sl_psa_dest_key_id              KeyId for new key.
+ *
+ * @retval                                          A psa_status_t status code. Refer to /ref psa_status_t.
+ *
+ */
+psa_status_t sl_sec_man_copy_key(psa_key_id_t          sl_psa_source_key_id,
+                                 psa_key_attributes_t *sl_psa_key_attributes,
+                                 psa_key_id_t         *sl_psa_dest_key_id);
+
+/**
  * API to encrypt or decrypt data using AES ECB.
  *
  * This API can be used to perform AES ECB on given data. The user will have to

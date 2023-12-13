@@ -58,8 +58,8 @@ CC_DeviceResetLocally_notification_tx(void)
   else
   {
     cc_group_t cmdGrp = { 
-      COMMAND_CLASS_DEVICE_RESET_LOCALLY, 
-      DEVICE_RESET_LOCALLY_NOTIFICATION
+      .cmdClass=COMMAND_CLASS_DEVICE_RESET_LOCALLY,
+      .cmd=DEVICE_RESET_LOCALLY_NOTIFICATION
     };
 
     if(JOB_STATUS_SUCCESS != cc_engine_multicast_request(

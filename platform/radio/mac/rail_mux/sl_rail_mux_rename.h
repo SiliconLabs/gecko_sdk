@@ -25,8 +25,9 @@
 #define RAIL_IEEE802154_SetRxToEnhAckTx   sl_rail_mux_IEEE802154_SetRxToEnhAckTx
 #define RAIL_ConfigRxOptions   sl_rail_mux_ConfigRxOptions
 #define RAIL_SetTaskPriority   sl_rail_mux_SetTaskPriority
-#define RAIL_IEEE802154_Config2p4GHzRadio   sl_rail_mux_IEEE802154_Config2p4GHzRadio
+#define RAIL_IEEE802154_Config2p4GHzRadio         sl_rail_mux_IEEE802154_Config2p4GHzRadio
 #define RAIL_IEEE802154_Config2p4GHzRadioAntDiv   sl_rail_mux_IEEE802154_Config2p4GHzRadioAntDiv
+#define RAIL_IEEE802154_Config2p4GHzRadio2Mbps    sl_rail_mux_IEEE802154_Config2p4GHzRadio2Mbps
 #define RAIL_ConfigEvents   sl_rail_mux_ConfigEvents
 #define RAIL_Init   sl_rail_mux_Init
 #define RAIL_SetPtiProtocol   sl_rail_mux_SetPtiProtocol
@@ -126,6 +127,12 @@
 #define RAIL_SetNextTxRepeat sl_rail_mux_SetNextTxRepeat
 
 #define RAIL_GetChannel sl_rail_mux_GetChannel
+
+#define RAIL_IEEE802154_EnableDataFramePending sl_rail_mux_IEEE802154_EnableDataFramePending
+
+#define RAIL_GetTxPacketsRemaining sl_rail_mux_GetTxPacketsRemaining
+
+#define RAIL_ResetFifo sl_rail_mux_ResetFifo
 
 #define ATOMIC_SECTION(RETURN_TYPE, yourcode, ...) \
   ({                                               \

@@ -144,6 +144,8 @@ class Profile_Sigfox_TX(IProfile):
         profile.inputs.white_poly.default = model.vars.white_poly.var_enum.NONE
         profile.inputs.white_seed.default = 0
 
+        buildStudioLogOutput(model, profile)
+
         return profile
 
     def _set_frame_coding(self, model, profile):

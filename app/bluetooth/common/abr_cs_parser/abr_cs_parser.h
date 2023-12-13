@@ -34,13 +34,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "sl_bt_api.h"
-#ifndef JS_BUILDER_ACTIVE
 #include "sl_rtl_clib_api.h"
-
-#else
-#include "sl_rtl_clib_hadm_api.h"
-#endif
-
 #include "abr_cs_parser_types.h"
 
 #ifdef __cplusplus
@@ -49,14 +43,17 @@ extern "C" {
 
 // -----------------------------------------------------------------------------
 // Definitions
-
+#define LL_INVALID_TOA        0x800             // Invalid time value from LL
+#define ABR_CS_PARSER_INVALID_TIME_VALUE    0x80000000        // Invalid RTL library time value
+#define ABR_CS_PARSER_INVALID_RSSI_VALUE    0x80000000        // Invalid RTL library RSSI value
+#define ABR_CS_PARSER_TONE_QUALITY_MASK_LOW 0x0F              // Tone quality indicator low bitmask
 // -------------------------------
 // Enums, structs, typedefs
 
 /// CS measurement data for RTL library
 typedef struct {
   sl_rtl_abr_rtt_data rtt_data;                   ///< RTT measurement data
-  sl_rtl_abr_rtp_data rtp_data;                   ///< RTP measurement data
+  sl_rtl_abr_rtp_data pbr_data;                   ///< PBR measurement data
   float               initiator_calibration_rssi; ///< Initiator RSSI from calibration
   float               reflector_calibration_rssi; ///< Reflector RSSI from calibration
 } abr_cs_parser_meas_data_t;
@@ -143,9 +140,18 @@ sl_status_t abr_cs_parser_cleanup_measurement(uint8_t connection);
 /**************************************************************************//**
  * Store distance for logging.
  * @param[in] distance calculated distance in mm
+ * @param[in] likeliness calculated distance likeliness
+ * @param[in] rssi_distance distance calculated with RSSI values
  *
  *****************************************************************************/
-void abr_cs_parser_store_distance(float *distance);
+void abr_cs_parser_store_distance(float *distance, float *likeliness, float *rssi_distance);
+
+/**************************************************************************//**
+ * Get the current CS bit error rate.
+ *
+ * @return the current bit error rate
+ *****************************************************************************/
+uint8_t abr_cs_parser_get_cs_bit_error_rate();
 
 /**************************************************************************//**
  * Deinitialize CS parser.

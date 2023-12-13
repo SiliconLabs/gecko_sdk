@@ -28,26 +28,24 @@ JOB_STATUS cc_engine_multicast_request(
     VOID_CALLBACKFUNC(pCbFunc)(TRANSMISSION_RESULT * pTransmissionResult))
 {
   uint8_t frame_len = sizeof(CMD_CLASS_GRP);
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  ZW_ENGINE_FRAME * pTxBuf = (ZW_ENGINE_FRAME *) &txBuf;
-  zaf_tx_options_t tx_options;
-
-  pTxBuf->grp.cmdClass = pcmdGrp->cmdClass;
-  pTxBuf->grp.cmd = pcmdGrp->cmd;
+  ZW_ENGINE_FRAME txBuf = {
+    .grp.cmdClass = pcmdGrp->cmdClass,
+    .grp.cmd = pcmdGrp->cmd
+  };
 
   if( 0 != size )
   {
-    memcpy(pTxBuf->payload, pPayload, size);
+    memcpy(&txBuf.payload, pPayload, size);
     frame_len += size;
   }
-
-  tx_options.dest_node_id = 0;
-  tx_options.agi_profile = pProfile;
-  tx_options.source_endpoint = endpoint;
-  tx_options.use_supervision = fSupervisionEnable;
+  zaf_tx_options_t tx_options = {
+    .dest_node_id = 0,
+    .agi_profile = pProfile,
+    .source_endpoint = endpoint,
+    .use_supervision = fSupervisionEnable
+  };
   if(!zaf_transport_tx((uint8_t *)&txBuf, frame_len, pCbFunc, &tx_options)) {
     return JOB_STATUS_BUSY;
   }
-
   return JOB_STATUS_SUCCESS;
 }

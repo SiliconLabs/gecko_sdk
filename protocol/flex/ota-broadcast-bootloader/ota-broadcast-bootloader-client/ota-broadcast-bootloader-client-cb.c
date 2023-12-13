@@ -33,9 +33,9 @@
 //------------------------------------------------------------------------------
 // Weak callbacks definitions
 
-WEAK(bool emberAfPluginOtaBootloaderClientNewIncomingImageCallback(EmberNodeId serverId,
-                                                                   EmberNodeId *alternateServerId,
-                                                                   uint8_t imageTag))
+SL_WEAK bool emberAfPluginOtaBootloaderClientNewIncomingImageCallback(EmberNodeId serverId,
+                                                                      EmberNodeId *alternateServerId,
+                                                                      uint8_t imageTag)
 {
   (void)serverId;
   (void)alternateServerId;
@@ -44,11 +44,11 @@ WEAK(bool emberAfPluginOtaBootloaderClientNewIncomingImageCallback(EmberNodeId s
   return false;
 }
 
-WEAK(void emberAfPluginOtaBootloaderClientIncomingImageSegmentCallback(EmberNodeId serverId,
-                                                                       uint32_t startIndex,
-                                                                       uint32_t endIndex,
-                                                                       uint8_t imageTag,
-                                                                       uint8_t *imageSegment))
+SL_WEAK void emberAfPluginOtaBootloaderClientIncomingImageSegmentCallback(EmberNodeId serverId,
+                                                                          uint32_t startIndex,
+                                                                          uint32_t endIndex,
+                                                                          uint8_t imageTag,
+                                                                          uint8_t *imageSegment)
 {
   (void)serverId;
   (void)startIndex;
@@ -57,28 +57,28 @@ WEAK(void emberAfPluginOtaBootloaderClientIncomingImageSegmentCallback(EmberNode
   (void)imageSegment;
 }
 
-WEAK(void emberAfPluginOtaBootloaderClientImageDownloadCompleteCallback(EmberAfOtaBootloaderStatus status,
-                                                                        uint8_t imageTag,
-                                                                        uint32_t imageSize))
+SL_WEAK void emberAfPluginOtaBootloaderClientImageDownloadCompleteCallback(EmberAfOtaBootloaderStatus status,
+                                                                           uint8_t imageTag,
+                                                                           uint32_t imageSize)
 {
   (void)status;
   (void)imageTag;
   (void)imageSize;
 }
 
-WEAK(void emberAfPluginOtaBootloaderClientIncomingRequestStatusCallback(EmberNodeId serverId,
-                                                                        uint8_t applicationServerStatus,
-                                                                        uint8_t *applicationStatus))
+SL_WEAK void emberAfPluginOtaBootloaderClientIncomingRequestStatusCallback(EmberNodeId serverId,
+                                                                           uint8_t applicationServerStatus,
+                                                                           uint8_t *applicationStatus)
 {
   (void)serverId;
   (void)applicationServerStatus;
   (void)applicationStatus;
 }
 
-WEAK(bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId serverId,
-                                                                          uint8_t imageTag,
-                                                                          uint32_t bootloadDelayMs,
-                                                                          uint8_t *applicationStatus))
+SL_WEAK bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId serverId,
+                                                                             uint8_t imageTag,
+                                                                             uint32_t bootloadDelayMs,
+                                                                             uint8_t *applicationStatus)
 {
   (void)serverId;
   (void)imageTag;

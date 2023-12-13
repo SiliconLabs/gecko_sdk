@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_dsa import calc_dsa_viper
+from pyradioconfig.parts.bobcat.calculators.calc_dsa import Calc_DSA_Bobcat
 
 
-class CalcDsaRainier(calc_dsa_viper):
+class CalcDsaRainier(Calc_DSA_Bobcat):
     pass

@@ -1,22 +1,21 @@
 package: Zigbee
-description: Common code for any storage module implementing an Over-the-air bootload
-  cluster.  This is used by either the Zigbee or legacy Ember Standalone bootloader implementations.
+description: Common code for any storage module implementing an Over-the-air bootload cluster.  This is used by either the Zigbee or legacy Ember Standalone bootloader implementations.
 label: OTA Bootload Cluster Storage Common Code
 quality: production
 id: zigbee_ota_storage_common
 category: Zigbee|Over-The-Air Bootloading
 provides:
-   - name: "zigbee_ota_storage_common"
+  - name: zigbee_ota_storage_common
 requires:
-   - name: "zigbee_ota_common"
-   - name: "zigbee_ota_storage_simple"
+  - name: zigbee_ota_common
+  - name: zigbee_ota_storage_simple
 config_file:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-common/config/ota-storage-common-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-common/ota-storage-common.c
   - path: protocol/zigbee/app/framework/plugin/ota-storage-common/ota-storage-common-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-common
     file_list:
@@ -43,8 +42,8 @@ template_contribution:
       handler: sli_zigbee_af_ota_image_delete
       help: Deletes the image at the specified index.
       argument:
-      - type: uint8
-        help: The index at which to begin deleting the image
+        - type: uint8
+          help: The index at which to begin deleting the image
   - name: cli_command
     value:
       group: ota-storage-common
@@ -64,10 +63,10 @@ template_contribution:
       handler: sli_zigbee_af_ota_storage_data_print
       help: Prints arbitrary bytes of the OTA image on disk.
       argument:
-      - type: uint8
-        help: The index of the image to print its data
-      - type: uint32
-        help: The offset into the OTA image that will be printed
+        - type: uint8
+          help: The index of the image to print its data
+        - type: uint32
+          help: The offset into the OTA image that will be printed
 documentation:
   docset: zigbee
   document: zigbee-af-api/ota-storage-common

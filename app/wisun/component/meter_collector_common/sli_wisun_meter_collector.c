@@ -53,7 +53,6 @@
       return;                                        \
     }                                                \
     dest->id          = src->id;                     \
-    dest->schedule    = src->schedule;               \
     dest->temperature = src->temperature;            \
     dest->humidity    = src->humidity;               \
     dest->light       = src->light;                  \
@@ -105,6 +104,18 @@ static void _mc_mutex_acquire(void);
 static void _mc_mutex_release(void);
 
 /**************************************************************************//**
+ * @brief Default collector parse
+ * @details Default handler
+ * @param[in] raw Received data buffer
+ * @param[in] packet_data_len Length of the received packet
+ * @param[in] remote_addr Address of the sender
+ * @return NULL
+ *****************************************************************************/
+static sl_wisun_meter_entry_t *_def_collector_parse(void *raw,
+                                                    int32_t packet_data_len,
+                                                    const sockaddr_in6_t * const remote_addr);
+
+/**************************************************************************//**
  * @brief Default collector timeout handler
  * @details Default handler
  * @param[in,out] meter Meter entry
@@ -112,33 +123,58 @@ static void _mc_mutex_release(void);
 static void _def_collector_timeout_hnd(sl_wisun_meter_entry_t *meter);
 
 /**************************************************************************//**
- * @brief Default collector send
+ * @brief Default meter parse
  * @details Default handler
- * @param[in] sockid The socket to use for transmission
- * @param[in,out] meter Meter entry
- * @param[in,out] req Request
+ * @param[in] raw Received data buffer
+ * @param[in] packet_data_len Length of the received packet
+ * @param[out] req NULL
  * @return SL_STATUS_OK Never
  * @return SL_STATUS_FAIL Always
  *****************************************************************************/
-static sl_status_t _def_collector_send(const int32_t sockid,
-                                       sl_wisun_meter_entry_t *meter,
-                                       sl_wisun_meter_request_t *req);
+static sl_status_t _def_meter_parse(const void * const raw,
+                                    int32_t packet_data_len,
+                                    sl_wisun_request_type_t * const req);
 
 /**************************************************************************//**
- * @brief Default collector receive
+ * @brief Default meter build
  * @details Default handler
- * @param[in] sockid Socket ID
- * @return sl_wisun_meter_entry_t* NULL
+ * @param[in] req Request type
+ * @param[in] packets Pointer to the packet buffer
+ * @param[in] nr_of_packets Number of packets to build
+ * @param[in, out] buf Buffer to store packed data
+ * @param[out] len Length of the buffer
+ * @return SL_STATUS_OK Never
+ * @return SL_STATUS_FAIL Always
  *****************************************************************************/
-static sl_wisun_meter_entry_t * _def_collector_recv(int32_t sockid);
+static sl_status_t _def_meter_build(const sl_wisun_request_type_t req,
+                                    const sl_wisun_meter_packet_t * const packets,
+                                    const uint8_t nr_of_packets,
+                                    uint8_t * const buf,
+                                    uint32_t * const len);
 
-/**************************************************************************//**
- * @brief Default get meter
+/***************************************************************************//**
+ * @brief Default meter measurement brancing
  * @details Default handler
- * @param[in] remote_addr Remote address
- * @return sl_wisun_meter_entry_t* NULL
- *****************************************************************************/
-static sl_wisun_meter_entry_t *_def_collector_get_meter(const wisun_addr_t * const remote_addr);
+ * @param[in] collector_mempool Pointer to the collectors mempool
+ * @param[in] schedule Schedule time for the measurements
+ * @return true Never
+ * @return false Always
+ ******************************************************************************/
+static bool _def_meter_meas_branching(sl_mempool_t *collector_mempool,
+                                      const uint32_t schedule);
+
+/***************************************************************************//**
+ * @brief Default meter sending brancing
+ * @details Default handler
+ * @param[in] storage Pointer to the measurement packet storage
+ * @param[in] collector Pointer to a collector entry
+ * @param[out] nr_of_packets Number of packets to send
+ * @return true Never
+ * @return false Always
+ ******************************************************************************/
+static bool _def_meter_send_branching(sl_wisun_meter_packet_storage_t *storage,
+                                      sl_wisun_collector_entry_t *collector,
+                                      uint8_t *nr_of_packets);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -192,18 +228,34 @@ void sl_wisun_meter_set_initializer(sl_wisun_meter_hnd_t *hnd,
 }
 
 void sl_wisun_collector_set_handler(sl_wisun_collector_hnd_t *hnd,
-                                    sl_wisun_collector_recv_hnd_t receiver,
-                                    sl_wisun_collector_send_hnd_t sender,
-                                    sl_wisun_collector_timeout_hnd_t timeout_hnd,
-                                    sl_wisun_collector_get_meter_entry_t get_meter)
+                                    sl_wisun_collector_parse_t parser,
+                                    sl_wisun_collector_timeout_hnd_t timeout_hnd)
 {
   if (hnd->resource_hnd.lock != NULL) {
     hnd->resource_hnd.lock();
   }
-  hnd->recv = receiver == NULL ? _def_collector_recv : receiver;
-  hnd->send = sender == NULL ? _def_collector_send : sender;
+  hnd->parse = parser == NULL ? _def_collector_parse : parser;
   hnd->timeout = timeout_hnd == NULL ? _def_collector_timeout_hnd : timeout_hnd;
-  hnd->get_meter = get_meter == NULL ? _def_collector_get_meter : get_meter;
+  if (hnd->resource_hnd.unlock != NULL) {
+    hnd->resource_hnd.unlock();
+  }
+}
+
+void sl_wisun_meter_set_handler(sl_wisun_meter_hnd_t *hnd,
+                                sl_wisun_meter_parse_t parser,
+                                sl_wisun_meter_build_hnd_t build,
+                                sl_wisun_meter_meas_branching_t is_measurement_necessary,
+                                sl_wisun_meter_send_branching_t is_sending_necessary)
+{
+  if (hnd->resource_hnd.lock != NULL) {
+    hnd->resource_hnd.lock();
+  }
+  hnd->parse = parser == NULL ? _def_meter_parse : parser;
+  hnd->build = build == NULL ? _def_meter_build : build;
+  hnd->is_measurement_necessary = (is_measurement_necessary == NULL)
+                                  ? _def_meter_meas_branching : is_measurement_necessary;
+  hnd->is_sending_necessary = (is_sending_necessary == NULL)
+                              ? _def_meter_send_branching : is_sending_necessary;
   if (hnd->resource_hnd.unlock != NULL) {
     hnd->resource_hnd.unlock();
   }
@@ -242,14 +294,14 @@ uint16_t sl_wisun_mc_get_token_size(void)
   return rval;
 }
 
-/* Pack packet */
+/* Unpack packet */
 void sl_wisun_mc_unpack_measurement_packet(sl_wisun_meter_packet_t * const dest,
                                            const sl_wisun_meter_packet_packed_t * const src)
 {
   __pack_unpack_measurement_packets(dest, src);
 }
 
-/* Unpack packet */
+/* Pack packet */
 void sl_wisun_mc_pack_measurement_packet(sl_wisun_meter_packet_packed_t * const dest,
                                          const sl_wisun_meter_packet_t * const src)
 {
@@ -275,7 +327,7 @@ void sl_wisun_mc_print_mesurement(const char *ip_address, const void *packet, co
 }
 
 /* compare token */
-bool sl_wisun_mc_compare_token(const uint8_t *token, const uint16_t token_size)
+bool sl_wisun_mc_compare_token(const char *token, const uint16_t token_size)
 {
   bool res = true;
 
@@ -291,6 +343,19 @@ bool sl_wisun_mc_compare_token(const uint8_t *token, const uint16_t token_size)
   }
   _mc_mutex_release();
   return res;
+}
+
+/* compare addresses */
+bool sl_wisun_mc_compare_address(const sockaddr_in6_t *addr1, const sockaddr_in6_t *addr2)
+{
+  uint8_t *p1 = (uint8_t *)&addr1->sin6_addr;
+  uint8_t *p2 = (uint8_t *)&addr2->sin6_addr;
+  for (uint8_t i = 0; i < IPV6_ADDR_SIZE; ++i) {
+    if (p1[i] != p2[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -322,6 +387,17 @@ static void _mc_mutex_release(void)
   }
 }
 
+static sl_wisun_meter_entry_t *_def_collector_parse(void *raw,
+                                                    int32_t packet_data_len,
+                                                    const sockaddr_in6_t * const remote_addr)
+{
+  (void) raw;
+  (void) packet_data_len;
+  (void) remote_addr;
+  assert("[Collector Parser not implemented!]" == NULL);
+  return NULL;
+}
+
 static void _def_collector_timeout_hnd(sl_wisun_meter_entry_t *meter)
 {
   const char *ip_str = NULL;
@@ -334,29 +410,50 @@ static void _def_collector_timeout_hnd(sl_wisun_meter_entry_t *meter)
   app_wisun_trace_util_destroy_ip_str(ip_str);
 }
 
-static sl_status_t _def_collector_send(const int32_t sockid,
-                                       sl_wisun_meter_entry_t *meter,
-                                       sl_wisun_meter_request_t *req)
+static sl_status_t _def_meter_build(const sl_wisun_request_type_t req,
+                                    const sl_wisun_meter_packet_t * const packets,
+                                    const uint8_t nr_of_packets,
+                                    uint8_t * const buf,
+                                    uint32_t * const len)
 {
-  (void) sockid;
-  (void) meter;
   (void) req;
-  assert("[Collector Send not implemented!]" == NULL);
+  (void) packets;
+  (void) nr_of_packets;
+  (void) buf;
+  (void) len;
+  assert("[Meter Build not implemented!]" == NULL);
   return SL_STATUS_FAIL;
 }
 
-static sl_wisun_meter_entry_t * _def_collector_recv(int32_t sockid)
+static sl_status_t _def_meter_parse(const void * const raw,
+                                    int32_t packet_data_len,
+                                    sl_wisun_request_type_t * const req)
 {
-  (void) sockid;
-  assert("[Collector Receive not implemented!]" == NULL);
-  return NULL;
+  (void) raw;
+  (void) packet_data_len;
+  (void) req;
+  assert("[Meter Parse not implemented!]" == NULL);
+  return SL_STATUS_FAIL;
 }
 
-static sl_wisun_meter_entry_t *_def_collector_get_meter(const wisun_addr_t * const remote_addr)
+static bool _def_meter_meas_branching(sl_mempool_t *collector_mempool,
+                                      const uint32_t schedule)
 {
-  (void) remote_addr;
-  assert("[Collector Get meter not implemented!]" == NULL);
-  return NULL;
+  (void) collector_mempool;
+  (void) schedule;
+  assert("[Meter Measurement branching not implemented!]" == NULL);
+  return false;
+}
+
+static bool _def_meter_send_branching(sl_wisun_meter_packet_storage_t *storage,
+                                      sl_wisun_collector_entry_t *collector,
+                                      uint8_t *nr_of_packets)
+{
+  (void) storage;
+  (void) collector;
+  (void) nr_of_packets;
+  assert("[Meter Sending branching not implemented!]" == NULL);
+  return false;
 }
 
 uint8_t sl_wisun_mc_get_led_id_from_payload(const char *payload_str)

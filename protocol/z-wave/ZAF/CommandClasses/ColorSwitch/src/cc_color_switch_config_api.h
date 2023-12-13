@@ -17,9 +17,9 @@
  */
 
 void cc_color_switch_cb(s_colorComponent * colorComponent);
-s_colorComponent *cc_color_switch_get_colorComponents();
-uint8_t cc_color_switch_get_length_colorComponents();
-uint8_t cc_color_switch_get_default_duration();
+s_colorComponent *cc_color_switch_get_colorComponents(void);
+uint8_t cc_color_switch_get_length_colorComponents(void);
+uint8_t cc_color_switch_get_default_duration(void);
 
 /**
  * @}

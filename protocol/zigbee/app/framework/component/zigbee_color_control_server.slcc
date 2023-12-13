@@ -1,14 +1,12 @@
 package: Zigbee
-description: This component is an implementation of the color server.  It supports color temperature, CIE
-  1931, and hue/saturation.  It also supports smooth transitions within a particular color
-  mode.
+description: This component is an implementation of the color server.  It supports color temperature, CIE 1931, and hue/saturation.  It also supports smooth transitions within a particular color mode.
 id: zigbee_color_control_server
 label: Color Control Cluster Server
 category: Zigbee|Cluster Library|Home Automation
-quality: "production"
+quality: production
 provides:
-   - name: "zigbee_color_control_server"
-   - name: "zigbee_color_control_server_implementation"
+  - name: zigbee_color_control_server
+  - name: zigbee_color_control_server_implementation
 config_file:
   - path: protocol/zigbee/app/framework/plugin/color-control-server/config/color-control-server-config.h
 source:
@@ -17,7 +15,7 @@ source:
 include:
   - path: protocol/zigbee/app/framework/plugin/color-control-server
     file_list:
-      - path: color-control-server.h  
+      - path: color-control-server.h
 template_contribution:
   - name: component_catalog
     value: zigbee_color_control_server
@@ -27,16 +25,16 @@ template_contribution:
       function_name: sli_zigbee_af_color_control_server_init_callback
   - name: cluster_service
     value:
-       cluster_id: "0x0300"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"       
-       service_function: "emberAfColorControlClusterServerCommandParse"      
+      cluster_id: '0x0300'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfColorControlClusterServerCommandParse
   - name: cluster_functions
     value:
-       cluster_name: ColorControl
-       cluster_id: 0x300
-       cluster_type: server
-       init_function: emberAfColorControlClusterServerInitCallback
+      cluster_name: ColorControl
+      cluster_id: 0x300
+      cluster_type: server
+      init_function: emberAfColorControlClusterServerInitCallback
 
 documentation:
   docset: zigbee

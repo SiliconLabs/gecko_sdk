@@ -15,14 +15,14 @@
 #include "AppTimer.h"
 #include "zaf_transport_tx.h"
 
-s_CC_centralScene_data_t centralSceneData;
+s_CC_centralScene_data_t centralSceneData = { 0 };
 
-static central_scene_configuration_t cc_central_scene_configuration;
+static central_scene_configuration_t cc_central_scene_configuration = { 0 };
 
 static uint8_t sequenceNumber = 0;
 
 /// Timer used to send consecutive CENTRAL_SCENE_NOTIFICATION
-static SSwTimer central_scene_notification_timer;
+static SSwTimer central_scene_notification_timer = { 0 };
 
 /// Holds the number of last active scene
 /// Used for sending CENTRAL_SCENE_NOTIFICATION
@@ -38,12 +38,10 @@ static received_frame_status_t
 CC_CentralScene_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength,
+  __attribute__((unused)) uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER *pFrameOut,
   uint8_t * pFrameOutLength)
 {
-  UNUSED(cmdLength);
-
   switch (pCmd->ZW_Common.cmd)
   {
     case CENTRAL_SCENE_SUPPORTED_GET_V2:
@@ -76,14 +74,15 @@ CC_CentralScene_handler(
 
     case CENTRAL_SCENE_CONFIGURATION_SET_V3:
     {
-      central_scene_configuration_t configuration;
-      configuration.slowRefresh = (pCmd->ZW_CentralSceneConfigurationSetV3Frame.properties1 >> 7);
+      central_scene_configuration_t configuration = {
+        .slowRefresh = (pCmd->ZW_CentralSceneConfigurationSetV3Frame.properties1 >> 7)
+      };
 
       cc_central_scene_write(&configuration);
       cc_central_scene_configuration.slowRefresh = configuration.slowRefresh;
 
       // Build up new CC data structure
-      memset(&centralSceneData, 0, sizeof(s_CC_centralScene_data_t));
+      memset(&centralSceneData, 0, sizeof(centralSceneData));
       centralSceneData.rxOptions = *rxOpt;
 
       if (false == ZAF_TSE_Trigger(CC_CentralScene_configuration_report_stx,
@@ -131,20 +130,19 @@ cc_central_scene_notification_tx(
  * @param txOptions txOptions
  * @param pData Command payload for the report
  */
-static void 
-CC_CentralScene_configuration_report_stx(zaf_tx_options_t *tx_options, void* pData)
+static void
+CC_CentralScene_configuration_report_stx(zaf_tx_options_t *tx_options, __attribute__((unused)) void* pData)
 {
-  UNUSED(pData);
   DPRINTF("* %s() *\n"
       "\ttxOpt.src = %d\n"
       "\ttxOpt.options %#02x\n",
       __func__, tx_options->source_endpoint, tx_options->tx_options);
 
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
+  ZW_APPLICATION_TX_BUFFER txBuf = { 0 };
 
   prepare_configuration_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_CENTRAL_SCENE_CONFIGURATION_REPORT_V3_FRAME),
@@ -160,7 +158,7 @@ static void reset(void)
 
 static void init(void)
 {
-  central_scene_configuration_t saved_configuration;
+  central_scene_configuration_t saved_configuration = { 0 };
   cc_central_scene_migrate();
 
   bool status = cc_central_scene_read(&saved_configuration);
@@ -178,7 +176,7 @@ static void init(void)
 
 static void prepare_configuration_report(ZW_APPLICATION_TX_BUFFER *pTxBuffer)
 {
-  memset((uint8_t*)pTxBuffer, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
+  memset(pTxBuffer, 0, sizeof(*pTxBuffer) );
 
   pTxBuffer->ZW_CentralSceneConfigurationReportV3Frame.cmdClass = COMMAND_CLASS_CENTRAL_SCENE_V3;
   pTxBuffer->ZW_CentralSceneConfigurationReportV3Frame.cmd = CENTRAL_SCENE_CONFIGURATION_REPORT_V3;
@@ -237,10 +235,8 @@ cc_central_scene_handle_notification_timer(
 }
 
 static void
-central_scene_notification_timer_cb(SSwTimer *pTimer)
+central_scene_notification_timer_cb(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
-
   // This function is only triggered if timer expired while the key was held down
   (void) cc_central_scene_notification_tx(
       NULL,

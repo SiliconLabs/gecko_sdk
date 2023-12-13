@@ -1723,9 +1723,15 @@ static void handle_dist_start_request(
       sl_bt_uuid_64_t *dist_blob_id = &self->fw_list[evt->fw_list_index]->blob_id;
 
       log_debug(LOG_PREFIX "Distribution Start request (fwid=");
-      log_fwid_level(APP_LOG_LEVEL_DEBUG, fw_info.p_fwid, fw_info.fwid_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+      log_fwid_level(APP_LOG_LEVEL_DEBUG,
+                     fw_info.p_fwid,
+                     fw_info.fwid_len,
+                     SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
       log_append_debug(",metadata=");
-      log_metadata_level(APP_LOG_LEVEL_DEBUG, fw_info.p_metadata, fw_info.metadata_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+      log_metadata_level(APP_LOG_LEVEL_DEBUG,
+                         fw_info.p_metadata,
+                         fw_info.metadata_len,
+                         SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
       log_append_debug(")" NL);
 
       // The distribution procedure can be started so success status is passed
@@ -2041,15 +2047,10 @@ static sl_status_t upload_is_start_req_valid(
   // The firmware id does not fit into the allocated array or the length of the
   // firmware id (mandatory) is zero, then error is returned.
   if ((0 == evt->fwid.len)
-      || (DFU_FWID_MAX_LEN < evt->fwid.len)
-      || (NULL == evt->fwid.data)) {
+      || (DFU_FWID_MAX_LEN < evt->fwid.len)) {
     log_error(LOG_PREFIX "Upload with invalid FW id (elem=%d)" NL,
               evt->elem_index);
-    if (NULL == evt->fwid.data) {
-      return SL_STATUS_NULL_POINTER;
-    } else {
-      return SL_STATUS_INVALID_RANGE;
-    }
+    return SL_STATUS_INVALID_RANGE;
   }
 
   // If there is not enough space to store the firmware binary, then an error is
@@ -2119,9 +2120,15 @@ static void handle_upload_start_request(
   // If an upload is already in progress then ignore the new request
   if (0 != upload_state_flags[self->upload.state].idle) {
     log_debug(LOG_PREFIX "Upload start request (fwid=");
-    log_fwid_level(APP_LOG_LEVEL_DEBUG, evt->fwid.data, evt->fwid.len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+    log_fwid_level(APP_LOG_LEVEL_DEBUG,
+                   evt->fwid.data,
+                   evt->fwid.len,
+                   SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
     log_append_debug(",metadata=");
-    log_metadata_level(APP_LOG_LEVEL_DEBUG, self->upload.temp_metadata, self->upload.temp_metadata_length, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+    log_metadata_level(APP_LOG_LEVEL_DEBUG,
+                       self->upload.temp_metadata,
+                       self->upload.temp_metadata_length,
+                       SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
     log_append_debug(")" NL);
 
     sl_status_t sc_upload_valid = upload_is_start_req_valid(evt);
@@ -2445,7 +2452,10 @@ static void handle_fw_delete_request(
            evt->elem_index,
            evt->client_address);
   log_append_debug(",fwid=");
-  log_fwid_level(APP_LOG_LEVEL_DEBUG, evt->fwid.data, evt->fwid.len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+  log_fwid_level(APP_LOG_LEVEL_DEBUG,
+                 evt->fwid.data,
+                 evt->fwid.len,
+                 SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
   log_append_info(")" NL);
 
   // Search for firmware information in FW list by fwid
@@ -3216,7 +3226,8 @@ sl_status_t mesh_platform_dfu_dist_server_get_fw_count(size_t element_index,
   return sc;
 }
 
-sl_status_t mesh_platform_dfu_dist_server_get_remaining_space(size_t element_index, uint32_t *bytes)
+sl_status_t mesh_platform_dfu_dist_server_get_remaining_space(size_t element_index,
+                                                              uint32_t *bytes)
 {
   sl_status_t sc;
   uint32_t remaining_upload_space = 0;
@@ -3274,9 +3285,15 @@ sl_status_t mesh_platform_dfu_dist_server_get_fw_by_index(size_t element_index,
     log_append_debug("(sc=0x%04lx)" NL, sc);
   } else {
     log_append_debug("(sc=0x%04lx,size=%lu,fwid=", sc, info->size);
-    log_fwid_level(APP_LOG_LEVEL_DEBUG, info->p_fwid, info->fwid_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+    log_fwid_level(APP_LOG_LEVEL_DEBUG,
+                   info->p_fwid,
+                   info->fwid_len,
+                   SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
     log_append_debug(",metadata=");
-    log_metadata_level(APP_LOG_LEVEL_DEBUG, info->p_metadata, info->metadata_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+    log_metadata_level(APP_LOG_LEVEL_DEBUG,
+                       info->p_metadata,
+                       info->metadata_len,
+                       SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
     log_append_debug(")" NL);
   }
 #endif
@@ -3297,7 +3314,10 @@ sl_status_t mesh_platform_dfu_dist_server_get_fw_by_fwid(size_t element_index,
 
 #if (SL_BTMESH_FW_DIST_SERVER_PLATFORM_CALLBACK_LOGGING_CFG_VAL != 0)
   log_debug(LOG_PREFIX "%s(elem=%d,fwid=", __func__, element_index);
-  log_fwid_level(APP_LOG_LEVEL_DEBUG, fwid, fwid_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+  log_fwid_level(APP_LOG_LEVEL_DEBUG,
+                 fwid,
+                 fwid_len,
+                 SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
   if ((sc != SL_STATUS_OK) || (info == NULL)) {
     log_append_debug(")->(sc=0x%04lx)" NL, sc);
   } else {
@@ -3305,7 +3325,10 @@ sl_status_t mesh_platform_dfu_dist_server_get_fw_by_fwid(size_t element_index,
                      sc,
                      info->index,
                      (unsigned long) info->size);
-    log_metadata_level(APP_LOG_LEVEL_DEBUG, info->p_metadata, info->metadata_len, SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
+    log_metadata_level(APP_LOG_LEVEL_DEBUG,
+                       info->p_metadata,
+                       info->metadata_len,
+                       SL_BTMESH_FW_DIST_SERVER_FWID_METADATA_LOG_FORMAT_HEX);
     log_append_debug(")" NL);
   }
 #endif

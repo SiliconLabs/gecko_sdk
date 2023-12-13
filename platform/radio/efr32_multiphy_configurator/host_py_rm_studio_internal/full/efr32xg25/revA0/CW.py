@@ -12,7 +12,7 @@ class RM_Peripheral_CW(Base_RM_Peripheral):
         super(RM_Peripheral_CW, self).__init__(rmio, label,
             0xB500FC00, 'CW',
             u"",
-            ['LEGOQPSK'])
+            ['LEGOQPSK', 'LRSWKOFDM', 'SUNFSK', 'SUNOFDM', 'SUNOQPSK'])
         self.CFG1 = RM_Register_CW_CFG1(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG1'] = self.CFG1
         self.CFG2 = RM_Register_CW_CFG2(self.zz_rmio, self.zz_label)

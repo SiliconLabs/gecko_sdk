@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<api device_id="6" device_name="bgapi_debug" version="7.0.0">
+    <datatypes>
+        <datatype base="int8" name="int8" length="1"/>
+        <datatype base="uint8" name="uint8" length="1"/>
+        <datatype base="int16" name="int16" length="2"/>
+        <datatype base="uint16" name="uint16" length="2"/>
+        <datatype base="int32" name="int32" length="4"/>
+        <datatype base="uint32" name="uint32" length="4"/>
+        <datatype base="uint16" name="errorcode" length="2"/>
+        <datatype base="uint64" name="timestamp" length="8"/>
+    </datatypes>
+    <class index="0" name="trace">
+        <event index="0" name="message_metadata">
+            <params>
+                <param datatype="uint8" name="type" type="uint8"/>
+                <param datatype="timestamp" name="timestamp_us" type="uint64"/>
+            </params>
+        </event>
+        <enums name="message_type">
+            <enum name="message_type_command" value="0x0"/>
+            <enum name="message_type_response" value="0x1"/>
+            <enum name="message_type_event" value="0x2"/>
+        </enums>
+    </class>
+</api>

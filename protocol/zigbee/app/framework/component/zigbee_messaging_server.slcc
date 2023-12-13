@@ -1,33 +1,31 @@
 package: Zigbee
-description: Silicon Labs implementation of the Messaging server cluster.  This component serves up messages
-  in its table to clients that request them. This component requires extending to populate the
-  message table with messages.
+description: Silicon Labs implementation of the Messaging server cluster.  This component serves up messages in its table to clients that request them. This component requires extending to populate the message table with messages.
 label: Messaging Server Cluster
 quality: evaluation
 id: zigbee_messaging_server
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_messaging_server"
+  - name: zigbee_messaging_server
 config_file:
   - path: protocol/zigbee/app/framework/plugin/messaging-server/config/messaging-server-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/messaging-server/messaging-server.c
   - path: protocol/zigbee/app/framework/plugin/messaging-server/messaging-server-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/messaging-server
     file_list:
-      - path: messaging-server.h  
+      - path: messaging-server.h
 template_contribution:
   - name: component_catalog
     value: zigbee_messaging_server
   - name: cluster_service
     value:
-       cluster_id: "0x0703"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "emberAfMessagingClusterServerCommandParse"
+      cluster_id: '0x0703'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfMessagingClusterServerCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -40,8 +38,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_msg
       help: Set the message used by the message plugin.
       argument:
-      - type: string
-        help: The message to set
+        - type: string
+          help: The message to set
   - name: cli_command
     value:
       group: messaging-server
@@ -49,8 +47,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_append
       help: Appends an additional string to the message contained in the message component.
       argument:
-      - type: string
-        help: The string to append to the current message
+        - type: string
+          help: The string to append to the current message
   - name: cli_command
     value:
       group: messaging-server
@@ -58,8 +56,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_id
       help: Sets the message ID for the message contained in the messaging component.
       argument:
-      - type: uint32
-        help: Message ID
+        - type: uint32
+          help: Message ID
   - name: cli_command
     value:
       group: messaging-server
@@ -67,10 +65,10 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_time
       help: Sets the start time and duration for the message used by the message component.
       argument:
-      - type: uint32
-        help: Start time
-      - type: uint16
-        help: Duration
+        - type: uint32
+          help: Start time
+        - type: uint16
+          help: Duration
   - name: cli_command
     value:
       group: messaging-server
@@ -78,10 +76,10 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_relative_time
       help: Sets the relative time on the message.
       argument:
-      - type: uint32
-        help: Number of minutes to add to the message time above the current time
-      - type: uint32
-        help: Duration in minutes for the message to be valid
+        - type: uint32
+          help: Number of minutes to add to the message time above the current time
+        - type: uint32
+          help: Duration in minutes for the message to be valid
   - name: cli_group
     value:
       group: messaging-server
@@ -158,8 +156,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_valid
       help: Sets the message validity to valid.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: messaging-server
@@ -167,8 +165,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_valid
       help: Sets the message validity to invalid.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cli_command
     value:
       group: messaging-server
@@ -176,12 +174,12 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_display
       help: Displays the message.
       argument:
-      - type: uint16
-        help: The destination of the message
-      - type: uint8
-        help: The source endpoint of the message
-      - type: uint8
-        help: The destination endpoint of the message
+        - type: uint16
+          help: The destination of the message
+        - type: uint8
+          help: The source endpoint of the message
+        - type: uint8
+          help: The destination endpoint of the message
   - name: cli_command
     value:
       group: messaging-server
@@ -189,12 +187,12 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_cancel
       help: Cancels the message.
       argument:
-      - type: uint16
-        help: The destination of the message
-      - type: uint8
-        help: The source endpoint of the message
-      - type: uint8
-        help: The destination endpoint of the message
+        - type: uint16
+          help: The destination of the message
+        - type: uint8
+          help: The source endpoint of the message
+        - type: uint8
+          help: The destination endpoint of the message
   - name: cli_command
     value:
       group: messaging-server
@@ -202,8 +200,8 @@ template_contribution:
       handler: sli_zigbee_af_messaging_server_cli_print
       help: Prints the message info.
       argument:
-      - type: uint8
-        help: The relevant endpoint
+        - type: uint8
+          help: The relevant endpoint
   - name: cluster_functions
     value:
       cluster_name: Messaging

@@ -10,7 +10,7 @@ EmberStatus emApiSetNcpSecurityKeyPersistent(uint8_t *keyContents, uint8_t keyLe
 
 EmberStatus emApiSetNcpSecurityKey(uint8_t *keyContents, uint8_t keyLength)
 {
-  (void *)keyContents;
+  (void)keyContents;
   (void)keyLength;
   return EMBER_INVALID_CALL;
 }

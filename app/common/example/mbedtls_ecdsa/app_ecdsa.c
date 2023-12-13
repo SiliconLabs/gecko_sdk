@@ -92,7 +92,7 @@ mbedtls_ecp_group_id input_curve(void)
   int loop_control = 0;
 
   mbedtls_printf("\nWelcome to the ECDSA example application. \n");
-  mbedtls_printf("You can choose between the follwing curves: \n");
+  mbedtls_printf("You can choose between the following curves: \n");
   mbedtls_printf("1. MBEDTLS_ECP_DP_SECP256R1 \n");
   mbedtls_printf("2. MBEDTLS_ECP_DP_SECP192R1 \n");
 

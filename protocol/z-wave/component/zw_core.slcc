@@ -32,6 +32,8 @@ requires:
   - name: zw_versions
   - name: zw_series
   - name: zw_target_boards
+  - name: zpal_zwave_nvm_instance
+    condition: [device_series_1]
   - name: zaf_protocol_config
   - name: sleeptimer
   # Platform
@@ -105,7 +107,7 @@ include:
       - path: "hal-config.h"
       - path: "hal-config-board-700.h"
         condition: [device_sdid_89]
-      - path: "hal-config-board-700.h"        
+      - path: "hal-config-board-700.h"
         condition: [device_sdid_95]
       - path: "hal-config-board-800.h"
         condition: [device_sdid_210]
@@ -145,10 +147,10 @@ define:
   - name: EFR32ZG
     value: 1
   # TODO: Integration hooks needed in FreeRTOS wrapper to register functions for pre/post sleep hooks
-  - name: configPRE_SLEEP_PROCESSING(ms)
-    value: enterPowerDown(ms)
-  - name: configPOST_SLEEP_PROCESSING(ms)
-    value: exitPowerDown(ms)
+  - name: configPRE_SLEEP_PROCESSING
+    value: enterPowerDown
+  - name: configPOST_SLEEP_PROCESSING
+    value: exitPowerDown
   - name: SL_IOSTREAM_UART_FLUSH_TX_BUFFER
   - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC
 
@@ -161,11 +163,6 @@ toolchain_settings:
   - option: optimize
     value: size
     condition: [zw_release]
-  - option: gcc_compiler_option
-    value: "-flto"
-    condition: [zw_release]
-#  - option: gcc_compiler_option
-#    value: "-ffat-lto-objects"
   - option: gcc_compiler_option
     value: "-fmerge-all-constants"
   - option: gcc_compiler_option
@@ -185,7 +182,7 @@ toolchain_settings:
   #   value: "-Wconversion"
   - option: gcc_compiler_option
     value: "-Wextra"
-  # Allow implicit function declaration until freertos has an integration hook    
+  # Allow implicit function declaration until freertos has an integration hook
   - option: gcc_compiler_option
     value: "-Wno-implicit-function-declaration"
     condition: [zw_release]

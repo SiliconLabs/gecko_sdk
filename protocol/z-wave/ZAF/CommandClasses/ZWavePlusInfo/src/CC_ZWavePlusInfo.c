@@ -49,12 +49,11 @@ static received_frame_status_t
 CC_ZWavePlusInfo_handler(
     RECEIVE_OPTIONS_TYPE_EX *rxOpt,
     ZW_APPLICATION_TX_BUFFER *pCmd,
-    uint8_t cmdLength,
+    __attribute__((unused)) uint8_t cmdLength,
     ZW_APPLICATION_TX_BUFFER * pFrameOut,
     uint8_t * pLengthOut
 )
 {
-  UNUSED(cmdLength);
 
   if (pCmd->ZW_Common.cmd == ZWAVEPLUS_INFO_GET)
   {
@@ -99,9 +98,8 @@ ZW_WEAK uint8_t cc_zwave_plus_info_config_get_endpoint_count(void)
   return 0;
 }
 
-ZW_WEAK zw_plus_info_config_icons_t * cc_zwave_plus_info_config_get_endpoint_entry(uint8_t endpoint)
+ZW_WEAK zw_plus_info_config_icons_t * cc_zwave_plus_info_config_get_endpoint_entry(__attribute__((unused)) uint8_t endpoint)
 {
-  UNUSED(endpoint);
   return &unassinged_icons;
 }
 

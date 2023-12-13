@@ -163,10 +163,6 @@ void app_init(int argc, char *argv[])
   SL_BTMESH_API_REGISTER();
 
   app_log_info("Empty NCP-host initialised." APP_LOG_NEW_LINE);
-  app_log_info("Resetting NCP..." APP_LOG_NEW_LINE);
-  // Reset NCP to ensure it gets into a defined state
-  // Once the chip successfully boots, boot event should be received
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
@@ -215,23 +211,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
     {
-      // Filter legacy and new scanner report events as it would send a message
-      // every 5 ms and clog UART while scanning for unprovisioned nodes
-      sc = app_add_user_event_filter(sl_bt_evt_scanner_scan_report_id);
-      app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
-
+      // Filter scanner report events as it would send a message every 5 ms and
+      // clog UART while scanning for unprovisioned nodes
       sc = app_add_user_event_filter(sl_bt_evt_scanner_legacy_advertisement_report_id);
       app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
 
       sc = app_add_user_event_filter(sl_bt_evt_scanner_extended_advertisement_report_id);
       app_assert_status_f(sc, "Failed to enable filtering on the target" APP_LOG_NEW_LINE);
-
-      // Print boot message.
-      app_log_info("Bluetooth stack booted: v%d.%d.%d-b%d" APP_LOG_NEW_LINE,
-                   evt->data.evt_system_boot.major,
-                   evt->data.evt_system_boot.minor,
-                   evt->data.evt_system_boot.patch,
-                   evt->data.evt_system_boot.build);
 
       // Initialize Mesh stack in Provisioner mode,
       // wait for initialized event

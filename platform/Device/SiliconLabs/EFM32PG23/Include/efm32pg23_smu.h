@@ -1375,4 +1375,4 @@ typedef struct {
 /** @} End of group EFM32PG23_SMU_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_SMU_H */
+#endif // EFM32PG23_SMU_H

@@ -1,0 +1,19 @@
+id: "btmesh_nlc_basic_scene_selector"
+label: "Basic Scene Selector Profile"
+package: "Btmesh"
+description: >
+  Basic Scene Selector role in an NLC network. This component
+  includes other components needed for an SoC application to
+  act as a Basic Scene Selector node in an NLC network, as
+  well as components providing the relevant metadata for the role.
+category: "Bluetooth Mesh|NLC"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_nlc_basic_scene_selector"
+tag:
+  - No-Code
+
+provides:
+  - name: "btmesh_nlc_basic_scene_selector"
+requires:
+  - name: "btmesh_nlc_basic_scene_selector_profile_metadata"
+  - name: "btmesh_scene_client"

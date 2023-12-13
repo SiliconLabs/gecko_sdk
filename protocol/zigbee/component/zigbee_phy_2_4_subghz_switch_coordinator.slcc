@@ -3,7 +3,6 @@ label: Zigbee 2.4GHz/SubGHz Switch Coordinator
 package: Zigbee
 category: Zigbee|Stack|PHY support
 quality: production
-
 description: Zigbee Multi-MAC Switch Coordinator - A Coordinator can form a network and operate on the 2.4GHz and Sub-GHz bands simultaneously. The supported radio boards are BRD4155a-Rev01 and BRD4197a-Rev01.
 
 provides:
@@ -13,8 +12,6 @@ provides:
 requires:
   - name: zigbee_pro_stack
   - name: zigbee_r22_support
-  - name: zigbee_phy_native
-  - name: zigbee_phy_pro2plus
 
 define:
   - name: PHY_DUAL

@@ -251,12 +251,10 @@ class BtmeshCore:
         self._dcdif = value
 
     def add_scan_event_filters(self):
-        self.lib.add_event_filter("bt", "scanner", "scan_report")
         self.lib.add_event_filter("bt", "scanner", "legacy_advertisement_report")
         self.lib.add_event_filter("bt", "scanner", "extended_advertisement_report")
 
     def remove_scan_event_filters(self):
-        self.lib.remove_event_filter("bt", "scanner", "scan_report")
         self.lib.remove_event_filter("bt", "scanner", "legacy_advertisement_report")
         self.lib.remove_event_filter("bt", "scanner", "extended_advertisement_report")
 

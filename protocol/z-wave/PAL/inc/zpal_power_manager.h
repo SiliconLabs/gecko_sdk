@@ -62,6 +62,15 @@ typedef enum
   ZPAL_PM_MODE_SHUTOFF,     ///< Chip is off and will boot from reset. Hence, no transition from this power mode will ever happen.
 } zpal_pm_mode_t;
 
+typedef enum
+{
+  ZPAL_PM_DEVICE_ALWAYS_LISTENING,
+  ZPAL_PM_DEVICE_FREQUENTLY_LISTENING,
+  ZPAL_PM_DEVICE_NOT_LISTENING,
+} zpal_pm_device_t;
+
+void zpal_pm_set_device_type(zpal_pm_device_t device_type);
+
 /**
  * @brief The ZPAL implementation must invoke this function whenever a transition happens between one of
  * the power modes defined in @ref zpal_pm_mode_t.

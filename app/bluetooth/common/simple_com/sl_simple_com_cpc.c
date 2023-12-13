@@ -3,7 +3,7 @@
  * @brief Simple Communication Interface (CPC)
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,11 +33,11 @@
 #include "sl_simple_com_config.h"
 #include "sli_cpc.h"
 
-// Receive and transmit buffers
-static uint8_t rx_buf[SL_SIMPLE_COM_RX_BUF_SIZE] = { 0 };
+// Transmit buffer
 static uint8_t tx_buf[SL_SIMPLE_COM_TX_BUF_SIZE] = { 0 };
 
 static sl_cpc_endpoint_handle_t endpoint_handle;
+static bool cpc_opened = false;
 static bool cpc_connected = false;
 
 // Write completed signal
@@ -47,20 +47,17 @@ typedef struct {
 } sig_wr_comp;
 
 // Signals to handle communication between callback functions
-static uint8_t signal_write = 0;
+static uint16_t signal_write = 0;
 static sig_wr_comp signal_wr_comp = { 0 };
 static uint8_t signal_read = 0;
-static uint8_t signal_init = 1;
 
-static uint8_t *rx_buf_p;
-
-void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
-               void *buffer,
-               void *arg,
-               sl_status_t status);
-void cpc_rx_cb(uint8_t endpoint_id, void *arg);
-void cpc_error_cb(uint8_t endpoint_id, void *arg);
-bool cpc_is_ep_free(void);
+static void cpc_on_tx(sl_cpc_user_endpoint_id_t endpoint_id,
+                      void *buffer,
+                      void *arg,
+                      sl_status_t status);
+static void cpc_on_rx(uint8_t endpoint_id, void *arg);
+static void cpc_on_error(uint8_t endpoint_id, void *arg);
+static void cpc_on_connect(uint8_t endpoint_id, void *arg);
 
 // -----------------------------------------------------------------------------
 // Public functions (API implementation)
@@ -72,29 +69,30 @@ void sl_simple_com_init(void)
 {
   sl_status_t status;
 
-  // clear RX and TX buffers
-  memset(rx_buf, 0, sizeof(rx_buf));
+  // clear TX buffer
   memset(tx_buf, 0, sizeof(tx_buf));
-
-  rx_buf_p = &rx_buf[0];
 
   status = sli_cpc_open_service_endpoint(&endpoint_handle,
                                          SL_CPC_ENDPOINT_BLUETOOTH, 0, 1);
   EFM_ASSERT(status == SL_STATUS_OK);
   status = sl_cpc_set_endpoint_option(&endpoint_handle,
                                       SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED,
-                                      (void *)cpc_tx_cb);
+                                      (void *)cpc_on_tx);
   EFM_ASSERT(status == SL_STATUS_OK);
   status = sl_cpc_set_endpoint_option(&endpoint_handle,
                                       SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE,
-                                      (void *)cpc_rx_cb);
+                                      (void *)cpc_on_rx);
   EFM_ASSERT(status == SL_STATUS_OK);
   status = sl_cpc_set_endpoint_option(&endpoint_handle,
                                       SL_CPC_ENDPOINT_ON_ERROR,
-                                      (void*)cpc_error_cb);
+                                      (void*)cpc_on_error);
+  EFM_ASSERT(status == SL_STATUS_OK);
+  status = sl_cpc_set_endpoint_option(&endpoint_handle,
+                                      SL_CPC_ENDPOINT_ON_CONNECT,
+                                      (void*)cpc_on_connect);
   EFM_ASSERT(status == SL_STATUS_OK);
 
-  cpc_connected = true;
+  cpc_opened = true;
 }
 
 /**************************************************************************//**
@@ -102,48 +100,38 @@ void sl_simple_com_init(void)
  *****************************************************************************/
 void sl_simple_com_step(void)
 {
-  sl_status_t status;
-  uint16_t len;
-
   // Check if the endpoint is open. If not, we need to reopen it,
   // but first we need to check if it has been freed by CPC
-  if (!cpc_connected) {
-    if (cpc_is_ep_free()) {
+  if (!cpc_opened) {
+    if (sl_cpc_get_endpoint_state(&endpoint_handle) == SL_CPC_STATE_FREED) {
       sl_simple_com_init();
     } else {
+      sl_simple_com_os_task_proceed();
       return;
     }
   }
 
-  // If something is in tx buffer, and initial handshake was done, transmit it
-  if ((signal_write > 0) && !signal_init) {
+  // If tx buffer is not empty, and primary device has connected, transmit it
+  if ((signal_write > 0) && cpc_connected) {
     (void)sl_cpc_write(&endpoint_handle, tx_buf, signal_write, 0, NULL);
     signal_write = 0;
   }
 
   if (signal_read > 0) {
-    status = sl_cpc_read(&endpoint_handle, (void **) &rx_buf_p, &len, 0, 0);
-    if (status != SL_STATUS_OK) {
-      // Drop packet
-      len = 0;
-    } else if (signal_init) {
-      // Drop first signaling (handshake) packet
-      signal_init = 0;
-      len = 0;
-      sl_simple_com_os_task_proceed();
-    } else {
-      // Everything OK, send msg to upper layers
-      memcpy(rx_buf, rx_buf_p, len);
-      sl_simple_com_receive_cb(status, len, rx_buf);
-      sl_cpc_free_rx_buffer((void *) &rx_buf);
-      memset(rx_buf, 0, sizeof(rx_buf));
+    sl_status_t status;
+    uint8_t *data;
+    uint16_t data_length;
+    status = sl_cpc_read(&endpoint_handle, (void **)&data, &data_length, 0, 0);
+    if (status == SL_STATUS_OK) {
+      // Send data to upper layers
+      sl_simple_com_receive_cb(status, data_length, data);
+      sl_cpc_free_rx_buffer(data);
     }
-
     signal_read--;
   }
 
   if (signal_wr_comp.write_completed > 0) {
-    if (!signal_init) {
+    if (cpc_connected) {
       memset(tx_buf, 0, sizeof(tx_buf));
       sl_simple_com_transmit_cb(signal_wr_comp.wr_comp_status);
       signal_wr_comp.wr_comp_status = SL_STATUS_FAIL;
@@ -155,24 +143,27 @@ void sl_simple_com_step(void)
 /**************************************************************************//**
  * Transmit function
  *
- * Transmits len bytes of data through the UART interface using DMA.
+ * Transmits len bytes of data through CPC. If primary device has not connected
+ * yet, data is reserved for later transmission. Note that the reserved data
+ * will be overwritten on a subsequent transmission.
  *
- * @param[out] len Message lenght
+ * @param[out] len Message length
  * @param[out] data Message data
  *****************************************************************************/
-void sl_simple_com_transmit(uint32_t len, uint8_t *data)
+void sl_simple_com_transmit(uint32_t len, const uint8_t *data)
 {
-  // Store msg to buffer until transmit callback is not called
+  EFM_ASSERT(len <= SL_SIMPLE_COM_TX_BUF_SIZE);
+  // Store data in TX buffer until the write completed callback is called
   signal_write = len;
   memcpy((void *)tx_buf, (void *)data, (size_t)len);
 
-  // Only send msg after signaling handshake was done
-  if (!signal_init) {
+  // Only send msg if primary device has connected to the endpoint.
+  if (cpc_connected) {
     (void)sl_cpc_write(&endpoint_handle,
                        tx_buf,
                        signal_write,
                        0,
-                       (void *)cpc_tx_cb);
+                       (void *)cpc_on_tx);
     signal_write = 0;
   }
 
@@ -228,7 +219,7 @@ SL_WEAK void sl_simple_com_receive_cb(sl_status_t status,
 /**************************************************************************//**
  * CPC receive completed callback
  *****************************************************************************/
-void cpc_rx_cb(uint8_t endpoint_id, void *arg)
+static void cpc_on_rx(uint8_t endpoint_id, void *arg)
 {
   (void)endpoint_id;
   (void)arg;
@@ -240,10 +231,10 @@ void cpc_rx_cb(uint8_t endpoint_id, void *arg)
 /**************************************************************************//**
  * CPC transmit completed callback
  *****************************************************************************/
-void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
-               void *buffer,
-               void *arg,
-               sl_status_t status)
+static void cpc_on_tx(sl_cpc_user_endpoint_id_t endpoint_id,
+                      void *buffer,
+                      void *arg,
+                      sl_status_t status)
 {
   (void)(endpoint_id);
   (void)(buffer);
@@ -259,7 +250,7 @@ void cpc_tx_cb(sl_cpc_user_endpoint_id_t endpoint_id,
 /**************************************************************************//**
  * CPC error callback
  *****************************************************************************/
-void cpc_error_cb(uint8_t endpoint_id, void *arg)
+static void cpc_on_error(uint8_t endpoint_id, void *arg)
 {
   (void)endpoint_id;
   (void)arg;
@@ -267,19 +258,21 @@ void cpc_error_cb(uint8_t endpoint_id, void *arg)
   if (state == SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE) {
     sl_status_t status = sl_cpc_close_endpoint(&endpoint_handle);
     EFM_ASSERT(status == SL_STATUS_OK);
+    cpc_opened = false;
     cpc_connected = false;
   }
+  sl_simple_com_os_task_proceed();
 }
 
 /**************************************************************************//**
- * Returns whether the CPC endpoint has been freed
+ * CPC connection callback
  *****************************************************************************/
-bool cpc_is_ep_free(void)
+static void cpc_on_connect(uint8_t endpoint_id, void *arg)
 {
-  if (sl_cpc_get_endpoint_state(&endpoint_handle) == SL_CPC_STATE_FREED) {
-    return true;
-  }
-  return false;
+  (void)endpoint_id;
+  (void)arg;
+  cpc_connected = true;
+  sl_simple_com_os_task_proceed();
 }
 
 /**************************************************************************//**

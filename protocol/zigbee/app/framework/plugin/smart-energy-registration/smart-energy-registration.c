@@ -1049,14 +1049,13 @@ static void discoveryCallback(const EmberAfServiceDiscoveryResult *result)
       resumeAfterFixedDelay(EMBER_ERR_FATAL);
     } else {
       sl_zb_sec_man_context_t context;
-      sl_zb_sec_man_key_t plaintext_key;
       sl_zb_sec_man_aps_key_metadata_t key_data;
       sl_zb_sec_man_init_context(&context);
 
       context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
-      (void)sl_zb_sec_man_get_aps_key_info(&context, &key_data);
+      sl_status_t status = sl_zb_sec_man_get_aps_key_info(&context, &key_data);
 
-      if (sl_zb_sec_man_export_key(&context, &plaintext_key) != SL_STATUS_OK) {
+      if (status != SL_STATUS_OK) {
         emberAfRegistrationPrintln("ERR: Failed to get trust center link key");
         emberAfRegistrationAbortCallback();
         return;

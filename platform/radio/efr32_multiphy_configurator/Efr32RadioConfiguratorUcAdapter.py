@@ -17,6 +17,10 @@ def generationResults(calc_multi_phy_model):
   for base_ch_conf in calc_multi_phy_model.base_channel_configurations.base_channel_configuration:
     for ch_conf_ent in base_ch_conf.channel_config_entries.channel_config_entry:
       output_model = ch_conf_ent.radio_configurator_output_model
+      if hasattr(output_model.vars, "demod_select"):
+        demod_sel = output_model.vars.demod_select.value
+      else:
+        demod_sel = None
       logs = []
       for _log in output_model.logs:
         log = {}
@@ -24,12 +28,14 @@ def generationResults(calc_multi_phy_model):
         log["message"] = _log.message.split("\n") if type(_log.message) == str else _log.message
         logs.append(log)
       cfg_logs = []
-      for output in output_model.profile.get_outputs([ModelOutputType.INFO]):
-        cfg_log = {}
-        cfg_log["name"] = output.readable_name
-        cfg_log["value"] = str(output.var_value) if isinstance(output.var_value, enum.Enum)  else output.var_value
-        cfg_logs.append(cfg_log)
-      for output in output_model.profile.get_outputs([ModelOutputType.LINKED_IO]):
+      for output in output_model.profile.get_outputs(only_in_public_log=True):
+        # Remove when MCUW_RADIO_CFG-2341 is done
+        # Skip TRECS-specific variables if the demod is not TRECS
+        if "trecs" in output.var_name and demod_sel not in (
+            output_model.vars.demod_select.var_enum.TRECS_SLICER,
+            output_model.vars.demod_select.var_enum.TRECS_VITERBI,
+        ):
+            continue
         cfg_log = {}
         cfg_log["name"] = output.readable_name
         cfg_log["value"] = str(output.var_value) if isinstance(output.var_value, enum.Enum)  else output.var_value

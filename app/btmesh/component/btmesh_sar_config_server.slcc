@@ -21,6 +21,7 @@ tag:
 config_file:
   - path: btmesh_sar_config_server.dcd
     directory: btmeshconf
+  - path: "config/sl_btmesh_sar_config_server_config.h"
 source:
   - path: "sl_btmesh_sar_config_server.c"
 include:

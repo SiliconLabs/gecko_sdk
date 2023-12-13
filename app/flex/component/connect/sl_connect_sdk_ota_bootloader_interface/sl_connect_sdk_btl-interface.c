@@ -30,10 +30,10 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
-#include "bootloader-interface-app.h"
 #include "sl_connect_sdk_btl-interface.h"
-#include "api/btl_interface.h"
+#include "btl_interface.h"
+#include "app_log.h"
+#include "stack/core/sl-connect-watchdog.h"
 
 static bool isBootloaderInitialized = false;
 static uint32_t storageSlotStartAddress = 0UL;
@@ -50,7 +50,9 @@ bool emberAfPluginBootloaderInterfaceIsBootloaderInitialized(void)
 
 void emberAfPluginBootloaderInterfaceGetVersion(uint16_t *blVersion)
 {
-  *blVersion = halAppBootloaderGetVersion();
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0L, .capabilities = 0L };
+  bootloader_getInfo(&info);
+  *blVersion = info.version;
 }
 
 // HACK: Currently, bootloaderIsCommonBootloader() is not exposed.
@@ -68,38 +70,13 @@ bool emberAfPluginBootloaderInterfaceInit(void)
 {
   BootloaderStorageInformation_t storageInfo;
   BootloaderStorageSlot_t storageSlotInfo;
-  const HalEepromInformationType *eepromInfo;
-  uint8_t result;
+  int32_t retval = 1L;
 
-  result = halAppBootloaderInit();
+  retval = bootloader_init();
 
-  if (result != EEPROM_SUCCESS) {
+  if (retval != BOOTLOADER_OK) {
+    app_log_error("bootloader_init failed!\n");
     return false;
-  }
-
-  eepromInfo = halAppBootloaderInfo();
-
-  if (eepromInfo != NULL) {
-    #if 0
-    emberAfCorePrintln("eeprom info: \r\ninfoVer %l\r\npartDesc %s\r\ncapabilities %l",
-                       eepromInfo->version,
-                       eepromInfo->partDescription,
-                       eepromInfo->capabilitiesMask);
-    // responsePrintf can't handle 32 bit decimals
-    emberAfCorePrintln("{partSize:%l} {pageSize:%l}",
-                       eepromInfo->partSize, eepromInfo->pageSize);
-    if ((eepromInfo->capabilitiesMask & EEPROM_CAPABILITIES_PART_ERASE_SECONDS) == EEPROM_CAPABILITIES_PART_ERASE_SECONDS) {
-      emberAfCorePrintln("partEraseTime(s) %d pageEraseMs %d",
-                         eepromInfo->partEraseTime,
-                         eepromInfo->pageEraseMs);
-    } else {
-      emberAfCorePrintln("partEraseTime(ms) %d pageEraseMs %d",
-                         eepromInfo->partEraseTime,
-                         eepromInfo->pageEraseMs);
-    }
-    #endif
-  } else {
-    emberAfCorePrintln("eeprom info not available");
   }
 
   bootloader_getStorageInfo(&storageInfo);
@@ -123,57 +100,28 @@ void emberAfPluginBootloaderInterfaceSleep(void)
   if (!isBootloaderInitialized) {
     emberAfPluginBootloaderInterfaceInit();
   }
-  halAppBootloaderShutdown();
+  bootloader_deinit();
   isBootloaderInitialized = false;
 }
 
 static bool legacyBootloaderChipErase(void)
 {
   bool result = true;
-  uint16_t delayUs = 50000;
-  uint32_t timeoutUs;
-  const HalEepromInformationType *eepromInfo;
 
-  eepromInfo = halAppBootloaderInfo();
-  if (eepromInfo == NULL) {
+  WDOGn_Feed(DEFAULT_WDOG);
+
+  if (BOOTLOADER_OK != bootloader_eraseStorageSlot(0)) {
     result = false;
     goto DONE;
   }
 
-  if ((eepromInfo->capabilitiesMask & EEPROM_CAPABILITIES_PART_ERASE_SECONDS) == EEPROM_CAPABILITIES_PART_ERASE_SECONDS) {
-    timeoutUs = (4 * eepromInfo->partEraseTime) * 1000 * 1024; // partEraseTime in seconds (multiplied by 1024 b/c spiflash
-                                                               // erase times in ms are based on 1024Hz)
-  } else {
-    timeoutUs = (4 * eepromInfo->partEraseTime) * 1000; //partEraseTime in milliseconds
-  }
-
-  halResetWatchdog();
-
-  if ( EEPROM_SUCCESS != halAppBootloaderEraseRawStorage(0, eepromInfo->partSize) ) {
-    result = false;
-    goto DONE;
-  }
-
-  while (halAppBootloaderStorageBusy()) {
-    halResetWatchdog();
-    emberAfCorePrint(".");
-    halCommonDelayMicroseconds(delayUs);
-
-    // Exit if timeoutUs exeeded
-    timeoutUs -= delayUs;
-    if (timeoutUs < delayUs) {
-      result = false;
-      goto DONE;
-    }
-  }
-
-  emberAfCorePrintln("");
+  app_log_info("\n");
 
   DONE:
   if (result) {
-    emberAfCorePrintln("flash erase successful!");
+    app_log_info("flash erase successful!\n");
   } else {
-    emberAfCorePrintln("flash erase failed!");
+    app_log_error("flash erase failed!\n");
   }
 
   return result;
@@ -189,7 +137,7 @@ static bool geckoBootloaderChipEraseSlot(uint32_t slot)
 
   bootloader_getStorageInfo(&storageInfo);
   if (slot >= storageInfo.numStorageSlots) {
-    emberAfCorePrintln("ERROR: invalid erase slot number(%d)!", slot);
+    app_log_error("ERROR: invalid erase slot number(%ld)!\n", slot);
     return false;
   }
 
@@ -206,30 +154,30 @@ static bool geckoBootloaderChipEraseSlot(uint32_t slot)
   // This shouldn't happen unless the user configures something improperly, and
   // even then, the bootloader may complain when being compiled/run
   if (storageSlotInfo.length % storageInfo.info->pageSize) {
-    emberAfCorePrintln("Erase: slot length (%d) not aligned "
-                       "to page size (%d). The entire slot will not be erased.",
-                       storageSlotInfo.length,
-                       storageInfo.info->pageSize);
+    app_log_warning("Erase: slot length (%ld) not aligned "
+                    "to page size (%ld). The entire slot will not be erased.\n",
+                    storageSlotInfo.length,
+                    storageInfo.info->pageSize);
   }
   address = storageSlotInfo.address;
 
   // Erase the slot in page chunks
   while ((BOOTLOADER_OK == retVal)
          && ((address - storageSlotInfo.address) < bytesToErase)) {
-    halResetWatchdog();
-    emberAfCorePrint(".");
+    WDOGn_Feed(DEFAULT_WDOG);
+    app_log_info(".");
     retVal = bootloader_eraseRawStorage(address, storageInfo.info->pageSize);
     address += storageInfo.info->pageSize;
   }
 
-  emberAfCorePrintln("");
+  app_log_info("\n");
 
   if (BOOTLOADER_OK != retVal) {
-    emberAfCorePrintln("Erase: failed to erase %d bytes in slot at "
-                       "address 0x%4x (error 0x%x)",
-                       storageInfo.info->pageSize,
-                       address - storageInfo.info->pageSize,
-                       retVal);
+    app_log_error("Erase: failed to erase %ld bytes in slot at "
+                  "address 0x%4lx (error 0x%lx)\n",
+                  storageInfo.info->pageSize,
+                  address - storageInfo.info->pageSize,
+                  retVal);
   }
   return (BOOTLOADER_OK == retVal);
 }
@@ -243,13 +191,13 @@ static bool geckoBootloaderChipEraseSlotAll(void)
   MEMSET(&storageInfo, 0, sizeof(BootloaderStorageInformation_t));
   bootloader_getStorageInfo(&storageInfo);
   for (uint32_t index = 0; index < storageInfo.numStorageSlots; index++) {
-    emberAfCorePrintln("flash erasing slot %d started", index);
+    app_log_info("flash erasing slot %ld started\n", index);
     result = geckoBootloaderChipEraseSlot(index);
 
     if (result) {
-      emberAfCorePrintln("flash erase successful!");
+      app_log_info("flash erase successful!\n");
     } else {
-      emberAfCorePrintln("flash erase failed!");
+      app_log_error("flash erase failed!\n");
     }
 
     retVal &= result;
@@ -279,21 +227,16 @@ uint16_t emberAfPluginBootloaderInterfaceValidateImage(void)
 {
   uint16_t result;
 
-  emberAfCorePrint("Verifying image");
+  app_log_info("Verifying image");
 
-  halResetWatchdog();
-  halAppBootloaderImageIsValidReset();
+  WDOGn_Feed(DEFAULT_WDOG);
 
-  do {
-    halResetWatchdog();
-    result = halAppBootloaderImageIsValid();
-    emberAfCorePrint(".");
-  } while (result == BL_IMAGE_IS_VALID_CONTINUE);
+  result = bootloader_verifyImage(0, NULL);
 
-  if (result == 0) {
-    emberAfCorePrintln("failed!");
+  if (result != BOOTLOADER_OK) {
+    app_log_error("failed!\n");
   } else {
-    emberAfCorePrintln("done!");
+    app_log_info("done!\n");
   }
 
   return result;
@@ -301,25 +244,25 @@ uint16_t emberAfPluginBootloaderInterfaceValidateImage(void)
 
 void emberAfPluginBootloaderInterfaceBootload(void)
 {
-  EmberStatus result;
+  int32_t result;
 
-  if (!emberAfPluginBootloaderInterfaceValidateImage()) {
+  if (emberAfPluginBootloaderInterfaceValidateImage() != BOOTLOADER_OK) {
+    app_log_error("Invalid image!\n");
     return;
   }
 
-  emberAfCorePrintln("Installing new image and rebooting...");
-  halCommonDelayMilliseconds(500);
+  app_log_info("Installing new image and rebooting...\n");
+  sl_sleeptimer_delay_millisecond(500);
 
-  result = halAppBootloaderInstallNewImage();
+  result = bootloader_setImageToBootload(0);
 
-  // We should not get here if bootload is succeeded.
-  emberAfCorePrintln("New image installation ");
-  if (result == EMBER_SUCCESS) {
-    emberAfCorePrintln("done!");
-  } else {
-    emberAfCorePrintln("failed (error 0x%x)!", result);
+  if (result != BOOTLOADER_OK) {
+    app_log_error("Failed to set bootload image (error 0x%lx)!\n", result);
+    return;
   }
-  return;
+  app_log_info("Bootload image set!\n");
+
+  bootloader_rebootAndInstall();
 }
 
 bool emberAfPluginBootloaderInterfaceRead(uint32_t startAddress,
@@ -337,11 +280,11 @@ bool emberAfPluginBootloaderInterfaceRead(uint32_t startAddress,
   if (isBootloaderInitialized) {
     // Implement block read so we can take care of the watchdog reset.
     while (remainingLength) {
-      halResetWatchdog();
+      WDOGn_Feed(DEFAULT_WDOG);
       len = (remainingLength > 255) ? 255 : (uint8_t)remainingLength;
-      result = halAppBootloaderReadRawStorage((storageSlotStartAddress + address), buffer + address - startAddress, len);
+      result = bootloader_readRawStorage((storageSlotStartAddress + address), buffer + address - startAddress, len);
 
-      if (EEPROM_SUCCESS != result) {
+      if (BOOTLOADER_OK != result) {
         return false;
       }
 
@@ -369,11 +312,11 @@ bool emberAfPluginBootloaderInterfaceWrite(uint32_t startAddress,
   if (isBootloaderInitialized) {
     // Implement block write so we can take care of the watchdog reset.
     while (remainingLength) {
-      halResetWatchdog();
+      WDOGn_Feed(DEFAULT_WDOG);
       len = (remainingLength > 255) ? 255 : (uint8_t)remainingLength;
-      result = halAppBootloaderWriteRawStorage((storageSlotStartAddress + address), buffer + address - startAddress, len);
+      result = bootloader_writeRawStorage((storageSlotStartAddress + address), ((uint8_t *)buffer) + address - startAddress, len);
 
-      if (EEPROM_SUCCESS != result) {
+      if (BOOTLOADER_OK != result) {
         return false;
       }
 

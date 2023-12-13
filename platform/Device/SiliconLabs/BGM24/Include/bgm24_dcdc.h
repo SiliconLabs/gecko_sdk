@@ -443,4 +443,4 @@ typedef struct {
 /** @} End of group BGM24_DCDC */
 /** @} End of group Parts */
 
-#endif /* BGM24_DCDC_H */
+#endif // BGM24_DCDC_H

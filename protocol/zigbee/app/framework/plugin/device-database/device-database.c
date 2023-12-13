@@ -89,7 +89,7 @@ const EmberAfDeviceInfo* emberAfPluginDeviceDatabaseAddDeviceWithAllInfo(const E
 {
   if (NULL != findDeviceByEui64(newDevice->eui64)) {
     emberAfCorePrint("Error: %p cannot add device that already exists: ", PLUGIN_NAME);
-    emberAfPrintLittleEndianEui64(newDevice->eui64);
+    emberAfPrintBigEndianEui64(newDevice->eui64);
     emberAfCorePrintln("");
     return NULL;
   }
@@ -138,7 +138,7 @@ bool emberAfPluginDeviceDatabaseSetEndpoints(const EmberEUI64 eui64,
   EmberAfDeviceInfo* device = findDeviceByEui64(eui64);
   if (device == NULL) {
     emberAfCorePrint("Error: %p cannot add endpoints.  No such device in database: ");
-    emberAfPrintLittleEndianEui64(eui64);
+    emberAfPrintBigEndianEui64(eui64);
     emberAfCorePrintln("");
     return false;
   }

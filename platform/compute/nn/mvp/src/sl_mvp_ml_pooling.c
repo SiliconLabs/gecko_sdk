@@ -31,7 +31,7 @@
 #include "sl_nn_mvp_config.h"
 #include "sl_mvp_ml_pooling.h"
 #include "sl_mvp.h"
-#include "sl_mvp_util.h"
+#include "sl_nn_util.h"
 #include "sl_mvp_program_area.h"
 #include "sl_common.h"
 
@@ -47,16 +47,6 @@
 static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool execute);
 static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bool execute);
 static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool execute);
-
-__STATIC_FORCEINLINE int sli_div_floor_int(const int dividend, const int divisor)
-{
-  return dividend / divisor;
-}
-
-__STATIC_FORCEINLINE int sli_div_ceil_int(const int dividend, const int divisor)
-{
-  return (dividend / divisor) + (((dividend % divisor) != 0) ? 1 : 0);
-}
 
 /***************************************************************************//**
  *
@@ -201,16 +191,16 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
         const int filter_y_start = SL_MAX(0, -in_y_origin);
         const int filter_y_end   = SL_MIN(filter_height, input_height - in_y_origin);
 
-        const int input_offset = sli_mvp_util_offset_nhwc(input_height, input_width, depth,
+        const int input_offset = sli_nn_calc_offset_nhwc(input_height, input_width, depth,
+                                                         batch,
+                                                         in_y_origin + filter_y_start,
+                                                         in_x_origin + filter_x_start,
+                                                         0 /* channel */);
+        const int output_offset = sli_nn_calc_offset_nhwc(output_height, output_width, depth,
                                                           batch,
-                                                          in_y_origin + filter_y_start,
-                                                          in_x_origin + filter_x_start,
+                                                          out_y,
+                                                          out_x,
                                                           0 /* channel */);
-        const int output_offset = sli_mvp_util_offset_nhwc(output_height, output_width, depth,
-                                                           batch,
-                                                           out_y,
-                                                           out_x,
-                                                           0 /* channel */);
 
         const int filter_x_count = filter_x_end - filter_x_start;
         const int filter_y_count = filter_y_end - filter_y_start;
@@ -416,14 +406,17 @@ static sl_status_t avg_pool_opt(const sli_mvp_ml_pooling_s8_params_t *params, bo
 
         // Execute the program
         if (execute) {
-          sli_mvp_pb_execute_program(p);
+          if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+            return status;
+          }
         }
       }
     }
   }
-  sli_mvp_cmd_wait_for_completion();
-
-  return SL_STATUS_OK;
+  if (execute) {
+    status = sli_mvp_cmd_wait_for_completion();
+  }
+  return status;
 }
 
 static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool execute)
@@ -478,9 +471,9 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   // Doesn't actually loop through each index, but only those that correspond to
   // unique sub-filters.
   const int in_y_origin_center_max = input_height - filter_height;
-  const int out_y_center_max = sli_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
+  const int out_y_center_max = sli_nn_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
   const int in_x_origin_center_max = input_width - filter_width;
-  const int out_x_center_max = sli_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
+  const int out_x_center_max = sli_nn_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
 
   for (int out_x_min = 0, out_x_max; out_x_min < output_width; out_x_min = out_x_max + 1) {
     const int in_x_origin_min = (out_x_min * stride_width) - pad_width;
@@ -580,7 +573,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
         // Could compute out_y_size for offset 0 and use for all but it is possible
         // that some more programs may be possible with a tighter bound on array size.
         SLI_MVP_CHECK(output_height_truncated >= out_y_offset);
-        int out_y_size = sli_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
+        int out_y_size = sli_nn_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
         int in_y_extra_incr_adjusted = out_y_size == 1 ? 0 : in_y_extra_incr;
 
         // Could just set in_y_size to input_height, but it may be possible to
@@ -607,11 +600,11 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
           for (int channel = 0; channel < depth; channel += parallelization) {
             // These array indexing computations should be moved up to highest loop
             // level possible so uncompiled operation is more efficient.
-            int output_index_base = sli_mvp_util_offset_nhwc(output_height, output_width, depth,
-                                                             batch,
-                                                             out_y_min + out_y_offset,
-                                                             out_x_min,
-                                                             channel);
+            int output_index_base = sli_nn_calc_offset_nhwc(output_height, output_width, depth,
+                                                            batch,
+                                                            out_y_min + out_y_offset,
+                                                            out_x_min,
+                                                            channel);
 
             int output_stride_col = 0;
             int output_size_col   = 1;                    // Unused dimension
@@ -631,11 +624,11 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
             SLI_MVP_CHECK(output_stride_row >= 0);
             SLI_MVP_CHECK(output_stride_vec >= 0);
 
-            int input_index_base = sli_mvp_util_offset_nhwc(input_height, input_width, depth,
-                                                            batch,
-                                                            (out_y_min + out_y_offset) * stride_height - pad_height + filter_y_start,
-                                                            out_x_min * stride_width - pad_width + filter_x_start,
-                                                            channel);
+            int input_index_base = sli_nn_calc_offset_nhwc(input_height, input_width, depth,
+                                                           batch,
+                                                           (out_y_min + out_y_offset) * stride_height - pad_height + filter_y_start,
+                                                           out_x_min * stride_width - pad_width + filter_x_start,
+                                                           channel);
 
             int input_stride_col = depth;
             int input_size_col   = filter_width_truncated;
@@ -951,7 +944,9 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
 
             // Execute the program
             if (execute) {
-              sli_mvp_pb_execute_program(p);
+              if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+                return status;
+              }
             }
           } // channels
         } // batches
@@ -960,7 +955,7 @@ static sl_status_t avg_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   } // out_x_range
 
   if (execute) {
-    sli_mvp_cmd_wait_for_completion();
+    status = sli_mvp_cmd_wait_for_completion();
   }
 
   return status;
@@ -1019,9 +1014,9 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   // Doesn't actually loop through each index, but only those that correspond to
   // unique sub-filters.
   const int in_y_origin_center_max = input_height - filter_height;
-  const int out_y_center_max = sli_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
+  const int out_y_center_max = sli_nn_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
   const int in_x_origin_center_max = input_width - filter_width;
-  const int out_x_center_max = sli_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
+  const int out_x_center_max = sli_nn_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
 
   for (int out_x_min = 0, out_x_max; out_x_min < output_width; out_x_min = out_x_max + 1) {
     const int in_x_origin_min = (out_x_min * stride_width) - pad_width;
@@ -1104,7 +1099,7 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
         // Could compute out_y_size for offset 0 and use for all but it is possible
         // that some more programs may be possible with a tighter bound on array size.
         SLI_MVP_CHECK(output_height_truncated >= out_y_offset);
-        int out_y_size = sli_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
+        int out_y_size = sli_nn_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
         // Don't need to worry about the increments if will never go to next output
         int in_y_extra_incr_adjusted = out_y_size == 1 ? 0 : in_y_extra_incr;
 
@@ -1132,8 +1127,8 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
           for (int channel = 0; channel < depth; channel += parallelization) {
             // These array indexing computations should be moved up to highest loop
             // level possible so operation is more efficient.
-            int output_index_base = sli_mvp_util_offset_nhwc(output_height, output_width, depth,
-                                                             batch, out_y_min + out_y_offset, out_x_min, channel);
+            int output_index_base = sli_nn_calc_offset_nhwc(output_height, output_width, depth,
+                                                            batch, out_y_min + out_y_offset, out_x_min, channel);
             int output_stride_col = 0;
             int output_size_col   = 1;    // unused dimension
             int output_stride_row = depth;
@@ -1152,11 +1147,11 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
             SLI_MVP_CHECK(output_stride_row >= 0);
             SLI_MVP_CHECK(output_stride_vec >= 0);
 
-            int input_index_base = sli_mvp_util_offset_nhwc(input_height, input_width, depth,
-                                                            batch,
-                                                            (out_y_min + out_y_offset) * stride_height - pad_height + filter_y_start,
-                                                            out_x_min * stride_width - pad_width + filter_x_start,
-                                                            channel);
+            int input_index_base = sli_nn_calc_offset_nhwc(input_height, input_width, depth,
+                                                           batch,
+                                                           (out_y_min + out_y_offset) * stride_height - pad_height + filter_y_start,
+                                                           out_x_min * stride_width - pad_width + filter_x_start,
+                                                           channel);
 
             int input_stride_col = depth;
             int input_size_col   = filter_width_truncated;
@@ -1381,7 +1376,9 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
 
             // Execute the program
             if (execute) {
-              sli_mvp_pb_execute_program(p);
+              if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+                return status;
+              }
             }
           } // channels
         } // batches
@@ -1390,10 +1387,10 @@ static sl_status_t max_pool(const sli_mvp_ml_pooling_s8_params_t *params, bool e
   } // out_x_range
 
   if (execute) {
-    sli_mvp_cmd_wait_for_completion();
+    status = sli_mvp_cmd_wait_for_completion();
   }
 
-  return SL_STATUS_OK;
+  return status;
 }
 
 /// @endcond

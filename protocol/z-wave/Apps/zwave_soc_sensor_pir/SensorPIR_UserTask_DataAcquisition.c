@@ -85,11 +85,8 @@ NO_RETURN static void executeThread(void)
  * but here casted to SApplicationHandles-pointer.
  */
 NO_RETURN void
-SensorPIR_DataAcquisitionTask(void* pUserTaskParam)
+SensorPIR_DataAcquisitionTask(__attribute__((unused)) void* pUserTaskParam)
 {
-  const SApplicationHandles* pAppHandles = (SApplicationHandles*)pUserTaskParam;
-  UNUSED(pAppHandles);  // Suppose to be NULL anyway in this example app
-
   DPRINT("\r\nSensorPIR Data Acquisition UserTask started!");
 
   task_power_lock = zpal_pm_register(ZPAL_PM_TYPE_DEEP_SLEEP);

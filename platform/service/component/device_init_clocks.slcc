@@ -16,6 +16,11 @@ template_file:
   - path: template/sl_device_init_clocks.c.jinja
 provides:
   - name: device_init_clocks
+    condition: [device_series_0]
+  - name: device_init_clocks
+    condition: [device_series_1]
+  - name: device_init_clocks
+    condition: [device_series_2]
 requires:
   - name: emlib_cmu
   - name: status
@@ -26,6 +31,7 @@ template_contribution:
       include: sl_device_init_clocks.h
       handler: sl_device_init_clocks
     priority: -9500
+    condition: [device, sl_system]
   - name: device_init_clocks_arch
     value: s0
     condition: [device_series_0]
@@ -35,6 +41,8 @@ template_contribution:
   - name: device_init_clocks_arch
     value: s2
     condition: [device_series_2]
+  - name: component_catalog
+    value: device_init_clocks
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-clocks

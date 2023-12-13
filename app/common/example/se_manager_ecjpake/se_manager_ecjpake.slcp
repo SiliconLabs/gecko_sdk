@@ -1,7 +1,7 @@
 project_name: se_manager_ecjpake
 package: platform
 quality: production
-label: Platform - SE Manager Key Agreement (ECJPAKE)
+label: Platform Security - SoC SE Manager Key Agreement (ECJPAKE)
 description: >
   This example project demonstrates the key agreement (ECJPAKE) API of SE Manager.
 category: Example|Platform

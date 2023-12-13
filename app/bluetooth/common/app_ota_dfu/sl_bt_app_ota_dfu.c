@@ -204,6 +204,10 @@ void sli_bt_app_ota_dfu_on_event(sl_bt_msg_t *evt)
           req_sts = SL_BT_APP_OTA_DFU_ERROR;
           attr_status = ATT_ERR_NOT_READY_FOR_WRITE_REQUEST;
         }
+      } else {
+        // The write request was not Application OTA DFU relevant.
+        // Avoid doing anything with it.
+        break;
       }
 
       // Forward download information to application.

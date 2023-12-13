@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_battery
 tag:
   - No-Code
-
 config_file:
   - path: gatt_service_battery.xml
     directory: btconf
@@ -34,3 +33,6 @@ template_contribution:
       function: sl_gatt_service_battery_on_event
   - name: component_catalog
     value: gatt_service_battery
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-battery

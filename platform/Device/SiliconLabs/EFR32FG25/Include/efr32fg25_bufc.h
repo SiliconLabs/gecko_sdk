@@ -941,4 +941,4 @@ typedef struct {
 /** @} End of group EFR32FG25_BUFC */
 /** @} End of group Parts */
 
-#endif /* EFR32FG25_BUFC_H */
+#endif // EFR32FG25_BUFC_H

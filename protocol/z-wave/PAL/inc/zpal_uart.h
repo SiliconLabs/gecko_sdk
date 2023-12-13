@@ -46,6 +46,18 @@ extern "C" {
  */
 
 /**
+ * Set this flag in the configuration if the UART must be configured as a blocking UART.
+ * 
+ * Example of use:
+ * @code{.c}
+ * zpal_uart_config_t config = {
+ *   .flags = ZPAL_UART_CONFIG_FLAG_BLOCKING
+ * }
+ * @endcode
+ */
+#define ZPAL_UART_CONFIG_FLAG_BLOCKING (1 << 1)
+
+/**
  * @brief IDs for each of the UARTs.
  */
 typedef enum
@@ -99,17 +111,18 @@ typedef void (*zpal_uart_transmit_done_t)(zpal_uart_handle_t handle);
  * @brief UART configuration.
  */
 typedef struct {
-  zpal_uart_id_t id;                              ///<Uart id.
-  uint8_t *tx_buffer;                             ///<Poniter to transmit buffer.
-  size_t tx_buffer_len;                           ///<Size of transmit buffer.
-  uint8_t *rx_buffer;                             ///<Poniter to receive buffer.
-  size_t rx_buffer_len;                           ///<Size of receive buffer.
-  uint32_t baud_rate;                             ///<Baud rate of UART.
-  uint8_t data_bits;                              ///<Defines amount of data bits in the UART frame.
-  zpal_uart_parity_bit_t parity_bit;              ///<Defines parity bit in the UART frame.
-  zpal_uart_stop_bits_t stop_bits;                ///<Define stop bit in the UART frame
+  zpal_uart_id_t id;                              ///< UART ID.
+  uint8_t *tx_buffer;                             ///< Poniter to transmit buffer.
+  size_t tx_buffer_len;                           ///< Size of transmit buffer.
+  uint8_t *rx_buffer;                             ///< Poniter to receive buffer.
+  size_t rx_buffer_len;                           ///< Size of receive buffer.
+  uint32_t baud_rate;                             ///< Baud rate of UART.
+  uint8_t data_bits;                              ///< Defines amount of data bits in the UART frame.
+  zpal_uart_parity_bit_t parity_bit;              ///< Defines parity bit in the UART frame.
+  zpal_uart_stop_bits_t stop_bits;                ///< Define stop bit in the UART frame
   zpal_uart_receive_callback_t receive_callback;  ///< Expect this callback to be invoked in interrupt context.
   const void *ptr;                                ///< This can be used for anything, but might not work for all platform implementations.
+  uint8_t flags;                                  ///< Configuration flags
 } zpal_uart_config_t;
 
 /**

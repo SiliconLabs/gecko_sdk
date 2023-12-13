@@ -19,6 +19,8 @@ source:
 requires:
   - name: bluetooth_stack
 template_contribution:
+  - name: component_catalog
+    value: bluetooth_rtos_adaptation
   - name: event_handler
     value:
       event: stack_init

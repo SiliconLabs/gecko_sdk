@@ -318,7 +318,7 @@ void app_process_action(void)
     case SET_ROOT_SERIAL:
       app_state = PSA_CRYPTO_EXIT;
       printf("  + Setting the serial number for the root certificate... ");
-      if (set_serial() == PSA_SUCCESS) {
+      if (set_serial(true) == PSA_SUCCESS) {
         app_state = SET_ROOT_VALIDITY;
       }
       break;
@@ -533,7 +533,7 @@ void app_process_action(void)
     case SET_DEVICE_SERIAL:
       app_state = PSA_CRYPTO_EXIT;
       printf("  + Setting the serial number for the device certificate... ");
-      if (set_serial() == PSA_SUCCESS) {
+      if (set_serial(false) == PSA_SUCCESS) {
         app_state = SET_DEVICE_VALIDITY;
       }
       break;

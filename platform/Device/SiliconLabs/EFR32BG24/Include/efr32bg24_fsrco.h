@@ -72,4 +72,4 @@ typedef struct {
 /** @} End of group EFR32BG24_FSRCO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG24_FSRCO_H */
+#endif // EFR32BG24_FSRCO_H

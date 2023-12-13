@@ -593,6 +593,30 @@ EmberStatus emberMacAddShortToLongAddressMapping(EmberNodeId shortId,
 EmberStatus emberMacClearShortToLongAddressMappings(void);
 
 /**
+ * @brief Set the MCS in case of an OFDM PHY. MCS can range from 0 to 6.
+ *
+ * @param[in] mcs The MCS value to set.
+ *
+ * @return an ::EmberStatus value of ::EMBER_SUCCESS if the MCS is valid,
+ * an ::EmberStatus value of ::EMBER_INVALID_CALL if the current PHY is not
+ * OFDM or an ::EmberStatus value of ::EMBER_BAD_ARGUMENT if the MCS value is
+ * not valid.
+ **/
+EmberStatus emberOfdmSetMcs(uint8_t mcs);
+
+/**
+ * @brief Get the MCS in case of an OFDM PHY.
+ *
+ * @param[out] mcs A pointer to the uint8_t that should hold the current MCS
+ * value.
+ *
+ * @return an ::EmberStatus value of ::EMBER_INVALID_CALL if the current PHY is
+ * not OFDM or an ::EmberStatus value of ::EMBER_SUCCESS if the current PHY is
+ * OFDM.
+ **/
+EmberStatus emberOfdmGetMcs(uint8_t *mcs);
+
+/**
  * @}
  */
 

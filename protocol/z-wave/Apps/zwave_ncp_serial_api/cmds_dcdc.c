@@ -61,7 +61,6 @@ void SerialAPI_hw_psu_init(void)
 
 ZW_ADD_CMD(FUNC_ID_GET_DCDC_CONFIG)
 {
-  UNUSED(frame);
   uint8_t retVal = GetDcDcConfig();
   DoRespond(retVal);
 }

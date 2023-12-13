@@ -714,7 +714,7 @@ void otLinkSetMaxFrameRetriesIndirect(otInstance *aInstance, uint8_t aMaxFrameRe
 /**
  * Gets the address mode of MAC filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance  A pointer to an OpenThread instance.
  *
@@ -726,7 +726,7 @@ otMacFilterAddressMode otLinkFilterGetAddressMode(otInstance *aInstance);
 /**
  * Sets the address mode of MAC filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance  A pointer to an OpenThread instance.
  * @param[in]  aMode      The address mode to set.
@@ -737,7 +737,7 @@ void otLinkFilterSetAddressMode(otInstance *aInstance, otMacFilterAddressMode aM
 /**
  * Adds an Extended Address to MAC filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance    A pointer to an OpenThread instance.
  * @param[in]  aExtAddress  A pointer to the Extended Address (MUST NOT be NULL).
@@ -751,7 +751,7 @@ otError otLinkFilterAddAddress(otInstance *aInstance, const otExtAddress *aExtAd
 /**
  * Removes an Extended Address from MAC filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * No action is performed if there is no existing entry in Filter matching the given Extended Address.
  *
@@ -764,7 +764,7 @@ void otLinkFilterRemoveAddress(otInstance *aInstance, const otExtAddress *aExtAd
 /**
  * Clears all the Extended Addresses from MAC filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance  A pointer to an OpenThread instance.
  *
@@ -774,7 +774,7 @@ void otLinkFilterClearAddresses(otInstance *aInstance);
 /**
  * Gets an in-use address filter entry.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]      aInstance  A pointer to an OpenThread instance.
  * @param[in,out]  aIterator  A pointer to the MAC filter iterator context. To get the first in-use address filter
@@ -788,10 +788,14 @@ void otLinkFilterClearAddresses(otInstance *aInstance);
 otError otLinkFilterGetNextAddress(otInstance *aInstance, otMacFilterIterator *aIterator, otMacFilterEntry *aEntry);
 
 /**
- * Adds a fixed received signal strength (in dBm) entry for the messages from a given Extended Address in
- * MAC Filter.
+ * Adds the specified Extended Address to the `RssIn` list (or modifies an existing
+ * address in the `RssIn` list) and sets the received signal strength (in dBm) entry
+ * for messages from that address. The Extended Address does not necessarily have
+ * to be in the `address allowlist/denylist` filter to set the `rss`.
+ * @note The `RssIn` list contains Extended Addresses whose `rss` or link quality indicator (`lqi`)
+ * values have been set to be different from the defaults.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance    A pointer to an OpenThread instance.
  * @param[in]  aExtAddress  A pointer to the IEEE 802.15.4 Extended Address. MUST NOT be NULL.
@@ -804,11 +808,14 @@ otError otLinkFilterGetNextAddress(otInstance *aInstance, otMacFilterIterator *a
 otError otLinkFilterAddRssIn(otInstance *aInstance, const otExtAddress *aExtAddress, int8_t aRss);
 
 /**
- * Removes a MAC Filter entry for fixed received signal strength setting for a given Extended Address.
+ * Removes the specified Extended Address from the `RssIn` list. Once removed
+ * from the `RssIn` list, this MAC address will instead use the default `rss`
+ * and `lqi` settings, assuming defaults have been set.
+ * (If no defaults have been set, the over-air signal is used.)
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
- * No action is performed if there is no existing entry in Filter matching the given Extended Address.
+ * No action is performed if there is no existing entry in the `RssIn` list matching the specified Extended Address.
  *
  * @param[in]  aInstance    A pointer to an OpenThread instance.
  * @param[in]  aExtAddress  A pointer to the IEEE 802.15.4 Extended Address. MUST NOT be NULL.
@@ -819,7 +826,7 @@ void otLinkFilterRemoveRssIn(otInstance *aInstance, const otExtAddress *aExtAddr
 /**
  * Sets the default received signal strength (in dBm) on MAC Filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * The default RSS value is used for all received frames from addresses for which there is no explicit RSS-IN entry
  * in the Filter list (added using `otLinkFilterAddRssIn()`).
@@ -833,7 +840,7 @@ void otLinkFilterSetDefaultRssIn(otInstance *aInstance, int8_t aRss);
 /**
  * Clears any previously set default received signal strength (in dBm) on MAC Filter.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance    A pointer to an OpenThread instance.
  *
@@ -841,9 +848,11 @@ void otLinkFilterSetDefaultRssIn(otInstance *aInstance, int8_t aRss);
 void otLinkFilterClearDefaultRssIn(otInstance *aInstance);
 
 /**
- * Clears all the received signal strength entries (including default RSS-in) on MAC Filter.
+ * Clears all the received signal strength (`rss`) and link quality
+ * indicator (`lqi`) entries (including defaults) from the `RssIn` list.
+ * Performing this action means that all Extended Addresses will use the on-air signal.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]  aInstance A pointer to an OpenThread instance.
  *
@@ -853,7 +862,7 @@ void otLinkFilterClearAllRssIn(otInstance *aInstance);
 /**
  * Gets an in-use RssIn filter entry.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @param[in]      aInstance  A pointer to an OpenThread instance.
  * @param[in,out]  aIterator  A pointer to the MAC filter iterator context. MUST NOT be NULL.
@@ -871,7 +880,7 @@ otError otLinkFilterGetNextRssIn(otInstance *aInstance, otMacFilterIterator *aIt
 /**
  * Enables/disables IEEE 802.15.4 radio filter mode.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * The radio filter is mainly intended for testing. It can be used to temporarily block all tx/rx on the 802.15.4 radio.
  * When radio filter is enabled, radio is put to sleep instead of receive (to ensure device does not receive any frame
@@ -887,7 +896,7 @@ void otLinkSetRadioFilterEnabled(otInstance *aInstance, bool aFilterEnabled);
 /**
  * Indicates whether the IEEE 802.15.4 radio filter is enabled or not.
  *
- * Is available when OPENTHREAD_CONFIG_MAC_FILTER_ENABLE configuration is enabled.
+ * Is available when `OPENTHREAD_CONFIG_MAC_FILTER_ENABLE` configuration is enabled.
  *
  * @retval TRUE   If the radio filter is enabled.
  * @retval FALSE  If the radio filter is disabled.
@@ -1031,7 +1040,7 @@ otError otLinkSetPromiscuous(otInstance *aInstance, bool aPromiscuous);
  * @returns The CSL channel.
  *
  */
-uint8_t otLinkCslGetChannel(otInstance *aInstance);
+uint8_t otLinkGetCslChannel(otInstance *aInstance);
 
 /**
  * Sets the CSL channel.
@@ -1044,29 +1053,40 @@ uint8_t otLinkCslGetChannel(otInstance *aInstance);
  * @retval OT_ERROR_INVALID_ARGS   Invalid @p aChannel.
  *
  */
-otError otLinkCslSetChannel(otInstance *aInstance, uint8_t aChannel);
+otError otLinkSetCslChannel(otInstance *aInstance, uint8_t aChannel);
 
 /**
- * Gets the CSL period.
+ * Represents CSL period ten symbols unit in microseconds.
  *
- * @param[in]  aInstance      A pointer to an OpenThread instance.
- *
- * @returns The CSL period in units of 10 symbols.
+ * The CSL period (in micro seconds) MUST be a multiple of this value.
  *
  */
-uint16_t otLinkCslGetPeriod(otInstance *aInstance);
+#define OT_LINK_CSL_PERIOD_TEN_SYMBOLS_UNIT_IN_USEC (160)
 
 /**
- * Sets the CSL period in units of 10 symbols. Disable CSL by setting this parameter to `0`.
+ * Gets the CSL period in microseconds
  *
  * @param[in]  aInstance      A pointer to an OpenThread instance.
- * @param[in]  aPeriod        The CSL period in units of 10 symbols.
+ *
+ * @returns The CSL period in microseconds.
+ *
+ */
+uint32_t otLinkGetCslPeriod(otInstance *aInstance);
+
+/**
+ * Sets the CSL period in microseconds. Disable CSL by setting this parameter to `0`.
+ *
+ * The CSL period MUST be a multiple of `OT_LINK_CSL_PERIOD_TEN_SYMBOLS_UNIT_IN_USEC`, otherwise `OT_ERROR_INVALID_ARGS`
+ * is returned.
+ *
+ * @param[in]  aInstance      A pointer to an OpenThread instance.
+ * @param[in]  aPeriod        The CSL period in microseconds.
  *
  * @retval OT_ERROR_NONE           Successfully set the CSL period.
- * @retval OT_ERROR_INVALID_ARGS   Invalid CSL period.
+ * @retval OT_ERROR_INVALID_ARGS   Invalid CSL period
  *
  */
-otError otLinkCslSetPeriod(otInstance *aInstance, uint16_t aPeriod);
+otError otLinkSetCslPeriod(otInstance *aInstance, uint32_t aPeriod);
 
 /**
  * Gets the CSL timeout.
@@ -1076,7 +1096,7 @@ otError otLinkCslSetPeriod(otInstance *aInstance, uint16_t aPeriod);
  * @returns The CSL timeout in seconds.
  *
  */
-uint32_t otLinkCslGetTimeout(otInstance *aInstance);
+uint32_t otLinkGetCslTimeout(otInstance *aInstance);
 
 /**
  * Sets the CSL timeout in seconds.
@@ -1088,7 +1108,7 @@ uint32_t otLinkCslGetTimeout(otInstance *aInstance);
  * @retval OT_ERROR_INVALID_ARGS   Invalid CSL timeout.
  *
  */
-otError otLinkCslSetTimeout(otInstance *aInstance, uint32_t aTimeout);
+otError otLinkSetCslTimeout(otInstance *aInstance, uint32_t aTimeout);
 
 /**
  * Returns the current CCA (Clear Channel Assessment) failure rate.
@@ -1161,6 +1181,39 @@ bool otLinkIsCslSupported(otInstance *aInstance);
  *
  */
 otError otLinkSendEmptyData(otInstance *aInstance);
+
+/**
+ * Sets the region code.
+ *
+ * The radio region format is the 2-bytes ascii representation of the ISO 3166 alpha-2 code.
+ *
+ * @param[in]  aInstance    The OpenThread instance structure.
+ * @param[in]  aRegionCode  The radio region code. The `aRegionCode >> 8` is first ascii char
+ *                          and the `aRegionCode & 0xff` is the second ascii char.
+ *
+ * @retval  OT_ERROR_FAILED           Other platform specific errors.
+ * @retval  OT_ERROR_NONE             Successfully set region code.
+ * @retval  OT_ERROR_NOT_IMPLEMENTED  The feature is not implemented.
+ *
+ */
+otError otLinkSetRegion(otInstance *aInstance, uint16_t aRegionCode);
+
+/**
+ * Get the region code.
+ *
+ * The radio region format is the 2-bytes ascii representation of the ISO 3166 alpha-2 code.
+
+ * @param[in]  aInstance    The OpenThread instance structure.
+ * @param[out] aRegionCode  The radio region code. The `aRegionCode >> 8` is first ascii char
+ *                          and the `aRegionCode & 0xff` is the second ascii char.
+ *
+ * @retval  OT_ERROR_INVALID_ARGS     @p aRegionCode is nullptr.
+ * @retval  OT_ERROR_FAILED           Other platform specific errors.
+ * @retval  OT_ERROR_NONE             Successfully got region code.
+ * @retval  OT_ERROR_NOT_IMPLEMENTED  The feature is not implemented.
+ *
+ */
+otError otLinkGetRegion(otInstance *aInstance, uint16_t *aRegionCode);
 
 /**
  * @}

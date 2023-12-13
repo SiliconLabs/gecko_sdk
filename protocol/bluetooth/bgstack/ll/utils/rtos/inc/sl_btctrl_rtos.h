@@ -49,6 +49,13 @@
  */
 sl_status_t sl_btctrl_rtos_init();
 
+/**
+ * @brief  Get the available stack space of the link layer thread as determined
+ * by the stack watermark recorded during execution.
+ * @return SL_STATUS_OK if succeeds, otherwise error
+ */
+uint8_t sl_btctrl_rtos_get_stack_space(uint32_t *stack_space);
+
 /** @} end bluetooth_controller_rtos_adaptation */
 
 #endif //SL_BTCTRL_RTOS_ADAPTATION_H

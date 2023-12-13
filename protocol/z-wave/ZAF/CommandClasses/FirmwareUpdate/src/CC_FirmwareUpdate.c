@@ -41,7 +41,7 @@ CC_FirmwareUpdate_handler(
   ZW_APPLICATION_TX_BUFFER *pCmd,
   uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER *pFrameOut,
-  uint8_t * pFrameOutLength)  
+  uint8_t * pFrameOutLength)
 {
   if (true == Check_not_legal_response_job(rxOpt))
   {
@@ -125,12 +125,8 @@ CC_FirmwareUpdate_handler(
       return RECEIVED_FRAME_STATUS_SUCCESS;
     case FIRMWARE_UPDATE_MD_REQUEST_GET_V5:
       {
-        ZAF_TRANSPORT_TX_BUFFER  TxBuf;
-        ZW_APPLICATION_TX_BUFFER *pTxBuf = &(TxBuf.appTxBuf);
+        uint8_t status = 0;
         zaf_tx_options_t tx_options;
-        uint8_t status;
-
-        memset((uint8_t*)pTxBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
 
         handleCmdClassFirmwareUpdateMdReqGet(
             rxOpt,
@@ -138,12 +134,15 @@ CC_FirmwareUpdate_handler(
             cmdLength,
             &status);
 
-        pTxBuf->ZW_FirmwareUpdateMdRequestReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5;
-        pTxBuf->ZW_FirmwareUpdateMdRequestReportV5Frame.cmd = FIRMWARE_UPDATE_MD_REQUEST_REPORT_V5;
-        pTxBuf->ZW_FirmwareUpdateMdRequestReportV5Frame.status = status;
+        ZAF_TRANSPORT_TX_BUFFER  TxBuf = {
+          .appTxBuf.ZW_FirmwareUpdateMdRequestReportV5Frame.cmdClass = COMMAND_CLASS_FIRMWARE_UPDATE_MD_V5,
+          .appTxBuf.ZW_FirmwareUpdateMdRequestReportV5Frame.cmd = FIRMWARE_UPDATE_MD_REQUEST_REPORT_V5,
+          .appTxBuf.ZW_FirmwareUpdateMdRequestReportV5Frame.status = status
+        };
 
         zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
-        if(!zaf_transport_tx((uint8_t *)pTxBuf,
+        tx_options.use_supervision = true;
+        if(!zaf_transport_tx((uint8_t *)&(TxBuf.appTxBuf),
                 sizeof(ZW_FIRMWARE_UPDATE_MD_REQUEST_REPORT_V5_FRAME),
                 ZCB_CmdClassFwUpdateMdReqReport, &tx_options))
         {
@@ -196,16 +195,13 @@ CC_FirmwareUpdate_handler(
   return RECEIVED_FRAME_STATUS_NO_SUPPORT;
 }
 
-ZW_WEAK bool CC_FirmwareUpdate_SetStartCallback(uint16_t fwId, uint16_t CRC)
+ZW_WEAK bool CC_FirmwareUpdate_SetStartCallback(__attribute__((unused)) uint16_t fwId, __attribute__((unused)) uint16_t CRC)
 {
-  UNUSED(fwId);
-  UNUSED(CRC);
   return true;
 }
 
-ZW_WEAK void CC_FirmwareUpdate_SetFinishCallback(OTA_STATUS pOtaFinish)
+ZW_WEAK void CC_FirmwareUpdate_SetFinishCallback(__attribute__((unused)) OTA_STATUS pOtaFinish)
 {
-  UNUSED(pOtaFinish);
 }
 
 static void init_and_reset(void)

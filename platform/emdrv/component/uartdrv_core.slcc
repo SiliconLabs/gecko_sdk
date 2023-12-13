@@ -26,11 +26,16 @@ requires:
   - name: "emlib_leuart"
     condition:
       - "device_has_leuart"
-  - name: "emlib_eusart"
+  - name: "lld_eusart"
     condition:
       - "device_has_euart"
-  - name: "emlib_gpio"
+  - name: "lld_gpio"
   - name: "gpiointerrupt"
+    condition: [device_series_0]
+  - name: "gpiointerrupt"
+    condition: [device_series_1]
+  - name: "gpiointerrupt"
+    condition: [device_series_2]
   - name: "emlib_cmu"
   - name: "emlib_core"
   - name: "ecode"

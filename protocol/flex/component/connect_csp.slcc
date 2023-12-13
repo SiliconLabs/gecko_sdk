@@ -29,8 +29,6 @@ include:
       - path: csp-command-utils.h
       - path: csp-format.h
       - path: csp-api-enum-gen.h
-      - path: csp-enum.h
-      - path: csp-common.h
   - path: "protocol/flex/ncp"
     file_list:
       - path: "ncp-security.h"

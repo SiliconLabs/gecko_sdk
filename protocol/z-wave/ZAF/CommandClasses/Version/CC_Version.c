@@ -46,11 +46,9 @@
  * @param[out] pVariantgroup returns pointer to application version group number n.
  */
 ZW_WEAK void CC_Version_GetFirmwareVersion_handler(
-    uint8_t firmwareTargetIndex,
-    VG_VERSION_REPORT_V2_VG* pVariantgroup)
+    __attribute__((unused)) uint8_t firmwareTargetIndex,
+    __attribute__((unused)) VG_VERSION_REPORT_V2_VG* pVariantgroup)
 {
-  UNUSED(firmwareTargetIndex);
-  UNUSED(pVariantgroup);
 }
 
 /****************************************************************************/
@@ -61,23 +59,22 @@ static void
 CC_Version_add_bootloader(
   VG_VERSION_REPORT_V2_VG *pVariantgroup)
 {
-  zpal_bootloader_info_t bootloader_info;
+  zpal_bootloader_info_t bootloader_info = { 0 };
 
   zpal_bootloader_get_info(&bootloader_info);
-  pVariantgroup->firmwareVersion = 
+  pVariantgroup->firmwareVersion =
     ((uint8_t)((bootloader_info.version & ZPAL_BOOTLOADER_VERSION_MAJOR_MASK) >> ZPAL_BOOTLOADER_VERSION_MAJOR_SHIFT));
-  pVariantgroup->firmwareSubVersion = 
+  pVariantgroup->firmwareSubVersion =
     ((uint8_t)((bootloader_info.version & ZPAL_BOOTLOADER_VERSION_MINOR_MASK) >> ZPAL_BOOTLOADER_VERSION_MINOR_SHIFT));
 }
 
 static received_frame_status_t CC_Version_handler(
     RECEIVE_OPTIONS_TYPE_EX *rxOpt,
     ZW_APPLICATION_TX_BUFFER *pCmd,
-    uint8_t cmdLength,
+    __attribute__((unused)) uint8_t cmdLength,
     ZW_APPLICATION_TX_BUFFER * pFrameOut,
     uint8_t * pLengthOut)
 {
-  UNUSED(cmdLength);
   SApplicationHandles * pAppHandles;
 
   if(true == Check_not_legal_response_job(rxOpt))

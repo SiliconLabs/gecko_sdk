@@ -266,7 +266,8 @@ static bool validate_signature_location(uint32_t firmware_start, uint32_t firmwa
 
 static uint32_t get_application_properties_struct_addr(uint32_t start_addr)
 {
-  uint32_t *application_properties_ptr
+  // Apply volatile pointer to prevent gcc warning [-Werror=array-bounds]
+  uint32_t * volatile application_properties_ptr
     = (uint32_t *)(start_addr + (uint32_t)offsetof(BareBootTable_t, signature));
   return *application_properties_ptr;
 }
@@ -983,7 +984,7 @@ psa_status_t sli_tz_attestation_get_public_key(psa_invec in_vec[],
   (void)in_vec;
   // in vec stores the function ID
   // out vec stores the buffer to output the key
-  SLI_TZ_IOVEC_ASSERT_N_IOVECS(1, 1);
+  SLI_TZ_IOVEC_ASSERT_N_IOVECS(1, 1, PSA_ERROR_INVALID_ARGUMENT);
 
   uint8_t *out_buffer = out_vec[0].base;
   size_t out_buffer_size = out_vec[0].len;

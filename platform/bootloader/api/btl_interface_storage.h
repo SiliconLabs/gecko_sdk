@@ -206,7 +206,12 @@ typedef struct BootloaderStorageFunctions {
 
 /// Context size for bootloader verification context
 #if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(SEMAILBOX_PRESENT)
+/// Context size(680) includes counter(16) plus stream_block(16 (block size) * 8 (Maximum blocks))
+#define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (680)
+#else
 #define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (568)
+#endif
 #else
 #define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (384)
 #endif
@@ -331,7 +336,7 @@ int32_t bootloader_readStorage(uint32_t slotId,
  * @param[in] slotId ID of the slot
  * @param[in] offset Offset into the slot to start writing to
  * @param[in] buffer Buffer to read data to write from
- * @param[in] length Amount of data to write
+ * @param[in] length Amount of data to write. Must be a multiple of 4.
  *
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
@@ -357,7 +362,7 @@ int32_t bootloader_writeStorage(uint32_t slotId,
  * @param[in] slotId ID of the slot
  * @param[in] offset Offset into the slot to start writing to
  * @param[in] buffer Buffer to read data to write from
- * @param[in] length Amount of data to write
+ * @param[in] length Amount of data to write. Must be a multiple of 4.
  *
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
@@ -607,7 +612,7 @@ int32_t bootloader_readRawStorage(uint32_t address,
  *
  * @param[in] address Address to start writing to
  * @param[in] buffer  Buffer to read data to write from
- * @param[in] length  Amount of data to write
+ * @param[in] length  Amount of data to write. Must be a multiple of 4.
  *
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range

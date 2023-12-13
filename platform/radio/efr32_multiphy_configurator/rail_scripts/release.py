@@ -19,6 +19,7 @@ except ImportError:
     coloramaIsAvailable = False
 
 import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../src/efr32multiphy_frontend'))
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'tests'))
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 

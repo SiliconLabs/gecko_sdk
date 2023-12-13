@@ -38,7 +38,7 @@
 
 #include "common/locator.hpp"
 #include "common/non_copyable.hpp"
-#include "thread/topology.hpp"
+#include "thread/neighbor.hpp"
 
 namespace ot {
 
@@ -176,6 +176,17 @@ public:
      */
     Neighbor *FindNeighbor(const Ip6::Address   &aIp6Address,
                            Neighbor::StateFilter aFilter = Neighbor::kInStateValidOrRestoring);
+
+    /**
+     * Searches in the neighbor table to find a `Neighbor` for which a one-way link is maintained (as in the
+     * case of an FTD child with neighbor routers).
+     *
+     * @param[in]  aExtAddress  An Extended address.
+     *
+     * @returns A pointer to the Neighbor corresponding to @p aExtAddress, `nullptr` otherwise.
+     *
+     */
+    Neighbor *FindRxOnlyNeighborRouter(const Mac::ExtAddress &aExtAddress);
 
     /**
      * Searches in the neighbor table to find a `Neighbor` for which a one-way link is maintained (as in the

@@ -50,8 +50,4 @@ extern EzspStatus ncpError;
   #endif
 #endif // EZSP_UART
 
-#if defined(EZSP_ASH) && defined (EZSP_USB)
-  #error Conflicting EZSP modes
-#endif
-
 #endif //__EZSP_HOST_COMMON_H__

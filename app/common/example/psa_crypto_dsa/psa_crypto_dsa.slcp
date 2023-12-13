@@ -1,7 +1,7 @@
 project_name: psa_crypto_dsa
 package: platform
 quality: production
-label: Platform - PSA Crypto DSA
+label: Platform Security - SoC PSA Crypto DSA
 description: >
   This example project demonstrates the ECDSA and EdDSA digital signature API for generic and built-in ECC keys.
 category: Example|Platform

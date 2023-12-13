@@ -25,31 +25,25 @@ config_file:
       instance: exp_epd
     condition:
       - brd4182a
-
 include:
   - path: ./inc
     file_list:
       - path: esl_tag_pd_epd_interface.h
       - path: esl_tag_pd_epd_driver.h
-
 source:
   - path: src/esl_tag_pd_epd_interface.c
   - path: src/esl_tag_pd_epd_driver.c
-
 provides:
   - name: esl_tag_pd_epd_driver
-
 requires:
   - name: tempdrv
   - name: spidrv
   - name: esl_tag_display
   - name: udelay
-
 recommends:
   - id: spidrv
     instance:
       - exp_epd
-
 template_contribution:
   - name: bluetooth_on_event
     value:

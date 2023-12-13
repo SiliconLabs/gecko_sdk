@@ -3,7 +3,7 @@ from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.common.profiles.jumbo_regs import build_modem_regs_jumbo
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutputs, buildRailOutputs
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
-    buildWhiteOutputs, build_ircal_sw_vars
+    buildWhiteOutputs, build_ircal_sw_vars, buildStudioLogOutput
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 
@@ -38,6 +38,10 @@ class ProfileWisunFanJumbo(IProfile):
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
+
+        buildStudioLogOutput(model, profile)
+
+        return profile
 
     def profile_calculate(self, model):
         self._fixed_wisun_vars(model)

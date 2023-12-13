@@ -37,11 +37,11 @@
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/heap.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/num_utils.hpp"
 #include "common/numeric_limits.hpp"
+#include "instance/instance.hpp"
 #include "net/checksum.hpp"
 #include "net/ip6.hpp"
 
@@ -80,6 +80,8 @@ Message *MessagePool::Allocate(Message::Type aType, uint16_t aReserveHeader, con
     message->SetType(aType);
     message->SetReserved(aReserveHeader);
     message->SetLinkSecurityEnabled(aSettings.IsLinkSecurityEnabled());
+    message->SetLoopbackToHostAllowed(OPENTHREAD_CONFIG_IP6_ALLOW_LOOP_BACK_HOST_DATAGRAMS);
+    message->SetOrigin(Message::kOriginHostTrusted);
 
     SuccessOrExit(error = message->SetPriority(aSettings.GetPriority()));
     SuccessOrExit(error = message->SetLength(0));
@@ -772,6 +774,8 @@ Message *Message::Clone(uint16_t aLength) const
     messageCopy->SetOffset(offset);
 
     messageCopy->SetSubType(GetSubType());
+    messageCopy->SetLoopbackToHostAllowed(IsLoopbackToHostAllowed());
+    messageCopy->SetOrigin(GetOrigin());
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
     messageCopy->SetTimeSync(IsTimeSync());
 #endif

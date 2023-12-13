@@ -62,8 +62,7 @@ void app_task(void *args)
   app_wisun_connect_and_wait();
 
   while (1) {
-    sl_wisun_collector_measurement_request_loop();
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 

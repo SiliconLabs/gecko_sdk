@@ -44,36 +44,36 @@
 // -----------------------------------------------------------------------------
 // Space Defines
 
-#define SL_STATUS_SPACE_MASK              ((sl_status_t)0xFF00)
+#define SL_STATUS_SPACE_MASK              ((sl_status_t)0xFF00)  ///< sl status space mask.
 
-#define SL_STATUS_GENERIC_SPACE           ((sl_status_t)0x0000)
+#define SL_STATUS_GENERIC_SPACE           ((sl_status_t)0x0000)  ///< sl status generic space.
 
-#define SL_STATUS_PLATFORM_1_SPACE        ((sl_status_t)0x0100)
-#define SL_STATUS_PLATFORM_2_SPACE        ((sl_status_t)0x0200)
-#define SL_STATUS_HARDWARE_SPACE          ((sl_status_t)0x0300)
+#define SL_STATUS_PLATFORM_1_SPACE        ((sl_status_t)0x0100)  ///< sl status platform 1 space.
+#define SL_STATUS_PLATFORM_2_SPACE        ((sl_status_t)0x0200)  ///< sl status platform 2 space.
+#define SL_STATUS_HARDWARE_SPACE          ((sl_status_t)0x0300)  ///< sl status hardware space.
 
-#define SL_STATUS_BLUETOOTH_SPACE         ((sl_status_t)0x0400)
-#define SL_STATUS_BLUETOOTH_MESH_SPACE    ((sl_status_t)0x0500)
-#define SL_STATUS_CAN_CANOPEN_SPACE       ((sl_status_t)0x0600)
-#define SL_STATUS_CONNECT_SPACE           ((sl_status_t)0x0700)
-#define SL_STATUS_NET_SUITE_SPACE         ((sl_status_t)0x0800)
-#define SL_STATUS_THREAD_SPACE            ((sl_status_t)0x0900)
-#define SL_STATUS_USB_SPACE               ((sl_status_t)0x0A00)
-#define SL_STATUS_WIFI_SPACE              ((sl_status_t)0x0B00)
-#define SL_STATUS_ZIGBEE_SPACE            ((sl_status_t)0x0C00)
-#define SL_STATUS_Z_WAVE_SPACE            ((sl_status_t)0x0D00)
+#define SL_STATUS_BLUETOOTH_SPACE         ((sl_status_t)0x0400)  ///< sl status bluetooth space.
+#define SL_STATUS_BLUETOOTH_MESH_SPACE    ((sl_status_t)0x0500)  ///< sl status bluetooth mesh space.
+#define SL_STATUS_CAN_CANOPEN_SPACE       ((sl_status_t)0x0600)  ///< sl status can canopen space.
+#define SL_STATUS_CONNECT_SPACE           ((sl_status_t)0x0700)  ///< sl status connect space.
+#define SL_STATUS_NET_SUITE_SPACE         ((sl_status_t)0x0800)  ///< sl status net suite space.
+#define SL_STATUS_THREAD_SPACE            ((sl_status_t)0x0900)  ///< sl status thread space.
+#define SL_STATUS_USB_SPACE               ((sl_status_t)0x0A00)  ///< sl status usb space.
+#define SL_STATUS_WIFI_SPACE              ((sl_status_t)0x0B00)  ///< sl status wifi space.
+#define SL_STATUS_ZIGBEE_SPACE            ((sl_status_t)0x0C00)  ///< sl status zigbee space.
+#define SL_STATUS_Z_WAVE_SPACE            ((sl_status_t)0x0D00)  ///< sl status z wave space.
 
-#define SL_STATUS_GECKO_OS_1_SPACE        ((sl_status_t)0x0E00)
-#define SL_STATUS_GECKO_OS_2_SPACE        ((sl_status_t)0x0F00)
+#define SL_STATUS_GECKO_OS_1_SPACE        ((sl_status_t)0x0E00)  ///< sl status gecko os 1 space.
+#define SL_STATUS_GECKO_OS_2_SPACE        ((sl_status_t)0x0F00)  ///< sl status gecko os 2 space.
 
-#define SL_STATUS_BLUETOOTH_CTRL_SPACE    ((sl_status_t)0x1000)
-#define SL_STATUS_BLUETOOTH_ATT_SPACE     ((sl_status_t)0x1100)
-#define SL_STATUS_BLUETOOTH_SMP_SPACE     ((sl_status_t)0x1200)
-#define SL_STATUS_BLUETOOTH_MESH_FOUNDATION_SPACE     ((sl_status_t)0x1300)
+#define SL_STATUS_BLUETOOTH_CTRL_SPACE    ((sl_status_t)0x1000)  ///< sl status bluetooth ctrl space.
+#define SL_STATUS_BLUETOOTH_ATT_SPACE     ((sl_status_t)0x1100)  ///< sl status bluetooth att space.
+#define SL_STATUS_BLUETOOTH_SMP_SPACE     ((sl_status_t)0x1200)  ///< sl status bluetooth mesh foundation space.
+#define SL_STATUS_BLUETOOTH_MESH_FOUNDATION_SPACE     ((sl_status_t)0x1300)  ///< sl status bluetooth mesh foundation space.
 
-#define SL_STATUS_WISUN_SPACE             ((sl_status_t)0x1400)
+#define SL_STATUS_WISUN_SPACE             ((sl_status_t)0x1400)  ///< sl status wisun space.
 
-#define SL_STATUS_COMPUTE_SPACE           ((sl_status_t)0x1500)
+#define SL_STATUS_COMPUTE_SPACE           ((sl_status_t)0x1500)  ///< sl status compute space.
 
 // -----------------------------------------------------------------------------
 // Status Defines
@@ -148,20 +148,20 @@
 #define SL_STATUS_MESSAGE_TOO_LONG      ((sl_status_t)0x0038)  ///< Message is too long.
 
 // EEPROM/Flash Errors
-#define SL_STATUS_EEPROM_MFG_VERSION_MISMATCH     ((sl_status_t)0x0039)  ///<
-#define SL_STATUS_EEPROM_STACK_VERSION_MISMATCH   ((sl_status_t)0x003A)  ///<
+#define SL_STATUS_EEPROM_MFG_VERSION_MISMATCH     ((sl_status_t)0x0039)  ///< EEPROM MFG version mismatch.
+#define SL_STATUS_EEPROM_STACK_VERSION_MISMATCH   ((sl_status_t)0x003A)  ///< EEPROM Stack version mismatch.
 #define SL_STATUS_FLASH_WRITE_INHIBITED           ((sl_status_t)0x003B)  ///< Flash write is inhibited.
 #define SL_STATUS_FLASH_VERIFY_FAILED             ((sl_status_t)0x003C)  ///< Flash verification failed.
 #define SL_STATUS_FLASH_PROGRAM_FAILED            ((sl_status_t)0x003D)  ///< Flash programming failed.
 #define SL_STATUS_FLASH_ERASE_FAILED              ((sl_status_t)0x003E)  ///< Flash erase failed.
 
 // MAC Errors
-#define SL_STATUS_MAC_NO_DATA                   ((sl_status_t)0x003F)  ///<
-#define SL_STATUS_MAC_NO_ACK_RECEIVED           ((sl_status_t)0x0040)  ///<
-#define SL_STATUS_MAC_INDIRECT_TIMEOUT          ((sl_status_t)0x0041)  ///<
-#define SL_STATUS_MAC_UNKNOWN_HEADER_TYPE       ((sl_status_t)0x0042)  ///<
-#define SL_STATUS_MAC_ACK_HEADER_TYPE           ((sl_status_t)0x0043)  ///<
-#define SL_STATUS_MAC_COMMAND_TRANSMIT_FAILURE  ((sl_status_t)0x0044)  ///<
+#define SL_STATUS_MAC_NO_DATA                   ((sl_status_t)0x003F)  ///< MAC no data.
+#define SL_STATUS_MAC_NO_ACK_RECEIVED           ((sl_status_t)0x0040)  ///< MAC no ACK received.
+#define SL_STATUS_MAC_INDIRECT_TIMEOUT          ((sl_status_t)0x0041)  ///< MAC indirect timeout.
+#define SL_STATUS_MAC_UNKNOWN_HEADER_TYPE       ((sl_status_t)0x0042)  ///< MAC unknown header type.
+#define SL_STATUS_MAC_ACK_HEADER_TYPE           ((sl_status_t)0x0043)  ///< MAC ACK unknown header type.
+#define SL_STATUS_MAC_COMMAND_TRANSMIT_FAILURE  ((sl_status_t)0x0044)  ///< MAC command transmit failure.
 
 // CLI_STORAGE Errors
 #define SL_STATUS_CLI_STORAGE_NVM_OPEN_ERROR    ((sl_status_t)0x0045)  ///< Error in open NVM
@@ -179,13 +179,13 @@
 #define SL_STATUS_BUS_ERROR                     ((sl_status_t)0x004B)  ///< Bus error, e.g. invalid DMA address
 
 // Unified MAC Errors
-#define SL_STATUS_CCA_FAILURE                   ((sl_status_t)0x004C)  ///<
+#define SL_STATUS_CCA_FAILURE                   ((sl_status_t)0x004C)  ///< CCA failure.
 
 // Scan errors
-#define SL_STATUS_MAC_SCANNING                  ((sl_status_t)0x004D)  ///<
-#define SL_STATUS_MAC_INCORRECT_SCAN_TYPE       ((sl_status_t)0x004E)  ///<
-#define SL_STATUS_INVALID_CHANNEL_MASK          ((sl_status_t)0x004F)  ///<
-#define SL_STATUS_BAD_SCAN_DURATION             ((sl_status_t)0x0050)  ///<
+#define SL_STATUS_MAC_SCANNING                  ((sl_status_t)0x004D)  ///< MAC scanning.
+#define SL_STATUS_MAC_INCORRECT_SCAN_TYPE       ((sl_status_t)0x004E)  ///< MAC incorrect scan type.
+#define SL_STATUS_INVALID_CHANNEL_MASK          ((sl_status_t)0x004F)  ///< Invalid channel mask.
+#define SL_STATUS_BAD_SCAN_DURATION             ((sl_status_t)0x0050)  ///< Bad scan duration.
 
 // Bluetooth status codes
 #define SL_STATUS_BT_OUT_OF_BONDS                                                                        ((sl_status_t)0x0402)        ///< Bonding procedure can't be started because device has no space left for bond.
@@ -210,7 +210,7 @@
 #define SL_STATUS_BT_PS_STORE_FULL                                                                       ((sl_status_t)0x041B)        ///< Flash reserved for PS store is full
 #define SL_STATUS_BT_PS_KEY_NOT_FOUND                                                                    ((sl_status_t)0x041C)        ///< PS key not found
 #define SL_STATUS_BT_APPLICATION_MISMATCHED_OR_INSUFFICIENT_SECURITY                                     ((sl_status_t)0x041D)        ///< Mismatched or insufficient security level
-#define SL_STATUS_BT_APPLICATION_ENCRYPTION_DECRYPTION_ERROR                                             ((sl_status_t)0x041E)        ///< Encrypion/decryption operation failed.
+#define SL_STATUS_BT_APPLICATION_ENCRYPTION_DECRYPTION_ERROR                                             ((sl_status_t)0x041E)        ///< Encryption/decryption operation failed.
 
 // Bluetooth controller status codes
 #define SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER                                                  ((sl_status_t)0x1002)      ///< Connection does not exist, or connection open request was cancelled.
@@ -251,7 +251,7 @@
 #define SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_NO_SUITABLE_CHANNEL_FOUND                           ((sl_status_t)0x1039)     ///< The Controller could not calculate an appropriate value for the Channel selection operation.
 #define SL_STATUS_BT_CTRL_CONTROLLER_BUSY                                                                ((sl_status_t)0x103A)     ///< Operation was rejected because the controller is busy and unable to process the request.
 #define SL_STATUS_BT_CTRL_UNACCEPTABLE_CONNECTION_INTERVAL                                               ((sl_status_t)0x103B)     ///< Remote device terminated the connection because of an unacceptable connection interval.
-#define SL_STATUS_BT_CTRL_ADVERTISING_TIMEOUT                                                            ((sl_status_t)0x103C)     ///< Ddvertising for a fixed duration completed or, for directed advertising, that advertising completed without a connection being created.
+#define SL_STATUS_BT_CTRL_ADVERTISING_TIMEOUT                                                            ((sl_status_t)0x103C)     ///< Advertising for a fixed duration completed or, for directed advertising, that advertising completed without a connection being created.
 #define SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_DUE_TO_MIC_FAILURE                                       ((sl_status_t)0x103D)     ///< Connection was terminated because the Message Integrity Check (MIC) failed on a received packet.
 #define SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED                                            ((sl_status_t)0x103E)     ///< LL initiated a connection but the connection has failed to be established. Controller did not receive any packets from remote end.
 #define SL_STATUS_BT_CTRL_MAC_CONNECTION_FAILED                                                          ((sl_status_t)0x103F)     ///< The MAC of the 802.11 AMP was requested to connect to a peer, but the connection failed.
@@ -270,7 +270,7 @@
 #define SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED                                                           ((sl_status_t)0x1106)      ///< Attribute Server does not support the request received from the client.
 #define SL_STATUS_BT_ATT_INVALID_OFFSET                                                                  ((sl_status_t)0x1107)      ///< Offset specified was past the end of the attribute
 #define SL_STATUS_BT_ATT_INSUFFICIENT_AUTHORIZATION                                                      ((sl_status_t)0x1108)      ///< The attribute requires authorization before it can be read or written.
-#define SL_STATUS_BT_ATT_PREPARE_QUEUE_FULL                                                              ((sl_status_t)0x1109)      ///< Too many prepare writes have been queueud
+#define SL_STATUS_BT_ATT_PREPARE_QUEUE_FULL                                                              ((sl_status_t)0x1109)      ///< Too many prepare writes have been queued
 #define SL_STATUS_BT_ATT_ATT_NOT_FOUND                                                                   ((sl_status_t)0x110A)     ///< No attribute found within the given attribute handle range.
 #define SL_STATUS_BT_ATT_ATT_NOT_LONG                                                                    ((sl_status_t)0x110B)     ///< The attribute cannot be read or written using the Read Blob Request
 #define SL_STATUS_BT_ATT_INSUFFICIENT_ENC_KEY_SIZE                                                       ((sl_status_t)0x110C)     ///< The Encryption Key Size used for encrypting this link is insufficient.
@@ -281,7 +281,7 @@
 #define SL_STATUS_BT_ATT_INSUFFICIENT_RESOURCES                                                          ((sl_status_t)0x1111)     ///< Insufficient Resources to complete the request
 #define SL_STATUS_BT_ATT_OUT_OF_SYNC                                                                     ((sl_status_t)0x1112)     ///< The server requests the client to rediscover the database.
 #define SL_STATUS_BT_ATT_VALUE_NOT_ALLOWED                                                               ((sl_status_t)0x1113)     ///< The attribute parameter value was not allowed.
-#define SL_STATUS_BT_ATT_APPLICATION                                                                     ((sl_status_t)0x1180)    ///< When this is returned in a BGAPI response, the application tried to read or write the value of a user attribute from the GATT databa
+#define SL_STATUS_BT_ATT_APPLICATION                                                                     ((sl_status_t)0x1180)    ///< When this is returned in a BGAPI response, the application tried to read or write the value of a user attribute from the GATT database.
 #define SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED                                                          ((sl_status_t)0x11FC)    ///< The requested write operation cannot be fulfilled for reasons other than permissions.
 #define SL_STATUS_BT_ATT_CLIENT_CHARACTERISTIC_CONFIGURATION_DESCRIPTOR_IMPROPERLY_CONFIGURED            ((sl_status_t)0x11FD)    ///< The Client Characteristic Configuration descriptor is not configured according to the requirements of the profile or service.
 #define SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS                                                   ((sl_status_t)0x11FE)    ///< The profile or service request cannot be serviced because an operation that has been previously triggered is still in progress.
@@ -382,7 +382,6 @@
 #define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_INFINITY  ((sl_status_t)0x1507)   ///< Infinity encountered during array store conversion
 #define SL_STATUS_COMPUTE_DRIVER_STORE_CONVERSION_NAN       ((sl_status_t)0x1508)   ///< NaN encountered during array store conversion
 
-#define SL_STATUS_COMPUTE_MATH_FAULT                        ((sl_status_t)0x1511)   ///< MATH Critical fault
 #define SL_STATUS_COMPUTE_MATH_NAN                          ((sl_status_t)0x1512)   ///< MATH NaN encountered
 #define SL_STATUS_COMPUTE_MATH_INFINITY                     ((sl_status_t)0x1513)   ///< MATH Infinity encountered
 #define SL_STATUS_COMPUTE_MATH_OVERFLOW                     ((sl_status_t)0x1514)   ///< MATH numeric overflow
@@ -390,7 +389,7 @@
 
 // -----------------------------------------------------------------------------
 // Data Types
-
+/** @brief define global status variable. */
 typedef uint32_t sl_status_t;
 
 // -----------------------------------------------------------------------------

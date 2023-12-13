@@ -41,12 +41,11 @@ typedef enum
   E_SECURITY_SETUP_SUPPORT_CMD_SET_SECURITY_INCLUSION_REQUESTED_AUTHENTICATION = (1<<E_SECURITY_SETUP_CMD_SET_SECURITY_INCLUSION_REQUESTED_AUTHENTICATION) // OBSOLETE
 } eSecuritySetupSupportCmd_t;
 
-void func_id_zw_security_setup(uint8_t inputLength,
+void func_id_zw_security_setup(__attribute__((unused)) uint8_t inputLength,
                                const uint8_t *pInputBuffer,
                                uint8_t *pOutputBuffer,
                                uint8_t *pOutputLength)
 {
-  UNUSED(inputLength);
   {
     /* HOST->ZW: securityFuncID [| bDataLen | abData[bDataLen]] */
     /* ZW->HOST: securityFuncID | bretValLen | retVal[bretValLen] */
@@ -73,9 +72,10 @@ void func_id_zw_security_setup(uint8_t inputLength,
         {
           /* Set the requestedSecurityKeysBits requested by protocol when doing S2 inclusion */
           //SecureKeysRequested = serial_frame->payload[2];
-          SZwaveCommandPackage Package;
-          Package.eCommandType = EZWAVECOMMANDTYPE_SET_SECURITY_KEYS;
-          Package.uCommandParams.SetSecurityKeys.keys = *(pInputBuffer + 2);
+          SZwaveCommandPackage Package = {
+            .eCommandType = EZWAVECOMMANDTYPE_SET_SECURITY_KEYS,
+            .uCommandParams.SetSecurityKeys.keys = *(pInputBuffer + 2)
+          };
           QueueNotifyingSendToBack(ZAF_getAppHandle()->pZwCommandQueue, (uint8_t *)&Package, 0);
           /* sRequestedSecuritySettings.requestedSecurityKeysBits are either the initialized */
           /* define value (REQUESTED_SECURITY_KEYS) or the value set through the FUNC_ID_ZW_SECURITY_SETUP */

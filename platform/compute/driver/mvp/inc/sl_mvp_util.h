@@ -89,35 +89,6 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
 
 /**
  * @brief
- *   Calculate the offset of a given element in a NHWC formated array.
- *
- * @note
- *   NHWC: N = batch, H = height, W = width, C = channel.
- *   NHWC memory ordering is "row major" within each batch, and is the default
- *   memory ordering used in TensorFlow.
- *   Input parameters n, h, w and c are all zero indexed.
- *
- * @param[in] height Matrix height (rows).
- * @param[in] width  Matrix width (cols).
- * @param[in] depth  Matrix depth (vecs).
- * @param[in] n      batch.
- * @param[in] h      height (row).
- * @param[in] w      width (col).
- * @param[in] c      channel (vec).
- */
-__INLINE int sli_mvp_util_offset_nhwc(int height,
-                                      int width,
-                                      int depth,
-                                      int n,
-                                      int h,
-                                      int w,
-                                      int c)
-{
-  return (((((n * height) + h) * width) + w) * depth) + c;
-}
-
-/**
- * @brief
  *   Find out if a pointer is word aligned.
  *
  * @param[in] pointer The pointer to check.

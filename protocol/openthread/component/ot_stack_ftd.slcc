@@ -12,7 +12,7 @@ requires:
   - name: ot_stack_implementation
   - name: ot_headers
   - name: ot_platform_abstraction
-  - name: ot_thirdparty
+  - name: ot_mbedtls
   - name: ot_psa_crypto
 recommends:
   - id: ot_stack_source
@@ -28,6 +28,8 @@ config_file:
     file_id: openthread_features
     condition: [ot_reference_device]
   - path: protocol/openthread/config/sl_openthread_generic_config.h
+validation_helper:
+  - path: protocol/openthread/component/script/ot_log_validation.lua
 define:
   - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
     value: "\"sl_openthread_features_config.h\""

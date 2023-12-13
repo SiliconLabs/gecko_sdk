@@ -258,6 +258,14 @@ typedef const struct {
   uint16_t (*fnct_get_descriptor_size)(void  *p_subclass_arg);  ///< Callback to get the size of the functional desc.
 } sl_usbd_cdc_subclass_driver_t;
 
+/// Async comm callback
+typedef void (*sl_usbd_cdc_async_function_t)(uint8_t      class_nbr,
+                                             void         *p_buf,
+                                             uint32_t     buf_len,
+                                             uint32_t     xfer_len,
+                                             void         *p_callback_arg,
+                                             sl_status_t  status);
+
 /********************************************************************************************************
  ********************************************************************************************************
  *                                           FUNCTION PROTOTYPES
@@ -388,6 +396,30 @@ sl_status_t sl_usbd_cdc_read_data(uint8_t  class_nbr,
                                   uint32_t *p_xfer_len);
 
 /****************************************************************************************************//**
+ * @brief    Receive data on the CDC data interface asynchronously.
+ *
+ * @param    class_nbr       Class instance number.
+ *
+ * @param    data_if_nbr     CDC data interface number.
+ *
+ * @param    p_buf           Pointer to the destination buffer to receive data.
+ *
+ * @param    buf_len         Number of octets to receive.
+ *
+ * @param    async_fnct      Function that will be invoked upon completion of receive operation.
+ *
+ * @param    p_async_arg     Pointer to the argument that will be passed as parameter of 'async_fnct'.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_read_data_async(uint8_t                      class_nbr,
+                                        uint8_t                      data_if_nbr,
+                                        uint8_t                      *p_buf,
+                                        uint32_t                     buf_len,
+                                        sl_usbd_cdc_async_function_t async_fnct,
+                                        void                         *p_async_arg);
+
+/****************************************************************************************************//**
  * @brief    Send data on the CDC data interface.
  *
  * @param    class_nbr       Class instance number.
@@ -412,6 +444,30 @@ sl_status_t sl_usbd_cdc_write_data(uint8_t  class_nbr,
                                    uint32_t buf_len,
                                    uint16_t timeout,
                                    uint32_t *p_xfer_len);
+
+/****************************************************************************************************//**
+ * @brief    Send data on the CDC data interface asynchronously.
+ *
+ * @param    class_nbr       Class instance number.
+ *
+ * @param    data_if_nbr     CDC data interface number.
+ *
+ * @param    p_buf           Pointer to the buffer of data that will be transmitted.
+ *
+ * @param    buf_len         Number of octets to transmit.
+ *
+ * @param    async_fnct      Function that will be invoked upon completion of transfer operation.
+ *
+ * @param    p_async_arg     Pointer to the argument that will be passed as parameter of 'async_fnct'.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_write_data_async(uint8_t                      class_nbr,
+                                         uint8_t                      data_if_nbr,
+                                         uint8_t                      *p_buf,
+                                         uint32_t                     buf_len,
+                                         sl_usbd_cdc_async_function_t async_fnct,
+                                         void                         *p_async_arg);
 
 /****************************************************************************************************//**
  * @brief    Send a communication interface class notification to the host.

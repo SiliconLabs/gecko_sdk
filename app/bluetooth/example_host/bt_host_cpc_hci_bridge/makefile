@@ -59,8 +59,8 @@ else
   $(info CPC library dir in CPC_DIR is not set, linking with installed libcpc)
 endif
 
-# Some linux distros require this for PTY
-override LDFLAGS += -lutil
+# Some linux distros require libutil for PTY
+override LDFLAGS += -lutil -lpthread
 
 ################################################################################
 # Target rules                                                                 #

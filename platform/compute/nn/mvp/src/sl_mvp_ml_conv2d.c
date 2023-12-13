@@ -31,7 +31,7 @@
 #include "sl_nn_mvp_config.h"
 #include "sl_mvp_ml_conv2d.h"
 #include "sl_mvp.h"
-#include "sl_mvp_util.h"
+#include "sl_nn_util.h"
 #include "sl_math_mvp.h"
 #include "sl_mvp_program_area.h"
 #include "sl_common.h"
@@ -48,16 +48,6 @@
 static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool execute);
 static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params);
 static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params, int out_x);
-
-__STATIC_FORCEINLINE int sli_div_floor_int(const int dividend, const int divisor)
-{
-  return dividend / divisor;
-}
-
-__STATIC_FORCEINLINE int sli_div_ceil_int(const int dividend, const int divisor)
-{
-  return (dividend / divisor) + (((dividend % divisor) != 0) ? 1 : 0);
-}
 
 /***************************************************************************//**
  *
@@ -151,7 +141,7 @@ static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params)
   if (padding) {              // True if "SAME" padding
     // Calculate "left" padding width.
     pad_along_width = SL_MAX((out_width - 1) * stride_width + filter_width - input_width, 0);
-    pad_left        = sli_div_floor_int(pad_along_width, 2);
+    pad_left        = sli_nn_div_floor_int(pad_along_width, 2);
     column          = 0;
     while ((pad_left > 0) && (status == SL_STATUS_OK)) {
       // Calculate one output column. Compute with host CPU.
@@ -163,7 +153,7 @@ static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params)
     }
 
     // Calculate "right" padding width.
-    pad_right = pad_along_width - sli_div_floor_int(pad_along_width, 2);
+    pad_right = pad_along_width - sli_nn_div_floor_int(pad_along_width, 2);
     column = out_width - 1;
     while ((pad_right > 0) && (status == SL_STATUS_OK)) {
       // Calculate one output column. Compute with host CPU.
@@ -184,9 +174,9 @@ static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params)
     if (input_width_max <= output_width_max) {
       // Calculate max chunk width with input width as limiting factor.
       chunk_input_width  = SL_MIN(remaining_input_width, input_width_max);
-      chunk_input_width  = sli_div_floor_int(chunk_input_width - filter_width, stride_width);
+      chunk_input_width  = sli_nn_div_floor_int(chunk_input_width - filter_width, stride_width);
       chunk_input_width  = (chunk_input_width * stride_width) + filter_width;
-      chunk_output_width = sli_div_floor_int(chunk_input_width - filter_width, stride_width) + 1;
+      chunk_output_width = sli_nn_div_floor_int(chunk_input_width - filter_width, stride_width) + 1;
     } else {
       // Calculate max chunk width with output width as limiting factor.
       chunk_output_width = SL_MIN(remaining_output_width, output_width_max);
@@ -196,7 +186,9 @@ static sl_status_t conv1d(const sli_mvp_ml_conv2d_s8_params_t *params)
     par.output_width = chunk_output_width;
 
     // Do one Conv1D.
-    status = conv2d(&par, true);
+    if ((status = conv2d(&par, true)) != SL_STATUS_OK) {
+      return status;
+    }
 
     // Advance tensor pointers.
     chunk_input_width      = chunk_input_width - filter_width + stride_width;
@@ -227,12 +219,12 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   const float16_t zero                = 0.0f;
   int8_t *output                      = params->output;
 
+  sl_status_t status                  = SL_STATUS_OK;
+  sli_mvp_program_context_t *p        = sli_mvp_get_program_area_context();
+
   #if (SL_MVP_OPTIMIZE_SPEED & 1)
   float16_t *scaled_input = (float16_t*)params->scratch_buffer;
   #endif
-
-  sl_status_t status                  = SL_STATUS_OK;
-  sli_mvp_program_context_t *p        = sli_mvp_get_program_area_context();
 
   if (needs_padding == false) {
     if ((pad_width != 0) || (pad_height != 0)) {
@@ -254,6 +246,12 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
         || (((uint32_t)output_scaler & 0x1) != 0U)) {
       status = SL_STATUS_INVALID_PARAMETER;
     }
+    #if (SL_MVP_OPTIMIZE_SPEED & 1)
+    // Check if scratch buffer is provided.
+    if (params->scratch_buffer == NULL) {
+      status = SL_STATUS_INVALID_PARAMETER;
+    }
+    #endif
   }
 
   if (status != SL_STATUS_OK) {
@@ -289,11 +287,11 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
     int input_stride_dim0 = input_size_dim2 * input_size_dim1;
     int input_size_dim0   = input_height;
 
-    int input_index = sli_mvp_util_offset_nhwc(input_height, input_width, input_depth,
-                                                batch /* out_channel_start */,
-                                                0,
-                                                0,
-                                                0);
+    int input_index = sli_nn_calc_offset_nhwc(input_height, input_width, input_depth,
+                                              batch /* out_channel_start */,
+                                              0,
+                                              0,
+                                              0);
 
     // Condition to pack two reals to use both FMACs in MVP and double throughput.
     const bool use_parallel_mac_input_scaling =  (input_size_dim2    % 2 == 0)
@@ -382,7 +380,9 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
     }
 
     if (execute) {
-      sli_mvp_pb_execute_program(p);
+      if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+        return status;
+      }
     }
   }
 #endif // #if (SL_MVP_OPTIMIZE_SPEED & 1)
@@ -398,9 +398,9 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   // each case. Doesn't actually loop through each index, but only those that
   // correspond to unique sub-filters.
   const int in_y_origin_center_max = input_height - filter_height;
-  const int out_y_center_max = sli_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
+  const int out_y_center_max = sli_nn_div_floor_int(in_y_origin_center_max + pad_height, stride_height);
   const int in_x_origin_center_max = input_width - filter_width;
-  const int out_x_center_max = sli_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
+  const int out_x_center_max = sli_nn_div_floor_int(in_x_origin_center_max + pad_width, stride_width);
 
   for (int out_x_min = 0, out_x_max; out_x_min < output_width; out_x_min = out_x_max + 1) {
     /* Truncate filter width to actual filter width when filter starts outside of
@@ -487,7 +487,7 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
         // Could compute out_y_size for offset 0 and use for all but it is possible
         // that some more programs may be possible with a tighter bound on array size.
         SLI_MVP_CHECK(output_height_truncated >= out_y_offset);
-        int out_y_size = sli_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
+        int out_y_size = sli_nn_div_ceil_int(output_height_truncated - out_y_offset, out_y_incr);
         // Don't need to worry about the increments if will never go to next output.
         int in_y_extra_incr_adjusted = out_y_size == 1 ? 0 : in_y_extra_incr;
 
@@ -510,10 +510,10 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
         for (int batch = 0; batch < batches; ++batch) {
           // These array indexing computations should be moved up to highest loop
           // level possible so uncompiled operation is more efficient.
-          int output_index_base = sli_mvp_util_offset_nhwc(output_height, output_width, output_depth,
-                                                           batch,
-                                                           out_y_min + out_y_offset,
-                                                           out_x_min, 0 /* out_channel_start */);
+          int output_index_base = sli_nn_calc_offset_nhwc(output_height, output_width, output_depth,
+                                                          batch,
+                                                          out_y_min + out_y_offset,
+                                                          out_x_min, 0 /* out_channel_start */);
           int output_stride_col = 1;
           int output_size_col   = output_depth;
           int output_stride_row = output_depth;
@@ -533,11 +533,11 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
           SLI_MVP_CHECK(output_stride_row >= 0);
           SLI_MVP_CHECK(output_stride_vec >= 0);
 
-          int filter_index_base = sli_mvp_util_offset_nhwc(filter_height, filter_width, input_depth,
-                                                           0 /* out_channel_start */,
-                                                           filter_y_start,
-                                                           filter_x_start,
-                                                           0 /* in_channel_start */);
+          int filter_index_base = sli_nn_calc_offset_nhwc(filter_height, filter_width, input_depth,
+                                                          0 /* out_channel_start */,
+                                                          filter_y_start,
+                                                          filter_x_start,
+                                                          0 /* in_channel_start */);
           int filter_stride_col = 1;
           int filter_size_col   = filter_width_truncated * input_depth;
           int filter_stride_row = filter_width * input_depth;
@@ -545,15 +545,15 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
           int filter_stride_vec = filter_height * filter_stride_row;
           int filter_size_vec   = output_depth;
 
-          int input_index_base = sli_mvp_util_offset_nhwc(input_height, input_width, input_depth,
-                                                          batch,
-                                                          (out_y_min + out_y_offset) * stride_height
-                                                          - pad_height
-                                                          + dilation_height_factor * filter_y_start,
-                                                          out_x_min * stride_width
-                                                          - pad_width
-                                                          + dilation_width_factor * filter_x_start,
-                                                          0);
+          int input_index_base = sli_nn_calc_offset_nhwc(input_height, input_width, input_depth,
+                                                         batch,
+                                                         (out_y_min + out_y_offset) * stride_height
+                                                         - pad_height
+                                                         + dilation_height_factor * filter_y_start,
+                                                         out_x_min * stride_width
+                                                         - pad_width
+                                                         + dilation_width_factor * filter_x_start,
+                                                         0);
           int input_stride_col = 1;
           int input_size_col   = filter_width_truncated * input_depth;
           int input_stride_row = input_width * input_depth;
@@ -873,7 +873,9 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
           }
 
           if (execute) {
-            sli_mvp_pb_execute_program(p);
+            if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+              return status;
+            }
           }
         } // batches
       } // out_y_offset
@@ -881,14 +883,16 @@ static sl_status_t conv2d(const sli_mvp_ml_conv2d_s8_params_t *params, bool exec
   } // out_x_range
 
   if (execute) {
-    sli_mvp_cmd_wait_for_completion();
-    sl_math_mvp_clamp_i8(params->output,
-                         batches * output_height * output_width * output_depth,
-                         params->output_activation_min,
-                         params->output_activation_max);
+    if ((status = sli_mvp_cmd_wait_for_completion()) != SL_STATUS_OK) {
+      return status;
+    }
+    status = sl_math_mvp_clamp_i8(params->output,
+                                  batches * output_height * output_width * output_depth,
+                                  params->output_activation_min,
+                                  params->output_activation_max);
   }
 
-  return SL_STATUS_OK;
+  return status;
 }
 
 static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params, int out_x)
@@ -924,9 +928,9 @@ static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params
       for (int filter_x = filter_x_start; filter_x < filter_x_end; ++filter_x) {
         const int in_x = in_x_origin + filter_x;
         for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
-          input_index = sli_mvp_util_offset_nhwc(1, input_width, input_depth, batch, 0, in_x, in_channel);
+          input_index = sli_nn_calc_offset_nhwc(1, input_width, input_depth, batch, 0, in_x, in_channel);
           const int8_t input_value = input[input_index];
-          filter_index = sli_mvp_util_offset_nhwc(1, filter_width, input_depth, out_channel, 0, filter_x, in_channel);
+          filter_index = sli_nn_calc_offset_nhwc(1, filter_width, input_depth, out_channel, 0, filter_x, in_channel);
           const int8_t filter_value = filter[filter_index];
           acc += (input_value + input_offset) * filter_value * SLI_MVP_ACCUMULATOR_SCALER;
         }
@@ -943,7 +947,7 @@ static sl_status_t conv1d_one_column(const sli_mvp_ml_conv2d_s8_params_t *params
       acc_int32 = SL_MIN(acc_int32, output_activation_max);
       acc = (float16_t)acc_int32;
 
-      output_index = sli_mvp_util_offset_nhwc(1, 1, output_depth, batch, 0, out_x, out_channel);
+      output_index = sli_nn_calc_offset_nhwc(1, 1, output_depth, batch, 0, out_x, out_channel);
       output[output_index] = (int8_t)acc;
     }
   }

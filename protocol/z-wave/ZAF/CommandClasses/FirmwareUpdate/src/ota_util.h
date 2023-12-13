@@ -119,7 +119,7 @@ uint16_t handleCommandClassFirmwareUpdateMaxFragmentSize(void);
  * @return Number of Reports, greater of equal to 1.
  * @private
  */
-uint8_t getFWUpdateMDGetNumberOfReports();
+uint8_t getFWUpdateMDGetNumberOfReports(void);
 
 /**
  * @brief This function returns a firmware ID based on a given target index.

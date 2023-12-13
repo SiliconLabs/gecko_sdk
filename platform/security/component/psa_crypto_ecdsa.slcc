@@ -33,7 +33,7 @@ requires:
     condition: [device_has_semailbox, psa_crypto_ecc_secp256k1]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_ECDSA
+    value: PSA_WANT_ALG_ECDSA 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
     condition: [mbedtls_ecdsa]
@@ -43,7 +43,7 @@ template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ECDSA_C
     condition: [mbedtls_uses_psa_crypto]
-  
+
   # The ECDSA module depends on ASN.1.
   - name: mbedtls_config
     value: MBEDTLS_ASN1_PARSE_C

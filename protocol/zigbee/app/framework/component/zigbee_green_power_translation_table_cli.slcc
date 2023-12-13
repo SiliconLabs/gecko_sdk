@@ -1,31 +1,30 @@
 package: Zigbee
-description: A component implementing the translation table CLI functionality of the Green
-  Power cluster.
+description: A component implementing the translation table CLI functionality of the Green Power cluster.
 label: Green Power Translation Table CLI
 quality: production
 id: zigbee_green_power_translation_table_cli
 category: Zigbee|Green Power
 provides:
-   - name: "zigbee_green_power_translation_table_cli"
+  - name: zigbee_green_power_translation_table_cli
 source:
   - path: protocol/zigbee/app/framework/plugin/green-power-translation-table/green-power-translation-table-cli.c
     condition:
-      - "cli"
-      - "zigbee_green_power_translation_table"
+      - cli
+      - zigbee_green_power_translation_table
   - path: protocol/zigbee/app/framework/plugin/green-power-common/green-power-cli.c
     condition:
-      - "cli"
+      - cli
     unless:
-      - "zigbee_green_power_translation_table"
+      - zigbee_green_power_translation_table
 include:
   - path: protocol/zigbee/app/framework/plugin/green-power-translation-table
     file_list:
       - path: green-power-translation-table.h
         condition:
-          - "zigbee_green_power_translation_table"
+          - zigbee_green_power_translation_table
       - path: green-power-translation-table-tokens.h
         condition:
-          - "zigbee_green_power_translation_table"
+          - zigbee_green_power_translation_table
 template_contribution:
   - name: component_catalog
     value: zigbee_green_power_translation_table_cli
@@ -47,22 +46,22 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliSetTranslationTable
       help: Sets  entry at index within the translation table.
       argument:
-      - type: uint8
-        help: Index to translation table
-      - type: uint16
-      - type: hex
-      - type: uint8
-      - type: uint32
-      - type: uint8
-      - type: uint8
-        help: The endpoint for which the translation is valid
-      - type: uint16
-      - type: uint16
-      - type: uint16
-      - type: uint8
-      - type: hex
-      - type: uint8
-      - type: hex
+        - type: uint8
+          help: Index to translation table
+        - type: uint16
+        - type: hex
+        - type: uint8
+        - type: uint32
+        - type: uint8
+        - type: uint8
+          help: The endpoint for which the translation is valid
+        - type: uint16
+        - type: uint16
+        - type: uint16
+        - type: uint8
+        - type: hex
+        - type: uint8
+        - type: hex
   - name: cli_command
     value:
       group: green-power-server
@@ -70,12 +69,12 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliRemoveGpdEndpoint
       help: Removes GPD  entry from the translation table for the specified endpoint.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: hex
-      - type: uint8
-      - type: uint8
-        help: The endpoint for which the translation is valid
+        - type: uint8
+        - type: uint32
+        - type: hex
+        - type: uint8
+        - type: uint8
+          help: The endpoint for which the translation is valid
   - name: cli_command
     value:
       group: green-power-server
@@ -95,11 +94,11 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliSetAdditionalInfoBlockTableEntry
       help: Sets entry at index within the additionalInfoTable.
       argument:
-      - type: uint8
-        help: Index to additionalInfoBlock table
-      - type: uint8
-      - type: uint8
-      - type: string
+        - type: uint8
+          help: Index to additionalInfoBlock table
+        - type: uint8
+        - type: uint8
+        - type: string
   - name: cli_command
     value:
       group: green-power-server
@@ -107,8 +106,8 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliClearAdditionalInfoBlockTableEntry
       help: Clears entry at index within the additionalInfoTable.
       argument:
-      - type: uint8
-        help: Index to additionalInfoBlock table
+        - type: uint8
+          help: Index to additionalInfoBlock table
   - name: cli_command
     value:
       group: green-power-server
@@ -128,18 +127,18 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliSetCustomizedTableEntry
       help: Sets entry at index within the customizedTable.
       argument:
-      - type: uint8
-        help: Index to customized table
-      - type: uint8
-      - type: uint8
-        help: The endpoint for which the translation is valid
-      - type: uint16
-      - type: uint16
-      - type: uint8
-      - type: uint16
-      - type: uint8
-      - type: uint8
-      - type: string
+        - type: uint8
+          help: Index to customized table
+        - type: uint8
+        - type: uint8
+          help: The endpoint for which the translation is valid
+        - type: uint16
+        - type: uint16
+        - type: uint8
+        - type: uint16
+        - type: uint8
+        - type: uint8
+        - type: string
   - name: cli_command
     value:
       group: green-power-server
@@ -147,8 +146,8 @@ template_contribution:
       handler: emberAfPluginGreenPowerServerCliClearCustomizedTableEntry
       help: Clears entry at index within the customizedTable.
       argument:
-      - type: uint8
-        help: Index to customized table
+        - type: uint8
+          help: Index to customized table
   - name: cli_command
     value:
       group: green-power-server

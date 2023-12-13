@@ -66,7 +66,7 @@ void sli_zigbee_af_device_database_print_all(sl_cli_command_arg_t *arguments)
     emberAfCorePrint("%d - ", i);
     deviceCount++;
 
-    emberAfPrintLittleEndianEui64(device->eui64);
+    emberAfPrintBigEndianEui64(device->eui64);
     emberAfCorePrintln(" - Capabilities: 0x%X - EPs: %d - Status: %p - Failures:%d - Stack Revision: %d",
                        device->capabilities,
                        device->endpointCount,
@@ -116,7 +116,7 @@ void sli_zigbee_af_device_database_add_dummy_device(sl_cli_command_arg_t *argume
 {
   EmberAfDeviceInfo dummy;
   MEMSET(&dummy, 0, sizeof(EmberAfDeviceInfo));
-  sl_zigbee_copy_eui64_arg(arguments, 0, dummy.eui64, false);
+  sl_zigbee_copy_eui64_arg(arguments, 0, dummy.eui64, true);
   dummy.endpointCount = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t clusterCount = sl_cli_get_argument_uint8(arguments, 2);
   dummy.stackRevision = DUMMY_STACK_REVISION;
@@ -168,7 +168,7 @@ void sli_zigbee_af_device_database_add_dummy_device(sl_cli_command_arg_t *argume
 void sli_zigbee_af_device_database_erase(sl_cli_command_arg_t *arguments)
 {
   EmberEUI64 eui64;
-  sl_zigbee_copy_eui64_arg(arguments, 0, eui64, false);
+  sl_zigbee_copy_eui64_arg(arguments, 0, eui64, true);
   if (!emberAfPluginDeviceDatabaseEraseDevice(eui64)) {
     emberAfCorePrintln("Error:  Could not delete device.");
   }

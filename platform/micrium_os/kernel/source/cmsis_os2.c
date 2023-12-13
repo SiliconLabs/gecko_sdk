@@ -2118,6 +2118,7 @@ osThreadId_t  osThreadNew(osThreadFunc_t          func,
       p_thread->obj_dyn_alloc = DEF_TRUE;
       p_stk_base = (CPU_STK *)malloc(CMSIS_DEFAULT_STACK_SIZE);
       if (p_stk_base == (CPU_STK *)0) {
+        free(p_thread);
         return (osThreadId_t)0;
       }
       p_thread->stack_dyn_alloc = DEF_TRUE;

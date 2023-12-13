@@ -12,31 +12,28 @@ quality: production
 root_path: app/bluetooth/common/esl_tag_display
 tag:
   - Custom-Code
-
 config_file:
   - path: config/esl_tag_display.xml
     file_id: esl_tag_display_characteristics
     directory: btconf
   - path: config/esl_tag_display_config.h
     file_id: esl_tag_display_config
-
 include:
   - path: ./inc
     file_list:
       - path: esl_tag_display.h
-
 source:
   - path: src/esl_tag_display.c
-
 provides:
   - name: esl_tag_display
-
 requires:
   - name: esl_tag_core
-
 template_contribution:
   - name: bluetooth_on_event
     value:
       include: esl_tag_display.h
       function: esl_display_bt_on_event
     priority: -8190
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/esl-tag-display

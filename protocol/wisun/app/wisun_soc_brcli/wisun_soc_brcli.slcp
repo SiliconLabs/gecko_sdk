@@ -12,6 +12,8 @@ component:
   - id: "wisun_default_phy"
   - id: "wisun_stack_debug"
   - id: "wisun_stack_lfn"
+  - id: "wisun_config"
+  - id: "wisun_cli"
   - id: "sl_system"
   - id: "device_init"
   - id: "slist"
@@ -100,7 +102,7 @@ configuration:
     value: "1"
     condition: [device_sdid_220, hardware_board_default_rf_band_470]
   - name: SL_CLI_VCOM_TASK_STACK_SIZE
-    value: 500
+    value: 600
 
 template_contribution:
   - name: "cli_command"
@@ -156,6 +158,31 @@ template_contribution:
       help: "Start the border router using radio conf ids: w sti"
       shortcuts:
         - name: "sti"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_custom_fsk"
+      handler: "app_start_custom_fsk"
+      help: "Start the border router using custom FSK PHY settings: w scf"
+      shortcuts:
+        - name: "scf"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_custom_ofdm"
+      handler: "app_start_custom_ofdm"
+      help: "Start the border router using custom OFDM PHY settings: w scof"
+      shortcuts:
+        - name: "scof"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "start_custom_oqpsk"
+      handler: "app_start_custom_oqpsk"
+      help: "Start the border router using custom OQPSK PHY settings: w scoq"
+      shortcuts:
+        - name: "scoq"
+
   - name: "cli_command"
     value:
       group: "wisun"
@@ -412,6 +439,17 @@ template_contribution:
       help: "List installed certificates: w cl"
       shortcuts:
         - name: "cl"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "trigger"
+      handler: "app_trigger_frame"
+      help: "Trigger the transmission of a frame"
+      shortcuts:
+        - name: "tx"
+      argument:
+        - type: string
+          help: "frame type"
 
 readme:
   - path: ../../../../app/wisun/documentation/example/wisun_br/readme.md

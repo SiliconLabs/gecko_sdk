@@ -21,7 +21,12 @@
 #include PLATFORM_HEADER
 #include "stack/security/zigbee-secure-key-storage-upgrade.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
+#endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
 //headers used in non-Vault security manager implementation
 #include "hal.h" // for TOKEN_resolution
@@ -43,7 +48,7 @@ sl_status_t zb_sec_man_upgrade_link_key_table(void)
   //avoid compiler issues for builds without a key table
   #if (EMBER_KEY_TABLE_SIZE > 0)
   uint8_t i;
-
+  EmberEUI64 invalidEUI64 = { 0 };
   sl_zb_sec_man_context_t context;
   sl_zb_sec_man_init_context(&context);
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
@@ -74,6 +79,9 @@ sl_status_t zb_sec_man_upgrade_link_key_table(void)
             &(tok[KEY_ENTRY_IEEE_OFFSET]),
             EUI64_SIZE);
 
+    if (MEMCOMPARE(context.eui64, invalidEUI64, EUI64_SIZE) == 0) {
+      continue;
+    }
     sl_status_t vault_import_status;
 
     vault_import_status = sl_zb_sec_man_import_key(&context, &plaintext_key);
@@ -241,38 +249,6 @@ sl_status_t zb_sec_man_upgrade_tc_link_key(void)
   return SL_STATUS_OK;
 }
 
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-sl_status_t zb_sec_man_upgrade_secure_ezsp_key(void)
-{
-  sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_init_context(&context);
-  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY;
-
-  sl_status_t is_key_migrated = sl_zb_sec_man_check_key_context(&context);
-  // move key if it hasn't been moved already.
-  if (is_key_migrated != SL_STATUS_OK) {
-    sl_zb_sec_man_key_t plaintext_key;
-    sl_status_t vault_import_status;
-
-    tokTypeSecureEzspSecurityKey tok;
-    halCommonGetToken(&tok, TOKEN_SECURE_EZSP_SECURITY_KEY);
-    MEMMOVE(&plaintext_key.key, tok.contents, EMBER_ENCRYPTION_KEY_SIZE);
-
-    vault_import_status = sl_zb_sec_man_import_key(&context, &plaintext_key);
-    // exit with error if we couldn't import the key
-    if (vault_import_status != SL_STATUS_OK) {
-      keys_failed[KEYS_STATUS_OTHER]++;
-      return SL_STATUS_FAIL;
-    }
-    // "erase" the non-secure vault key
-    MEMSET(&tok.contents, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);
-    halCommonSetToken(TOKEN_SECURE_EZSP_SECURITY_KEY, &tok);
-    keys_passed[KEYS_STATUS_OTHER];
-  }
-  return SL_STATUS_OK;
-}
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
 sl_status_t zb_sec_man_upgrade_zll_key(void)
 {
@@ -336,7 +312,10 @@ void sli_zb_sec_man_upgrade_key_storage(void)
 {
   //Disable watchdog timer so it doesn't interrupt the upgrade
   //process if more than 50 keys are being migrated.
-  halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
+  bool wdog_enabled = halInternalWatchDogEnabled();
+  if (wdog_enabled) {
+    halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
+  }
 
   //current network key
   (void) zb_sec_man_upgrade_nwk_key(0);
@@ -349,10 +328,6 @@ void sli_zb_sec_man_upgrade_key_storage(void)
   #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
   (void) zb_sec_man_upgrade_zll_key();
   #endif // defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
-
-  #if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-  (void) zb_sec_man_upgrade_secure_ezsp_key();
-  #endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
 
   (void) zb_sec_man_upgrade_link_key_table();
 
@@ -368,11 +343,15 @@ void sli_zb_sec_man_upgrade_key_storage(void)
     total_keys_failed += keys_failed[i];
   }
 
+  #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
   //print upgrade status if any keys needed to be migrated
   if (total_keys_passed > 0 || total_keys_failed > 0) {
     local_printf("Successfully migrated %d keys to PSA.\n", total_keys_passed);
     local_printf("Failed to migrate %d keys (which may also be invalid).\n", total_keys_failed);
   }
+  #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
-  halInternalEnableWatchDog();
+  if (wdog_enabled) {
+    halInternalEnableWatchDog();
+  }
 }

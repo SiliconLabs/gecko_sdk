@@ -259,11 +259,13 @@ int mbedtls_aes_crypt_xts(mbedtls_aes_xts_context *ctx,
   unsigned char tmp[16];
 
   AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(mode == MBEDTLS_AES_ENCRYPT
-                   || mode == MBEDTLS_AES_DECRYPT);
   AES_VALIDATE_RET(data_unit != NULL);
   AES_VALIDATE_RET(input != NULL);
   AES_VALIDATE_RET(output != NULL);
+
+  if ((mode != MBEDTLS_AES_ENCRYPT) && (mode != MBEDTLS_AES_DECRYPT)) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   /* Data units must be at least 16 bytes long. */
   if ( length < 16 ) {
@@ -409,8 +411,10 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(input != NULL);
   AES_VALIDATE_RET(output != NULL);
-  AES_VALIDATE_RET(mode == MBEDTLS_AES_ENCRYPT
-                   || mode == MBEDTLS_AES_DECRYPT);
+
+  if ((mode != MBEDTLS_AES_ENCRYPT) && (mode != MBEDTLS_AES_DECRYPT)) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   if ( ctx->keybits != 128UL
        && ctx->keybits != 192UL
@@ -463,11 +467,13 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   block_t data_out;
 
   AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(mode == MBEDTLS_AES_ENCRYPT
-                   || mode == MBEDTLS_AES_DECRYPT);
   AES_VALIDATE_RET(iv != NULL);
   AES_VALIDATE_RET(input != NULL);
   AES_VALIDATE_RET(output != NULL);
+
+  if ((mode != MBEDTLS_AES_ENCRYPT) && (mode != MBEDTLS_AES_DECRYPT)) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   /* Input length must be a multiple of 16 bytes which is the AES block
      length. */
@@ -530,12 +536,14 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
   block_t data_out;
 
   AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(mode == MBEDTLS_AES_ENCRYPT
-                   || mode == MBEDTLS_AES_DECRYPT);
   AES_VALIDATE_RET(iv_off != NULL);
   AES_VALIDATE_RET(iv != NULL);
   AES_VALIDATE_RET(input != NULL);
   AES_VALIDATE_RET(output != NULL);
+
+  if ((mode != MBEDTLS_AES_ENCRYPT) && (mode != MBEDTLS_AES_DECRYPT)) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   if ( n > 15 ) {
     return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
@@ -635,11 +643,13 @@ int mbedtls_aes_crypt_cfb8(mbedtls_aes_context *ctx,
   int ret = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(mode == MBEDTLS_AES_ENCRYPT
-                   || mode == MBEDTLS_AES_DECRYPT);
   AES_VALIDATE_RET(iv != NULL);
   AES_VALIDATE_RET(input != NULL);
   AES_VALIDATE_RET(output != NULL);
+
+  if ((mode != MBEDTLS_AES_ENCRYPT) && (mode != MBEDTLS_AES_DECRYPT)) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   if ( ctx->keybits != 128UL
        && ctx->keybits != 192UL

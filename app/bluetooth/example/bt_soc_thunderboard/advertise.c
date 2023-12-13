@@ -285,7 +285,7 @@ void advertise_start(void)
 
   // Start advertising and enable connections
   sc = sl_bt_legacy_advertiser_start(adv_set_handle,
-                                     sl_bt_advertiser_connectable_scannable);
+                                     sl_bt_legacy_advertiser_connectable);
   app_assert_status(sc);
 
   // Start timer to alternate advertising data

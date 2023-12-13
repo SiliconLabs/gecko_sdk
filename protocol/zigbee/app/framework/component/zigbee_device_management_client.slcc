@@ -1,17 +1,16 @@
 package: Zigbee
-description: This component implements the client-side functionality of the Smart Energy
-  1.2 Device Management cluster.
+description: This component implements the client-side functionality of the Smart Energy 1.2 Device Management cluster.
 id: zigbee_device_management_client
 label: Device Management Client
 category: Zigbee|Cluster Library|Smart Energy
 quality: production
 provides:
-   - name: "zigbee_device_management_client"
+  - name: zigbee_device_management_client
 source:
   - path: protocol/zigbee/app/framework/plugin/device-management-client/device-management-client.c
   - path: protocol/zigbee/app/framework/plugin/device-management-client/device-management-client-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/device-management-client/device-management-client-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/device-management-client
@@ -25,10 +24,10 @@ template_contribution:
     value: zigbee_device_management_client
   - name: cluster_service
     value:
-       cluster_id: "0x0708"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"
-       service_function: "emberAfDeviceManagementClusterClientCommandParse"
+      cluster_id: '0x0708'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfDeviceManagementClusterClientCommandParse
   - name: cli_group
     value:
       group: plugin

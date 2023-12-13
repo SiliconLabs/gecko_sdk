@@ -24,8 +24,6 @@ include:
 config_file:
   - path: "config/emlib_core_debug_config.h"
     file_id: emlib_core_debug_config
-validation_helper:
-  - path: emlib_core_validation.lua
 provides:
   - name: emlib_core
 requires:

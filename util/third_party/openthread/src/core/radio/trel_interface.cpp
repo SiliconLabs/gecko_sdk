@@ -40,10 +40,10 @@
 #include "common/as_core_type.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/string.hpp"
+#include "instance/instance.hpp"
 #include "net/dns_types.hpp"
 
 namespace ot {
@@ -324,15 +324,9 @@ Interface::Peer *Interface::GetNewPeerEntry(void)
         }
 
 #if OPENTHREAD_FTD
+        if (Get<NeighborTable>().FindRxOnlyNeighborRouter(entry.GetExtAddress()) != nullptr)
         {
-            Mac::Address macAddress;
-
-            macAddress.SetExtended(entry.GetExtAddress());
-
-            if (Get<NeighborTable>().FindRxOnlyNeighborRouter(macAddress) != nullptr)
-            {
-                continue;
-            }
+            continue;
         }
 #endif
 

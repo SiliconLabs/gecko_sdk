@@ -3,7 +3,6 @@ label: Pro Stack Non Default
 package: Zigbee
 category: Zigbee|Stack|Pro Core
 quality: production
-
 description: Provides Zigbee PRO stack functionality along with APIs to interface with non default 15.4 interfaces such as BLE.
 
 provides:
@@ -14,15 +13,15 @@ requires:
   - name: zigbee_pro_stack_non_default_mac_implementation
   - name: zigbee_pro_stack_non_default_mac_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_stack_common
   - name: zigbee_phy_2_4
 
 recommends:
-  - id: zigbee_pro_stack_non_default_mac_source
+  - id: zigbee_pro_stack_non_default_mac_library_internal
 
 config_file:
-  - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_stack_non_default_mac_config.h
+  - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_stack_config.h
 
 template_contribution:
   - name: component_catalog

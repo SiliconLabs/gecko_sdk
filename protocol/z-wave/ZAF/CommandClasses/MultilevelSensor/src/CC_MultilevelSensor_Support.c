@@ -40,13 +40,13 @@
 // -----------------------------------------------------------------------------
 //              Static Function Declarations
 // -----------------------------------------------------------------------------
-static void 
+static void
 cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer);
 
-static void 
+static void
 cc_multilevel_sensor_operation_report_stx(zaf_tx_options_t *tx_options, void* pData);
 
-static received_frame_status_t 
+static received_frame_status_t
 cc_multilevel_sensor_cmd_sensor_multilevel_get(  RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                     const ZW_APPLICATION_TX_BUFFER *pCmd,
                                                     uint8_t cmdLength,
@@ -73,7 +73,7 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_
 //                Static Variables
 // -----------------------------------------------------------------------------
 /**< Software timer instance which handles the periodic reporting to the lifeline. */
-static SSwTimer cc_multilevel_sensor_autoreport_timer;
+static SSwTimer cc_multilevel_sensor_autoreport_timer = { 0 };
 // -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -81,12 +81,9 @@ static received_frame_status_t
 CC_MultilevelSensor_handler(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                             ZW_APPLICATION_TX_BUFFER *pCmd,
                             uint8_t cmdLength,
-                            ZW_APPLICATION_TX_BUFFER * pFrameOut,
-                            uint8_t * pLengthOut)
+                            __attribute__((unused)) ZW_APPLICATION_TX_BUFFER * pFrameOut,
+                            __attribute__((unused)) uint8_t * pLengthOut)
 {
-  UNUSED(pFrameOut);
-  UNUSED(pLengthOut);
-
   received_frame_status_t return_value = RECEIVED_FRAME_STATUS_SUCCESS;
 
   switch (pCmd->ZW_Common.cmd)
@@ -118,10 +115,10 @@ static void cc_multilevel_sensor_init(void)
 
 typedef struct tse_data_t {
   RECEIVE_OPTIONS_TYPE_EX zaf_tse_local_actuation;
-  sensor_interface_iterator_t* sensor_interface;  
+  sensor_interface_iterator_t* sensor_interface;
 } tse_data_t;
- 
-  
+
+
 static tse_data_t tse_data[MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {0};
 
 /**
@@ -129,9 +126,8 @@ static tse_data_t tse_data[MULTILEVEL_SENSOR_REGISTERED_SENSOR_NUMBER_LIMIT] = {
  * report of the sensors' measured values.
  * @param[in] pTimer timer instance which called the callback
  */
-static void cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
+static void cc_multilevel_sensor_autoreport_callback(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
   cc_multilevel_sensor_send_sensor_data();
   AppTimerDeepSleepPersistentStart(&cc_multilevel_sensor_autoreport_timer, MULTILEVEL_SENSOR_DEFAULT_AUTOREPORT_PEDIOD_MS);
 }
@@ -141,7 +137,7 @@ static void cc_multilevel_sensor_autoreport_callback(SSwTimer *pTimer)
  * @param[in] txOptions TxOptions, filled in by TSE
  * @param[in] pData this parameter is not used in this case
  */
-static void 
+static void
 cc_multilevel_sensor_operation_report_stx(zaf_tx_options_t *tx_options, void* pData)
 {
   if (NULL == pData)
@@ -156,55 +152,45 @@ cc_multilevel_sensor_operation_report_stx(zaf_tx_options_t *tx_options, void* pD
     return;
   }
 
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  uint8_t *pTxBufRaw = (uint8_t *)&txBuf;
-
-  sensor_read_result_t read_result;
-  size_t raw_buffer_offset = 0;
-  uint8_t sensor_type_value = 0;
-  uint8_t scale = 0;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
-  txBuf.ZW_SensorMultilevelGetV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
-  raw_buffer_offset++;
-  txBuf.ZW_SensorMultilevelGetV11Frame.cmd = SENSOR_MULTILEVEL_REPORT_V11;
-  raw_buffer_offset++;
-
-  sensor_type_value = sensor_interface_iterator->sensor_type->value;
-  pTxBufRaw[raw_buffer_offset++] = sensor_type_value;
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_SensorMultilevelReport1byteV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11,
+    .ZW_SensorMultilevelReport1byteV11Frame.cmd = SENSOR_MULTILEVEL_REPORT_V11,
+    .ZW_SensorMultilevelReport1byteV11Frame.sensorType = sensor_interface_iterator->sensor_type->value
+  };
 
   if (sensor_interface_iterator->read_value != NULL)
   {
+    uint8_t scale;
+    sensor_read_result_t read_result;
     scale = cc_multilevel_sensor_check_scale(sensor_interface_iterator, 0);
     if (true == sensor_interface_iterator->read_value(&read_result, scale))
     {
-      pTxBufRaw[raw_buffer_offset++] = (uint8_t)(read_result.precision << 5) |
-                                       (uint8_t)(scale << 3) |
-                                       (uint8_t)read_result.size_bytes;
-      memcpy(&pTxBufRaw[raw_buffer_offset], read_result.raw_result, read_result.size_bytes);
-      raw_buffer_offset += read_result.size_bytes;
+      txBuf.ZW_SensorMultilevelReport1byteV11Frame.level = (uint8_t)(read_result.precision << 5) |
+                                                           (uint8_t)(scale << 3) |
+                                                           (uint8_t)read_result.size_bytes;
+      memcpy(&txBuf.ZW_SensorMultilevelReport1byteV11Frame.sensorValue1, read_result.raw_result, read_result.size_bytes);
+      tx_options->use_supervision = true;
 
       (void) zaf_transport_tx((uint8_t *)&txBuf,
-                              raw_buffer_offset,
+                              sizeof(ZW_SENSOR_MULTILEVEL_REPORT_1BYTE_V11_FRAME) - 1 + read_result.size_bytes,
                               ZAF_TSE_TXCallback,
                               tx_options);
     }
   }
 }
 
-static received_frame_status_t 
+static received_frame_status_t
 cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
-                                                   uint8_t cmdLength,
+                                                   __attribute__((unused)) uint8_t cmdLength,
                                                    ZW_APPLICATION_TX_BUFFER * pFrameOut,
                                                    uint8_t * pLengthOut)
 {
-  UNUSED(cmdLength);
 
   if(true == Check_not_legal_response_job(pRxOpt))
   {
     return RECEIVED_FRAME_STATUS_FAIL;
-  } 
+  }
 
   sensor_interface_t* sensor_interface;
   uint8_t sensor_type_value =  pCmd->ZW_SensorMultilevelGetV11Frame.sensorType;
@@ -213,7 +199,7 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.cmdClass = COMMAND_CLASS_SENSOR_MULTILEVEL_V11;
   pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.cmd      = SENSOR_MULTILEVEL_REPORT_V11;
 
-  if( CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND == 
+  if( CC_MULTILEVEL_SENSOR_RETURN_VALUE_NOT_FOUND ==
       cc_multilevel_sensor_check_sensor_type_registered(sensor_type_value))
   {
     cc_multilevel_sensor_get_default_sensor_type(&sensor_type_value);
@@ -221,7 +207,7 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 
   pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.sensorType = sensor_type_value;
 
-  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
+  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK ==
      cc_multilevel_sensor_get_interface(sensor_type_value, &sensor_interface))
   {
     sensor_read_result_t read_result;
@@ -232,6 +218,7 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
       pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.level =  (uint8_t)(read_result.precision << 5) |
                                                                               (uint8_t)(scale << 3) |
                                                               (uint8_t)read_result.size_bytes;
+      // TODO: Why memset 4 bytes to 0 instead of setting the correct size to pLengthOut ?
       memset(&pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.sensorValue1, 0, SLI_MAX_RAW_RESULT_BYTES);
       memcpy(&pFrameOut->ZW_SensorMultilevelReport4byteV11Frame.sensorValue1,
               read_result.raw_result,
@@ -252,15 +239,13 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   return RECEIVED_FRAME_STATUS_SUCCESS;
 }
 
-static received_frame_status_t 
+static received_frame_status_t
 cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
-                                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
-                                                                    uint8_t cmdLength,
+                                                                    __attribute__((unused)) const ZW_APPLICATION_TX_BUFFER *pCmd,
+                                                                    __attribute__((unused)) uint8_t cmdLength,
                                                                     ZW_APPLICATION_TX_BUFFER * pFrameOut,
                                                                     uint8_t * pLengthOut)
 {
-  UNUSED(cmdLength);
-  UNUSED(pCmd);
   if(true == Check_not_legal_response_job(pRxOpt))
   {
     return RECEIVED_FRAME_STATUS_FAIL;
@@ -286,11 +271,10 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_sensor( RECEIVE_OPTIONS
 static received_frame_status_t
 cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                                                    const ZW_APPLICATION_TX_BUFFER *pCmd,
-                                                                   uint8_t cmdLength,
+                                                                   __attribute__((unused)) uint8_t cmdLength,
                                                                    ZW_APPLICATION_TX_BUFFER * pFrameOut,
                                                                    uint8_t * pLengthOut)
 {
-  UNUSED(cmdLength);
   if(true == Check_not_legal_response_job(pRxOpt))
   {
     return RECEIVED_FRAME_STATUS_FAIL;
@@ -303,7 +287,7 @@ cc_multilevel_sensor_cmd_sensor_multilevel_get_supported_scale( RECEIVE_OPTIONS_
 
   supported_scale = 0;
 
-  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK == 
+  if(CC_MULTILEVEL_SENSOR_RETURN_VALUE_OK ==
      cc_multilevel_sensor_get_supported_scale(pCmd->ZW_SensorMultilevelGetV11Frame.sensorType, &supported_scale))
   {
     pFrameOut->ZW_SensorMultilevelSupportedScaleReportV5Frame.properties1 = supported_scale;
@@ -321,7 +305,7 @@ static uint8_t lifeline_reporting(ccc_pair_t * p_ccc_pair)
   return 1;
 }
 
-void cc_multilevel_sensor_send_sensor_data()
+void cc_multilevel_sensor_send_sensor_data(void)
 {
   /**
     * TSE simulated RX option for local change addressed to the Root Device

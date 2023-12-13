@@ -3,7 +3,8 @@
 ################################################################################
 
 override INCLUDEPATHS += \
-$(SDK_DIR)/app/bluetooth/common/abr_initiator
+$(SDK_DIR)/app/bluetooth/common/abr_initiator \
+$(SDK_DIR)/app/bluetooth/common/abr_initiator/config
 
 override C_SRC += \
 $(SDK_DIR)/app/bluetooth/common/abr_initiator/abr_initiator.c \

@@ -33,7 +33,7 @@ static void ZW_SWO_Print(const uint8_t * pData,uint32_t iLength)
 }
 
 #ifdef ZWAVE_SERIES_800
-void SWO_DebugPrintInit() {
+void SWO_DebugPrintInit(void) {
   static uint8_t buffer[64];
   uint32_t div;
  /*Enable GPIO clock*/
@@ -72,7 +72,7 @@ void SWO_DebugPrintInit() {
 }
 
 #else // 700s
-void SWO_DebugPrintInit() {
+void SWO_DebugPrintInit(void) {
   static uint8_t buffer[64];
   uint32_t div;
  /*Enable GPIO clock*/

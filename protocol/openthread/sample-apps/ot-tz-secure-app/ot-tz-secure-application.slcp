@@ -1,0 +1,88 @@
+project_name: ot-tz-secure-application
+label: Sample project for TrustZone Secure Key Library
+package: OpenThread
+description: >
+  This is a trustzone enabled application used to manage security operations from trustzone aware OpenThread applications.
+
+category: OpenThread Examples
+quality: evaluation
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Thread"]
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+
+component:
+  - id: tz_secure_key_library_s
+
+provides:
+  - name: ot-tz-secure-application
+
+requires:
+  - name: armv8m.main # Armv8-M Supports TrustZone
+
+configuration:
+  - name: SL_STACK_SIZE
+    value: 3072
+  - name: SL_HEAP_SIZE
+    value: 3072
+
+define:
+  # PSA Crypto configuration:
+  - name: TFM_CRYPTO_CONC_OPER_NUM
+    value: 4
+
+template_contribution:
+  - name: application_type
+    value: "APPLICATION_TYPE_MCU"
+    condition:
+      - bootloader_app_properties
+
+  - name: memory_flash_start
+    value: 0x0
+    condition: [device_sdid_200]
+    unless: [bootloader_interface]
+  - name: memory_flash_start
+    value: 0x08000000
+    unless: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x4000
+    condition: [device_sdid_200, bootloader_interface]
+  - name: memory_flash_start
+    value: 0x08006000
+    condition: [bootloader_interface]
+    unless: [device_sdid_200]
+
+  - name: memory_flash_size
+    value: 0x2C000
+
+  - name: memory_ram_start
+    value: 0x20000000
+
+  - name: memory_ram_size
+    value: 0x3000
+
+tag:
+  - companion:nonsecure_app # Needs a companion app and cannot be built alone
+
+import:
+  # Import the config files from the TZ Non-Secure application
+  - id: ot-tz-nonsecure-application
+
+export:
+  library:
+    - path: artifact/trustzone_secure_library.o
+
+post_build:
+  profile: tz_secure_application
+
+readme:
+  - path: README.md
+
+ui_hints:
+  highlight:
+    - path: README.md
+      focus: true

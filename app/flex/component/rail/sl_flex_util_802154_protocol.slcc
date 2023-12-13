@@ -98,6 +98,17 @@ config_file:
     - "hardware_board_supports_rf_band_924"
     - "hardware_board_supports_rf_band_914"
 
+  # The board has 868MHz, 915MHz and 2.4GHz RF bands
+  - path: config/dualband/sl_flex_util_802154_protocol_config.h
+    condition:
+    - "hardware_board_supports_rf_band_868"
+    - "hardware_board_supports_rf_band_914"
+    - "hardware_board_supports_rf_band_924"
+    - "hardware_board_supports_rf_band_2400"
+    unless:
+    - "hardware_board_supports_rf_band_915"
+
+
 include:
   - path: "."
     file_list:

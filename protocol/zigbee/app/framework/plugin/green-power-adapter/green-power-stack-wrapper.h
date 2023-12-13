@@ -126,6 +126,7 @@ void emberGpSinkTableSetSecurityFrameCounterWrapper(uint8_t index,
 #define emberGpSinkTableLookup emberGpSinkTableLookupWrapper
 #define emberGpSinkTableRemoveEntry emberGpSinkTableRemoveEntryWrapper
 #define emberGpSinkTableSetSecurityFrameCounter emberGpSinkTableSetSecurityFrameCounterWrapper
+#define emberGpSinkTableGetNumberOfActiveEntries emberGpSinkTableGetNumberOfActiveEntriesWrapper
 
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_GP_STACK == 1)
 

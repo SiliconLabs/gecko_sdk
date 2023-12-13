@@ -89,6 +89,8 @@ requires:
   - name: bootloader_tz_secure
   - name: bootloader_tz_utils
   - name: sl_fault_injection_hardening
+  - name: bootloader_aes_ctr_stream_block_cfg
+    condition: [device_has_semailbox]
 recommends:
   - id: bootloader_delay_driver
   - id: bootloader_ezsp_spi

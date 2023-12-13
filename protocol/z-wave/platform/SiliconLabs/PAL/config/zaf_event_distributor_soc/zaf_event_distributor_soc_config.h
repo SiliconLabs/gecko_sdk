@@ -1,7 +1,16 @@
-/**
- * @file
- * @copyright 2023 Silicon Laboratories Inc.
- */
+/***************************************************************************//**
+ * # License
+ * <b> Copyright 2023 Silicon Laboratories Inc. www.silabs.com </b>
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of the Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * https://www.silabs.com/about-us/legal/master-software-license-agreement
+ * By installing, copying or otherwise using this software, you agree to the
+ * terms of the MSLA.
+ *
+ ******************************************************************************/
 
 #ifndef _ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_H_
 #define _ZAF_EVENT_DISTRIBUTOR_SOC_CONFIG_H_

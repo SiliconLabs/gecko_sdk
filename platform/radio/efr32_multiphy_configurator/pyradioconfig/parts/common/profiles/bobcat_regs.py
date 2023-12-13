@@ -7,7 +7,7 @@ def build_modem_regs_bobcat(model, profile):
     build_rac_clkmult_regs(model, profile)
 
 def build_modem_regs_bobcat_only(model, profile):
-    if model.part_family.lower() in ["bobcat", "caracal"]:
+    if model.part_family.lower() in ["bobcat", "caracal", "rainier"]:
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBAAGCTHR, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBAAGCTHR'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBAMODE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBAMODE'))
         profile.outputs.append(ModelOutput(model.vars.MODEM_ADQUAL8_ADBACORRTHR2, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.ADQUAL8.ADBACORRTHR2'))
@@ -115,7 +115,6 @@ def build_modem_regs_bobcat_only(model, profile):
 
 def build_rac_clkmult_regs(model, profile):
     # commented out registers are defined in lynx_regs.py (Lynx calculator didn't output all registers as clkmult was not used for IFADC clocking in prod PHYs)
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTBWCAL'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTDISICO'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENBBDET'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXLDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENBBXLDET'))
@@ -125,8 +124,15 @@ def build_rac_clkmult_regs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVADC, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVADC'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVN'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVP'))
-
     if model.part_family.lower() not in ["rainier"]:
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTBWCAL'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTFREQCAL'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDFNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDFNIB'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDMNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDMNIB'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTRDNIBBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTRDNIBBLE'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDCNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDCNIB'))
+
+    if model.part_family.lower() not in ["rainier"]:  ### removed in Series 3
         profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRX2P4G, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRX2P4G'))
         profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVRXSUBG, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVRXSUBG'))
         profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVTXDUALB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVTXDUALB'))
@@ -144,13 +150,8 @@ def build_rac_clkmult_regs(model, profile):
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENREG3, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENREG3'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENROTDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENROTDET'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENBYPASS40MHZ, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENBYPASS40MHZ'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTFREQCAL'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG3ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG3ADJV'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTINNIBBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTINNIBBLE'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDFNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDFNIB'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDMNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDMNIB'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTRDNIBBLE, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTRDNIBBLE'))
-    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTLDCNIB, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTLDCNIB'))
     # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN1_CLKMULTDRVAMPSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN1.CLKMULTDRVAMPSEL'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTENRESYNC'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTVALID'))

@@ -1,19 +1,12 @@
 package: Zigbee
-description: Silicon Labs implementation of Poll Control server cluster.  The component 
-  periodically checks in with Poll Control clients to see if any client wants to manage
-  the poll period of the server. Any device listed in the binding table for the Poll
-  Control cluster is assumed to be a client. At startup, this component sets the
-  long and short poll intervals of the device to the values of the long and short
-  poll interval attributes.
+description: Silicon Labs implementation of Poll Control server cluster.  The component periodically checks in with Poll Control clients to see if any client wants to manage the poll period of the server. Any device listed in the binding table for the Poll Control cluster is assumed to be a client. At startup, this component sets the long and short poll intervals of the device to the values of the long and short poll interval attributes.
 label: Poll Control Server Cluster
 quality: production
 id: zigbee_poll_control_server
 category: Zigbee|Cluster Library|Home Automation
 provides:
-   - name: "zigbee_tc_connectivity"
-   - name: "zigbee_poll_control_server"
-requires:
-   - name: "zigbee_binding"
+  - name: zigbee_tc_connectivity
+  - name: zigbee_poll_control_server
 config_file:
   - path: protocol/zigbee/app/framework/plugin/poll-control-server/config/poll-control-server-config.h
 source:
@@ -22,16 +15,16 @@ source:
 include:
   - path: protocol/zigbee/app/framework/plugin/poll-control-server
     file_list:
-      - path: poll-control-server.h  
+      - path: poll-control-server.h
 template_contribution:
   - name: component_catalog
     value: zigbee_poll_control_server
   - name: cluster_service
     value:
-       cluster_id: "0x0020"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "emberAfPollControlClusterServerCommandParse"    
+      cluster_id: '0x0020'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfPollControlClusterServerCommandParse
   - name: zigbee_af_callback
     value:
       callback_type: event_init
@@ -39,7 +32,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: reset_attributes
-      function_name: sli_zigbee_af_poll_control_server_reset_attributes_callback  
+      function_name: sli_zigbee_af_poll_control_server_reset_attributes_callback
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status
@@ -54,7 +47,7 @@ template_contribution:
     value:
       cluster_name: PollControl
       cluster_id: 0x20
-      cluster_type: server 
+      cluster_type: server
       pre_attribute_changed_function: emberAfPollControlClusterServerPreAttributeChangedCallback
   - name: cluster_functions
     value:

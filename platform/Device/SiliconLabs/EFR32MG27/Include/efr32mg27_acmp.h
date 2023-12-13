@@ -651,4 +651,4 @@ typedef struct {
 /** @} End of group EFR32MG27_ACMP */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_ACMP_H */
+#endif // EFR32MG27_ACMP_H

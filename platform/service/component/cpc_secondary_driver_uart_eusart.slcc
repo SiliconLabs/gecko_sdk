@@ -8,10 +8,10 @@ instantiable:
   prefix: inst
 root_path: platform/service/cpc
 config_file:
-  - path: config/s2/sl_cpc_drv_secondary_uart_eusart_{{instance}}_config.h
-    file_id: cpc_drv_secondary_uart_eusart_config
+  - path: config/s2/sl_cpc_drv_uart_eusart_{{instance}}_config.h
+    file_id: cpc_drv_uart_eusart_config
 source:
-  - path: src/sl_cpc_drv_secondary_uart.c
+  - path: src/sl_cpc_drv_uart.c
 provides:
   - name: cpc_driver
   - name: cpc_secondary_driver_uart_eusart_interface
@@ -20,6 +20,7 @@ provides:
   - name: cpc_secondary_driver_uart_eusart
     allow_multiple: false
 requires:
+  - name: cpc_secondary
   - name: status
   - name: dmadrv
   - name: emlib_gpio
@@ -27,7 +28,7 @@ requires:
   - name: emlib_eusart
   - name: slist
 template_file:
-  - path: template/s2/sl_cpc_drv_secondary_uart_config.h.jinja
+  - path: template/s2/sl_cpc_drv_uart_config.h.jinja
 template_contribution:
   - name: cpc_instance_name
     value: "{{instance}}"
@@ -35,3 +36,5 @@ template_contribution:
     value: uart
   - name: cpc_periph_type
     value: eusart
+  - name: component_catalog
+    value: cpc_driver_uart

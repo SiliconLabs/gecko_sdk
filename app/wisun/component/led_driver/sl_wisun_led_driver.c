@@ -44,6 +44,7 @@
 #include "sl_simple_led.h"
 #include "sl_simple_led_instances.h"
 #include "sl_wisun_trace_util.h"
+#include "sl_wisun_led_driver_config.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -284,10 +285,12 @@ static bool _get_next_led_state(sl_wisun_led_signal_t *led_signal,
   if (led_signal->period) {
     if (led_signal->high_ms) {
       res = true;
-      --led_signal->high_ms;
+      led_signal->high_ms = (led_signal->high_ms < SL_WISUN_LED_DRIVER_UPDATE_STATE_MS)
+                            ? 0UL : (led_signal->high_ms - SL_WISUN_LED_DRIVER_UPDATE_STATE_MS);
     } else if (led_signal->low_ms) {
       res = false;
-      --led_signal->low_ms;
+      led_signal->low_ms = (led_signal->low_ms < SL_WISUN_LED_DRIVER_UPDATE_STATE_MS)
+                           ? 0UL : (led_signal->low_ms - SL_WISUN_LED_DRIVER_UPDATE_STATE_MS);
     } else {
       // -1: infinit repeat
       if (led_signal->period != SL_WISUN_LED_PERIOD_CONTINOUS_SIGNAL) {
@@ -306,9 +309,9 @@ static bool _get_next_led_state(sl_wisun_led_signal_t *led_signal,
 /* LED task */
 static void _led_task(void *arg)
 {
-  sl_wisun_led_signal_t led_msg  = { 0 }; // incomming led message
-  sl_wisun_led_signal_t led0_ref = { 0 }; // LED0 reference storage
-  sl_wisun_led_signal_t led1_ref = { 0 }; // LED1 reference storage
+  static sl_wisun_led_signal_t led_msg  = { 0 }; // incomming led message
+  static sl_wisun_led_signal_t led0_ref = { 0 }; // LED0 reference storage
+  static sl_wisun_led_signal_t led1_ref = { 0 }; // LED1 reference storage
   uint8_t msg_prio = 0;
   bool led0_state  = false;                // led0 state
   bool led1_state  = false;                // led1 state
@@ -352,7 +355,7 @@ static void _led_task(void *arg)
     _led_mutex_release();
 
     // 1 ms delay
-    osDelay(1);
+    osDelay(SL_WISUN_LED_DRIVER_UPDATE_STATE_MS);
   }
 }
 

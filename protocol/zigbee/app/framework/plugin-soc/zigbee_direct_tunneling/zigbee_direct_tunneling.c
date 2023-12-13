@@ -30,6 +30,7 @@
 #include "stack/include/sl_zigbee_tlv_core.h"
 #include "stack/include/sl_zigbee_stack_specific_tlv.h"
 #include "stack/include/sl_zigbee_address_info.h"
+#include "stack/include/zigbee-security-manager.h"
 #include "zigbee_direct_tlv.h"
 #include "zigbee_direct_common.h"
 #include <string.h>
@@ -279,9 +280,9 @@ EmberPacketAction emberAfIncomingPacketFilterCallback(EmberZigbeePacketType pack
             sl_zigbee_app_debug_println("No luck decrypting with default key", status);
           }
 
-          EmberKeyData zigbeeAlliance09Key = ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY;
-          status = emberAddOrUpdateKeyTableEntry(sl_zvd_eui,
-                                                 true,
+          sl_zb_sec_man_key_t zigbeeAlliance09Key = ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY;
+          status = sl_zb_sec_man_import_link_key(0xFF,
+                                                 sl_zvd_eui,
                                                  &zigbeeAlliance09Key);
           sl_zigbee_app_debug_println("Adding well known key with status: %x", status);
           status = sli_zigbee_direct_send_ephemeral_key(sl_zvd_node_id,

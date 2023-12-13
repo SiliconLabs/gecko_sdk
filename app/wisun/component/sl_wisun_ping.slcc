@@ -6,7 +6,7 @@ description: >
   The component is able to send ICMPv6 packets, receive the associated responses, and compute the round-trip latency. 
   Using the sl_wisun_ping_request() API, an application emits a single ping packet. 
   To receive the pong response, the application can then call the sl_wisun_ping_response() API.
-  sl_wisun_ping() function provides a simple solution to periodically send and receive ping packets. 
+  The sl_wisun_ping() function provides a simple solution to periodically send and receive ping packets. 
   To stop the process, call the sl_wisun_ping_stop() function. 
   A ping test is configurable in size, number of pings sent, and timeout if a response is not received.
   To initialize the component, call sl_wisun_ping_init() function.
@@ -23,7 +23,6 @@ include:
     file_list:
     - "path": "sl_wisun_ping.h"
 requires:
-  - name: "sl_wisun_socket"
   - name: "sleeptimer"
 
 config_file:

@@ -75,12 +75,13 @@ include:
 provides:
   - name: "nvm3"
   - name: "nvm3_lib"
-    condition: [device]
   - name: "nvm_system"
 requires:
   - name: "emlib_msc"
     condition: [device_efx]
   - name: "ecode"
+  - name: "sl_si91x_nvm3"
+    condition: [device_si91x]
 template_contribution:
   - name: component_catalog
     value: nvm3

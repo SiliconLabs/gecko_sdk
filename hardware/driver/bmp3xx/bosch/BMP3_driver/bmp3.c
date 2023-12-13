@@ -2498,18 +2498,18 @@ static int8_t compensate_pressure(double *pressure,
     double partial_out2;
 
     partial_data1 = quantized_calib_data->par_p6 * quantized_calib_data->t_lin;
-    partial_data2 = quantized_calib_data->par_p7 * pow_bmp3(quantized_calib_data->t_lin, 2);
-    partial_data3 = quantized_calib_data->par_p8 * pow_bmp3(quantized_calib_data->t_lin, 3);
+    partial_data2 = quantized_calib_data->par_p7 * (double)pow_bmp3(quantized_calib_data->t_lin, 2);
+    partial_data3 = quantized_calib_data->par_p8 * (double)pow_bmp3(quantized_calib_data->t_lin, 3);
     partial_out1 = quantized_calib_data->par_p5 + partial_data1 + partial_data2 + partial_data3;
     partial_data1 = quantized_calib_data->par_p2 * quantized_calib_data->t_lin;
-    partial_data2 = quantized_calib_data->par_p3 * pow_bmp3(quantized_calib_data->t_lin, 2);
-    partial_data3 = quantized_calib_data->par_p4 * pow_bmp3(quantized_calib_data->t_lin, 3);
+    partial_data2 = quantized_calib_data->par_p3 * (double)pow_bmp3(quantized_calib_data->t_lin, 2);
+    partial_data3 = quantized_calib_data->par_p4 * (double)pow_bmp3(quantized_calib_data->t_lin, 3);
     partial_out2 = uncomp_data->pressure *
                    (quantized_calib_data->par_p1 + partial_data1 + partial_data2 + partial_data3);
-    partial_data1 = pow_bmp3((double)uncomp_data->pressure, 2);
+    partial_data1 = (double)pow_bmp3((double)uncomp_data->pressure, 2);
     partial_data2 = quantized_calib_data->par_p9 + quantized_calib_data->par_p10 * quantized_calib_data->t_lin;
     partial_data3 = partial_data1 * partial_data2;
-    partial_data4 = partial_data3 + pow_bmp3((double)uncomp_data->pressure, 3) * quantized_calib_data->par_p11;
+    partial_data4 = partial_data3 + (double)pow_bmp3((double)uncomp_data->pressure, 3) * quantized_calib_data->par_p11;
     comp_press = partial_out1 + partial_out2 + partial_data4;
 
     if (comp_press < BMP3_MIN_PRES_DOUBLE)

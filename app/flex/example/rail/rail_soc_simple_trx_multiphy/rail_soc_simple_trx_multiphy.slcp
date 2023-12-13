@@ -20,14 +20,7 @@ component:
   - id: app_log
   - id: app_assert
   - id: sl_flex_rail_package_assistant
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
+  - id: simple_rail_assistance
 #------------Memory Protection Unit-------------------
   - id: mpu
 #---------------------- CLI --------------------------
@@ -55,6 +48,8 @@ requires:
   - name: radio_config_singlephy_device_family_fgm23
     condition:
       - "device_family_fgm23"
+  - name: simple_button
+  - name: simple_led
 
 #----------------- Project files ---------------------
 include:

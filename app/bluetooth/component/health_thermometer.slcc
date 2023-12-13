@@ -21,7 +21,6 @@ quality: production
 root_path: app/bluetooth/common/health_thermometer
 tag:
   - Low-Code
-
 config_file:
   - path: config/sl_health_thermometer_config.h
   - path: health_thermometer.xml
@@ -49,3 +48,6 @@ template_contribution:
     priority: 0
   - name: component_catalog
     value: health_thermometer
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/health-thermometer

@@ -1,7 +1,7 @@
 
 #include "tensorflow/lite/kernels/internal/reference/fully_connected.h"
 
-#include "CMSIS/NN/Include/arm_nnfunctions.h"
+#include "Include/arm_nnfunctions.h"
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/kernels/internal/common.h"
@@ -36,11 +36,11 @@ constexpr int kOutputTensor = 0;
 // Register_FULLY_CONNECTED).
 TfLiteRegistration fully_connected_registration;
 
-sli_shape_t dims2shape(const TfLiteIntArray *dim)
+sli_nn_shape_t dims2shape(const TfLiteIntArray *dim)
 {
   TFLITE_DCHECK(dim->size <= 4);
 
-  sli_shape_t shape = {0};
+  sli_nn_shape_t shape = {0};
   for (int i = 0; i < dim->size; i++) {
     shape.dim[i] = dim->data[i];
   }

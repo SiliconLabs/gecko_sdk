@@ -1,7 +1,7 @@
 project_name: se_manager_signature
 package: platform
 quality: production
-label: Platform - SE Manager Digital Signature (ECDSA and EdDSA)
+label: Platform Security - SoC SE Manager Digital Signature (ECDSA and EdDSA)
 description: >
   This example project demonstrates the digital signature (ECDSA and EdDSA) API of SE Manager.
 category: Example|Platform

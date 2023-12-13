@@ -9,7 +9,7 @@ description:
   cannot handle: that is the case where both the message- and additional authenticated \
   data lengths are equal to zero. If the user needs zero data length, they will \
   need to include the 'ChaChaPoly' component under the Platform|Security|\
-  Mbed TLS|Authenticated Encryption category in order to include fallback to the \ 
+  Mbed TLS|Authenticated Encryption category in order to include fallback to the \
   software implementation in the Mbed TLS library."
 category: Platform|Security|PSA Crypto|Authenticated Encryption
 quality: production
@@ -25,14 +25,20 @@ requires:
     condition: [device_security_se]
   - name: mbedtls_chachapoly
     condition: [device_security_rot]
+  - name: sl_si91x_psa_aead
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
+  - name: sl_si91x_psa_wrap
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CHACHA20_POLY1305
+    value: PSA_WANT_ALG_CHACHA20_POLY1305 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CHACHA20_POLY1305 1"
     condition: [mbedtls_chachapoly]
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_CHACHA20
+    value: PSA_WANT_KEY_TYPE_CHACHA20 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_CHACHA20 1"
     condition: [mbedtls_chachapoly]

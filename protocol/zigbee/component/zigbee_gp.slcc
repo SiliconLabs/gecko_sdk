@@ -3,7 +3,6 @@ label: Green Power
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
 description: Provides functionality for Green Power infrastructure devices.
 
 provides:
@@ -14,10 +13,10 @@ requires:
   - name: zigbee_gp_implementation
   - name: zigbee_gp_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
 
 recommends:
-  - id: zigbee_gp_source
+  - id: zigbee_gp_library_internal
 
 include:
   - path: protocol/zigbee/stack/include
@@ -37,6 +36,9 @@ source:
 config_file:
   - path: protocol/zigbee/stack/config/component_config/sl_zigbee_green_power_config.h
 
+validation_helper:
+  - path: protocol/zigbee/component/scripts/upgrade_gp_table_token_size.lua
+
 template_contribution:
   - name: component_catalog
     value: zigbee_green_power
@@ -44,16 +46,16 @@ template_contribution:
     value:
       callback_type: d_gp_sent
       function_name: sli_zigbee_af_d_gp_sent_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: gpep_incoming_message
       function_name: sli_zigbee_af_gpep_incoming_message_callback
-    condition:  
-       - zigbee_ncp
-  
-    
+    condition:
+      - zigbee_ncp
+
+
 
 
 documentation:

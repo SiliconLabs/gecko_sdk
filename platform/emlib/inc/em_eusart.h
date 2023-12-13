@@ -32,8 +32,13 @@
 #define EM_EUSART_H
 #include "em_device.h"
 #if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
+#include "sl_enum.h"
 #include "em_eusart_compat.h"
 #include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* *INDENT-OFF* */
 // *****************************************************************************
@@ -140,6 +145,30 @@
 /* *INDENT-ON* */
 
 /*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+
+/** Define EUSART FIFO Depth information */
+#if !defined(EUSART_FIFO_DEPTH)
+#if defined(EUART_PRESENT)
+#define EUSART0_FIFO_DEPTH 4
+#elif defined(EUSART_PRESENT)
+#define EUSART0_FIFO_DEPTH 16
+#endif /* EUART_PRESENT */
+#define EUSART1_FIFO_DEPTH EUSART0_FIFO_DEPTH
+#define EUSART2_FIFO_DEPTH EUSART0_FIFO_DEPTH
+#define EUSART3_FIFO_DEPTH EUSART0_FIFO_DEPTH
+#define EUSART4_FIFO_DEPTH EUSART0_FIFO_DEPTH
+
+#define EUSART_FIFO_DEPTH(n)            (((n) == 0) ? EUSART0_FIFO_DEPTH   \
+                                         : ((n) == 1) ? EUSART1_FIFO_DEPTH \
+                                         : ((n) == 2) ? EUSART2_FIFO_DEPTH \
+                                         : ((n) == 3) ? EUSART3_FIFO_DEPTH \
+                                         : ((n) == 4) ? EUSART4_FIFO_DEPTH \
+                                         : 0x0UL)
+#endif /* EUSART_FIFO_DEPTH */
+
+/*******************************************************************************
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
@@ -162,7 +191,7 @@ typedef enum {
 typedef enum {
   eusartDataBits7 = EUSART_FRAMECFG_DATABITS_SEVEN,     ///< 7 data bits.
   eusartDataBits8 = EUSART_FRAMECFG_DATABITS_EIGHT,     ///< 8 data bits.
-  eusartDataBits9 = EUSART_FRAMECFG_DATABITS_NINE,       ///< 9 data bits.
+  eusartDataBits9 = EUSART_FRAMECFG_DATABITS_NINE,      ///< 9 data bits.
 #if defined(EUSART_PRESENT)
   eusartDataBits10 = EUSART_FRAMECFG_DATABITS_TEN,      ///< 10 data bits, SPI mode only.
   eusartDataBits11 = EUSART_FRAMECFG_DATABITS_ELEVEN,   ///< 11 data bits, SPI mode only.
@@ -284,30 +313,20 @@ typedef enum {
   eusartInvertIOEnable = (EUSART_CFG0_RXINV_ENABLE | EUSART_CFG0_TXINV_ENABLE)
 } EUSART_InvertIO_TypeDef;
 
-#if defined(EUSART_PRESENT)
-/// Clock polarity/phase mode.
-typedef enum {
-  /// Clock idle low, sample on rising edge.
-  eusartClockMode0 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+/// Auto TX delay transmission.
+SL_ENUM(EUSART_AutoTxDelay_TypeDef) {
+  /// Frames are transmitted immediately.
+  eusartAutoTxDelayNone = EUSART_TIMINGCFG_TXDELAY_NONE,
 
-  /// Clock idle low, sample on falling edge.
-  eusartClockMode1 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLETRAILING,
+  /// Transmission of new frames is delayed by a single bit period.
+  eusartAutoTxDelaySingle = EUSART_TIMINGCFG_TXDELAY_SINGLE,
 
-  /// Clock idle high, sample on falling edge.
-  eusartClockMode2 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+  /// Transmission of new frames is delayed by a two bit periods.
+  eusartAutoTxDelayDouble = EUSART_TIMINGCFG_TXDELAY_DOUBLE,
 
-  /// Clock idle high, sample on rising edge.
-  eusartClockMode3 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLETRAILING
-} EUSART_ClockMode_TypeDef;
-
-/// Chip select polarity.
-typedef enum {
-  /// Chip select active low.
-  eusartCsActiveLow = EUSART_CFG2_CSINV_AL,
-
-  /// Chip select active high.
-  eusartCsActiveHigh = EUSART_CFG2_CSINV_AH,
-} EUSART_CsPolarity_TypeDef;
+  /// Transmission of new frames is delayed by a three bit periods.
+  eusartAutoTxDelayTripple = EUSART_TIMINGCFG_TXDELAY_TRIPPLE
+};
 
 /// RX FIFO Interrupt ans Status Watermark.
 typedef enum {
@@ -352,6 +371,31 @@ typedef enum {
   eusartTxFiFoWatermark16Frame = EUSART_CFG1_TXFIW_SIXTEENFRAMES
 #endif
 } EUSART_TxFifoWatermark_TypeDef;
+
+#if defined(EUSART_PRESENT)
+/// Clock polarity/phase mode.
+typedef enum {
+  /// Clock idle low, sample on rising edge.
+  eusartClockMode0 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+
+  /// Clock idle low, sample on falling edge.
+  eusartClockMode1 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLETRAILING,
+
+  /// Clock idle high, sample on falling edge.
+  eusartClockMode2 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+
+  /// Clock idle high, sample on rising edge.
+  eusartClockMode3 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLETRAILING
+} EUSART_ClockMode_TypeDef;
+
+/// Chip select polarity.
+typedef enum {
+  /// Chip select active low.
+  eusartCsActiveLow = EUSART_CFG2_CSINV_AL,
+
+  /// Chip select active high.
+  eusartCsActiveHigh = EUSART_CFG2_CSINV_AH,
+} EUSART_CsPolarity_TypeDef;
 
 #if defined(EUSART_DALICFG_DALIEN)
 /// DALI TX databits (8-32).
@@ -459,6 +503,15 @@ typedef struct {
 
   /// Multiprocessor address bit value. If true, 9th bit of address frame must bit 1, 0 otherwise.
   bool multiProcessorAddressBitHigh;
+
+  /// Auto TX delay before new transfers. Frames sent back-to-back are not delayed.
+  EUSART_AutoTxDelay_TypeDef autoTxDelay;
+
+  /// Interrupt and status level of the Receive FIFO.
+  EUSART_RxFifoWatermark_TypeDef RxFifoWatermark;
+
+  /// Interrupt and status level of the Transmit FIFO.
+  EUSART_TxFifoWatermark_TypeDef TxFifoWatermark;
 } EUSART_AdvancedInit_TypeDef;
 
 /// Initialization structure.
@@ -649,21 +702,24 @@ typedef struct {
 #define EUSART_DEFAULT_START_FRAME 0x00u
 
 /// Default configuration for EUSART advanced initialization structure.
-#define EUSART_ADVANCED_INIT_DEFAULT                                                         \
-  {                                                                                          \
-    eusartHwFlowControlNone,        /* Flow control disabled. */                             \
-    false,                          /* Collision detection disabled. */                      \
-    false,                          /* Data is sent with the least significant bit first. */ \
-    eusartInvertIODisable,          /* RX and TX signal active high. */                      \
-    false,                          /* No DMA wake up on reception. */                       \
-    false,                          /* No DMA wake up on transmission. */                    \
-    false,                          /* Halt DMA on error disabled. */                        \
-    EUSART_DEFAULT_START_FRAME,     /* No start frame.  */                                   \
-    false,                          /* TX auto tristate disabled. */                         \
-    false,                          /* Do not use PRS signal as RX signal.*/                 \
-    (EUSART_PrsChannel_TypeDef) 0u, /* EUSART RX connected to prs channel 0. */              \
-    false,                          /* Multiprocessor mode disabled. */                      \
-    false,                          /* Multiprocessor address bit : 0.*/                     \
+#define EUSART_ADVANCED_INIT_DEFAULT                                                                            \
+  {                                                                                                             \
+    eusartHwFlowControlNone,        /* Flow control disabled. */                                                \
+    false,                          /* Collision detection disabled. */                                         \
+    false,                          /* Data is sent with the least significant bit first. */                    \
+    eusartInvertIODisable,          /* RX and TX signal active high. */                                         \
+    false,                          /* No DMA wake up on reception. */                                          \
+    false,                          /* No DMA wake up on transmission. */                                       \
+    false,                          /* Halt DMA on error disabled. */                                           \
+    EUSART_DEFAULT_START_FRAME,     /* No start frame.  */                                                      \
+    false,                          /* TX auto tristate disabled. */                                            \
+    false,                          /* Do not use PRS signal as RX signal.*/                                    \
+    (EUSART_PrsChannel_TypeDef) 0u, /* EUSART RX connected to prs channel 0. */                                 \
+    false,                          /* Multiprocessor mode disabled. */                                         \
+    false,                          /* Multiprocessor address bit : 0.*/                                        \
+    eusartAutoTxDelayNone,          /* Frames are transmitted immediately */                                    \
+    eusartRxFiFoWatermark1Frame,    /* RXFL status/IF set when RX FIFO has at least one frame in it */          \
+    eusartTxFiFoWatermark1Frame,    /* TXFL status/IF set when TX FIFO has space for at least one more frame */ \
   }
 
 /// Default configuration for EUSART initialization structure in UART mode with low-frequency clock.
@@ -764,21 +820,24 @@ typedef struct {
 #if defined(EUSART_DALICFG_DALIEN)
 /// Default configuration for EUSART initialization structure in DALI mode with high-frequency clock.
 /// Default configuration for EUSART advanced initialization structure.
-#define EUSART_ADVANCED_DALI_INIT_DEFAULT                                                   \
-  {                                                                                         \
-    eusartHwFlowControlNone,        /* Flow control disabled. */                            \
-    false,                          /* Collision detection disabled. */                     \
-    true,                           /* Data is sent with the most significant bit first. */ \
-    eusartInvertIODisable,          /* RX and TX signal active high. */                     \
-    false,                          /* No DMA wake up on reception. */                      \
-    false,                          /* No DMA wake up on transmission. */                   \
-    false,                          /* Halt DMA on error disabled. */                       \
-    EUSART_DEFAULT_START_FRAME,     /* No start frame.  */                                  \
-    false,                          /* TX auto tristate disabled. */                        \
-    false,                          /* Do not use PRS signal as RX signal.*/                \
-    (EUSART_PrsChannel_TypeDef) 0u, /* EUSART RX connected to prs channel 0. */             \
-    false,                          /* Multiprocessor mode disabled. */                     \
-    false,                          /* Multiprocessor address bit : 0.*/                    \
+#define EUSART_ADVANCED_DALI_INIT_DEFAULT                                                                       \
+  {                                                                                                             \
+    eusartHwFlowControlNone,        /* Flow control disabled. */                                                \
+    false,                          /* Collision detection disabled. */                                         \
+    true,                           /* Data is sent with the most significant bit first. */                     \
+    eusartInvertIODisable,          /* RX and TX signal active high. */                                         \
+    false,                          /* No DMA wake up on reception. */                                          \
+    false,                          /* No DMA wake up on transmission. */                                       \
+    false,                          /* Halt DMA on error disabled. */                                           \
+    EUSART_DEFAULT_START_FRAME,     /* No start frame.  */                                                      \
+    false,                          /* TX auto tristate disabled. */                                            \
+    false,                          /* Do not use PRS signal as RX signal.*/                                    \
+    (EUSART_PrsChannel_TypeDef) 0u, /* EUSART RX connected to prs channel 0. */                                 \
+    false,                          /* Multiprocessor mode disabled. */                                         \
+    false,                          /* Multiprocessor address bit : 0.*/                                        \
+    eusartAutoTxDelayNone,          /* Frames are transmitted immediately */                                    \
+    eusartRxFiFoWatermark1Frame,    /* RXFL status/IF set when RX FIFO has at least one frame in it */          \
+    eusartTxFiFoWatermark1Frame,    /* TXFL status/IF set when TX FIFO has space for at least one more frame */ \
   }
 
 /// Default configuration for EUSART initialization structure in DALI mode with high-frequency clock.
@@ -1046,7 +1105,7 @@ void  EUSART_TxTristateSet(EUSART_TypeDef *eusart,
  * Initialize the automatic enabling of transmissions and/or reception using
  * the PRS as a trigger.
  * @note
- *   Initialize EUSART with sl_eusart_initHf() or sl_eusart_initLf() before
+ *   Initialize EUSART with EUSART_UartInitHf() or EUSART_UartInitLf() before
  *   enabling the PRS trigger.
  *
  * @param eusart Pointer to the EUSART peripheral register block.
@@ -1154,6 +1213,10 @@ __STATIC_INLINE void EUSART_IntSet(EUSART_TypeDef *eusart, uint32_t flags)
 {
   eusart->IF_SET = flags;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} (end addtogroup eusart) */
 #endif /* defined(EUART_PRESENT) || defined(EUSART_PRESENT) */

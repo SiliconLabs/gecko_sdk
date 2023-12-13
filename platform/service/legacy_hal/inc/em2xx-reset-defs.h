@@ -24,13 +24,13 @@
 /** @brief EM2xx-compatible reset code returned by halGetEm2xxResetInfo()
  *@{
  */
-#define EM2XX_RESET_UNKNOWN               0
-#define EM2XX_RESET_EXTERNAL              1   // EM2XX reports POWERON instead
-#define EM2XX_RESET_POWERON               2
-#define EM2XX_RESET_WATCHDOG              3
-#define EM2XX_RESET_ASSERT                6
-#define EM2XX_RESET_BOOTLOADER            9
-#define EM2XX_RESET_SOFTWARE              11
+#define EM2XX_RESET_UNKNOWN               0      ///< EM2XX reset unknown
+#define EM2XX_RESET_EXTERNAL              1        ///< EM2XX reports POWERON instead
+#define EM2XX_RESET_POWERON               2        ///< EM2XX reset poweron
+#define EM2XX_RESET_WATCHDOG              3        ///< EM2XX reset watchdog
+#define EM2XX_RESET_ASSERT                6        ///< EM2XX reset assert
+#define EM2XX_RESET_BOOTLOADER            9        ///< EM2XX reset bootloader
+#define EM2XX_RESET_SOFTWARE              11       ///< EM2XX reset software
 
 /**@} */
 

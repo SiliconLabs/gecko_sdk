@@ -975,4 +975,4 @@
 #define PRS_EUSART2L_RXFL                                  (PRS_ASYNC_EUSART2L_RXFL)
 #define PRS_EUSART2L_TXFL                                  (PRS_ASYNC_EUSART2L_TXFL)
 
-#endif /* FGM23_PRS_SIGNALS_H */
+#endif // FGM23_PRS_SIGNALS_H

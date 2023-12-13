@@ -1017,4 +1017,4 @@ typedef struct {
 /** @} End of group EFR32FG28_TIMER */
 /** @} End of group Parts */
 
-#endif /* EFR32FG28_TIMER_H */
+#endif // EFR32FG28_TIMER_H

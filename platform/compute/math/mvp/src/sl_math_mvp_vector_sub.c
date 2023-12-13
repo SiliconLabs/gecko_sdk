@@ -46,6 +46,7 @@ sl_status_t sl_math_mvp_vector_sub_f16(const float16_t *input_a,
   uint32_t len_parallel;
   uint32_t rows, cols;
   sli_mvp_datatype_t data_type;
+  sl_status_t status;
 
   if (!input_a || !input_b || !output || !num_elements) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -83,14 +84,14 @@ sl_status_t sl_math_mvp_vector_sub_f16(const float16_t *input_a,
     }
   }
 
-  sli_math_mvp_matrix_sub_f16(input_a, input_b, output, rows, cols, data_type);
-  sli_mvp_cmd_wait_for_completion();
+  if ((status = sli_math_mvp_matrix_sub_f16(input_a, input_b, output, rows, cols, data_type)) != SL_STATUS_OK) {
+    return status;
+  }
 
   if (len_remainder > 0) {
     ofs_remainder = num_elements - len_remainder;
-    sli_math_mvp_matrix_sub_f16(&input_a[ofs_remainder], &input_b[ofs_remainder], &output[ofs_remainder], 1, len_remainder, SLI_MVP_DATATYPE_BINARY16);
-    sli_mvp_cmd_wait_for_completion();
+    status = sli_math_mvp_matrix_sub_f16(&input_a[ofs_remainder], &input_b[ofs_remainder], &output[ofs_remainder], 1, len_remainder, SLI_MVP_DATATYPE_BINARY16);
   }
 
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return status;
 }

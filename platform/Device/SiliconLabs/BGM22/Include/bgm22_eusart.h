@@ -913,4 +913,4 @@ typedef struct {
 /** @} End of group BGM22_EUSART */
 /** @} End of group Parts */
 
-#endif /* BGM22_EUSART_H */
+#endif // BGM22_EUSART_H

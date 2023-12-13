@@ -9,9 +9,6 @@ provides:
   - name: mbedtls_tls_server
 requires:
   - name: mbedtls_tls
-# Will not become compatible until upper layer TLS code only uses PSA APIs.
-conflicts:
-  - name: tz_secure_key_library_ns
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_SSL_SRV_C

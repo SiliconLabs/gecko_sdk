@@ -35,7 +35,6 @@
 #include "app/ezsp-host/ezsp-host-io.h"
 #include "app/ezsp-host/ezsp-host-queues.h"
 #include "app/ezsp-host/ezsp-host-ui.h"
-#include "app/util/gateway/backchannel.h"
 #include "app/ezsp-host/ash/ash-host-ui.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -43,6 +42,7 @@
 #ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
 #include "ota-storage-linux-config.h"
 #endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
+
 //------------------------------------------------------------------------------
 // Preprocessor definitions
 
@@ -220,20 +220,6 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
           ashWriteConfig(traceFlags, trace);
         }
         break;
-      case 'v':
-        if (!backchannelSupported) {
-          fprintf(stderr, "Error: Backchannel support not compiled into this application.\n");
-          exit(1);
-        }
-        backchannelEnable = true;
-        if (optarg) {
-          int port = atoi(optarg);
-          if (port == 0 || port > 65535) {
-            snprintf(errStr, ERR_LEN, "Invalid virtual ISA port number '%d'.\n", port);
-          }
-          backchannelSerialPortOffset = port;
-        }
-        break;
       case 'x':
         if (!optarg || (sscanf(optarg, "%hhu", &enable) != 1) || (enable > 1)) {
           snprintf(errStr, ERR_LEN, "Invalid randomization choice %s.\n",
@@ -245,15 +231,19 @@ bool ezspInternalProcessCommandOptions(int argc, char *argv[], char *errStr)
       case 'd': {
   #ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
         char otaStorageDir[128];
+        int ret = 0;
         if (!optarg || (sscanf(optarg, "%127s", otaStorageDir) <= 0)) {
-          snprintf(errStr, ERR_LEN, "Invalid OTA files storage directory name %s.\n",
-                   optarg ? optarg : "NULL");
+          ret = snprintf(errStr, ERR_LEN, "Invalid OTA files storage directory name %s.\n",
+                         optarg ? optarg : "NULL");
         } else if (strlen(otaStorageDir) >= OTA_FILE_STORAGE_DIR_LENGTH) {
-          snprintf(errStr, ERR_LEN, "OTA files storage directory %s too long.\n",
-                   otaStorageDir);
+          ret = snprintf(errStr, ERR_LEN, "OTA files storage directory %s too long.\n",
+                         otaStorageDir);
         } else {
           otaStorageDir[OTA_FILE_STORAGE_DIR_LENGTH - 1] = '\0';
           strncpy(defaultStorageDirectory, otaStorageDir, OTA_FILE_STORAGE_DIR_LENGTH);
+        }
+        if (ret < 0) {
+          snprintf(errStr, ERR_LEN, "Error with OTA files storage directory.\n");
         }
   #endif  // SL_CATALOG_ZIGBEE_OTA_STORAGE_POSIX_FILESYSTEM_PRESENT
       }

@@ -64,7 +64,12 @@ void app_measure(sl_cli_command_arg_t *arguments)
   const char *remote_ip_str = NULL;
   uint16_t meas_count = 0;
   uint16_t meas_packet_length = 0;
-  wisun_addr_t remote_addr = { 0 };
+  sockaddr_in6_t remote_addr = { 0 };
+
+  if (arguments == NULL) {
+    printf("[Argument error]\n");
+    return;
+  }
 
   // get arguments
   remote_ip_str = sl_cli_get_argument_string(arguments, 0);
@@ -93,7 +98,7 @@ void app_measure(sl_cli_command_arg_t *arguments)
   } else if (!strcmp(remote_ip_str, "br")) {
     sl_wisun_nwm_quick_measure(SL_WISUN_NWM_TARGET_TYPE_BORDER_ROUTER, meas_count, meas_packet_length);
   } else {
-    if (inet_pton(AF_WISUN, remote_ip_str, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
+    if (inet_pton(AF_INET6, remote_ip_str, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
       printf("[IP address is not set]\n");
       return;
     }
@@ -103,6 +108,12 @@ void app_measure(sl_cli_command_arg_t *arguments)
     sl_wisun_nwm_measure(&remote_addr, meas_count, meas_packet_length);
 #endif
   }
+}
+
+void app_print_node_info(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  sl_wisun_print_node_info();
 }
 
 // -----------------------------------------------------------------------------

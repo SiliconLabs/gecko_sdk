@@ -315,7 +315,7 @@ static void throughput_peripheral_advertising_start(void)
   app_assert_status(sc);
 
   sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                     sl_bt_advertiser_connectable_scannable);
+                                     sl_bt_legacy_advertiser_connectable);
   app_assert_status(sc);
 
   #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
@@ -355,7 +355,7 @@ static void throughput_peripheral_advertising_start(void)
 
   if (sc == SL_STATUS_OK) {
     sc = sl_bt_extended_advertiser_start(coded_advertising_set_handle,
-                                         sl_bt_advertiser_connectable_non_scannable,
+                                         sl_bt_extended_advertiser_connectable,
                                          SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER);
     app_assert_status(sc);
   }
@@ -510,9 +510,15 @@ static void throughput_peripheral_on_refresh_timer_rise(app_timer_t *timer,
   (void) data;
   (void) timer;
   sl_status_t sc;
+  int8_t rssi = SL_BT_CONNECTION_RSSI_UNAVAILABLE;
   if (connection_handle_peripheral && peripheral_state.state != THROUGHPUT_STATE_TEST) {
-    sc = sl_bt_connection_get_rssi(connection_handle_peripheral);
-    app_assert_status(sc);
+    sc = sl_bt_connection_get_median_rssi(connection_handle_peripheral, &rssi);
+    if (sc == SL_STATUS_OK) {
+      peripheral_state.rssi = rssi;
+      throughput_peripheral_on_rssi_change(peripheral_state.rssi);
+    } else {
+      app_log_warning("Failed to get RSSI. sc = 0x%04lx" APP_LOG_NL, sc);
+    }
   }
 }
 
@@ -1077,11 +1083,6 @@ void throughput_peripheral_on_bt_event(sl_bt_msg_t *evt)
         peripheral_state.tx_power = evt->data.evt_connection_tx_power.power_level;
         throughput_peripheral_on_power_change(peripheral_state.tx_power);
       }
-      break;
-
-    case sl_bt_evt_connection_rssi_id:
-      peripheral_state.rssi = evt->data.evt_connection_rssi.rssi;
-      throughput_peripheral_on_rssi_change(peripheral_state.rssi);
       break;
 
     case sl_bt_evt_gatt_mtu_exchanged_id:

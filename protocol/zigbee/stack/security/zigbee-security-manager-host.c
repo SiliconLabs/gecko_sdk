@@ -225,12 +225,10 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
   }
 }
 
-#ifndef CCM_STAR_HEADER
 #define STANDALONE_FLAGS_INDEX                   0
 #define STANDALONE_NONCE_INDEX                   1
 #define STANDALONE_VARIABLE_FIELD_INDEX_HIGH    14
 #define STANDALONE_VARIABLE_FIELD_INDEX_LOW     15
-#endif
 
 #ifndef TEMP_BUFFER_SIZE
 #define TEMP_BUFFER_SIZE 256
@@ -471,4 +469,30 @@ sl_status_t zb_sec_man_fetch_internal_key(UNUSED sl_zb_sec_man_context_t* contex
 {
   MEMMOVE(plaintext_key, &zb_sec_man_internal_key, EMBER_ENCRYPTION_KEY_SIZE);
   return SL_STATUS_OK;
+}
+
+bool sl_zigbee_sec_man_link_key_slot_available(EmberEUI64 eui64)
+{
+  sl_zb_sec_man_context_t context_existing;
+  sl_zb_sec_man_context_t context_open;
+  sl_zb_sec_man_export_link_key_by_eui(eui64, &context_existing, NULL, NULL);
+  sl_zb_sec_man_export_link_key_by_eui(NULL, &context_open, NULL, NULL);
+  if (0xFF != context_existing.key_index
+      || 0xFF != context_open.key_index) {
+    return true;
+  }
+
+  return false;
+}
+
+bool sl_zb_sec_man_compare_key_to_value(sl_zb_sec_man_context_t* context, const sl_zb_sec_man_key_t* test_key)
+{
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_export_key(context, &plaintext_key);
+
+  if (MEMCOMPARE(&plaintext_key, test_key, EMBER_ENCRYPTION_KEY_SIZE) == 0) {
+    return true;
+  }
+
+  return false;
 }

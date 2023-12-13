@@ -19,7 +19,6 @@ include:
     - path: "sl_wisun_tcp_client.h"
 
 requires:
-  - name: "sl_wisun_socket"
   - name: "sl_wisun_app_core"
 
 ui_hints:

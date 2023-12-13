@@ -826,13 +826,11 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
 
         sli_psa_zeroize(dec_key, 32);
 
-        // Check how many bytes of padding to subtract
-        uint8_t pad_bytes = final_block[15];
-
         // Check all padding bytes
+        size_t pad_bytes = 0;
         status = sli_psa_validate_pkcs7_padding(final_block,
                                                 16,
-                                                pad_bytes);
+                                                &pad_bytes);
         if (status != PSA_SUCCESS) {
           goto exit;
         }
@@ -1627,10 +1625,10 @@ psa_status_t sli_crypto_transparent_cipher_finish(sli_crypto_transparent_cipher_
           break;
         }
 
-        size_t padding_bytes = out_buf[15];
+        size_t padding_bytes = 0;
         psa_status = sli_psa_validate_pkcs7_padding(out_buf,
                                                     16,
-                                                    padding_bytes);
+                                                    &padding_bytes);
 
         if (psa_status == PSA_SUCCESS) {
           // The padding was valid

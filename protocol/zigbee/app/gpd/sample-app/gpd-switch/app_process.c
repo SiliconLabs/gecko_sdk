@@ -71,21 +71,17 @@
 
 #define GPD_BUTTON_COUNT SL_SIMPLE_BUTTON_COUNT
 
+// Btn1 in the boards 4182 and 4161/4162 are EM4 wake up pins.
 #ifdef SL_CATALOG_SIMPLE_BUTTON_BTN1_PRESENT
 #define EM4WU_PORT              SL_SIMPLE_BUTTON_BTN1_PORT
 #define EM4WU_PIN               SL_SIMPLE_BUTTON_BTN1_PIN
 #endif
 
-#if defined _SILICON_LABS_32B_SERIES_2_CONFIG_2   //For 4182, PB1
+#if defined _SILICON_LABS_32B_SERIES_2_CONFIG_2   //For 4182, PB1 is the EM4 wake up
   #define EM4WU_EM4WUEN_NUM       (3)
   #define EM4WU_BASE_SHIFT_MASK   (16)
   #define EM4WU_EM4WUEN_MASK      (1 << (EM4WU_EM4WUEN_NUM + EM4WU_BASE_SHIFT_MASK))
-#elif defined _SILICON_LABS_32B_SERIES_2_CONFIG_1 //For 4180, PB0
-  #define EM4WU_EM4WUEN_NUM
-  #define EM4WU_EM4WUEN_MASK
-  #error "BRD4180 and BRD4181 currently not supported by this application. \
-  For custom hardware please define the macros above"
-#elif defined _SILICON_LABS_32B_SERIES_1      //For 4161, PF7
+#elif defined _SILICON_LABS_32B_SERIES_1          //For 4161, PF7
   #define EM4WU_EM4WUEN_NUM       (1)
   #define EM4WU_EM4WUEN_MASK      ((1 << EM4WU_EM4WUEN_NUM) << _GPIO_EM4WUEN_EM4WUEN_SHIFT)
 #endif
@@ -336,7 +332,9 @@ static void processAppEvent(EmberGpd_t * gpd, GpdAppEventActionType *appAction)
       gpdDebugPrintf("Decomm Cmd : ");
     } else if (*appAction == APP_EVENT_ACTION_SEND_COMMISSION) {
       emberGpdAfPluginCommission(gpd);
-      emberGpdStoreSecDataToNV(gpd);
+      if (gpd->gpdState > EMBER_GPD_APP_STATE_NOT_COMMISSIONED) {
+        emberGpdStoreSecDataToNV(gpd);
+      }
       gpdDebugPrintf("Comm. Cmd : ");
     } else if (*appAction == APP_EVENT_ACTION_SEND_TOGGLE) {
       sendToggle(gpd);
@@ -399,16 +397,13 @@ static void appEm4TimerCallback(sl_sleeptimer_timer_handle_t *handle, void *cont
 
 static void gpdConfigGpiosForEm4(void)
 {
-#if (defined EM4WU_PORT && defined EM4WU_EM4WUEN_MASK)
+#if (defined EM4WU_PORT && defined EM4WU_PIN && defined EM4WU_EM4WUEN_MASK)
   // Turn on the clock for the GPIO
   CMU_ClockEnable(cmuClock_GPIO, true);
   GPIO_Unlock();
   GPIO_PinModeSet(EM4WU_PORT, EM4WU_PIN, gpioModeInputPullFilter, 1UL);
   GPIO_EM4EnablePinWakeup(EM4WU_EM4WUEN_MASK, 0);
   GPIO_IntClear(0xFFFFFFFF);
-#if defined _SILICON_LABS_32B_SERIES_2_CONFIG_2
-  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
-#endif
 #endif
 }
 

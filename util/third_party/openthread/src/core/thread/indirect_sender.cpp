@@ -36,12 +36,12 @@
 #if OPENTHREAD_FTD
 
 #include "common/code_utils.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/message.hpp"
+#include "instance/instance.hpp"
+#include "thread/child.hpp"
 #include "thread/mesh_forwarder.hpp"
 #include "thread/mle_tlvs.hpp"
-#include "thread/topology.hpp"
 
 namespace ot {
 
@@ -384,7 +384,7 @@ uint16_t IndirectSender::PrepareDataFrame(Mac::TxFrame &aFrame, Child &aChild, M
     directTxOffset = aMessage.GetOffset();
     aMessage.SetOffset(aChild.GetIndirectFragmentOffset());
 
-    nextOffset = Get<MeshForwarder>().PrepareDataFrame(aFrame, aMessage, macAddrs);
+    nextOffset = Get<MeshForwarder>().PrepareDataFrameWithNoMeshHeader(aFrame, aMessage, macAddrs);
 
     aMessage.SetOffset(directTxOffset);
 

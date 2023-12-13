@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ public:
     enum
     {
         kBlockSize = 16, ///< AES-128 block size (bytes).
-        kKeyBits   = 128 
+        kKeyBits   = 128
     };
 
     /**
@@ -62,7 +62,7 @@ public:
      * @param[in]  aKey    Pointer to the AES Key to use.
      *
      */
-    void SetKey(const uint8_t* aKey) { mKey = aKey; }
+    void SetKey(const uint8_t *aKey) { mKey = aKey; }
 
     /**
      * This method initializes the AES CCM computation.
@@ -74,12 +74,11 @@ public:
      * @param[in]  aNonceLength      Length of nonce in bytes.
      *
      */
-    void Init(  uint32_t         aHeaderLength,
-                uint32_t         aPlainTextLength,
-                uint8_t          aTagLength,
-                const void       *aNonce,
-                uint8_t          aNonceLength);
-
+    void Init(uint32_t    aHeaderLength,
+              uint32_t    aPlainTextLength,
+              uint8_t     aTagLength,
+              const void *aNonce,
+              uint8_t     aNonceLength);
 
     /**
      * This method processes the header.
@@ -118,18 +117,18 @@ public:
     void Finalize(void *aTag);
 
 private:
-    uint8_t         mBlock[kBlockSize];
-    uint8_t         mCtr[kBlockSize];
-    uint8_t         mCtrPad[kBlockSize];
-    const uint8_t*  mKey;
-    uint32_t        mHeaderLength;
-    uint32_t        mHeaderCur;
-    uint32_t        mPlainTextLength;
-    uint32_t        mPlainTextCur;
-    uint16_t        mBlockLength;
-    uint16_t        mCtrLength;
-    uint8_t         mNonceLength;
-    uint8_t         mTagLength;
+    uint8_t        mBlock[kBlockSize];
+    uint8_t        mCtr[kBlockSize];
+    uint8_t        mCtrPad[kBlockSize];
+    const uint8_t *mKey;
+    uint32_t       mHeaderLength;
+    uint32_t       mHeaderCur;
+    uint32_t       mPlainTextLength;
+    uint32_t       mPlainTextCur;
+    uint16_t       mBlockLength;
+    uint16_t       mCtrLength;
+    uint8_t        mNonceLength;
+    uint8_t        mTagLength;
 };
 
 /**

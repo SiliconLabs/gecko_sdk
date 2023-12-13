@@ -241,7 +241,7 @@ void uart_init(struct sl_wsrcp_uart *uart_ctxt)
 
         next = i + 1;
         next %= ARRAY_SIZE(uart_ctxt->descr_rx);
-        uart_ctxt->descr_rx[i].xfer.linkAddr = ((uintptr_t)&(uart_ctxt->descr_rx[next])) >> _LDMA_CH_LINK_LINKADDR_SHIFT;
+        uart_ctxt->descr_rx[i].xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&uart_ctxt->descr_rx[next]);
     }
 
     for (i = 0; i < ARRAY_SIZE(uart_ctxt->descr_tx); i++) {

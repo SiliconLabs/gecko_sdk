@@ -1,0 +1,43 @@
+id: rail_util_hadm_gdcomp
+label: RAIL Utility, HADM Group Delay Compensation
+description: Utility to aid with loading HADM group delay compensation tables
+package: platform
+category: Platform|Radio
+quality: production
+ui_hints:
+  visibility: never
+requires:
+  - name: rail_lib
+provides:
+  - name: rail_util_hadm_gdcomp
+
+config_file:
+  - path: platform/radio/rail_lib/plugin/hadm/gdcomp/config/efr32xg24/sl_rail_util_hadm_gdcomp_config.h
+    file_id: rail_util_hadm_gdcomp
+    condition:
+      - device_sdid_215
+include:
+  - path: platform/radio/rail_lib/plugin/hadm/gdcomp
+    file_list:
+      - path: sl_rail_util_hadm_gdcomp_tables.h
+
+define:
+  - name: SL_RAIL_UTIL_HADM_GDCOMP_LP_PA_DBM
+    value: '0'
+    condition:
+      - device_sdid_215
+      - device_pa_0dbm
+  - name: SL_RAIL_UTIL_HADM_GDCOMP_HP_PA_DBM
+    value: '10'
+    condition:
+      - device_sdid_215
+      - device_pa_10dbm
+  - name: SL_RAIL_UTIL_HADM_GDCOMP_HP_PA_DBM
+    value: '20'
+    condition:
+      - device_sdid_215
+      - device_pa_20dbm
+
+source:
+  - path: platform/radio/rail_lib/plugin/hadm/gdcomp/sl_rail_util_hadm_gdcomp.c
+  - path: platform/radio/rail_lib/plugin/hadm/gdcomp/sl_rail_util_hadm_gdcomp_tables.c

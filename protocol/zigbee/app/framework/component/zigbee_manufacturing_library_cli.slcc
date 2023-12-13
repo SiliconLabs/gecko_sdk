@@ -5,10 +5,10 @@ quality: production
 id: zigbee_manufacturing_library_cli
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_mfglib_cli"
-   - name: "zigbee_manufacturing_library_cli"
+  - name: zigbee_mfglib_cli
+  - name: zigbee_manufacturing_library_cli
 requires:
-   - name: "zigbee_mfglib"
+  - name: zigbee_mfglib
 source:
   - path: protocol/zigbee/app/framework/plugin/manufacturing-library-cli/manufacturing-library-cli-soc.c
     condition:
@@ -31,7 +31,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: sli_zigbee_af_manufacturing_library_cli_init_callback    
+      function_name: sli_zigbee_af_manufacturing_library_cli_init_callback
   - name: cli_group
     value:
       group: plugin
@@ -44,8 +44,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_start_command
       help: Start the mfglib test mode.
       argument:
-      - type: int8
-        help: Use the Rx callback.
+        - type: int8
+          help: Use the Rx callback.
   - name: cli_command
     value:
       group: mfglib
@@ -82,8 +82,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_set_channel_command
       help: Sets the channel used by the manufacturing library for testing.
       argument:
-      - type: uint8
-        help: The 802.15.4 channel number.
+        - type: uint8
+          help: The 802.15.4 channel number.
   - name: cli_command
     value:
       group: mfglib
@@ -91,10 +91,10 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_set_power_and_mode_command
       help: Set the power level and mode for the manufacturing test.
       argument:
-      - type: int8
-        help: The power level
-      - type: uint16
-        help: The power mode
+        - type: int8
+          help: The power level
+        - type: uint16
+          help: The power mode
   - name: cli_group
     value:
       group: mfglib
@@ -124,10 +124,10 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_send_command
       help: Send a series of test packets with random data..
       argument:
-      - type: uint16
-        help: The number of packets to send.
-      - type: uint8
-        help: The length of the packet to send.
+        - type: uint16
+          help: The number of packets to send.
+        - type: uint8
+          help: The length of the packet to send.
   - name: cli_command
     value:
       group: send
@@ -135,10 +135,10 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_send_command
       help: Send a series of test packets with fixed data.
       argument:
-      - type: uint16
-        help: The number of packets to send.
-      - type: uint8
-        help: The length of the packet to send.
+        - type: uint16
+          help: The number of packets to send.
+        - type: uint8
+          help: The length of the packet to send.
   - name: cli_command
     value:
       group: send
@@ -146,10 +146,10 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_send_message_command
       help: Send a test message with the specified data in it.
       argument:
-      - type: hex
-        help: The hex data to send, up to 16 bytes.
-      - type: uint16
-        help: The number of packets to send.
+        - type: hex
+          help: The hex data to send, up to 16 bytes.
+        - type: uint16
+          help: The number of packets to send.
   - name: cli_command
     value:
       group: mfglib
@@ -157,8 +157,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_sleep_command
       help: Sleep.
       argument:
-      - type: uint16
-        help: Sleep duration (mS).
+        - type: uint16
+          help: Sleep duration (mS).
   - name: cli_command
     value:
       group: mfglib
@@ -166,8 +166,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_program_eui_command
       help: Program EUI.
       argument:
-      - type: hex
-        help: IEEE address to program.
+        - type: hex
+          help: IEEE address to program.
   - name: cli_command
     value:
       group: mfglib
@@ -175,8 +175,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_enable_mfglib
       help: Enable mfglib.
       argument:
-      - type: uint8
-        help: 1 = enable, 0 = disable.
+        - type: uint8
+          help: 1 = enable, 0 = disable.
   - name: cli_command
     value:
       group: mfglib
@@ -184,8 +184,8 @@ template_contribution:
       handler: sli_zigbee_af_mfglib_set_options
       help: Sets options in the manufacturing library for testing.
       argument:
-      - type: uint8
-        help: The options bitmask (0 = normal transmit, 1 = CSMA transmit).
+        - type: uint8
+          help: The options bitmask (0 = normal transmit, 1 = CSMA transmit).
   - name: token_header
     value: app/framework/plugin/manufacturing-library-cli/manufacturing-library-cli-tokens.h
 

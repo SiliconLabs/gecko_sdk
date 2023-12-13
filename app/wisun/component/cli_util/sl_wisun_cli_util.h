@@ -31,6 +31,10 @@
 #ifndef WISUN_CLI_UTIL_H
 #define WISUN_CLI_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -162,5 +166,9 @@ char *app_util_printable_data_init(app_printable_data_ctx_t *const ctx,
  * @return char* Printable data ptr
  *****************************************************************************/
 char *app_util_printable_data_next(app_printable_data_ctx_t *const ctx);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WISUN_CLI_UTIL_H

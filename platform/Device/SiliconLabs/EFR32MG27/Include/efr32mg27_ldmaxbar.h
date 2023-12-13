@@ -93,4 +93,4 @@ typedef struct {
 /** @} End of group EFR32MG27_LDMAXBAR */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_LDMAXBAR_H */
+#endif // EFR32MG27_LDMAXBAR_H

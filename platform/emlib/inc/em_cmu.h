@@ -40,6 +40,7 @@
 #include "em_gpio.h"
 #include "sl_common.h"
 #include "sl_enum.h"
+#include "sl_status.h"
 #include "sli_em_cmu.h"
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,9 @@ extern "C" {
 #define CMU_NO_EN_REG               0
 #define CMU_CLKEN0_EN_REG           1
 #define CMU_CLKEN1_EN_REG           2
+#if defined(_CMU_CLKEN2_MASK)
+#define CMU_CLKEN2_EN_REG           3
+#endif
 #define CMU_CRYPTOACCCLKCTRL_EN_REG 3
 #define CMU_EN_REG_POS              5U
 #define CMU_EN_REG_MASK             0x3U
@@ -375,42 +379,71 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
                     | (_CMU_CLKEN0_TIMER2_SHIFT << CMU_EN_BIT_POS),             /**< TIMER2 clock. */
   cmuClock_TIMER3 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_TIMER3_SHIFT << CMU_EN_BIT_POS),             /**< TIMER3 clock. */
-#if defined(_CMU_CLKEN1_TIMER4_SHIFT)
+#if defined(_CMU_CLKEN2_TIMER4_SHIFT)
+  cmuClock_TIMER4 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER4_SHIFT << CMU_EN_BIT_POS),             /**< TIMER4 clock. */
+#elif defined(_CMU_CLKEN1_TIMER4_SHIFT)
   cmuClock_TIMER4 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN1_TIMER4_SHIFT << CMU_EN_BIT_POS),             /**< TIMER4 clock. */
 #elif defined(_CMU_CLKEN0_TIMER4_SHIFT)
   cmuClock_TIMER4 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_TIMER4_SHIFT << CMU_EN_BIT_POS),             /**< TIMER4 clock. */
 #endif
-#if defined(_CMU_CLKEN1_TIMER5_SHIFT)
+#if defined(_CMU_CLKEN2_TIMER5_SHIFT)
+  cmuClock_TIMER5 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER5_SHIFT << CMU_EN_BIT_POS),             /**< TIMER5 clock. */
+#elif defined(_CMU_CLKEN1_TIMER5_SHIFT)
   cmuClock_TIMER5 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN1_TIMER5_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN1_TIMER5_SHIFT << CMU_EN_BIT_POS),             /**< TIMER5 clock. */
 #elif defined(_CMU_CLKEN0_TIMER5_SHIFT)
   cmuClock_TIMER5 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN0_TIMER5_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN0_TIMER5_SHIFT << CMU_EN_BIT_POS),             /**< TIMER5 clock. */
 #endif
-#if defined(_CMU_CLKEN1_TIMER6_SHIFT)
+#if defined(_CMU_CLKEN2_TIMER6_SHIFT)
+  cmuClock_TIMER6 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER6_SHIFT << CMU_EN_BIT_POS),             /**< TIMER6 clock. */
+#elif defined(_CMU_CLKEN1_TIMER6_SHIFT)
   cmuClock_TIMER6 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN1_TIMER6_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN1_TIMER6_SHIFT << CMU_EN_BIT_POS),             /**< TIMER6 clock. */
 #elif defined(_CMU_CLKEN0_TIMER6_SHIFT)
   cmuClock_TIMER6 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN0_TIMER6_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN0_TIMER6_SHIFT << CMU_EN_BIT_POS),             /**< TIMER6 clock. */
 #endif
-#if defined(_CMU_CLKEN1_TIMER7_SHIFT)
+#if defined(_CMU_CLKEN2_TIMER7_SHIFT)
+  cmuClock_TIMER7 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER7_SHIFT << CMU_EN_BIT_POS),             /**< TIMER7 clock. */
+#elif defined(_CMU_CLKEN1_TIMER7_SHIFT)
   cmuClock_TIMER7 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN1_TIMER7_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN1_TIMER7_SHIFT << CMU_EN_BIT_POS),             /**< TIMER7 clock. */
 #elif defined(_CMU_CLKEN0_TIMER7_SHIFT)
   cmuClock_TIMER7 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
-                    | (_CMU_CLKEN0_TIMER7_SHIFT << CMU_EN_BIT_POS),
+                    | (_CMU_CLKEN0_TIMER7_SHIFT << CMU_EN_BIT_POS),             /**< TIMER7 clock. */
+#endif
+#if defined(_CMU_CLKEN2_TIMER8_SHIFT)
+  cmuClock_TIMER8 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER8_SHIFT << CMU_EN_BIT_POS),             /**< TIMER8 clock. */
+#endif
+#if defined(_CMU_CLKEN2_TIMER9_SHIFT)
+  cmuClock_TIMER9 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_TIMER9_SHIFT << CMU_EN_BIT_POS),             /**< TIMER9 clock. */
 #endif
 #if defined(USART_PRESENT) && USART_COUNT > 0
   cmuClock_USART0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_USART0_SHIFT << CMU_EN_BIT_POS),             /**< USART0 clock. */
 #endif
 #if defined(USART_PRESENT) && USART_COUNT > 1
+#if defined(_CMU_CLKEN0_USART1_SHIFT)
   cmuClock_USART1 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_USART1_SHIFT << CMU_EN_BIT_POS),             /**< USART1 clock. */
+#elif defined(_CMU_CLKEN2_USART1_SHIFT)
+  cmuClock_USART1 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_USART1_SHIFT << CMU_EN_BIT_POS),             /**< USART1 clock. */
 #endif
+#endif /* defined(USART_PRESENT) && USART_COUNT > 1 */
+#if defined(USART_PRESENT) && USART_COUNT > 2
+  cmuClock_USART2 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN2_USART2_SHIFT << CMU_EN_BIT_POS),             /**< USART2 clock. */
+#endif /* defined(USART_PRESENT) && USART_COUNT > 2 */
 #if defined(IADC_PRESENT)
   cmuClock_IADC0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN0_IADC0_SHIFT << CMU_EN_BIT_POS),               /**< IADC0 clock. */
@@ -433,8 +466,16 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
 #if I2C_COUNT > 1
   cmuClock_I2C1 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                   | (_CMU_CLKEN0_I2C1_SHIFT << CMU_EN_BIT_POS),                 /**< I2C1 clock. */
-#endif
-#endif
+#endif /* I2C_COUNT > 1 */
+#if I2C_COUNT > 2
+  cmuClock_I2C2 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                  | (_CMU_CLKEN2_I2C2_SHIFT << CMU_EN_BIT_POS),                 /**< I2C2 clock. */
+#endif /* I2C_COUNT > 2 */
+#if I2C_COUNT > 3
+  cmuClock_I2C3 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                  | (_CMU_CLKEN2_I2C3_SHIFT << CMU_EN_BIT_POS),                 /**< I2C3 clock. */
+#endif /* I2C_COUNT > 3 */
+#endif /* defined(I2C_PRESENT) */
   cmuClock_SYSCFG = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_SYSCFG_SHIFT << CMU_EN_BIT_POS),             /**< SYSCFG clock. */
   cmuClock_DPLL0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
@@ -492,17 +533,32 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
                      | (_CMU_CLKEN1_EUSART1_SHIFT << CMU_EN_BIT_POS),           /**< EUSART1 clock. */
 #endif
 #if defined(EUSART_PRESENT) && EUSART_COUNT > 2
+#if defined(_CMU_CLKEN1_EUSART2_SHIFT)
   cmuClock_EUSART2 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN1_EUSART2_SHIFT << CMU_EN_BIT_POS),           /**< EUSART2 clock. */
+#elif defined(_CMU_CLKEN2_EUSART2_SHIFT)
+  cmuClock_EUSART2 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN2_EUSART2_SHIFT << CMU_EN_BIT_POS),           /**< EUSART2 clock. */
 #endif
+#endif /* defined(EUSART_PRESENT) && EUSART_COUNT > 2 */
 #if defined(EUSART_PRESENT) && EUSART_COUNT > 3
+#if defined(_CMU_CLKEN1_EUSART3_SHIFT)
   cmuClock_EUSART3 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN1_EUSART3_SHIFT << CMU_EN_BIT_POS),           /**< EUSART3 clock. */
+#elif defined(_CMU_CLKEN2_EUSART3_SHIFT)
+  cmuClock_EUSART3 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN2_EUSART3_SHIFT << CMU_EN_BIT_POS),           /**< EUSART3 clock. */
 #endif
+#endif /* defined(EUSART_PRESENT) && EUSART_COUNT > 3 */
 #if defined(EUSART_PRESENT) && EUSART_COUNT > 4
+#if defined(_CMU_CLKEN1_EUSART4_SHIFT)
   cmuClock_EUSART4 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN1_EUSART4_SHIFT << CMU_EN_BIT_POS),           /**< EUSART4 clock. */
+#elif defined(_CMU_CLKEN2_EUSART4_SHIFT)
+  cmuClock_EUSART4 = (CMU_CLKEN2_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN2_EUSART4_SHIFT << CMU_EN_BIT_POS),           /**< EUSART4 clock. */
 #endif
+#endif /* defined(EUSART_PRESENT) && EUSART_COUNT > 4 */
 #if defined(_CMU_CLKEN1_IFADCDEBUG_SHIFT)
   cmuClock_IFADCDEBUG = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                         | (_CMU_CLKEN1_IFADCDEBUG_SHIFT << CMU_EN_BIT_POS),     /**< IFADCDEBUG clock. */
@@ -867,7 +923,8 @@ typedef struct {
 // See [PM-2871] for details.
 /** Default configuration of fixed tuning capacitance on XI or XO for EFR32XG23 and EFR32XG28. */
 #define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Xo
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)    \
+#elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6))    \
   && defined(_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
   && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM == 20)
 // See [PM-5131] for details.
@@ -1331,7 +1388,7 @@ void                       CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Out
                                                               GPIO_Port_TypeDef                     port,
                                                               unsigned int                          pin);
 #endif
-void                       CMU_HFXOCTuneSet(uint32_t ctune);
+sl_status_t                CMU_HFXOCTuneSet(uint32_t ctune);
 uint32_t                   CMU_HFXOCTuneGet(void);
 void                       CMU_HFXOCTuneDeltaSet(int32_t delta);
 int32_t                    CMU_HFXOCTuneDeltaGet(void);
@@ -3545,93 +3602,12 @@ __STATIC_INLINE void CMU_Lock(void)
 
 /***************************************************************************//**
  * @brief
- *   Convert logarithm of 2 prescaler to division factor.
- * @deprecated
- *   Deprecated and marked for removal in a later release. It will be replaced
- *   by SL_Log2ToDiv.
- * @param[in] log2
- *   Logarithm of 2, as used by fixed prescalers.
- *
- * @return
- *   Dividend.
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 uint32_t CMU_Log2ToDiv(uint32_t log2)
-{
-  return SL_Log2ToDiv(log2);
-}
-
-/***************************************************************************//**
- * @brief
  *   Unlock the CMU so that writing to locked registers again is possible.
  ******************************************************************************/
 __STATIC_INLINE void CMU_Unlock(void)
 {
   CMU->LOCK = CMU_LOCK_LOCKKEY_UNLOCK;
 }
-
-#if defined(_CMU_HFRCOCTRL_FREQRANGE_MASK)
-/***************************************************************************//**
- * @brief
- *   Get the current HFRCO frequency.
- *
- * @deprecated
- *   A deprecated function. New code should use @ref CMU_HFRCOBandGet().
- *
- * @return
- *   HFRCO frequency.
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 CMU_HFRCOFreq_TypeDef CMU_HFRCOFreqGet(void)
-{
-  return CMU_HFRCOBandGet();
-}
-
-/***************************************************************************//**
- * @brief
- *   Set HFRCO calibration for the selected target frequency.
- *
- * @deprecated
- *   A deprecated function. New code should use @ref CMU_HFRCOBandSet().
- *
- * @param[in] setFreq
- *   HFRCO frequency to set.
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void CMU_HFRCOFreqSet(CMU_HFRCOFreq_TypeDef setFreq)
-{
-  CMU_HFRCOBandSet(setFreq);
-}
-#endif
-
-#if defined(_CMU_AUXHFRCOCTRL_FREQRANGE_MASK)
-/***************************************************************************//**
- * @brief
- *   Get the current AUXHFRCO frequency.
- *
- * @deprecated
- *   A deprecated function. New code should use @ref CMU_AUXHFRCOBandGet().
- *
- * @return
- *   AUXHFRCO frequency.
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 CMU_AUXHFRCOFreq_TypeDef CMU_AUXHFRCOFreqGet(void)
-{
-  return CMU_AUXHFRCOBandGet();
-}
-
-/***************************************************************************//**
- * @brief
- *   Set AUXHFRCO calibration for the selected target frequency.
- *
- * @deprecated
- *   A deprecated function. New code should use @ref CMU_AUXHFRCOBandSet().
- *
- * @param[in] setFreq
- *   AUXHFRCO frequency to set.
- ******************************************************************************/
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 void CMU_AUXHFRCOFreqSet(CMU_AUXHFRCOFreq_TypeDef setFreq)
-{
-  CMU_AUXHFRCOBandSet(setFreq);
-}
-#endif
 
 #endif // defined(_SILICON_LABS_32B_SERIES_2)
 

@@ -2,7 +2,7 @@ id: device_init_lfrco
 label: "Low Frequency RC Oscillator (LFRCO)"
 package: platform
 description: >
-  Instantiate the component for Low Frequency RC Oscillator (LFRCO) 
+  Instantiate the component for Low Frequency RC Oscillator (LFRCO)
   initialization based on the provided precision configuration.
 category: Services|Device Initialization|Peripherals
 quality: production
@@ -17,6 +17,9 @@ config_file:
   - path: config/s2/sl_device_init_lfrco_config.h
     file_id: device_init_lfrco_config
     condition: [device_sdid_215]
+  - path: config/s2/sl_device_init_lfrco_config.h
+    file_id: device_init_lfrco_config
+    condition: [device_sdid_225]
   - path: config/s2/sl_device_init_lfrco_config.h
     file_id: device_init_lfrco_config
     condition: [device_sdid_230]
@@ -38,8 +41,11 @@ template_contribution:
       include: sl_device_init_lfrco.h
       handler: sl_device_init_lfrco
     priority: -9600
+    condition: [sl_system]
   - name: device_init_clocks_present
     value: lfrco
+  - name: component_catalog
+    value: device_init_lfrco
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-lfrco

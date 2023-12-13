@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,24 @@
  *   This file implements the OpenThread platform abstraction for miscellaneous behaviors.
  */
 
+#include <openthread-core-config.h>
 #include <openthread/platform/misc.h>
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
+#include "btl_interface.h"
+#endif
 
 #include "em_rmu.h"
 #include "platform-efr32.h"
+
+#if defined(SL_CATALOG_OT_CRASH_HANDLER_PRESENT)
+#include <openthread/logging.h>
+#include "crash_handler.h"
+#endif
 
 static uint32_t sResetCause;
 
@@ -53,13 +67,24 @@ void otPlatReset(otInstance *aInstance)
     NVIC_SystemReset();
 }
 
+#if defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
+#if OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE
+otError otPlatResetToBootloader(otInstance *aInstance)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+    bootloader_rebootAndInstall();
+    return OT_ERROR_NONE;
+}
+#endif
+#endif
+
 otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
 
     otPlatResetReason reason = OT_PLAT_RESET_REASON_UNKNOWN;
 
-    #if defined(_EMU_RSTCAUSE_MASK)
+#if defined(_EMU_RSTCAUSE_MASK)
     if (sResetCause & EMU_RSTCAUSE_POR)
     {
         reason = OT_PLAT_RESET_REASON_POWER_ON;
@@ -80,14 +105,18 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     {
         reason = OT_PLAT_RESET_REASON_FAULT;
     }
-    else if ((sResetCause & EMU_RSTCAUSE_AVDDBOD) || (sResetCause & EMU_RSTCAUSE_DECBOD) ||
-             (sResetCause & EMU_RSTCAUSE_DVDDBOD) || (sResetCause & EMU_RSTCAUSE_DVDDLEBOD) ||
-             (sResetCause & EMU_RSTCAUSE_EM4))
+    /* clang-format off */
+    else if ((sResetCause & EMU_RSTCAUSE_AVDDBOD)
+             || (sResetCause & EMU_RSTCAUSE_DECBOD)
+             || (sResetCause & EMU_RSTCAUSE_DVDDBOD)
+             || (sResetCause & EMU_RSTCAUSE_DVDDLEBOD)
+             || (sResetCause & EMU_RSTCAUSE_EM4))
+    /* clang-format on */
     {
         reason = OT_PLAT_RESET_REASON_OTHER;
     }
-    #endif
-    #if defined(_RMU_RSTCAUSE_MASK)
+#endif
+#if defined(_RMU_RSTCAUSE_MASK)
     if (sResetCause & RMU_RSTCAUSE_PORST)
     {
         reason = OT_PLAT_RESET_REASON_POWER_ON;
@@ -108,14 +137,39 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     {
         reason = OT_PLAT_RESET_REASON_FAULT;
     }
-    else if ((sResetCause & RMU_RSTCAUSE_AVDDBOD) || (sResetCause & RMU_RSTCAUSE_DECBOD) ||
-             (sResetCause & RMU_RSTCAUSE_DVDDBOD) || (sResetCause & RMU_RSTCAUSE_EM4RST))
+    /* clang-format off */
+    else if ((sResetCause & RMU_RSTCAUSE_AVDDBOD)
+             || (sResetCause & RMU_RSTCAUSE_DECBOD)
+             || (sResetCause & RMU_RSTCAUSE_DVDDBOD)
+             || (sResetCause & RMU_RSTCAUSE_EM4RST))
+    /* clang-format on */
     {
         reason = OT_PLAT_RESET_REASON_OTHER;
     }
-    #endif
+#endif
     return reason;
 }
+
+#if defined(SL_CATALOG_OT_CRASH_HANDLER_PRESENT)
+void efr32PrintResetInfo(void)
+{
+    otLogCritPlat("Reset info: 0x%x (%s)",
+                                halGetResetInfo(),
+                                halGetResetString());
+
+    otLogCritPlat("Extended Reset info: 0x%2X (%s)",
+                                halGetExtendedResetInfo(),
+                                halGetExtendedResetString());
+
+    if (halResetWasCrash()) {
+        // We pass port 0 here though this parameter is unused in the legacy HAL
+        // version of the diagnostic code.
+        halPrintCrashSummary(0);
+        halPrintCrashDetails(0);
+        halPrintCrashData(0);
+    }
+}
+#endif // SL_CATALOG_OT_CRASH_HANDLER_PRESENT
 
 void otPlatWakeHost(void)
 {
@@ -142,4 +196,22 @@ OT_TOOL_WEAK void otCliPlatLogv(otLogLevel aLogLevel, otLogRegion aLogRegion, co
 OT_TOOL_WEAK void efr32UartProcess(void)
 {
     // do nothing
+}
+
+otError railStatusToOtError(RAIL_Status_t status)
+{
+    switch (status)
+    {
+    case RAIL_STATUS_NO_ERROR:
+        return OT_ERROR_NONE;
+    case RAIL_STATUS_INVALID_PARAMETER:
+        return OT_ERROR_INVALID_ARGS;
+    case RAIL_STATUS_INVALID_STATE:
+        return OT_ERROR_INVALID_STATE;
+    case RAIL_STATUS_INVALID_CALL:
+    case RAIL_STATUS_SUSPENDED:
+    case RAIL_STATUS_SCHED_ERROR:
+    default:
+        return OT_ERROR_FAILED;
+    }
 }

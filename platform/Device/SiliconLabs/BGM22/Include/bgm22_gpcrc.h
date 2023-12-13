@@ -243,4 +243,4 @@ typedef struct {
 /** @} End of group BGM22_GPCRC */
 /** @} End of group Parts */
 
-#endif /* BGM22_GPCRC_H */
+#endif // BGM22_GPCRC_H

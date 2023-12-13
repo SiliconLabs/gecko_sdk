@@ -329,4 +329,4 @@ typedef struct {
 /** @} End of group MGM21_BURTC */
 /** @} End of group Parts */
 
-#endif /* MGM21_BURTC_H */
+#endif // MGM21_BURTC_H

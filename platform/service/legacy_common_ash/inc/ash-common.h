@@ -122,6 +122,7 @@ void ashStopAckTimer(void);
 /** @brief Indicates whether or not ashAckTimer has expired.
  *  If the timer is stopped then it is not expired.
  *
+ *  @return bool
  */
 bool ashAckTimerHasExpired(void);
 
@@ -162,7 +163,7 @@ void ashAdjustAckPeriod(bool expired);
   do { ashSetAckPeriod(msec); ashStartAckTimer(); }  while (false)
 
 // Define the units used by the Not Ready timer as 2**n msecs
-#define ASH_NR_TIMER_BIT    4 // log2 of msecs per NR timer unit
+#define ASH_NR_TIMER_BIT    4 ///< log2 of msecs per NR timer unit
 
 /** @brief Starts the Not Ready timer
  *
@@ -189,12 +190,12 @@ bool ashNrTimerHasExpired(void);
  */
 #define ashNrTimerIsNotRunning() (ashAckTimer == 0)
 
-extern bool ashDecodeInProgress; // set false to start decoding a new frame
+extern bool ashDecodeInProgress; ///< set false to start decoding a new frame
 
 // ASH timers (units)
-extern uint16_t ashAckTimer;        // rec'd ack timer (msecs)
-extern uint16_t ashAckPeriod;       // rec'd ack timer period (msecs)
-extern uint8_t ashNrTimer;          // not ready timer (16 msec units)
+extern uint16_t ashAckTimer;        ///< rec'd ack timer (msecs)
+extern uint16_t ashAckPeriod;       ///< rec'd ack timer period (msecs)
+extern uint8_t ashNrTimer;          ///< not ready timer (16 msec units)
 
 #endif //__ASH_COMMON_H__
 

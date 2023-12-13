@@ -88,7 +88,7 @@ void sl_imu_fuse_gyro_set_sample_rate(sl_imu_sensor_fusion_t *f, float rate)
 {
   f->gSampleRate      = rate;
   f->gDeltaTime       = 1.0f / rate;
-  f->gDeltaTimeScale  = IMU_DEG_TO_RAD_FACTOR / rate;
+  f->gDeltaTimeScale  = (float)IMU_DEG_TO_RAD_FACTOR / rate;
 }
 
 /***************************************************************************//**
@@ -164,9 +164,9 @@ void sl_imu_fuse_gyro_calculate_correction_vector(sl_imu_sensor_fusion_t *f, boo
       sl_imu_vector_subtract(f->angleCorrection, accAngle, f->orientation);
       sl_imu_vector_normalize_angle(f->angleCorrection);
     } else {
-      accAngle[0] = IMU_PI - asinf(accy);
+      accAngle[0] = (float)IMU_PI - asinf(accy);
       accAngle[1] = -asinf(accx);
-      accAngle[2] = IMU_PI + dirZ;
+      accAngle[2] = (float)IMU_PI + dirZ;
 
       sl_imu_vector_normalize_angle(accAngle);
       sl_imu_vector_subtract(f->angleCorrection, accAngle, f->orientation);
@@ -203,8 +203,8 @@ static bool sl_imu_is_acceleration_ok(sl_imu_sensor_fusion_t *f)
 
   accx = f->aVector[0];
   accy = f->aVector[1];
-  if ( (accx >= -IMU_MAX_ACCEL_FOR_ANGLE) && (accx <= IMU_MAX_ACCEL_FOR_ANGLE)
-       && (accy >= -IMU_MAX_ACCEL_FOR_ANGLE) && (accy <= IMU_MAX_ACCEL_FOR_ANGLE) ) {
+  if ( (accx >= -(float)IMU_MAX_ACCEL_FOR_ANGLE) && (accx <= (float)IMU_MAX_ACCEL_FOR_ANGLE)
+       && (accy >= -(float)IMU_MAX_ACCEL_FOR_ANGLE) && (accy <= (float)IMU_MAX_ACCEL_FOR_ANGLE) ) {
     r = true;
   } else {
     r = false;

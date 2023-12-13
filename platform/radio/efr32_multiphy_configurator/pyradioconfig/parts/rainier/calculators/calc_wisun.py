@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_wisun import calc_wisun_viper
+from pyradioconfig.parts.bobcat.calculators.calc_wisun import CALC_WiSUN_Bobcat
 
 
-class CalcWisunRainier(calc_wisun_viper):
+class CalcWisunRainier(CALC_WiSUN_Bobcat):
     pass

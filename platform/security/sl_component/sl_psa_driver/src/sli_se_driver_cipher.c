@@ -885,10 +885,10 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
         }
 
         // Validate padding.
-        uint8_t pad_bytes = tmp_buf[15];
+        size_t pad_bytes = 0;
         psa_status = sli_psa_validate_pkcs7_padding(tmp_buf,
                                                     16,
-                                                    pad_bytes);
+                                                    &pad_bytes);
         if (psa_status != PSA_SUCCESS) {
           *output_length = 0;
           return psa_status;
@@ -1724,10 +1724,10 @@ psa_status_t sli_se_driver_cipher_finish(
           psa_status = PSA_SUCCESS;
         }
 
-        size_t padding_bytes = out_buf[15];
+        size_t padding_bytes = 0;
         psa_status = sli_psa_validate_pkcs7_padding(out_buf,
                                                     16,
-                                                    padding_bytes);
+                                                    &padding_bytes);
 
         if (psa_status == PSA_SUCCESS) {
           // The padding was valid

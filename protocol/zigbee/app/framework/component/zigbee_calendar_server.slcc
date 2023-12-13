@@ -1,19 +1,18 @@
 package: Zigbee
-description: This component is an implementation of the calendar server cluster.  It responds to requests
-  for the calendar data using data from the Calendar Common component.
+description: This component is an implementation of the calendar server cluster.  It responds to requests for the calendar data using data from the Calendar Common component.
 label: Calendar Server
 quality: production
 id: zigbee_calendar_server
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_calendar_server"
+  - name: zigbee_calendar_server
 requires:
-   - name: "zigbee_calendar_common"
+  - name: zigbee_calendar_common
 source:
   - path: protocol/zigbee/app/framework/plugin/calendar-server/calendar-server.c
   - path: protocol/zigbee/app/framework/plugin/calendar-server/calendar-server-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/calendar-server/calendar-server-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/calendar-server
@@ -24,10 +23,10 @@ template_contribution:
     value: zigbee_calendar_server
   - name: cluster_service
     value:
-       cluster_id: "0x0707"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"       
-       service_function: "emberAfCalendarClusterServerCommandParse"    
+      cluster_id: '0x0707'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfCalendarClusterServerCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -40,14 +39,14 @@ template_contribution:
       handler: sli_zigbee_af_calendar_server_cli_publish_calendar
       help: Publishes a calendar.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: The index of the calendar within the calendar table
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: The index of the calendar within the calendar table
   - name: cli_command
     value:
       group: calendar-server
@@ -55,16 +54,16 @@ template_contribution:
       handler: sli_zigbee_af_calendar_server_cli_publish_day_profiles
       help: Publishes the day profiles of the specified day in the specified calendar.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: The index of the calendar within the calendar table
-      - type: uint8
-        help: The index of the day in the calendar
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: The index of the calendar within the calendar table
+        - type: uint8
+          help: The index of the day in the calendar
   - name: cli_command
     value:
       group: calendar-server
@@ -72,16 +71,16 @@ template_contribution:
       handler: sli_zigbee_af_calendar_server_cli_publish_week_profile
       help: Publishes the week profile of the specified week in the specified calendar.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: The index of the calendar within the calendar table
-      - type: uint8
-        help: The index of the week in the calendar
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: The index of the calendar within the calendar table
+        - type: uint8
+          help: The index of the week in the calendar
   - name: cli_command
     value:
       group: calendar-server
@@ -89,14 +88,14 @@ template_contribution:
       handler: sli_zigbee_af_calendar_server_cli_publish_seasons
       help: Publishes the seasons in the specified calendar.
       argument:
-      - type: uint16
-        help: The destination node ID
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: The index of the calendar within the calendar table
+        - type: uint16
+          help: The destination node ID
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: The index of the calendar within the calendar table
   - name: cli_command
     value:
       group: calendar-server
@@ -104,14 +103,14 @@ template_contribution:
       handler: sli_zigbee_af_calendar_server_cli_publish_special_days
       help: Publishes the special days for the specified calendar.
       argument:
-      - type: uint16
-        help: The destination node id
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
-        help: The index of the calendar within the calendar table
+        - type: uint16
+          help: The destination node id
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
+          help: The index of the calendar within the calendar table
   - name: cli_command
     value:
       group: calendar-server
@@ -119,19 +118,19 @@ template_contribution:
       handler: emberAfCalendarServerCliCancelCalendar
       help: Invalidates the specified calendar and sends a cancel calendar.
       argument:
-      - type: uint16
-        help: The destination node id
-      - type: uint8
-        help: The source endpoint
-      - type: uint8
-        help: The destination endpoint
-      - type: uint8
+        - type: uint16
+          help: The destination node id
+        - type: uint8
+          help: The source endpoint
+        - type: uint8
+          help: The destination endpoint
+        - type: uint8
   - name: cluster_functions
     value:
-       cluster_name: Calendar
-       cluster_id: 0x707
-       cluster_type: server
-       init_function: emberAfCalendarClusterServerInitCallback
+      cluster_name: Calendar
+      cluster_id: 0x707
+      cluster_type: server
+      init_function: emberAfCalendarClusterServerInitCallback
 
 documentation:
   docset: zigbee

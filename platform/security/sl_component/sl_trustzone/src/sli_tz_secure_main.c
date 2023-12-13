@@ -141,6 +141,13 @@ typedef void (*nsfunc)(void) __attribute__((cmse_nonsecure_call));
   #define BUILTIN_UNREACHABLE() __builtin_unreachable();
 #endif
 
+// Require GCC version 10.3.1 (or later) for TrustZone support
+#if defined(__GNUC__) && ((__GNUC__ < 10)   \
+  || (__GNUC__ == 10 && __GNUC_MINOR__ < 3) \
+  || (__GNUC__ == 10 && __GNUC_MINOR__ == 3 && __GNUC_PATCHLEVEL__ < 1))
+#error "GCC version 10.3.1 (or later) is required for Trustzone support."
+#endif
+
 // -----------------------------------------------------------------------------
 // Static function declarations
 
@@ -249,9 +256,7 @@ int main(void)
 
   #if defined(TFM_FIH_PROFILE_ON) && defined(FIH_ENABLE_DELAY)
   configure_sau_smu_for_fih_delay();
-    #if defined(CRYPTOACC_PRESENT)
-  cryptoacc_trng_initialize();
-    #endif
+  fih_delay_init();
   #endif
 
   FIH_CALL(enable_fault_exceptions, fih_rc);
@@ -369,11 +374,17 @@ int main(void)
 #if defined(TFM_FIH_PROFILE_ON)
 static int32_t __attribute__ ((noinline)) bootloader_table_valid(void)
 {
-  return bootloader_pointerValid(mainBootloaderTable) ? FIH_TRUE : FIH_FALSE;
+  // Apply volatile pointer to prevent gcc warning [-Werror=array-bounds]
+  MainBootloaderTable_t ** volatile pp_btl_tbl
+    = (MainBootloaderTable_t **) (BTL_MAIN_BOOTLOADER_TABLE_BASE);
+  return bootloader_pointerValid(*pp_btl_tbl) ? FIH_TRUE : FIH_FALSE;
 }
 static int32_t __attribute__ ((noinline)) bootloader_magic_valid(void)
 {
-  if (mainBootloaderTable->header.type == BOOTLOADER_MAGIC_MAIN) {
+  // Apply volatile pointer to prevent gcc warning [-Werror=array-bounds]
+  MainBootloaderTable_t ** volatile pp_btl_tbl
+    = (MainBootloaderTable_t **) (BTL_MAIN_BOOTLOADER_TABLE_BASE);
+  if ((*pp_btl_tbl)->header.type == BOOTLOADER_MAGIC_MAIN) {
     return FIH_TRUE;
   } else {
     return FIH_FALSE;
@@ -398,8 +409,12 @@ static inline bool bootloader_present(void)
     return rc_1 == FIH_TRUE ? true : false;
   }
 #else
-  if (bootloader_pointerValid(mainBootloaderTable)) {
-    if (mainBootloaderTable->header.type == BOOTLOADER_MAGIC_MAIN) {
+  // Apply volatile pointer to prevent gcc warning [-Werror=array-bounds]
+  MainBootloaderTable_t ** volatile pp_btl_tbl
+    = (MainBootloaderTable_t **) (BTL_MAIN_BOOTLOADER_TABLE_BASE);
+
+  if (bootloader_pointerValid(*pp_btl_tbl)) {
+    if ((*pp_btl_tbl)->header.type == BOOTLOADER_MAGIC_MAIN) {
       return true;
     }
   }

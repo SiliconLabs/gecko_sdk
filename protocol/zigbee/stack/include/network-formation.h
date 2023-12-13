@@ -502,6 +502,16 @@ bool emberTcRejoinsUsingWellKnownKeyAllowed(void);
  */
 EmberStatus emberSetupDelayedJoin(uint8_t networkKeyTimeoutS);
 
+/**
+ * @brief Return true if the TC is delaying in sending the network key to newly joining devices. The delay amount is configured via the Delayed Join component.
+ */
+bool emberDelayedJoinIsActivated(void);
+
+/**
+ * @brief Set the activation state of Delayed Join. If Delayed Join is activated, the TC will delay in sending network key to newly joining devices
+ */
+void emberDelayedJoinActivate(bool activated);
+
 /*
  * @brief Return the value of network key timeout in seconds.
  *

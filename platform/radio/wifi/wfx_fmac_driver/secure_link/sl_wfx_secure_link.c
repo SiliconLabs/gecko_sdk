@@ -348,7 +348,16 @@ sl_status_t sl_wfx_secure_link_receive(sl_wfx_generic_message_t **network_rx_buf
 
   if (has_encrypt_header) {
     uint16_t *nonce_ptr = (uint16_t *) *network_rx_buffer;
+
+#if defined(__ICCARM__)
+/* Suppress warnings originating from use of address of unaligned structure member with IAR Embedded Workbench */
+#pragma diag_suppress=Pa039
+#endif
     uint32_t new_packet_count = sl_wfx_unpack_16bit_little_endian(&((*network_rx_buffer)->header.length));
+#if defined(__ICCARM__)
+#pragma diag_default=Pa039
+#endif
+
     nonce_ptr++;
     new_packet_count |= (*nonce_ptr & 0x3FFF) << 16;
 

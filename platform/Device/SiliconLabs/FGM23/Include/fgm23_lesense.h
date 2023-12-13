@@ -1219,4 +1219,4 @@ typedef struct {
 /** @} End of group FGM23_LESENSE */
 /** @} End of group Parts */
 
-#endif /* FGM23_LESENSE_H */
+#endif // FGM23_LESENSE_H

@@ -124,7 +124,7 @@ static range_test_std_phys_t range_test_std_phys[NUM_OF_PREDEFINED_PHYS] = {
   {
     .phy = BLE_125KBPS,
     .protocol = PROT_BLE,
-#if RAIL_BLE_SUPPORTS_CODED_PHY
+#if ((RAIL_BLE_SUPPORTS_CODED_PHY == 1) && (RAIL_SUPPORTS_PROTOCOL_BLE == 1))
     .is_supported = true
 #else
     .is_supported = false
@@ -133,7 +133,7 @@ static range_test_std_phys_t range_test_std_phys[NUM_OF_PREDEFINED_PHYS] = {
   {
     .phy = BLE_500KBPS,
     .protocol = PROT_BLE,
-#if RAIL_BLE_SUPPORTS_CODED_PHY
+#if ((RAIL_BLE_SUPPORTS_CODED_PHY == 1) && (RAIL_SUPPORTS_PROTOCOL_BLE == 1))
     .is_supported = true
 #else
     .is_supported = false
@@ -142,7 +142,7 @@ static range_test_std_phys_t range_test_std_phys[NUM_OF_PREDEFINED_PHYS] = {
   {
     .phy = BLE_1MBPS,
     .protocol = PROT_BLE,
-#if RAIL_BLE_SUPPORTS_1MBPS
+#if ((RAIL_BLE_SUPPORTS_1MBPS == 1) && (RAIL_SUPPORTS_PROTOCOL_BLE == 1))
     .is_supported = true
 #else
     .is_supported = false
@@ -151,7 +151,7 @@ static range_test_std_phys_t range_test_std_phys[NUM_OF_PREDEFINED_PHYS] = {
   {
     .phy = BLE_2MBPS,
     .protocol = PROT_BLE,
-#if RAIL_BLE_SUPPORTS_2MBPS
+#if ((RAIL_BLE_SUPPORTS_2MBPS == 1) && (RAIL_SUPPORTS_PROTOCOL_BLE == 1))
     .is_supported = true
 #else
     .is_supported = false
@@ -315,6 +315,7 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
       }
       RAIL_Idle(rail_handles[i], RAIL_IDLE, true);
     } else if (PROT_BLE == i) {
+#if RAIL_SUPPORTS_PROTOCOL_BLE == 1
       // Configure RAIL instance to run in BLE mode
       RAIL_BLE_Init(rail_handles[PROT_BLE]);
 
@@ -339,6 +340,7 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
         app_log_error("RAIL_BLE_ConfigChannelRadioParams failed");
       }
       RAIL_Idle(rail_handles[PROT_BLE], RAIL_IDLE, true);
+#endif
     }
 
     RAIL_TxPowerConfig_t txPowerConfig = {
@@ -373,10 +375,10 @@ void init_ranget_test_standard_phys(uint8_t* number_of_phys)
 bool ble_protocol_change(void)
 {
   bool is_supported = false;
-  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
 // Idle
   RAIL_Idle(rail_handles[PROT_BLE], RAIL_IDLE, true);
-
+#if RAIL_SUPPORTS_PROTOCOL_BLE == 1
+  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
   switch (current_phy_standard_value()) {
 #if RAIL_BLE_SUPPORTS_CODED_PHY
     case BLE_125KBPS:
@@ -430,7 +432,6 @@ bool ble_protocol_change(void)
         false;
     }
   }
-
   status = RAIL_BLE_ConfigChannelRadioParams(rail_handles[PROT_BLE],
                                              BLE_CRC_INIT,
                                              BLE_ACCESS_ADDRESS,
@@ -439,7 +440,9 @@ bool ble_protocol_change(void)
   if (status != RAIL_STATUS_NO_ERROR) {
     app_log_error("RAIL_BLE_ConfigChannelRadioParams failed");
   }
-
+#else
+  is_supported = false;
+#endif
   return is_supported;
 }
 
@@ -751,8 +754,11 @@ void menu_set_std_phy(bool init)
       while (true) {
         if (!ble_protocol_change()) {
           range_test_settings.current_phy++;
-          if (range_test_std_phys[current_phy_standard_value()].is_supported
-              || range_test_settings.current_phy >= get_number_of_phys()) {
+          if (range_test_settings.current_phy >= get_number_of_phys()) {
+            range_test_settings.current_phy = 0;
+            break;
+          }
+          if (range_test_std_phys[current_phy_standard_value()].is_supported) {
             break;
           }
         } else {

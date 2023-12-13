@@ -1,0 +1,36 @@
+id: "sl_wisun_app_status"
+label: "Application status over CoAP"
+package: "wisun"
+description: "Sending status with using CoAP notification service"
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/app_status"
+provides:
+  - name: sl_wisun_app_status
+
+requires:
+  - name: "sl_wisun_coap"
+  - name: "sl_wisun_app_core"
+  - name: "app_project_info"
+
+source:
+  - path: "sl_wisun_app_status.c"
+
+include:
+  - path: "."
+    file_list:
+    - "path": "sl_wisun_app_status.h"
+config_file:
+  - path: "config/sl_wisun_app_status_config.h"
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "event_handler"
+    value:
+      event: "internal_app_init"
+      include: "sl_wisun_app_status.h"
+      handler: "sl_wisun_app_status_init"
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_app_status
+  

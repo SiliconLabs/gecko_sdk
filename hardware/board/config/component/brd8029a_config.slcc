@@ -1,0 +1,207 @@
+!!omap
+- id: brd8029a_config
+- label: brd8029a config
+- description: Configuration files for BRD8029A
+- package: platform
+- category: Platform|Board|Config
+- quality: production
+- ui_hints:
+    visibility: never
+- root_path: hardware/board/config
+- requires:
+  - name: brd8029a
+- provides:
+  - name: brd8029a_config
+- config_file:
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_button_exp_btn0_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_button_exp_btn1_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_button_exp_btn2_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_button_exp_btn3_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led0
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_led_exp_led0_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led1
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_led_exp_led1_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led2
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_led_exp_led2_config.h
+  - condition:
+    - device_series_1
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led3
+    path: brd8029a/brd8029a_efr32xg13/sl_simple_led_exp_led3_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_button_exp_btn0_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_button_exp_btn1_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_button_exp_btn2_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_button_exp_btn3_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led0
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_led_exp_led0_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led1
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_led_exp_led1_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led2
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_led_exp_led2_config.h
+  - condition:
+    - device_sdid_210
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led3
+    path: brd8029a/brd8029a_efr32zg23/sl_simple_led_exp_led3_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_button_exp_btn0_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_button_exp_btn1_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_button_exp_btn2_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: exp_btn0
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_button_exp_btn3_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led0
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_led_exp_led0_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led1
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_led_exp_led1_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led2
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_led_exp_led2_config.h
+  - condition:
+    - device_sdid_235
+    - hardware_board_rb
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: exp_led3
+    path: brd8029a/brd8029a_efr32zg28/sl_simple_led_exp_led3_config.h

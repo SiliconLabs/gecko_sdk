@@ -89,7 +89,6 @@ source:
       - path: common/heap.cpp
       - path: common/heap_data.cpp
       - path: common/heap_string.cpp
-      - path: common/instance.cpp
       - path: common/log.cpp
       - path: common/message.cpp
       - path: common/notifier.cpp
@@ -112,6 +111,7 @@ source:
       - path: crypto/sha256.cpp
       - path: crypto/storage.cpp
       - path: diags/factory_diags.cpp
+      - path: instance/instance.cpp
       - path: mac/channel_mask.cpp
       - path: mac/data_poll_handler.cpp
       - path: mac/data_poll_sender.cpp
@@ -178,6 +178,7 @@ source:
       - path: thread/announce_begin_server.cpp
       - path: thread/announce_sender.cpp
       - path: thread/anycast_locator.cpp
+      - path: thread/child.cpp
       - path: thread/child_supervision.cpp
       - path: thread/child_table.cpp
       - path: thread/csl_tx_scheduler.cpp
@@ -198,6 +199,7 @@ source:
       - path: thread/mle_tlvs.cpp
       - path: thread/mle_types.cpp
       - path: thread/mlr_manager.cpp
+      - path: thread/neighbor.cpp
       - path: thread/neighbor_table.cpp
       - path: thread/network_data.cpp
       - path: thread/network_data_leader.cpp
@@ -212,12 +214,12 @@ source:
       - path: thread/network_diagnostic_tlvs.cpp
       - path: thread/panid_query_server.cpp
       - path: thread/radio_selector.cpp
+      - path: thread/router.cpp
       - path: thread/router_table.cpp
       - path: thread/src_match_controller.cpp
       - path: thread/thread_netif.cpp
       - path: thread/time_sync_service.cpp
       - path: thread/tmf.cpp
-      - path: thread/topology.cpp
       - path: thread/uri_paths.cpp
       - path: utils/channel_manager.cpp
       - path: utils/channel_monitor.cpp
@@ -225,6 +227,7 @@ source:
       - path: utils/heap.cpp
       - path: utils/history_tracker.cpp
       - path: utils/jam_detector.cpp
+      - path: utils/link_metrics_manager.cpp
       - path: utils/mesh_diag.cpp
       - path: utils/otns.cpp
       - path: utils/parse_cmdline.cpp

@@ -1428,4 +1428,4 @@ typedef struct {
 /** @} End of group MGM22_USART */
 /** @} End of group Parts */
 
-#endif /* MGM22_USART_H */
+#endif // MGM22_USART_H

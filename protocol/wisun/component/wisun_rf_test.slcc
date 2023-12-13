@@ -24,3 +24,7 @@ include:
 documentation:
   docset: wisun
   document: wisun-stack-api/sl-wisun-rf-test
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_rf_test

@@ -229,4 +229,4 @@ typedef struct {
 /** @} End of group BGM24_DPLL */
 /** @} End of group Parts */
 
-#endif /* BGM24_DPLL_H */
+#endif // BGM24_DPLL_H

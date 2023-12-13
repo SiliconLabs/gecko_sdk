@@ -10,18 +10,14 @@
 #include "DebugPrint.h"
 
 ZW_WEAK bool
-cc_door_lock_write(cc_door_lock_data_t *door_lock_data)
+cc_door_lock_write(__attribute__((unused)) cc_door_lock_data_t *door_lock_data)
 {
-  UNUSED(door_lock_data);
-
   return true;
 }
 
 ZW_WEAK bool
-cc_door_lock_read(cc_door_lock_data_t *door_lock_data)
+cc_door_lock_read(__attribute__((unused)) cc_door_lock_data_t *door_lock_data)
 {
-  UNUSED(door_lock_data);
-
   return false;
 }
 

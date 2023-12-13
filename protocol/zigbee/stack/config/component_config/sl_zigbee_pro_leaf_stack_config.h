@@ -91,6 +91,11 @@
 // The minimum size of the route table.
 #define EMBER_MIN_ROUTE_TABLE_SIZE  0
 
+// <o EMBER_BINDING_TABLE_SIZE> Binding Table Size <1-127>
+// <i> Default: 3
+// <i> The number of entries that the binding table can hold.
+#define EMBER_BINDING_TABLE_SIZE   3
+
 // </h>
 
 // <<< end of configuration section >>>

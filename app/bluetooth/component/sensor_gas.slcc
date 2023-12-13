@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_gas
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_gas.c
 include:
@@ -21,6 +20,10 @@ requires:
   - name: ccs811_driver
   - name: i2cspm
   - name: app_assert
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: sensor_gas
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-gas

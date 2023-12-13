@@ -973,4 +973,4 @@ typedef struct {
 /** @} End of group EFR32BG24_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG24_DEVINFO_H */
+#endif // EFR32BG24_DEVINFO_H

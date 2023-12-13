@@ -57,13 +57,6 @@ include:
     file_list:
       - path: events.h
 configuration:
-  # Version numbers are equal to ZAF_VERSION_MAJOR, ZAF_VERSION_MINOR, ZAF_VERSION_PATCH
-  - name: APP_VERSION
-    value: 10
-  - name: APP_REVISION
-    value: 20
-  - name: APP_PATCH
-    value: 2
   - name: CC_MULTI_CHANNEL_IDENTICAL_ENDPOINTS
     value: 0
   - name: ZAF_CONFIG_REQUEST_KEY_S0

@@ -5,9 +5,12 @@ description: >
   This component disables debug logging in TensorFlow Lite Micro.
 category: Machine Learning|TensorFlow|Debug
 quality: production
+root_path: util/third_party/tensorflow_extra
 provides:
   - name: tensorflow_debug_log_none
   - name: tensorflow_debug_log_implementation
 define: 
   - name: TF_LITE_STRIP_ERROR_STRINGS
   - name: NDEBUG
+source:
+  - path: siliconlabs/debug_log_none.cc

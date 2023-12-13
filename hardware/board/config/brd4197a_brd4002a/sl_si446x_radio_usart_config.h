@@ -32,8 +32,8 @@
 #define SL_SI446X_RADIO_CONFIG_H
 
 // <<< sl:start pin_tool >>>
-// {usart signal=TX,RX,CLK} SL_SI446X_RADIO
-// [USART_SL_SI446X_RADIO]
+// <usart signal=TX,RX,CLK> SL_SI446X_RADIO
+// $[USART_SL_SI446X_RADIO]
 #define SL_SI446X_RADIO_PERIPHERAL               USART0
 #define SL_SI446X_RADIO_PERIPHERAL_NO            0
 
@@ -49,7 +49,7 @@
 #define SL_SI446X_RADIO_CLK_PORT                 gpioPortC
 #define SL_SI446X_RADIO_CLK_PIN                  3
 
-// [USART_SL_SI446X_RADIO]
+// [USART_SL_SI446X_RADIO]$
 
 // <gpio> SL_SI446X_RADIO_CS
 // $[GPIO_SL_SI446X_RADIO_CS]

@@ -128,7 +128,9 @@ sl_status_t sl_math_mvp_complex_vector_mult_real_f16(const float16_t *input_a,
   if (status != SL_STATUS_OK) {
     return status;
   }
-  sli_mvp_pb_execute_program(p);
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
 #else
 
   sli_mvp_cmd_enable();
@@ -224,9 +226,7 @@ sl_status_t sl_math_mvp_complex_vector_mult_real_f16(const float16_t *input_a,
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
 #endif
 
-  sli_mvp_cmd_wait_for_completion();
-
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return sli_mvp_cmd_wait_for_completion();
 }
 
 sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
@@ -238,6 +238,7 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
   uint32_t len_remainder;
   size_t ofs_remainder;
   uint32_t rows, cols;
+  sl_status_t status;
 
   if (!input_a || !input_b || !output || !num_elements) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -267,7 +268,6 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
 
 #if USE_MVP_PROGRAMBUILDER
   // This is the reference MVP program for the optimized setup below.
-  sl_status_t status;
   const int vector_x = SLI_MVP_ARRAY(0);
   const int vector_y = SLI_MVP_ARRAY(1);
   const int vector_z = SLI_MVP_ARRAY(2);
@@ -303,8 +303,9 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
   if (status != SL_STATUS_OK) {
     return status;
   }
-  sli_mvp_pb_execute_program(p);
-  sli_mvp_cmd_wait_for_completion();
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
 
   if (len_remainder > 0) {
     sli_mvp_pb_config_vector(p->p, vector_x, (void *)&input_a[ofs_remainder * 2], SLI_MVP_DATATYPE_COMPLEX_BINARY16, len_remainder, &status);
@@ -328,9 +329,11 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
     if (status != SL_STATUS_OK) {
       return status;
     }
-    sli_mvp_pb_execute_program(p);
-    sli_mvp_cmd_wait_for_completion();
+    if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+      return status;
+    }
   }
+  status = sli_mvp_cmd_wait_for_completion();
 #else
 
   sli_mvp_cmd_enable();
@@ -368,7 +371,9 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
 
   // Start program.
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
-  sli_mvp_cmd_wait_for_completion();
+  if ((status = sli_mvp_cmd_wait_for_completion()) != SL_STATUS_OK) {
+    return status;
+  }
 
   if (len_remainder > 0) {
     // Program array controllers.
@@ -397,9 +402,9 @@ sl_status_t sl_math_mvp_complex_vector_mult_f16(const float16_t *input_a,
 
     // Start program.
     MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
-    sli_mvp_cmd_wait_for_completion();
+    status = sli_mvp_cmd_wait_for_completion();
   }
 #endif
 
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return status;
 }

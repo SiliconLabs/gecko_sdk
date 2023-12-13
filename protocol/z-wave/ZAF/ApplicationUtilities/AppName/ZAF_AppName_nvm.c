@@ -25,7 +25,7 @@ bool ZAF_AppName_Read(char * app_name)
   return status == ZPAL_STATUS_OK;
 }
 
-bool ZAF_AppName_Write()
+bool ZAF_AppName_Write(void)
 {
   char app_name_new[ZAF_FILE_SIZE_APP_NAME];
   char app_name_current[ZAF_FILE_SIZE_APP_NAME];

@@ -776,4 +776,4 @@ typedef struct {
 /** @} End of group BGM24_EMU */
 /** @} End of group Parts */
 
-#endif /* BGM24_EMU_H */
+#endif // BGM24_EMU_H

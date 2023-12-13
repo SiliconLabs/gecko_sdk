@@ -20,7 +20,6 @@
 
 #include "ember-types.h"
 #include "ezsp-enum.h"
-#include "app/util/ezsp/secure-ezsp-types.h"
 #include "app/util/ezsp/ezsp-utils.h"
 #include "app/framework/include/af-types.h"
 #include "app/util/ezsp/command-prototypes.h"
@@ -115,4 +114,32 @@ uint8_t sl_zigbee_get_max_end_device_children(void)
   (void) ezspGetConfigurationValue(EZSP_CONFIG_MAX_END_DEVICE_CHILDREN,
                                    (uint16_t*)&(max_end_device_children));
   return max_end_device_children;
+}
+
+sl_status_t sl_zigbee_set_transient_device_table_timeout_ms(uint16_t timeout)
+{
+  EzspStatus status = EZSP_SUCCESS;
+#ifdef SL_CATALOG_ZIGBEE_DELAYED_JOIN_PRESENT
+  if (timeout < SL_ZIGBEE_TRANSIENT_DEVICE_MINIMUM_TIMEOUT_MS) {
+    return SL_STATUS_FAIL;
+  }
+  status = emberAfSetEzspValue(EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT,
+                               2,
+                               (uint8_t*)&timeout,
+                               "default timeout for transient device table");
+#endif
+  if (status == EZSP_SUCCESS) {
+    return SL_STATUS_OK;
+  }
+  return SL_STATUS_FAIL;
+}
+
+uint16_t sl_zigbee_get_transient_device_table_timeout_ms(void)
+{
+  uint16_t transient_device_timeout = 0;
+  uint8_t valueLength = 2;
+  (void) ezspGetValue(EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT,
+                      &valueLength,
+                      (uint8_t*)&(transient_device_timeout));
+  return transient_device_timeout;
 }

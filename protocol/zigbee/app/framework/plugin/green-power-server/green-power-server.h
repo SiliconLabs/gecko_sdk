@@ -36,14 +36,6 @@
 #define EMBER_AF_GREEN_POWER_GP_SHARED_KEY 0
 #define EMBER_AF_GREEN_POWER_GP_INDIVIDUAL_KEY 1
 
-#define GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS     0x00
-#define GREEN_POWER_SERVER_RESERVED_ENDPOINTS      0xFD
-#define GREEN_POWER_SERVER_SINK_DERIVES_ENDPOINTS  0xFE
-#define GREEN_POWER_SERVER_ALL_SINK_ENDPOINTS      0xFF
-
-#define GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT  1
-#define GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT  240
-
 #define GREEN_POWER_SERVER_GPS_SECURITY_LEVEL_ATTRIBUTE_FIELD_INVOLVE_TC 0x08
 
 #define GP_DEVICE_ANNOUNCE_SIZE 12
@@ -131,6 +123,18 @@ enum
   SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED = 6,
 }; // The pairing status.
 
+typedef uint8_t EmberPreSinkPairingCallbackSource;
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum PreSinkPairingCallbackSource
+#else
+enum
+#endif
+{
+  GP_PRE_SINK_PAIRING_CALLBACK_SOURCE_UNKNOWN = 0,
+  GP_PRE_SINK_PAIRING_CALLBACK_COMMISSONING_FINALIZE = 1,
+  GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION = 2,
+}; // The source of presink callback.
+
 typedef struct {
   bool sendGpPairingInUnicastMode;
   bool unicastCommunication;
@@ -191,6 +195,7 @@ typedef struct {
   EmberSinkCommissionState      commissionState;
   // Send GP Pairing bit for current commissioning
   bool                          doNotSendGpPairing;
+  EmberPreSinkPairingCallbackSource preSinkCbSource;
 } GpCommDataSaved;
 
 typedef GpCommDataSaved EmberCommissioningGpd;
@@ -576,5 +581,7 @@ void sli_zigbee_af_gp_forward_gpd_command_default(EmberGpAddress *addr,
                                                   uint8_t gpdCommandId,
                                                   uint8_t *gpdCommandPayload);
 void emberAfGreenPowerServerSinkTableInit(void);
+
+bool isCommissioningAppEndpoint(uint8_t endpoint);
 
 #endif //_GREEN_POWER_SERVER_H_

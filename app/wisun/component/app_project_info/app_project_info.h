@@ -89,7 +89,9 @@ typedef enum app_project_info_version_id {
   /// Wi-SUN version
   APP_PROJECT_INFO_VERSION_ID_WISUN,
   /// MbedTLS version
-  APP_PROJECT_INFO_VERSION_ID_MBEDTLS
+  APP_PROJECT_INFO_VERSION_ID_MBEDTLS,
+  /// Application version
+  APP_PROJECT_INFO_VERSION_ID_APP
 } app_project_info_version_id_t;
 
 /// Version number structure definition

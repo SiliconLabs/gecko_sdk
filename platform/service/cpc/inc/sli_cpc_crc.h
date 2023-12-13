@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
  * @file
- * @brief CPC
+ * @brief CPC CRC Definitions
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>

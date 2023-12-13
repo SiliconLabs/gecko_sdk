@@ -1550,4 +1550,4 @@ typedef struct {
 /** @} End of group ZGM23_PRS */
 /** @} End of group Parts */
 
-#endif /* ZGM23_PRS_H */
+#endif // ZGM23_PRS_H

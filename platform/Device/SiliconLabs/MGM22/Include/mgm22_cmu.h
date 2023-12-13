@@ -975,4 +975,4 @@ typedef struct {
 /** @} End of group MGM22_CMU */
 /** @} End of group Parts */
 
-#endif /* MGM22_CMU_H */
+#endif // MGM22_CMU_H

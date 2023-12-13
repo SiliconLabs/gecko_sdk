@@ -349,7 +349,7 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
   // ------- Token Data Saving to the provided File -----------
   uint8_t numberOfTokens = emberGetTokenCount();
   if (numberOfTokens) {
-    uint8_t secure_key_storage_present;
+    uint8_t secure_key_storage_present = 0;
     #if !defined(EMBER_SCRIPTED_TEST) && defined(EZSP_HOST)
     //returns 1 if NCP has secure key storage (where these tokens do not store the key data).
     //Don't compile for scripted test or any non-host code due to linker issues.
@@ -357,8 +357,6 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
     #elif defined(SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT)
     //if this is running on SoC with secure key storage
     secure_key_storage_present = 1;
-    #else
-    secure_key_storage_present = 0;
     #endif
     fwrite(&numberOfTokens, 1, 1, output);
     for (uint8_t tokenIndex = 0; tokenIndex < numberOfTokens; tokenIndex++) {
@@ -382,6 +380,8 @@ EmberStatus emberAfTrustCenterBackupSaveTokensToFile(const char* filepath)
               //Populate keys into tokenData because tokens do not contain them with secure key storage
               sli_zigbee_af_trust_center_backup_save_keys_to_data(&tokenData, tokenInfo.nvm3Key, arrayIndex);
             }
+            #else
+            (void)secure_key_storage_present; // workaround -Wunused-but-set-variable
             #endif //!EMBER_SCRIPTED_TEST
             // Check the Key to see if the token to save is restoredEui64, in that case
             // check if it is blank, then save the node EUI64 in its place, else save the value
@@ -563,14 +563,12 @@ EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath)
   uint8_t numberOfTokens = 0;
   fread(&numberOfTokens, 1, 1, input);
   //printf("numberOfTokens = %d\n", numberOfTokens);
-  uint8_t secure_key_storage_present;
+  uint8_t secure_key_storage_present = 0;
   #if !defined(EMBER_SCRIPTED_TEST) && defined(EZSP_HOST)
   secure_key_storage_present = sl_zb_sec_man_version();
   #elif defined(SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_PRESENT)
   //if this is running on SoC with secure key storage
   secure_key_storage_present = 1;
-  #else
-  secure_key_storage_present = 0;
   #endif
   for (uint8_t i = 0; i < numberOfTokens; i++) {
     EmberTokenInfo tokenInfo;
@@ -598,6 +596,8 @@ EmberStatus emberAfTrustCenterBackupRestoreTokensFromFile(const char* filepath)
         //do not keep keys in classic key storage upon restoration
         sli_zigbee_af_trust_center_backup_restore_keys_from_data(&tokenData, tokenInfo.nvm3Key, arrayIndex);
       }
+      #else
+      (void)secure_key_storage_present; // workaround -Wunused-but-set-variable
       #endif //!EMBER_SCRIPTED_TEST
       EmberStatus setStatus = emberSetTokenData(token,
                                                 arrayIndex,

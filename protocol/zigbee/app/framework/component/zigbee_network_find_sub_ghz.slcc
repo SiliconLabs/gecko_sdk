@@ -1,14 +1,13 @@
 package: Zigbee
-description: This component extends the functionality of the Network Find component to sub-GHz.
-  channels.
+description: This component extends the functionality of the Network Find component to sub-GHz. channels.
 label: Network Find (Sub-GHz)
 quality: production
 id: zigbee_network_find_sub_ghz
 category: Zigbee|Network Form and Join
 provides:
-   - name: "zigbee_network_find_sub_ghz"
+  - name: zigbee_network_find_sub_ghz
 requires:
-   - name: "zigbee_network_find"
+  - name: zigbee_network_find
 config_file:
   - path: protocol/zigbee/app/framework/plugin/network-find-sub-ghz/config/network-find-sub-ghz-config.h
 validation_helper:

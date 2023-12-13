@@ -29,6 +29,11 @@
 
 #include "api/btl_interface.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 extern uint8_t sli_802154phy_get_phy_radio_channel(void);
 extern int8_t sli_802154phy_get_phy_radio_power(void);
 
@@ -100,3 +105,7 @@ uint16_t halGetStandaloneBootloaderVersion(void)
     return BOOTLOADER_INVALID_VERSION;
   }
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

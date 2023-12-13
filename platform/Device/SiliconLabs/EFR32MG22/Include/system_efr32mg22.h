@@ -206,6 +206,11 @@ static __INLINE void SystemCoreClockUpdate(void)
 }
 
 void     SystemInit(void);
+#if !defined(SL_LEGACY_LINKER)
+void     FlashToRamCopy(uint32_t *from,
+                        uint32_t *to,
+                        uint32_t size);
+#endif
 uint32_t SystemHFRCODPLLClockGet(void);
 void     SystemHFRCODPLLClockSet(uint32_t freq);
 uint32_t SystemSYSCLKGet(void);

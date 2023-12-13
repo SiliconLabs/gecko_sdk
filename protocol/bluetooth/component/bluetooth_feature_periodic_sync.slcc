@@ -19,3 +19,6 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_periodic_sync
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-periodic-sync

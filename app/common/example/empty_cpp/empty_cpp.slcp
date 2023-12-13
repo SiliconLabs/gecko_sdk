@@ -2,7 +2,7 @@ project_name: empty_cpp
 package: platform
 quality: production
 label: Platform - Empty C++ Example
-description: > 
+description: >
   This example project shows an empty configuration that can be used as a starting point to add components and functionality.
 category: Example|Platform
 filter:
@@ -25,3 +25,7 @@ component:
   - id: cpp_support
 define:
   - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md

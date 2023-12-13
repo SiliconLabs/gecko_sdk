@@ -35,51 +35,51 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-/* System oscillator frequencies. These frequencies are normally constant */
-/* for a target, but they are made configurable in order to allow run-time */
-/* handling of different boards. The crystal oscillator clocks can be set */
-/* compile time to a non-default value by defining respective nFXO_FREQ */
-/* values according to board design. By defining the nFXO_FREQ to 0, */
-/* one indicates that the oscillator is not present, in order to save some */
-/* SW footprint. */
+// System oscillator frequencies. These frequencies are normally constant
+// for a target, but they are made configurable in order to allow run-time
+// handling of different boards. The crystal oscillator clocks can be set
+// compile time to a non-default value by defining respective nFXO_FREQ
+// values according to board design. By defining the nFXO_FREQ to 0,
+// one indicates that the oscillator is not present, in order to save some
+// SW footprint.
 
 #if !defined(FSRCO_FREQ)
-/* FSRCO frequency */
+// FSRCO frequency
 #define FSRCO_FREQ    (20000000UL)
 #endif
 
 #if !defined(HFXO_FREQ)
-/* HFXO frequency */
+// HFXO frequency
 #define HFXO_FREQ    (38400000UL)
 #endif
 
 #if !defined(HFRCODPLL_STARTUP_FREQ)
-/* HFRCODPLL startup frequency */
+// HFRCODPLL startup frequency
 #define HFRCODPLL_STARTUP_FREQ    (19000000UL)
 #endif
 
 #if !defined(HFRCODPLL_MAX_FREQ)
-/* Maximum HFRCODPLL frequency */
+// Maximum HFRCODPLL frequency
 #define HFRCODPLL_MAX_FREQ    (80000000UL)
 #endif
 
-/* CLKIN0 input */
+// CLKIN0 input
 #if !defined(CLKIN0_FREQ)
 #define CLKIN0_FREQ    (0UL)
 #endif
 
 #if !defined(LFRCO_MAX_FREQ)
-/* LFRCO frequency, tuned to below frequency during manufacturing. */
+// LFRCO frequency, tuned to below frequency during manufacturing.
 #define LFRCO_FREQ    (32768UL)
 #endif
 
 #if !defined(ULFRCO_FREQ)
-/* ULFRCO frequency */
+// ULFRCO frequency
 #define ULFRCO_FREQ    (1000UL)
 #endif
 
 #if !defined(LFXO_FREQ)
-/* LFXO frequency */
+// LFXO frequency
 #define LFXO_FREQ    (LFRCO_FREQ)
 #endif
 
@@ -88,18 +88,18 @@
  ******************************************************************************/
 
 #if (HFXO_FREQ > 0) && !defined(SYSTEM_NO_STATIC_MEMORY)
-/* NOTE: Gecko bootloaders can't have static variable allocation. */
-/* System HFXO clock frequency */
+// NOTE: Gecko bootloaders can't have static variable allocation.
+// System HFXO clock frequency
 static uint32_t SystemHFXOClock = HFXO_FREQ;
 #endif
 
 #if (LFXO_FREQ > 0) && !defined(SYSTEM_NO_STATIC_MEMORY)
-/* System LFXO clock frequency */
+// System LFXO clock frequency
 static uint32_t SystemLFXOClock = LFXO_FREQ;
 #endif
 
 #if !defined(SYSTEM_NO_STATIC_MEMORY)
-/* System HFRCODPLL clock frequency */
+// System HFRCODPLL clock frequency
 static uint32_t SystemHFRCODPLLClock = HFRCODPLL_STARTUP_FREQ;
 #endif
 
@@ -166,7 +166,7 @@ void SystemInit(void)
   && defined(__TZ_PRESENT)
   CMU->CLKEN1_SET = CMU_CLKEN1_SMU;
 
-  /* config SMU to Secure and other peripherals to Non-Secure. */
+  // config SMU to Secure and other peripherals to Non-Secure.
   SMU->PPUSATD0_CLR = _SMU_PPUSATD0_MASK;
 #if defined (SEMAILBOX_PRESENT)
   SMU->PPUSATD1_CLR = (_SMU_PPUSATD1_MASK & (~SMU_PPUSATD1_SMU & ~SMU_PPUSATD1_SEMAILBOX));
@@ -174,22 +174,51 @@ void SystemInit(void)
   SMU->PPUSATD1_CLR = (_SMU_PPUSATD1_MASK & ~SMU_PPUSATD1_SMU);
 #endif
 
-  /* SAU treats all accesses as non-secure */
+  // SAU treats all accesses as non-secure
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   SAU->CTRL = SAU_CTRL_ALLNS_Msk;
   __DSB();
   __ISB();
 #else
   #error "The startup code requires access to the CMSE toolchain extension to set proper SAU settings."
-#endif /* __ARM_FEATURE_CMSE */
+#endif // __ARM_FEATURE_CMSE
 
-/* Clear and Enable the SMU PPUSEC and BMPUSEC interrupt. */
+// Clear and Enable the SMU PPUSEC and BMPUSEC interrupt.
   NVIC_ClearPendingIRQ(SMU_SECURE_IRQn);
   SMU->IF_CLR = SMU_IF_PPUSEC | SMU_IF_BMPUSEC;
   NVIC_EnableIRQ(SMU_SECURE_IRQn);
   SMU->IEN = SMU_IEN_PPUSEC | SMU_IEN_BMPUSEC;
-#endif /*SL_TRUSTZONE_SECURE */
+#endif //SL_TRUSTZONE_SECURE
 }
+
+#if !defined(SL_LEGACY_LINKER)
+/**************************************************************************//**
+ * @brief
+ *   Copy data.
+ *
+ * @details
+ *   Used to copy data from Flash to Ram at startup and runtime.
+ *
+ * @param[in] from
+ *   Pointer to the source address in Flash.
+ *
+ * @param[in] to
+ *   Pointer to the destination address in Ram.
+ *
+ * @param[in] size
+ *   Size of data to copy.
+ *****************************************************************************/
+void FlashToRamCopy(uint32_t *from,
+                    uint32_t *to,
+                    uint32_t size)
+{
+  if (size != 0) {
+    while (size--) {
+      *to++ = *from++;
+    }
+  }
+}
+#endif
 
 /**************************************************************************//**
  * @brief
@@ -209,7 +238,7 @@ uint32_t SystemHFRCODPLLClockGet(void)
 #else
   uint32_t ret = 0UL;
 
-  /* Get oscillator frequency band */
+  // Get oscillator frequency band
   switch ((HFRCO0->CAL & _HFRCO_CAL_FREQRANGE_MASK)
           >> _HFRCO_CAL_FREQRANGE_SHIFT) {
     case 0:
@@ -299,7 +328,7 @@ void SystemHFRCODPLLClockSet(uint32_t freq)
 #if !defined(SYSTEM_NO_STATIC_MEMORY)
   SystemHFRCODPLLClock = freq;
 #else
-  (void) freq; /* Unused parameter */
+  (void) freq; // Unused parameter
 #endif
 }
 
@@ -322,7 +351,7 @@ uint32_t SystemSYSCLKGet(void)
 {
   uint32_t ret = 0U;
 
-  /* Find clock source */
+  // Find clock source
   switch (CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) {
     case _CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL:
       ret = SystemHFRCODPLLClockGet();
@@ -349,7 +378,7 @@ uint32_t SystemSYSCLKGet(void)
       break;
 
     default:
-      /* Unknown clock source. */
+      // Unknown clock source.
       while (1) {
       }
   }
@@ -386,7 +415,7 @@ uint32_t SystemHCLKGet(void)
   ret /= presc + 1U;
 
 #if !defined(SYSTEM_NO_STATIC_MEMORY)
-  /* Keep CMSIS system clock variable up-to-date */
+  // Keep CMSIS system clock variable up-to-date
   SystemCoreClock = ret;
 #endif
 
@@ -423,7 +452,7 @@ uint32_t SystemMaxCoreClockGet(void)
  *****************************************************************************/
 uint32_t SystemHFXOClockGet(void)
 {
-  /* The external crystal oscillator is not present if HFXO_FREQ==0 */
+  // The external crystal oscillator is not present if HFXO_FREQ==0
 #if (HFXO_FREQ > 0U)
 #if defined(SYSTEM_NO_STATIC_MEMORY)
   return HFXO_FREQ;
@@ -453,18 +482,18 @@ uint32_t SystemHFXOClockGet(void)
  *****************************************************************************/
 void SystemHFXOClockSet(uint32_t freq)
 {
-  /* External crystal oscillator present? */
+  // External crystal oscillator present?
 #if (HFXO_FREQ > 0) && !defined(SYSTEM_NO_STATIC_MEMORY)
   SystemHFXOClock = freq;
 
-  /* Update core clock frequency if HFXO is used to clock core */
+  // Update core clock frequency if HFXO is used to clock core
   if ((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK)
       == _CMU_SYSCLKCTRL_CLKSEL_HFXO) {
-    /* This function will update the global variable */
+    // This function will update the global variable
     SystemHCLKGet();
   }
 #else
-  (void) freq; /* Unused parameter */
+  (void) freq; // Unused parameter
 #endif
 }
 
@@ -529,7 +558,7 @@ uint32_t SystemLFRCOClockGet(void)
  *****************************************************************************/
 uint32_t SystemULFRCOClockGet(void)
 {
-  /* The ULFRCO frequency is not tuned, and can be very inaccurate */
+  // The ULFRCO frequency is not tuned, and can be very inaccurate
   return ULFRCO_FREQ;
 }
 
@@ -546,7 +575,7 @@ uint32_t SystemULFRCOClockGet(void)
  *****************************************************************************/
 uint32_t SystemLFXOClockGet(void)
 {
-  /* External crystal present? */
+  // External crystal present?
 #if (LFXO_FREQ > 0U)
 #if defined(SYSTEM_NO_STATIC_MEMORY)
   return LFXO_FREQ;
@@ -576,10 +605,10 @@ uint32_t SystemLFXOClockGet(void)
  *****************************************************************************/
 void SystemLFXOClockSet(uint32_t freq)
 {
-  /* External crystal oscillator present? */
+  // External crystal oscillator present?
 #if (LFXO_FREQ > 0U) && !defined(SYSTEM_NO_STATIC_MEMORY)
   SystemLFXOClock = freq;
 #else
-  (void) freq; /* Unused parameter */
+  (void) freq; // Unused parameter
 #endif
 }

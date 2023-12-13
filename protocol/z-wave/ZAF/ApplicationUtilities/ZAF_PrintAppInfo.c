@@ -11,7 +11,7 @@
 #include "ZAF_PrintAppInfo.h"
 #include "ZAF_AppName.h"
 
-void ZAF_PrintAppInfo()
+void ZAF_PrintAppInfo(void)
 {
   char app_name[ZAF_FILE_SIZE_APP_NAME];
   ZAF_AppName_Read(app_name);

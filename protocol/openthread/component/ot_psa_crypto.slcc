@@ -20,6 +20,7 @@ requires:
   - name: psa_crypto_ecdh
   - name: psa_crypto_ecdsa
   - name: psa_crypto_ecc_secp256r1
+  - name: psa_crypto_pbkdf2_cmac
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_USE_PSA_CRYPTO 

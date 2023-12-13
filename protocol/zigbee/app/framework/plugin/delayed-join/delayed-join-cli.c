@@ -40,8 +40,10 @@ void sli_zigbee_af_delayed_join_activate_command(sl_cli_command_arg_t *arguments
                        EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
                        "failed to configure delayed joining",
                        status);
+    return;
   }
   #endif // EZSP_HOST
+  emberAfPluginDelayedJoinActivate(true);
 }
 
 void sli_zigbee_af_delayed_join_send_network_key_command(sl_cli_command_arg_t *arguments)
@@ -50,6 +52,13 @@ void sli_zigbee_af_delayed_join_send_network_key_command(sl_cli_command_arg_t *a
   EmberEUI64  targetLong;
   sl_zigbee_copy_eui64_arg(arguments, 1, targetLong, true);
   EmberNodeId parentShort = sl_cli_get_argument_uint16(arguments, 2);
+
+  if (!emberAfPluginDelayedJoinIsActivated()) {
+    emberAfCorePrintln("%s: %s ",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                       "Not activated");
+    return;
+  }
 
   if (EMBER_SUCCESS != emberUnicastCurrentNetworkKey(targetShort,
                                                      targetLong,
@@ -64,5 +73,34 @@ void sli_zigbee_af_delayed_join_send_network_key_command(sl_cli_command_arg_t *a
 void sli_zigbee_af_delayed_join_set_network_key_timeout_command(sl_cli_command_arg_t *arguments)
 {
   uint8_t seconds = sl_cli_get_argument_uint8(arguments, 0);
-  emberAfPluginDelayedJoinSetNetworkKeyTimeout(seconds);
+  if (seconds > EMBER_AF_PLUGIN_DELAYED_JOIN_MAXIMUM_TIMEOUT_SUPPORTED_S) {
+    emberAfCorePrintln("%s: %s %3d",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                       "failed to set network key timeout that is greater than upper limit",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_MAXIMUM_TIMEOUT_SUPPORTED_S);
+  } else {
+    emberAfPluginDelayedJoinSetNetworkKeyTimeout(seconds);
+  }
+}
+
+void sli_zigbee_af_delayed_join_set_supported_timeout_command(sl_cli_command_arg_t *arguments)
+{
+  uint8_t seconds = sl_cli_get_argument_uint8(arguments, 0);
+  if (seconds > EMBER_AF_PLUGIN_DELAYED_JOIN_MAXIMUM_TIMEOUT_SUPPORTED_S) {
+    emberAfCorePrintln("%s: %s %3d",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                       "failed to set supported timeout that is greater than upper limit",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_MAXIMUM_TIMEOUT_SUPPORTED_S);
+  } else {
+    if (sl_zigbee_set_transient_device_table_timeout_ms(seconds * MILLISECOND_TICKS_PER_SECOND) == SL_STATUS_OK) {
+      emberAfCorePrintln("%s: %s %3d",
+                         EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                         "Adjust TC timeout to",
+                         seconds);
+    } else {
+      emberAfCorePrintln("%s: %s",
+                         EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                         "failed to set supported timeout");
+    }
+  }
 }

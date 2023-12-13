@@ -40,6 +40,7 @@
 #include "sl_cmsis_os2_common.h"
 #include "sl_sleeptimer.h"
 #include "sl_wisun_trace_util.h"
+#include "sl_wisun_app_core_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -227,7 +228,7 @@ void sl_wisun_ping_response(sl_wisun_ping_info_t * const ping_response)
 }
 
 /* Ping */
-sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
+sl_status_t sl_wisun_ping(const sockaddr_in6_t *const remote_addr,
                           const uint16_t packet_count,
                           const uint16_t packet_length,
                           sl_wisun_ping_stat_hnd_t stat_hnd,
@@ -267,8 +268,8 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
   stat->max_time_ms   = 0UL;
   stat->avg_time_ms   = 0UL;
 
-  memcpy(&req->remote_addr, remote_addr, sizeof(wisun_addr_t));
-  memcpy(&stat->remote_addr, remote_addr, sizeof(wisun_addr_t));
+  memcpy(&req->remote_addr, remote_addr, sizeof(sockaddr_in6_t));
+  memcpy(&stat->remote_addr, remote_addr, sizeof(sockaddr_in6_t));
 
   req->identifier = id++;
   req->sequence_number = 1U;
@@ -406,7 +407,7 @@ static void _ping_task_fnc(void *args)
   static sl_wisun_ping_echo_response_t icmp_resp = { 0U };
   int32_t sockid                                 = SOCKET_INVALID_ID;
   osStatus_t stat                                = osError;
-  socklen_t len                                  = sizeof(wisun_addr_t);
+  socklen_t len                                  = sizeof(sockaddr_in6_t);
   int32_t r                                      = SOCKET_RETVAL_ERROR;
   uint32_t time_cnt                              = 0UL;
   uint8_t msg_prio                               = 0U;
@@ -426,7 +427,7 @@ static void _ping_task_fnc(void *args)
     stat = osMessageQueueGet(_ping_req_msg_queue, &req, &msg_prio, 0U);
     (void) msg_prio;
     if (stat != osOK) {
-      osDelay(1UL);
+      app_wisun_dispatch_thread();
       continue;
     }
 
@@ -439,10 +440,10 @@ static void _ping_task_fnc(void *args)
     }
 
     // create socket and slect port
-    req.remote_addr.sin6_family = AF_WISUN;
+    req.remote_addr.sin6_family = AF_INET6;
     req.remote_addr.sin6_port = htons(SL_WISUN_PING_ICMP_PORT);
 
-    sockid = socket(AF_WISUN, SOCK_RAW, IPPROTO_ICMP);
+    sockid = socket(AF_INET6, (SOCK_RAW | SOCK_NONBLOCK), IPPROTO_ICMP);
 
     if (sockid == SOCKET_INVALID_ID) {
       _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_SOCKET_ERROR);
@@ -456,7 +457,7 @@ static void _ping_task_fnc(void *args)
 
     // send request
     r = sendto(sockid, (const void *) &icmp_req, req.packet_length, 0,
-               (const struct sockaddr *)&req.remote_addr, sizeof(wisun_addr_t));
+               (const struct sockaddr *)&req.remote_addr, sizeof(sockaddr_in6_t));
     if (r == SOCKET_RETVAL_ERROR) {
       _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_SEND_ERROR);
       close(sockid);
@@ -482,7 +483,7 @@ static void _ping_task_fnc(void *args)
         if (r > 0L) {
           break;
         }
-        osDelay(1UL);
+        app_wisun_dispatch_thread();
         time_cnt = _get_ms_val_from_start_time_stamp(&req);
       }
 
@@ -491,9 +492,9 @@ static void _ping_task_fnc(void *args)
       }
 
       // if address is not the requeste address (multicast address)
-      if (memcmp(&resp.remote_addr.sin6_addr.s6_addr,
-                 &req.remote_addr.sin6_addr.s6_addr,
-                 sizeof(req.remote_addr.sin6_addr.s6_addr))) {
+      if (memcmp(&resp.remote_addr.sin6_addr,
+                 &req.remote_addr.sin6_addr,
+                 sizeof(req.remote_addr.sin6_addr))) {
         multicast = true;
       } else {
         multicast = false;
@@ -507,7 +508,9 @@ static void _ping_task_fnc(void *args)
 
       // put response into the message queue
       osMessageQueuePut(_ping_resp_msg_queue, &resp, 0U, 0U);
-      osDelay(1UL); // thread dispatch
+
+      // thread dispatch
+      app_wisun_dispatch_thread();
     } while (multicast);
 
     osEventFlagsSet(_ping_evt, SL_WISUN_PING_STATUS_TRANSACTION_END);
@@ -521,7 +524,7 @@ __STATIC_INLINE bool _compare_req_resp(const sl_wisun_ping_echo_request_t * cons
   return req->identifier == resp->identifier
          && req->sequence_number == resp->sequence_number
          && req->type == SL_WISUN_PING_TYPE_ECHO_REQUEST
-         && resp->type == SL_WISUN_PING_TYPE_ECHO_RESPONSE ? true : false;
+         && resp->type == SL_WISUN_PING_TYPE_ECHO_RESPONSE;
 }
 
 /* Prepare and push failed response */

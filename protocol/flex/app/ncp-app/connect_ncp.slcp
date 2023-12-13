@@ -19,6 +19,8 @@ component:
   - id: connect_ncp
   - id: connect_cpc
   - id: cpc_secondary_recommended_interface
+  - id: iostream_cpc
+  - id: iostream_retarget_stdio
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM

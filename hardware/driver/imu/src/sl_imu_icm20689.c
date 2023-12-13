@@ -173,9 +173,9 @@ void sl_imu_get_acceleration(int16_t avec[3])
  ******************************************************************************/
 void sl_imu_get_orientation(int16_t ovec[3])
 {
-  ovec[0] = (int16_t) (100.0f * IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[0]);
-  ovec[1] = (int16_t) (100.0f * IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[1]);
-  ovec[2] = (int16_t) (100.0f * IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[2]);
+  ovec[0] = (int16_t) (100.0f * (float)IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[0]);
+  ovec[1] = (int16_t) (100.0f * (float)IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[1]);
+  ovec[2] = (int16_t) (100.0f * (float)IMU_RAD_TO_DEG_FACTOR * fuseObj.orientation[2]);
 }
 
 /***************************************************************************//**

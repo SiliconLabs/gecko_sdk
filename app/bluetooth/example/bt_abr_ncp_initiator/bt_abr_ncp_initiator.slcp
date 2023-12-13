@@ -21,7 +21,8 @@ component:
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_nvm
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_extended_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_sync
   - id: bluetooth_feature_system
@@ -37,6 +38,7 @@ component:
   - id: sl_system
   - id: device_init
   - id: bootloader_interface
+  - id: rail_util_hadm_antenna_offset
 
 source:
   - path: main.c
@@ -60,6 +62,8 @@ configuration:
     value: "2752"
   - name: SL_HEAP_SIZE
     value: "10000"
+  - name: SL_BT_CONFIG_BUFFER_SIZE
+    value: "12000"
   - name: SL_BT_CONFIG_USER_ADVERTISERS
     value: 4
   - name: SL_BOARD_ENABLE_VCOM

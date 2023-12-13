@@ -361,7 +361,7 @@ typedef struct {
 #define SYSCFG_IEN_FRCRAMERR2B_DEFAULT                        (_SYSCFG_IEN_FRCRAMERR2B_DEFAULT << 29)    /**< Shifted mode DEFAULT for SYSCFG_IEN         */
 
 /* Bit fields for SYSCFG CHIPREVHW */
-#define _SYSCFG_CHIPREVHW_RESETVALUE                          0x00000C01UL                            /**< Default value for SYSCFG_CHIPREVHW          */
+#define _SYSCFG_CHIPREVHW_RESETVALUE                          0x00000F01UL                            /**< Default value for SYSCFG_CHIPREVHW          */
 #define _SYSCFG_CHIPREVHW_MASK                                0xFF0FFFFFUL                            /**< Mask for SYSCFG_CHIPREVHW                   */
 #define _SYSCFG_CHIPREVHW_MAJOR_SHIFT                         0                                       /**< Shift value for SYSCFG_MAJOR                */
 #define _SYSCFG_CHIPREVHW_MAJOR_MASK                          0x3FUL                                  /**< Bit mask for SYSCFG_MAJOR                   */
@@ -369,7 +369,7 @@ typedef struct {
 #define SYSCFG_CHIPREVHW_MAJOR_DEFAULT                        (_SYSCFG_CHIPREVHW_MAJOR_DEFAULT << 0)  /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_FAMILY_SHIFT                        6                                       /**< Shift value for SYSCFG_FAMILY               */
 #define _SYSCFG_CHIPREVHW_FAMILY_MASK                         0xFC0UL                                 /**< Bit mask for SYSCFG_FAMILY                  */
-#define _SYSCFG_CHIPREVHW_FAMILY_DEFAULT                      0x00000030UL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
+#define _SYSCFG_CHIPREVHW_FAMILY_DEFAULT                      0x0000003CUL                            /**< Mode DEFAULT for SYSCFG_CHIPREVHW           */
 #define SYSCFG_CHIPREVHW_FAMILY_DEFAULT                       (_SYSCFG_CHIPREVHW_FAMILY_DEFAULT << 6) /**< Shifted mode DEFAULT for SYSCFG_CHIPREVHW   */
 #define _SYSCFG_CHIPREVHW_MINOR_SHIFT                         12                                      /**< Shift value for SYSCFG_MINOR                */
 #define _SYSCFG_CHIPREVHW_MINOR_MASK                          0xFF000UL                               /**< Bit mask for SYSCFG_MINOR                   */
@@ -386,7 +386,11 @@ typedef struct {
 #define _SYSCFG_CHIPREV_FAMILY_SHIFT                          6                                     /**< Shift value for SYSCFG_FAMILY               */
 #define _SYSCFG_CHIPREV_FAMILY_MASK                           0xFC0UL                               /**< Bit mask for SYSCFG_FAMILY                  */
 #define _SYSCFG_CHIPREV_FAMILY_DEFAULT                        0x00000000UL                          /**< Mode DEFAULT for SYSCFG_CHIPREV             */
+#define _SYSCFG_CHIPREV_FAMILY_MG24                           0x0000003CUL                          /**< Mode MG24 for SYSCFG_CHIPREV                */
+#define _SYSCFG_CHIPREV_FAMILY_BG24                           0x0000003DUL                          /**< Mode BG24 for SYSCFG_CHIPREV                */
 #define SYSCFG_CHIPREV_FAMILY_DEFAULT                         (_SYSCFG_CHIPREV_FAMILY_DEFAULT << 6) /**< Shifted mode DEFAULT for SYSCFG_CHIPREV     */
+#define SYSCFG_CHIPREV_FAMILY_MG24                            (_SYSCFG_CHIPREV_FAMILY_MG24 << 6)    /**< Shifted mode MG24 for SYSCFG_CHIPREV        */
+#define SYSCFG_CHIPREV_FAMILY_BG24                            (_SYSCFG_CHIPREV_FAMILY_BG24 << 6)    /**< Shifted mode BG24 for SYSCFG_CHIPREV        */
 #define _SYSCFG_CHIPREV_MINOR_SHIFT                           12                                    /**< Shift value for SYSCFG_MINOR                */
 #define _SYSCFG_CHIPREV_MINOR_MASK                            0xFF000UL                             /**< Bit mask for SYSCFG_MINOR                   */
 #define _SYSCFG_CHIPREV_MINOR_DEFAULT                         0x00000000UL                          /**< Mode DEFAULT for SYSCFG_CHIPREV             */
@@ -769,4 +773,4 @@ typedef struct {
 /** @} End of group BGM24_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* BGM24_SYSCFG_H */
+#endif // BGM24_SYSCFG_H

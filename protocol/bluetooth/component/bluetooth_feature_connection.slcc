@@ -25,3 +25,6 @@ template_contribution:
       include: "sl_bluetooth_connection_config.h"
       function: sl_btctrl_init_conn()
     priority: 5
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-connection

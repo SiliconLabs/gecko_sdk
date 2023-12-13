@@ -2,7 +2,7 @@
 #define SL_BT_HCI_COEX_CONFIG_H
 
 /***********************************************************************************************//**
- * @addtogroup hci_coex
+ * @addtogroup bt_hci_coex
  * @{
  **************************************************************************************************/
 
@@ -58,5 +58,5 @@
 
 // <<< end of configuration section >>>
 
-/** @} (end addtogroup hci_coex) */
+/** @} (end addtogroup bt_hci_coex) */
 #endif // SL_BT_HCI_COEX_CONFIG_H

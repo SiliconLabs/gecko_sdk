@@ -12,9 +12,15 @@ requires:
   - name: psa_crypto_aes
   - name: mbedtls_ccm
     condition: [device_series_0]
+  - name: sl_si91x_psa_aead
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
+  - name: sl_si91x_psa_wrap
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CCM
+    value: PSA_WANT_ALG_CCM 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CCM 1"
     condition: [mbedtls_ccm]

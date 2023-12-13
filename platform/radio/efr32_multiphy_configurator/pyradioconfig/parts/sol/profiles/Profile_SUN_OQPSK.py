@@ -33,6 +33,8 @@ class Profile_SUN_OQPSK_Sol(IProfile):
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
 
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
     def build_required_profile_inputs(self, model, profile):
         self.make_required_input(profile, model.vars.base_frequency_hz, "operational_frequency",
                                      readable_name="Base Channel Frequency", value_limit_min=358000000,

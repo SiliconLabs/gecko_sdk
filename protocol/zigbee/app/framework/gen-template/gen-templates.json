@@ -12,7 +12,7 @@
       "shareClusterStatesAcrossEndpoints": "true"
     }
   },
-  "requiredFeatureLevel": 94,
+  "requiredFeatureLevel": 99,
   "templates": [
     {
       "path": "zap-id.zapt",

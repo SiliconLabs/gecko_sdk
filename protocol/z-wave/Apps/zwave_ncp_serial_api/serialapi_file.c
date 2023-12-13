@@ -43,6 +43,7 @@
 #define APP_VERSION_7_15_3             0x00070F03  // 7.15.3 (NO_20DBM_SUPPORT)
 #define APP_VERSION_7_18_1             0x00071201  /* 7.18.1 - The changes include the capability to set tx power to
                                                     * 20+ dBm over the serial link. */
+#define APP_VERSION_7_21_0             0x00071500  /* 7.21.0 - [FIX] save the node ID type. */
 
 // Used by the application data file.
 typedef struct SApplicationData
@@ -77,13 +78,25 @@ typedef struct SApplicationConfiguration_v7_15_3  // Cannot pack this (change si
   int16_t             maxTxPower;          // changed to zpal_tx_power_t { aka int16_t } in APP_VERSION_7_18_1
 } SApplicationConfiguration_v7_15_3;
 
+//declare the old structure only for the migration process.
+//No variable should be declared with this type (excepted for migration process).
+typedef struct __attribute__((packed)) SApplicationConfiguration_V7_18_1
+{
+  zpal_radio_region_t           rfRegion;
+  zpal_tx_power_t               iTxPower;
+  zpal_tx_power_t               ipower0dbmMeasured;
+  uint8_t                       radio_debug_enable;
+  zpal_tx_power_t               maxTxPower; // For LR only
+}SApplicationConfiguration_V7_18_1;
+
 typedef struct __attribute__((packed)) SApplicationConfiguration  // Must be packet as it is saved on NVM.
 {
-  zpal_radio_region_t rfRegion;
-  zpal_tx_power_t     iTxPower;
-  zpal_tx_power_t     ipower0dbmMeasured;
-  uint8_t             radio_debug_enable;
-  zpal_tx_power_t     maxTxPower;          // For LR only
+  zpal_radio_region_t           rfRegion;
+  zpal_tx_power_t               iTxPower;
+  zpal_tx_power_t               ipower0dbmMeasured;
+  uint8_t                       radio_debug_enable;
+  zpal_tx_power_t               maxTxPower; // For LR only
+  eSerialAPISetupNodeIdBaseType nodeIdBaseType;
 } SApplicationConfiguration;
 
 #define FILE_SIZE_APPLICATIONDATA        (sizeof(SApplicationData))
@@ -111,7 +124,7 @@ bool SerialAPI_SetZWVersion(const uint32_t * appVersion)
 }
 
 static void
-SerialAPI_FileSystemMigrationManagement()
+SerialAPI_FileSystemMigrationManagement(void)
 {
   //Read present file system version file
   uint32_t presentFilesysVersion;
@@ -143,9 +156,8 @@ SerialAPI_FileSystemMigrationManagement()
       zpal_nvm_get_object_size(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &dataLen);
 
       //Read legacy file to first members of tApplicationConfiguration
-      SApplicationConfiguration_v7_15_3 tApplicationConfiguration;
+      SApplicationConfiguration_v7_15_3 tApplicationConfiguration = { 0 };
       // Initialize, since zpal_nvm_read() might fail.
-      memset(&tApplicationConfiguration, 0, sizeof(tApplicationConfiguration));
       zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, dataLen);
 
       //Write default values to new members of tApplicationConfiguration and update the file.
@@ -162,8 +174,8 @@ SerialAPI_FileSystemMigrationManagement()
     // Migrate files from file system version APP_VERSION_7_15_3 to APP_VERSION_7_18_1.
     if ( presentFilesysVersion < APP_VERSION_7_18_1 )
     {
-      SApplicationConfiguration_v7_15_3 tApplicationConfiguration_v7_15_3;
-      SApplicationConfiguration tApplicationConfiguration;
+      SApplicationConfiguration_v7_15_3 tApplicationConfiguration_v7_15_3 = { 0 };
+      SApplicationConfiguration_V7_18_1 tApplicationConfiguration = { 0 };
       zpal_status_t status;
 
       status = zpal_nvm_read(pFileSystemApplication, FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration_v7_15_3,
@@ -193,10 +205,45 @@ SerialAPI_FileSystemMigrationManagement()
       // Lifted to version APP_VERSION_7_18_1
     }
 
+#ifdef ZW_MIGRATION_FROM_7_20
+    // Migrate files from file system version APP_VERSION_7_20_0 (same as 7_18_1) to APP_VERSION_7_21_0.
+    if ( presentFilesysVersion < APP_VERSION_7_21_0 )
+    {
+      SApplicationConfiguration sAppCfgMigration = { 0 };
+      zpal_status_t status;
+
+      //cannot migrate if the file system is older than V7.18.1. Other migration script should have been called before.
+      ASSERT(APP_VERSION_7_18_1 <= presentFilesysVersion);
+
+      /*New application configuration has only a new member (no change in the legacy part). So read the
+      legacy structure directly in the new one, then just set value for new member.*/
+      status = ZAF_nvm_app_read(FILE_ID_APPLICATIONCONFIGURATION, &sAppCfgMigration,
+          sizeof(SApplicationConfiguration_V7_18_1));
+      if (ZPAL_STATUS_OK != status)
+      {
+        WriteDefaultApplicationConfiguration();
+      }
+      else
+      {
+        //default value for new member.
+        sAppCfgMigration.nodeIdBaseType = SERIAL_API_SETUP_NODEID_BASE_TYPE_DEFAULT;
+
+        status = ZAF_nvm_app_write(FILE_ID_APPLICATIONCONFIGURATION, &sAppCfgMigration,
+            sizeof(sAppCfgMigration));   /* Do not use FILE_SIZE_APPLICATIONCONFIGURATION in
+                                          * migration functions, instead hard-code the size as
+                                          * sizes do change with FW upgrades. */
+        if (ZPAL_STATUS_OK == status)
+        {
+          presentFilesysVersion = APP_VERSION_7_21_0;
+        }
+      }
+    }
+#endif /* ZW_MIGRATION_FROM_7_20 */
+
     /*
      * If this fails, some of the migrations were not performed due to earlier migrations that have failed.
      */
-    ASSERT(APP_VERSION_7_18_1 <= presentFilesysVersion);
+    ASSERT(APP_VERSION_7_21_0 <= presentFilesysVersion);
 
     /**
      * @attention This implementation assumes that the build is going to update the ZAF_FILE_ID_APP_VERSION to the current!
@@ -266,7 +313,7 @@ bool ObjectExist(zpal_nvm_object_key_t key)
  */
 uint8_t SerialApiNvmReadAppData(uint32_t offset, uint8_t* pAppData, uint32_t iLength)
 {
-  SApplicationData tApplicationData;
+  SApplicationData tApplicationData = { 0 };
 
   uint8_t dataIsRead = false;
   zpal_status_t status;
@@ -292,7 +339,7 @@ uint8_t SerialApiNvmReadAppData(uint32_t offset, uint8_t* pAppData, uint32_t iLe
  */
 uint8_t SerialApiNvmWriteAppData(uint32_t offset, const uint8_t* pAppData, uint32_t iLength)
 {
-  SApplicationData tApplicationData;
+  SApplicationData tApplicationData = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -315,7 +362,7 @@ SaveApplicationSettings(uint8_t bListening,
                         uint8_t bSpecific
                        )
 {
-  SApplicationSettings tApplicationSettings;
+  SApplicationSettings tApplicationSettings = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -341,7 +388,7 @@ ReadApplicationSettings(uint8_t* pListening,
                         uint8_t* pSpecific
                        )
 {
-  SApplicationSettings tApplicationSettings;
+  SApplicationSettings tApplicationSettings = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -369,7 +416,7 @@ SaveApplicationCCInfo (uint8_t        bUnSecureIncludedCCLen,
                        uint8_t        bSecureIncludedSecureCCLen,
                        const uint8_t* pSecureIncludedSecureCC)
 {
-  SApplicationCmdClassInfo tApplicationCmdClassInfo;
+  SApplicationCmdClassInfo tApplicationCmdClassInfo = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -430,7 +477,7 @@ ReadApplicationCCInfo (uint8_t* pUnSecureIncludedCCLen,
                        uint8_t* pSecureIncludedSecureCCLen,
                        uint8_t* pSecureIncludedSecureCC)
 {
-  SApplicationCmdClassInfo tApplicationCmdClassInfo;
+  SApplicationCmdClassInfo tApplicationCmdClassInfo = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -482,7 +529,7 @@ ReadApplicationCCInfo (uint8_t* pUnSecureIncludedCCLen,
 uint8_t
 SaveApplicationRfRegion(zpal_radio_region_t rfRegion)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -502,7 +549,7 @@ SaveApplicationRfRegion(zpal_radio_region_t rfRegion)
 uint8_t
 ReadApplicationRfRegion(zpal_radio_region_t* rfRegion)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -520,9 +567,49 @@ ReadApplicationRfRegion(zpal_radio_region_t* rfRegion)
 }
 
 uint8_t
-SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured)
+SaveApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType nodeIdBaseType)
+{
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
+  uint8_t dataIsWritten = false;
+  zpal_status_t status;
+
+  status = ZAF_nvm_app_read(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, FILE_SIZE_APPLICATIONCONFIGURATION);
+  if (ZPAL_STATUS_OK == status)
+  {
+    tApplicationConfiguration.nodeIdBaseType = nodeIdBaseType;
+    status = ZAF_nvm_app_write(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, FILE_SIZE_APPLICATIONCONFIGURATION);
+    if (ZPAL_STATUS_OK == status)
+    {
+      dataIsWritten = true;
+    }
+  }
+  return dataIsWritten;
+}
+
+uint8_t
+ReadApplicationNodeIdBaseType(eSerialAPISetupNodeIdBaseType* nodeIdBaseType)
 {
   SApplicationConfiguration tApplicationConfiguration;
+  uint8_t dataIsRead = false;
+  zpal_status_t status;
+
+  if (ObjectExist(FILE_ID_APPLICATIONCONFIGURATION))
+  {
+    status = ZAF_nvm_app_read(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, FILE_SIZE_APPLICATIONCONFIGURATION);
+    if (ZPAL_STATUS_OK == status)
+    {
+      *nodeIdBaseType = tApplicationConfiguration.nodeIdBaseType;
+      dataIsRead = true;
+    }
+  }
+  return dataIsRead;
+
+}
+
+uint8_t
+SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMeasured)
+{
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -544,7 +631,7 @@ SaveApplicationTxPowerlevel(zpal_tx_power_t ipower, zpal_tx_power_t power0dbmMea
 uint8_t
 ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmMeasured)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -565,7 +652,7 @@ ReadApplicationTxPowerlevel(zpal_tx_power_t *ipower, zpal_tx_power_t *power0dbmM
 uint8_t
 SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -586,7 +673,7 @@ SaveApplicationMaxLRTxPwr(zpal_tx_power_t maxTxPwr)
 uint8_t
 ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -606,7 +693,7 @@ ReadApplicationMaxLRTxPwr(zpal_tx_power_t *maxTxPwr)
 uint8_t
 SaveApplicationEnablePTI(uint8_t radio_debug_enable)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
 
@@ -627,7 +714,7 @@ SaveApplicationEnablePTI(uint8_t radio_debug_enable)
 uint8_t
 ReadApplicationEnablePTI(uint8_t *radio_debug_enable)
 {
-  SApplicationConfiguration tApplicationConfiguration;
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   uint8_t dataIsRead = false;
   zpal_status_t status;
 
@@ -657,8 +744,7 @@ static void
 WriteDefaultApplicationSettings(void)
 {
   //Write default Application Settings file
-  SApplicationSettings tApplicationSettings;
-  memset(&tApplicationSettings, 0 , sizeof(SApplicationSettings));
+  SApplicationSettings tApplicationSettings = { 0 };
   ZAF_nvm_app_write(FILE_ID_APPLICATIONSETTINGS, &tApplicationSettings, sizeof(SApplicationSettings));
 }
 
@@ -666,8 +752,7 @@ static void
 WriteDefaultApplicationCmdClassInfo(void)
 {
   //Write default ApplicationCmdClassInfo file
-  SApplicationCmdClassInfo tApplicationCmdClassInfo;
-  memset(&tApplicationCmdClassInfo, 0 , sizeof(SApplicationCmdClassInfo));
+  SApplicationCmdClassInfo tApplicationCmdClassInfo = { 0 };
   ZAF_nvm_app_write(FILE_ID_APPLICATIONCMDINFO, &tApplicationCmdClassInfo, sizeof(SApplicationCmdClassInfo));
 }
 
@@ -675,8 +760,7 @@ static void
 WriteDefaultApplicationData(void)
 {
   //Write default Controller Info file
-  SApplicationData tApplicationData;
-  memset(&tApplicationData, 0 , sizeof(SApplicationData));
+  SApplicationData tApplicationData = { 0 };
   ZAF_nvm_app_write(FILE_ID_APPLICATIONDATA, &tApplicationData, sizeof(SApplicationData));
 }
 
@@ -684,8 +768,7 @@ static void
 WriteDefaultApplicationConfiguration(void)
 {
   //Write default Application Configuration file
-  SApplicationConfiguration tApplicationConfiguration;
-  memset(&tApplicationConfiguration, 0 , sizeof(SApplicationConfiguration));
+  SApplicationConfiguration tApplicationConfiguration = { 0 };
   ZAF_nvm_app_write(FILE_ID_APPLICATIONCONFIGURATION, &tApplicationConfiguration, sizeof(SApplicationConfiguration));
 }
 

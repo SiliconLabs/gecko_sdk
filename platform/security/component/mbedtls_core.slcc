@@ -21,11 +21,7 @@ provides:
 
 requires:
   - name: device
-    condition: [device_series_0]
-  - name: device
-    condition: [device_series_1]
-  - name: device
-    condition: [device_series_2]
+    condition: [device_efx]
 
   - name: mbedtls_source
   - name: mbedtls_config

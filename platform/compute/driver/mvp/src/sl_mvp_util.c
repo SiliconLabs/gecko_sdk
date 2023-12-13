@@ -32,9 +32,6 @@
 
 extern __INLINE bool sli_mvp_util_is_pointer_word_aligned(const void *pointer);
 
-extern __INLINE int sli_mvp_util_offset_nhwc(int height, int width, int depth,
-                                             int n, int h, int w, int c);
-
 /***************************************************************************//**
  *
  * sli_mvp_memclr_f16() clears 2 * batches * vecs * rows * cols bytes in memory.
@@ -98,11 +95,13 @@ sl_status_t sli_mvp_util_memclr_f16(sli_mvp_program_context_t *p,
       sli_mvp_pb_postloop_incr_dim(p, SLI_MVP_ARRAY(0), SLI_MVP_INCRDIM_DEPTH);
     sli_mvp_pb_end_loop(p);
 
-    if (status == SL_STATUS_OK) {
-      sli_mvp_pb_execute_program(p);
-    } else {
+    if (status != SL_STATUS_OK) {
       return status;
     }
+    if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+      return status;
+    }
+
     dest += batch_size;
   }
   return status;

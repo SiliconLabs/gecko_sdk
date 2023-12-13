@@ -9,12 +9,6 @@ The Gecko SDK (GSDK) combines Silicon Labs wireless software development kits (S
 
 Silicon Labs also helps future-proof your devices with over-the-air software and security updates, helping to minimize maintenance cost and improve your end user product experience!
 
-## News
-
-### My git clone stopped working with an LFS error. What could be the cause?
-
-On September 30th, 2023, the git LFS server will enable a bandwidth quota based on your IP address. Go [here](https://github.com/SiliconLabs/.github) for more information on how to resolve this issue.
-
 ## Licensing
 
 Gecko SDK is covered by one of several different licenses.
@@ -26,7 +20,7 @@ An archive of all documents associated with the latest release of GSDK can be fo
 
 ## Getting Started with GSDK
 
-The recommended method to get started with the GSDK is to first install [Simplicity Studio 5](https://www.silabs.com/developers/simplicity-studio), which will setup your development environment and walk you through the installation of GSDK. Alternatively, GSDK and other required tools may be installed manually.
+The recommended method to get started with the GSDK is to first install [Simplicity Studio 5](https://www.silabs.com/developers/simplicity-studio), which will set up your development environment and walk you through installing the GSDK. Alternatively, GSDK and other required tools may be installed manually.
 
 ### Installing through Simplicity Studio
 
@@ -54,9 +48,9 @@ GSDK releases are packaged as an archive that may be downloaded from the [Releas
 
 #### Toolchain
 
-This release of GSDK supports the Arm Embedded Toolchain version 10.3-2021.10 and IAR Embedded Workbench version 9.20.4. One of these toolchains must be installed.
+This release of GSDK supports the Arm Embedded Toolchain version 12.2.1 and IAR Embedded Workbench version 9.40.1. One of these toolchains must be installed.
 
-- [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) - Download and install v10.3-2021.10 for your host operating system.
+- [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) - Download and install v12.2.1 for your host operating system.
 - [IAR Embedded Workbench for Arm](https://www.iar.com/downloads) - Only the latest version is available in Downloads; for older versions you must log-in to your "My Pages".
 
 #### Silicon Labs Configurator (SLC) Command-line Interface (CLI)
@@ -65,4 +59,4 @@ GSDK contains software that follows the [SLC specification](https://siliconlabs.
 
 Simplicity Studio 5 includes a pre-integrated version of SLC tooling. The SLC-CLI tool provides a command-line alternative that, among other things, will resolve project and component dependencies and generate a project for a specified embedded target and build system (for example, IAR Embedded Workbench or GNU tools via a Makefile).  
 
-See the [SLC specification](https://siliconlabs.github.io/slc-specification/) for details about SLC. For information on installing and using the SLC-CLI, see [UG520: Software Project Generation and Configuration with SLC-CLI](https://www.silabs.com/documents/public/user-guides/ug520-software-project-generation-configuration-with-slc-cli.pdf). 
+See the [SLC specification](https://siliconlabs.github.io/slc-specification/) for details about SLC. For information on installing and using the SLC-CLI, see [UG520: Software Project Generation and Configuration with SLC-CLI](https://www.silabs.com/documents/public/user-guides/ug520-software-project-generation-configuration-with-slc-cli.pdf).

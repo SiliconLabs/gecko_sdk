@@ -27,9 +27,11 @@ component:
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_nvm
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_extended_scanner
   - id: bluetooth_feature_sm
   - id: bluetooth_feature_sync
+  - id: bluetooth_feature_periodic_sync
+  - id: bluetooth_feature_sync_scanner
   - id: bluetooth_feature_system
   - id: bluetooth_feature_aod_receiver
   - id: ncp

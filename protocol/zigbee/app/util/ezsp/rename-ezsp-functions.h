@@ -121,15 +121,10 @@
 //Security Frames
 #define emberSetInitialSecurityState        ezspSetInitialSecurityState
 #define emberGetCurrentSecurityState        ezspGetCurrentSecurityState
-#define emberGetKey                         ezspGetKey
-#define emberGetKeyTableEntry               ezspGetKeyTableEntry
-#define emberSetKeyTableEntry               ezspSetKeyTableEntry
 #define emberFindKeyTableEntry              ezspFindKeyTableEntry
-#define emberAddOrUpdateKeyTableEntry       ezspAddOrUpdateKeyTableEntry
 #define emberEraseKeyTableEntry             ezspEraseKeyTableEntry
 #define emberClearKeyTable                  ezspClearKeyTable
 #define emberRequestLinkKey                 ezspRequestLinkKey
-#define emberAddTransientLinkKey            ezspAddTransientLinkKey
 #define emberClearTransientLinkKeys         ezspClearTransientLinkKeys
 #define emberUpdateTcLinkKey                ezspUpdateTcLinkKey
 #define emberSendTrustCenterLinkKey         ezspSendTrustCenterLinkKey
@@ -170,6 +165,7 @@
 #define emberGpSinkTableClearAll ezspGpSinkTableClearAll
 #define emberGpSinkTableInit        ezspGpSinkTableInit
 #define emberGpSinkTableSetSecurityFrameCounter ezspGpSinkTableSetSecurityFrameCounter
+#define emberGpSinkTableGetNumberOfActiveEntries ezspGpSinkTableGetNumberOfActiveEntries
 
 // WWAH frames
 #define emberSetParentClassificationEnabled   ezspSetParentClassificationEnabled

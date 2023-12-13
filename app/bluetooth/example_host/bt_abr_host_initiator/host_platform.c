@@ -42,5 +42,6 @@ void waiting_indication(void)
 
 void platform_display_state(abr_state_t state)
 {
+  (void)state; // Unused parameter
   // Do nothing
 }

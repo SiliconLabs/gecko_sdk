@@ -58,6 +58,8 @@
     value: '"BRD4251D"'
   - name: SL_BOARD_REV
     value: '"B02"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_169
   - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS

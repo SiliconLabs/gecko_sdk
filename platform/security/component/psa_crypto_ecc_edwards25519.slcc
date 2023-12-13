@@ -17,6 +17,6 @@ requires:
   - name: psa_crypto_ecc
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_TWISTED_EDWARDS_255
+    value: PSA_WANT_ECC_TWISTED_EDWARDS_255 1
 documentation:
   url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_TWISTED_EDWARDS

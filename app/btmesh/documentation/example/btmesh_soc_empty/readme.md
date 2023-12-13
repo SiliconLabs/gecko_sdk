@@ -23,7 +23,7 @@ To learn more about programming an SoC application, see [UG472: Silicon Labs Blu
 
 - Some components are configurable, and can be customized using the Component Editor
 
-![Bluetooth Mesh Components](readme_img5.png)
+![Bluetooth Mesh Components](readme_img2.png)
 
 - Respond to the events raised by the Bluetooth stack
 - Implement additional application logic
@@ -53,15 +53,15 @@ As described above, an empty example does nothing except broadcast unprovisioned
 3. Build and flash the **Bluetooth Mesh - SoC Empty** example to your device. The flashing can be done, for example, using the Simplicity Studio internal **Flash Programmer** or external **Simplicity Commander** tools.
 4. Download the Silicon Labs **Bluetooth Mesh** smartphone application available on [iOS](https://apps.apple.com/us/app/bluetooth-mesh-by-silicon-labs/id1411352948) and [Android](https://play.google.com/store/apps/details?id=com.siliconlabs.bluetoothmesh). Make sure to reset the local database by pressing the "Reset local database" button in the menu "More".
 
-![Bluetooth Mesh start screen](readme_img4.png)
+![Bluetooth Mesh App Reset local database](readme_img3.png)
 
 5. Open the app, choose the Provision Browser, and tap **Scan**.
 
-![Bluetooth Mesh start screen](readme_img2.png)
+![Bluetooth Mesh App Scan](readme_img4.png)
 
 6. Now you should find your device advertising. Tap **PROVISION**.
 
-![Bluetooth Browser](readme_img3.png)
+![Bluetooth Mesh App Provision](readme_img5.png)
 
 ## Troubleshooting
 

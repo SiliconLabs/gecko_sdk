@@ -115,7 +115,7 @@ sl_status_t get_attested_token(token_t token_type,
 {
   sl_se_command_context_t cmd_ctx = { 0 }; // SE Manager command context
   uint8_t nonce[64] = { 0 }; /// Nonce/challenge, to be randomly generated.
-  sl_status_t ret;
+  sl_status_t retval;
 
   /// Initialize Secure Element command context
   if (sl_se_init_command_context(&cmd_ctx) != SL_STATUS_OK) {
@@ -124,12 +124,12 @@ sl_status_t get_attested_token(token_t token_type,
   }
 
   /// Generate random nonce
-  ret = sl_se_get_random(&cmd_ctx, &nonce, nonce_size);
+  retval = sl_se_get_random(&cmd_ctx, &nonce, nonce_size);
   sl_se_deinit_command_context(&cmd_ctx);
 
-  if (ret != SL_STATUS_OK) {
+  if (retval != SL_STATUS_OK) {
     printf("[ERROR] Failed to generate random nonce.\n");
-    return ret;
+    return retval;
   }
 
   /// Get attested token

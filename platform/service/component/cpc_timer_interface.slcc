@@ -1,0 +1,15 @@
+id: cpc_timer_interface
+label: CPC Timer interface
+package: platform
+description: Co-Processor Communication (CPC) Core
+category: Services|Co-Processor Communication
+quality: production
+ui_hints:
+  visibility: never
+root_path: platform/service/cpc
+include:
+  - path: inc
+    file_list:
+      - path: sli_cpc_timer.h
+provides:
+  - name: cpc_timer_interface

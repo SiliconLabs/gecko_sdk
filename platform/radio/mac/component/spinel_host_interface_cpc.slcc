@@ -22,5 +22,24 @@ source:
   - path: "protocol/openthread/platform-abstraction/posix/cpc_interface.cpp"
 
 define:
-  - name: "OPENTHREAD_POSIX_CONFIG_RCP_BUS"
-    value: OT_POSIX_RCP_BUS_VENDOR
+#
+# OpenThread now allows multiple spinel instances (HDLC/SPI/VENDOR) to be active
+# at the same time. In our CPC implementation we only maintain one active vendor
+# interface "spinel+cpc".
+#
+# HDLC interface is enabled by default in the OT stack. While it should be okay
+# to support both interfaces (our radio URL will force using the CPC interface)
+# turning on HDLC interface requires bringing in HDLC source which is already in
+# a different component.
+#
+# Forcing only CPC interface now to keep the distinction clean, but maybe we can
+# support both interfaces if required sometime in the future.
+#
+  - name: "OPENTHREAD_POSIX_CONFIG_SPINEL_HDLC_INTERFACE_ENABLE"
+    value: 0
+  - name: "OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE"
+    value: 1
+  - name: "OPENTHREAD_CONFIG_PLATFORM_POWER_CALIBRATION_ENABLE"
+    value: 0
+  - name: "OPENTHREAD_POSIX_CONFIG_CONFIGURATION_FILE_ENABLE"
+    value: 0

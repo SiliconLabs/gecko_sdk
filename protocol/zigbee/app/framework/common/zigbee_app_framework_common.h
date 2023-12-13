@@ -46,6 +46,10 @@ void sli_zigbee_common_rtos_wakeup_isr_callback(void);
 
 uint32_t sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup(void);
 
+#ifdef EZSP_SPI
+void sl_zigbee_app_framework_sleep_tick();
+#endif // EZSP_SPI
+
 //------------------------------------------------------------------------------
 // Internal debug print stub macros
 

@@ -1,7 +1,7 @@
 project_name: psa_crypto_kdf
 package: platform
 quality: production
-label: Platform - PSA Crypto KDF
+label: Platform Security - SoC PSA Crypto KDF
 description: >
   This example project demonstrates the Key Derivation Function (KDF) API.
 category: Example|Platform

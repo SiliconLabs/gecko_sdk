@@ -1,15 +1,14 @@
 package: Zigbee
-description: A component implementing the translation table functionality of the Green
-  Power cluster.
+description: A component implementing the translation table functionality of the Green Power cluster.
 label: Green Power Translation Table
 quality: production
 id: zigbee_green_power_translation_table
 category: Zigbee|Green Power
 provides:
-   - name: "zigbee_green_power_translation_table"
+  - name: zigbee_green_power_translation_table
 requires:
-   - name: "zigbee_green_power_server"
-   - name: "zigbee_green_power_common"
+  - name: zigbee_green_power_server
+  - name: zigbee_green_power_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-translation-table/config/green-power-translation-table-config.h
 source:
@@ -33,7 +32,7 @@ template_contribution:
       function_name: emberAfPluginGreenPowerTranslationTableStackStatusCallback
   - name: token_header
     value: app/framework/plugin/green-power-translation-table/green-power-translation-table-tokens.h
- 
+
 
 documentation:
   docset: zigbee

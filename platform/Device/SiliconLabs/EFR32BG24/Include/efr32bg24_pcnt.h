@@ -479,4 +479,4 @@ typedef struct {
 /** @} End of group EFR32BG24_PCNT */
 /** @} End of group Parts */
 
-#endif /* EFR32BG24_PCNT_H */
+#endif // EFR32BG24_PCNT_H

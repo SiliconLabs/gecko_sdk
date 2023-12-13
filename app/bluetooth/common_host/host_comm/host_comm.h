@@ -35,16 +35,15 @@
 
 // Macros used by CPC
 #if defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
-#define HOST_COMM_CPC_OPTSTRING  "C:R"
+#define HOST_COMM_CPC_OPTSTRING  "C:"
 
 // Usage info.
-#define HOST_COMM_CPC_USAGE " | -C <cpcd_instance_name> | [-R] |"
+#define HOST_COMM_CPC_USAGE " | -C <cpcd_instance_name> |"
 
 // Options info.
-#define HOST_COMM_CPC_OPTIONS                                               \
-  "    -C  CPC connection\n"                                                \
-  "        <cpcd_instance_name> Name of the CPCd instance to connect to.\n" \
-  "    -R  No reset on start\n"
+#define HOST_COMM_CPC_OPTIONS \
+  "    -C  CPC connection\n"  \
+  "        <cpcd_instance_name> Name of the CPCd instance to connect to.\n"
 #else // defined(POSIX) && POSIX == 1 && defined (CPC) && CPC == 1
 #define HOST_COMM_CPC_OPTSTRING
 #define HOST_COMM_CPC_USAGE

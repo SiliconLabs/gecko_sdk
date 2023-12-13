@@ -229,4 +229,4 @@ typedef struct {
 /** @} End of group FGM23_DPLL */
 /** @} End of group Parts */
 
-#endif /* FGM23_DPLL_H */
+#endif // FGM23_DPLL_H

@@ -47,10 +47,10 @@
 /// LFN connection parameters
 SL_PACK_START(1)
 typedef struct {
-  /// Duration of LPA listening slot (millisecond)
+  /// Duration of LFN PAN Advertisement (LPA) listening slot (millisecond)
   /// Specification range [15, 255]
   uint8_t discovery_slot_time_ms;
-  /// Number of slots for which an LFN shall listen for LPA frames
+  /// Number of LPA slots for which an LFN shall listen for LPA frames
   /// Specification range [1, 255]
   uint8_t discovery_slots;
   /// Reserved, set to zero
@@ -61,15 +61,16 @@ SL_PACK_END()
 /// LFN data layer parameters
 SL_PACK_START(1)
 typedef struct {
-  /// Time between LFN sampled listening points (milliseconds)
+  /// Initial LFN Unicast interval proposed by the LFN (milliseconds).
+  /// The real unicast interval duration is negotiated with the LFN parent,
+  /// between unicast_interval_min_ms and unicast_interval_max_ms.
   uint32_t unicast_interval_ms;
   /// Minimum acceptable LFN unicast interval (milliseconds)
   uint32_t unicast_interval_min_ms;
   /// Maximum acceptable LFN unicast interval (milliseconds)
   uint32_t unicast_interval_max_ms;
-  /// The number of LFN Broadcast Sync Period (parent defined) after which,
-  /// having not received any messaging from its parent, an LFN assumes
-  /// the parent is lost.
+  /// The LFN assumes its parent is lost after [lfn_maintain_parent_time]
+  /// number of Broadcast sync periods with no message received from its parent.
   /// Specification range [1, 60]
   uint8_t lfn_maintain_parent_time;
   /// Reserved, set to zero
@@ -80,10 +81,11 @@ SL_PACK_END()
 /// LFN network parameters
 SL_PACK_START(1)
 typedef struct {
-  /// Recommended address registration lifetime to be used by an LFN (minutes)
+  /// Address registration lifetime (IPv6 lease duration) the LFN requires
+  /// to the Border Router (minutes).
   /// Specification range [1440, 5040]
   uint16_t lfn_registration_lifetime_m;
-  /// Interval during which an LFN waits for an FFN NA(EARO) response (minutes)
+  /// Duration for which an LFN waits for a registration confirmation (minutes).
   /// Specification range [30, 120]
   uint8_t lfn_na_wait_duration_m;
   /// Reserved, set to zero
@@ -94,17 +96,15 @@ SL_PACK_END()
 /// LFN power parameters
 SL_PACK_START(1)
 typedef struct {
-  /// Minimum sampled listen width (microseconds)
-  /// Sampled listen is calculated with PHY parameters.
-  /// Set to force sampled listen duration above this value.
+  /// Minimum duration of the listening window.
+  /// Applies to both Unicast and Broadcast slots.
   uint16_t listening_window_min_us;
-  /// Minimum listening window margin (microseconds)
-  /// Window Margin is calculated dynamically with aging synchronization info.
-  /// Set to force margin above this value.
+  /// Minimum margin added to the listening window (before and after).
+  /// The real margin increases with aging synchronization info.
   uint16_t window_margin_min_us;
-  /// If true, the node limits LFN broadcast interval wakeups to minimum
-  /// while still maintaining time synchronization with the parent.
-  /// If false, the node wakes up on every LFN broadcast interval.
+  /// If true, the LFN wakes up only for broadcast slots containing
+  /// synchronization information.
+  /// If false, the node wakes up on every LFN broadcast slot.
   uint8_t broadcast_lts_only;
   /// Reserved, set to zero
   uint8_t reserved[3];

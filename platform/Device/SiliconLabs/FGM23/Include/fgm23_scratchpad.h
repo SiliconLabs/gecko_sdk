@@ -84,4 +84,4 @@ typedef struct {
 /** @} End of group FGM23_SCRATCHPAD */
 /** @} End of group Parts */
 
-#endif /* FGM23_SCRATCHPAD_H */
+#endif // FGM23_SCRATCHPAD_H

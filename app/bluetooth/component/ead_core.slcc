@@ -18,24 +18,22 @@ quality: production
 root_path: app/bluetooth/common/ead_core
 tag:
   - Custom-Code
-
 config_file:
   - path: config/sl_bt_ead_core_config.h
     file_id: sl_bt_ead_core_config
-
 include:
   - path: .
     file_list:
       - path: sl_bt_ead_core.h
-
 source:
   - path: sl_bt_ead_core.c
-
 provides:
   - name: ead_core
-
 requires:
   - name: silabs_core_sl_malloc
   - name: psa_crypto
   - name: psa_crypto_ccm
   - name: sli_protocol_crypto
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ead-core

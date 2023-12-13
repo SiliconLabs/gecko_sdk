@@ -33,7 +33,7 @@
 // -----------------------------------------------------------------------------
 #include "sl_rail_util_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
+#include "simple_rail_assistance.h"
 #include "sl_wmbus_support.h"
 #include "sl_flex_rail_channel_selector.h"
 
@@ -65,7 +65,7 @@ RAIL_Handle_t app_init(void)
   // Get RAIL handle, used later by the application
   RAIL_Handle_t rail_handle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 
-  sl_led_turn_off(&sl_led_led0);
+  clear_receive_led();
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your application init code here!                                    //

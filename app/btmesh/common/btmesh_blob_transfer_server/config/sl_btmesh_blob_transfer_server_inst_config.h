@@ -33,6 +33,12 @@
 
 #include "sl_btmesh_dcd.h"
 
+// Memory is allocated statically at link time
+#define SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_STATIC  0
+
+// Memory is allocated dynamically at runtime from heap
+#define SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_HEAP    1
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <e SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_ELEM_INDEX_OVERRIDE_CFG_VAL> Override Element Index
@@ -65,6 +71,27 @@
 // <d> 0x9
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_MAX_BLOCK_SIZE_LOG_CFG_VAL   0x9
 
+// <o SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_BLOCK_BUFFER_TYPE_CFG_VAL> Block Buffer Memory Type
+// <SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_STATIC=> Static
+// <SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_HEAP=> Heap
+// <i> If Static is selected then RAM buffer is allocated statically at link time for the worst case Max BLOB Block Size.
+// <i> If Heap is selected then RAM buffer is allocated from the heap at runtime when the BLOB transfer is started and
+// <i> the buffer is deallocated when the BLOB transfer is completed or cancelled.
+// <i> The Heap provides the following advantages over Static block buffer memory type:
+// <i>  - The block buffer memory is allocated for the BLOB transfer only.
+// <i>  - The size of allocated block buffer memory is calculated from the actual Block Size Log from BLOB Transfer Start
+// <i>    message which might be lower than Max BLOB Block Size.
+// <i> The Static provides the following advantages over Heap block buffer memory type:
+// <i>  - It is guaranteed that Block Buffer Memory is available for BLOB Transfer which improves robustness.
+// <i>    Example: if there is a memory leak in the application then it might be impossible to run a firmware update
+// <i>    through BLOB Transfer Server without resetting the device because it can't allocate the block buffer memory
+// <i>    from the heap.
+// <i> Note: The BLOB Transfer Server must have buffer for the whole block during BLOB transfer because the BLOB Chunk
+// <i> Transfer messages can be received in any order (e.g. due to interference). The Chunk Data of BLOB Chunk Transfer
+// <i> can't be written in the flash at reception because the data size is not the multiple of flash write size (alignment).
+// <d> SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_HEAP
+#define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_BLOCK_BUFFER_TYPE_CFG_VAL   SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_HEAP
+
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_MAX_CHUNKS_PER_BLOCK_CFG_VAL> Maximum of number of chunks per block <8-64:8>
 // <d> 40
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_MAX_CHUNKS_PER_BLOCK_CFG_VAL  40
@@ -91,8 +118,8 @@
 #define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_PULL_MODE_CFG_VAL 1
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_PULL_CHUNK_REQUEST_CNT_CFG_VAL> Number of chunks requested in Block Status or Partial Block Report <1-32>
-// <d> 4
-#define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_PULL_CHUNK_REQUEST_CNT_CFG_VAL 4
+// <d> 3
+#define SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_PULL_CHUNK_REQUEST_CNT_CFG_VAL 3
 
 // <o SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_PULL_RETRY_INTERVAL_MS_CFG_VAL> Interval, in milliseconds, between Partial Block Reports, if nothing is received <1000-30000:100>
 // <d> 1000

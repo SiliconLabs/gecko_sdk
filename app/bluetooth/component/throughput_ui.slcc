@@ -8,7 +8,6 @@ quality: production
 root_path: app/bluetooth/common/throughput_ui
 tag:
   - No-Code
-
 include:
   - path: .
     file_list:
@@ -18,15 +17,18 @@ source:
   - path: throughput_ui.c
   - path: throughput_ui_common.c
 config_file:
-  - path: "config/throughput_ui_config.h"
+  - path: config/throughput_ui_config.h
 requires:
-  - name: "throughput"
-  - name: "app_assert"
-  - name: "glib"
-  - name: "dmd_memlcd"
-  - name: "ls013b7dh03"
+  - name: throughput
+  - name: app_assert
+  - name: glib
+  - name: dmd_memlcd
+  - name: ls013b7dh03
 provides:
   - name: throughput_ui
 template_contribution:
   - name: component_catalog
     value: throughput_ui
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/throughput-ui

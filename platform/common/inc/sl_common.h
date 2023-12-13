@@ -58,7 +58,7 @@ extern "C" {
  *  This SDK supports the following compilers/IDEs:
  *  @li Simplicity Studio
  *  @li IAR Embedded Workbench
- *  @li Keil µVision IDE
+ *  @li Keil uVision IDE
  *  @li Plain armgcc
  *
  * Certain compiler features such as alignment is implemented differently in the tools.
@@ -71,6 +71,11 @@ extern "C" {
  *
  * @{
  ******************************************************************************/
+
+/** @brief Macros to concatenate. */
+#define SL_CONCAT_PASTER_2(first, second)                 first ##  second                      ///< sl concat paster 2.
+#define SL_CONCAT_PASTER_3(first, second, third)          first ##  second ## third             ///< sl concat paster 3.
+#define SL_CONCAT_PASTER_4(first, second, third, fourth)  first ##  second ## third ## fourth   ///< sl concat paster 4.
 
 /** @brief Round n up to closest interval of i. */
 #define SL_CEILING(n, i)   ((((n) + (i) - 1U) / (i)) * (i))
@@ -254,6 +259,12 @@ extern "C" {
 #define SL_DEPRECATED_API_SDK_4_2
 #else
 #define SL_DEPRECATED_API_SDK_4_2 __attribute__ ((deprecated))
+#endif
+
+#ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_4_4
+#define SL_DEPRECATED_API_SDK_4_4
+#else
+#define SL_DEPRECATED_API_SDK_4_4 __attribute__ ((deprecated))
 #endif
 /** @endcond */
 

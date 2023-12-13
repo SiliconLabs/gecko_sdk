@@ -24,6 +24,7 @@
 // Globals
 
 bool sli_zigbee_af_test_harness_z3_ignore_leave_commands = false;
+bool sli_zigbee_test_harness_z3_ignore_rejoin_commands = false;
 
 // private stack API
 extern void sli_zigbee_change_pan_id_now(EmberPanId panId);
@@ -42,7 +43,7 @@ extern bool sli_zigbee_network_sendCommand(EmberNodeId destination,
                                            bool tryToInsertLongDest,
                                            EmberEUI64 destinationEui);
 extern uint8_t sli_zigbee_set_nwk_update_id(uint8_t id);
-
+extern uint8_t emGetNwkUpdateId(void);
 #endif /* EZSP_HOST */
 
 static EmberStatus sendNetworkCommand(EmberNodeId destinationShort,
@@ -96,6 +97,7 @@ void sli_zigbee_af_test_harness_z3_nwk_nwk_rejoin_request_command(SL_CLI_COMMAND
       break;
     default:
       status = EMBER_ERR_FATAL;
+      goto done;
   }
 
   status = sendNetworkCommand(destinationShort,
@@ -180,7 +182,7 @@ void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_command(SL_CLI_COMMAND_ARG)
 
 // plugin test-harness z3 nwk nwk-leave-supression on
 // plugin test-harness z3 nwk nwk-leave-supression off
-void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression(SL_CLI_COMMAND_ARG)
+void sli_zigbee_af_test_harness_z3_nwk_leave_suppression(SL_CLI_COMMAND_ARG)
 {
   sli_zigbee_af_test_harness_z3_ignore_leave_commands
     = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[1] == 'n');
@@ -189,6 +191,20 @@ void sli_zigbee_af_test_harness_z3_nwk_nwk_leave_supression(SL_CLI_COMMAND_ARG)
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Supress network leave",
                      (sli_zigbee_af_test_harness_z3_ignore_leave_commands
+                      ? "YES"
+                      : "NO"));
+}
+
+// plugin test-harness z3 nwk nwk-rejoin-supression on
+// plugin test-harness z3 nwk nwk-rejoin-supression off
+void sli_zigbee_af_test_harness_z3_nwk_rejoin_suppression(SL_CLI_COMMAND_ARG)
+{
+  sli_zigbee_test_harness_z3_ignore_rejoin_commands
+    = (sl_zigbee_cli_get_argument_string_and_length(arguments, -1, NULL)[1] == 'n');
+  emberAfCorePrintln("%p: %p: %p",
+                     TEST_HARNESS_Z3_PRINT_NAME,
+                     "Supress network rejoin",
+                     (sli_zigbee_test_harness_z3_ignore_rejoin_commands
                       ? "YES"
                       : "NO"));
 }
@@ -223,4 +239,93 @@ void sli_zigbee_af_test_harness_z3_nwk_set_network_update_id(SL_CLI_COMMAND_ARG)
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Set network update id",
                      updateId);
+}
+
+// plugin test-harness z3 nwk nwk-update-request <newPanId:2> <dstShort:2>
+void sli_zigbee_af_test_harness_z3_nwk_update_request_command(SL_CLI_COMMAND_ARG)
+{
+  EmberPanId newPanId = (EmberPanId)sl_cli_get_argument_uint16(arguments, 0);
+  EmberNodeId destinationShort = (EmberNodeId)sl_cli_get_argument_uint16(arguments, 1);
+  EmberStatus status;
+
+  uint8_t commandFrame[13];
+  uint8_t updateCommandIdentifier = 0; // PAN id update
+
+  EmberNodeType nodeType;
+  EmberNetworkParameters networkParams;
+  status = emberAfGetNetworkParameters(&nodeType, &networkParams);
+
+// The command currently only supports a single information type.
+  if (updateCommandIdentifier == 0) {
+    // Update the network short PAN id. The local PAN id will not be updated.
+    commandFrame[0] = NWK_NETWORK_UPDATE_COMMAND;
+    commandFrame[1] = 1;  // Command options field: info count = 1, command id = 0
+    MEMMOVE(commandFrame + 2, networkParams.extendedPanId, EXTENDED_PAN_ID_SIZE);
+    commandFrame[10] = networkParams.nwkUpdateId;;
+    commandFrame[11] = LOW_BYTE(newPanId);
+    commandFrame[12] = HIGH_BYTE(newPanId);
+  } else {
+    status = EMBER_ERR_FATAL;
+    goto done;
+  }
+
+  status = sendNetworkCommand(destinationShort,
+                              commandFrame,
+                              sizeof(commandFrame));
+
+  done:
+  emberAfCorePrintln("%p: %p: 0x%X",
+                     TEST_HARNESS_Z3_PRINT_NAME,
+                     "Network update request",
+                     status);
+}
+
+// plugin test-harness z3 change-pan-id <newPanId:2>
+void sli_zigbee_af_test_harness_z3_change_pan_id(SL_CLI_COMMAND_ARG)
+{
+  EmberPanId newPanId = (EmberPanId)sl_cli_get_argument_uint16(arguments, 0);
+
+  emberAfCorePrintln("New PAN: %2X", newPanId);
+
+  // Just do it, no delays.
+  sli_zigbee_change_pan_id_now(newPanId);
+}
+
+// plugin test-harness z3 nwk set-long-up-time <longUpTime:1>
+void sli_zigbee_test_harness_z3_nwk_set_long_up_time(SL_CLI_COMMAND_ARG)
+{
+  bool longUpTime = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  emberSetLongUpTime(longUpTime);
+  emberAfCorePrintln("%p: %p: %p",
+                     TEST_HARNESS_Z3_PRINT_NAME,
+                     "Set long up time",
+                     (longUpTime
+                      ? "True"
+                      : "False"));
+}
+
+// plugin test-harness z3 nwk set-hub-connectivity <hubConnectivity:1>
+void sli_zigbee_test_harness_z3_nwk_set_hub_connectivity(SL_CLI_COMMAND_ARG)
+{
+  bool hubConnectivity = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  emberSetHubConnectivity(hubConnectivity);
+  emberAfCorePrintln("%p: %p: %p",
+                     TEST_HARNESS_Z3_PRINT_NAME,
+                     "Set hub connectivity",
+                     (hubConnectivity
+                      ? "True"
+                      : "False"));
+}
+
+// plugin test-harness z3 nwk set-parent-classification <parentClassification:1>
+void sli_zigbee_test_harness_z3_nwk_set_parent_classification(SL_CLI_COMMAND_ARG)
+{
+  bool parentClassification = (bool)sl_cli_get_argument_uint8(arguments, 0);
+  emberSetParentClassificationEnabled(parentClassification);
+  emberAfCorePrintln("%p: %p: %p",
+                     TEST_HARNESS_Z3_PRINT_NAME,
+                     "Set parent classification",
+                     (parentClassification
+                      ? "True"
+                      : "False"));
 }

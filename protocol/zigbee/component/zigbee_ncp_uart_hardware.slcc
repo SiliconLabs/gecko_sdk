@@ -1,9 +1,8 @@
 id: zigbee_ncp_uart_hardware
 label: NCP UART Hardware Flow Control
 package: Zigbee
-category: Zigbee|NCP|UART
+category: Zigbee|NCP
 quality: production
-
 description: Provides the functionality for an NCP application to communicate with a host over a UART using hardware flow control.
 
 provides:
@@ -15,21 +14,20 @@ requires:
   - name: zigbee_ncp_uart_implementation
   - name: zigbee_ncp_uart_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_ncp_framework
   - name: legacy_ncp_ash
     condition:
       - device_cortexm
   - name: legacy_ncp_ash
     condition:
-      - zigbee_stack_unix    
+      - zigbee_stack_unix
 
 recommends:
-  - id: zigbee_ncp_uart_source
+  - id: zigbee_ncp_uart_library_internal
 
 define:
   - name: EZSP_UART
-  - name: NO_USB
   - name: EMBER_SERIAL1_RTSCTS
 
 template_contribution:

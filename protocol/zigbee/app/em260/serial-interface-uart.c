@@ -160,12 +160,6 @@ bool serialCallbackResponse(void)
 
   ezspBuffer = callback;
 
-  if (sli_zigbee_secure_ezsp_is_on()) {
-    emberSetLinkedBuffersLength(ezspBuffer,
-                                emberMessageBufferLength(ezspBuffer)
-                                + SECURE_EZSP_OVERHEAD_LENGTH);
-  }
-
   ezspFrameContents = emberMessageBufferContents(ezspBuffer);
   ezspWritePointer = ezspFrameContents + callbackLength;
   return true;

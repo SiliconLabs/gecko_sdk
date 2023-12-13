@@ -372,4 +372,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_WDOG */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_WDOG_H */
+#endif // EFR32ZG23_WDOG_H

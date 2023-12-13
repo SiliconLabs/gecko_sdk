@@ -13,6 +13,9 @@ requires:
     condition: [device_series_0]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_KEY_TYPE_AES
+    value: PSA_WANT_KEY_TYPE_AES 1
+  - name: psa_crypto_builtin_config
+    value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_AES 1"
+    condition: [mbedtls_aes]
 documentation:
   url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_KEY_TYPE_AES

@@ -35,13 +35,16 @@
 #include "sl_assert.h"
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
 
+#include "sli_cpc_trace.h"
 #include "sli_cpc_hdlc.h"
 #include "sli_cpc_drv.h"
 #include "sli_cpc_crc.h"
 #include "sli_cpc_debug.h"
 #include "sl_cpc_config.h"
 #include "sli_cpc_system_common.h"
+#include "sli_cpc_types.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -53,6 +56,17 @@
 #include "sl_cmsis_os2_common.h"
 #endif
 #include "sl_cpc_kernel_config.h"
+#endif
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+#include "sl_cpc_system_primary.h"
+#include "sli_cpc_reboot_sequence.h"
+#include "sli_cpc_system_primary.h"
+#include "sli_cpc_fwu.h"
+#include "sli_cpc_trace.h"
+#include "sl_cpc_primary_config.h"
+#endif
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+#include "sli_cpc_system_secondary.h"
 #endif
 
 /*******************************************************************************
@@ -83,18 +97,21 @@
 #define SLI_CPC_SECURITY_NONCE_FRAME_COUNTER_RESET_VALUE 0
 #endif
 
-#define ABS(a)  ((a) < 0 ? -(a) : (a))
+#define ABS(a) (unsigned) ((a) < 0 ? -(a) : (a))
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
  ******************************************************************************/
 
 static sl_slist_node_t *endpoints;
-static sl_slist_node_t *closed_endpoint_list;
+static sl_slist_node_t *defer_endpoint_free_list;
 static sl_slist_node_t *transmit_queue;
 static sl_slist_node_t *pending_on_security_ready_queue;
+static sl_slist_node_t *write_complete_callback_list;
+static sl_slist_node_t *expired_retransmit_list;
 
-static sl_cpc_dispatcher_handle_t dispatcher_handle;
+static sl_cpc_dispatcher_handle_t callback_dispatcher_handle;
+static sl_cpc_dispatcher_handle_t retransmit_dispatcher_handle;
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
@@ -125,11 +142,25 @@ sli_cpc_drv_capabilities_t sli_cpc_driver_capabilities;
 sl_cpc_core_debug_t sl_cpc_core_debug;
 #endif
 
+// The default value of 0 means that there is no maximum length. This will stay at 0 with a Linux host
+// and will be set to a certain value with a MCU Primary.
+static uint16_t remote_tx_payload_max_length = 0;
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+bool secondary_protocol_version_mismatch = false;
+bool secondary_capabilities_mismatch = false;
+bool secondary_application_version_mismatch = false;
+static bool cpc_core_in_reset = false;
+static bool cpc_initialized = false;
+#endif
+
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
-
-SL_WEAK void sli_cpc_system_process(void);
+static sl_status_t handle_to_ep(sl_cpc_endpoint_handle_t *handle,
+                                sl_cpc_endpoint_t **endpoint);
+static sl_status_t handle_to_ep_enter_api(sl_cpc_endpoint_handle_t *handle,
+                                          sl_cpc_endpoint_t **endpoint);
 
 static sl_status_t init(void);
 
@@ -137,10 +168,9 @@ static sl_status_t init(void);
 static void task(void *arg);
 #endif
 
-static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint,
+static sl_status_t init_endpoint(sl_cpc_endpoint_handle_t *endpoint,
                                  uint8_t id,
-                                 uint8_t flags,
-                                 uint8_t tx_window_size);
+                                 uint8_t flags);
 
 static sl_cpc_endpoint_t *find_endpoint(uint8_t id);
 
@@ -152,6 +182,12 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
                          uint16_t data_length,
                          uint8_t flags,
                          void *on_write_completed_arg);
+
+static void notify_write_complete(void *data);
+
+static bool notify_state_change(sl_cpc_endpoint_t *endpoint);
+
+static void submit_write_completion(sl_cpc_buffer_handle_t *buffer_handle, sl_status_t write_status);
 
 static void decode_packet(void);
 
@@ -183,22 +219,32 @@ static void transmit_reject(sl_cpc_endpoint_t *endpoint,
                             sl_cpc_reject_reason_t reason);
 
 static void queue_for_transmission(sl_cpc_endpoint_t *ep,
-                                   sl_cpc_transmit_queue_item_t *item,
+                                   sl_cpc_buffer_handle_t *buffer_handle,
                                    bool signal_tx_event);
 
 static sl_status_t process_tx_queue(void);
 
-static void process_close(void);
+static void process_free(void);
 
 static void defer_endpoint_free(sl_cpc_endpoint_t *ep);
 
+static bool is_endpoint_tx_done(const sl_cpc_endpoint_t *ep);
+
+static bool is_endpoint_empty(const sl_cpc_endpoint_t *ep);
+
+static bool is_endpoint_connection_active(const sl_cpc_endpoint_t *ep);
+
 static bool free_closed_endpoint_if_empty(sl_cpc_endpoint_t *ep);
+
+static void notify_endpoint_is_closed(void);
+
+static sl_status_t terminate_endpoint(sl_cpc_endpoint_t *endpoint, bool queue_free, uint8_t flags);
 
 static void clean_tx_queues(sl_cpc_endpoint_t *endpoint);
 
-static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *data);
+static void clean_rx_queues(sl_cpc_endpoint_t *endpoint);
 
-static void endpoint_close_timeout_callback(sli_cpc_timer_handle_t *handle, void *data);
+static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *data);
 
 static void notify_error(sl_cpc_endpoint_t *endpoint);
 
@@ -210,6 +256,39 @@ static void cpc_exit_api(sl_cpc_endpoint_handle_t *endpoint_handle);
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
 static void on_state_change(sl_cpc_security_state_t old, sl_cpc_security_state_t new);
+#endif
+
+static void notify_ep_on_connect(sl_cpc_endpoint_t * ep, sl_status_t status);
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+static sl_status_t cpc_core_is_ready(void);
+
+static void on_connection_request_reply(sli_cpc_property_id_t property_id,
+                                        void *property_value,
+                                        size_t property_length,
+                                        void *on_reply_arg,
+                                        sl_status_t status);
+
+static void on_endpoint_terminate_reply(sli_cpc_property_id_t property_id,
+                                        void *property_value,
+                                        size_t property_length,
+                                        void *on_reply_arg,
+                                        sl_status_t status);
+
+static void on_endpoint_shutdown_reply(sli_cpc_property_id_t property_id,
+                                       void *property_value,
+                                       size_t property_length,
+                                       void *on_reply_arg,
+                                       sl_status_t status);
+
+bool sli_cpc_endpoints_are_all_closed(void);
+#endif
+
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint,
+                                 uint8_t id,
+                                 uint8_t flags,
+                                 uint8_t tx_window_size);
 #endif
 
 /*******************************************************************************
@@ -225,7 +304,7 @@ sl_status_t sl_cpc_init(void)
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   osThreadAttr_t task_attr = { 0 };
   osMutexAttr_t mutex_attr = { 0 };
-  osSemaphoreAttr_t semaphore_attr = { 0 };
+  osSemaphoreAttr_t event_signal_semaphore_attr = { 0 };
 
   SLI_CPC_DEBUG_CORE_INIT();
 
@@ -246,14 +325,14 @@ sl_status_t sl_cpc_init(void)
   }
 
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-  semaphore_attr.cb_mem = event_semaphore_cb;
-  semaphore_attr.cb_size = osSemaphoreCbSize;
+  event_signal_semaphore_attr.cb_mem = event_semaphore_cb;
+  event_signal_semaphore_attr.cb_size = osSemaphoreCbSize;
 #else
   semaphore_attr.cb_mem = NULL;
   semaphore_attr.cb_size = 0U;
 #endif  // SL_CATALOG_CMSIS_OS_COMMON_PRESENT
 
-  event_signal = osSemaphoreNew(EVENT_SIGNAL_MAX_COUNT, 0u, &semaphore_attr);
+  event_signal = osSemaphoreNew(EVENT_SIGNAL_MAX_COUNT, 0u, &event_signal_semaphore_attr);
   if (event_signal == 0) {
     EFM_ASSERT(false);
     status = SL_STATUS_ALLOCATION_FAILED;
@@ -278,69 +357,125 @@ sl_status_t sl_cpc_init(void)
   if (thread_id == 0) {
     EFM_ASSERT(false);
     status = SL_STATUS_ALLOCATION_FAILED;
-    goto exit_free_semaphore;
+    goto exit_free_event_semaphore;
   }
 #endif // SL_CATALOG_KERNEL_PRESENT
 
   sl_slist_init(&endpoints);
-  sl_slist_init(&closed_endpoint_list);
+  sl_slist_init(&defer_endpoint_free_list);
   sl_slist_init(&transmit_queue);
   sl_slist_init(&pending_on_security_ready_queue);
+  sl_slist_init(&write_complete_callback_list);
 
-  sli_cpc_init_buffers();
+  sli_cpc_memory_init();
 
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
   status = init();
   if (status != SL_STATUS_OK) {
     goto exit;
   }
-#endif
 
   goto exit;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-  exit_free_semaphore:
+  exit_free_event_semaphore:
   osSemaphoreDelete(event_signal);
   exit_free_mutex:
   osMutexDelete(endpoints_list_lock);
 #endif // SL_CATALOG_KERNEL_PRESENT
   exit:
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+  cpc_initialized = true;
+#endif
   return status;
 }
 
-/***************************************************************************//**
- * Open a user endpoint
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************/ /**
+ * Checks if CPC has been initialized
  ******************************************************************************/
-sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+sl_status_t sli_cpc_is_initialized(void)
+{
+  if (cpc_initialized) {
+    return SL_STATUS_OK;
+  } else {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+}
+#endif
+
+/***************************************************************************/ /**
+ * Initialize a CPC user endpoint
+ ******************************************************************************/
+sl_status_t sl_cpc_init_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                       sl_cpc_user_endpoint_id_t id,
-                                      uint8_t flags,
-                                      uint8_t tx_window_size)
+                                      uint8_t flags)
 {
-  EFM_ASSERT((uint8_t)id >= SL_CPC_USER_ENDPOINT_ID_START);
-  EFM_ASSERT((uint8_t)id <= SL_CPC_USER_ENDPOINT_ID_END);
-  return open_endpoint(endpoint_handle, (uint8_t)id, flags, tx_window_size);
+  // Validate input parameters
+  if (endpoint_handle == NULL) {
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  if ((uint8_t) id < SL_CPC_USER_ENDPOINT_ID_START
+      || (uint8_t) id > SL_CPC_USER_ENDPOINT_ID_END) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (flags & ~(SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE
+                | SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE
+                | SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE
+                | SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return init_endpoint(endpoint_handle, id, flags);
 }
 
 /***************************************************************************//**
- * Open a service endpoint
+ * Allocate a CPC service endpoint
  ******************************************************************************/
-sl_status_t sli_cpc_open_service_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+sl_status_t sli_cpc_init_service_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                           sl_cpc_service_endpoint_id_t id,
-                                          uint8_t flags,
-                                          uint8_t tx_window_size)
+                                          uint8_t flags)
 {
-  EFM_ASSERT((uint8_t)id <= SLI_CPC_SERVICE_ENDPOINT_ID_END);
-  return open_endpoint(endpoint_handle, (uint8_t)id, flags, tx_window_size);
+  // Validate input parameters
+  if (endpoint_handle == NULL) {
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  if ((uint8_t) id > SLI_CPC_SERVICE_ENDPOINT_ID_END) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (flags & ~(SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION
+                | SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE
+                | SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE
+                | SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return init_endpoint(endpoint_handle, id, flags);
 }
 
 /***************************************************************************//**
- * Open a temporary endpoint
+ * Initialize a CPC temporary endpoint
  ******************************************************************************/
-sl_status_t sli_cpc_open_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+sl_status_t sli_cpc_init_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                             uint8_t *id,
-                                            uint8_t flags,
-                                            uint8_t tx_window_size)
+                                            uint8_t flags)
 {
+  sl_status_t status;
   uint8_t id_free = 0;
+
+  // Validate input parameters
+  if (endpoint_handle == NULL) {
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  if (id == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  LOCK_ENDPOINTS_LIST();
+
   for (uint8_t i = SLI_CPC_TEMPORARY_ENDPOINT_ID_START; i <= SLI_CPC_TEMPORARY_ENDPOINT_ID_END; i++) {
     sl_cpc_endpoint_t *endpoint = find_endpoint(i);
     if (endpoint == NULL) {
@@ -350,13 +485,20 @@ sl_status_t sli_cpc_open_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_h
   }
 
   if (id_free == 0) {
-    return SL_STATUS_NO_MORE_RESOURCE;
+    status = SL_STATUS_NO_MORE_RESOURCE;
+    goto release_ep_list;
   }
 
   EFM_ASSERT(id_free >= SLI_CPC_TEMPORARY_ENDPOINT_ID_START);
   EFM_ASSERT(id_free <= SLI_CPC_TEMPORARY_ENDPOINT_ID_END);
   *id = id_free;
-  return open_endpoint(endpoint_handle, id_free, flags, tx_window_size);
+
+  status = init_endpoint(endpoint_handle, *id, flags);
+
+  release_ep_list:
+  RELEASE_ENDPOINTS_LIST();
+
+  return status;
 }
 
 /***************************************************************************//**
@@ -369,27 +511,18 @@ sl_status_t sl_cpc_set_endpoint_option(sl_cpc_endpoint_handle_t *endpoint_handle
   sl_cpc_endpoint_t *ep;
   sl_status_t status = SL_STATUS_OK;
 
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && (SL_CPC_PRIMARY_FIRMWARE_UPGRADE_SUPPORT_ENABLED >= 1)
+  if (sli_cpc_is_fwu_in_progress() && (endpoint_handle->id != SL_CPC_ENDPOINT_SYSTEM)) {
+    return SL_STATUS_BUSY;
+  }
+#endif
+
   if (endpoint_handle == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
-  if (!cpc_enter_api(endpoint_handle)) {
-    return SL_STATUS_INVALID_STATE;
-  }
-
-  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
-
-  if (ep == NULL) {
-    // Close has already been called, we are in the process of closing the endpoint
-    ep = find_endpoint(endpoint_handle->id);
-    if (ep == NULL) {
-      status = SL_STATUS_INVALID_STATE;
-    } else if (ep->state == SL_CPC_STATE_CLOSING) {
-      status = SL_STATUS_INVALID_STATE;
-    } else {
-      status = SL_STATUS_OWNERSHIP;
-    }
-    cpc_exit_api(endpoint_handle);
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
     return status;
   }
 
@@ -437,6 +570,20 @@ sl_status_t sl_cpc_set_endpoint_option(sl_cpc_endpoint_handle_t *endpoint_handle
     case SL_CPC_ENDPOINT_ON_ERROR_ARG:
       ep->on_error_arg = value;
       break;
+    case SL_CPC_ENDPOINT_ON_CONNECT:
+      ep->on_connect = (sl_cpc_on_connect_callback_t)value;
+      break;
+    case SL_CPC_ENDPOINT_ON_CONNECT_ARG:
+      ep->on_connect_arg = value;
+      break;
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    case SL_CPC_ENDPOINT_SHUTDOWN_TIMEOUT:
+      ep->shutdown_timeout = *(uint32_t*)value;
+      break;
+    case SL_CPC_ENDPOINT_WRITE_TIMEOUT:
+      ep->write_timeout = *(uint32_t*)value;
+      break;
+#endif
     default:
       status = SL_STATUS_INVALID_PARAMETER;
       break;
@@ -449,6 +596,372 @@ sl_status_t sl_cpc_set_endpoint_option(sl_cpc_endpoint_handle_t *endpoint_handle
 }
 
 /***************************************************************************//**
+ * Shutdown endpoint's connection
+ ******************************************************************************/
+sl_status_t sl_cpc_shutdown_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                     uint8_t flags)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_cpc_endpoint_state_t state;
+  sl_status_t status = SL_STATUS_FAIL;
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
+  osSemaphoreAttr_t semaphore_attr;
+  osStatus_t sem_status;
+
+  #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  uint32_t semaphore_cb[osSemaphoreCbSize / 4];
+  #endif
+  #endif
+  (void) flags;
+  (void) state;
+
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  LOCK_ENDPOINT(ep);
+
+  if (ep->state == SL_CPC_STATE_DISCONNECTED) {
+    // Endpoint disconnected, shutdown sequence done.
+    status = SL_STATUS_OK;
+    goto fail;
+  }
+
+  if (!is_endpoint_connection_active(ep)) {
+    // Can only be called when actively connected to remote
+    status = SL_STATUS_INVALID_STATE;
+    goto fail;
+  }
+
+  if (ep->state == SL_CPC_STATE_CONNECTED) {
+    if (is_endpoint_tx_done(ep)) {
+      // Endpoint is done transmitting all its frames, send shutdown request immediately
+      ep->state = SL_CPC_STATE_SHUTDOWN;
+      #if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+      state = SL_CPC_STATE_DISCONNECTED;
+      status = sli_cpc_system_cmd_property_set(on_endpoint_shutdown_reply,
+                                               (void*)ep,
+                                               EP_ID_TO_PROPERTY_STATE(ep->id),
+                                               0,       // try only once
+                                               SLI_CPC_SYSTEM_CMD_TIMEOUT_MS,
+                                               &state,
+                                               sizeof(state),
+                                               SYSTEM_EP_IFRAME);
+      #else
+      status = sli_cpc_send_shutdown_request(ep->id);
+      #endif
+      if (status != SL_STATUS_OK) {
+        // System endpoint command failed.
+        goto fail;
+      }
+    } else {
+      // Endpoint still has frames pending a transmission. Once all pending frames
+      // have been sent and their on_write_complete callbacks called, the system
+      // will automatically send a shutdown request to the remote without having
+      // to call this API again.
+      ep->state = SL_CPC_STATE_SHUTTING_DOWN;
+    }
+  }
+
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
+  // Wait for all pending TX frames to be sent
+  if (flags & SL_CPC_FLAG_NO_BLOCK) {
+    status = SL_STATUS_IN_PROGRESS;
+    goto release_ep;
+  }
+
+  // Allocate semaphore for blocking mode
+  if (osKernelGetState() != osKernelRunning) {
+    status = SL_STATUS_NOT_READY;
+    goto fail;
+  }
+  // Allocate endpoint semaphore
+  #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  semaphore_attr.cb_mem = semaphore_cb;
+  semaphore_attr.cb_size = osSemaphoreCbSize;
+  #else
+  semaphore_attr.cb_mem = NULL;
+  semaphore_attr.cb_size = 0U;
+  #endif // SL_CATALOG_CMSIS_OS_COMMON_PRESENT
+
+  if (ep->state_event_signal != NULL) {
+    // Another thread is already shutting down
+    EFM_ASSERT(false);
+    status = SL_STATUS_IS_WAITING;
+    goto fail;
+  }
+
+  ep->state_event_signal = osSemaphoreNew(1, 0u, &semaphore_attr);
+  if (ep->state_event_signal == NULL) {
+    status = SL_STATUS_ALLOCATION_FAILED;
+    goto fail;
+  }
+
+  RELEASE_ENDPOINT(ep);
+  // acquire semaphore, it will be released when remote responds to SHUTDOWN
+  // or command times out (on_endpoint_shutdown_reply)
+  sem_status = osSemaphoreAcquire(ep->state_event_signal, ep->shutdown_timeout);
+  LOCK_ENDPOINT(ep);
+
+  // delete semaphore
+  if (osSemaphoreDelete(ep->state_event_signal) != osOK) {
+    EFM_ASSERT(false);
+    status = SL_STATUS_FAIL;
+    goto fail;
+  }
+  ep->state_event_signal = NULL;
+
+  if (sem_status != osOK && sem_status != osErrorTimeout) {
+    EFM_ASSERT(false);
+    status = SL_STATUS_FAIL;
+    goto fail;
+  }
+
+  if (ep->state != SL_CPC_STATE_DISCONNECTED) {
+    // Failed to disconnect before timeout. Abort shutdown procedure.
+    status = SL_STATUS_TIMEOUT;
+    ep->state = SL_CPC_STATE_DISCONNECTED;
+    clean_tx_queues(ep);
+  } else {
+    // Finished transmitting the pending frames
+    status = SL_STATUS_OK;
+    EFM_ASSERT(is_endpoint_tx_done(ep));
+  }
+
+  #else // SL_CATALOG_KERNEL_PRESENT
+  // Shutdown procedure in progress.
+  status = SL_STATUS_IN_PROGRESS;
+  #endif
+  goto release_ep;
+
+  // Failure handling
+  fail:
+  ep->state = SL_CPC_STATE_DISCONNECTED;
+  clean_tx_queues(ep);
+
+  release_ep:
+  RELEASE_ENDPOINT(ep);
+  cpc_exit_api(endpoint_handle);
+  return status;
+}
+
+/***************************************************************************//**
+ * Empty all endpoint RX queues.
+ ******************************************************************************/
+static void clean_rx_queues(sl_cpc_endpoint_t *endpoint)
+{
+  // Drop all RX I-Frames
+  while (endpoint->iframe_receive_queue != NULL) {
+    sl_cpc_receive_queue_item_t *item;
+    item = SL_SLIST_ENTRY(sl_slist_pop(&endpoint->iframe_receive_queue), sl_cpc_receive_queue_item_t, node);
+
+    sli_cpc_free_receive_queue_item(item);
+  }
+
+  // Drop all RX U-Frames
+  while (endpoint->uframe_receive_queue != NULL) {
+    sl_cpc_receive_queue_item_t *item;
+    item = SL_SLIST_ENTRY(sl_slist_pop(&endpoint->uframe_receive_queue), sl_cpc_receive_queue_item_t, node);
+
+    sli_cpc_free_receive_queue_item(item);
+  }
+}
+
+/***************************************************************************//**
+ * Terminate endpoint (This function must be called on a locked endpoint).
+ ******************************************************************************/
+static sl_status_t terminate_endpoint(sl_cpc_endpoint_t *endpoint, bool queue_free, uint8_t flags)
+{
+  sl_status_t status;
+  #if defined (SL_CATALOG_CPC_PRIMARY_PRESENT)
+  sl_cpc_endpoint_state_t ep_state;
+  #endif
+  (void) flags;
+
+  // Notify the host that we want to close an endpoint
+  if (is_endpoint_connection_active(endpoint)) {
+    // Send terminate notification to remote
+    if (endpoint->id == SL_CPC_ENDPOINT_SYSTEM) {
+      // System endpoint sends no notification when it terminates, it only cleans up.
+    } else {
+      #if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+      ep_state = SL_CPC_STATE_CLOSED;
+      // Return status is irrelevant. If the command fails, the endpoint will
+      // still get terminated, and incoming frames will simply get rejected with
+      // SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE.
+      status = sli_cpc_system_cmd_property_set(on_endpoint_terminate_reply,
+                                               (void*)endpoint,
+                                               EP_ID_TO_PROPERTY_STATE(endpoint->id),
+                                               0,     // try only once
+                                               SLI_CPC_SYSTEM_CMD_TIMEOUT_MS, // 10 second timeout
+                                               &ep_state,
+                                               sizeof(ep_state),
+                                               SYSTEM_EP_IFRAME);
+    #else
+      // Return status is irrelevant. If the command fails, the endpoint will
+      // still get terminated, and incoming frames will simply get rejected with
+      // SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE.
+      status = sli_cpc_send_terminate_notification(endpoint->id);
+    #endif
+    }
+  }
+
+  // Endpoint is now in the process of cleaning its queues
+  endpoint->state = SL_CPC_STATE_CLOSING;
+
+  // Drop any pending RX frame
+  clean_rx_queues(endpoint);
+
+  // Drop any pending TX frame
+  clean_tx_queues(endpoint);
+
+  // reset various counters
+  endpoint->seq = 0;
+  endpoint->ack = 0;
+  endpoint->re_transmit_timeout = sli_cpc_timer_ms_to_tick(SLI_CPC_INIT_RE_TRANSMIT_TIMEOUT_MS);
+  endpoint->last_iframe_sent_timestamp = 0;
+  endpoint->smoothed_rtt = 0;
+  endpoint->rtt_variation = 0;
+#if (SECURITY_ENABLED >= 1)
+  endpoint->frame_counter_rx = 0;
+  endpoint->frame_counter_tx = 0;
+#endif
+
+  if (is_endpoint_empty(endpoint)) {
+    // Endpoint is empty, set it to CLOSED
+    endpoint->state = SL_CPC_STATE_CLOSED;
+    status = SL_STATUS_OK;
+
+    if (queue_free) {
+      // defer_endpoint_free already notifies the core that
+      // the endpoint is being freed, so no need to notify
+      // that endpoint is being closed in that case.
+      defer_endpoint_free(endpoint);
+    } else {
+      notify_endpoint_is_closed();
+    }
+  } else {
+    // If endpoint is not yet empty, it means the driver still owns one of its buffer
+    // handles. The endpoint will be CLOSED once the buffer handle is returned
+    // (see notify_write_complete)
+    status = SL_STATUS_IN_PROGRESS;
+  }
+
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
+  // Unlock any pending semaphore
+  if (endpoint->receive_signal != NULL) {
+    EFM_ASSERT(osSemaphoreRelease(endpoint->receive_signal) == osOK);
+  }
+  #endif
+  // Return state is irrelevant since call was made by the user. Simply unblock
+  // any blocking APIs.
+  notify_state_change(endpoint);
+
+  return status;
+}
+
+/***************************************************************************//**
+ * Terminate endpoint
+ ******************************************************************************/
+sl_status_t sl_cpc_terminate_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                      uint8_t flags)
+{
+  sl_status_t status;
+  sl_cpc_endpoint_t *ep;
+
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+  LOCK_ENDPOINT(ep);
+  if (ep->flags & SL_CPC_ENDPOINT_FLAG_LEGACY_API) {
+    RELEASE_ENDPOINT(ep);
+    cpc_exit_api(endpoint_handle);
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  switch (ep->state) {
+    case SL_CPC_STATE_CLOSED:
+      // Endpoint already terminated
+      status = SL_STATUS_OK;
+      goto exit;
+      break;
+    case SL_CPC_STATE_CLOSING:
+      // Termination in progress, endpoint will go to CLOSED when all on_write_completed
+      // callbacks have been called (see notify_write_complete)
+      status = SL_STATUS_IN_PROGRESS;
+      goto exit;
+      break;
+    case SL_CPC_STATE_FREED:
+      EFM_ASSERT(false);
+      status = SL_STATUS_INVALID_STATE;
+      goto exit;
+      break;
+    default:
+      // Proceed to terminate
+      break;
+  }
+
+  status = terminate_endpoint(ep, false, flags);
+
+  exit:
+  RELEASE_ENDPOINT(ep);
+  cpc_exit_api(endpoint_handle);
+  return status;
+}
+
+/***************************************************************************//**
+ * Free endpoint
+ ******************************************************************************/
+sl_status_t sl_cpc_free_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle)
+{
+  sl_cpc_endpoint_t *ep;
+  MCU_DECLARE_IRQ_STATE;
+
+  MCU_ENTER_ATOMIC();
+
+  if (endpoint_handle->ep == NULL) {
+    MCU_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  ep = endpoint_handle->ep;
+
+  if (ep->state != SL_CPC_STATE_CLOSED) {
+    MCU_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (endpoint_handle->ref_count > 1) {
+    // Another API has been called at the same time
+    MCU_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
+  // Invalidate handle
+  endpoint_handle->ref_count = 0u;
+
+  MCU_EXIT_ATOMIC();
+  LOCK_ENDPOINT(ep);
+
+  // Endpoint should have been freed on termination
+  if (is_endpoint_empty(ep) == false) {
+    RELEASE_ENDPOINT(ep);
+    EFM_ASSERT(false);
+    return SL_STATUS_FAIL;
+  }
+  // Cleanup the endpoint
+  defer_endpoint_free(ep);
+  RELEASE_ENDPOINT(ep);
+
+  // Invalidate handle endpoint pointer
+  endpoint_handle->ep = NULL;
+  return SL_STATUS_OK;
+}
+
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+/***************************************************************************//**
  * Close an endpoint
  ******************************************************************************/
 sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle)
@@ -458,101 +971,59 @@ sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle)
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
+  ep = (sl_cpc_endpoint_t *)endpoint_handle->ep;
+  if (ep != NULL && (ep->flags & SL_CPC_ENDPOINT_FLAG_LEGACY_API) == 0) {
+    // Close only allowed on an endpoint that was initialized with the legacy
+    // open API.
+    MCU_EXIT_ATOMIC();
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
   if (endpoint_handle->ref_count > 1) {
     MCU_EXIT_ATOMIC();
     return SL_STATUS_BUSY;
   }
-  endpoint_handle->ref_count = 0u;
 
-  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
+  endpoint_handle->ref_count = 0u;
+  MCU_EXIT_ATOMIC();
 
   if (ep == NULL) {
     // Close has already been called, we are in the process of closing the endpoint
+    LOCK_ENDPOINTS_LIST();
+
     ep = find_endpoint(endpoint_handle->id);
     if (ep == NULL) {
       status = SL_STATUS_OK;
-    } else if (ep->state == SL_CPC_STATE_CLOSING || ep->state == SL_CPC_STATE_CLOSED) {
-      status = SL_STATUS_OK;
     } else {
-      status = SL_STATUS_OWNERSHIP;
+      LOCK_ENDPOINT(ep);
+
+      if (ep->state == SL_CPC_STATE_CLOSING || ep->state == SL_CPC_STATE_CLOSED) {
+        status = SL_STATUS_OK;
+      } else {
+        status = SL_STATUS_OWNERSHIP;
+      }
+
+      RELEASE_ENDPOINT(ep);
     }
 
-    MCU_EXIT_ATOMIC();
+    RELEASE_ENDPOINTS_LIST();
+
     return status;
   }
 
-  MCU_EXIT_ATOMIC();
   LOCK_ENDPOINT(ep);
 
-  // Notify the host that we want to close an endpoint
-  if (endpoint_handle->id != SL_CPC_ENDPOINT_SYSTEM) {
-    status = sli_cpc_send_disconnection_notification(ep->id);
-    if (status != SL_STATUS_OK) {
-      RELEASE_ENDPOINT(ep);
-      MCU_EXIT_ATOMIC();
-      return SL_STATUS_BUSY;
-    }
+  if (ep->state == SL_CPC_STATE_CLOSED || ep->state == SL_CPC_STATE_CLOSING) {
+    // Endpoint handle should have been invalidated on a CLOSED/CLOSING endpoint
+    EFM_ASSERT(false);
+    RELEASE_ENDPOINT(ep);
+    return SL_STATUS_FAIL;
   }
 
-  while (ep->iframe_receive_queue != NULL) {
-    // Drop the data from the receive Queue;
-    //   Data reception is not allowed when the endpoint is in closing state
-    //   Not possible to read anymore data once the endpoint is closed (or in closing state)
-    sl_slist_node_t *node;
-    sl_cpc_receive_queue_item_t *item;
-    node = sl_slist_pop(&ep->iframe_receive_queue);
-    item = SL_SLIST_ENTRY(node, sl_cpc_receive_queue_item_t, node);
-
-    sli_cpc_drop_receive_queue_item(item);
-  }
-
-  while (ep->uframe_receive_queue != NULL) {
-    // Drop the data from the receive Queue;
-    //   Data reception is not allowed when the endpoint is in closing state
-    //   Not possible to read anymore data once the endpoint is closed (or in closing state)
-    sl_slist_node_t *node;
-    sl_cpc_receive_queue_item_t *item;
-    node = sl_slist_pop(&ep->uframe_receive_queue);
-    item = SL_SLIST_ENTRY(node, sl_cpc_receive_queue_item_t, node);
-
-    sli_cpc_drop_receive_queue_item(item);
-  }
-
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-  if (ep->receive_signal != NULL) {
-    EFM_ASSERT(osSemaphoreRelease(ep->receive_signal) == osOK);
-  }
-#endif
-
-  switch (ep->state) {
-    case SL_CPC_STATE_OPEN:
-      break;
-    case SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE:
-    case SL_CPC_STATE_ERROR_SECURITY_INCIDENT:
-    case SL_CPC_STATE_ERROR_FAULT:
-      // Fatal error; must clean everything and free endpoint
-      clean_tx_queues(ep);
-      break;
-
-    case SL_CPC_STATE_CLOSING:
-    case SL_CPC_STATE_CLOSED:
-    default:
-      EFM_ASSERT(false);  // Should not reach this case
-      return SL_STATUS_FAIL;
-  }
-
-  if ( endpoint_handle->id == SL_CPC_ENDPOINT_SYSTEM) {
-    ep->state = SL_CPC_STATE_CLOSED;
-    defer_endpoint_free(ep);
-  } else {
-    ep->state = SL_CPC_STATE_CLOSING;
-
-    // We expect the host to close the endpoint in a reasonable time, start a timer
-    status = sli_cpc_timer_restart_timer(&ep->close_timer,
-                                         sli_cpc_timer_ms_to_tick(SLI_CPC_DISCONNECTION_NOTIFICATION_TIMEOUT_MS),
-                                         endpoint_close_timeout_callback,
-                                         ep);
-    EFM_ASSERT(status == SL_STATUS_OK);
+  // Clear queues and queue for a free
+  status = terminate_endpoint(ep, true, 0);
+  if (status == SL_STATUS_OK || status == SL_STATUS_IN_PROGRESS) {
+    status = SL_STATUS_OK;
   }
 
   RELEASE_ENDPOINT(ep);
@@ -561,8 +1032,219 @@ sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle)
   // closing the endpoint again
   endpoint_handle->ep = NULL;
 
-  return SL_STATUS_OK;
+  return status;
 }
+#endif
+
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+/***************************************************************************//**
+ * Open a user endpoint
+ ******************************************************************************/
+sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                      sl_cpc_user_endpoint_id_t id,
+                                      uint8_t flags,
+                                      uint8_t tx_window_size)
+{
+  EFM_ASSERT((uint8_t)id >= SL_CPC_USER_ENDPOINT_ID_START);
+  EFM_ASSERT((uint8_t)id <= SL_CPC_USER_ENDPOINT_ID_END);
+
+  return open_endpoint(endpoint_handle, (uint8_t)id, flags, tx_window_size);
+}
+
+/***************************************************************************//**
+ * Open a service endpoint
+ ******************************************************************************/
+sl_status_t sli_cpc_open_service_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                          sl_cpc_service_endpoint_id_t id,
+                                          uint8_t flags,
+                                          uint8_t tx_window_size)
+{
+  EFM_ASSERT((uint8_t)id <= SLI_CPC_SERVICE_ENDPOINT_ID_END);
+
+  return open_endpoint(endpoint_handle, (uint8_t)id, flags, tx_window_size);
+}
+
+/***************************************************************************//**
+ * Open a temporary endpoint
+ ******************************************************************************/
+sl_status_t sli_cpc_open_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                            uint8_t *id,
+                                            uint8_t flags,
+                                            uint8_t tx_window_size)
+{
+  uint8_t id_free = 0;
+
+  LOCK_ENDPOINTS_LIST();
+
+  for (uint8_t i = SLI_CPC_TEMPORARY_ENDPOINT_ID_START; i <= SLI_CPC_TEMPORARY_ENDPOINT_ID_END; i++) {
+    sl_cpc_endpoint_t *endpoint = find_endpoint(i);
+    if (endpoint == NULL) {
+      id_free = i;
+      break;
+    }
+  }
+
+  RELEASE_ENDPOINTS_LIST();
+
+  if (id_free == 0) {
+    return SL_STATUS_NO_MORE_RESOURCE;
+  }
+
+  EFM_ASSERT(id_free >= SLI_CPC_TEMPORARY_ENDPOINT_ID_START);
+  EFM_ASSERT(id_free <= SLI_CPC_TEMPORARY_ENDPOINT_ID_END);
+  *id = id_free;
+
+  return open_endpoint(endpoint_handle, id_free, flags, tx_window_size);
+}
+
+/***************************************************************************//**
+ * Set endpoint in listening mode, waiting for remote to connect
+ ******************************************************************************/
+sl_status_t sl_cpc_listen_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle, uint8_t flags)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_status_t status;
+
+  // Semaphore resource when using an RTOS
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  bool blocking = (flags & SL_CPC_FLAG_NO_BLOCK) != SL_CPC_FLAG_NO_BLOCK;
+  osSemaphoreAttr_t semaphore_attr;
+  osStatus_t sem_status;
+
+#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  uint32_t semaphore_cb[osSemaphoreCbSize / 4];
+#endif
+
+#else
+  (void) flags;
+#endif
+
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (ep->configured_tx_window_size != ep->current_tx_window_space
+      || ep->configured_tx_window_size < SL_CPC_TRANSMIT_WINDOW_MIN_SIZE
+      || ep->configured_tx_window_size > SL_CPC_TRANSMIT_WINDOW_MAX_SIZE) {
+    cpc_exit_api(endpoint_handle);
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  LOCK_ENDPOINT(ep);
+
+  // if the endpoint is already in the open state, it means
+  // this function was already called before, return that we're in progress
+  if (ep->state == SL_CPC_STATE_OPEN || ep->state == SL_CPC_STATE_CONNECTING) {
+    status = SL_STATUS_IN_PROGRESS;
+    goto release_ep;
+  }
+
+  // if connected, let the user know
+  if (ep->state == SL_CPC_STATE_CONNECTED) {
+    status = SL_STATUS_OK;
+    goto release_ep;
+  }
+
+  if (ep->state != SL_CPC_STATE_CLOSED) {
+    status = SL_STATUS_INVALID_STATE;
+    goto release_ep;
+  }
+
+  if (ep->id == SL_CPC_ENDPOINT_SYSTEM) {
+    ep->state = SL_CPC_STATE_CONNECTED;
+    status = SL_STATUS_OK;
+    goto release_ep;
+  }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (blocking) {
+#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+    // static allocation
+    semaphore_attr.cb_mem = semaphore_cb;
+    semaphore_attr.cb_size = osSemaphoreCbSize;
+#else
+    // dynamic allocation
+    semaphore_attr.cb_mem = NULL;
+    semaphore_attr.cb_size = 0U;
+#endif
+    // check the semaphore is not used, it should
+    // not be coming from CLOSED state
+    EFM_ASSERT(ep->state_event_signal == NULL);
+    if (ep->state_event_signal != NULL) {
+      status = SL_STATUS_ALLOCATION_FAILED;
+      goto release_ep;
+    }
+
+    // create semaphore and check it's valid
+    ep->state_event_signal = osSemaphoreNew(1, 0u, &semaphore_attr);
+    EFM_ASSERT(ep->state_event_signal != NULL);
+    if (ep->state_event_signal == NULL) {
+      status = SL_STATUS_ALLOCATION_FAILED;
+      goto release_ep;
+    }
+  }
+#endif
+
+  if (sli_cpc_reboot_is_sequence_done()) {
+    status = sli_cpc_send_opening_notification(ep->id);
+    if (status != SL_STATUS_OK) {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+      if (blocking) {
+        EFM_ASSERT(osSemaphoreDelete(ep->state_event_signal) == osOK);
+      }
+#endif
+      goto release_ep;
+    }
+  }
+
+  // Endpoint is now waiting for remote to connect.
+  //  - in baremetal, the completion will be done via a callback, so the
+  //    function is basically done here
+  //  - with a RTOS, this call is blocking until the remote connects,
+  //    so allocate a semaphore and wait on it; except if timeout is 0
+  ep->state = SL_CPC_STATE_OPEN;
+
+  // Indicate that the operation is not done yet
+  status = SL_STATUS_IN_PROGRESS;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (!blocking) {
+    // Don't block
+    goto release_ep;
+  }
+
+  RELEASE_ENDPOINT(ep);
+  // acquire semaphore, it will be released when remote connects to endpoint
+  sem_status = osSemaphoreAcquire(ep->state_event_signal, osWaitForever);
+  EFM_ASSERT(sem_status == osOK);
+  LOCK_ENDPOINT(ep);
+
+  // delete semaphore
+  EFM_ASSERT(osSemaphoreDelete(ep->state_event_signal) == osOK);
+  ep->state_event_signal = NULL;
+
+  // if the semaphore can be acquired, it means that the remote connected
+  // successfully, the state is already updated to CONNECTED at this point.
+  if (sem_status == osOK) {
+    if (ep->state == SL_CPC_STATE_CONNECTED) {
+      status = SL_STATUS_OK;
+    } else {
+      status = SL_STATUS_ABORT;
+    }
+  } else {
+    ep->state = SL_CPC_STATE_CLOSED;
+    status = SL_STATUS_INVALID_STATE;
+  }
+#endif
+
+  release_ep:
+  RELEASE_ENDPOINT(ep);
+  cpc_exit_api(endpoint_handle);
+
+  return status;
+}
+#endif
 
 /***************************************************************************//**
  * Abort read from an endpoint
@@ -572,24 +1254,15 @@ sl_status_t sl_cpc_abort_read(sl_cpc_endpoint_handle_t *endpoint_handle)
 {
   osSemaphoreId_t receive_signal;
   sl_cpc_endpoint_t *ep;
-
-  if (endpoint_handle == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
+  sl_status_t status;
 
   if (osKernelGetState() != osKernelRunning) {
     return SL_STATUS_INVALID_STATE;
   }
 
-  if (!cpc_enter_api(endpoint_handle)) {
-    return SL_STATUS_INVALID_STATE;
-  }
-
-  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
-
-  if (ep == NULL) {
-    cpc_exit_api(endpoint_handle);
-    return SL_STATUS_NOT_INITIALIZED;
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
   MCU_ATOMIC_LOAD(receive_signal, ep->receive_signal);
@@ -619,8 +1292,9 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
   sl_cpc_endpoint_t *ep = NULL;
   sl_cpc_receive_queue_item_t *item = NULL;
   sl_slist_node_t *node = NULL;
-  sl_status_t status = SL_STATUS_EMPTY;
+  sl_status_t status;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
+  bool blocking = (flags & SL_CPC_FLAG_NO_BLOCK) != SL_CPC_FLAG_NO_BLOCK;
   osStatus_t  sem_status = osOK;
   osSemaphoreId_t receive_signal;
 
@@ -629,25 +1303,18 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
   }
 #endif
 
-  if (endpoint_handle == NULL) {
-    return SL_STATUS_NULL_POINTER;
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && (SL_CPC_PRIMARY_FIRMWARE_UPGRADE_SUPPORT_ENABLED >= 1)
+  if (sli_cpc_is_fwu_in_progress() && (endpoint_handle->id != SL_CPC_ENDPOINT_SYSTEM)) {
+    return SL_STATUS_BUSY;
   }
+#endif
 
-  if (!cpc_enter_api(endpoint_handle)) {
-    return SL_STATUS_INVALID_STATE;
-  }
-
-  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
-  if (ep == NULL) {
-    ep = find_endpoint(endpoint_handle->id);
-    if (ep != NULL) {
-      status = SL_STATUS_OWNERSHIP;
-    } else {
-      status = SL_STATUS_INVALID_STATE;
-    }
-    cpc_exit_api(endpoint_handle);
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
     return status;
   }
+
+  status = SL_STATUS_EMPTY;
 
   LOCK_ENDPOINT(ep);
 
@@ -658,7 +1325,25 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
   }
 
   if (*receive_queue == NULL) {
-    if (ep->state != SL_CPC_STATE_OPEN) {
+    bool legacy_valid_read_states = false;
+
+    if (ep->flags & SL_CPC_ENDPOINT_FLAG_LEGACY_API) {
+      if (ep->state == SL_CPC_STATE_OPEN
+          || ep->state == SL_CPC_STATE_CONNECTING) {
+        legacy_valid_read_states = true;
+      }
+    }
+
+    /*
+     * Can still receive in all three states:
+     *   Connected:     we are actively connected to remote
+     *   Shutting down: we are draining our TX queue to the bus.
+     *   Shut down:     we will no longer transmit.
+     */
+    if (ep->state != SL_CPC_STATE_CONNECTED
+        && ep->state != SL_CPC_STATE_SHUTTING_DOWN
+        && ep->state != SL_CPC_STATE_SHUTDOWN
+        && !legacy_valid_read_states) {
       // Return error only when the receive queue is empty
       RELEASE_ENDPOINT(ep);
       cpc_exit_api(endpoint_handle);
@@ -666,7 +1351,7 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
     }
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-    if ((flags & SL_CPC_FLAG_NO_BLOCK) > 0) {
+    if (!blocking) {
       RELEASE_ENDPOINT(ep);
       cpc_exit_api(endpoint_handle);
       return status;
@@ -753,6 +1438,33 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
 }
 
 /***************************************************************************//**
+ * Helper function to validate the tx_payload length against the maximum
+ ******************************************************************************/
+static sl_status_t sli_cpc_validate_tx_payload_length(uint16_t tx_length, bool security_enabled)
+{
+  uint16_t tx_max_length = SL_CPC_TX_PAYLOAD_MAX_LENGTH;
+#if !(SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  (void) security_enabled;
+#endif
+
+  if (remote_tx_payload_max_length != 0) {
+    tx_max_length = remote_tx_payload_max_length;
+  }
+
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  if (security_enabled) {
+    tx_max_length -= SLI_CPC_SECURITY_TAG_LENGTH;
+  }
+#endif
+
+  if (tx_length > tx_max_length) {
+    return SL_STATUS_INVALID_COUNT;
+  } else {
+    return SL_STATUS_OK;
+  }
+}
+
+/***************************************************************************//**
  * Write data from an endpoint
  ******************************************************************************/
 sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
@@ -764,13 +1476,24 @@ sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
   sl_cpc_endpoint_t *ep;
   sl_status_t status;
 
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-  if (osKernelGetState() != osKernelRunning) {
-    return SL_STATUS_INVALID_STATE;
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+  // Secondary cannot send poll message
+  // Can answer only using the on_poll callback
+  EFM_ASSERT((flags & SL_CPC_FLAG_UNNUMBERED_POLL_FINAL) == 0);
+#endif
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && (SL_CPC_PRIMARY_FIRMWARE_UPGRADE_SUPPORT_ENABLED >= 1)
+  if (sli_cpc_is_fwu_in_progress() && (endpoint_handle->id != SL_CPC_ENDPOINT_SYSTEM)) {
+    return SL_STATUS_BUSY;
   }
 #endif
 
-  if (endpoint_handle == NULL || data == NULL) {
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if (data == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -778,30 +1501,21 @@ sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  // Payload must be 4087 or less
-  EFM_ASSERT(data_length <= SL_CPC_TX_PAYLOAD_MAX_LENGTH);
+  // Validate data_length against the maximum TX payload length
+  {
+    #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+    const bool security_enabled = ep->encrypted;
+    #else
+    const bool security_enabled = false;
+    #endif
 
-  if (!cpc_enter_api(endpoint_handle)) {
-    return SL_STATUS_INVALID_STATE;
-  }
-  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
-
-  if (ep == NULL) {
-    ep = find_endpoint(endpoint_handle->id);
-    if (ep != NULL) {
-      status = SL_STATUS_OWNERSHIP;
-    } else {
-      status = SL_STATUS_INVALID_STATE;
+    status = sli_cpc_validate_tx_payload_length(data_length, security_enabled);
+    if (status != SL_STATUS_OK) {
+      cpc_exit_api(endpoint_handle);
+      return status;
     }
-    cpc_exit_api(endpoint_handle);
-    return status;
   }
 
-#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
-  // Secondary cannot send poll message
-  // Can answer only using the on_poll callback
-  EFM_ASSERT((flags & SL_CPC_FLAG_UNNUMBERED_POLL) == 0);
-#endif
   status = write(ep, data, data_length, flags, on_write_completed_arg);
   cpc_exit_api(endpoint_handle);
 
@@ -813,20 +1527,28 @@ sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
  ******************************************************************************/
 sl_cpc_endpoint_state_t sl_cpc_get_endpoint_state(sl_cpc_endpoint_handle_t *endpoint_handle)
 {
-  sl_cpc_endpoint_t *ep;
   sl_cpc_endpoint_state_t state;
+  sl_cpc_endpoint_t *ep;
 
   MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
 
   if (ep == NULL) {
+    LOCK_ENDPOINTS_LIST();
+
     ep = find_endpoint(endpoint_handle->id);
     if (ep == NULL) {
       state = SL_CPC_STATE_FREED;
     } else {
-      MCU_ATOMIC_LOAD(state, ep->state);
+      LOCK_ENDPOINT(ep);
+      state = ep->state;
+      RELEASE_ENDPOINT(ep);
     }
+
+    RELEASE_ENDPOINTS_LIST();
   } else {
-    MCU_ATOMIC_LOAD(state, ep->state);
+    LOCK_ENDPOINT(ep);
+    state = ep->state;
+    RELEASE_ENDPOINT(ep);
   }
 
   return state;
@@ -844,14 +1566,23 @@ bool sl_cpc_get_endpoint_encryption(sl_cpc_endpoint_handle_t *endpoint_handle)
   MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
 
   if (ep == NULL) {
+    LOCK_ENDPOINTS_LIST();
+
     ep = find_endpoint(endpoint_handle->id);
+
     if (ep == NULL) {
       encrypted = false;
     } else {
-      MCU_ATOMIC_LOAD(encrypted, ep->encrypted);
+      LOCK_ENDPOINT(ep);
+      encrypted = ep->encrypted;
+      RELEASE_ENDPOINT(ep);
     }
+
+    RELEASE_ENDPOINTS_LIST()
   } else {
-    MCU_ATOMIC_LOAD(encrypted, ep->encrypted);
+    LOCK_ENDPOINT(ep);
+    encrypted = ep->encrypted;
+    RELEASE_ENDPOINT(ep);
   }
 
   return encrypted;
@@ -862,53 +1593,262 @@ bool sl_cpc_get_endpoint_encryption(sl_cpc_endpoint_handle_t *endpoint_handle)
 #endif
 }
 
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+sl_status_t sli_cpc_remote_connecting(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_status_t status;
+
+  LOCK_ENDPOINTS_LIST();
+  ep = find_endpoint(endpoint_id);
+
+  // Only accept the connection request if the endpoint is in a valid state.
+  *reply_state = SL_CPC_STATE_CLOSED;
+
+  if (ep == NULL) {
+    RELEASE_ENDPOINTS_LIST();
+
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  switch (ep->state) {
+    case SL_CPC_STATE_OPEN:
+    case SL_CPC_STATE_CONNECTING:
+      // Reply with CONNECTED to accept the connection
+      ep->state = SL_CPC_STATE_CONNECTING;
+      *reply_state = SL_CPC_STATE_CONNECTED;
+      status = SL_STATUS_OK;
+      break;
+    default:
+      status = SL_STATUS_INVALID_STATE;
+      break;
+  }
+  RELEASE_ENDPOINT(ep);
+
+  return status;
+}
+
 /***************************************************************************//**
- * Notify remote is disconnected
+ * Notify remote has connected, unlocked version, operating directly on an
+ * endpoint instead of an endpoint ID.
  ******************************************************************************/
-void sli_cpc_remote_disconnected(uint8_t endpoint_id)
+static void sli_cpc_remote_connected_endpoint(sl_cpc_endpoint_t *ep, sl_status_t status)
+{
+  // only notify when the endpoint is connecting, as it's not valid
+  // to become connected from any other state
+  if (ep->state == SL_CPC_STATE_CONNECTING) {
+    bool skip_callback = false;
+
+    if (status == SL_STATUS_OK) {
+      ep->state = SL_CPC_STATE_CONNECTED;
+    } else {
+      // Connection failed. Go back to CLOSED state. Connection sequence will
+      // have to be restarted.
+      ep->state = SL_CPC_STATE_CLOSED;
+    }
+
+    skip_callback = notify_state_change(ep);
+
+    if (!skip_callback && ep->on_connect != NULL) {
+      RELEASE_ENDPOINT(ep);
+      notify_ep_on_connect(ep, status);
+      LOCK_ENDPOINT(ep);
+    }
+  }
+}
+
+/***************************************************************************//**
+ * Notify remote has connected
+ ******************************************************************************/
+void sli_cpc_remote_connected(uint8_t endpoint_id, sl_status_t status)
 {
   sl_cpc_endpoint_t *ep;
 
+  LOCK_ENDPOINTS_LIST();
+
   ep = find_endpoint(endpoint_id);
-
   if (ep == NULL) {
-    return; // Endpoint is not being used
-  }
+    // This can happen is the endpoint was terminated + freed while waiting
+    // for the connection handshake to complete. Simply ignore the command.
+    RELEASE_ENDPOINTS_LIST();
 
-  if (ep->state == SL_CPC_STATE_CLOSING) {
-    // Stop the close timer
-    sli_cpc_timer_stop_timer(&ep->close_timer);
-    ep->state = SL_CPC_STATE_CLOSED;
-    defer_endpoint_free(ep);
     return;
   }
 
-  // Check if endpoint is in error
-  if (ep->state == SL_CPC_STATE_OPEN) {
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  sli_cpc_remote_connected_endpoint(ep, status);
+
+  RELEASE_ENDPOINT(ep);
+}
+#endif
+
+/***************************************************************************//**
+ * Completed endpoint shutdown handshake. Endpoint must be locked by caller.
+ ******************************************************************************/
+void sli_cpc_endpoint_disconnected(uint8_t endpoint_id)
+{
+  sl_cpc_endpoint_t *ep;
+
+  LOCK_ENDPOINTS_LIST();
+
+  ep = find_endpoint(endpoint_id);
+  if (ep == NULL) {
+    // This can happen if the endpoint is terminated + freed while waiting for
+    // the shutdown handshake to complete. Simply ignore the request.
+    RELEASE_ENDPOINTS_LIST();
+
+    return;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  if (ep->state == SL_CPC_STATE_SHUTDOWN
+      || ep->state == SL_CPC_STATE_REMOTE_SHUTDOWN) {
+    // Both sides are done transmitting and the endpoint shutdown handshake
+    // completed successfully, endpoint has cleanly disconnected.
+    EFM_ASSERT(is_endpoint_tx_done(ep) == true);
+    ep->state = SL_CPC_STATE_DISCONNECTED;
+  } else {
+    // Endpoint was either terminated or went in error while waiting for the
+    // shutdown handshake to complete. Don't update the state, as it is no longer
+    // related to the shutdown handshake
+  }
+
+  RELEASE_ENDPOINT(ep);
+  // Return state is irrelevant since there is not disconnection callback
+  notify_state_change(ep);
+}
+
+/***************************************************************************//**
+ * Received shutdown request from remote.
+ ******************************************************************************/
+sl_status_t sli_cpc_remote_shutdown(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_status_t status;
+
+  LOCK_ENDPOINTS_LIST();
+  ep = find_endpoint(endpoint_id);
+  if (ep == NULL) {
+    RELEASE_ENDPOINTS_LIST();
+
+    // Endpoint was not allocated, simply accept the shutdown request silently.
+    *reply_state = SL_CPC_STATE_DISCONNECTED;
+    return SL_STATUS_NOT_FOUND;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  switch (ep->state) {
+    case SL_CPC_STATE_SHUTDOWN:
+      // Endpoint was already shutdown, accept the request.
+      // The local endpoint state will be updated to DISCONNECTED once the reply
+      // has been succesfully sent to the remote (on_write_completed)
+      *reply_state = SL_CPC_STATE_DISCONNECTED;
+      status = SL_STATUS_OK;
+      break;
+    case SL_CPC_STATE_SHUTTING_DOWN:
+      // Endpoint still has frames pending a transmission. Refuse shutdown request
+      // for now. The local system will request a shutdown once all frames have
+      // been sent.
+      ep->state = SL_CPC_STATE_REMOTE_SHUTDOWN;
+      *reply_state = ep->state;
+      status = SL_STATUS_IN_PROGRESS;
+      break;
+    case SL_CPC_STATE_REMOTE_SHUTDOWN:
+    case SL_CPC_STATE_CONNECTED:
+      // Remote requests a shutdown
+      ep->state = SL_CPC_STATE_REMOTE_SHUTDOWN;
+
+      if (is_endpoint_tx_done(ep) == true) {
+        // The local endpoint state will be updated once the reply has been succesfully
+        // sent to the remote (on_write_completed)
+        *reply_state = SL_CPC_STATE_DISCONNECTED;
+        status = SL_STATUS_OK;
+      } else {
+        *reply_state = ep->state;
+        status = SL_STATUS_IN_PROGRESS;
+      }
+      break;
+    default:
+      // Endpoint was not in an active connection, simply accept the shutdown
+      // request silently.
+      *reply_state = SL_CPC_STATE_DISCONNECTED;
+      status = SL_STATUS_INVALID_STATE;
+      break;
+  }
+  RELEASE_ENDPOINT(ep);
+
+  return status;
+}
+
+/***************************************************************************//**
+ * Notify remote has terminated endpoint connection
+ ******************************************************************************/
+void sli_cpc_remote_terminated(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state)
+{
+  sl_cpc_endpoint_t *ep;
+
+  SL_CPC_JOURNAL_RECORD_INFO("Remote terminated endpoint connection", endpoint_id);
+
+  LOCK_ENDPOINTS_LIST();
+  ep = find_endpoint(endpoint_id);
+
+  // Always reply CLOSED to a terminate command, regardless of the internal state
+  // of the endpoint.
+  *reply_state = SL_CPC_STATE_CLOSED;
+
+  if (ep == NULL) {
+    // Endpoint is not being used, terminate command has no effect.
+    RELEASE_ENDPOINTS_LIST();
+
+    return;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  if (is_endpoint_connection_active(ep) == true) {
+    // Connection was unexpectedly terminated, notify error
     ep->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
 
-    // Stop re-transmit timeout
+    // Stop sending, remote has left
     clean_tx_queues(ep);
+    RELEASE_ENDPOINT(ep);
+
+    // Notify user
+    // CPC-1101:  Once notify_error will be dispatched, call before cleaning queues
+    //            and move RELEASE to function end.
     notify_error(ep);
+  } else {
+    // Don't release twice
+    RELEASE_ENDPOINT(ep);
   }
 }
 
 /***************************************************************************//**
  * Calculate the re transmit timeout
- * Implemented using Karn’s algorithm
+ * Implemented using Karn's algorithm
  * Based off of RFC 2988 Computing TCP's Retransmission Timer
  ******************************************************************************/
 static void sli_compute_re_transmit_timeout(sl_cpc_endpoint_t *endpoint)
 {
-  // Implemented using Karn’s algorithm
+  // Implemented using Karn's algorithm
   // Based off of RFC 2988 Computing TCP's Retransmission Timer
   static bool first_rtt_measurement = true;
 
   uint64_t round_trip_time = 0;
   uint64_t rto = 0;
-  int64_t delta = 0;
+  uint64_t delta = 0;
 
-  const long k = 4; // This value is recommended by the Karn’s algorithm
+  const unsigned k = 4; // This value is recommended by the Karn's algorithm
 
   EFM_ASSERT(endpoint != NULL);
 
@@ -940,7 +1880,7 @@ static void sli_compute_re_transmit_timeout(sl_cpc_endpoint_t *endpoint)
     rto = sli_cpc_timer_ms_to_tick(SLI_CPC_MIN_RE_TRANSMIT_TIMEOUT_MS);
   }
 
-  endpoint->re_transmit_timeout = rto;
+  endpoint->re_transmit_timeout = (uint32_t) rto;
 }
 
 /***************************************************************************//**
@@ -948,9 +1888,9 @@ static void sli_compute_re_transmit_timeout(sl_cpc_endpoint_t *endpoint)
  ******************************************************************************/
 void sli_cpc_signal_event(sl_cpc_signal_type_t signal_type)
 {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
   (void)signal_type;
 
-#if defined(SL_CATALOG_KERNEL_PRESENT)
   EFM_ASSERT(osSemaphoreRelease(event_signal) == osOK);
 #else
   if (signal_type == SL_CPC_SIGNAL_RX) {
@@ -960,15 +1900,164 @@ void sli_cpc_signal_event(sl_cpc_signal_type_t signal_type)
 }
 
 /***************************************************************************//**
+ * Notify the core that an endpoint is terminated, it is used to unlock the
+ * semaphore in CPC core task.
+ ******************************************************************************/
+static void notify_endpoint_is_closed(void)
+{
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (cpc_core_in_reset) {
+    sli_cpc_signal_event(SL_CPC_SIGNAL_SYSTEM);
+  }
+#endif
+#endif
+}
+
+/***************************************************************************//**
+ * This function checks the frame type and notifies the appropriate callback.
+ * After notification, it clears the data and releases the buffer handle.
+ ******************************************************************************/
+static void notify_write_complete(void *data)
+{
+  uint8_t type;
+  sl_cpc_buffer_handle_t *buffer_handle;
+  sl_cpc_endpoint_t * endpoint;
+  sl_status_t status;
+  #if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+  sl_cpc_endpoint_state_t state;
+  #endif
+
+  (void)data;
+
+  MCU_DECLARE_IRQ_STATE;
+
+  while (write_complete_callback_list != NULL) {
+    MCU_ENTER_ATOMIC();
+    buffer_handle = sli_cpc_pop_core_buffer_handle(&write_complete_callback_list);
+    endpoint = buffer_handle->endpoint;
+    if (endpoint->state == SL_CPC_STATE_FREED
+        || endpoint->on_write_complete_pending_count == 0) {
+      MCU_EXIT_ATOMIC();
+      EFM_ASSERT(false);
+      return;
+    }
+    endpoint->on_write_complete_pending_count--;
+    MCU_EXIT_ATOMIC();
+
+    SL_CPC_JOURNAL_RECORD_TRACE("Write Complete", buffer_handle->endpoint->id);
+
+    type = sli_cpc_hdlc_get_frame_type(buffer_handle->control);
+
+    if (type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED && buffer_handle->endpoint->on_uframe_write_completed != NULL) {
+      buffer_handle->endpoint->on_uframe_write_completed(buffer_handle->endpoint->id, buffer_handle->data, buffer_handle->arg, buffer_handle->write_status);
+    } else if (type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION && buffer_handle->endpoint->on_iframe_write_completed != NULL) {
+      buffer_handle->endpoint->on_iframe_write_completed(buffer_handle->endpoint->id, buffer_handle->data, buffer_handle->arg, buffer_handle->write_status);
+    }
+
+    LOCK_ENDPOINT(endpoint);
+    switch (endpoint->state) {
+      case SL_CPC_STATE_CLOSING:
+        // Endpoint pending a cleanup
+        if (is_endpoint_empty(endpoint)) {
+          // Cleanup done, set endpoint to initial state
+          endpoint->state = SL_CPC_STATE_CLOSED;
+
+          // sl_cpc_close_endpoint called, automatically free the endpoint
+          if (endpoint->flags & SL_CPC_ENDPOINT_FLAG_LEGACY_API) {
+            defer_endpoint_free(endpoint);
+          } else {
+            // defer_endpoint_free already notifies the core that
+            // the endpoint is being freed, so no need to notify
+            // that endpoint is being closed in that case.
+            notify_endpoint_is_closed();
+          }
+        }
+        break;
+
+      case SL_CPC_STATE_REMOTE_SHUTDOWN:
+      case SL_CPC_STATE_SHUTTING_DOWN:
+        if (!is_endpoint_tx_done(endpoint)) {
+          // Frames yet to be sent
+          break;
+        }
+        // Finished sending pending frames, send notification to remote
+        #if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+        state = SL_CPC_STATE_DISCONNECTED;
+        status = sli_cpc_system_cmd_property_set(on_endpoint_shutdown_reply,
+                                                 (void*)endpoint,
+                                                 EP_ID_TO_PROPERTY_STATE(endpoint->id),
+                                                 0,     // try only once
+                                                 SLI_CPC_SYSTEM_CMD_TIMEOUT_MS,
+                                                 &state,
+                                                 sizeof(state),
+                                                 SYSTEM_EP_IFRAME);
+        #else
+        status = sli_cpc_send_shutdown_request(endpoint->id);
+        #endif
+        if (status != SL_STATUS_OK) {
+          // System endpoint command failed, handshake aborted
+          endpoint->state = SL_CPC_STATE_DISCONNECTED;
+          // Return value is irrelevant since there is no disconnection callback
+          notify_state_change(endpoint);
+        }
+
+        // Update endpoint state
+        if (endpoint->state == SL_CPC_STATE_SHUTTING_DOWN) {
+          // Signaled remote that we are done TX. Once remote responds, will
+          // go to DISCONNECTED
+          endpoint->state = SL_CPC_STATE_SHUTDOWN;
+        } else {
+          // Stay in REMOTE_SHUTDOWN until the remote replies to our shutdown
+          // handshake, or times out.
+        }
+        break;
+      default:
+        // Nothing to be done
+        break;
+    }
+    RELEASE_ENDPOINT(endpoint);
+
+    buffer_handle->data = NULL;
+    sli_cpc_free_buffer_handle(buffer_handle);
+  }
+}
+
+/***************************************************************************//**
+ * This function is called upon the completion of a write operation. It sets
+ * the write status of the buffer handle and dispatches a routine that will
+ * be executed later to inform the endpoint user via the appropriate registered
+ * callback.
+ ******************************************************************************/
+static void submit_write_completion(sl_cpc_buffer_handle_t *buffer_handle, sl_status_t write_status)
+{
+  // When submitting for write completion, the buffer handle should not be referenced
+  EFM_ASSERT(buffer_handle->ref_count == 0);
+
+  buffer_handle->write_status = write_status;
+
+  SL_CPC_JOURNAL_RECORD_TRACE("Submit write complete", buffer_handle->endpoint->id);
+  MCU_ATOMIC_SECTION(sli_cpc_push_back_core_buffer_handle(&write_complete_callback_list, buffer_handle); );
+  sli_cpc_dispatcher_push(&callback_dispatcher_handle, notify_write_complete, NULL); //Use to push status
+
+  if (buffer_handle->endpoint->on_write_complete_pending_count == UINT16_MAX) {
+    // Count would overflow.
+    EFM_ASSERT(false);
+    return;
+  }
+
+  buffer_handle->endpoint->on_write_complete_pending_count++;
+}
+
+/***************************************************************************//**
  * Notify Transmit completed
  ******************************************************************************/
-void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
+void sli_cpc_notify_tx_data_by_drv(sl_cpc_buffer_handle_t *buffer_handle)
 {
   uint8_t control_byte;
   uint8_t frame_type;
   sl_status_t status = SL_STATUS_OK;
   sl_cpc_endpoint_t *endpoint;
-  bool can_be_freed = false;
   MCU_DECLARE_IRQ_STATE;
 
 #if defined(CPC_DEBUG_TRACE)
@@ -984,97 +2073,84 @@ void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle)
 
   MCU_ENTER_ATOMIC();
   endpoint = buffer_handle->endpoint;
+  if (endpoint == NULL && frame_type != SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
+    // Only a REJECT frame for a closed endpoint may have a NULL endpoint
+    MCU_EXIT_ATOMIC();
+    EFM_ASSERT(false);
+    return;
+  }
 
-  if ((endpoint == NULL)                 // Endpoint already closed
-      || ((frame_type != SLI_CPC_HDLC_FRAME_TYPE_INFORMATION)
-          && (frame_type != SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED))) {
-    if ((frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION)
-        || (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED)) {
-      // Data associated with a closed endpoint,
-      // but buffer was still referenced in the driver
-      sl_cpc_endpoint_closed_arg_t *arg = buffer_handle->arg;
-
-      EFM_ASSERT(arg != NULL);
-      if ((frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION)
-          && (arg->on_iframe_write_completed != NULL)) {
-        // Notify caller that it can free the tx buffer now
-        arg->on_iframe_write_completed(arg->id, buffer_handle->data, arg->arg, SL_STATUS_TRANSMIT_INCOMPLETE);
-      } else if ((frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED)
-                 && (arg->on_uframe_write_completed != NULL)) {
-        arg->on_uframe_write_completed(arg->id, buffer_handle->data, arg->arg, SL_STATUS_TRANSMIT_INCOMPLETE);
-      }
-      buffer_handle->data = NULL;
-      sli_cpc_free_closed_arg(arg);
-    }
-    // Free handle and data buffer
-    sli_cpc_drop_buffer_handle(buffer_handle);
-  } else {
-    if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
-      if (buffer_handle->on_write_complete_pending) {
-        if (endpoint->on_iframe_write_completed != NULL) {
-          endpoint->on_iframe_write_completed(endpoint->id, buffer_handle->data, buffer_handle->arg, SL_STATUS_OK);
-        }
-
-        buffer_handle->on_write_complete_pending = false;
-
-        sli_cpc_drop_buffer_handle(buffer_handle);
+  if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+    if (buffer_handle->on_write_complete_pending) {
+      // Frame has already been acked by remote (this was a retranmission)
+      buffer_handle->on_write_complete_pending = false;
+      submit_write_completion(buffer_handle, SL_STATUS_OK);
+    } else if (is_endpoint_connection_active(endpoint)) {
+      status = sli_cpc_free_buffer_handle(buffer_handle);
+      if (status == SL_STATUS_BUSY) {
+        // Buffer waiting for an acknowledge, add to retransmit queue and start timer
+        SLI_CPC_DEBUG_TRACE_ENDPOINT_DATA_FRAME_TRANSMIT_COMPLETED(endpoint);
+        status = sli_cpc_timer_restart_timer(&endpoint->re_transmit_timer,
+                                             endpoint->re_transmit_timeout,
+                                             re_transmit_timeout_callback,
+                                             buffer_handle);
+        EFM_ASSERT(status == SL_STATUS_OK);
+      } else if (status == SL_STATUS_OK) {
+        // Buffer is not in the endpoint's queues anymore. This can happen when
+        // the remote closes the endpoint unexpectedly, which clears the TX queues
+        // (see sli_cpc_remote_terminated).
       } else {
-        // Drop the buffer restart re_transmit_timer if it was not acknowledged (still referenced)
-        if (sli_cpc_drop_buffer_handle(buffer_handle) == SL_STATUS_BUSY) {
-          SLI_CPC_DEBUG_TRACE_ENDPOINT_DATA_FRAME_TRANSMIT_COMPLETED(endpoint);
-          if (endpoint->re_transmit_queue != NULL) {
-            status = sli_cpc_timer_restart_timer(&endpoint->re_transmit_timer,
-                                                 endpoint->re_transmit_timeout,
-                                                 re_transmit_timeout_callback,
-                                                 buffer_handle);
-            EFM_ASSERT(status == SL_STATUS_OK);
-          }
-        }
-      }
-    } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
-      EFM_ASSERT(endpoint->uframe_tx_complete_pending);
-      // Reset uframe_tx_complete_pending flag
-      endpoint->uframe_tx_complete_pending = false;
-
-      if (endpoint->on_uframe_write_completed != NULL) {
-        // Notify caller that it can free the tx buffer now
-        endpoint->on_uframe_write_completed(endpoint->id, buffer_handle->data, buffer_handle->arg, SL_STATUS_OK);
-      }
-
-      // Free handle
-      buffer_handle->data = NULL;
-      sli_cpc_drop_buffer_handle(buffer_handle);
-
-      if (endpoint->uframe_holding_list != NULL) {
-        // Put pending uframe in the tx queue
-        sl_slist_node_t *item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->uframe_holding_list, sl_cpc_transmit_queue_item_t);
-        sl_cpc_transmit_queue_item_t *qitem = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
-        queue_for_transmission(endpoint, qitem, true);
-      } else if (endpoint->state == SL_CPC_STATE_CLOSED) {
-        can_be_freed = true;
+        EFM_ASSERT(false);
       }
     } else {
-      // Supervisory frame
+      // Endpoint disconnected from remote, notify transmit failed
+      endpoint->current_tx_window_space++;
+      submit_write_completion(buffer_handle, SL_STATUS_TRANSMIT_INCOMPLETE);
+    }
+  } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
+    if (endpoint->uframe_tx_complete_pending == false) {
+      // U-Frame TX complete should always be pending upon finishing a U-Frame TX
+      MCU_EXIT_ATOMIC();
+      EFM_ASSERT(false);
+      return;
+    }
+
+    // Reset uframe_tx_complete_pending flag
+    endpoint->uframe_tx_complete_pending = false;
+    submit_write_completion(buffer_handle, SL_STATUS_OK);
+
+    if (endpoint->uframe_holding_list != NULL) {
+      // Put pending uframe in the tx queue
+      sl_cpc_buffer_handle_t *frame = sli_cpc_pop_core_buffer_handle(&endpoint->uframe_holding_list);
+      queue_for_transmission(endpoint, frame, true);
+    }
+  } else if (SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
+    if (endpoint != NULL) {
+      // Reject frame for an endpoint that is not allocated results in a frame
+      // with a NULL endpoint.
       SLI_CPC_DEBUG_TRACE_ENDPOINT_SUPERVISORY_FRAME_TRANSMIT_COMPLETED(endpoint);
     }
+
+    sli_cpc_free_buffer_handle(buffer_handle);
+  } else {
+    // Unknown frame type
+    MCU_EXIT_ATOMIC();
+    EFM_ASSERT(false);
+    return;
   }
 
   // Notify task if transmit frames are still queued in endpoints
   if (transmit_queue != NULL) {
-    EFM_ASSERT(can_be_freed == false);
     sli_cpc_signal_event(SL_CPC_SIGNAL_TX);
   }
 
-  if (can_be_freed) {
-    defer_endpoint_free(endpoint);
-  }
   MCU_EXIT_ATOMIC();
 }
 
 /***************************************************************************//**
  * Notify Packet has been received and it is ready to be processed
  ******************************************************************************/
-void sli_cpc_drv_notify_rx_data(void)
+void sli_cpc_notify_rx_data_from_drv(void)
 {
   sli_cpc_signal_event(SL_CPC_SIGNAL_RX);
 }
@@ -1099,6 +2175,62 @@ sl_power_manager_on_isr_exit_t sl_cpc_sleep_on_isr_exit(void)
 }
 #endif
 
+/***************************************************************************/ /**
+ * Convert a sl_cpc_endpoint_handle_t, owned by the user, to internal CPC
+ * structure sl_cpc_endpoint_t.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ * @param[out] endpoint        Pointer to a sl_cpc_endpoint_t pointer.
+ *
+ * @retval  SL_STATUS_OK            Successfully converted a handle to an endpoint.
+ * @retval  SL_STATUS_INVALID_STATE Handle or endpoint is NULL
+ ******************************************************************************/
+static sl_status_t handle_to_ep(sl_cpc_endpoint_handle_t *handle,
+                                sl_cpc_endpoint_t **endpoint)
+{
+  sl_cpc_endpoint_t *ep;
+
+  if (!endpoint) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t*)handle->ep);
+  if (!ep) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  *endpoint = ep;
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************/ /**
+ * Convert a sl_cpc_endpoint_handle_t, owned by the user, to internal CPC
+ * structure sl_cpc_endpoint_t, entering the API (increase handle's ref_count).
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ * @param[out] endpoint        Pointer to a sl_cpc_endpoint_t pointer.
+ *
+ * @retval  SL_STATUS_OK            Successfully converted a handle to an endpoint.
+ * @retval  SL_STATUS_INVALID_STATE Handle or endpoint is NULL, or failed to enter API
+ ******************************************************************************/
+static sl_status_t handle_to_ep_enter_api(sl_cpc_endpoint_handle_t *handle,
+                                          sl_cpc_endpoint_t **endpoint)
+{
+  sl_status_t status;
+
+  if (!cpc_enter_api(handle)) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  status = handle_to_ep(handle, endpoint);
+  if (status != SL_STATUS_OK) {
+    cpc_exit_api(handle);
+  }
+
+  return status;
+}
+
 /***************************************************************************//**
  * Initialize core objects and driver
  ******************************************************************************/
@@ -1106,7 +2238,28 @@ static sl_status_t init(void)
 {
   sl_status_t status;
 
-  sli_cpc_drv_get_capabilities(&sli_cpc_driver_capabilities);
+  status = sli_cpc_drv_get_capabilities(&sli_cpc_driver_capabilities);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  status = sli_cpc_drv_hw_init();
+  if (status != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    return status;
+  }
+
+  #if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+  PRINT_INFO("Probing the bootloader");
+
+  if (sli_cpc_is_bootloader_running()) {
+    // CPC-1073 : Support asking the bootloader to trap to application
+    // Ask the bootloader to jump to application, then only if it can't print this message
+    PRINT_INFO("The secondary is currently running the bootloader. CPC will not be initialized, only doing a firmware upgrade is possible");
+    return SL_STATUS_NOT_READY;
+  } else {
+    PRINT_INFO("The secondary didn't respond to bootloader probing, assuming CPC is running");
+  }
+  #endif
+
   status = sli_cpc_drv_init();
   if (status != SL_STATUS_OK) {
     EFM_ASSERT(false);
@@ -1119,15 +2272,30 @@ static sl_status_t init(void)
     return status;
   }
 
-  #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+  status = sli_cpc_drv_start_rx();
+  if (status != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    return status;
+  }
+
+  status = sli_cpc_system_start();
+  if (status != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    return status;
+  }
+
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   status = sli_cpc_security_init(on_state_change);
   if (status != SL_STATUS_OK) {
     EFM_ASSERT(false);
     return status;
   }
-  #endif // SL_CPC_ENDPOINT_SECURITY_ENABLED
+#endif // SL_CATALOG_KERNEL_PRESENT
+#endif // SL_CPC_ENDPOINT_SECURITY_ENABLED
 
-  sli_cpc_dispatcher_init_handle(&dispatcher_handle);
+  sli_cpc_dispatcher_init_handle(&callback_dispatcher_handle);
+  sli_cpc_dispatcher_init_handle(&retransmit_dispatcher_handle);
 
   return SL_STATUS_OK;
 }
@@ -1140,14 +2308,47 @@ static void task(void *arg)
 {
   (void)arg;
 
-  if (init() != SL_STATUS_OK) {
+  if (sli_cpc_drv_start_rx() != SL_STATUS_OK) {
     EFM_ASSERT(false);
-    return;
   }
+
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  if (sli_cpc_security_init(on_state_change) != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+  }
+#endif
+
+  if (sli_cpc_system_start() != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+  }
+
+  EFM_ASSERT(osSemaphoreRelease(event_signal) == osOK);
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && !defined(SLI_CPC_DEVICE_UNDER_TEST)
+  // need to kickstart the transmission of the first packet to get the
+  // event_signal semaphore to work as expected
+  sli_cpc_reboot_sequence_process();
+#endif
 
   while (1) {
     // Wait for signal indicating frame to receive or frame to transmit
     EFM_ASSERT(osSemaphoreAcquire(event_signal, osWaitForever) == osOK);
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+    if (cpc_core_in_reset) {
+      if (sli_cpc_endpoints_are_all_closed()) {
+        sl_status_t status;
+
+        cpc_core_in_reset = false;
+
+        // the system endpoint should never fail to connect
+        status = sli_cpc_system_start();
+        EFM_ASSERT(status == SL_STATUS_OK);
+
+        sli_cpc_reboot_sequence_start();
+      }
+    }
+#endif
 
     // Check for frame to receive and demux it
     decode_packet();
@@ -1158,10 +2359,14 @@ static void task(void *arg)
     sli_cpc_security_process();
 #endif
 
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && !defined(SLI_CPC_DEVICE_UNDER_TEST)
+    sli_cpc_reboot_sequence_process();
+#endif
+
     // Check for frame to transmit
     process_tx_queue();
 
-    process_close();
+    process_free();
 
     sli_cpc_dispatcher_process();
   }
@@ -1177,6 +2382,31 @@ void sl_cpc_process_action(void)
   uint8_t flag;
   uint8_t processed;
   MCU_DECLARE_IRQ_STATE;
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+#if (SL_CPC_PRIMARY_FIRMWARE_UPGRADE_SUPPORT_ENABLED >= 1)
+  sli_cpc_fwu_process_action();
+
+  if (sli_cpc_is_bootloader_running()) {
+    return;
+  }
+#endif
+
+  if (cpc_core_in_reset) {
+    if (sli_cpc_endpoints_are_all_closed()) {
+      sl_status_t status;
+
+      cpc_core_in_reset = false;
+
+      // the system endpoint should never fail to connect
+      status = sli_cpc_system_start();
+      EFM_ASSERT(status == SL_STATUS_OK);
+
+      sli_cpc_reboot_sequence_start();
+    }
+  }
+
+#endif
 
   MCU_ATOMIC_LOAD(flag, rx_process_flag);
   processed = flag;
@@ -1196,6 +2426,10 @@ void sl_cpc_process_action(void)
   sli_cpc_security_process();
 #endif
 
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT) && !defined(SLI_CPC_DEVICE_UNDER_TEST)
+  sli_cpc_reboot_sequence_process();
+#endif
+
   // Transmit frame process action
   while (transmit_queue != NULL || pending_on_security_ready_queue != NULL) {
     sl_status_t status;
@@ -1206,57 +2440,57 @@ void sl_cpc_process_action(void)
     }
   }
 
-  process_close();
+  process_free();
 
   sli_cpc_dispatcher_process();
 }
 #endif
 
 /***************************************************************************//**
- * Open a specialized endpoint
+ * Initialize CPC endpoint
  ******************************************************************************/
-static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+static sl_status_t init_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                  uint8_t id,
-                                 uint8_t flags,
-                                 uint8_t tx_window_size)
+                                 uint8_t flags)
 {
+  MCU_DECLARE_IRQ_STATE;
   sl_cpc_endpoint_t *ep;
   sl_status_t status;
-
-  EFM_ASSERT(tx_window_size >= SL_CPC_TRANSMIT_WINDOW_MIN_SIZE);
-  EFM_ASSERT(tx_window_size <= SL_CPC_TRANSMIT_WINDOW_MAX_SIZE);
-
+  LOCK_ENDPOINTS_LIST();
+  //  Check that endpoint doesn't exist
   ep = find_endpoint(id);
-
   if (ep != NULL) {
-    if (ep->state == SL_CPC_STATE_OPEN) {
-      return SL_STATUS_ALREADY_EXISTS;
-    }
-    return SL_STATUS_BUSY; // Can't open right away
+    status = SL_STATUS_ALREADY_INITIALIZED;
+    goto release_ep_list;
   }
 
+  // Allocate and setup the endpoint
   status = sli_cpc_get_endpoint(&ep);
   if (status != SL_STATUS_OK) {
-    return status;
+    goto release_ep_list;
   }
 
   SLI_CPC_DEBUG_ENDPOINT_INIT(ep);
-  ep->flags = flags;
+  // Set default options
+  ep->configured_tx_window_size = 1;
+
+  // Initialize endpoint
+  ep->current_tx_window_space = ep->configured_tx_window_size;
+  ep->flags = flags;  // CPC-1038: Flags should be set using the set_option API.
   ep->id = id;
   ep->seq = 0;
   ep->ack = 0;
-  ep->configured_tx_window_size = tx_window_size;
-  ep->current_tx_window_space = ep->configured_tx_window_size;
   ep->frames_count_re_transmit_queue = 0;
-  ep->state = SL_CPC_STATE_OPEN;
+  ep->state = SL_CPC_STATE_CLOSED;
   ep->node.node = NULL;
   ep->re_transmit_timeout = sli_cpc_timer_ms_to_tick(SLI_CPC_INIT_RE_TRANSMIT_TIMEOUT_MS);
+
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   if (id == SL_CPC_ENDPOINT_SYSTEM
       || id == SL_CPC_ENDPOINT_SECURITY) {
     ep->encrypted = false;
   } else {
-    if (flags & SL_CPC_OPEN_ENDPOINT_FLAG_DISABLE_ENCRYPTION) {
+    if (flags & SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION) {
       ep->encrypted = false;
     } else {
       ep->encrypted = true;
@@ -1267,6 +2501,8 @@ static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
+  ep->shutdown_timeout = osWaitForever;
+  ep->write_timeout = osWaitForever;
   osMutexAttr_t mutex_attr;
   mutex_attr.attr_bits = osMutexRecursive;
   mutex_attr.name = "CPC Endpoint Lock";
@@ -1280,8 +2516,10 @@ static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
   ep->lock = osMutexNew(&mutex_attr);
   if (ep->lock == 0) {
     ep->state = SL_CPC_STATE_FREED;
+    sli_cpc_free_endpoint(ep);
     EFM_ASSERT(false);
-    return SL_STATUS_ALLOCATION_FAILED;
+    status = SL_STATUS_NO_MORE_RESOURCE;
+    goto release_ep_list;
   }
 #endif
 
@@ -1291,23 +2529,565 @@ static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
   sl_slist_init(&ep->iframe_holding_list);
   sl_slist_init(&ep->uframe_holding_list);
 
-  LOCK_ENDPOINTS_LIST();
   sl_slist_push(&endpoints, &ep->node);
   sl_slist_sort(&endpoints, sort_endpoints);
-  RELEASE_ENDPOINTS_LIST();
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   ep->read_aborted = false;
   ep->receive_signal = NULL;
 #endif
 
+  MCU_ENTER_ATOMIC();
+  // Update the handle
   endpoint_handle->id = id;
   endpoint_handle->ref_count = 1u;
-  endpoint_handle->ep = ep;
+  endpoint_handle->ep = (void*) ep;
+  MCU_EXIT_ATOMIC();
 
+  status = SL_STATUS_OK;
+
+  release_ep_list:
+  RELEASE_ENDPOINTS_LIST();
   SLI_CPC_DEBUG_TRACE_CORE_OPEN_ENDPOINT();
-  return SL_STATUS_OK;
+  return status;
 }
+
+/***************************************************************************//**
+ * Wrapper function to signal the state_event_signal semaphore.
+ * Returns if the state change was signaled or not.
+ ******************************************************************************/
+static inline bool notify_state_change(sl_cpc_endpoint_t *endpoint)
+{
+  bool signaled = false;
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (endpoint->state_event_signal != NULL) {
+    EFM_ASSERT(osSemaphoreRelease(endpoint->state_event_signal) == osOK);
+    signaled = true;
+  }
+  #else
+  (void) endpoint;
+  #endif
+  return signaled;
+}
+
+/***************************************************************************//**
+ * Wrapper function to call the `on_connect` callback on an endpoint with the
+ * given `status`. This function checks if `on_connect` is defined befor calling it
+ ******************************************************************************/
+static void notify_ep_on_connect(sl_cpc_endpoint_t * ep, sl_status_t status)
+{
+  bool skip_callback = notify_state_change(ep);
+
+  if (!skip_callback && ep->on_connect) {
+    ep->on_connect(ep->id, ep->on_connect_arg, status);
+  }
+}
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************//**
+ * Callback called when the secondary replies to a connection request command
+ ******************************************************************************/
+static void on_connection_request_reply(sli_cpc_property_id_t property_id,
+                                        void *property_value,
+                                        size_t property_length,
+                                        void *on_reply_arg,
+                                        sl_status_t status)
+{
+  sl_cpc_endpoint_t *ep = (sl_cpc_endpoint_t*)on_reply_arg;
+  sl_cpc_endpoint_state_t *reply_state;
+  uint8_t endpoint_id;
+
+  EFM_ASSERT(property_id >= PROP_ENDPOINT_STATE_0);
+  EFM_ASSERT(property_id <= PROP_ENDPOINT_STATE_255);
+  EFM_ASSERT(ep != NULL);
+
+  LOCK_ENDPOINT(ep);
+
+  // Command failed, go back to the closed state
+  if (status != SL_STATUS_OK && status != SL_STATUS_IN_PROGRESS) {
+    ep->state = SL_CPC_STATE_CLOSED;
+    goto notify;
+  }
+
+  endpoint_id = PROPERTY_ID_TO_EP_ID(property_id);
+  if (ep->id != endpoint_id) {
+    EFM_ASSERT(false);
+    status = SL_STATUS_FAIL;
+    goto notify;
+  }
+
+  status = SL_STATUS_OK;
+
+  // Validate response
+  if (property_length != sizeof(sl_cpc_endpoint_state_t)
+      || property_value == NULL) {
+    EFM_ASSERT(false);
+    status = SL_STATUS_FAIL;
+    goto notify;
+  }
+
+  reply_state = (sl_cpc_endpoint_state_t *)property_value;
+
+  // Received valid response
+  if (*reply_state == SL_CPC_STATE_CONNECTED) {
+    if (ep->state != SL_CPC_STATE_CONNECTING) {
+      EFM_ASSERT(false);
+      status = SL_STATUS_FAIL;
+      goto notify;
+    }
+    // Remote accepted connection
+    ep->state = SL_CPC_STATE_CONNECTED;
+  } else {
+    // Remote refused connection, stay in the same state without notify
+    goto release_ep;
+  }
+
+  notify:
+  notify_ep_on_connect(ep, status);
+
+  release_ep:
+  RELEASE_ENDPOINT(ep);
+}
+
+/***************************************************************************//**
+ * Callback called when the secondary replies to a terminate notification.
+ * (terminate is SET ENDPOINT_STATE=CLOSED)
+ ******************************************************************************/
+static void on_endpoint_terminate_reply(sli_cpc_property_id_t property_id,
+                                        void *property_value,
+                                        size_t property_length,
+                                        void *on_reply_arg,
+                                        sl_status_t status)
+{
+  sl_cpc_endpoint_t *ep = (sl_cpc_endpoint_t*)on_reply_arg;
+  uint8_t endpoint_id;
+
+  (void) property_value;
+  (void) property_length;
+
+  // Validate the reply
+  EFM_ASSERT(ep != NULL);
+  EFM_ASSERT(property_id >= PROP_ENDPOINT_STATE_0);
+  EFM_ASSERT(property_id <= PROP_ENDPOINT_STATE_255);
+
+  if (status != SL_STATUS_OK && status != SL_STATUS_IN_PROGRESS) {
+    SL_CPC_JOURNAL_RECORD_WARNING("Terminate failed on EP:", PROPERTY_ID_TO_EP_ID(property_id));
+  }
+
+  endpoint_id = PROPERTY_ID_TO_EP_ID(property_id);
+  EFM_ASSERT(ep->id == endpoint_id);
+
+  // A terminate command is a notification. No action is taken upon receiving
+  // the reply.
+}
+
+/***************************************************************************//**
+ * Callback called when the secondary replies to a shutdown command.
+ * (shutdown is SET ENDPOINT_STATE=SHUTDOWN)
+ ******************************************************************************/
+static void on_endpoint_shutdown_reply(sli_cpc_property_id_t property_id,
+                                       void *property_value,
+                                       size_t property_length,
+                                       void *on_reply_arg,
+                                       sl_status_t status)
+{
+  sl_cpc_endpoint_t *ep = (sl_cpc_endpoint_t*)on_reply_arg;
+  sl_cpc_endpoint_state_t *reply_state;
+  uint8_t endpoint_id;
+
+  LOCK_ENDPOINT(ep);
+
+  // Endpoint connection was interrupted before command could complete.
+  // Ignore the reply and leave the endpoint as-is.
+  if (is_endpoint_connection_active(ep) == false) {
+    goto release_ep;
+  }
+
+  // Command failed, disconnect the endpoint
+  if (status != SL_STATUS_OK && status != SL_STATUS_IN_PROGRESS) {
+    sli_cpc_endpoint_disconnected(ep->id);
+    goto notify;
+  }
+
+  endpoint_id = PROPERTY_ID_TO_EP_ID(property_id);
+  if (ep->id != endpoint_id) {
+    EFM_ASSERT(false);
+    goto notify;
+  }
+
+  // Validate response
+  if (property_length != sizeof(sl_cpc_endpoint_state_t)
+      || property_value == NULL) {
+    EFM_ASSERT(false);
+    goto notify;
+  }
+
+  reply_state = (sl_cpc_endpoint_state_t *)property_value;
+
+  // Received valid response
+  if (*reply_state == SL_CPC_STATE_DISCONNECTED) {
+    // Remote is done transmitting, end connection
+    EFM_ASSERT(ep->state == SL_CPC_STATE_REMOTE_SHUTDOWN || ep->state == SL_CPC_STATE_SHUTDOWN);
+    sli_cpc_endpoint_disconnected(ep->id);
+  } else {
+    // Remote has pending TX frames. Stay in SHUTDOWN until notification.
+    EFM_ASSERT(ep->state == SL_CPC_STATE_SHUTDOWN);
+    goto release_ep;
+  }
+
+  notify:
+  // Return value is irrelevant, since no callback is associated with a shutdown
+  notify_state_change(ep);
+  release_ep:
+  RELEASE_ENDPOINT(ep);
+}
+
+/***************************************************************************//**
+ * Connect endpoint to secondary
+ ******************************************************************************/
+sl_status_t sl_cpc_connect_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle, uint8_t flags)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_cpc_endpoint_state_t state;
+  sl_status_t status;
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  bool blocking = (flags & SL_CPC_FLAG_NO_BLOCK) != SL_CPC_FLAG_NO_BLOCK;
+  osStatus_t os_status;
+  osSemaphoreId_t state_event_signal;
+  osSemaphoreAttr_t semaphore_attr;
+  #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  uint32_t semaphore_cb[osSemaphoreCbSize / 4];
+  #endif
+#else
+  (void) flags;
+#endif
+
+  // Validate input parameters
+  if (endpoint_handle == NULL) {
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  status = handle_to_ep_enter_api(endpoint_handle, &ep);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  LOCK_ENDPOINT(ep);
+
+  switch (ep->state) {
+    case SL_CPC_STATE_CLOSED:
+      // Endpoint closed, proceed with connection request
+      break;
+    case SL_CPC_STATE_CONNECTED:
+      // Connection already established
+      status = SL_STATUS_OK;
+      goto exit;
+      break;
+    case SL_CPC_STATE_CONNECTING:
+    case SL_CPC_STATE_OPEN:
+      // Connection request sent previously
+      status = SL_STATUS_IN_PROGRESS;
+      goto exit;
+      break;
+    default:
+      // Any other state is invalid
+      status = SL_STATUS_INVALID_STATE;
+      goto exit;
+  }
+
+  // System endpoint is always connected
+  if (ep->id == SL_CPC_ENDPOINT_SYSTEM) {
+    ep->state = SL_CPC_STATE_CONNECTED;
+    status = SL_STATUS_OK;
+    goto exit;
+  }
+
+  status = cpc_core_is_ready();
+  if (status != SL_STATUS_OK) {
+    goto exit;
+  }
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (blocking) {
+    // Allocate semaphore for blocking mode
+    if (osKernelGetState() != osKernelRunning) {
+      status = SL_STATUS_NOT_READY;
+      goto exit;
+    }
+
+    if (ep->state_event_signal != NULL) {
+      // Another thread is already connecting
+      EFM_ASSERT(false);
+      status = SL_STATUS_INVALID_STATE;
+      goto exit;
+    }
+
+    // Allocate endpoint semaphore
+    #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+    semaphore_attr.cb_mem = semaphore_cb;
+    semaphore_attr.cb_size = osSemaphoreCbSize;
+    #else
+    semaphore_attr.cb_mem = NULL;
+    semaphore_attr.cb_size = 0U;
+    #endif // defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+
+    ep->state_event_signal = osSemaphoreNew(1, 0u, &semaphore_attr);
+    if (ep->state_event_signal == NULL) {
+      status = SL_STATUS_ALLOCATION_FAILED;
+      goto exit;
+    }
+  }
+#endif // defined(SL_CATALOG_KERNEL_PRESENT)
+
+  // Endpoint in connecting state while pending reply
+  ep->state = SL_CPC_STATE_CONNECTING;
+
+  // Send connection request
+  state = SL_CPC_STATE_CONNECTED;
+  status = sli_cpc_system_cmd_property_set(on_connection_request_reply,
+                                           (void*)ep,
+                                           EP_ID_TO_PROPERTY_STATE(ep->id),
+                                           0,
+                                           SLI_CPC_SYSTEM_CMD_TIMEOUT_MS,
+                                           &state, // State is copied in cmd_propery_set
+                                           sizeof(state),
+                                           SYSTEM_EP_IFRAME);
+  if (status != SL_STATUS_OK) {
+    ep->state = SL_CPC_STATE_CLOSED;
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    if (blocking) {
+      // Cleanup semaphore
+      state_event_signal = ep->state_event_signal;
+      ep->state_event_signal =  NULL;
+      os_status = osSemaphoreDelete(state_event_signal);
+      if (os_status != osOK) {
+        status = SL_STATUS_FAIL;
+      }
+    }
+#endif
+    goto exit;
+  }
+
+  status = SL_STATUS_IN_PROGRESS;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (!blocking) {
+    // Don't block
+    goto exit;
+  }
+
+  // Handle blocking mode
+  // Wait for connection reply
+  RELEASE_ENDPOINT(ep);
+  os_status = osSemaphoreAcquire(ep->state_event_signal, osWaitForever);
+  EFM_ASSERT(os_status == osOK);
+  LOCK_ENDPOINT(ep);
+
+  // Cleanup semaphore
+  state_event_signal = ep->state_event_signal;
+  ep->state_event_signal = NULL;
+  EFM_ASSERT(osSemaphoreDelete(state_event_signal) == osOK);
+
+  // EP state updated in the on_connection_request_reply callback
+  if (ep->state == SL_CPC_STATE_CONNECTED) {
+    // Connection successful
+    status = SL_STATUS_OK;
+  } else {
+    // Connection failed
+    EFM_ASSERT(ep->state == SL_CPC_STATE_CLOSED);
+    status = SL_STATUS_TIMEOUT;
+  }
+
+#endif // defined(SL_CATALOG_KERNEL_PRESENT)
+
+  exit:
+  RELEASE_ENDPOINT(ep);
+  cpc_exit_api(endpoint_handle);
+  return status;
+}
+
+/***************************************************************************//**
+ * Remote notified its endpoint is open.
+ ******************************************************************************/
+void sli_cpc_remote_open_unsolicited(uint8_t id)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_cpc_endpoint_state_t ep_state;
+  sl_status_t status;
+
+  LOCK_ENDPOINTS_LIST();
+
+  // Verify input parameter
+  ep = find_endpoint(id);
+  if (ep == NULL) {
+    // Freed endpoint, disregard
+    RELEASE_ENDPOINTS_LIST();
+
+    return;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  // Send another connection request as previous one was denied
+  if (ep->state == SL_CPC_STATE_OPEN) {
+    ep_state = SL_CPC_STATE_CONNECTED;
+    status = sli_cpc_system_cmd_property_set(on_connection_request_reply,
+                                             (void*)ep,
+                                             EP_ID_TO_PROPERTY_STATE(ep->id),
+                                             0,
+                                             SLI_CPC_SYSTEM_CMD_TIMEOUT_MS,  // Allow 10 seconds for connection
+                                             &ep_state,
+                                             sizeof(ep_state),
+                                             SYSTEM_EP_IFRAME);
+
+    if (status == SL_STATUS_OK) {
+      // System command success
+      ep->state = SL_CPC_STATE_CONNECTING;
+    } else {
+      // System command failure
+      ep->state = SL_CPC_STATE_CLOSED;
+      notify_ep_on_connect(ep, status);
+    }
+  }
+  RELEASE_ENDPOINT(ep);
+}
+/***************************************************************************//**
+ * Remote is asking to shutdown its connection.
+ ******************************************************************************/
+void sli_cpc_remote_shutdown_unsolicited(uint8_t id)
+{
+  sl_cpc_endpoint_t *ep;
+  sl_cpc_endpoint_state_t reply_state;
+  sl_status_t status;
+
+  LOCK_ENDPOINTS_LIST();
+  ep = find_endpoint(id);
+  if (ep == NULL) {
+    // Remote tried to shutdown an endpoint that is not allocated. Ignore request.
+    RELEASE_ENDPOINTS_LIST();
+
+    return;
+  }
+
+  LOCK_ENDPOINT(ep);
+  RELEASE_ENDPOINTS_LIST();
+
+  status = sli_cpc_remote_shutdown(id, &reply_state);
+  if (status != SL_STATUS_IN_PROGRESS) {
+    // Endpoint was either done transmitting and the shutdown request should be
+    // accepted, or the endpoint was not in a connected state to begin with.
+    // In both cases, we want the remote to set its endpoint state to DISCONNECTED.
+    status = sli_cpc_system_cmd_property_set(on_endpoint_shutdown_reply,
+                                             (void*)ep,
+                                             EP_ID_TO_PROPERTY_STATE(ep->id),
+                                             0,         // try only once
+                                             SLI_CPC_SYSTEM_CMD_TIMEOUT_MS,
+                                             &reply_state,
+                                             sizeof(reply_state),
+                                             SYSTEM_EP_IFRAME);
+    if (status != SL_STATUS_OK) {
+      // System endpoint command failed.
+      if (is_endpoint_connection_active(ep)) {
+        // Enpoint had an active connection, but we failed to reply to the remote's
+        // request. Go to the disconnected state without notifying the remote.
+        ep->state = SL_CPC_STATE_DISCONNECTED;
+        clean_tx_queues(ep);
+      } else {
+        // Endpoint was not connected upon receiving the shutdown request. Ignore
+        // the command.
+      }
+    }
+  } else {
+    // Endpoint still has frames pending transmission. Once they have all been
+    // transmitted, the system will automatically send the shutdown request.
+  }
+  RELEASE_ENDPOINT(ep);
+}
+
+/***************************************************************************//**
+ * Remote has reset.
+ ******************************************************************************/
+void sli_cpc_reset(void)
+{
+  sl_cpc_endpoint_t *ep;
+
+  cpc_core_in_reset = true;
+
+  LOCK_ENDPOINTS_LIST();
+  SL_SLIST_FOR_EACH_ENTRY(endpoints, ep, sl_cpc_endpoint_t, node) {
+    LOCK_ENDPOINT(ep);
+
+    switch (ep->state) {
+      // if endpoint is waiting for connection, just notify the endpoint
+      // that the connection failed, no extra clean-up required.
+      case SL_CPC_STATE_OPEN:
+      case SL_CPC_STATE_CONNECTING:
+        ep->state = SL_CPC_STATE_CLOSED;
+        notify_ep_on_connect(ep, SL_STATUS_ABORT);
+        break;
+
+      case SL_CPC_STATE_CONNECTED:
+      case SL_CPC_STATE_SHUTTING_DOWN:
+      case SL_CPC_STATE_SHUTDOWN:
+      case SL_CPC_STATE_REMOTE_SHUTDOWN:
+        ep->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
+        // notify error
+        notify_error(ep);
+        clean_tx_queues(ep);
+        break;
+
+      // If already in error, nothing to do
+      case SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE:
+      case SL_CPC_STATE_ERROR_SECURITY_INCIDENT:
+      case SL_CPC_STATE_ERROR_FAULT:
+        break;
+
+      // If the endpoint is already closing/closed, nothing to do
+      case SL_CPC_STATE_CLOSED:
+      case SL_CPC_STATE_CLOSING:
+      case SL_CPC_STATE_DISCONNECTED:
+        break;
+
+      case SL_CPC_STATE_FREED:
+      default:
+        // Endpoint in that state should not be in the list
+        EFM_ASSERT(false);
+        break;
+    }
+
+    RELEASE_ENDPOINT(ep);
+  }
+  RELEASE_ENDPOINTS_LIST();
+}
+
+/***************************************************************************//**
+ * Helper function to check if all endpoints are closed.
+ ******************************************************************************/
+bool sli_cpc_endpoints_are_all_closed(void)
+{
+  sl_cpc_endpoint_t *ep;
+  bool closed = true;
+
+  LOCK_ENDPOINTS_LIST();
+
+  SL_SLIST_FOR_EACH_ENTRY(endpoints, ep, sl_cpc_endpoint_t, node) {
+    LOCK_ENDPOINT(ep);
+    if (ep->state != SL_CPC_STATE_CLOSED) {
+      closed = false;
+
+      RELEASE_ENDPOINT(ep);
+      break;
+    }
+
+    RELEASE_ENDPOINT(ep);
+  }
+
+  RELEASE_ENDPOINTS_LIST();
+
+  return closed;
+}
+#endif // SL_CATALOG_CPC_PRIMARY_PRESENT
 
 /***************************************************************************//**
  * Check if endpoint ID is already in use
@@ -1315,18 +3095,18 @@ static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
 static sl_cpc_endpoint_t *find_endpoint(uint8_t id)
 {
   sl_cpc_endpoint_t *endpoint;
-  MCU_DECLARE_IRQ_STATE;
 
-  MCU_ENTER_ATOMIC();
   SL_SLIST_FOR_EACH_ENTRY(endpoints, endpoint, sl_cpc_endpoint_t, node) {
     if (endpoint->id == id) {
-      EFM_ASSERT(endpoint->state != SL_CPC_STATE_FREED); // Should not be in the endpoint list if freed
-      MCU_EXIT_ATOMIC();
+      if (endpoint->state == SL_CPC_STATE_FREED) {
+        // Should not be in the endpoint list if freed
+        EFM_ASSERT(false);
+        return NULL;
+      }
       return endpoint;
     }
   }
 
-  MCU_EXIT_ATOMIC();
   return NULL;
 }
 
@@ -1353,10 +3133,10 @@ static bool sort_endpoints(sl_slist_node_t *item_l,
  * This function doesn't lock the endpoint, it's caller's responsibility.
  ******************************************************************************/
 static void queue_for_transmission(sl_cpc_endpoint_t *ep,
-                                   sl_cpc_transmit_queue_item_t *item,
+                                   sl_cpc_buffer_handle_t *buffer_handle,
                                    bool signal_tx_event)
 {
-  uint8_t type = sli_cpc_hdlc_get_frame_type(item->handle->control);
+  uint8_t type = sli_cpc_hdlc_get_frame_type(buffer_handle->control);
   MCU_DECLARE_IRQ_STATE;
   MCU_ENTER_ATOMIC();
   // Check if room in TX Queue for endpoint
@@ -1368,7 +3148,7 @@ static void queue_for_transmission(sl_cpc_endpoint_t *ep,
       ep->uframe_tx_complete_pending = true;
     }
     // Put frame in Tx Q so that it can be transmitted by CPC Core later
-    sli_cpc_push_back_buffer_handle(&transmit_queue, &item->node, item->handle);
+    sli_cpc_push_back_core_buffer_handle(&transmit_queue, buffer_handle);
 
     if (signal_tx_event) {
       // Signal task/process_action that frame is in Tx Queue
@@ -1379,7 +3159,7 @@ static void queue_for_transmission(sl_cpc_endpoint_t *ep,
   else {
     sl_slist_node_t **holding_list = type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION
                                      ? &ep->iframe_holding_list : &ep->uframe_holding_list;
-    sli_cpc_push_back_buffer_handle(holding_list, &item->node, item->handle);
+    sli_cpc_push_back_core_buffer_handle(holding_list, buffer_handle);
   }
   MCU_EXIT_ATOMIC();
 }
@@ -1435,20 +3215,36 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
                          void *on_write_completed_arg)
 {
   sl_cpc_buffer_handle_t *frame_handle;
-  sl_cpc_transmit_queue_item_t *item;
   sl_status_t status;
-  bool is_final = flags & SL_CPC_FLAG_INFORMATION_FINAL;
+  bool is_final = flags & SL_CPC_FLAG_INFORMATION_POLL_FINAL;
   bool iframe = true;
   uint16_t fcs;
   uint8_t type = 0;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  if (osKernelGetState() != osKernelRunning) {
+    return SL_STATUS_INVALID_STATE;
+  }
+#endif
+  // Get new frame handler
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  bool block = !(flags & SL_CPC_FLAG_NO_BLOCK);
+  status = sli_cpc_get_write_buffer_handle(&frame_handle, block, ep->write_timeout);
+#else
+  status = sli_cpc_get_write_buffer_handle(&frame_handle, false, 0);
+#endif
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
 
   LOCK_ENDPOINT(ep);
 
   if ((flags & SL_CPC_FLAG_UNNUMBERED_INFORMATION)
       || (flags & SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE)
-      || (flags & SL_CPC_FLAG_UNNUMBERED_POLL)) {
-    if (!(ep->flags & SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE)) {
+      || (flags & SL_CPC_FLAG_UNNUMBERED_POLL_FINAL)) {
+    if (!(ep->flags & SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE)) {
       RELEASE_ENDPOINT(ep);
+      EFM_ASSERT(sli_cpc_free_buffer_handle(frame_handle) == SL_STATUS_OK);
       return SL_STATUS_INVALID_PARAMETER;
     }
 
@@ -1456,34 +3252,22 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
 
     if (flags & SL_CPC_FLAG_UNNUMBERED_INFORMATION) {
       type = SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_INFORMATION;
-    } else if ((flags & SL_CPC_FLAG_UNNUMBERED_POLL)) {
+    } else if ((flags & SL_CPC_FLAG_UNNUMBERED_POLL_FINAL)) {
       type = SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_POLL_FINAL;
     } else if ((flags & SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE)) {
       type = SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_ACKNOWLEDGE;
     }
-  } else if (ep->flags & SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE) {
+  } else if (ep->flags & SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE) {
     RELEASE_ENDPOINT(ep);
+    EFM_ASSERT(sli_cpc_free_buffer_handle(frame_handle) == SL_STATUS_OK);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  if (ep->state != SL_CPC_STATE_OPEN) {
+  // Write only allowed when TX connection is active
+  if (ep->state != SL_CPC_STATE_CONNECTED) {
     RELEASE_ENDPOINT(ep);
+    EFM_ASSERT(sli_cpc_free_buffer_handle(frame_handle) == SL_STATUS_OK);
     return SL_STATUS_INVALID_STATE;
-  }
-
-  // Get item to queue frame
-  status = sli_cpc_get_transmit_queue_item(&item);
-  if (status != SL_STATUS_OK) {
-    RELEASE_ENDPOINT(ep);
-    return status;
-  }
-
-  // Get new frame handler
-  status = sli_cpc_get_buffer_handle(&frame_handle);
-  if (status != SL_STATUS_OK) {
-    EFM_ASSERT(sli_cpc_free_transmit_queue_item(item) == SL_STATUS_OK);
-    RELEASE_ENDPOINT(ep);
-    return status;
   }
 
   // Link the data buffer inside the frame buffer
@@ -1492,9 +3276,6 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
   frame_handle->endpoint = ep;
   frame_handle->address = ep->id;
   frame_handle->arg = on_write_completed_arg;
-
-  // Add buffer to tx_queue_item
-  item->handle = frame_handle;
 
   if (iframe) {
     // Set the SEQ number and ACK number in the control byte
@@ -1511,7 +3292,7 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
   frame_handle->fcs[0] = (uint8_t)fcs;
   frame_handle->fcs[1] = (uint8_t)(fcs >> 8);
 
-  queue_for_transmission(ep, item, true);
+  queue_for_transmission(ep, frame_handle, true);
 
   RELEASE_ENDPOINT(ep);
 
@@ -1523,17 +3304,15 @@ static sl_status_t write(sl_cpc_endpoint_t *ep,
  ******************************************************************************/
 static void decode_packet(void)
 {
-  uint8_t address;
-  uint8_t type;
-  uint8_t control;
-  uint16_t hcs;
-  uint16_t data_length;
   sl_cpc_buffer_handle_t *rx_handle;
   sl_cpc_endpoint_t *endpoint;
-  uint16_t rx_buffer_payload_len;
+  uint16_t data_length;
+  uint8_t control;
+  uint8_t address;
+  uint8_t type;
+  uint16_t hcs;
 
-  if (sli_cpc_drv_read_data(&rx_handle, &rx_buffer_payload_len) != SL_STATUS_OK) {
-    SLI_CPC_DEBUG_TRACE_CORE_DRIVER_READ_ERROR();
+  if (sli_cpc_drv_read_data(&rx_handle) != SL_STATUS_OK) {
     return;
   }
 
@@ -1545,7 +3324,7 @@ static void decode_packet(void)
     if (!sli_cpc_validate_crc_sw(rx_handle->hdlc_header, SLI_CPC_HDLC_HEADER_SIZE, hcs)
         || ((uint8_t*)rx_handle->hdlc_header)[0] != SLI_CPC_HDLC_FLAG_VAL) {
       // If HCS is invalid, we drop the packet as we cannot NAK it
-      sli_cpc_drop_buffer_handle(rx_handle);
+      sli_cpc_free_buffer_handle(rx_handle);
       SLI_CPC_DEBUG_TRACE_CORE_INVALID_HEADER_CHECKSUM();
       return;
     }
@@ -1556,18 +3335,53 @@ static void decode_packet(void)
   data_length = sli_cpc_hdlc_get_length(rx_handle->hdlc_header);
   type = sli_cpc_hdlc_get_frame_type(control);
 
-  if (data_length < rx_buffer_payload_len) {
+  if (data_length < SLI_CPC_RX_DATA_MAX_LENGTH) {
     // If driver return worst case; set true data size
     rx_handle->data_length = data_length;
   } else {
-    rx_handle->data_length = rx_buffer_payload_len;
+    rx_handle->data_length = SLI_CPC_RX_DATA_MAX_LENGTH;
   }
 
+  LOCK_ENDPOINTS_LIST();
   endpoint = find_endpoint(address);
+
+  // lock endpoint before releasing endpoint list
+  if (endpoint != NULL) {
+    LOCK_ENDPOINT(endpoint);
+  }
+
+  RELEASE_ENDPOINTS_LIST();
 
   if (endpoint != NULL) {
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_FRAME(endpoint)
-    LOCK_ENDPOINT(endpoint);
+
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+    // endpoint is in CONNECTING state until it receives the ack to its
+    // STATE IS CONNECTED frame. But the ack might get lost because of a
+    // CRC error. In that case, the primary sees the endpoint as CONNECTED
+    // and start transmitting while the secondary is still CONNECTING.
+    // So it's a valid scenario to receive an I-Frame in that state.
+    if (endpoint->state == SL_CPC_STATE_CONNECTING && type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+      sli_cpc_remote_connected_endpoint(endpoint, SL_STATUS_OK);
+    }
+#endif
+
+    if (!is_endpoint_connection_active(endpoint)
+        || (endpoint->state == SL_CPC_STATE_REMOTE_SHUTDOWN
+            && type != SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY)) {
+      // The connection is not considered active in reception when the endpoint
+      // is in REMOTE_SHUTDOWN, since this indicates that the remote signaled that
+      // it was done transmitting. Hence, we should reject the frame because it
+      // should not have been sent. Also reject any frame if the endpoint does not
+      // have an active connection.
+      transmit_reject(endpoint, address, 0, SL_CPC_REJECT_UNREACHABLE_ENDPOINT);
+      sli_cpc_free_buffer_handle(rx_handle);
+      SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_DROPPED(endpoint);
+      RELEASE_ENDPOINT(endpoint);
+      return;
+    }
+
+    rx_handle->endpoint = endpoint;
 
     if ((type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION
          || type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY)
@@ -1582,24 +3396,24 @@ static void decode_packet(void)
     if (rx_handle->reason != SL_CPC_REJECT_NO_ERROR) {
       transmit_reject(endpoint, address, endpoint->ack, rx_handle->reason);
       rx_handle->reason = SL_CPC_REJECT_NO_ERROR;
-      sli_cpc_drop_buffer_handle(rx_handle);
+      sli_cpc_free_buffer_handle(rx_handle);
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_DROPPED(endpoint);
     }
 
     if (data_length > 0) {
       uint16_t fcs;
 
-      EFM_ASSERT(rx_handle->data != NULL);
-
       // make sure the payload is at least 3 bytes (FCS + 1 byte payload)
       if (data_length <= SLI_CPC_HDLC_FCS_SIZE) {
         transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
 
-        sli_cpc_drop_buffer_handle(rx_handle);
+        sli_cpc_free_buffer_handle(rx_handle);
         RELEASE_ENDPOINT(endpoint);
 
         return;
       }
+
+      EFM_ASSERT(rx_handle->data != NULL);
 
       data_length = data_length - SLI_CPC_HDLC_FCS_SIZE;
       fcs = sli_cpc_hdlc_get_fcs(rx_handle->data, data_length);
@@ -1613,7 +3427,7 @@ static void decode_packet(void)
           SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
         }
 
-        sli_cpc_drop_buffer_handle(rx_handle);
+        sli_cpc_free_buffer_handle(rx_handle);
         RELEASE_ENDPOINT(endpoint);
 
         return;
@@ -1631,22 +3445,16 @@ static void decode_packet(void)
       SLI_CPC_DEBUG_TRACE_CORE_RXD_VALID_UFRAME();
     } else {
       transmit_reject(endpoint, address, endpoint->ack, SL_CPC_REJECT_ERROR);
-      sli_cpc_drop_buffer_handle(rx_handle);
+      sli_cpc_free_buffer_handle(rx_handle);
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_DROPPED(endpoint);
     }
-
-    if (endpoint->state == SL_CPC_STATE_CLOSED) {
-      if (!free_closed_endpoint_if_empty(endpoint)) {
-        RELEASE_ENDPOINT(endpoint);
-      }
-    } else {
-      RELEASE_ENDPOINT(endpoint);
-    }
+    RELEASE_ENDPOINT(endpoint);
   } else {
     if (type != SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
+      // Received data on a unallocated endpoint, reject
       transmit_reject(NULL, address, 0, SL_CPC_REJECT_UNREACHABLE_ENDPOINT);
     }
-    sli_cpc_drop_buffer_handle(rx_handle);
+    sli_cpc_free_buffer_handle(rx_handle);
   }
 }
 
@@ -1656,8 +3464,6 @@ static void decode_packet(void)
 static void receive_ack(sl_cpc_endpoint_t * endpoint,
                         uint8_t ack)
 {
-  sl_cpc_transmit_queue_item_t *item;
-  sl_slist_node_t *item_node;
   sl_cpc_buffer_handle_t *frame;
   uint8_t control_byte;
   uint8_t seq_number;
@@ -1676,8 +3482,7 @@ static void receive_ack(sl_cpc_endpoint_t * endpoint,
   }
 
   // Get the sequence number of the first frame in the re-transmission queue
-  item = SL_SLIST_ENTRY(endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t, node);
-  frame = item->handle;
+  frame = SL_SLIST_ENTRY(endpoint->re_transmit_queue, sl_cpc_buffer_handle_t, core_node);
 
   control_byte = sli_cpc_hdlc_get_control(frame->hdlc_header);
   seq_number = sli_cpc_hdlc_get_seq(control_byte);
@@ -1724,27 +3529,15 @@ static void receive_ack(sl_cpc_endpoint_t * endpoint,
 
   // Remove all acknowledged frames in re-transmit queue
   for (uint8_t i = 0; i < frames_count_ack; i++) {
-    item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t);
-    EFM_ASSERT(item_node != NULL);
+    frame = sli_cpc_pop_core_buffer_handle(&endpoint->re_transmit_queue);
+    EFM_ASSERT(frame != NULL);
 
-    item = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
-    frame = item->handle;
-
+    // ref_count is > 0 indicates that the driver is still processing this frame
     if (frame->ref_count == 0) {
-      // Only iframe can be acked
-      if (endpoint->on_iframe_write_completed != NULL) {
-        endpoint->on_iframe_write_completed(endpoint->id, frame->data, frame->arg, SL_STATUS_OK);
-      }
-
-      // Free the header buffer, the buffer handle and queue item
-      frame->data = NULL;
-      sli_cpc_drop_buffer_handle(frame);
-      frame = NULL;
+      submit_write_completion(frame, SL_STATUS_OK);
     } else {
       frame->on_write_complete_pending = true;
     }
-
-    sli_cpc_free_transmit_queue_item(item);
 
     // Update transmit window
     endpoint->current_tx_window_space++;
@@ -1759,10 +3552,9 @@ static void receive_ack(sl_cpc_endpoint_t * endpoint,
   while (endpoint->iframe_holding_list != NULL
          && endpoint->current_tx_window_space > 0) {
     MCU_ENTER_ATOMIC();
-    item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->iframe_holding_list, sl_cpc_transmit_queue_item_t);
+    frame = sli_cpc_pop_core_buffer_handle(&endpoint->iframe_holding_list);
     MCU_EXIT_ATOMIC();
-    item = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
-    queue_for_transmission(endpoint, item, false);
+    queue_for_transmission(endpoint, frame, false);
   }
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_ACK(endpoint);
@@ -1868,20 +3660,14 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
                            uint8_t control,
                            uint16_t data_length)
 {
-  sl_status_t status;
   uint8_t seq;
+  #if defined(SL_CPC_ON_POLL_PRESENT)
   uint32_t reply_data_length = 0;
   void *reply_data = NULL;
   void *on_write_completed_arg = NULL;
+  #endif
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DATA_FRAME(endpoint);
-  if (endpoint->state == SL_CPC_STATE_CLOSING) {
-    // Close endpoint has been called. The Receive side is closed (rx queue cleaned)
-    // Endpoint is not yet removed from the list because we need to complete the transmission(s)
-    transmit_reject(endpoint, endpoint->id, 0, SL_CPC_REJECT_UNREACHABLE_ENDPOINT);
-    sli_cpc_drop_buffer_handle(rx_handle);
-    return;
-  }
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   EFM_ASSERT(data_length <= SL_CPC_RX_PAYLOAD_MAX_LENGTH + SLI_SECURITY_TAG_LENGTH_BYTES);
@@ -1889,110 +3675,134 @@ static void receive_iframe(sl_cpc_endpoint_t *endpoint,
   EFM_ASSERT(data_length <= SL_CPC_RX_PAYLOAD_MAX_LENGTH);
 #endif
 
-  if (endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE) {
-    // iframe disable; drop packet and send reject
+  // If iframe are disabled, drop packet and send reject
+  if (endpoint->flags & SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE) {
     transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_ERROR);
-    sli_cpc_drop_buffer_handle(rx_handle);
+    sli_cpc_free_buffer_handle(rx_handle);
     return;
   }
 
   seq = sli_cpc_hdlc_get_seq(control);
 
+  // If the sequence number doesn't march, reject the frame
+  if (seq != endpoint->ack && !is_seq_valid(seq, endpoint->ack)) {
+    transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SEQUENCE_MISMATCH);
+    sli_cpc_free_buffer_handle(rx_handle);
+    return;
+  }
+
+  // If the packet was already received, re-send a ACK because the other side missed it the first time
+  if (seq != endpoint->ack && is_seq_valid(seq, endpoint->ack)) {
+    transmit_ack(endpoint);
+    sli_cpc_free_buffer_handle(rx_handle);
+    SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DUPLICATE_DATA_FRAME(endpoint);
+    return;
+  }
+
   // data received, Push in Rx Queue and send Ack
-  if (seq == endpoint->ack) {
-#if defined(SL_CPC_ON_POLL_PRESENT)
-    if (sli_cpc_hdlc_is_poll_final(control)) {
-#if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
-      // Only system endpoint can use poll/final
-      if (endpoint->id != 0) {
-        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_ERROR);
-        sli_cpc_drop_buffer_handle(rx_handle);
-        return;
-      }
-#endif
+
+  if (sli_cpc_hdlc_is_poll_final(control)) {
+  #if (!defined(SLI_CPC_DEVICE_UNDER_TEST))
+    // Only system endpoint can use poll/final
+    if (endpoint->id != 0) {
+      transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_ERROR);
+      sli_cpc_free_buffer_handle(rx_handle);
+      return;
+    }
+  #endif
+
+  #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+    sl_status_t ret = decrypt_iframe(endpoint, rx_handle, &data_length);
+    if (ret != SL_STATUS_OK) {
+      transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
+      sli_cpc_free_buffer_handle(rx_handle);
+      return;
+    }
+  #endif
+
+  #if defined(SL_CPC_ON_POLL_PRESENT)
+    if (endpoint->poll_final.on_poll != NULL) {
+      endpoint->poll_final.on_poll(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_INFORMATION,
+                                   rx_handle->data, data_length,
+                                   &reply_data, &reply_data_length, &on_write_completed_arg);
+    }
+  #elif defined(SL_CPC_ON_FINAL_PRESENT)
+    if (endpoint->poll_final.on_final != NULL) {
+      endpoint->poll_final.on_final(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_INFORMATION,
+                                    rx_handle->data, data_length);
+    }
+  #endif
+    sli_cpc_free_rx_buffer(rx_handle->data);
+    rx_handle->data = NULL;
+    sli_cpc_free_buffer_handle(rx_handle);
+  } else {
+    sl_status_t ret;
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-      sl_status_t ret = decrypt_iframe(endpoint, rx_handle, &data_length);
-      if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
-        sli_cpc_drop_buffer_handle(rx_handle);
-        return;
-      }
-#endif
-
-      if (endpoint->poll_final.on_poll != NULL) {
-        endpoint->poll_final.on_poll(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_INFORMATION,
-                                     rx_handle->data, data_length,
-                                     &reply_data, &reply_data_length, &on_write_completed_arg);
-      }
-      sli_cpc_free_rx_buffer(rx_handle->data);
-      rx_handle->data = NULL;
-      sli_cpc_drop_buffer_handle(rx_handle);
+    ret = decrypt_iframe(endpoint, rx_handle, &data_length);
+    if (ret != SL_STATUS_OK) {
+      transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
+      sli_cpc_free_buffer_handle(rx_handle);
+      return;
     }
 #endif
-    else {
-      sl_status_t ret;
 
+    ret = sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->iframe_receive_queue, data_length);
+
+    if (ret != SL_STATUS_OK) {
+      transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_OUT_OF_MEMORY);
+      sli_cpc_free_buffer_handle(rx_handle);
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-      ret = decrypt_iframe(endpoint, rx_handle, &data_length);
-      if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SECURITY_ISSUE);
-        sli_cpc_drop_buffer_handle(rx_handle);
-        return;
-      }
+      sli_cpc_security_rollback_decrypt(endpoint);
 #endif
-
-      ret = sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->iframe_receive_queue, data_length);
-
-      if (ret != SL_STATUS_OK) {
-        transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_OUT_OF_MEMORY);
-        sli_cpc_drop_buffer_handle(rx_handle);
-#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-        sli_cpc_security_rollback_decrypt(endpoint);
-#endif
-        return;
-      }
+      return;
     }
-    SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DATA_FRAME_QUEUED(endpoint);
 
-    #if defined(SL_CATALOG_KERNEL_PRESENT)
+  #if defined(SL_CATALOG_KERNEL_PRESENT)
     if (endpoint->receive_signal != NULL) {
       EFM_ASSERT(osSemaphoreRelease(endpoint->receive_signal) == osOK);
     }
-    #endif
+  #endif
 
     // Notify the user if a callback is registered
     // We expect the users to not call sl_cpc_read from there
     if (endpoint->on_iframe_data_reception != NULL) {
       endpoint->on_iframe_data_reception(endpoint->id, endpoint->on_iframe_data_reception_arg);
     }
-
-    // Update endpoint acknowledge number
-    endpoint->ack++;
-    endpoint->ack %= 8;
-
-    // Send ack
-    transmit_ack(endpoint);
-#if defined(SL_CPC_ON_POLL_PRESENT)
-    // Send poll reply (final) if required
-    if (reply_data != NULL && reply_data_length > 0) {
-      status = write(endpoint, reply_data, reply_data_length, SL_CPC_FLAG_INFORMATION_FINAL, on_write_completed_arg);
-      EFM_ASSERT(status == SL_STATUS_OK);
-    } else {
-      sli_cpc_free_command_buffer(reply_data);
-    }
-#endif
-  } else if (is_seq_valid(seq, endpoint->ack)) {
-    // The packet was already received. We must re-send a ACK because the other side missed it the first time
-    transmit_ack(endpoint);
-    sli_cpc_drop_buffer_handle(rx_handle);
-    SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DUPLICATE_DATA_FRAME(endpoint);
-  } else {
-    transmit_reject(endpoint, endpoint->id, endpoint->ack, SL_CPC_REJECT_SEQUENCE_MISMATCH);
-    sli_cpc_drop_buffer_handle(rx_handle);
-    return;
   }
+  SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DATA_FRAME_QUEUED(endpoint);
+
+  // Update endpoint acknowledge number
+  endpoint->ack++;
+  endpoint->ack %= 8;
+
+  // Send ack
+  transmit_ack(endpoint);
+
+#if defined(SL_CPC_ON_POLL_PRESENT)
+  // Send poll reply (final) if required
+  if (reply_data != NULL && reply_data_length > 0) {
+    sl_status_t status = write(endpoint, reply_data, reply_data_length, SL_CPC_FLAG_INFORMATION_POLL_FINAL | SL_CPC_FLAG_NO_BLOCK, on_write_completed_arg);
+    if (status != SL_STATUS_OK) {
+      if (endpoint->on_iframe_write_completed != NULL) {
+        endpoint->on_iframe_write_completed(endpoint->id, reply_data, NULL, SL_STATUS_TRANSMIT_INCOMPLETE);
+      }
+    }
+  } else {
+    sli_cpc_free_command_buffer(reply_data);
+  }
+#endif
 }
+
+/***************************************************************************//**
+ * Check if currently in bootloader/firmware-upgrade mode
+ ******************************************************************************/
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+SL_WEAK bool sli_cpc_is_bootloader_running(void)
+{
+  return false;
+}
+#endif
 
 #if defined(SLI_CPC_ENABLE_TEST_FEATURES)
 /***************************************************************************//**
@@ -2016,7 +3826,6 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_FRAME(endpoint);
   // Supervisory packet received
   bool fatal_error = false;
-  bool notify = false;
   sl_cpc_endpoint_state_t new_state = endpoint->state;
   uint8_t supervisory_function = sli_cpc_hdlc_get_supervisory_function(control);
 
@@ -2027,6 +3836,8 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
       break;
 
     case SLI_CPC_HDLC_REJECT_SUPERVISORY_FUNCTION:
+      SL_CPC_JOURNAL_RECORD_WARNING("RXD reject", *((sl_cpc_reject_reason_t *)rx_handle->data));
+      SL_CPC_JOURNAL_RECORD_WARNING("On endpoint", endpoint->id);
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_SUPERVISORY_PROCESSED(endpoint);
       EFM_ASSERT(data_length  == SLI_CPC_HDLC_REJECT_PAYLOAD_SIZE);
       switch (*((sl_cpc_reject_reason_t *)rx_handle->data)) {
@@ -2049,20 +3860,17 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
           fatal_error = true;
           new_state = SL_CPC_STATE_ERROR_SECURITY_INCIDENT;
           SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_REJECT_SECURITY_ISSUE(endpoint);
-          notify = true;
           break;
         case SL_CPC_REJECT_UNREACHABLE_ENDPOINT:
           fatal_error = true;
           new_state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
           SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_REJECT_DESTINATION_UNREACHABLE(endpoint);
-          notify = true;
           break;
         case SL_CPC_REJECT_ERROR:
         default:
           fatal_error = true;
           new_state = SL_CPC_STATE_ERROR_FAULT;
           SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_REJECT_FAULT(endpoint);
-          notify = true;
           break;
       }
 #if defined(SLI_CPC_ENABLE_TEST_FEATURES)
@@ -2076,21 +3884,16 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
   }
 
   // Free buffers
-  sli_cpc_drop_buffer_handle(rx_handle);
+  sli_cpc_free_buffer_handle(rx_handle);
 
-  if ((fatal_error)
-      && (endpoint->state != SL_CPC_STATE_CLOSING)) {
-    // Stop incomming re-transmit timeout
+  if (fatal_error) {
+    // Stop incoming re-transmit timeout
     sli_cpc_timer_stop_timer(&endpoint->re_transmit_timer);
     endpoint->state = new_state;
-    if (notify) {
-      notify_error(endpoint);
-    }
-  } else if ((fatal_error)
-             && (endpoint->state == SL_CPC_STATE_CLOSING)) {
-    // Force shutdown
-    clean_tx_queues(endpoint);
-    // Free is completed in free_closed_endpoint_if_empty
+
+    // Endpoint in error, should no longer transmit
+    notify_error(endpoint);
+    clean_tx_queues(endpoint); // Endpoint locked by caller
   }
 }
 
@@ -2098,27 +3901,30 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
  * Process received uframe
  ******************************************************************************/
 static void receive_uframe(sl_cpc_endpoint_t *endpoint,
-                           sl_cpc_buffer_handle_t *rx_handle,
+                           sl_cpc_buffer_handle_t *buffer_handle,
                            uint8_t control,
                            uint16_t data_length)
 {
+  sl_status_t status = SL_STATUS_FAIL;
   uint8_t type;
+  void *reply_data = NULL;
+  uint32_t reply_data_length = 0;
+  sl_status_t reply_write_status = SL_STATUS_FAIL;
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_FRAME(endpoint);
 
-  type = sli_cpc_hdlc_get_unumbered_type(control);
-
-  if (!(endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE)) {
+  if (!(endpoint->flags & SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE)) {
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
-    sli_cpc_drop_buffer_handle(rx_handle);
+    sli_cpc_free_buffer_handle(buffer_handle);
     return;
   }
 
+  type = sli_cpc_hdlc_get_unumbered_type(control);
   if ((type == SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_INFORMATION)
-      && !(endpoint->flags & SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE)) {
-    if (sli_cpc_push_back_rx_data_in_receive_queue(rx_handle, &endpoint->uframe_receive_queue, data_length) != SL_STATUS_OK) {
+      && !(endpoint->flags & SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE)) {
+    if (sli_cpc_push_back_rx_data_in_receive_queue(buffer_handle, &endpoint->uframe_receive_queue, data_length) != SL_STATUS_OK) {
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
-      sli_cpc_drop_buffer_handle(rx_handle);
+      sli_cpc_free_buffer_handle(buffer_handle);
       return;
     }
 
@@ -2134,29 +3940,35 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
     }
 #endif
   } else if (type == SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_POLL_FINAL) {
+    #if defined(SL_CPC_ON_POLL_PRESENT)
     if (endpoint->poll_final.on_poll != NULL) {
-      void *reply_data;
-      uint32_t reply_data_length = 0;
-
       void *on_write_completed_arg;
       endpoint->poll_final.on_poll(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED,
-                                   rx_handle->data, data_length,
+                                   buffer_handle->data, data_length,
                                    &reply_data, &reply_data_length, &on_write_completed_arg);
       if (reply_data != NULL && reply_data_length > 0) {
-        sl_status_t status = write(endpoint, reply_data, reply_data_length, SL_CPC_FLAG_UNNUMBERED_POLL, on_write_completed_arg);
-        if ((status != SL_STATUS_OK)
-            && (endpoint->on_uframe_write_completed != NULL)) {
-          endpoint->on_uframe_write_completed(endpoint->id, reply_data, on_write_completed_arg, status);
-        }
+        reply_write_status = write(endpoint, reply_data, reply_data_length, SL_CPC_FLAG_NO_BLOCK | SL_CPC_FLAG_UNNUMBERED_POLL_FINAL, on_write_completed_arg);
       } else {
+        EFM_ASSERT(false);
         sli_cpc_free_command_buffer(reply_data);
+        reply_data = NULL;
       }
     }
-    sli_cpc_free_rx_buffer(rx_handle->data);
-    rx_handle->data = NULL;
-    sli_cpc_drop_buffer_handle(rx_handle);
+    #elif defined(SL_CPC_ON_FINAL_PRESENT)
+    if (endpoint->poll_final.on_final != NULL) {
+      endpoint->poll_final.on_final(endpoint->id, (void *)SLI_CPC_HDLC_FRAME_TYPE_INFORMATION,
+                                    buffer_handle->data, data_length);
+    }
+    #endif
+    sli_cpc_free_buffer_handle(buffer_handle);
+
+    if (reply_data != NULL && reply_data_length > 0 && reply_write_status != SL_STATUS_OK) {
+      if (endpoint->on_uframe_write_completed != NULL) {
+        endpoint->on_uframe_write_completed(endpoint->id, reply_data, NULL, SL_STATUS_TRANSMIT_INCOMPLETE);
+      }
+    }
   } else if (type == SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_RESET_SEQ) {
-    sli_cpc_drop_buffer_handle(rx_handle);
+    sli_cpc_free_buffer_handle(buffer_handle);
     if (endpoint->id != 0) {
       // Can only reset sequence numbers on the system endpoint, drop the packet
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
@@ -2166,11 +3978,16 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
       endpoint->seq = 0;
       endpoint->ack = 0;
       // Send an unnumbered acknowledgement
-      write(endpoint, NULL, 0, SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE, NULL);
+      status = write(endpoint, NULL, 0, SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE | SL_CPC_FLAG_NO_BLOCK, NULL);
+      if (status != SL_STATUS_OK) {
+        EFM_ASSERT(false);
+        SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
+        return;
+      }
     }
   } else {
     SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
-    sli_cpc_drop_buffer_handle(rx_handle);
+    sli_cpc_free_buffer_handle(buffer_handle);
     return;
   }
 
@@ -2184,18 +4001,10 @@ static sl_status_t transmit_ack(sl_cpc_endpoint_t * endpoint)
 {
   sl_status_t status;
   sl_cpc_buffer_handle_t *frame_handle;
-  sl_cpc_transmit_queue_item_t *item;
-
-  // Get tx queue item
-  status = sli_cpc_get_sframe_transmit_queue_item(&item);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
 
   // Get new frame handler
-  status = sli_cpc_get_buffer_handle(&frame_handle);
+  status = sli_cpc_get_buffer_handle(&frame_handle, SL_CPC_TX_SFRAME_BUFFER_HANDLE);
   if (status != SL_STATUS_OK) {
-    EFM_ASSERT(sli_cpc_free_sframe_transmit_queue_item(item) == SL_STATUS_OK);
     return status;
   }
 
@@ -2206,8 +4015,7 @@ static sl_status_t transmit_ack(sl_cpc_endpoint_t * endpoint)
   frame_handle->control = sli_cpc_hdlc_create_control_supervisory(endpoint->ack, 0);
 
   // Put frame in Tx Q so that it can be transmitted by CPC Core later
-  item->handle = frame_handle;
-  MCU_ATOMIC_SECTION(sli_cpc_push_back_buffer_handle(&transmit_queue, &item->node, item->handle); );
+  MCU_ATOMIC_SECTION(sli_cpc_push_back_core_buffer_handle(&transmit_queue, frame_handle); );
 
   SLI_CPC_DEBUG_TRACE_ENDPOINT_TXD_ACK(endpoint);
 
@@ -2216,11 +4024,19 @@ static sl_status_t transmit_ack(sl_cpc_endpoint_t * endpoint)
 
 #if defined(SLI_CPC_ENABLE_TEST_FEATURES)
 /***************************************************************************//**
+ * Called on expiration of retransmit timer
+ ******************************************************************************/
+SL_WEAK void sli_cpc_on_retransmit_timer_expiration(sl_cpc_buffer_handle_t *frame)
+{
+  (void)frame;
+}
+
+/***************************************************************************//**
  * Called on re-transmition of frame
  ******************************************************************************/
-SL_WEAK void sli_cpc_on_frame_retransmit(sl_cpc_transmit_queue_item_t *item)
+SL_WEAK void sli_cpc_on_frame_retransmit(sl_cpc_buffer_handle_t *frame)
 {
-  (void)item;
+  (void)frame;
 }
 #endif
 
@@ -2229,23 +4045,21 @@ SL_WEAK void sli_cpc_on_frame_retransmit(sl_cpc_transmit_queue_item_t *item)
  ******************************************************************************/
 static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
 {
-  sl_cpc_transmit_queue_item_t *item;
-  sl_slist_node_t *item_node;
+  sl_cpc_buffer_handle_t *buffer_handle;
   bool free_hdlc_header = true;
   MCU_DECLARE_IRQ_STATE;
 
   EFM_ASSERT(endpoint != NULL);
 
   MCU_ENTER_ATOMIC();
-  item_node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&endpoint->re_transmit_queue, sl_cpc_transmit_queue_item_t);
-  if (item_node == NULL) {
+  buffer_handle = sli_cpc_pop_core_buffer_handle(&endpoint->re_transmit_queue);
+  if (buffer_handle == NULL) {
     MCU_EXIT_ATOMIC();
 
     return SL_STATUS_NOT_AVAILABLE;
   }
 
-  item = SL_SLIST_ENTRY(item_node, sl_cpc_transmit_queue_item_t, node);
-  if (item->handle->ref_count > 0) {
+  if (buffer_handle->ref_count > 0) {
     // If ref_count is greater than 0, it means that the buffer is still
     // currently owned by the SPI/UART driver. This is possible for instance
     // with the following scenario:
@@ -2264,7 +4078,7 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
     // handle is still owned by the driver before going forward.
 
     // if that happened, put back buffer handle at the front of the retransmit queue
-    sli_cpc_push_buffer_handle(&endpoint->re_transmit_queue, &item->node, item->handle);
+    sli_cpc_push_core_buffer_handle(&endpoint->re_transmit_queue, buffer_handle);
     MCU_EXIT_ATOMIC();
 
     return SL_STATUS_NOT_AVAILABLE;
@@ -2272,27 +4086,27 @@ static sl_status_t re_transmit_frame(sl_cpc_endpoint_t* endpoint)
   MCU_EXIT_ATOMIC();
 
 #if defined(SLI_CPC_ENABLE_TEST_FEATURES)
-  sli_cpc_on_frame_retransmit(item);
+  sli_cpc_on_frame_retransmit(buffer_handle);
 #endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   // If a frame is encrypted, the header is part of the authenticated data
   // (they are in plaintext but signed), meaning that the header must *NOT*
   // change once it has been used to generate a security tag.
-  if (item->handle->security_tag) {
+  if (buffer_handle->security_tag) {
     free_hdlc_header = false;
   }
 #endif
 
   // Free the header buffer
   if (free_hdlc_header) {
-    sli_cpc_free_hdlc_header(item->handle->hdlc_header);
-    item->handle->hdlc_header = NULL;
+    sli_cpc_free_hdlc_header(buffer_handle->hdlc_header);
+    buffer_handle->hdlc_header = NULL;
   }
 
   // Put frame in Tx Q so that it can be transmitted by CPC Core later
   MCU_ENTER_ATOMIC();
-  sli_cpc_push_buffer_handle(&transmit_queue, &item->node, item->handle);
+  sli_cpc_push_core_buffer_handle(&transmit_queue, buffer_handle);
 
   endpoint->packet_re_transmit_count++;
   endpoint->frames_count_re_transmit_queue--;
@@ -2318,17 +4132,9 @@ static void transmit_reject(sl_cpc_endpoint_t * endpoint,
   uint16_t fcs;
   sl_cpc_buffer_handle_t *handle;
   sl_status_t status;
-  sl_cpc_transmit_queue_item_t *item;
-
-  // Get tx queue item
-  status = sli_cpc_get_sframe_transmit_queue_item(&item);
-  if (status != SL_STATUS_OK) {
-    return;   // Try again when the primary will re-transmit
-  }
 
   status = sli_cpc_get_reject_buffer(&handle);
   if (status != SL_STATUS_OK) {
-    EFM_ASSERT(sli_cpc_free_sframe_transmit_queue_item(item) == SL_STATUS_OK);
     return;   // Try again when the primary will re-transmit
   }
 
@@ -2347,11 +4153,12 @@ static void transmit_reject(sl_cpc_endpoint_t * endpoint,
   handle->fcs[1] = (uint8_t)(fcs >> 8);
 
   // Put frame in Tx Q so that it can be transmitted by CPC Core later
-  item->handle = handle;
-  MCU_ATOMIC_SECTION(sli_cpc_push_back_buffer_handle(&transmit_queue, &item->node, item->handle); );
+  MCU_ATOMIC_SECTION(sli_cpc_push_back_core_buffer_handle(&transmit_queue, handle); );
 
 #if defined(CPC_DEBUG_TRACE)
   if (endpoint != NULL) {
+    SL_CPC_JOURNAL_RECORD_WARNING("TXD reject", reason);
+    SL_CPC_JOURNAL_RECORD_WARNING("On endpoint", endpoint->id);
     switch (reason) {
       case SL_CPC_REJECT_CHECKSUM_MISMATCH:
         SLI_CPC_DEBUG_TRACE_ENDPOINT_TXD_REJECT_CHECKSUM_MISMATCH(endpoint);
@@ -2388,9 +4195,7 @@ static void transmit_reject(sl_cpc_endpoint_t * endpoint,
 static sl_status_t process_tx_queue(void)
 {
   sl_status_t status;
-  sl_slist_node_t *node = NULL;
-  sl_cpc_transmit_queue_item_t *item;
-  sl_cpc_buffer_handle_t *frame;
+  sl_cpc_buffer_handle_t *frame = NULL;
   uint8_t frame_type;
   uint16_t data_length;
   sl_slist_node_t *tx_queue;
@@ -2412,14 +4217,13 @@ static sl_status_t process_tx_queue(void)
   // Otherwise, process the regular transmit_queue.
   MCU_ATOMIC_LOAD(tx_queue, pending_on_security_ready_queue);
   if (tx_queue != NULL && security_is_ready()) {
-    MCU_ATOMIC_SECTION(node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&pending_on_security_ready_queue,
-                                                             sl_cpc_transmit_queue_item_t); );
+    MCU_ATOMIC_SECTION(frame = sli_cpc_pop_core_buffer_handle(&pending_on_security_ready_queue); );
   }
 #endif
 
   // This condition is always true when security is not used.
   // It's just to keep the code a bit more clean.
-  if (node == NULL) {
+  if (frame == NULL) {
     // Return if nothing to transmit
     MCU_ATOMIC_LOAD(tx_queue, transmit_queue);
     if (tx_queue == NULL) {
@@ -2427,11 +4231,10 @@ static sl_status_t process_tx_queue(void)
     }
 
     // Get first queued frame for transmission
-    MCU_ATOMIC_SECTION(node = SLI_CPC_POP_BUFFER_HANDLE_LIST(&transmit_queue, sl_cpc_transmit_queue_item_t); );
+    MCU_ATOMIC_SECTION(frame = sli_cpc_pop_core_buffer_handle(&transmit_queue); );
   }
 
-  item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
-  frame = item->handle;
+  EFM_ASSERT(frame != NULL);
 
   // set frame_type as it's used further down in the function
   frame_type = sli_cpc_hdlc_get_frame_type(frame->control);
@@ -2449,7 +4252,7 @@ static sl_status_t process_tx_queue(void)
     status = sli_cpc_get_hdlc_header_buffer(&frame->hdlc_header);
     if (status != SL_STATUS_OK) {
       // Retry later on
-      MCU_ATOMIC_SECTION(sli_cpc_push_buffer_handle(&transmit_queue, &item->node, frame); );
+      MCU_ATOMIC_SECTION(sli_cpc_push_core_buffer_handle(&transmit_queue, frame); );
       return SL_STATUS_NO_MORE_RESOURCE;
     }
   }
@@ -2475,7 +4278,7 @@ static sl_status_t process_tx_queue(void)
       sli_cpc_free_hdlc_header(frame->hdlc_header);
       frame->hdlc_header = NULL;
 
-      MCU_ATOMIC_SECTION(sli_cpc_push_buffer_handle(&pending_on_security_ready_queue, &item->node, frame); );
+      MCU_ATOMIC_SECTION(sli_cpc_push_core_buffer_handle(&pending_on_security_ready_queue, frame); );
 
       return SL_STATUS_OK;
     }
@@ -2548,10 +4351,10 @@ static sl_status_t process_tx_queue(void)
 #endif
   // Pass frame to driver for transmission
   MCU_ENTER_ATOMIC();
-  status = sli_cpc_drv_transmit_data(frame, frame->data_length);
+  status = sli_cpc_drv_transmit_data(frame);
   if (status != SL_STATUS_OK) {
     // Retry later on
-    sli_cpc_push_buffer_handle(&transmit_queue, &item->node, frame);
+    sli_cpc_push_core_buffer_handle(&transmit_queue, frame);
 
     // In case the driver returns an error we will wait for driver
     // notification before resuming transmission. If the security
@@ -2569,11 +4372,20 @@ static sl_status_t process_tx_queue(void)
     return status;
   }
 
-  SLI_CPC_DEBUG_TRACE_ENDPOINT_FRAME_TRANSMIT_SUBMITTED(frame->endpoint);
+  if (frame->endpoint == NULL) {
+    if (frame_type != SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
+      // Only a REJECT frame on a closed endpoint can have a NULL endpoint.
+      MCU_EXIT_ATOMIC();
+      EFM_ASSERT(false);
+      return SL_STATUS_FAIL;
+    }
+  } else {
+    SLI_CPC_DEBUG_TRACE_ENDPOINT_FRAME_TRANSMIT_SUBMITTED(frame->endpoint);
+  }
 
   // Put frame in re-transmission queue if it's a I-frame type (with data)
   if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
-    sli_cpc_push_back_buffer_handle(&frame->endpoint->re_transmit_queue, &item->node, frame);
+    sli_cpc_push_back_core_buffer_handle(&frame->endpoint->re_transmit_queue, frame);
     frame->endpoint->frames_count_re_transmit_queue++;
 
     // Remember when we sent this i-frame in order to calculate round trip time
@@ -2581,17 +4393,8 @@ static sl_status_t process_tx_queue(void)
     if (frame->endpoint->packet_re_transmit_count == 0u) {
       frame->endpoint->last_iframe_sent_timestamp = sli_cpc_timer_get_tick_count64();
     }
-
-    MCU_EXIT_ATOMIC();
-  } else {
-    MCU_EXIT_ATOMIC();
-
-    if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
-      sli_cpc_free_sframe_transmit_queue_item(item);
-    } else {
-      sli_cpc_free_transmit_queue_item(item);
-    }
   }
+  MCU_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
 }
@@ -2599,21 +4402,23 @@ static sl_status_t process_tx_queue(void)
 /***************************************************************************//**
  * Process endpoint that need to be closed
  ******************************************************************************/
-static void process_close(void)
+static void process_free(void)
 {
   bool freed;
 
-  if (closed_endpoint_list != NULL) {
+  if (defer_endpoint_free_list != NULL) {
     sl_slist_node_t *node;
-    MCU_ATOMIC_SECTION(node = sl_slist_pop(&closed_endpoint_list); );
+
+    MCU_ATOMIC_SECTION(node = sl_slist_pop(&defer_endpoint_free_list); );
     do {
       sl_cpc_endpoint_t *endpoint = SL_SLIST_ENTRY(node, sl_cpc_endpoint_t, node_closing);
       LOCK_ENDPOINT(endpoint);
       freed = free_closed_endpoint_if_empty(endpoint);
-      MCU_ATOMIC_SECTION(node = sl_slist_pop(&closed_endpoint_list); );
+      MCU_ATOMIC_SECTION(node = sl_slist_pop(&defer_endpoint_free_list); );
       if (!freed) {
-        // Something is preventing us from freeing the endpoint
-        // process_close will be called again when freeing is possible
+        // Endpoint should never be prevented from being freed once it has been
+        // queued, as it should remain empty until freed.
+        EFM_ASSERT(false);
         RELEASE_ENDPOINT(endpoint);
       }
     } while (node != NULL);
@@ -2625,8 +4430,39 @@ static void process_close(void)
  ******************************************************************************/
 static void defer_endpoint_free(sl_cpc_endpoint_t * ep)
 {
-  MCU_ATOMIC_SECTION(sl_slist_push(&closed_endpoint_list, &ep->node_closing); );
+  MCU_ATOMIC_SECTION(sl_slist_push(&defer_endpoint_free_list, &ep->node_closing); );
   sli_cpc_signal_event(SL_CPC_SIGNAL_CLOSED);
+}
+
+static inline bool is_endpoint_tx_done(const sl_cpc_endpoint_t *ep)
+{
+  return ep->uframe_holding_list == NULL
+         && ep->uframe_tx_complete_pending == false
+         && ep->iframe_holding_list == NULL
+         && ep->re_transmit_queue == NULL
+         && ep->current_tx_window_space == ep->configured_tx_window_size;
+}
+
+/***************************************************************************//**
+ * Checks if an endpoint is empty
+ ******************************************************************************/
+static inline bool is_endpoint_empty(const sl_cpc_endpoint_t *ep)
+{
+  return is_endpoint_tx_done(ep)
+         && ep->uframe_receive_queue == NULL
+         && ep->iframe_receive_queue == NULL
+         && ep->on_write_complete_pending_count == 0;
+}
+
+/***************************************************************************//**
+ * Checks if an endpoint is connected to a remote
+ ******************************************************************************/
+static inline bool is_endpoint_connection_active(const sl_cpc_endpoint_t *ep)
+{
+  return ep->state == SL_CPC_STATE_CONNECTED
+         || ep->state == SL_CPC_STATE_REMOTE_SHUTDOWN
+         || ep->state == SL_CPC_STATE_SHUTDOWN
+         || ep->state == SL_CPC_STATE_SHUTTING_DOWN;
 }
 
 /***************************************************************************//**
@@ -2638,7 +4474,10 @@ static bool free_closed_endpoint_if_empty(sl_cpc_endpoint_t *ep)
   bool freed = false;
 
   // This function must not be called if the endpoint is not in the closed state
-  EFM_ASSERT(ep->state == SL_CPC_STATE_CLOSED);
+  if (ep->state != SL_CPC_STATE_CLOSED) {
+    EFM_ASSERT(false);
+    return false;
+  }
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   if (ep->receive_signal != NULL) {
@@ -2647,7 +4486,7 @@ static bool free_closed_endpoint_if_empty(sl_cpc_endpoint_t *ep)
   }
 #endif
 
-  if (ep->current_tx_window_space != ep->configured_tx_window_size) {
+  if (!is_endpoint_empty(ep)) {
     wait = true;
   }
 
@@ -2677,46 +4516,21 @@ static bool free_closed_endpoint_if_empty(sl_cpc_endpoint_t *ep)
 /***************************************************************************//**
  * Clean queue item
  ******************************************************************************/
-static void clean_single_queue_item(sl_cpc_endpoint_t *endpoint,
-                                    sl_cpc_transmit_queue_item_t *queue_item,
+static void clean_single_queue_item(sl_cpc_buffer_handle_t *queue_item,
                                     sl_slist_node_t **queue)
 {
-  uint8_t type = sli_cpc_hdlc_get_frame_type(queue_item->handle->control);
-
-  if ((type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION)
-      && (endpoint->on_iframe_write_completed != NULL)) {
-    endpoint->on_iframe_write_completed(endpoint->id,
-                                        queue_item->handle->data,
-                                        queue_item->handle->arg,
-                                        SL_STATUS_TRANSMIT_INCOMPLETE);
-  } else if ((type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED)
-             && (endpoint->on_uframe_write_completed != NULL)) {
-    endpoint->on_uframe_write_completed(endpoint->id,
-                                        queue_item->handle->data,
-                                        queue_item->handle->arg,
-                                        SL_STATUS_TRANSMIT_INCOMPLETE);
-  }
-
-  SLI_CPC_REMOVE_BUFFER_HANDLE_FROM_LIST(queue, &queue_item, sl_cpc_transmit_queue_item_t);
-  queue_item->handle->data = NULL;
-  sli_cpc_drop_buffer_handle(queue_item->handle);
-
-  if (type == SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY) {
-    sli_cpc_free_sframe_transmit_queue_item(queue_item);
-  } else {
-    sli_cpc_free_transmit_queue_item(queue_item);
-  }
+  sli_cpc_remove_core_buffer_handle(queue, queue_item);
+  submit_write_completion(queue_item, SL_STATUS_TRANSMIT_INCOMPLETE);
 }
 
 /***************************************************************************//**
- * Function for freeing items in tx queues
+ * Function for freeing items in tx queues.
+ * Endpoint must be locked before calling.
  ******************************************************************************/
 static void clean_tx_queues(sl_cpc_endpoint_t * endpoint)
 {
   sl_slist_node_t *node;
   MCU_DECLARE_IRQ_STATE;
-
-  LOCK_ENDPOINT(endpoint);
 
   // Enter atomic region for the following reasons:
   // - Re-transmit timer callback is an ISR and will access the re_transmit_queue.
@@ -2725,77 +4539,86 @@ static void clean_tx_queues(sl_cpc_endpoint_t * endpoint)
   MCU_ENTER_ATOMIC();
   node = transmit_queue;
   while (node != NULL) {
-    sl_cpc_transmit_queue_item_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
+    uint8_t frame_type = sli_cpc_hdlc_get_frame_type(queue_item->control);
 
     node = node->node;
-    if (queue_item->handle->endpoint == endpoint) {
-      clean_single_queue_item(endpoint, queue_item, &transmit_queue);
-      endpoint->current_tx_window_space++;
+    if (queue_item->endpoint == endpoint) {
+      clean_single_queue_item(queue_item, &transmit_queue);
+      if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+        endpoint->current_tx_window_space++;
+      } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
+        endpoint->uframe_tx_complete_pending = false;
+      }
     }
   }
 
-  node = endpoint->re_transmit_queue;
+  sli_cpc_timer_stop_timer(&endpoint->re_transmit_timer);
+
+  // Cleanup expired re-transmit queues
+  node = expired_retransmit_list;
   while (node != NULL) {
-    sl_cpc_transmit_queue_item_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
+    uint8_t frame_type = sli_cpc_hdlc_get_frame_type(queue_item->control);
 
     node = node->node;
-    SLI_CPC_REMOVE_BUFFER_HANDLE_FROM_LIST(&endpoint->re_transmit_queue, &queue_item, sl_cpc_transmit_queue_item_t);
-    if (queue_item->handle->ref_count == 0) {
-      // Can only be iframe in re_transmit_queue
-      if (endpoint->on_iframe_write_completed != NULL) {
-        endpoint->on_iframe_write_completed(endpoint->id, queue_item->handle->data, queue_item->handle->arg, SL_STATUS_TRANSMIT_INCOMPLETE);
+    if (queue_item->endpoint == endpoint) {
+      clean_single_queue_item(queue_item, &expired_retransmit_list);
+      if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_INFORMATION) {
+        EFM_ASSERT(endpoint->current_tx_window_space < endpoint->configured_tx_window_size);
+        endpoint->current_tx_window_space++;
+      } else if (frame_type == SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED) {
+        endpoint->uframe_tx_complete_pending = false;
       }
-      queue_item->handle->data = NULL;
-      sli_cpc_drop_buffer_handle(queue_item->handle);
-    } else {
-      // Will be freed when driver will notify it has completed the transmit
-      sl_cpc_endpoint_closed_arg_t *arg;
-
-      EFM_ASSERT(sli_cpc_get_closed_arg(&arg) == SL_STATUS_OK);
-      arg->id = endpoint->id;
-      arg->on_iframe_write_completed = endpoint->on_iframe_write_completed;
-      arg->on_uframe_write_completed = endpoint->on_uframe_write_completed;
-      arg->arg = queue_item->handle->arg;
-      queue_item->handle->endpoint = NULL;
-      queue_item->handle->arg = arg;
     }
-    sli_cpc_free_transmit_queue_item(queue_item);
+  }
+
+  // Cleanup re-transmit queues
+  node = endpoint->re_transmit_queue;
+  while (node != NULL) {
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
+
+    node = node->node;
+    sli_cpc_remove_core_buffer_handle(&endpoint->re_transmit_queue, queue_item);
+    if (queue_item->ref_count == 0) {
+      endpoint->current_tx_window_space++;
+      submit_write_completion(queue_item, SL_STATUS_TRANSMIT_INCOMPLETE);
+    } else {
+      // Frame is still owned by the core. Callback will be called once the
+      // the buffer is released.
+    }
     endpoint->frames_count_re_transmit_queue--;
   }
 
-  // Stop incoming re-transmit timeout
-  (void)sli_cpc_timer_stop_timer(&endpoint->re_transmit_timer);
-
   endpoint->packet_re_transmit_count = 0u;
-  endpoint->current_tx_window_space = endpoint->configured_tx_window_size;
 
   // Clean I-Frame holding list
   node = endpoint->iframe_holding_list;
   while (node != NULL) {
-    sl_cpc_transmit_queue_item_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
 
     node = node->node;
-    clean_single_queue_item(endpoint, queue_item, &endpoint->iframe_holding_list);
+    clean_single_queue_item(queue_item, &endpoint->iframe_holding_list);
   }
 
   // Clean U-Frame holding list
   node = endpoint->uframe_holding_list;
   while (node != NULL) {
-    sl_cpc_transmit_queue_item_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
 
     node = node->node;
-    clean_single_queue_item(endpoint, queue_item, &endpoint->uframe_holding_list);
+    clean_single_queue_item(queue_item, &endpoint->uframe_holding_list);
   }
 
   // pending_on_security_ready_queue list is not referenced by an ISR, an atomic section is not necessary
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   node = pending_on_security_ready_queue;
   while (node != NULL) {
-    sl_cpc_transmit_queue_item_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_transmit_queue_item_t, node);
+    sl_cpc_buffer_handle_t *queue_item = SL_SLIST_ENTRY(node, sl_cpc_buffer_handle_t, core_node);
 
     node = node->node;
-    if (queue_item->handle->endpoint == endpoint) {
-      clean_single_queue_item(endpoint, queue_item, &pending_on_security_ready_queue);
+    if (queue_item->endpoint == endpoint) {
+      clean_single_queue_item(queue_item, &pending_on_security_ready_queue);
       // Must be done in atomic context as we clean this flag on the first packet
       // that matches the condition, but there might be other packets queued up
       // for this endpoint
@@ -2805,28 +4628,117 @@ static void clean_tx_queues(sl_cpc_endpoint_t * endpoint)
 #endif
 
   MCU_EXIT_ATOMIC();
-  RELEASE_ENDPOINT(endpoint);
 }
 
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
 /***************************************************************************//**
- * Callback for endpoint close timeout
+ * Open a specialized endpoint
  ******************************************************************************/
-static void endpoint_close_timeout_callback(sli_cpc_timer_handle_t *handle, void *data)
+static sl_status_t open_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                 uint8_t id,
+                                 uint8_t flags,
+                                 uint8_t tx_window_size)
 {
-  sl_cpc_endpoint_t *ep = (sl_cpc_endpoint_t *)data;
+  sl_cpc_endpoint_state_t state;
+  sl_cpc_endpoint_t *ep;
+  sl_status_t status;
 
-  (void)handle;
-  MCU_DECLARE_IRQ_STATE;
+  status = init_endpoint(endpoint_handle, id, flags);
+  if (status != SL_STATUS_OK) {
+    // Convert init_endpoint return codes to open_endpoint return codes
+    switch (status) {
+      case SL_STATUS_ALREADY_INITIALIZED:
+        LOCK_ENDPOINTS_LIST();
 
-  MCU_ENTER_ATOMIC();
+        ep = find_endpoint(id);
+        LOCK_ENDPOINT(ep);
+        state = ep->state;
+        RELEASE_ENDPOINT(ep);
 
-  // If true, the host took too long to reply, close the endpoint anyway
-  if (ep->state == SL_CPC_STATE_CLOSING) {
-    ep->state = SL_CPC_STATE_CLOSED;
-    defer_endpoint_free(ep);
+        RELEASE_ENDPOINTS_LIST();
+
+        if (state == SL_CPC_STATE_OPEN) {
+          status = SL_STATUS_ALREADY_EXISTS;
+        } else {
+          status = SL_STATUS_BUSY;
+        }
+        break;
+      case SL_STATUS_NO_MORE_RESOURCE:
+        status = SL_STATUS_ALLOCATION_FAILED;
+        break;
+      default:
+        break;
+    }
+    return status;
   }
 
-  MCU_EXIT_ATOMIC();
+  // Set TX windows size
+  ep = (sl_cpc_endpoint_t *) endpoint_handle->ep;
+  ep->configured_tx_window_size = tx_window_size;
+  ep->current_tx_window_space = ep->configured_tx_window_size;
+
+  // this part is specific to the secondary, the primary should use the connect API
+  status = sl_cpc_listen_endpoint(endpoint_handle, SL_CPC_FLAG_NO_BLOCK);
+  if (status == SL_STATUS_OK || status == SL_STATUS_IN_PROGRESS) {
+    status = SL_STATUS_OK;
+  } else {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    osMutexDelete(ep->lock);
+#endif
+    sli_cpc_free_endpoint(ep);
+  }
+
+  // mark this endpoint as using the legacy API
+  ep->flags |= SL_CPC_ENDPOINT_FLAG_LEGACY_API;
+
+  SL_CPC_JOURNAL_RECORD_INFO("Endpoint opened", ep->id);
+
+  SLI_CPC_DEBUG_TRACE_CORE_OPEN_ENDPOINT();
+  return status;
+}
+#endif
+
+static void process_expired_retransmit(void *data)
+{
+  sl_cpc_buffer_handle_t *buffer_handle = NULL;
+  (void)data;
+
+  while (expired_retransmit_list != NULL) {
+    MCU_ATOMIC_SECTION(buffer_handle = sli_cpc_pop_core_buffer_handle(&expired_retransmit_list); );
+
+    sl_cpc_endpoint_t *endpoint = buffer_handle->endpoint;
+
+    LOCK_ENDPOINT(endpoint);
+    if (buffer_handle->on_write_complete_pending) {
+      // CPC-1162 : This scenario is to handle a case where a ack
+      //            is received while the driver is processing a retransmit.
+      //            However it could also happen when the retransmit timer is
+      //            expired and the ack is received before this dispatched
+      //            function is called.
+      //
+      //            The current implementation does not handle that,
+      //            however once CPC-1162 is completed, it should.
+      SL_CPC_JOURNAL_RECORD_DEBUG("Packet was acked while retransmit timer expired", endpoint->id);
+      submit_write_completion(buffer_handle, SL_STATUS_OK);
+    } else {
+      sli_cpc_push_core_buffer_handle(&endpoint->re_transmit_queue, buffer_handle);
+
+      if (endpoint->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
+        if (endpoint->id != SL_CPC_ENDPOINT_SYSTEM) {
+          endpoint->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
+          notify_error(endpoint);
+        }
+      } else {
+        endpoint->re_transmit_timeout *= 2;   // RTO(new) = RTO(before retransmission) *2 )
+        // this is explained in Karn's Algorithm
+        if (endpoint->re_transmit_timeout > sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS)) {
+          endpoint->re_transmit_timeout = sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS);
+        }
+        re_transmit_frame(endpoint);
+      }
+    }
+    RELEASE_ENDPOINT(buffer_handle->endpoint);
+  }
 }
 
 /***************************************************************************//**
@@ -2834,25 +4746,23 @@ static void endpoint_close_timeout_callback(sli_cpc_timer_handle_t *handle, void
  ******************************************************************************/
 static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *data)
 {
+  sl_cpc_buffer_handle_t *popped_buffer_handle;
   sl_cpc_buffer_handle_t *buffer_handle = (sl_cpc_buffer_handle_t *)data;
   (void)handle;
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
-  if (buffer_handle->endpoint->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
-    if (buffer_handle->endpoint->id != SL_CPC_ENDPOINT_SYSTEM) {
-      buffer_handle->endpoint->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
-      sli_cpc_timer_stop_timer(&buffer_handle->endpoint->re_transmit_timer);
-      notify_error(buffer_handle->endpoint);
-    }
-  } else {
-    buffer_handle->endpoint->re_transmit_timeout *= 2;   // RTO(new) = RTO(before retransmission) *2 )
-                                                         // this is explained in Karn’s Algorithm
-    if (buffer_handle->endpoint->re_transmit_timeout > sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS)) {
-      buffer_handle->endpoint->re_transmit_timeout = sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS);
-    }
-    re_transmit_frame(buffer_handle->endpoint);
-  }
+
+  SL_CPC_JOURNAL_RECORD_INFO("Retransmit timer expired", buffer_handle->endpoint->id);
+  popped_buffer_handle = sli_cpc_pop_core_buffer_handle(&buffer_handle->endpoint->re_transmit_queue);
+  EFM_ASSERT(buffer_handle == popped_buffer_handle);
+  sli_cpc_timer_stop_timer(&buffer_handle->endpoint->re_transmit_timer);
+#if defined(SLI_CPC_ENABLE_TEST_FEATURES)
+  sli_cpc_on_retransmit_timer_expiration(buffer_handle);
+#endif
+  sli_cpc_push_back_core_buffer_handle(&expired_retransmit_list, buffer_handle);
+  sli_cpc_dispatcher_push(&retransmit_dispatcher_handle, process_expired_retransmit, NULL);   //Use to push status
+
   MCU_EXIT_ATOMIC();
 }
 
@@ -2861,6 +4771,9 @@ static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *d
  ******************************************************************************/
 static void notify_error(sl_cpc_endpoint_t * endpoint)
 {
+  // CPC-1101:  In dispatched function, clean the TX queues (should've already been)
+  //            done, except in the case of a re-transmit timeout.
+  SL_CPC_JOURNAL_RECORD_INFO("Notify error on endpoint", endpoint->id);
   if (endpoint->on_error != NULL) {
     endpoint->on_error(endpoint->id, endpoint->on_error_arg);
   }
@@ -2870,6 +4783,8 @@ static void notify_error(sl_cpc_endpoint_t * endpoint)
     EFM_ASSERT(osSemaphoreRelease(endpoint->receive_signal) == osOK);
   }
 #endif
+  // Return state is irrelevant, simply want to unlock any blocking API.
+  notify_state_change(endpoint);
 }
 
 /***************************************************************************//**
@@ -2919,6 +4834,30 @@ static void cpc_exit_api(sl_cpc_endpoint_handle_t * endpoint_handle)
 {
   MCU_ATOMIC_SECTION(endpoint_handle->ref_count--; );
 }
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************//**
+ * Check if CPC core is ready to operate
+ ******************************************************************************/
+static sl_status_t cpc_core_is_ready(void)
+{
+  if (!sli_cpc_system_is_ready()) {
+    return SL_STATUS_NOT_READY;
+  }
+
+  if (secondary_protocol_version_mismatch || secondary_application_version_mismatch) {
+    return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
+  #if (SL_CPC_PRIMARY_FIRMWARE_UPGRADE_SUPPORT_ENABLED >= 1)
+  if (sli_cpc_is_fwu_in_progress()) {
+    return SL_STATUS_BUSY;
+  }
+  #endif
+
+  return SL_STATUS_OK;
+}
+#endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
 /***************************************************************************//**
@@ -2975,4 +4914,45 @@ sl_slist_node_t **sli_cpc_dut_get_endpoints_head(void)
 SL_WEAK sl_status_t sli_cpc_system_init(void)
 {
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Configure the maximum payload length. This is the number of bytes that can
+ * be sent as a payload. With security enabled this will include the security tag
+ ******************************************************************************/
+void sli_cpc_set_remote_tx_max_payload_length(uint16_t remote_tx_max_payload_length)
+{
+  remote_tx_payload_max_length = remote_tx_max_payload_length;
+}
+
+/***************************************************************************//**
+ * Retrieve the maximum payload length that can be transmitted
+ *
+ * @param endpoint_handle   handle of the endpoint for which the query is made
+ *
+ * @return the maximum tx payload length in function of whether the encryption
+ *         is enabled on the endpoint or not
+ ******************************************************************************/
+uint16_t sl_cpc_get_tx_max_payload_length(sl_cpc_endpoint_handle_t *endpoint_handle)
+{
+  uint16_t max_tx_length = SL_CPC_TX_PAYLOAD_MAX_LENGTH;
+  #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  sl_cpc_endpoint_t *ep;
+  MCU_ATOMIC_LOAD(ep, (sl_cpc_endpoint_t *)endpoint_handle->ep);
+  bool encrypted = ep->encrypted;
+  #else
+  (void) endpoint_handle;
+  #endif
+
+  if (remote_tx_payload_max_length != 0) {
+    max_tx_length = remote_tx_payload_max_length;
+  }
+
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  if (encrypted) {
+    max_tx_length -= SLI_CPC_SECURITY_TAG_LENGTH;
+  }
+#endif
+
+  return max_tx_length;
 }

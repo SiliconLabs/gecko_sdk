@@ -1,4 +1,4 @@
-label: tz_psa_attestation_ws 
+label: tz_psa_attestation_ws
 description: >
   This example workspace demonstrates TrustZone for PSA Attestation.
 quality: production

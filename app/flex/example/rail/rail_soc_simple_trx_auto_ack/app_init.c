@@ -37,8 +37,7 @@
 #include "rail_config.h"
 #include "sl_rail_util_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "app_task_init.h"
@@ -83,10 +82,8 @@ RAIL_Handle_t app_init(void)
   set_up_tx_fifo(rail_handle);
 
   // Turn OFF LEDs
-  sl_led_turn_off(&sl_led_led0);
-#if defined(SL_CATALOG_LED1_PRESENT)
-  sl_led_turn_off(&sl_led_led1);
-#endif
+  clear_receive_led();
+  clear_send_led();
 
   // Setup state timings for Auto-ACK
   RAIL_StateTiming_t timings = { 0 };

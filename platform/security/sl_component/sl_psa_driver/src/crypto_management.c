@@ -28,12 +28,15 @@
  *
  ******************************************************************************/
 
+#include "em_device.h"
+
+#if defined(CRYPTO_PRESENT)
+
 #include "crypto_management.h"
 #include "em_core.h"
 #include "em_bus.h"
 #include "sl_assert.h"
-
-#if defined(CRYPTO_PRESENT)
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_THREADING_C)
 #include "mbedtls/threading.h"

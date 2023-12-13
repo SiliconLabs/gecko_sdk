@@ -36,4 +36,22 @@
 
 SL_NORETURN void cpc_system_reset(sli_cpc_system_reboot_mode_t reboot_mode);
 
+/***************************************************************************//**
+ * Get a a system command buffer.
+ *
+ * @param[out] item Address of the variable that will receive the item pointer.
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sli_cpc_get_system_command_buffer(sli_cpc_system_cmd_t **item);
+
+/***************************************************************************//**
+ * Free CPC system command buffer.
+ *
+ * @param[in] item Pointer to system command buffer to free.
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sli_cpc_free_command_buffer(sli_cpc_system_cmd_t *item);
+
 #endif

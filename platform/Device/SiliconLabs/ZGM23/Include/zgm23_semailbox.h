@@ -380,4 +380,4 @@ typedef struct {
 /** @} End of group ZGM23_SEMAILBOX_APBSE */
 /** @} End of group Parts */
 
-#endif /* ZGM23_SEMAILBOX_H */
+#endif // ZGM23_SEMAILBOX_H

@@ -12,7 +12,7 @@ provides:
 ui_hints:
   visibility: never
 include:
-  - path: "include/"
+  - path: "inc/"
     file_list:
       - path: "sl_bt_mbedtls_context.h"
         condition: ["device_series_1"]

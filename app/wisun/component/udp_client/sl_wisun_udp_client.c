@@ -34,7 +34,10 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "socket.h"
+#include <stdlib.h>
+
+#include "socket/socket.h"
+#include "sl_wisun_trace_util.h"
 #include "sl_wisun_udp_client.h"
 
 // -----------------------------------------------------------------------------
@@ -63,7 +66,7 @@ void sl_wisun_udp_client_create(void)
   int32_t sockid = SOCKET_INVALID_ID; // client socket id
 
   // create client socket
-  sockid = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_IP);
+  sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_IP);
 
   if (sockid == SOCKET_INVALID_ID) {
     printf("[Failed to create socket: %ld]\n", sockid);
@@ -86,7 +89,7 @@ void sl_wisun_udp_client_write(const int32_t sockid, const char *remote_ip_addre
                                const uint16_t remote_port, const char *str)
 {
   int32_t res;
-  static wisun_addr_t server_addr;
+  static sockaddr_in6_t server_addr;
   if (remote_ip_address == NULL) {
     printf("[Failed: IP address is NULL ptr]\n");
     return;
@@ -98,9 +101,9 @@ void sl_wisun_udp_client_write(const int32_t sockid, const char *remote_ip_addre
   }
 
   // setting the server address
-  server_addr.sin6_family = AF_WISUN;
+  server_addr.sin6_family = AF_INET6;
   server_addr.sin6_port = remote_port;
-  if (inet_pton(AF_WISUN, remote_ip_address,
+  if (inet_pton(AF_INET6, remote_ip_address,
                 &server_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     printf("[Invalid IP address: %s]\n", remote_ip_address);
     return;
@@ -116,20 +119,19 @@ void sl_wisun_udp_client_write(const int32_t sockid, const char *remote_ip_addre
 /* read on tcp client socket */
 void sl_wisun_udp_client_read(const int32_t sockid, const uint16_t size)
 {
-  char c;
+  char *c = (char *) app_wisun_malloc((size + 1) * sizeof(char));
   int32_t res;
-  static wisun_addr_t server_addr;
+  static sockaddr_in6_t server_addr;
   socklen_t len = sizeof(server_addr);
 
-  for (uint16_t i = 0; i < size; ++i) {
-    res = recvfrom(sockid, &c, 1, 0,
-                   (struct sockaddr *)&server_addr, &len);
-    if (res == SOCKET_RETVAL_ERROR || !res) {
-      break;
-    }
-    printf("%c", c);
+  res = recvfrom(sockid, c, size, 0,
+                 (struct sockaddr *)&server_addr, &len);
+  if (res == SOCKET_RETVAL_ERROR || !res) {
+    app_wisun_free(c);
+    return;
   }
-  printf("\n");
+  printf("%s\r\n", c);
+  app_wisun_free(c);
 }
 
 // -----------------------------------------------------------------------------

@@ -30,6 +30,10 @@
 #ifndef __SL_WISUN_NETWORK_MEASUREMENT_LCD__
 #define __SL_WISUN_NETWORK_MEASUREMENT_LCD__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -97,5 +101,9 @@ void sli_wisun_nwm_test_result_form(void *args);
  * @param[in] args Arguments
  *****************************************************************************/
 void sli_wisun_neighbors_select_form(void *args);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

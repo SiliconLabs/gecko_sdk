@@ -46,10 +46,6 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index);
 
 sl_status_t zb_sec_man_upgrade_tc_link_key(void);
 
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-sl_status_t zb_sec_man_upgrade_secure_ezsp_key(void);
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
 sl_status_t zb_sec_man_upgrade_zll_key(void);
 #endif // defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)

@@ -231,27 +231,6 @@ sl_status_t zb_sec_man_fetch_transient_key(sl_zb_sec_man_context_t* context,
   return SL_STATUS_OK;
 }
 
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-sl_status_t zb_sec_man_fetch_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key)
-{
-  tokTypeSecureEzspSecurityKey tok;
-  halCommonGetToken(&tok, TOKEN_SECURE_EZSP_SECURITY_KEY);
-  MEMMOVE(plaintext_key->key, tok.contents, sizeof(plaintext_key->key));
-  return SL_STATUS_OK;
-}
-
-sl_status_t zb_sec_man_store_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key)
-{
-  tokTypeSecureEzspSecurityKey tok;
-  halCommonGetToken(&tok, TOKEN_SECURE_EZSP_SECURITY_KEY);
-  MEMMOVE(tok.contents, plaintext_key->key, sizeof(plaintext_key->key));
-  halCommonSetToken(TOKEN_SECURE_EZSP_SECURITY_KEY, &tok);
-  return SL_STATUS_OK;
-}
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT) || defined(EMBER_TEST)
 sl_status_t zb_sec_man_fetch_zll_key(sl_zb_sec_man_context_t* context,
                                      sl_zb_sec_man_key_t* plaintext_key)
@@ -598,14 +577,11 @@ sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,
 }
 
 #else //no support for PSA APIs at all; compile with software implementation of CCM*.
-//ported from ccm-star.c
-//Define these if ccm-star is no longer being included
-#ifndef CCM_STAR_HEADER
+
 #define STANDALONE_FLAGS_INDEX                   0
 #define STANDALONE_NONCE_INDEX                   1
 #define STANDALONE_VARIABLE_FIELD_INDEX_HIGH    14
 #define STANDALONE_VARIABLE_FIELD_INDEX_LOW     15
-#endif
 
 #ifndef TEMP_BUFFER_SIZE
 #define TEMP_BUFFER_SIZE 256
@@ -800,41 +776,35 @@ sl_status_t zb_sec_man_derive_key(sl_zb_sec_man_key_t* source_key,
   //key derivation is done correctly.
 
   sli_util_load_key_into_core((uint8_t*) source_key);
+  bool has_first_derivation = false;
 
-  switch (context->derived_type) {
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY:
-    {
-      tag = DERIVE_TRANSPORT_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*)derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY:
-    {
-      tag = DERIVE_LOAD_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY:
-    {
-      tag = DERIVE_VERIFY_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY:
-    {
-      emberAesHashSimple(EMBER_ENCRYPTION_KEY_SIZE,
-                         (const uint8_t*) source_key,
-                         (uint8_t* ) derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY:
-      sl_zb_sec_man_hmac_aes_mmo(context->eui64, EUI64_SIZE, (uint8_t*) derived_key);
-      break;
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE:
-      return SL_STATUS_INVALID_PARAMETER;
-      break;
-    default:
-      break;
+  if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY) != 0) {
+    emberAesHashSimple(EMBER_ENCRYPTION_KEY_SIZE,
+                       (const uint8_t*) source_key,
+                       (uint8_t* ) derived_key);
+    has_first_derivation = true;
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY) != 0) {
+    sl_zb_sec_man_hmac_aes_mmo(context->eui64, EUI64_SIZE, (uint8_t*) derived_key);
+    has_first_derivation = true;
+  }
+  if (has_first_derivation) {
+    //If key has multiple valid derived types, it will be one from the previous cases
+    //and one from the following (as some derived types are treated more like ordinary link keys).
+    //Load the first derivation in at this point to have the second derivation operation computed from it.
+    sli_util_load_key_into_core((uint8_t*) derived_key);
+  }
+  if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY) != 0) {
+    tag = DERIVE_TRANSPORT_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*)derived_key);
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY) != 0) {
+    tag = DERIVE_LOAD_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY) != 0) {
+    tag = DERIVE_VERIFY_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
+  }
+  if (context->derived_type == SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE) {
+    return SL_STATUS_INVALID_PARAMETER;
   }
   return SL_STATUS_OK;
 }
@@ -850,9 +820,6 @@ sl_status_t sl_zb_sec_man_delete_key(sl_zb_sec_man_context_t* context)
   switch (context->core_key_type) {
     case SL_ZB_SEC_MAN_KEY_TYPE_NETWORK:
     case SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK:
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY:
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT) || defined(EMBER_TEST)
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY:
@@ -948,4 +915,16 @@ sl_status_t sl_zb_sec_man_get_network_key_info(sl_zb_sec_man_network_key_info_t 
   // Fetch nwk key frame counter info
   network_key_info->network_key_frame_counter = emberGetSecurityFrameCounter();
   return SL_STATUS_OK;
+}
+
+bool sl_zb_sec_man_compare_key_to_value(sl_zb_sec_man_context_t* context, const sl_zb_sec_man_key_t* test_key)
+{
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_export_key(context, &plaintext_key);
+
+  if (MEMCOMPARE(&plaintext_key, test_key, EMBER_ENCRYPTION_KEY_SIZE) == 0) {
+    return true;
+  }
+
+  return false;
 }

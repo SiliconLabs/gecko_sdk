@@ -27,10 +27,11 @@
  *
  ******************************************************************************/
 
+#include <string.h>
+#include <assert.h>
 #include "ota-broadcast-bootloader-server-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "ota-broadcast-bootloader-server.h"
 #include "ota-broadcast-bootloader-server-internal.h"
@@ -270,7 +271,7 @@ EmberAfOtaBootloaderStatus emberAfPluginBootloaderServerInitiateRequestTargetsBo
   currentTargetErrorsCount = 0;
   currentImageTagOrServerStatus = imageTag;
   currentImageSizeOrBootloadTimeMs =
-    halCommonGetInt32uMillisecondTick() + bootloadDelayMs;
+    emberGetInt32uMillisecondTick() + bootloadDelayMs;
 
   internalState = STATE_OTA_SERVER_BOOTLOAD_REQUEST_UNICAST_INTERVAL;
 
@@ -1006,7 +1007,7 @@ static void scheduleImageDistributionProcessNextTask(bool newSegmentOrNewTarget)
         emberAfPluginCmsisRtosAcquireBufferSystemMutex();
 #endif
 
-        MEMSET(emberGetBufferPointer(segmentBitmaskBuffer),
+        memset(emberGetBufferPointer(segmentBitmaskBuffer),
                0x00,
                MISSING_SEGMENTS_BITMASK_LENGTH);
 
@@ -1164,7 +1165,7 @@ static void initSegmentsBitmask(void)
 #endif
 
   segmentBitmaskBufferPtr = emberGetBufferPointer(segmentBitmaskBuffer);
-  MEMSET(segmentBitmaskBufferPtr, 0xFF, MISSING_SEGMENTS_BITMASK_LENGTH);
+  memset(segmentBitmaskBufferPtr, 0xFF, MISSING_SEGMENTS_BITMASK_LENGTH);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosReleaseBufferSystemMutex();
@@ -1298,7 +1299,7 @@ static void targetsStatusRequestProcessFinished(EmberAfOtaBootloaderStatus statu
 static void requestNextTargetForBootload(void)
 {
   uint8_t message[EMBER_OTA_BROADCAST_BOOTLOADER_PROTOCOL_BOOTLOAD_REQ_HEADER_LENGTH];
-  uint32_t nowMs = halCommonGetInt32uMillisecondTick();
+  uint32_t nowMs = emberGetInt32uMillisecondTick();
   uint8_t *targetListBufferPtr;
   EmberNodeId destination;
   EmberStatus status;

@@ -1480,4 +1480,4 @@ typedef struct {
 /** @} End of group MGM24_SMU_CFGNS */
 /** @} End of group Parts */
 
-#endif /* MGM24_SMU_H */
+#endif // MGM24_SMU_H

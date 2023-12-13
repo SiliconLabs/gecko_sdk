@@ -38,50 +38,80 @@
 #include "app_log.h"
 #include "app_assert.h"
 #include "abr_cs_parser.h"
+#include "abr_file_log.h"
+#include "abr_ras.h"
 #include "abr_initiator_interface.h"
 #include "abr_initiator_config.h"
+#include "abr_ans.h"
 
 #include "sl_rtl_clib_api.h"
 
-/// Discovering services/characteristics and subscribing raises procedure_complete events
-/// Actions are used to indicate which procedure was completed.
+// Discovering services/characteristics and subscribing raises procedure_complete events
+// Actions are used to indicate which procedure was completed.
+#define CONFIG_TX_POWER_MIN         -100
+#define ABR_CENTRAL_TX_POWER        10
+#define ADR_LEN                     6
+#define UUID_LEN                    16
+#define COMPLETE_LOCAL_NAME         0x09
+#define CONFIG_RAS_REQUEST_PERIODIC_NOTIFICATION_MODE true
+#define BYTE_LEN                    8             // Byte length in bits
+#define DEFAULT_NUM_TONES           79            // Number of tones
+#define DEFAULT_FREQUENCY_DELTA     1e6f          // Channel frequency delta
+#define CS_ALL_SUBEVENTS_ABORTED    0x0F          // All subsequent CS subevents aborted
+#define PROCEDURE_DONE_STATUS_MASK  0x0F          // Procedure done status mask
+#define MODE_PBR_STR                "PBR"
+#define MODE_RTT_STR                "RTT"
+#define MODE_PBR_RTT_STR            "PBR and RTT"
+#define MODE_UNKNOWN_STR            "UNKNOWN"
+#define CS_CHANNEL_MAP_MIN_CHANNELS 15
+#define CS_CHANNEL_MAP_MAX_CHANNELS 76
+#define USER_CMD_GET_ANTENNA_OFFSET_ID 7
+#define OFFSET_RESPONSE_MAX_LENGHT     9
+
 typedef enum {
   act_none = 0,
   act_discover_service,
   act_discover_characteristics,
-  act_subscribe_result
+  act_subscribe_result_1,
+  act_subscribe_result_2,
 } action_t;
 
 static abr_initiator_config_t *initiator_config;
 static const char *device_name = INITIATOR_DEVICE_NAME; // Device name to match against scan results.
 
-static bool characteristic_found;
-static sl_bt_cs_channel_map_t channel_map;
+static bool ras_control_point_characteristic_found = false;
+static bool ras_procedure_enable_data_characteristic_found = false;
+static bool ras_se_ranging_data_characteristic_found = false;
+static bool ras_characteristics_discovered = false;
 
 static uint8_t connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-static uint32_t service_handle = 0xFFFFFFFF;
-static uint16_t result_handle = 0xFFFF;
+static uint32_t ras_service_handle = UINT32_MAX;
+static uint16_t ras_control_point_characteristic_handle = UINT16_MAX;
+static uint16_t ras_procedure_enable_data_characteristic_handle = UINT16_MAX;
+static uint16_t ras_se_ranging_data_characteristic_handle = UINT16_MAX;
 static action_t action = act_none;
 
-// bbb99e70-fff7-46cf-abc7-2d32c71820f2
-const uint8_t service_uuid[] = INITIATOR_SERVICE_UUID;
-
-// 929f95ec-1391-4303-9b49-3c22a418be91
+const uint8_t ras_service_uuid[] = RAS_SERVICE_UUID;
+const uint8_t ras_control_point_characteristic_uuid[] = RAS_CONTROL_POINT_CHARACTERISTIC_UUID;
+const uint8_t ras_procedure_enable_data_characteristic_uuid[] = RAS_PROCEDURE_ENABLE_DATA_CHARACTERISTIC_UUID;
 const uint8_t result_characteristic_uuid[] = INITIATOR_CHARACTERISTIC_UUID;
+const uint8_t ras_se_ranging_data_characteristic_uuid[] = RAS_SE_RANGING_DATA_CHARACTERISTIC_UUID;
 
-static bool initiator_process_scan_response(sl_bt_evt_scanner_scan_report_t *response);
+static volatile bool procedure_enable_retry = false;
+#ifdef HOST_TOOLCHAIN
+static volatile bool antenna_switching = false;
+#endif //HOST_TOOLCHAIN
+
 static void initiator_scanning_start(void);
 static void check_characteristic_uuid(sl_bt_msg_t *evt);
-static void process_procedure_complete_event(sl_bt_msg_t *evt);
-static void initiator_calculate_distance(uint8_t connection);
-static void abr_initiator_perform_procedure(void);
+static bool initiator_calculate_distance(uint8_t connection);
+static void abr_initiator_start_cs_procedure(void);
+static void abr_initiator_restart_cs_procedure(void);
 static void abr_initiator_create_config(void);
-static void rtl_library_init(sl_rtl_abr_libitem *handle, uint8_t abr_mode);
-
-#ifdef DEBUG_MODE
-FILE *initiator_statistics_file, *reflector_statistics_file;
-struct timespec bt_event_timestamp;
-#endif
+static void initiator_process_scan_response(bd_addr *address, uint8_t address_type, const uint8array *adv_data);
+static void process_procedure_complete_event(sl_bt_msg_t *evt);
+static uint32_t get_num_tones_from_channel_map(const uint8_t *channel_map, const uint32_t channel_map_len);
+static sl_status_t check_cs_result_event_flags(sl_bt_evt_cs_result_t *cs_res);
 
 /******************************************************************************
  * ABR initiator set initial config.
@@ -90,6 +120,19 @@ void abr_initiator_set_initial_state(abr_initiator_config_t *config)
 {
   initiator_config = config;
   initiator_config->discovery_state = ABR_DISCOVERY_STATE_IDLE;
+  // Antenna switching is only available for host initiator
+  #ifndef ABR_CPP_MODE
+  #ifdef HOST_TOOLCHAIN
+  abr_set_antenna_offset();
+  if (ans_initiator_decide_antenna_switching(initiator_config->use_antenna_wired_offset)) {
+    antenna_switching = true;
+    initiator_config->max_procedure_count = 1;
+    initiator_config->antenna_config = 3;
+    ans_set_antenna_offset(initiator_config->antenna_offset.offset_value,
+                           initiator_config->antenna_offset.offset_count);
+  }
+  #endif // HOST_TOOLCHAIN
+  #endif // ABR_CPP_MODE
 }
 
 /******************************************************************************
@@ -101,31 +144,18 @@ void bt_on_event_initiator(sl_bt_msg_t *evt)
   sl_status_t sc;
 
   switch (SL_BT_MSG_ID(evt->header)) {
-    case sl_bt_evt_scanner_scan_report_id:
-      if (initiator_process_scan_response(&(evt->data.evt_scanner_scan_report))) {
-        // Stop scanning
-        sc = sl_bt_scanner_stop();
-        app_assert_status(sc);
-
-        initiator_config->discovery_state = ABR_DISCOVERY_STATE_CONN;
-
-        if (initiator_config->phy != sl_bt_gap_phy_coding_1m_uncoded) {
-          app_log_warning("Connection PHY is not supported and set to 1M PHY" APP_LOG_NL);
-          initiator_config->phy = sl_bt_gap_phy_coding_1m_uncoded;
-        }
-
-        if (connection_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
-          app_log_info("Opening connection to Reflector" APP_LOG_NL);
-          sc = sl_bt_connection_open(evt->data.evt_scanner_scan_report.address,
-                                     evt->data.evt_scanner_scan_report.address_type,
-                                     initiator_config->phy,
-                                     &connection_handle);
-          app_assert_status(sc);
-        }
-      } else {
-        waiting_indication();
-      }
+    case sl_bt_evt_scanner_legacy_advertisement_report_id:
+      initiator_process_scan_response(&(evt->data.evt_scanner_legacy_advertisement_report.address),
+                                      evt->data.evt_scanner_legacy_advertisement_report.address_type,
+                                      &(evt->data.evt_scanner_legacy_advertisement_report.data));
       break;
+
+    case sl_bt_evt_scanner_extended_advertisement_report_id:
+      initiator_process_scan_response(&(evt->data.evt_scanner_extended_advertisement_report.address),
+                                      evt->data.evt_scanner_extended_advertisement_report.address_type,
+                                      &(evt->data.evt_scanner_extended_advertisement_report.data));
+      break;
+
     case sl_bt_evt_connection_opened_id:
       app_log_info("Connection opened to the Reflector" APP_LOG_NL);
       platform_display_state(ABR_STATE_CONNECTED);
@@ -144,114 +174,259 @@ void bt_on_event_initiator(sl_bt_msg_t *evt)
                                            initiator_config->max_ce_length);
 
       app_assert_status(sc);
+      ras_control_point_characteristic_found = false;
+      ras_procedure_enable_data_characteristic_found = false;
+      ras_se_ranging_data_characteristic_found = false;
+      ras_characteristics_discovered = false;
+      sc = sl_bt_cs_set_procedure_parameters(connection_handle,
+                                             initiator_config->config_id,
+                                             initiator_config->max_procedure_duration,
+                                             initiator_config->min_interval,
+                                             initiator_config->max_interval,
+                                             initiator_config->max_procedure_count,
+                                             initiator_config->min_subevent_len,
+                                             initiator_config->max_subevent_len,
+                                             initiator_config->antenna_config,
+                                             initiator_config->phy,
+                                             initiator_config->tx_pwr_delta,
+                                             initiator_config->preferred_peer_antenna);
+      app_log_status_warning_f(sc, "Set procedure parameters failed" APP_LOG_NL);
 
       break;
+
     case sl_bt_evt_connection_parameters_id:
       if (evt->data.evt_connection_parameters.security_mode == 1) {
         app_log_info("Connection encrypted" APP_LOG_NL);
         sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle,
                                                           UUID_LEN,
-                                                          service_uuid);
+                                                          ras_service_uuid);
         app_assert_status(sc);
-        characteristic_found = false;
       }
       break;
+
     case sl_bt_evt_gatt_procedure_completed_id:
       process_procedure_complete_event(evt);
       break;
+
     case sl_bt_evt_gatt_characteristic_id:
+      app_log_info("Discovered new characteristic" APP_LOG_NL);
       check_characteristic_uuid(evt);
       break;
+
     case sl_bt_evt_gatt_service_id:
       if (evt->data.evt_gatt_service.uuid.len == UUID_LEN) {
-        if (memcmp(service_uuid, evt->data.evt_gatt_service.uuid.data, UUID_LEN) == 0) {
-          service_handle = evt->data.evt_gatt_service.service;
+        if (memcmp(ras_service_uuid, evt->data.evt_gatt_service.uuid.data, UUID_LEN) == 0) {
+          ras_service_handle = evt->data.evt_gatt_service.service;
           action = act_discover_service;
-          app_log_info("Service found" APP_LOG_NL);
+          app_log_info("RAS service found" APP_LOG_NL);
         }
       }
       break;
+
     case sl_bt_evt_gatt_characteristic_value_id:
-      app_log_debug("Received new measurement data from the reflector" APP_LOG_NL);
+      app_log_info("Received new GATT data" APP_LOG_NL);
 
-#ifdef DEBUG_MODE
-      reflector_statistics_file = fopen("reflector_stats.txt", "w");
-      app_assert(reflector_statistics_file != NULL, "Failed opening file");
-      clock_gettime(CLOCK_MONOTONIC, &bt_event_timestamp);
-      fprintf(reflector_statistics_file, "%li:%li %s\n", bt_event_timestamp.tv_sec, bt_event_timestamp.tv_nsec, "new result");
-      fclose(reflector_statistics_file);
-#endif
+      if (evt->data.evt_gatt_characteristic_value.characteristic == ras_control_point_characteristic_handle) {
+        app_log_info("Received new RAS Control Point data" APP_LOG_NL);
 
-      if (evt->data.evt_gatt_characteristic_value.att_opcode == gatt_handle_value_indication) {
-        // Reflector sends indication about result after each test. Data is uint8array LSB first.
-
-        sc = sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
-        app_assert_status(sc);
-
-        app_log_debug("Reflector packet %hhu" APP_LOG_NL, evt->data.evt_gatt_characteristic_value.value.len);
-
-        struct sl_bt_evt_cs_result_s* result_ptr = (struct sl_bt_evt_cs_result_s*)evt->data.evt_gatt_characteristic_value.value.data;
-
-        sl_status_t parse_status = abr_cs_parser_parse_event_result_data(result_ptr,
-                                                                         ABR_DEVICE_REFLECTOR);
-        if (parse_status != SL_STATUS_OK) {
-          app_log_info("Incorrect cs_event_result reflector" APP_LOG_NL);
+        ras_ranging_data_get_command_t cmd;
+        sc = abr_ras_create_control_point_response(evt->data.evt_gatt_characteristic_value.value.data,
+                                                   evt->data.evt_gatt_characteristic_value.value.len,
+                                                   CONFIG_RAS_REQUEST_PERIODIC_NOTIFICATION_MODE,
+                                                   &cmd);
+        if (sc == SL_STATUS_OK) {
+          sc = sl_bt_gatt_write_characteristic_value(connection_handle,
+                                                     ras_control_point_characteristic_handle,
+                                                     sizeof(ras_ranging_data_get_command_t),
+                                                     (uint8_t*)&cmd);
+          app_assert_status(sc);
         }
 
-        initiator_calculate_distance(result_ptr->connection);
+        sc = sl_bt_gatt_send_characteristic_confirmation(connection_handle);
+        app_assert_status(sc);
+      }
 
-        if (abr_cs_parser_procedure_restart_needed(result_ptr->connection)) {
-          abr_initiator_perform_procedure();
+      if (evt->data.evt_gatt_characteristic_value.characteristic != ras_se_ranging_data_characteristic_handle) {
+        return;
+      }
+      app_log_info("Received new measurement data from the reflector" APP_LOG_NL);
+
+      if (evt->data.evt_gatt_characteristic_value.att_opcode == sl_bt_gatt_handle_value_notification) {
+        struct sl_bt_evt_cs_result_s* result_ptr =
+          (struct sl_bt_evt_cs_result_s*)evt->data.evt_gatt_characteristic_value.value.data;
+
+        app_log_debug("Reflector CS packet received; proc_cnt='%u' proc_done='%u' se_done='%u' len='%u'" APP_LOG_NL,
+                      result_ptr->procedure_counter,
+                      result_ptr->procedure_done_status,
+                      result_ptr->subevent_done_status,
+                      evt->data.evt_gatt_characteristic_value.value.len);
+
+        if (abr_process_reflector_cs_result(result_ptr, evt->data.evt_gatt_characteristic_value.connection)) {
+          abr_initiator_restart_cs_procedure();
         }
       }
       break;
-    case  sl_bt_evt_cs_procedure_enable_complete_id:
+
+    case sl_bt_evt_cs_procedure_enable_complete_id:
+      sc = abr_file_log_procedure_config_complete_event(&evt->data.evt_cs_procedure_enable_complete);
+      app_assert_status(sc);
       app_log_debug("Procedure enable complete" APP_LOG_NL);
       break;
+
     case sl_bt_evt_cs_config_complete_id:
       app_log_info("Config created" APP_LOG_NL);
-      abr_initiator_perform_procedure();
+      sc = abr_file_log_config_complete_event(&evt->data.evt_cs_config_complete);
+      app_assert_status(sc);
+      abr_initiator_start_cs_procedure();
       break;
+
     case sl_bt_evt_cs_result_id:
-      app_log_debug("Initiator packet %hhu" APP_LOG_NL, evt->data.evt_cs_result.data.len);
-
-#ifdef DEBUG_MODE
-      initiator_statistics_file = fopen("initiator_stats.txt", "w");
-      app_assert(initiator_statistics_file != NULL, "Failed opening file");
-      clock_gettime(CLOCK_MONOTONIC, &bt_event_timestamp);
-      fprintf(initiator_statistics_file, "%li:%li %s\n", bt_event_timestamp.tv_sec, bt_event_timestamp.tv_nsec, "new result");
-      fclose(initiator_statistics_file);
-#endif
-
-      sl_status_t parse_status = abr_cs_parser_parse_event_result_data(&evt->data.evt_cs_result,
-                                                                       ABR_DEVICE_INITIATOR);
-      if (parse_status != SL_STATUS_OK) {
-        app_log_info("Incorrect cs_event_result initiator" APP_LOG_NL);
+      if (abr_process_initiator_cs_result(&evt->data.evt_cs_result)) {
+        abr_initiator_restart_cs_procedure();
       }
-
-      initiator_calculate_distance(evt->data.evt_cs_result.connection);
-
-      if (abr_cs_parser_procedure_restart_needed(evt->data.evt_cs_result.connection)) {
-        abr_initiator_perform_procedure();
-      }
-
       break;
+
     case sl_bt_evt_connection_closed_id:
       initiator_config->discovery_state = ABR_DISCOVERY_STATE_IDLE;
 
       uint16_t reason = evt->data.evt_connection_closed.reason;
-      app_log_info("Connection closed to the Reflector %02X" APP_LOG_NL, reason);
+      app_log_info("Connection closed to the Reflector reason='%02X'" APP_LOG_NL,
+                   reason);
       platform_display_state(ABR_STATE_DISCONNECTED);
       connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-#ifdef DEBUG_MODE
-      char log_message[100];
-      sprintf(log_message, "Connection closed to the Reflector %02X", reason);
-      add_debug_message(log_message);
-#endif
       initiator_scanning_start();
       break;
+
+    case sl_bt_evt_system_resource_exhausted_id:
+    {
+      uint8_t num_buffers_discarded = evt->data.evt_system_resource_exhausted.num_buffers_discarded;
+      uint8_t num_buffer_allocation_failures = evt->data.evt_system_resource_exhausted.num_buffer_allocation_failures;
+      uint8_t num_heap_allocation_failures = evt->data.evt_system_resource_exhausted.num_heap_allocation_failures;
+      app_log_error("BT stack buffers exhausted, data loss may have occurred! "
+                    "buf_discarded='%u' buf_alloc_fail='%u' heap_alloc_fail='%u'" APP_LOG_NL,
+                    num_buffers_discarded,
+                    num_buffer_allocation_failures,
+                    num_heap_allocation_failures);
+    }
+    break;
+
     default:
+      app_log_info("BLE event: 0x%02lx" APP_LOG_NL,
+                   (unsigned long)SL_BT_MSG_ID(evt->header));
       break;
+  }
+}
+
+void abr_set_antenna_offset()
+{
+  sl_status_t sc;
+  uint8_t user_data_to_target = USER_CMD_GET_ANTENNA_OFFSET_ID;
+  // Max 9 data: number of antenna + max 4 wired offset value + max 4 wireless offset value
+  int16_t response_data_offset[OFFSET_RESPONSE_MAX_LENGHT];
+  size_t response_data_len;
+  sc = sl_bt_user_message_to_target(sizeof(user_data_to_target),
+                                    &user_data_to_target,
+                                    sizeof(response_data_offset),
+                                    &response_data_len,
+                                    (uint8_t *)response_data_offset);
+  if (sc != SL_STATUS_OK) {
+    app_log_warning("User message to target failed: %u" APP_LOG_NL, sc);
+  } else {
+    app_log_info("Received antenna offset parameters." APP_LOG_NL);
+    // First data is the number of antennas
+    initiator_config->antenna_offset.offset_count = response_data_offset[0];
+    if (initiator_config->antenna_offset.offset_count > MAX_ANTENNA_NUMBER) {
+      app_log_error("Antenna count exceeds max antenna number: %u" APP_LOG_NL, MAX_ANTENNA_NUMBER);
+      return;
+    }
+    if (initiator_config->use_antenna_wired_offset) {
+      memcpy(initiator_config->antenna_offset.offset_value,
+             response_data_offset + 1,
+             sizeof(initiator_config->antenna_offset.offset_value));
+    } else {
+      memcpy(initiator_config->antenna_offset.offset_value,
+             response_data_offset + 1 + initiator_config->antenna_offset.offset_count,
+             sizeof(initiator_config->antenna_offset.offset_value));
+    }
+    app_log_info("Offset: %d" APP_LOG_NL, initiator_config->antenna_offset.offset_value[0]);
+    // Use the offset of the first antenna
+    int16_t ant_offset_cm_origin[1] = { (int16_t)initiator_config->antenna_offset.offset_value[0] };
+    sc = sl_bt_cs_set_antenna_configuration(sizeof(initiator_config->antenna_offset.offset_value[0]), (uint8_t *) ant_offset_cm_origin);
+    if (sc != SL_STATUS_OK) {
+      app_log_warning("Set antenna config failed: %u" APP_LOG_NL, sc);
+    }
+  }
+}
+
+bool abr_process_reflector_cs_result(sl_bt_evt_cs_result_t *evt_cs_result, uint8_t initiator_connection)
+{
+  sl_status_t sc = check_cs_result_event_flags(evt_cs_result);
+  if (sc != SL_STATUS_OK) {
+    app_log_info("Performing new procedure, current one aborted" APP_LOG_NL);
+    return true;
+  }
+
+  sl_status_t parse_status = abr_cs_parser_parse_event_result_data(evt_cs_result,
+                                                                   ABR_DEVICE_REFLECTOR);
+  if (parse_status != SL_STATUS_OK) {
+    app_log_info("Incorrect cs_event_result reflector" APP_LOG_NL);
+  }
+
+  bool restart_needed = initiator_calculate_distance(initiator_connection);
+
+  if (abr_cs_parser_procedure_restart_needed(initiator_connection)
+      || (initiator_config->max_procedure_count != 0
+          && evt_cs_result->subevent_done_status == 0
+          && restart_needed)) {
+    app_log_info("Performing new procedure" APP_LOG_NL);
+    return true;
+  }
+  return false;
+}
+
+bool abr_process_initiator_cs_result(sl_bt_evt_cs_result_t *evt_cs_result)
+{
+  app_log_info("Initiator CS packet received; len='%u'" APP_LOG_NL, evt_cs_result->data.len);
+
+  sl_status_t sc = check_cs_result_event_flags(evt_cs_result);
+  if (sc != SL_STATUS_OK) {
+    if (initiator_config->max_procedure_count != 0) {
+      app_log_info("Performing new procedure" APP_LOG_NL);
+      return true;
+    }
+    abr_cs_parser_cleanup_measurement(evt_cs_result->connection);
+    return false;
+  }
+
+  sl_status_t parse_status = abr_cs_parser_parse_event_result_data(evt_cs_result,
+                                                                   ABR_DEVICE_INITIATOR);
+  if (parse_status != SL_STATUS_OK) {
+    app_log_info("Incorrect cs_event_result initiator" APP_LOG_NL);
+  }
+
+  // Calculate distance
+  bool restart_needed = initiator_calculate_distance(evt_cs_result->connection);
+
+  // Perform a new ABR measurement procedure
+  // Currently, subevent_done_status = 0 when we iterated through all channel and = 1 if not.
+  if (abr_cs_parser_procedure_restart_needed(evt_cs_result->connection)
+      || (initiator_config->max_procedure_count != 0
+          && evt_cs_result->subevent_done_status == 0
+          && restart_needed)) {
+    app_log_info("Performing new procedure" APP_LOG_NL);
+    return true;
+  }
+  return false;
+}
+
+void abr_initiator_deinit(void)
+{
+  sl_status_t sc;
+
+  if (connection_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+    app_log_info("Closing connection" APP_LOG_NL);
+    sc = sl_bt_connection_close(connection_handle);
+    app_assert_status(sc);
   }
 }
 
@@ -261,10 +436,9 @@ void bt_on_event_initiator(sl_bt_msg_t *evt)
 static void abr_initiator_create_config(void)
 {
   sl_status_t sc;
+  char *mode_string;
 
   app_log_info("Creating ABR config..." APP_LOG_NL);
-
-  memset(channel_map.data, 0x55, 10);
 
   // Set role
   sc = sl_bt_cs_set_default_settings(connection_handle,
@@ -290,7 +464,7 @@ static void abr_initiator_create_config(void)
                               sl_bt_cs_role_initiator,
                               initiator_config->rtt_type,
                               initiator_config->phy,
-                              &channel_map,
+                              &initiator_config->channel_map,
                               initiator_config->channel_map_repetition,
                               initiator_config->channel_selection_type,
                               initiator_config->ch3c_shape,
@@ -298,39 +472,63 @@ static void abr_initiator_create_config(void)
                               initiator_config->companion_signal_enable);
   app_assert_status(sc);
 
-  sc = abr_cs_parser_configure(channel_map.data,
-                               sizeof(channel_map.data) / sizeof(channel_map.data[0]),
+  abr_rtl_library_init(&initiator_config->rtl_handle, initiator_config->mode);
+
+  sc = abr_cs_parser_configure(initiator_config->channel_map.data,
+                               initiator_config->channel_map_len,
                                initiator_config->mode0_step);
   app_assert_status(sc);
+
+  switch (initiator_config->mode) {
+    case ABR_INITIATOR_MODE_PBR:
+      mode_string = MODE_PBR_STR;
+      break;
+    case ABR_INITIATOR_MODE_RTT:
+      mode_string = MODE_RTT_STR;
+      break;
+    default:
+      mode_string = MODE_UNKNOWN_STR;
+      break;
+  }
+  app_log_info("Mode: %s"APP_LOG_NL, mode_string);
 }
 
 /******************************************************************************
  * ABR initiator trigger channel-sounding procedure
  *****************************************************************************/
-static void abr_initiator_perform_procedure(void)
+static void abr_initiator_start_cs_procedure(void)
 {
   sl_status_t sc;
 
-  app_log_debug("Starting CS measurement..." APP_LOG_NL);
-  sc = sl_bt_cs_set_procedure_parameters(connection_handle,
-                                         initiator_config->config_id,
-                                         initiator_config->max_procedure_duration,
-                                         initiator_config->min_interval,
-                                         initiator_config->max_interval,
-                                         initiator_config->max_procedure_count,
-                                         initiator_config->min_subevent_len,
-                                         initiator_config->max_subevent_len,
-                                         initiator_config->antenna_config,
-                                         initiator_config->phy,
-                                         initiator_config->tx_pwr_delta,
-                                         initiator_config->preferred_peer_antenna);
-  app_log_status_warning_f(sc, "Set procedure parameters failed" APP_LOG_NL);
+  app_log_info("-------------------------------------------------------" APP_LOG_NL);
+  #ifdef HOST_TOOLCHAIN
+  if (antenna_switching) {
+    ans_antenna_switching();
+  }
+  #endif // HOST_TOOLCHAIN
 
+  app_log_info("Starting CS procedure..." APP_LOG_NL);
   sc = abr_cs_parser_cleanup_measurement(connection_handle);
   app_assert_status(sc);
-  sc = sl_bt_cs_procedure_enable(connection_handle, sl_bt_cs_procedure_state_enabled, initiator_config->config_id);
-  app_log_status_warning_f(sc, "Procedure enable failed" APP_LOG_NL);
-  app_assert_status(sc);
+  sc = sl_bt_cs_procedure_enable(connection_handle,
+                                 sl_bt_cs_procedure_state_enabled,
+                                 initiator_config->config_id);
+  if (sc != SL_STATUS_OK) {
+    app_log_warning("Procedure enable failed" APP_LOG_NL);
+    procedure_enable_retry = true;
+  }
+}
+
+static void abr_initiator_restart_cs_procedure(void)
+{
+  // If the application controls the procedure start (max_procedure_count != 0) we need to restart it manually,
+  // otherwise the stack will take care of it
+  if (initiator_config->max_procedure_count != 0) {
+    abr_initiator_start_cs_procedure();
+  } else {
+    sl_status_t sc = abr_cs_parser_cleanup_measurement(connection_handle);
+    app_assert_status(sc);
+  }
 }
 
 /******************************************************************************
@@ -343,10 +541,18 @@ void abr_initiator_init(abr_result_cb_t result_cb,
 {
   sl_status_t sc;
   abr_cs_parser_configuration_t parser_config;
+
   abr_initiator_set_initial_state(initiator_config);
   platform_display_state(ABR_STATE_DISCONNECTED);
   initiator_config->discovery_state = ABR_DISCOVERY_STATE_IDLE;
   initiator_config->result_cb = result_cb;
+
+  // Validate channel map
+  uint32_t enabled_channels = get_num_tones_from_channel_map(initiator_config->channel_map.data,
+                                                             initiator_config->channel_map_len);
+  app_log_info("CS channel count: %lu" APP_LOG_NL, (unsigned long)enabled_channels);
+  app_assert(enabled_channels >= CS_CHANNEL_MAP_MIN_CHANNELS, "CS channel map does not have enough channels enabled");
+  app_assert(enabled_channels <= CS_CHANNEL_MAP_MAX_CHANNELS, "CS channel map has too many channels enabled");
 
   if (initiator_config->filter_address != NULL) {
     app_log_info("Filtering reflectors. Accepting %02x:%02x:%02x:%02x:%02x:%02x" APP_LOG_NL,
@@ -357,7 +563,6 @@ void abr_initiator_init(abr_result_cb_t result_cb,
                  initiator_config->filter_address[1],
                  initiator_config->filter_address[0]);
   }
-  rtl_library_init(&initiator_config->rtl_handle, initiator_config->mode);
   parser_config.measurement_mode = initiator_config->mode;
   parser_config.rssi_measurement_enabled = initiator_config->rssi_measurement_enabled;
   parser_config.rssi_tx_power = initiator_config->rssi_tx_power;
@@ -376,7 +581,7 @@ void abr_initiator_enable(void)
 
   // Convert power to mdBm
   int16_t max_power = ( ((int16_t)initiator_config->tx_power_requested_max_dbm) * 10);
-  int16_t min_power = ( ((int16_t)initiator_config->tx_power_requested_max_dbm) * 10);
+  int16_t min_power = ( ((int16_t)initiator_config->tx_power_requested_min_dbm) * 10);
   sc = sl_bt_system_set_tx_power(min_power,
                                  max_power,
                                  &tx_power_min_dbm,
@@ -392,10 +597,6 @@ void abr_initiator_enable(void)
     initiator_config->scan_phy = sl_bt_gap_phy_coding_1m_uncoded;
     app_log_warning("Scanning PHY is not supported and set to 1M PHY" APP_LOG_NL);
   }
-
-  // Start scanning
-  sc = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive, initiator_config->scan_interval, initiator_config->scan_window);
-  app_assert_status(sc);
 
   initiator_scanning_start();
 }
@@ -417,11 +618,13 @@ static void initiator_scanning_start(void)
   }
 
   // Start scanning
-  sc = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive, initiator_config->scan_interval, initiator_config->scan_window);
+  sc = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_passive,
+                                    initiator_config->scan_interval,
+                                    initiator_config->scan_window);
   app_assert_status(sc);
 
   // Start scanning - looking for peripheral devices
-  sc = sl_bt_scanner_start(initiator_config->scan_phy, scanner_discover_generic);
+  sc = sl_bt_scanner_start(initiator_config->scan_phy, sl_bt_scanner_discover_generic);
   app_assert_status(sc);
   initiator_config->discovery_state = ABR_DISCOVERY_STATE_SCAN;
 }
@@ -440,23 +643,27 @@ void initiator_scanning_stop(void)
 }
 
 /******************************************************************************
- * Cycle through advertisement contents and look for the matching device name
+ * Cycle through advertisement contents and look for the matching device name.
+ * Initiate a connection if the name matches.
  *****************************************************************************/
-static bool initiator_process_scan_response(sl_bt_evt_scanner_scan_report_t *response)
+static void initiator_process_scan_response(bd_addr *address,
+                                            uint8_t address_type,
+                                            const uint8array *adv_data)
 {
   int i = 0;
   bool reflector_match = false;
   uint8_t advertisement_length;
   uint8_t advertisement_type;
+  sl_status_t sc;
 
-  while (i < (response->data.len - 1)) {
-    advertisement_length = response->data.data[i];
-    advertisement_type = response->data.data[i + 1];
+  while (i < (adv_data->len - 1)) {
+    advertisement_length = adv_data->data[i];
+    advertisement_type = adv_data->data[i + 1];
 
     // Type 0x09 = Complete Local Name, 0x08 Shortened Name
     if (advertisement_type == INITIATOR_LOCAL_NAME) {
       // Check if device name is a mach to device_name
-      if (memcmp(response->data.data + i + 2, device_name, strlen(device_name)) == 0) {
+      if (memcmp(adv_data->data + i + 2, device_name, strlen(device_name)) == 0) {
         reflector_match = true;
         break;
       }
@@ -466,11 +673,35 @@ static bool initiator_process_scan_response(sl_bt_evt_scanner_scan_report_t *res
   }
 
   //  Filter reflector
-  if (initiator_config->filter_address != NULL && 0 != memcmp(initiator_config->filter_address, response->address.addr, ADR_LEN)) {
+  if (initiator_config->filter_address != NULL && 0 != memcmp(initiator_config->filter_address,
+                                                              address->addr,
+                                                              ADR_LEN)) {
     reflector_match = false;
   }
 
-  return (reflector_match);
+  if (reflector_match) {
+    // Stop scanning
+    sc = sl_bt_scanner_stop();
+    app_assert_status(sc);
+
+    initiator_config->discovery_state = ABR_DISCOVERY_STATE_CONN;
+
+    if (initiator_config->phy != sl_bt_gap_phy_coding_1m_uncoded) {
+      app_log_warning("Connection PHY is not supported and set to 1M PHY" APP_LOG_NL);
+      initiator_config->phy = sl_bt_gap_phy_coding_1m_uncoded;
+    }
+
+    if (connection_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
+      app_log_info("Opening connection to Reflector" APP_LOG_NL);
+      sc = sl_bt_connection_open(*address,
+                                 address_type,
+                                 initiator_config->phy,
+                                 &connection_handle);
+      app_assert_status(sc);
+    }
+  } else {
+    waiting_indication();
+  }
 }
 
 /******************************************************************************
@@ -480,10 +711,38 @@ static bool initiator_process_scan_response(sl_bt_evt_scanner_scan_report_t *res
 static void check_characteristic_uuid(sl_bt_msg_t *evt)
 {
   if (evt->data.evt_gatt_characteristic.uuid.len == UUID_LEN) {
-    if (memcmp(result_characteristic_uuid, evt->data.evt_gatt_characteristic.uuid.data, UUID_LEN) == 0) {
-      result_handle = evt->data.evt_gatt_characteristic.characteristic;
-      characteristic_found = true;
-      app_log_info("Found remote value characteristic" APP_LOG_NL);
+    if (memcmp(ras_control_point_characteristic_uuid,
+               evt->data.evt_gatt_characteristic.uuid.data,
+               UUID_LEN) == 0) {
+      ras_control_point_characteristic_handle =
+        evt->data.evt_gatt_characteristic.characteristic;
+      ras_control_point_characteristic_found = true;
+      app_log_info("Discovered RAS Control Point characteristic" APP_LOG_NL);
+    }
+
+    if (memcmp(ras_procedure_enable_data_characteristic_uuid,
+               evt->data.evt_gatt_characteristic.uuid.data,
+               UUID_LEN) == 0) {
+      ras_procedure_enable_data_characteristic_handle =
+        evt->data.evt_gatt_characteristic.characteristic;
+      ras_procedure_enable_data_characteristic_found = true;
+      app_log_info("Discovered RAS Procedure Enable Data characteristic" APP_LOG_NL);
+    }
+
+    if (memcmp(ras_se_ranging_data_characteristic_uuid,
+               evt->data.evt_gatt_characteristic.uuid.data,
+               UUID_LEN) == 0) {
+      ras_se_ranging_data_characteristic_handle =
+        evt->data.evt_gatt_characteristic.characteristic;
+      ras_se_ranging_data_characteristic_found = true;
+      app_log_info("Discovered RAS Subevent Ranging Data characteristic" APP_LOG_NL);
+    }
+
+    if (ras_control_point_characteristic_found
+        && ras_procedure_enable_data_characteristic_found
+        && ras_se_ranging_data_characteristic_found) {
+      ras_characteristics_discovered = true;
+      app_log_info("All RAS characteristics have been discovered successfully" APP_LOG_NL);
     }
   }
 }
@@ -498,39 +757,55 @@ static void process_procedure_complete_event(sl_bt_msg_t *evt)
 {
   uint16_t procedure_result =  evt->data.evt_gatt_procedure_completed.result;
   sl_status_t sc;
+  if (procedure_result != SL_STATUS_OK) {
+    action = act_none;
+    app_log_error("GATT procedure failed" APP_LOG_NL);
+    app_assert_status(procedure_result);
+    return;
+  }
 
   switch (action) {
     case act_discover_service:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        // Discover successful, start characteristic discovery.
-        sc = sl_bt_gatt_discover_characteristics(connection_handle, service_handle);
-        app_assert_status(sc);
-        action = act_discover_characteristics;
-        app_log_info("Service discovered" APP_LOG_NL);
-      }
+      app_log_info("Service discovery finished" APP_LOG_NL);
+      // Service discovery successful, start characteristic discovery
+      sc = sl_bt_gatt_discover_characteristics(connection_handle, ras_service_handle);
+      app_assert_status(sc);
+      action = act_discover_characteristics;
       break;
+
     case act_discover_characteristics:
-      action = act_none;
-      app_assert_status(procedure_result);
-      if (!procedure_result) {
-        if (characteristic_found) {
-          initiator_config->discovery_state = ABR_DISCOVERY_STATE_FINISHED;
-          sc = sl_bt_gatt_set_characteristic_notification(connection_handle, result_handle, sl_bt_gatt_indication);
-          app_assert_status(sc);
-          action = act_subscribe_result;
-          app_log_info("Characteristic discovered" APP_LOG_NL);
-        }
+      if (!ras_characteristics_discovered) {
+        return;
       }
+      initiator_config->discovery_state = ABR_DISCOVERY_STATE_FINISHED;
+      app_log_info("Characteristics discovery finished" APP_LOG_NL);
+      // Subscribe for notifications on the RAS Subevent Ranging Data
+      sc = sl_bt_gatt_set_characteristic_notification(connection_handle,
+                                                      ras_se_ranging_data_characteristic_handle,
+                                                      sl_bt_gatt_notification);
+      app_assert_status(sc);
+      action = act_subscribe_result_1;
       break;
-    case act_subscribe_result:
-      action = act_none;
-      app_assert_status(procedure_result);
+
+    case act_subscribe_result_1:
+      app_log_info("Subscribed to RAS Subevent Ranging Data notifications" APP_LOG_NL);
+      // Subscribe for indications on the RAS Control Point
+      sc = sl_bt_gatt_set_characteristic_notification(connection_handle,
+                                                      ras_control_point_characteristic_handle,
+                                                      sl_bt_gatt_indication);
+      app_assert_status(sc);
+      action = act_subscribe_result_2;
+      break;
+
+    case act_subscribe_result_2:
+      app_log_info("Subscribed to RAS Control Point indications" APP_LOG_NL);
       abr_initiator_create_config();
+      action = act_none;
       break;
+
     case act_none:
       break;
+
     default:
       break;
   }
@@ -540,103 +815,87 @@ static void process_procedure_complete_event(sl_bt_msg_t *evt)
  * Calculate distance between initiator and reflector using RTL library.
  *
  * @param[in] connection Connection handle from BLE stack.
+ * @return A boolean value if restart is needed.
  *****************************************************************************/
-static void initiator_calculate_distance(uint8_t connection)
+static bool initiator_calculate_distance(uint8_t connection)
 {
   sl_status_t sc;
   abr_rtl_result_t result;
-  enum sl_rtl_error_code rtl_err;
+  enum sl_rtl_error_code rtl_err = SL_RTL_ERROR_NOT_INITIALIZED;
+  enum sl_rtl_error_code rtl_process_err = SL_RTL_ERROR_NOT_INITIALIZED;
   abr_cs_parser_meas_data_t cs_meas_data;
   bool restart_procedure = false;
-  result.distance = 0.0;
-  result.rssi_distance = 0.0;
+  result.connection = connection;
+  result.distance = 0.0f;
+  result.likeliness = 0.0f;
+  result.rssi_distance = 0.0f;
+  result.cs_bit_error_rate = 0u;
   memset(&cs_meas_data, 0, sizeof(abr_cs_parser_meas_data_t));
 
-  switch (initiator_config->mode) {
-    case sl_bt_cs_mode_rtt:
-      sc = abr_cs_parser_get_measurement_data(connection,
-                                              initiator_config->mode,
-                                              &cs_meas_data);
-      if (sc == SL_STATUS_OK) {
+  sc = abr_cs_parser_get_measurement_data(connection,
+                                          initiator_config->mode,
+                                          &cs_meas_data);
+  if (sc == SL_STATUS_OK) {
+    switch (initiator_config->mode) {
+      case ABR_INITIATOR_MODE_RTT:
         // RTT measurement can be processed by RTL lib.
         rtl_err = sl_rtl_abr_process_rtt(&initiator_config->rtl_handle,
                                          &cs_meas_data.rtt_data);
-        if (rtl_err == SL_RTL_ERROR_SUCCESS) {
-          rtl_err = sl_rtl_abr_get_distance(&initiator_config->rtl_handle,
-                                            &result.distance);
-        } else {
-          app_log_warning("Failed to call RTL library!" APP_LOG_NL);
-        }
+        break;
 
-        if (rtl_err == SL_RTL_ERROR_SUCCESS) {
-          abr_cs_parser_store_distance(&result.distance);
-
-          rtl_err = sl_rtl_util_rssi2distance(initiator_config->rssi_tx_power,
-                                              cs_meas_data.initiator_calibration_rssi,
-                                              &result.rssi_distance);
-          if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-            app_log_error("Failed to calculate RSSI distance!" APP_LOG_NL);
-          }
-
-          if (initiator_config->result_cb != NULL) {
-            initiator_config->result_cb(&result, NULL);
-          }
-        }
-        sc = abr_cs_parser_cleanup_measurement(connection);
-        app_assert_status(sc);
-
-        if (initiator_config->max_procedure_count != 0) {
-          restart_procedure = true;
-        }
-      }
-      break;
-    case sl_bt_cs_mode_pbr:
-      sc = abr_cs_parser_get_measurement_data(connection,
-                                              initiator_config->mode,
-                                              &cs_meas_data);
-      if (sc == SL_STATUS_OK) {
-        // RTP measurement can be processed by RTL lib.
+      case ABR_INITIATOR_MODE_PBR:
+        // PBR measurement can be processed by RTL lib.
         rtl_err = sl_rtl_abr_process_rtp(&initiator_config->rtl_handle,
-                                         &cs_meas_data.rtp_data);
-        if (rtl_err == SL_RTL_ERROR_SUCCESS) {
-          rtl_err = sl_rtl_abr_get_distance(&initiator_config->rtl_handle,
-                                            &result.distance);
-        } else {
-          app_log_warning("Failed to call RTL library!" APP_LOG_NL);
-        }
+                                         &cs_meas_data.pbr_data);
+        break;
 
-        if (rtl_err == SL_RTL_ERROR_SUCCESS) {
-          abr_cs_parser_store_distance(&result.distance);
+      default:
+        break;
+    }
 
-          rtl_err = sl_rtl_util_rssi2distance(initiator_config->rssi_tx_power,
-                                              cs_meas_data.initiator_calibration_rssi,
-                                              &result.rssi_distance);
-          if (rtl_err != SL_RTL_ERROR_SUCCESS) {
-            app_log_error("Failed to calculate RSSI distance!" APP_LOG_NL);
-          }
+    // Store RTL process return code
+    rtl_process_err = rtl_err;
 
-          if (initiator_config->result_cb != NULL) {
-            initiator_config->result_cb(&result, NULL);
-          }
-        }
+    if (rtl_err == SL_RTL_ERROR_SUCCESS || rtl_err == SL_RTL_ERROR_ESTIMATION_IN_PROGRESS) {
+      rtl_err = sl_rtl_abr_get_distance(&initiator_config->rtl_handle,
+                                        &result.distance);
+    } else {
+      app_log_warning("Failed to call RTL library!" APP_LOG_NL);
+    }
 
-        sc = abr_cs_parser_cleanup_measurement(connection);
-        app_assert_status(sc);
+    if (rtl_err == SL_RTL_ERROR_SUCCESS || rtl_err == SL_RTL_ERROR_ESTIMATION_IN_PROGRESS) {
+      rtl_err = sl_rtl_util_rssi2distance(initiator_config->rssi_tx_power,
+                                          cs_meas_data.initiator_calibration_rssi,
+                                          &result.rssi_distance);
+      if (rtl_err != SL_RTL_ERROR_SUCCESS) {
+        app_log_error("Failed to calculate RSSI distance!" APP_LOG_NL);
+      }
 
-        if (initiator_config->max_procedure_count != 0) {
-          restart_procedure = true;
+      rtl_err = sl_rtl_abr_get_distance_likeliness(&initiator_config->rtl_handle,
+                                                   &result.likeliness);
+      if (rtl_err != SL_RTL_ERROR_SUCCESS) {
+        app_log_error("Failed to calculate distance likeliness!" APP_LOG_NL);
+      } else {
+        abr_cs_parser_store_distance(&result.distance, &result.likeliness, &result.rssi_distance);
+      }
+
+      result.cs_bit_error_rate = abr_cs_parser_get_cs_bit_error_rate();
+
+      if (initiator_config->result_cb != NULL) {
+        // Call result callback in case of successful process call
+        if (rtl_process_err == SL_RTL_ERROR_SUCCESS) {
+          initiator_config->result_cb(&result, NULL);
         }
       }
-      break;
-    case sl_bt_cs_mode_pbr_and_rtt:
-      break;
-    default:
-      break;
-  }
+    }
+    sc = abr_cs_parser_cleanup_measurement(connection);
+    app_assert_status(sc);
 
-  if (restart_procedure) {
-    abr_initiator_perform_procedure();
+    if (initiator_config->max_procedure_count != 0) {
+      restart_procedure = true;
+    }
   }
+  return restart_procedure;
 }
 
 /**************************************************************************//**
@@ -644,9 +903,16 @@ static void initiator_calculate_distance(uint8_t connection)
  * @param[in] handle RTL library item handle.
  * @param[in] abr_mode Specifying ABR method.
  *****************************************************************************/
-static void rtl_library_init(sl_rtl_abr_libitem *handle, uint8_t abr_mode)
+void abr_rtl_library_init(sl_rtl_abr_libitem *handle, uint8_t abr_mode)
 {
   enum sl_rtl_error_code rtl_err;
+
+  if (handle != NULL && *handle != NULL) {
+    rtl_err = sl_rtl_abr_deinit(handle);
+    app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
+               "Failed to deinitialize RTL library!" APP_LOG_NL);
+    *handle = NULL;
+  }
 
   app_log_info("Initialising RTL..." APP_LOG_NL);
   rtl_err = sl_rtl_abr_init(handle);
@@ -658,31 +924,104 @@ static void rtl_library_init(sl_rtl_abr_libitem *handle, uint8_t abr_mode)
              "RTL library set mode failed!" APP_LOG_NL);
 
   switch (abr_mode) {
-    case sl_bt_cs_mode_rtt:
+    case ABR_INITIATOR_MODE_RTT:
       rtl_err = sl_rtl_abr_set_cs_mode(handle, SL_RTL_ABR_CS_MODE_RTT);
       app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
                  "RTL library set method failed!" APP_LOG_NL);
       break;
-    case sl_bt_cs_mode_pbr:
+    case ABR_INITIATOR_MODE_PBR:
+    {
+      uint32_t num_tones = DEFAULT_NUM_TONES;
+      sl_rtl_abr_parameters cs_params = {
+        .num_tones = num_tones,
+        .tones_frequency_delta_hz = DEFAULT_FREQUENCY_DELTA
+      };
       rtl_err = sl_rtl_abr_set_cs_mode(handle, SL_RTL_ABR_CS_MODE_RTP);
       app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
                  "RTL library set method failed!" APP_LOG_NL);
-      break;
-    case sl_bt_cs_mode_pbr_and_rtt:
-      // This shall be changed in future.
-      // There's no combined mode support in RTL now
-      rtl_err = sl_rtl_abr_set_cs_mode(handle, SL_RTL_ABR_CS_MODE_RTP);
+      rtl_err = sl_rtl_abr_set_parameters(handle, &cs_params);
       app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
-                 "RTL library set method failed!" APP_LOG_NL);
-      break;
+                 "RTL library set parameters method failed!" APP_LOG_NL);
+    }
+    break;
     default:
+    {
+      uint32_t num_tones = DEFAULT_NUM_TONES;
+      sl_rtl_abr_parameters cs_params = {
+        .num_tones = num_tones,
+        .tones_frequency_delta_hz = DEFAULT_FREQUENCY_DELTA
+      };
       rtl_err = sl_rtl_abr_set_cs_mode(handle, SL_RTL_ABR_CS_MODE_RTP);
       app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
                  "RTL library set method failed!" APP_LOG_NL);
-      break;
+      rtl_err = sl_rtl_abr_set_parameters(handle, &cs_params);
+      app_assert(rtl_err == SL_RTL_ERROR_SUCCESS,
+                 "RTL library set parameters method failed!" APP_LOG_NL);
+    }
+    break;
   }
 
   rtl_err = sl_rtl_abr_create_estimator(handle);
   app_assert(rtl_err == SL_RTL_ERROR_SUCCESS, "Failed to create estimator!"
              APP_LOG_NL);
+}
+
+/******************************************************************************
+ * Get number of tones in channel map
+ *
+ * @param channel_map is the channel_map data
+ * @param channel_map_len is the channel_map data length
+ *****************************************************************************/
+static uint32_t get_num_tones_from_channel_map(const uint8_t *channel_map, const uint32_t channel_map_len)
+{
+  uint8_t current_channel_map;
+  uint32_t num_hadm_channels = 0;
+
+  if (channel_map != NULL) {
+    for (uint32_t channel_map_index = 0;
+         channel_map_index < channel_map_len;
+         channel_map_index++) {
+      current_channel_map = channel_map[channel_map_index];
+      for (uint8_t current_bit_index = 0;
+           current_bit_index < sizeof(uint8_t) * BYTE_LEN;
+           current_bit_index++) {
+        if (current_channel_map & (1 << current_bit_index)) {
+          num_hadm_channels++;
+        }
+      }
+    }
+  }
+  return num_hadm_channels;
+}
+
+/**************************************************************************//**
+ * Check CS result event flags.
+ * @param[in] cs_res Channel sounding result event pointer.
+ *
+ * @return SL_STATUS_OK: No actions needed.
+ * @return SL_STATUS_ABORT: Procedure is aborted and new procedure should be started.
+ * @return SL_STATUS_NULL_POINTER: Invalid null pointer received as argument.
+ *****************************************************************************/
+static sl_status_t check_cs_result_event_flags(sl_bt_evt_cs_result_t *cs_res)
+{
+  sl_status_t ret = SL_STATUS_NULL_POINTER;
+
+  if (cs_res != NULL) {
+    if ((cs_res->procedure_done_status & PROCEDURE_DONE_STATUS_MASK) == CS_ALL_SUBEVENTS_ABORTED) {
+      app_log_info("Procedure aborted!" APP_LOG_NL);
+      ret = SL_STATUS_ABORT;
+    } else {
+      ret = SL_STATUS_OK;
+    }
+  }
+  return ret;
+}
+
+void abr_initiator_step(void)
+{
+  // Try to initialize the CS procedure again if it has failed
+  if (procedure_enable_retry) {
+    procedure_enable_retry = false;
+    abr_initiator_start_cs_procedure();
+  }
 }

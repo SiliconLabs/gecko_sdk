@@ -47,7 +47,7 @@
 
 // <o SL_DEVICE_INIT_LFXO_PRECISION> LFXO precision in PPM <0-65535>
 // <i> Default: 50
-#define SL_DEVICE_INIT_LFXO_PRECISION      100
+#define SL_DEVICE_INIT_LFXO_PRECISION      50
 
 // <o SL_DEVICE_INIT_LFXO_TIMEOUT> Startup Timeout Delay
 // <i>

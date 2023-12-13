@@ -67,7 +67,7 @@ uint8_t halGetResetInfo(void);
 
 /** @brief Calls ::halGetResetInfo() and supplies a string describing it.
  *
- * @appusage Useful for diagnostic printing of text just after program
+ * Useful for diagnostic printing of text just after program
  * initialization.
  *
  * @return A pointer to a program space string.

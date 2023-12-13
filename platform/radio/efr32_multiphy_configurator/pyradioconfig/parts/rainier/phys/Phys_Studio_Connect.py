@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.phys.Phys_Studio_Connect import phys_studio_connect_viper
+from pyradioconfig.parts.bobcat.phys.Phys_Studio_Connect import PHYS_connect_Bobcat
 
 
-class PhysStudioConnectRainier(phys_studio_connect_viper):
+class PhysStudioConnectRainier(PHYS_connect_Bobcat):
     pass

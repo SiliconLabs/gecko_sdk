@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_COAP_COLLECTOR_H__
 #define __SL_WISUN_COAP_COLLECTOR_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -62,10 +66,13 @@ void sl_wisun_coap_collector_init(void);
 /**************************************************************************//**
  * @brief Prepare CoAP request.
  * @details Should be used in thread init part
+ * @param[in] req_type Request type
+ * @param[out] req Pointer to the request
  * @return SL_STATUS_OK Success
  * @return SL_STATUS_FAIL Failure
  *****************************************************************************/
-sl_status_t sl_wisun_coap_collector_prepare_meas_request(void);
+sl_status_t sl_wisun_coap_collector_prepare_request(const sl_wisun_request_type_t req_type,
+                                                    sl_wisun_meter_request_t * const req);
 
 /**************************************************************************//**
 * @brief Prepare LED Toggle request.
@@ -83,6 +90,10 @@ sl_status_t sl_wisun_coap_collector_prepare_led_toggle_request(const uint8_t led
 * @return SL_STATUS_OK Success
 * @return SL_STATUS_FAIL Failure
 ******************************************************************************/
-sl_status_t sl_wisun_coap_collector_send_led_toggle_request(const wisun_addr_t * const meter_addr);
+sl_status_t sl_wisun_coap_collector_send_led_toggle_request(const sockaddr_in6_t *meter_addr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -96,16 +96,26 @@ EmberStatus emApiTempCalibration(void);
 
 EmberCalType emApiGetCalType(void);
 
-uint8_t emApiGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
-                                     EmberMacAddressMode dstAddressMode,
-                                     bool interpan,
-                                     bool secured);
+uint16_t emApiGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
+                                      EmberMacAddressMode dstAddressMode,
+                                      bool interpan,
+                                      bool secured);
 
 EmberStatus emApiSetIndirectQueueTimeout(uint32_t timeoutMs);
+
+uint32_t emApiGetInt32uMillisecondTick(void);
 
 EmberStatus emApiGetVersionInfo(uint16_t* gsdkVersion,
                                 uint16_t* connectStackVersion,
                                 uint32_t* bootloaderVersion);
+
+EmberStatus emApiOfdmSetMcs(uint8_t mcs);
+
+EmberStatus emApiOfdmGetMcs(uint8_t* mcs);
+
+EmberStatus emApiNcpSetLongMessagesUse(bool useLongMessages);
+
+bool emApiUsingLongMessages(void);
 
 uint32_t emApiStackIdleTimeMs(uint16_t * currentStackTasks);
 

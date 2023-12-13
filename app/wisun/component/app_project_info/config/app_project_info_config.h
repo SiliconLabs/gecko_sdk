@@ -62,6 +62,27 @@
 // <i> Default value: 0
 #define APP_PROJECT_INFO_MBEDTLS_VERSION_ENABLED        0U
 
+// <q APP_PROJECT_INFO_APP_VERSION_ENABLED> Enable application version
+// <i> Default value: 0
+#define APP_PROJECT_INFO_APP_VERSION_ENABLED            1U
+
+// </h>
+
+// <h> Application version
+#if APP_PROJECT_INFO_APP_VERSION_ENABLED
+
+// <o APP_PROJECT_INFO_APP_VERSION_MAJOR> App version major number
+// <i> Default: 0
+#define APP_PROJECT_INFO_APP_VERSION_MAJOR              0U
+
+// <o APP_PROJECT_INFO_APP_VERSION_MINOR> App version minor number
+// <i> Default: 0
+#define APP_PROJECT_INFO_APP_VERSION_MINOR              0U
+
+// <o APP_PROJECT_INFO_APP_VERSION_PATCH> App version patch number
+// <i> Default: 0
+#define APP_PROJECT_INFO_APP_VERSION_PATCH              0U
+#endif
 // </h>
 
 // <<< end of configuration section >>>

@@ -197,19 +197,17 @@ sl_status_t sl_icm20689_spi_init(void)
  ******************************************************************************/
 float sl_icm20689_set_sample_rate(float sample_rate)
 {
-#define INTERNAL_SAMPLE_RATE (1000.0)
+#define INTERNAL_SAMPLE_RATE (1000.0f)
 
   uint8_t div;
 
   /* Calculate the sample rate divider */
-  sample_rate = (INTERNAL_SAMPLE_RATE / sample_rate) - 1.0;
-
-  /* Check if it fits in the divider registers */
-  if ( sample_rate > 255.0 ) {
+  sample_rate = ((INTERNAL_SAMPLE_RATE / sample_rate) - 1.0f);
+  if ( sample_rate > 255.0f ) {
     sample_rate = 255.0;
   }
 
-  if ( sample_rate < 0.0 ) {
+  if ( sample_rate < 0.0f ) {
     sample_rate = 0.0;
   }
 
@@ -647,9 +645,9 @@ sl_status_t sl_icm20689_calibrate_accel_and_gyro(float *accel_bias_scaled, float
 
   /* Acceleormeter: add or remove (depending on the orientation of the chip) 1G (gravity) from the Z axis value */
   if ( accel_bias[2] > 0L ) {
-    accel_bias[2] -= (int32_t) (1.0 / accel_res);
+    accel_bias[2] -= (int32_t) (1.0f / accel_res);
   } else {
-    accel_bias[2] += (int32_t) (1.0 / accel_res);
+    accel_bias[2] += (int32_t) (1.0f / accel_res);
   }
 
   /* Convert the values to degrees per sec for displaying */
@@ -896,7 +894,7 @@ sl_status_t sl_icm20689_read_temperature_data(float *temperature)
   raw_temp = (int16_t) ( (data[0] << 8) + data[1]);
 
   /* Calculate the Celsius value from the raw reading */
-  *temperature = ( (float) raw_temp / 333.87) + 21.0;
+  *temperature = ( raw_temp / 333.87f) + 21.0f;
 
   return SL_STATUS_OK;
 }

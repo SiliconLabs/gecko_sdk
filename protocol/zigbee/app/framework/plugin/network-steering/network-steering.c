@@ -48,6 +48,10 @@
 #include "app/framework/plugin/scan-dispatch/scan-dispatch.h"
 #include "app/framework/plugin/update-tc-link-key/update-tc-link-key.h"
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+extern EmberEventControl sl_af_test_harness_z3_opent_network_event_control;
+#endif
+
 #ifdef EMBER_TEST
   #define HIDDEN
   #define EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER 3
@@ -183,7 +187,6 @@ static EmberStatus tryNextMethod(void);
 static EmberStatus setupSecurity(void);
 static uint32_t jitterTimeDelayMs();
 HIDDEN void scanResultsHandler(EmberAfPluginScanDispatchScanResults *results);
-bool sli_zigbee_af_is_well_known_key(sl_zb_sec_man_key_t key);
 
 bool emberStackIsUp(void);
 
@@ -332,13 +335,14 @@ void sli_zigbee_af_network_steering_stack_status_callback(EmberStatus status)
   if (sli_zigbee_af_network_steering_state
       == EMBER_AF_PLUGIN_NETWORK_STEERING_STATE_NONE) {
     sl_zb_sec_man_context_t context;
-    sl_zb_sec_man_key_t plaintext_key;
     sl_zb_sec_man_init_context(&context);
 
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
 
-    sl_status_t keystatus = sl_zb_sec_man_export_key(&context, &plaintext_key);
-    if (keystatus == SL_STATUS_OK && sli_zigbee_af_is_well_known_key(plaintext_key) && status == EMBER_NETWORK_UP) {
+    sl_status_t keystatus = sl_zb_sec_man_check_key_context(&context);
+    if (keystatus == SL_STATUS_OK
+        && sl_zb_sec_man_compare_key_to_value(&context, (sl_zb_sec_man_key_t*)&defaultLinkKey)
+        && status == EMBER_NETWORK_UP) {
       emberAfPluginUpdateTcLinkKeySetDelay(jitterTimeDelayMs());
     } else if (status == EMBER_NETWORK_DOWN) {
       emberAfPluginUpdateTcLinkKeySetInactive();
@@ -357,17 +361,6 @@ void sli_zigbee_af_network_steering_stack_status_callback(EmberStatus status)
     tryToJoinNetwork();
   } else {
   }
-}
-
-// Returns true if the key value is equal to defaultLinkKey
-bool sli_zigbee_af_is_well_known_key(sl_zb_sec_man_key_t key)
-{
-  for (uint8_t i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
-    if (key.key[i] != defaultLinkKey.contents[i]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 static void scanCompleteCallback(uint8_t channel, sl_status_t status)
@@ -524,9 +517,13 @@ static EmberStatus setupSecurity(void)
                    | EMBER_HAVE_PRECONFIGURED_KEY
                    | EMBER_REQUIRE_ENCRYPTED_KEY
                    | EMBER_NO_FRAME_COUNTER_RESET
+#ifndef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+                   // When running with a Test Harness, the Test Harness will write the install-code
+                   // derived link key directly to the Transient Key Table.
                    | (sli_zigbee_af_network_steering_state_uses_install_codes()
                       ? EMBER_GET_PRECONFIGURED_KEY_FROM_INSTALL_CODE
                       : 0)
+#endif
                    | (sli_zigbee_af_network_steering_state_uses_distributed_key()
                       ? EMBER_DISTRIBUTED_TRUST_CENTER_MODE
                       : 0)

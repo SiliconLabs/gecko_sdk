@@ -180,9 +180,12 @@ void app_process_action(RAIL_Handle_t pointer)
         graphics_draw_rx_screen();
 #endif
 #if defined(SL_CATALOG_RANGE_TEST_DMP_COMPONENT_PRESENT)
-        advertise_received_data(range_test_measurement.rssi_latch_value,
-                                range_test_measurement.packets_received_counter,
-                                range_test_measurement.packets_received_correctly);
+        int8_t rssi_latch_value_buff = range_test_measurement.rssi_latch_value;
+        uint16_t packets_received_counter_buff = range_test_measurement.packets_received_counter;
+        uint16_t packets_received_correctly_buff = range_test_measurement.packets_received_correctly;
+        advertise_received_data(rssi_latch_value_buff,
+                                packets_received_counter_buff,
+                                packets_received_correctly_buff);
 #endif
       }
 

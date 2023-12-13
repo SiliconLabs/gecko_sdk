@@ -3,7 +3,6 @@ label: CBKE DSA Sign
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
 description: This component is a part of the CBKE library that manages DSA Signing using the ECDSA algorithm.  It is not necessary for Zigbee OTA cluster and it is optional for Smart Energy 1.1 and later specs.
 
 provides:
@@ -13,11 +12,11 @@ requires:
   - name: zigbee_cbke_dsa_sign_implementation
   - name: zigbee_cbke_dsa_sign_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_cbke_163k1
 
 recommends:
-  - id: zigbee_cbke_dsa_sign_source
+  - id: zigbee_cbke_dsa_sign_library_internal
 
 template_contribution:
   - name: component_catalog

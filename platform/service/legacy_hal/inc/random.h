@@ -48,6 +48,8 @@ void halStackSeedRandom(uint32_t seed);
  * Complicated implementations may improve the MAC's
  * ability to avoid collisions in large networks, but it is \b critical to
  * implement this function to return quickly.
+ *
+ * @return random number.
  */
 uint16_t halCommonGetRandom(void);
 

@@ -129,6 +129,14 @@ void halEnablePrs(uint8_t channel,
  */
 void halDisablePrs(uint8_t channel);
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/**
+ * HAL API to check if PRS channel is free.
+ * @param channel The PRS channel to check.
+ */
+bool halIsPrsChannelFree(uint8_t channel);
+#endif //_SILICON_LABS_32B_SERIES_2
+
 void halCommonMemMove(void *dest, const void *src, uint16_t bytes);
 
 #define MEMCOPY(d, s, l) halCommonMemMove(d, s, l)

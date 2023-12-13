@@ -1,7 +1,7 @@
 project_name: psa_crypto_mac
 package: platform
 quality: production
-label: Platform - PSA Crypto MAC
+label: Platform Security - SoC PSA Crypto MAC
 description: >
   This example project demonstrates the Message Authentication Code (MAC) API.
 category: Example|Platform

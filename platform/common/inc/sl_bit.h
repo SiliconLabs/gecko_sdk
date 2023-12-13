@@ -38,6 +38,23 @@
  ******************************************************************************/
 
 /****************************************************************************************************//**
+ *                                               SL_DEF_BIT()
+ *
+ * @brief    Create bit mask with single, specified bit set.
+ *
+ * @param    bit     Bit number of bit to set.
+ *
+ * @return   Bit mask with single, specified bit set.
+ *
+ * @note     (1) 'bit' SHOULD be a non-negative integer.
+ *
+ * @note     (2) 'bit' values that overflow the target CPU &/or compiler environment (e.g. negative
+ *               or greater-than-CPU-data-size values) MAY generate compiler warnings &/or errors.
+ *******************************************************************************************************/
+
+#define  SL_DEF_BIT(bit)            (1u << (bit))
+
+/****************************************************************************************************//**
  *                                               SL_SET_BIT()
  *
  * @brief    Set specified bit(s) in a value.

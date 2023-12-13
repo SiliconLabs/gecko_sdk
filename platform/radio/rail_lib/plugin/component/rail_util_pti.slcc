@@ -13,8 +13,14 @@ documentation:
   docset: rail
   document: rail-api/rail-util-pti
 config_file:
+  - path: platform/radio/rail_lib/plugin/rail_util_pti/config/efr32xg25/sl_rail_util_pti_config.h
+    file_id: rail_util_pti_config
+    condition:
+      - device_sdid_220
   - path: platform/radio/rail_lib/plugin/rail_util_pti/config/sl_rail_util_pti_config.h
     file_id: rail_util_pti_config
+    unless:
+      - device_sdid_220
 include:
   - path: platform/radio/rail_lib/plugin/rail_util_pti
     file_list:

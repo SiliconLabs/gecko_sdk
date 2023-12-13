@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_frame import calc_frame_viper
+from pyradioconfig.parts.bobcat.calculators.calc_frame import Calc_Frame_Bobcat
 
 
-class CalcFrameRainier(calc_frame_viper):
+class CalcFrameRainier(Calc_Frame_Bobcat):
     pass

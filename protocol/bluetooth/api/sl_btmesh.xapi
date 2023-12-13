@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="5" device_name="btmesh" version="6.2.0">
+<api device_id="5" device_name="btmesh" version="7.0.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -116,19 +116,6 @@
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
                 <param datatype="uint8" name="mode" type="uint8"/>
-            </returns>
-        </command>
-        <command index="9" name="get_statistics" >
-            <params/>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint8array" name="statistics" type="uint8array"/>
-            </returns>
-        </command>
-        <command index="10" name="clear_statistics" >
-            <params/>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
         <command index="11" name="set_net_relay_delay" >
@@ -2268,26 +2255,6 @@
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="24" name="set_local_config" >
-            <params>
-                <param datatype="uint16" name="id" type="uint16"/>
-                <param datatype="uint16" name="netkey_index" type="uint16"/>
-                <param datatype="uint8array" name="value" type="uint8array"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="25" name="get_local_config" >
-            <params>
-                <param datatype="uint16" name="id" type="uint16"/>
-                <param datatype="uint16" name="netkey_index" type="uint16"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint8array" name="data" type="uint8array"/>
             </returns>
         </command>
         <command index="26" name="add_local_key" >
@@ -7408,6 +7375,60 @@
         <event index="2" name="network_pdu_changed">
             <params>
                 <param datatype="uint16" name="max_size" type="uint16"/>
+            </params>
+        </event>
+    </class>
+    <class index="108" name="diagnostic">
+        <command index="0" name="init" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="1" name="deinit" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="enable_relay" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="disable_relay" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="get_relay" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="relay_counter" type="uint32"/>
+            </returns>
+        </command>
+        <command index="5" name="get_statistics" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8array" name="statistics" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="6" name="clear_statistics" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <event index="0" name="relay">
+            <params>
+                <param datatype="uint16" name="destination_address" type="uint16"/>
+                <param datatype="uint16" name="source_address" type="uint16"/>
+                <param datatype="int8" name="rssi" type="int8"/>
+                <param datatype="uint8" name="ttl" type="uint8"/>
             </params>
         </event>
     </class>

@@ -1,0 +1,16 @@
+id: compute_util
+label: Compute utilities
+package: platform
+description: >
+  This component provides compute utilities.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/util
+source:
+  - path: src/sl_compute_util.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_compute_util.h
+provides:
+  - name: compute_util

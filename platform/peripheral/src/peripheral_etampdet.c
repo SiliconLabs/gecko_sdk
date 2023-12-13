@@ -44,16 +44,16 @@
 /***************************************************************************//**
  * Initialize ETAMPDET.
  ******************************************************************************/
-void sl_etampdet_init(const sl_etampdet_config_t *config)
+void sl_hal_etampdet_init(const sl_hal_etampdet_config_t *config)
 {
   // Wait for synchronization to finish
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   if (ETAMPDET->EN & ETAMPDET_EN_EN) {
     // Disable ETAMDET before initialization
-    sl_etampdet_disable();
+    sl_hal_etampdet_disable();
     // Wait for disablement to finish
-    sl_etampdet_wait_ready();
+    sl_hal_etampdet_wait_ready();
   }
 
   // Set upper and lower clock prescaler
@@ -64,17 +64,17 @@ void sl_etampdet_init(const sl_etampdet_config_t *config)
 /***************************************************************************//**
  * Initialize ETAMPDET channel.
  ******************************************************************************/
-void sl_etampdet_init_channel(const sl_etampdet_config_channel_t *config_channel)
+void sl_hal_etampdet_init_channel(const sl_hal_etampdet_config_channel_t *config_channel)
 {
   uint32_t temp = 0;
   // Wait for synchronization to finish
-  sl_etampdet_wait_sync();
+  sl_hal_etampdet_wait_sync();
 
   if (ETAMPDET->EN & ETAMPDET_EN_EN) {
     // Disable ETAMDET before initialization
-    sl_etampdet_disable();
+    sl_hal_etampdet_disable();
     // Wait for disablement to finish
-    sl_etampdet_wait_ready();
+    sl_hal_etampdet_wait_ready();
   }
 
   // Set enable channel value

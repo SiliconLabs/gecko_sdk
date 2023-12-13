@@ -1387,4 +1387,4 @@ typedef struct {
 /** @} End of group EFM32PG28_MVP */
 /** @} End of group Parts */
 
-#endif /* EFM32PG28_MVP_H */
+#endif // EFM32PG28_MVP_H

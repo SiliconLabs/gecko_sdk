@@ -1,0 +1,34 @@
+id: "ncp_btmesh_ae_server"
+label: "NCP Advertisement Extension Server"
+package: "Btmesh"
+description: >
+  NCP Advertisement Extension Server component enables the Silabs Configuration Server vendor model for the node to
+  allow data transfer over Advertisement Extension. This is a proprietary feature which breaks compliance with AE in
+  BT Mesh 1.1 specification.
+  Mesh data over Advertisement Extension can be used in message-heavy applications (e.g. Device Firmware Update) to
+  speed up data transfer between nodes. All nodes must have the Silabs Configuration Server vendor model enabled, and a
+  Silabs Configuration Client (enabled by e.g. the Advertisement Extension Client component) must configure the clients
+  to use Advertisement Extension.
+  This component is prepared for integration into NCP applications.
+
+  This is a No-Code component.
+category: "Bluetooth Mesh|Models|Proprietary"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_ae_server"
+tag:
+  - No-Code
+
+config_file:
+  - path: btmesh_ae_server.dcd
+    directory: btmeshconf
+provides:
+  - name: "ncp_btmesh_ae_server"
+requires:
+  - name: "btmesh_stack_advertiser_extended"
+  - name: "btmesh_stack_advertiser_legacy"
+  - name: "btmesh_stack_scanner_extended"
+  - name: "btmesh_stack_scanner_legacy"
+  - name: "btmesh_stack_silabs_config_server"
+
+validation_helper:
+  - path: "../../script/validation/ncp_soc_compatibility.lua"

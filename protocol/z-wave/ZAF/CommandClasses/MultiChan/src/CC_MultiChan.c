@@ -16,10 +16,13 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
-extern node_id_t g_nodeID;
-
 /// Header size of ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME, before encapFrame field
 #define CC_MULTICHAN_ENCAP_HEADER_SIZE   4
+
+static inline bool CC_MultiChannel_IsLongRange()
+{
+  return (ZAF_GetNodeID() >= LOWEST_LONG_RANGE_NODE_ID);
+}
 
 static void CmdClassMultiChannelEncapsulateCmd(
     cc_handler_input_t * input,
@@ -94,7 +97,7 @@ static received_frame_status_t CC_MultiChannel_handler(
          * - Security 0 CC is not applicable in Long Range networks
          */
         const uint8_t* cc_list = pCmdClassList->cc_list;
-        const bool curr_region_is_lr = (LOWEST_LONG_RANGE_NODE_ID <= g_nodeID);
+        const bool curr_region_is_lr = CC_MultiChannel_IsLongRange();
 
         for (uint8_t i = 0; i < pCmdClassList->list_size; ++i) {
           if (
@@ -267,11 +270,11 @@ static void CmdClassMultiChannelEncapsulateCmd(
     if (true == ZAF_CC_MultiChannel_IsCCSupported(input->rx_options, &encapsulatedFrame))
     {
       /* Command class supported */
-      cc_handler_input_t input_encap;
-      memset((uint8_t *)&input_encap, 0, sizeof(cc_handler_input_t));
-      input_encap.rx_options = input->rx_options;
-      input_encap.frame = &encapsulatedFrame;
-      input_encap.length = input->length - CC_MULTICHAN_ENCAP_HEADER_SIZE;
+      cc_handler_input_t input_encap = {
+        .rx_options = input->rx_options,
+        .frame = &encapsulatedFrame,
+        .length = input->length - CC_MULTICHAN_ENCAP_HEADER_SIZE
+      };
 
       // No encapsulation, use original output frame.
       // Encapsulation happens later using CmdClassMultiChannelEncapsulate()

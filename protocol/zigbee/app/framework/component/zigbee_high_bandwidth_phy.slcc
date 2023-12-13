@@ -1,0 +1,63 @@
+id: zigbee_high_bandwidth_phy
+label: zigbee_high_bandwidth_phy
+package: Zigbee
+category: Zigbee
+quality: experimental
+description: Provides transmit API and receive callback for high-bandwidth phy and limited CLI to aid testing of the rail_util_ieee802154_high_speed feature
+
+requires:
+  - name: rail_util_ieee802154_high_speed_phy
+provides:
+  - name: zigbee_high_bandwidth_phy
+
+include:
+  - path: protocol/zigbee/app/framework/plugin-soc/high_bandwidth_phy
+    file_list:
+      - path: high_bandwidth_phy.h
+
+source:
+  - path: protocol/zigbee/app/framework/plugin-soc/high_bandwidth_phy/high_bandwidth_phy.c
+
+template_contribution:
+  - name: component_catalog
+    value: high_bandwidth_phy
+
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_high_bw_phy_init
+
+  - name: zigbee_af_callback
+    value:
+      callback_type: init_done
+      function_name: sli_high_bw_phy_init
+
+# CLI Commands < high_bw_phy  >
+  - name: cli_group
+    value:
+      name: high_bw_phy
+      help: CLI Commands to test high-bandwidth phy transmit
+
+  - name: cli_command
+    value:
+      group: high_bw_phy
+      name: transmit
+      handler: sl_high_bw_phy_tx_command
+      argument:
+        - type: uint16
+          help: length
+      help: Transmit payload of specified length over high bandwidth phy (data is 1,2,3... len)
+
+  - name: cli_command
+    value:
+      group: high_bw_phy
+      name: clr_stats
+      handler: sl_high_bw_phy_clr_stats_command
+      help: Clear high bandwidth phy statistics
+
+  - name: cli_command
+    value:
+      group: high_bw_phy
+      name: print_stats
+      handler: sl_high_bw_phy_print_stats_command
+      help: Prints high bandwidth phy statistics

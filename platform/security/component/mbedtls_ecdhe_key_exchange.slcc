@@ -25,13 +25,6 @@ requires:
   - name: psa_crypto_rsa_sign_legacy
     condition: [psa_crypto_rsa]
 
-conflicts:
-  # This component will not become compatible with the SiliconLabs TrustZone Secure
-  # Key Library until the upper layer TLS code fully supports use of PSA APIs. For
-  # more details, please refer to the documentation of MBEDTLS_USE_PSA_CRYPTO in
-  # mbedtls/include/mbedtls/mbedtls_config.h.
-  - name: tz_secure_key_library_ns
-
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED

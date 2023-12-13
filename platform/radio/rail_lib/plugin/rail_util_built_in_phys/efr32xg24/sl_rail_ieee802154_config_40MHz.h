@@ -2,8 +2,8 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2304.2.1
- *   RAIL Adapter Version: 2.4.32
+ *   Radio Configurator Version: 2304.4.2
+ *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License
@@ -39,6 +39,7 @@
 #include "rail_types.h"
 
 extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_40MHz_modemConfigBase[];
+extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_fast_switch_40MHz_modemConfigBase[];
 
 extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_antdiv_40MHz_modemConfig[];
@@ -49,6 +50,11 @@ extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_fem_40MHz_modemConfig[];
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_40MHZ_PROFILE_BASE
 extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_40MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_40MHz_channels[];
+
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_FAST_SWITCH_40MHZ_PHY_IEEE802154_2P4GHZ_ANTDIV_FASTSWITCH
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_FAST_SWITCH_40MHZ_PROFILE_BASE
+extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_fast_switch_40MHz_channelConfig;
+extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_fast_switch_40MHz_channels[];
 
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_40MHZ_PHY_IEEE802154_2P4GHZ_DIVERSITY_PROD
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_40MHZ_PROFILE_BASE

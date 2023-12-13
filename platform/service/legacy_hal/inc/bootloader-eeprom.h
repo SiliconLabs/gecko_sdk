@@ -117,8 +117,8 @@ typedef struct {
 /** @brief The current version of the ::HalEepromInformationType data structure
  */
 #define EEPROM_INFO_VERSION             (0x0202)
-#define EEPROM_INFO_MAJOR_VERSION       (0x0200)
-#define EEPROM_INFO_MAJOR_VERSION_MASK  (0xFF00)
+#define EEPROM_INFO_MAJOR_VERSION       (0x0200)   ///< eeprom info major version
+#define EEPROM_INFO_MAJOR_VERSION_MASK  (0xFF00)   ///< eeprom info major version mask
 // ***  Eeprom info version history: ***
 // 0x0202 - Changed partEraseMs to be called partEraseTime and added an
 //          EEPROM_CAPABILITIES field to indicate if partEraseTime is in
@@ -127,7 +127,7 @@ typedef struct {
 //          word in the EEPROM. Writes should always be aligned to the word
 //          size and have a length that is a multiple of the word size.
 // 0x0101 - Initial version
-#define EEPROM_INFO_MIN_VERSION_WITH_WORD_SIZE_SUPPORT 0x0102U
+#define EEPROM_INFO_MIN_VERSION_WITH_WORD_SIZE_SUPPORT 0x0102U                                       ///< eeprom info min version with word size support
 
 /** @brief Eeprom capabilites mask that indicates the erase API is supported
  */
@@ -165,14 +165,16 @@ typedef struct {
  */
 const HalEepromInformationType *halEepromInfo(void);
 
-// This structure holds information about where we left off when last accessing
-// the eeprom.
+/**
+ * @brief This structure holds information about where we left off when last
+ * accessing the eeprom.
+ */
 typedef struct {
-  uint32_t address;
-  uint16_t pages;
-  uint16_t pageBufFinger;
-  uint16_t pageBufLen;
-  uint8_t pageBuf[EEPROM_PAGE_SIZE];
+  uint32_t address;                                ///< address
+  uint16_t pages;                                  ///< pages
+  uint16_t pageBufFinger;                          ///< page Buf Finger
+  uint16_t pageBufLen;                             ///< page Buf Len
+  uint8_t pageBuf[EEPROM_PAGE_SIZE];               ///< pageBuf[EEPROM_PAGE_SIZE]
 } EepromStateType;
 
 /** @} (end addtogroup legacyhal) */

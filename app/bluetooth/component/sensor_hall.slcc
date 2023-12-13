@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/common/sensor_hall
 tag:
   - No-Code
-
 source:
   - path: sl_sensor_hall.c
 include:
@@ -21,6 +20,10 @@ requires:
   - name: si7210_driver
   - name: i2cspm
   - name: app_assert
+  - name: board_control
 template_contribution:
   - name: component_catalog
     value: sensor_hall
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-hall

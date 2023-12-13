@@ -18,7 +18,9 @@ template_contribution:
       include: em_chip.h
       handler: CHIP_Init
     priority: -9999
-    condition: [device_efx]
+    condition: [device_efx, sl_system]
+  - name: component_catalog
+    value: device_init_core
 documentation:
   docset: gecko-platform
   document: platform-service/device-init

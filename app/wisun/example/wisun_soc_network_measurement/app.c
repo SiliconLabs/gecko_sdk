@@ -77,7 +77,7 @@ void app_task(void *args)
 
   while (1) {
     // User code here
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 

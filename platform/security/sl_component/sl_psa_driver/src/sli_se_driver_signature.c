@@ -65,6 +65,11 @@ static psa_status_t check_curve_availability(
   psa_key_type_t key_type = psa_get_key_type(attributes);
   psa_ecc_family_t curvetype = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
 
+  if (PSA_ALG_IS_RSA_PSS(alg) || PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg)) {
+    // We shouldn't have a RSA-type alg for a ECC key.
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
   #if defined(SLI_PSA_DRIVER_FEATURE_ECDSA)
   if (curvetype == PSA_ECC_FAMILY_SECP_R1) {
     switch (psa_get_key_bits(attributes)) {
@@ -534,10 +539,6 @@ static psa_status_t sli_se_verify_message(
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  if (signature_length == 0) {
-    return PSA_ERROR_INVALID_SIGNATURE;
-  }
-
   // Verify can happen with a public or private key
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(psa_get_key_type(attributes))
       || PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(psa_get_key_type(attributes))) {
@@ -553,6 +554,10 @@ static psa_status_t sli_se_verify_message(
   // Check the requested hashing algorithm is supported
   if (get_hash_for_algorithm(alg) == SL_SE_HASH_NONE) {
     return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  if (signature_length == 0) {
+    return PSA_ERROR_INVALID_SIGNATURE;
   }
 
   // Ephemeral contexts

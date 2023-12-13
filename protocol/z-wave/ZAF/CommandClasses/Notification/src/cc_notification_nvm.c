@@ -33,7 +33,7 @@ typedef struct notifications_data_t_
 
 bool cc_notification_write (void) {
 
-  notifications_data_t notifications_data;
+  notifications_data_t notifications_data = { 0 };
   cc_notification_t *notifications = cc_notification_get_config();
 
   for(uint8_t i = 0; i <cc_notification_get_config_length(); i++) {
@@ -54,7 +54,7 @@ bool cc_notification_read (void) {
     return false;
   }
 
-  notifications_data_t notifications_data;
+  notifications_data_t notifications_data  = { 0 };
   if (ZPAL_STATUS_OK != ZAF_nvm_read(ZAF_FILE_ID_NOTIFICATIONDATA,
                                       &notifications_data,
                                       ZAF_FILE_SIZE_NOTIFICATIONDATA)) {

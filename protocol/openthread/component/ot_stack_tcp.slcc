@@ -11,6 +11,7 @@ ui_hints:
 root_path: util/third_party/openthread/third_party/tcplp
 source:
       - path: bsdtcp/cc/cc_newreno.c
+      - path: bsdtcp/tcp_fastopen.c
       - path: bsdtcp/tcp_input.c
       - path: bsdtcp/tcp_output.c
       - path: bsdtcp/tcp_reass.c

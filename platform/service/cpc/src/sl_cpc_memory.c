@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 
@@ -46,6 +47,11 @@
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+// needed for definition of sli_cpc_system_command_handle_t;
+#include "sli_cpc_system_primary.h"
 #endif
 
 /*******************************************************************************
@@ -100,30 +106,17 @@ static sl_cpc_mem_pool_handle_t cpc_mempool_rx_queue_item =
 { .pool_handle = &mempool_rx_queue_item,
   .used_block_cnt = 0 };
 
-static sli_mem_pool_handle_t mempool_tx_queue_item;
-SLI_MEM_POOL_DECLARE_BUFFER_WITH_TYPE(mempool_tx_queue_item,
-                                      sl_cpc_transmit_queue_item_t,
-                                      SL_CPC_TX_QUEUE_ITEM_MAX_COUNT);
-static sl_cpc_mem_pool_handle_t cpc_mempool_tx_queue_item =
-{ .pool_handle = &mempool_tx_queue_item,
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+static sli_mem_pool_handle_t mempool_command_handle;
+SLI_MEM_POOL_DECLARE_BUFFER_WITH_TYPE(mempool_command_handle,
+                                      sli_cpc_system_command_handle_t,
+                                      SLI_CPC_SYSTEM_COMMAND_HANDLE_COUNT);
+static sl_cpc_mem_pool_handle_t cpc_mempool_command_handle =
+{ .pool_handle = &mempool_command_handle,
   .used_block_cnt = 0 };
+#endif
 
-static sli_mem_pool_handle_t mempool_tx_queue_item_sframe;
-SLI_MEM_POOL_DECLARE_BUFFER_WITH_TYPE(mempool_tx_queue_item_sframe,
-                                      sl_cpc_transmit_queue_item_t,
-                                      SLI_CPC_TX_QUEUE_ITEM_SFRAME_MAX_COUNT);
-static sl_cpc_mem_pool_handle_t cpc_mempool_tx_queue_item_sframe =
-{ .pool_handle = &mempool_tx_queue_item_sframe,
-  .used_block_cnt = 0 };
-
-static sli_mem_pool_handle_t mempool_endpoint_closed_arg_item;
-SLI_MEM_POOL_DECLARE_BUFFER_WITH_TYPE(mempool_endpoint_closed_arg_item,
-                                      sl_cpc_endpoint_closed_arg_t,
-                                      SL_CPC_TX_QUEUE_ITEM_MAX_COUNT);
-static sl_cpc_mem_pool_handle_t cpc_mempool_endpoint_closed_arg_item =
-{ .pool_handle = &mempool_endpoint_closed_arg_item,
-  .used_block_cnt = 0 };
-
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
 static sli_mem_pool_handle_t mempool_system_command;
 SLI_MEM_POOL_DECLARE_BUFFER(mempool_system_command,
                             SLI_CPC_SYSTEM_COMMAND_BUFFER_SIZE,
@@ -131,6 +124,7 @@ SLI_MEM_POOL_DECLARE_BUFFER(mempool_system_command,
 static sl_cpc_mem_pool_handle_t cpc_mempool_system_command =
 { .pool_handle = &mempool_system_command,
   .used_block_cnt = 0 };
+#endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
 static sli_mem_pool_handle_t mempool_tx_security_tag;
@@ -143,6 +137,17 @@ static sl_cpc_mem_pool_handle_t cpc_mempool_tx_security_tag =
 #endif
 
 sl_slist_node_t *postponed_free_rx_queue_item;
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+static uint16_t tx_item_used_count = 0;
+#endif
+static uint16_t sframe_tx_item_used_count = 0;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+__ALIGNED(4) static uint8_t tx_item_availability_semaphore_cb[osSemaphoreCbSize];
+#endif
+static osSemaphoreId_t tx_item_availability_signal;     ///< transmit queue item availability signal
+#endif
 
 extern sli_cpc_drv_capabilities_t sli_cpc_driver_capabilities;
 
@@ -163,15 +168,33 @@ static sl_status_t free_receive_queue_item_from_postponed_list();
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
 
-SL_WEAK void sli_cpc_memory_on_rx_buffer_free(void);
-
 /***************************************************************************//**
  * Initialize CPC buffers' handling module.
  ******************************************************************************/
-void sli_cpc_init_buffers(void)
+sl_status_t sli_cpc_memory_init(void)
 {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  osSemaphoreAttr_t tx_item_availability_signal_semaphore_attr = { 0 };
+#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  tx_item_availability_signal_semaphore_attr.cb_mem = tx_item_availability_semaphore_cb;
+  tx_item_availability_signal_semaphore_attr.cb_size = osSemaphoreCbSize;
+#else
+  semaphore_attr.cb_mem = NULL;
+  semaphore_attr.cb_size = 0U;
+#endif  // SL_CATALOG_CMSIS_OS_COMMON_PRESENT
+
+  tx_item_availability_signal = osSemaphoreNew(SL_CPC_TX_QUEUE_ITEM_MAX_COUNT, SL_CPC_TX_QUEUE_ITEM_MAX_COUNT, &tx_item_availability_signal_semaphore_attr);
+  if (tx_item_availability_signal == 0) {
+    EFM_ASSERT(false);
+    return SL_STATUS_ALLOCATION_FAILED;
+  }
+
+#endif
+
+  SLI_CPC_DEBUG_MEMORY_POOL_INIT();
+
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_buffer_handle.pool_handle,
-                      sizeof(sl_cpc_buffer_handle_t),
+                      (uint16_t)sizeof(sl_cpc_buffer_handle_t),
                       SLI_CPC_BUFFER_HANDLE_MAX_COUNT,
                       mempool_buffer_handle_buffer,
                       sizeof(mempool_buffer_handle_buffer));
@@ -195,46 +218,32 @@ void sli_cpc_init_buffers(void)
                       sizeof(mempool_rx_buffer_buffer));
 
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_endpoint.pool_handle,
-                      sizeof(sl_cpc_endpoint_t),
+                      (uint16_t)sizeof(sl_cpc_endpoint_t),
                       SLI_CPC_ENDPOINT_COUNT,
                       mempool_endpoint_buffer,
                       sizeof(mempool_endpoint_buffer));
 
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_rx_queue_item.pool_handle,
-                      sizeof(sl_cpc_receive_queue_item_t),
+                      (uint16_t)sizeof(sl_cpc_receive_queue_item_t),
                       SLI_CPC_RX_QUEUE_ITEM_MAX_COUNT,
                       mempool_rx_queue_item_buffer,
                       sizeof(mempool_rx_queue_item_buffer));
 
-  sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_tx_queue_item.pool_handle,
-                      sizeof(sl_cpc_transmit_queue_item_t),
-                      SL_CPC_TX_QUEUE_ITEM_MAX_COUNT,
-                      mempool_tx_queue_item_buffer,
-                      sizeof(mempool_tx_queue_item_buffer));
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+  sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_command_handle.pool_handle,
+                      (uint16_t)sizeof(sli_cpc_system_command_handle_t),
+                      SLI_CPC_SYSTEM_COMMAND_HANDLE_COUNT,
+                      mempool_command_handle_buffer,
+                      sizeof(mempool_command_handle_buffer));
+#endif
 
-  sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_tx_queue_item_sframe.pool_handle,
-                      sizeof(sl_cpc_transmit_queue_item_t),
-                      SLI_CPC_TX_QUEUE_ITEM_SFRAME_MAX_COUNT,
-                      mempool_tx_queue_item_sframe_buffer,
-                      sizeof(mempool_tx_queue_item_sframe_buffer));
-
-  sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_endpoint_closed_arg_item.pool_handle,
-                      sizeof(sl_cpc_endpoint_closed_arg_t),
-                      SL_CPC_TX_QUEUE_ITEM_MAX_COUNT,
-                      mempool_endpoint_closed_arg_item_buffer,
-                      sizeof(mempool_endpoint_closed_arg_item_buffer));
-
-  sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_endpoint_closed_arg_item.pool_handle,
-                      sizeof(sl_cpc_endpoint_closed_arg_t),
-                      SL_CPC_TX_QUEUE_ITEM_MAX_COUNT,
-                      mempool_endpoint_closed_arg_item_buffer,
-                      sizeof(mempool_endpoint_closed_arg_item_buffer));
-
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_system_command.pool_handle,
                       SLI_CPC_SYSTEM_COMMAND_BUFFER_SIZE,
                       SLI_CPC_SYSTEM_COMMAND_BUFFER_COUNT,
                       mempool_system_command_buffer,
                       sizeof(mempool_system_command_buffer));
+#endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
   sli_mem_pool_create((sli_mem_pool_handle_t *)cpc_mempool_tx_security_tag.pool_handle,
@@ -246,14 +255,37 @@ void sli_cpc_init_buffers(void)
 
   sl_slist_init(&postponed_free_rx_queue_item);
 
-  SLI_CPC_DEBUG_MEMORY_POOL_INIT();
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Get a CPC handle buffer from write operations
+ ******************************************************************************/
+sl_status_t sli_cpc_get_write_buffer_handle(sl_cpc_buffer_handle_t **handle, bool block, uint32_t timeout)
+{
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  sl_status_t status;
+  osStatus_t sem_status = osSemaphoreAcquire(tx_item_availability_signal, block ? timeout : 0);
+  if (sem_status == osErrorResource ||  sem_status == osErrorTimeout) {
+    return SL_STATUS_NO_MORE_RESOURCE;
+  }
+  EFM_ASSERT(sem_status == osOK);
+  status = sli_cpc_get_buffer_handle(handle, SL_CPC_TX_DATA_BUFFER_HANDLE);
+  EFM_ASSERT(status != SL_STATUS_NO_MORE_RESOURCE); // On a kernel, this should not happen
+  return status;
+#else
+  (void)block;
+  (void)timeout;
+  return sli_cpc_get_buffer_handle(handle, SL_CPC_TX_DATA_BUFFER_HANDLE);
+#endif
 }
 
 /***************************************************************************//**
  * Get a CPC handle buffer
  ******************************************************************************/
-sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle)
+sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle, sl_cpc_buffer_handle_type_t type)
 {
+  MCU_DECLARE_IRQ_STATE;
   sl_cpc_buffer_handle_t *buf_handle;
 
   if (handle == NULL) {
@@ -264,6 +296,37 @@ sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle)
   if (buf_handle == NULL) {
     return SL_STATUS_NO_MORE_RESOURCE;
   }
+
+  // Update counters
+  MCU_ENTER_ATOMIC();
+  switch (type) {
+    case SL_CPC_RX_INTERNAL_BUFFER_HANDLE:
+      break;
+    case SL_CPC_TX_REJECT_BUFFER_HANDLE:
+    case SL_CPC_TX_SFRAME_BUFFER_HANDLE:
+      if (sframe_tx_item_used_count >= SLI_CPC_TX_QUEUE_ITEM_SFRAME_MAX_COUNT) {
+        free_object(&cpc_mempool_buffer_handle, buf_handle);
+        MCU_EXIT_ATOMIC();
+        return SL_STATUS_NO_MORE_RESOURCE;
+      }
+      ++sframe_tx_item_used_count;
+      break;
+    case SL_CPC_TX_DATA_BUFFER_HANDLE:
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+      if (tx_item_used_count >= SL_CPC_TX_QUEUE_ITEM_MAX_COUNT) {
+        free_object(&cpc_mempool_buffer_handle, buf_handle);
+        MCU_EXIT_ATOMIC();
+        return SL_STATUS_NO_MORE_RESOURCE;
+      }
+      ++tx_item_used_count;
+#endif
+      break;
+    case SL_CPC_UNKNOWN_BUFFER_HANDLE:
+    default:
+      return SL_STATUS_INVALID_PARAMETER;
+      break;
+  }
+  MCU_EXIT_ATOMIC();
 
   buf_handle->hdlc_header = NULL;
   buf_handle->data = NULL;
@@ -276,10 +339,14 @@ sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle)
   buf_handle->fcs[1] = 0;
   buf_handle->control = 0;
   buf_handle->address = 0;
-  buf_handle->buffer_type = SL_CPC_UNKNOWN_BUFFER;
+  buf_handle->type = type;
   buf_handle->arg = NULL;
   buf_handle->reason = SL_CPC_REJECT_NO_ERROR;
   buf_handle->ref_count = 0;
+  EFM_ASSERT(buf_handle->core_node.node == NULL);
+  EFM_ASSERT(buf_handle->driver_node.node == NULL);
+  buf_handle->core_node.node = NULL;
+  buf_handle->driver_node.node = NULL;
 
   *handle = buf_handle;
 
@@ -311,16 +378,15 @@ sl_status_t sli_cpc_get_reject_buffer(sl_cpc_buffer_handle_t **handle)
   sl_status_t status;
   sl_cpc_buffer_handle_t *buf_handle;
 
-  status = sli_cpc_get_buffer_handle(&buf_handle);
+  status = sli_cpc_get_buffer_handle(&buf_handle, SL_CPC_TX_REJECT_BUFFER_HANDLE);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
   buf_handle->data = alloc_object(&cpc_mempool_hdlc_reject);
-  buf_handle->buffer_type = SL_CPC_HDLC_REJECT_BUFFER;
 
   if (buf_handle->data == NULL) {
-    free_object(&cpc_mempool_buffer_handle, buf_handle);
+    sli_cpc_free_buffer_handle(buf_handle);
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 
@@ -337,40 +403,47 @@ sl_status_t sli_cpc_get_buffer_handle_for_rx(sl_cpc_buffer_handle_t **handle)
 {
   sl_cpc_buffer_handle_t *buf_handle;
   sl_status_t status;
+  void *data = NULL;
+  void *hdlc_header = NULL;
 
   if (handle == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
-  status = sli_cpc_get_buffer_handle(&buf_handle);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  sli_cpc_get_hdlc_header_buffer(&buf_handle->hdlc_header);
-  if (buf_handle->hdlc_header == NULL) {
-    free_object(&cpc_mempool_buffer_handle, buf_handle);
-    return SL_STATUS_NO_MORE_RESOURCE;
-  }
-
   if (!sli_cpc_driver_capabilities.use_raw_rx_buffer) {
-    buf_handle->data = alloc_object(&cpc_mempool_rx_buffer);
-    if (buf_handle->data == NULL) {
-      sli_cpc_free_hdlc_header(buf_handle->hdlc_header);
-      free_object(&cpc_mempool_buffer_handle, buf_handle);
+    data = alloc_object(&cpc_mempool_rx_buffer);
+    if (data == NULL) {
       return SL_STATUS_NO_MORE_RESOURCE;
     }
-  } else {
-    buf_handle->data = NULL;
   }
 
-  buf_handle->data_length = 0u;
-  buf_handle->buffer_type = SL_CPC_RX_BUFFER;
-  buf_handle->reason = SL_CPC_REJECT_NO_ERROR;
+  status = sli_cpc_get_hdlc_header_buffer(&hdlc_header);
+  if (hdlc_header == NULL) {
+    goto rx_buffer_allocated;
+  }
 
+  status = sli_cpc_get_buffer_handle(&buf_handle, SL_CPC_RX_INTERNAL_BUFFER_HANDLE);
+  if (status != SL_STATUS_OK) {
+    goto hdlc_header_allocated;
+  }
+
+  buf_handle->data = data;
+  buf_handle->hdlc_header = hdlc_header;
+  buf_handle->data_length = 0u;
+  buf_handle->reason = SL_CPC_REJECT_NO_ERROR;
   *handle = buf_handle;
 
   return SL_STATUS_OK;
+
+  // Error path:
+  hdlc_header_allocated:
+  sli_cpc_free_hdlc_header(hdlc_header);
+
+  rx_buffer_allocated:
+  if (!sli_cpc_driver_capabilities.use_raw_rx_buffer) {
+    free_object(&cpc_mempool_rx_buffer, data);
+  }
+  return status;
 }
 
 /***************************************************************************//**
@@ -407,16 +480,13 @@ sl_status_t sli_cpc_free_raw_rx_buffer(void *raw_rx_buffer)
 /***************************************************************************//**
  * Free rx handle and all associate buffers
  ******************************************************************************/
-sl_status_t sli_cpc_drop_buffer_handle(sl_cpc_buffer_handle_t *handle)
+sl_status_t sli_cpc_free_buffer_handle(sl_cpc_buffer_handle_t *handle)
 {
-  bool is_rx_buffer = false;
+  MCU_DECLARE_IRQ_STATE;
+  bool rx_buffer_handle_freed = false;
 
   if (handle == NULL) {
     return SL_STATUS_NULL_POINTER;
-  }
-
-  if (handle->buffer_type == SL_CPC_RX_BUFFER) {
-    is_rx_buffer = true;
   }
 
   if (handle->ref_count > 0) {
@@ -424,24 +494,10 @@ sl_status_t sli_cpc_drop_buffer_handle(sl_cpc_buffer_handle_t *handle)
     return SL_STATUS_BUSY;
   }
 
-  if (handle->data != NULL) {
-    if (handle->buffer_type == SL_CPC_HDLC_REJECT_BUFFER) {
-      free_object(&cpc_mempool_hdlc_reject, handle->data);
-    } else if (handle->buffer_type == SL_CPC_RX_BUFFER) {
-      free_object(&cpc_mempool_rx_buffer, handle->data);
-
-#ifdef CPC_DEBUG_TRACE
-      if (handle->endpoint != NULL) {
-        SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DATA_FRAME_DROPPED(handle->endpoint);
-      } else {
-        SLI_CPC_DEBUG_TRACE_CORE_RXD_DATA_FRAME_DROPPED();
-      }
-#endif
-    } else {
-      // If no type, it's a buffer used for transmit operation.
-      // So no need to free any data since the buffer is passed by the application.
-    }
-  }
+  // Check if the buffer handle was still pointing to another buffer handle
+  // If so, it could cause a dangling buffer_handle not referenced in any list
+  EFM_ASSERT(handle->core_node.node == NULL);
+  EFM_ASSERT(handle->driver_node.node == NULL);
 
   if (handle->hdlc_header != NULL) {
     sli_cpc_free_hdlc_header(handle->hdlc_header);
@@ -451,11 +507,57 @@ sl_status_t sli_cpc_drop_buffer_handle(sl_cpc_buffer_handle_t *handle)
   sli_cpc_free_security_tag_buffer(handle->security_tag);
 #endif
 
+  switch (handle->type) {
+    case SL_CPC_RX_INTERNAL_BUFFER_HANDLE:
+      // Buffer was allocated but handle is freed before being passed to user
+      // This means that we must free the rx buffer or it will be leaked
+
+      if (handle->data != NULL) {
+        sli_cpc_free_rx_buffer(handle->data);
+      }
+      rx_buffer_handle_freed = true;
+#ifdef CPC_DEBUG_TRACE
+      if (handle->endpoint != NULL) {
+        SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_DATA_FRAME_DROPPED(handle->endpoint);
+      } else {
+        SLI_CPC_DEBUG_TRACE_CORE_RXD_DATA_FRAME_DROPPED();
+      }
+#endif
+      break;
+    case SL_CPC_TX_REJECT_BUFFER_HANDLE:
+      free_object(&cpc_mempool_hdlc_reject, handle->data);
+      SL_FALLTHROUGH
+    case SL_CPC_TX_SFRAME_BUFFER_HANDLE:
+    case SL_CPC_TX_DATA_BUFFER_HANDLE:
+    case SL_CPC_RX_USER_BUFFER_HANDLE:
+    case SL_CPC_UNKNOWN_BUFFER_HANDLE:
+      break;
+    default:
+      EFM_ASSERT(false);
+      break;
+  }
+
+  // Update counters
+  MCU_ENTER_ATOMIC();
   free_object(&cpc_mempool_buffer_handle, handle);
 
-  if (is_rx_buffer) {
-    // Notify that at least one RX buffer is available
-    sli_cpc_memory_on_rx_buffer_free();
+  if (handle->type == SL_CPC_TX_DATA_BUFFER_HANDLE) {
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    osStatus_t sem_status = osSemaphoreRelease(tx_item_availability_signal);
+    EFM_ASSERT(sem_status == osOK);
+#else
+    EFM_ASSERT(tx_item_used_count > 0);
+    --tx_item_used_count;
+#endif
+  } else if (handle->type == SL_CPC_TX_SFRAME_BUFFER_HANDLE || handle->type == SL_CPC_TX_REJECT_BUFFER_HANDLE) {
+    EFM_ASSERT(sframe_tx_item_used_count > 0);
+    --sframe_tx_item_used_count;
+  }
+  MCU_EXIT_ATOMIC();
+
+  if (rx_buffer_handle_freed) {
+    // Notify the driver
+    sli_cpc_drv_on_rx_buffer_handle_free();
   }
 
   return SL_STATUS_OK;
@@ -484,13 +586,16 @@ sl_status_t sli_cpc_push_back_rx_data_in_receive_queue(sl_cpc_buffer_handle_t *h
 
   item->node.node = NULL;
   item->data = handle->data;
-  item->buffer_type = handle->buffer_type;
+  EFM_ASSERT(handle->type == SL_CPC_RX_INTERNAL_BUFFER_HANDLE);
+  item->buffer_type = SL_CPC_RX_USER_BUFFER_HANDLE;
   item->data_length = data_length;
 
   sl_slist_push_back(head, &item->node);
 
-  sli_cpc_free_hdlc_header(handle->hdlc_header);
-  free_object(&cpc_mempool_buffer_handle, handle);
+  // Buffer is now owned by the user
+  handle->type = SL_CPC_RX_USER_BUFFER_HANDLE;
+
+  sli_cpc_free_buffer_handle(handle);
 
   return SL_STATUS_OK;
 }
@@ -509,7 +614,7 @@ sl_status_t sl_cpc_free_rx_buffer(void *data)
   free_receive_queue_item_from_postponed_list();
 
   // Notify that at least one RX buffer is available
-  sli_cpc_memory_on_rx_buffer_free();
+  sli_cpc_drv_on_rx_buffer_free();
 
   return SL_STATUS_OK;
 }
@@ -524,6 +629,9 @@ sl_status_t sli_cpc_free_rx_buffer(void *data)
   }
 
   free_object(&cpc_mempool_rx_buffer, data);
+
+  // Notify that at least one RX buffer is available
+  sli_cpc_drv_on_rx_buffer_free();
 
   return SL_STATUS_OK;
 }
@@ -576,21 +684,18 @@ static sl_status_t free_receive_queue_item(sl_cpc_receive_queue_item_t *item)
 /***************************************************************************//**
  * Free receive queue item and the data buffer
  ******************************************************************************/
-void sli_cpc_drop_receive_queue_item(sl_cpc_receive_queue_item_t *item)
+void sli_cpc_free_receive_queue_item(sl_cpc_receive_queue_item_t *item)
 {
   if (item == NULL) {
     return;
   }
 
   if (item->data != NULL) {
-    if (item->buffer_type == SL_CPC_HDLC_REJECT_BUFFER) {
-      free_object(&cpc_mempool_hdlc_reject, item->data);
-    } else if (item->buffer_type == SL_CPC_RX_BUFFER) {
-      free_object(&cpc_mempool_rx_buffer, item->data);
+    EFM_ASSERT(item->buffer_type == SL_CPC_RX_USER_BUFFER_HANDLE);
+    free_object(&cpc_mempool_rx_buffer, item->data);
 
-      // Notify that at least one RX buffer is available
-      sli_cpc_memory_on_rx_buffer_free();
-    }
+    // Notify that at least one RX buffer is available
+    sli_cpc_drv_on_rx_buffer_free();
   }
 
   free_object(&cpc_mempool_rx_queue_item, item);
@@ -623,65 +728,57 @@ static sl_status_t free_receive_queue_item_from_postponed_list()
 }
 
 /***************************************************************************//**
- * Get a transmit queue item.
+ * Pop a buffer handle from a list owned by the CPC core
  ******************************************************************************/
-sl_status_t sli_cpc_get_transmit_queue_item(sl_cpc_transmit_queue_item_t **item)
+sl_cpc_buffer_handle_t* sli_cpc_pop_core_buffer_handle(sl_slist_node_t **head)
 {
-  if (item == NULL) {
-    return SL_STATUS_NULL_POINTER;
+  sl_slist_node_t *item_node = sl_slist_pop(head);
+  if (item_node == NULL) {
+    return NULL;
   }
-
-  *item = alloc_object(&cpc_mempool_tx_queue_item);
-  if (*item == NULL) {
-    return SL_STATUS_NO_MORE_RESOURCE;
-  }
-
-  return SL_STATUS_OK;
+  sl_cpc_buffer_handle_t *item = SL_SLIST_ENTRY(item_node, sl_cpc_buffer_handle_t, core_node);
+  EFM_ASSERT(item != NULL);
+  EFM_ASSERT(item->ref_count > 0);
+  --item->ref_count;
+  return item;
 }
 
 /***************************************************************************//**
- * Free transmit queue item.
+ * Pop a buffer handle from a list owned by the CPC driver
  ******************************************************************************/
-sl_status_t sli_cpc_free_transmit_queue_item(sl_cpc_transmit_queue_item_t *item)
+sl_cpc_buffer_handle_t* sli_cpc_pop_driver_buffer_handle(sl_slist_node_t **head)
 {
-  if (item == NULL) {
-    return SL_STATUS_NULL_POINTER;
+  sl_slist_node_t *item_node = sl_slist_pop(head);
+  if (item_node == NULL) {
+    return NULL;
   }
-
-  free_object(&cpc_mempool_tx_queue_item, item);
-
-  return SL_STATUS_OK;
+  sl_cpc_buffer_handle_t *item = SL_SLIST_ENTRY(item_node, sl_cpc_buffer_handle_t, driver_node);
+  EFM_ASSERT(item != NULL);
+  EFM_ASSERT(item->ref_count > 0);
+  --item->ref_count;
+  return item;
 }
 
 /***************************************************************************//**
- * Get a transmit queue item from S-Frame.
+ * Remove a buffer handle from a list owned by the CPC core
  ******************************************************************************/
-sl_status_t sli_cpc_get_sframe_transmit_queue_item(sl_cpc_transmit_queue_item_t **item)
+void sli_cpc_remove_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buffer_handle)
 {
-  if (item == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  *item = alloc_object(&cpc_mempool_tx_queue_item_sframe);
-  if (*item == NULL) {
-    return SL_STATUS_NO_MORE_RESOURCE;
-  }
-
-  return SL_STATUS_OK;
+  EFM_ASSERT(buffer_handle != NULL);
+  EFM_ASSERT(buffer_handle->ref_count > 0);
+  buffer_handle->ref_count--;
+  sl_slist_remove(head, &buffer_handle->core_node);
 }
 
 /***************************************************************************//**
- * Free transmit queue item from S-Frame pool.
+ * Remove a buffer handle from a list owned by the CPC driver
  ******************************************************************************/
-sl_status_t sli_cpc_free_sframe_transmit_queue_item(sl_cpc_transmit_queue_item_t *item)
+void sli_cpc_remove_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buffer_handle)
 {
-  if (item == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  free_object(&cpc_mempool_tx_queue_item_sframe, item);
-
-  return SL_STATUS_OK;
+  EFM_ASSERT(buffer_handle != NULL);
+  EFM_ASSERT(buffer_handle->ref_count > 0);
+  buffer_handle->ref_count--;
+  sl_slist_remove(head, &buffer_handle->driver_node);
 }
 
 /***************************************************************************//**
@@ -712,16 +809,61 @@ void sli_cpc_free_endpoint(sl_cpc_endpoint_t *endpoint)
 }
 
 /***************************************************************************//**
- * Get endpoint closed argument item
+ * Push back a list item containing an allocated buffer handle for the core
  ******************************************************************************/
-sl_status_t sli_cpc_get_closed_arg(sl_cpc_endpoint_closed_arg_t **arg)
+void sli_cpc_push_back_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle)
 {
-  if (arg == NULL) {
+  EFM_ASSERT(buf_handle != NULL);
+  buf_handle->ref_count++;
+  EFM_ASSERT(buf_handle->ref_count <= 2);
+  sl_slist_push_back(head, &buf_handle->core_node);
+}
+
+/***************************************************************************//**
+ * Push back a list item containing an allocated buffer handle for the driver
+ ******************************************************************************/
+void sli_cpc_push_back_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle)
+{
+  EFM_ASSERT(buf_handle != NULL);
+  buf_handle->ref_count++;
+  EFM_ASSERT(buf_handle->ref_count <= 2);
+  sl_slist_push_back(head, &buf_handle->driver_node);
+}
+
+/***************************************************************************//**
+ * Push a list item containing an allocated buffer handle for the core
+ ******************************************************************************/
+void sli_cpc_push_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle)
+{
+  EFM_ASSERT(buf_handle != NULL);
+  buf_handle->ref_count++;
+  EFM_ASSERT(buf_handle->ref_count <= 2);
+  sl_slist_push(head, &buf_handle->core_node);
+}
+
+/***************************************************************************//**
+ * Push a list item containing an allocated buffer handle for the driver
+ ******************************************************************************/
+void sli_cpc_push_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle)
+{
+  EFM_ASSERT(buf_handle != NULL);
+  buf_handle->ref_count++;
+  EFM_ASSERT(buf_handle->ref_count <= 2);
+  sl_slist_push(head, &buf_handle->driver_node);
+}
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************//**
+ * Get a system command handle
+ ******************************************************************************/
+sl_status_t sli_cpc_get_system_command_handle(sli_cpc_system_command_handle_t **item)
+{
+  if (item == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
-  *arg = alloc_object(&cpc_mempool_endpoint_closed_arg_item);
-  if (*arg == NULL) {
+  *item = alloc_object(&cpc_mempool_command_handle);
+  if (*item == NULL) {
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 
@@ -729,33 +871,21 @@ sl_status_t sli_cpc_get_closed_arg(sl_cpc_endpoint_closed_arg_t **arg)
 }
 
 /***************************************************************************//**
- * Free endpoint closed argument item
+ * Free a command buffer
  ******************************************************************************/
-void sli_cpc_free_closed_arg(sl_cpc_endpoint_closed_arg_t *arg)
+sl_status_t sli_cpc_free_system_command_handle(sli_cpc_system_command_handle_t *item)
 {
-  free_object(&cpc_mempool_endpoint_closed_arg_item, arg);
-}
+  if (item == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
 
-/***************************************************************************//**
- * Push back a list item containing an allocated buffer handle
- ******************************************************************************/
-void sli_cpc_push_back_buffer_handle(sl_slist_node_t **head, sl_slist_node_t *item, sl_cpc_buffer_handle_t *buf_handle)
-{
-  EFM_ASSERT(buf_handle != NULL);
-  buf_handle->ref_count++;
-  sl_slist_push_back(head, item);
-}
+  free_object(&cpc_mempool_command_handle, item);
 
-/***************************************************************************//**
- * Push a list item containing an allocated buffer handle
- ******************************************************************************/
-void sli_cpc_push_buffer_handle(sl_slist_node_t **head, sl_slist_node_t *item, sl_cpc_buffer_handle_t *buf_handle)
-{
-  EFM_ASSERT(buf_handle != NULL);
-  buf_handle->ref_count++;
-  sl_slist_push(head, item);
+  return SL_STATUS_OK;
 }
+#endif
 
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
 /***************************************************************************//**
  * Get a command buffer
  ******************************************************************************/
@@ -786,6 +916,7 @@ sl_status_t sli_cpc_free_command_buffer(sli_cpc_system_cmd_t *item)
 
   return SL_STATUS_OK;
 }
+#endif
 
 /***************************************************************************//**
  * Allocate a security tag buffer
@@ -838,8 +969,8 @@ static void* alloc_object(sl_cpc_mem_pool_handle_t *pool)
   void *block;
 
   #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
-  CORE_DECLARE_IRQ_STATE;
-  CORE_ENTER_ATOMIC();
+  MCU_DECLARE_IRQ_STATE;
+  MCU_ENTER_ATOMIC();
   #endif
 
   block = sli_mem_pool_alloc((sli_mem_pool_handle_t *)pool->pool_handle);
@@ -848,7 +979,7 @@ static void* alloc_object(sl_cpc_mem_pool_handle_t *pool)
   if (block != NULL) {
     pool->used_block_cnt++;
   }
-  CORE_EXIT_ATOMIC();
+  MCU_EXIT_ATOMIC();
   #endif
 
   return block;

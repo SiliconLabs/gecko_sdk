@@ -46,7 +46,7 @@
  * This function will report the registered sensor's measured datas
  * to the Lifeline group.
  */
-void cc_multilevel_sensor_send_sensor_data();
+void cc_multilevel_sensor_send_sensor_data(void);
 
 /**
  * @}

@@ -55,6 +55,8 @@ struct sli_wisun_timer {
     uint64_t expire_time_us;               // Next expiration absolute time in microseconds
     const char *name;                      // Name used in debug traces (can be NULL)
     ns_list_link_t link;                   // Reserved for ns_list
+    uint32_t is_valid;                     // Valid value is set when the timer is inititialized
+    bool persistent;                       // True to keep timer running while the interface is down
 };
 
 /**
@@ -117,8 +119,8 @@ void sli_wisun_timer_context_dispatcher(sli_wisun_timer_context_t *ctxt);
  * respectively provided by functions _us, _ms and _s.
  * The function sli_wisun_timer_start_us() provides the most control over timer
  * start.
- * A "start" function called on an already running timer will implicitely call
- * the "restart" function instead.
+ * A running timer can be restarted with a "start" function, no need to call
+ * sli_wisun_timer_stop() first.
  * User must ensure that the system is not running more than
  * (2^32)*3/4 microseconds (~53 minutes) without a timer expiration.
  *
@@ -128,16 +130,21 @@ void sli_wisun_timer_context_dispatcher(sli_wisun_timer_context_t *ctxt);
  * this case sli_wisun_timer_init() can be called with a NULL callback.
  *
  * A special state for timers is "infinite" which means "never expire", such a
- * timer is started with sli_wisun_timer_start_infinite() and restarted with
- * sli_wisun_timer_restart_infinite(). It is possible to check if a timer is
- * infinite with sli_wisun_timer_is_infinite() and the return of
- * sli_wisun_timer_get_remaining_xx() functions is guaranteed to be greater than
- * the one for a non infinite timer.
+ * timer is started with sli_wisun_timer_start_infinite(). It is possible to
+ * check if a timer is infinite with sli_wisun_timer_is_infinite() and the
+ * return of sli_wisun_timer_get_remaining_xx() functions is guaranteed to be
+ * greater than the one for a non infinite timer.
+ *
+ * Timers are automatically stopped when the stack is brought down to avoid
+ * callbacks to deleted contexts. Timers can be set to persist using the API
+ * sli_wisun_timer_set_persistent().
  */
 void sli_wisun_timer_init(sli_wisun_timer_t *timer,
                           sli_wisun_timer_context_t *ctxt,
                           void (*callback)(sli_wisun_timer_t *),
                           const char *name);
+
+void sli_wisun_timer_set_persistent(sli_wisun_timer_t *timer, bool persistent);
 
 void sli_wisun_timer_start_us(sli_wisun_timer_t *timer, uint64_t period_us, uint64_t next_time_us);
 
@@ -155,20 +162,6 @@ void sli_wisun_timer_start_periodic_s(sli_wisun_timer_t *timer, uint64_t period_
 
 void sli_wisun_timer_start_infinite(sli_wisun_timer_t *timer);
 
-void sli_wisun_timer_restart_absolute_us(sli_wisun_timer_t *timer, uint64_t time_us);
-void sli_wisun_timer_restart_relative_us(sli_wisun_timer_t *timer, uint64_t delay_us);
-void sli_wisun_timer_restart_periodic_us(sli_wisun_timer_t *timer, uint64_t period_us);
-
-void sli_wisun_timer_restart_absolute_ms(sli_wisun_timer_t *timer, uint64_t time_ms);
-void sli_wisun_timer_restart_relative_ms(sli_wisun_timer_t *timer, uint64_t delay_ms);
-void sli_wisun_timer_restart_periodic_ms(sli_wisun_timer_t *timer, uint64_t period_ms);
-
-void sli_wisun_timer_restart_absolute_s(sli_wisun_timer_t *timer, uint64_t time_s);
-void sli_wisun_timer_restart_relative_s(sli_wisun_timer_t *timer, uint64_t delay_s);
-void sli_wisun_timer_restart_periodic_s(sli_wisun_timer_t *timer, uint64_t period_s);
-
-void sli_wisun_timer_restart_infinite(sli_wisun_timer_t *timer);
-
 void sli_wisun_timer_stop(sli_wisun_timer_t *timer);
 
 /**
@@ -182,6 +175,8 @@ void sli_wisun_timer_stop(sli_wisun_timer_t *timer);
  * used to query the status of a timer, the functions with _ms and _s suffixes
  * provide the result respectively in milliseconds and seconds rounded to the
  * nearest integer.
+ * sli_wisun_timer_32_to_64_us() returns a 64bits time from a 32bits one, the
+ * result is only valid for values closer than (2^32)/2 to the current time.
  */
 uint32_t sli_wisun_timer_get_current_time32_us(void);
 uint64_t sli_wisun_timer_get_current_time_us(void);
@@ -194,8 +189,10 @@ uint64_t sli_wisun_timer_get_remaining_us(const sli_wisun_timer_t *timer);
 uint64_t sli_wisun_timer_get_remaining_ms(const sli_wisun_timer_t *timer);
 uint64_t sli_wisun_timer_get_remaining_s(const sli_wisun_timer_t *timer);
 
+bool sli_wisun_timer_is_infinite(const sli_wisun_timer_t *timer);
+
 uint64_t sli_wisun_timer_32_to_64_us(uint32_t time_us);
 
-bool sli_wisun_timer_is_infinite(const sli_wisun_timer_t *timer);
+void sli_wisun_timer_garbage_collection(void);
 
 #endif

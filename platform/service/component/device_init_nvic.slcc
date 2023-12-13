@@ -27,6 +27,7 @@ template_contribution:
       include: sl_device_init_nvic.h
       handler: sl_device_init_nvic
     priority: -9998
+    condition: [sl_system]
   - name: component_catalog
     value: device_init_nvic
 documentation:

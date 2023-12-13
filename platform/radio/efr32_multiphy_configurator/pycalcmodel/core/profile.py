@@ -137,16 +137,22 @@ class ModelProfile(object):
                 return False
         return True
 
-    def get_outputs(self, output_types=[]):
+    def get_outputs(self, output_types=[], only_in_public_log=False):
         if len(output_types) == 0:
             # return all
             for output in self.outputs:
+                # skip non-public outputs if requested
+                if only_in_public_log and not output.in_public_log:
+                    continue
                 yield output
         else:
             # return only requested
             for output in self.outputs:
                 for output_type in output_types:
                     if output.output_type == output_type:
+                        # skip non-public outputs if requested
+                        if only_in_public_log and not output.in_public_log:
+                            continue
                         yield output
                         break
 

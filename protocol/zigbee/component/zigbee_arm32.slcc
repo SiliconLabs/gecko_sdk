@@ -1,15 +1,16 @@
-id: "zigbee_arm32"
-label: "Zigbee ARM32"
-package: "Zigbee"
-category: "Zigbee"
-quality: "production"
-description: "This plugin contains defines to build Zigbee apps against ARM32."
+id: zigbee_arm32
+label: Zigbee ARM32
+package: Zigbee
+category: Zigbee
+quality: production
+description: This plugin contains defines to build Zigbee apps against ARM32.
 
 provides:
-  - name: "zigbee_arm32"
+  - name: arm32v7
+  - name: zigbee_arm32
 
 requires:
-  - name: "linux_arch_32"
+  - name: linux_arch_32
 
 documentation:
   docset: zigbee

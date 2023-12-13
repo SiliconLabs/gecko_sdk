@@ -42,67 +42,67 @@
 #define SL_KEYSCAN_DRIVER_ROW_NUMBER    3
 
 // <o SL_KEYSCAN_DRIVER_SCAN_DELAY_MS> Scan Delay
-//    <SL_KEYSCAN_DELAY_2MS=>     2ms
-//    <SL_KEYSCAN_DELAY_4MS=>     4ms
-//    <SL_KEYSCAN_DELAY_6MS=>     6ms
-//    <SL_KEYSCAN_DELAY_8MS=>     8ms
-//    <SL_KEYSCAN_DELAY_10MS=>    10ms
-//    <SL_KEYSCAN_DELAY_12MS=>    12ms
-//    <SL_KEYSCAN_DELAY_14MS=>    14ms
-//    <SL_KEYSCAN_DELAY_16MS=>    16ms
-//    <SL_KEYSCAN_DELAY_18MS=>    18ms
-//    <SL_KEYSCAN_DELAY_20MS=>    20ms
-//    <SL_KEYSCAN_DELAY_22MS=>    22ms
-//    <SL_KEYSCAN_DELAY_24MS=>    24ms
-//    <SL_KEYSCAN_DELAY_26MS=>    26ms
-//    <SL_KEYSCAN_DELAY_28MS=>    28ms
-//    <SL_KEYSCAN_DELAY_30MS=>    30ms
-//    <SL_KEYSCAN_DELAY_32MS=>    32ms
+//    <SL_HAL_KEYSCAN_DELAY_2MS=>     2ms
+//    <SL_HAL_KEYSCAN_DELAY_4MS=>     4ms
+//    <SL_HAL_KEYSCAN_DELAY_6MS=>     6ms
+//    <SL_HAL_KEYSCAN_DELAY_8MS=>     8ms
+//    <SL_HAL_KEYSCAN_DELAY_10MS=>    10ms
+//    <SL_HAL_KEYSCAN_DELAY_12MS=>    12ms
+//    <SL_HAL_KEYSCAN_DELAY_14MS=>    14ms
+//    <SL_HAL_KEYSCAN_DELAY_16MS=>    16ms
+//    <SL_HAL_KEYSCAN_DELAY_18MS=>    18ms
+//    <SL_HAL_KEYSCAN_DELAY_20MS=>    20ms
+//    <SL_HAL_KEYSCAN_DELAY_22MS=>    22ms
+//    <SL_HAL_KEYSCAN_DELAY_24MS=>    24ms
+//    <SL_HAL_KEYSCAN_DELAY_26MS=>    26ms
+//    <SL_HAL_KEYSCAN_DELAY_28MS=>    28ms
+//    <SL_HAL_KEYSCAN_DELAY_30MS=>    30ms
+//    <SL_HAL_KEYSCAN_DELAY_32MS=>    32ms
 // <i> Duration of the scan period per column
-// <i> Default: SL_KEYSCAN_DELAY_2MS
-#define SL_KEYSCAN_DRIVER_SCAN_DELAY_MS    SL_KEYSCAN_DELAY_2MS
+// <i> Default: SL_HAL_KEYSCAN_DELAY_2MS
+#define SL_KEYSCAN_DRIVER_SCAN_DELAY_MS    SL_HAL_KEYSCAN_DELAY_2MS
 
 // <o SL_KEYSCAN_DRIVER_DEBOUNCE_DELAY_MS> Debounce Delay
-//    <SL_KEYSCAN_DELAY_2MS=>     2ms
-//    <SL_KEYSCAN_DELAY_4MS=>     4ms
-//    <SL_KEYSCAN_DELAY_6MS=>     6ms
-//    <SL_KEYSCAN_DELAY_8MS=>     8ms
-//    <SL_KEYSCAN_DELAY_10MS=>    10ms
-//    <SL_KEYSCAN_DELAY_12MS=>    12ms
-//    <SL_KEYSCAN_DELAY_14MS=>    14ms
-//    <SL_KEYSCAN_DELAY_16MS=>    16ms
-//    <SL_KEYSCAN_DELAY_18MS=>    18ms
-//    <SL_KEYSCAN_DELAY_20MS=>    20ms
-//    <SL_KEYSCAN_DELAY_22MS=>    22ms
-//    <SL_KEYSCAN_DELAY_24MS=>    24ms
-//    <SL_KEYSCAN_DELAY_26MS=>    26ms
-//    <SL_KEYSCAN_DELAY_28MS=>    28ms
-//    <SL_KEYSCAN_DELAY_30MS=>    30ms
-//    <SL_KEYSCAN_DELAY_32MS=>    32ms
+//    <SL_HAL_KEYSCAN_DELAY_2MS=>     2ms
+//    <SL_HAL_KEYSCAN_DELAY_4MS=>     4ms
+//    <SL_HAL_KEYSCAN_DELAY_6MS=>     6ms
+//    <SL_HAL_KEYSCAN_DELAY_8MS=>     8ms
+//    <SL_HAL_KEYSCAN_DELAY_10MS=>    10ms
+//    <SL_HAL_KEYSCAN_DELAY_12MS=>    12ms
+//    <SL_HAL_KEYSCAN_DELAY_14MS=>    14ms
+//    <SL_HAL_KEYSCAN_DELAY_16MS=>    16ms
+//    <SL_HAL_KEYSCAN_DELAY_18MS=>    18ms
+//    <SL_HAL_KEYSCAN_DELAY_20MS=>    20ms
+//    <SL_HAL_KEYSCAN_DELAY_22MS=>    22ms
+//    <SL_HAL_KEYSCAN_DELAY_24MS=>    24ms
+//    <SL_HAL_KEYSCAN_DELAY_26MS=>    26ms
+//    <SL_HAL_KEYSCAN_DELAY_28MS=>    28ms
+//    <SL_HAL_KEYSCAN_DELAY_30MS=>    30ms
+//    <SL_HAL_KEYSCAN_DELAY_32MS=>    32ms
 // <i> Duration of debounce period once a key press is detected.
-// <i> Default: SL_KEYSCAN_DELAY_2MS
-#define SL_KEYSCAN_DRIVER_DEBOUNCE_DELAY_MS    SL_KEYSCAN_DELAY_2MS
+// <i> Default: SL_HAL_KEYSCAN_DELAY_2MS
+#define SL_KEYSCAN_DRIVER_DEBOUNCE_DELAY_MS    SL_HAL_KEYSCAN_DELAY_2MS
 
 // <o SL_KEYSCAN_DRIVER_STABLE_DELAY_MS> Stable Delay
-//    <SL_KEYSCAN_DELAY_2MS=>     2ms
-//    <SL_KEYSCAN_DELAY_4MS=>     4ms
-//    <SL_KEYSCAN_DELAY_6MS=>     6ms
-//    <SL_KEYSCAN_DELAY_8MS=>     8ms
-//    <SL_KEYSCAN_DELAY_10MS=>    10ms
-//    <SL_KEYSCAN_DELAY_12MS=>    12ms
-//    <SL_KEYSCAN_DELAY_14MS=>    14ms
-//    <SL_KEYSCAN_DELAY_16MS=>    16ms
-//    <SL_KEYSCAN_DELAY_18MS=>    18ms
-//    <SL_KEYSCAN_DELAY_20MS=>    20ms
-//    <SL_KEYSCAN_DELAY_22MS=>    22ms
-//    <SL_KEYSCAN_DELAY_24MS=>    24ms
-//    <SL_KEYSCAN_DELAY_26MS=>    26ms
-//    <SL_KEYSCAN_DELAY_28MS=>    28ms
-//    <SL_KEYSCAN_DELAY_30MS=>    30ms
-//    <SL_KEYSCAN_DELAY_32MS=>    32ms
+//    <SL_HAL_KEYSCAN_DELAY_2MS=>     2ms
+//    <SL_HAL_KEYSCAN_DELAY_4MS=>     4ms
+//    <SL_HAL_KEYSCAN_DELAY_6MS=>     6ms
+//    <SL_HAL_KEYSCAN_DELAY_8MS=>     8ms
+//    <SL_HAL_KEYSCAN_DELAY_10MS=>    10ms
+//    <SL_HAL_KEYSCAN_DELAY_12MS=>    12ms
+//    <SL_HAL_KEYSCAN_DELAY_14MS=>    14ms
+//    <SL_HAL_KEYSCAN_DELAY_16MS=>    16ms
+//    <SL_HAL_KEYSCAN_DELAY_18MS=>    18ms
+//    <SL_HAL_KEYSCAN_DELAY_20MS=>    20ms
+//    <SL_HAL_KEYSCAN_DELAY_22MS=>    22ms
+//    <SL_HAL_KEYSCAN_DELAY_24MS=>    24ms
+//    <SL_HAL_KEYSCAN_DELAY_26MS=>    26ms
+//    <SL_HAL_KEYSCAN_DELAY_28MS=>    28ms
+//    <SL_HAL_KEYSCAN_DELAY_30MS=>    30ms
+//    <SL_HAL_KEYSCAN_DELAY_32MS=>    32ms
 // <i> Duration of the stable period after the debounce stage.
-// <i> Default: SL_KEYSCAN_DELAY_2MS
-#define SL_KEYSCAN_DRIVER_STABLE_DELAY_MS    SL_KEYSCAN_DELAY_2MS
+// <i> Default: SL_HAL_KEYSCAN_DELAY_2MS
+#define SL_KEYSCAN_DRIVER_STABLE_DELAY_MS    SL_HAL_KEYSCAN_DELAY_2MS
 
 // <q SL_KEYSCAN_DRIVER_SINGLEPRESS> keyscan single-press functionality
 // <i> Enable or disable single-press functionality.

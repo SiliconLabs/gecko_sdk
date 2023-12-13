@@ -179,40 +179,6 @@ EmberStatus ezspMatchDescriptorsRequest(EmberNodeId target,
                                         EmberApsOption options);
 /** @} END name group */
 
-/** @name Binding Manager Functions
- * @{
- */
-
-/**
- * @brief An end device bind request to the coordinator. If the coordinator receives a
- * second end device bind request then a binding is created for every matching
- * cluster.
- *
- * @param localNodeId  The node ID of the local device.
- * @param localEui64  The EUI64 of the local device.
- * @param endpoint  The endpoint to be bound.
- * @param profile  The application profile of the endpoint.
- * @param inCount  The number of input clusters.
- * @param outCount  The number of output clusters.
- * @param inClusters  The list of input clusters.
- * @param outClusters  The list of output clusters.
- * @param options  The options to use when sending the request. See
- * emberSendUnicast() for a description.
- *
- * @return An EmberStatus value. EMBER_SUCCESS, EMBER_NO_BUFFERS,
- * EMBER_NETWORK_DOWN or EMBER_NETWORK_BUSY.
- */
-EmberStatus ezspEndDeviceBindRequest(EmberNodeId localNodeId,
-                                     EmberEUI64 localEui64,
-                                     uint8_t endpoint,
-                                     uint16_t profile,
-                                     uint8_t inCount,
-                                     uint8_t outCount,
-                                     uint16_t *inClusters,
-                                     uint16_t *outClusters,
-                                     EmberApsOption options);
-/** @} END name group */
-
 /** @name Function to Decode Address Response Messages
  * @{
  */

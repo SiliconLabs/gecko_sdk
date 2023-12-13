@@ -151,10 +151,14 @@ uint32_t decode_temp(uint8_t* read_register)
 
   // Formula to decode read Temperature from the Si7021 Datasheet
   tempValue = ((uint32_t) read_register[0] << 8) + (read_register[1] & 0xfc);
-  actual_temp = (((tempValue) * 175.72) / 65536) - 46.85;
+  actual_temp = (((tempValue) * 175.72f) / 65536) - 46.85f;
 
   // Round the temperature to an integer value
-  rounded_temp = (uint32_t)(actual_temp + 0.5 - (actual_temp < 0));
+  if (actual_temp < 0) {
+    rounded_temp = (uint32_t)(actual_temp - 0.5f);
+  } else {
+    rounded_temp = (uint32_t)(actual_temp + 0.5f);
+  }
 
   return rounded_temp;
 }
@@ -178,7 +182,7 @@ static void SI7021_measure(uint32_t *rhData, int32_t *tData)
   EFM_ASSERT(ret == i2cTransferDone);
 
   // Wait for data to become ready
-  timeout = 300;
+  timeout = 500;
   while (timeout--) {
     ret = SI7021_transaction(I2C_FLAG_READ, NULL, 0, readData, 2);
     if (ret == i2cTransferDone) {

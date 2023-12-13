@@ -34,7 +34,6 @@
 EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 #define NO_READLINE // disable readline in UC
 //#include "serial/ember-printf.h"
-#include "command-interpreter2.h"
 #include "cli.h"
 
 #include <sys/types.h>         // for fstat()
@@ -58,22 +57,12 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 #include <stdarg.h>            // for vfprintf()
 #include <sys/wait.h>          // for wait()
 
-#if defined(AF_USB_HOST)
-  #include "app/util/ezsp/ezsp-protocol.h"
-  #include "app/ezsp-host/ezsp-host-io.h"
-#elif defined(EZSP_ASH)
+#if defined(EZSP_ASH)
 // All needed For ashSerialGetFd()
   #include "app/util/ezsp/ezsp-protocol.h"
   #include "app/ezsp-host/ash/ash-host.h"
   #include "app/ezsp-host/ezsp-host-io.h"
   #include "app/ezsp-host/ash/ash-host-ui.h"
-#endif
-
-#if defined(EMBER_AF_PLUGIN_GATEWAY)
-  #include "app/framework/plugin-host/gateway/gateway-support.h"
-#else
-  #include "app/util/gateway/backchannel.h"
-  #include "app/util/gateway/gateway.h"
 #endif
 
 #include "linux-serial.h"
@@ -96,6 +85,7 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
 #define LINE_FEED              0x0A
 #define EOF_CHAR               0x04
 #define MAX_STRING_LENGTH      250  // arbitrary limit
+#define EMBER_COMMAND_BUFFER_LENGTH 100
 
 static int STDIN = 0;
 
@@ -114,7 +104,6 @@ static int pipeFileDescriptors[NUM_PORTS][4] = {
 static bool amParent = true;
 static bool useControlChannel = true;
 static bool debugOn = false;
-static bool promptSet = false;
 static char prompt[MAX_PROMPT_LENGTH];
 static pid_t childPid[NUM_PORTS] = { INVALID_PID, INVALID_PID };
 
@@ -165,7 +154,6 @@ static char* duplicateString(const char* source);
 static void parentCleanupAfterChildDied(void);
 static void installSignalHandler(void);
 static void childCleanupAndExit(void);
-static void handleBackchannelConnection(uint8_t port);
 
 static bool sendGoAhead = true;
 
@@ -197,26 +185,9 @@ EmberStatus emberSerialInit(uint8_t port,
     return EMBER_SUCCESS;
   }
 
-  // Without the backchannel, there is only one serial port available (STDIN).
-  if (!backchannelEnable
-      && emberSerialInitCalled) {
+  // there is only one serial port available (STDIN).
+  if (emberSerialInitCalled) {
     return EMBER_SERIAL_INVALID_PORT;
-  }
-
-  if (backchannelEnable) {
-    // For the CLI, wait here until a new client connects for the first time.
-    BackchannelState state =
-      backchannelCheckConnection(port,
-                                 (port                     // waitForConnection?
-                                  == SERIAL_PORT_CLI));
-    if (port == SERIAL_PORT_CLI && state != NEW_CONNECTION) {
-      debugPrint("Failed to get new backchannel connection.\n");
-      return EMBER_ERR_FATAL;
-    } else if ( !(state == NEW_CONNECTION || state == CONNECTION_EXISTS) ) {
-      // We will defer initializing the RAW serial port (spawning the child
-      // and that jazz) until we actually have a new client connection.
-      return EMBER_SUCCESS;
-    }
   }
 
   EmberStatus status = serialInitInternal(port);
@@ -308,59 +279,12 @@ static EmberStatus serialInitInternal(uint8_t port)
   return EMBER_SUCCESS;
 }
 
-// Checks to see if there is a remote connection in place, or if a new
-// one has come in.  When a new one comes in, spawn a child process to
-// deal with it.
-static bool handleRemoteConnection(uint8_t port)
-{
-  BackchannelState state =
-    backchannelCheckConnection(port,
-                               false); // don't wait for new connection
-  if (state == CONNECTION_ERROR
-      || state == NO_CONNECTION) {
-    // BugzId:12928 If child still exists, return true to suck pipe 'til empty
-    return (childPid[port] != INVALID_PID);
-  } else if (state == CONNECTION_EXISTS) {
-    return true;
-  } // else
-    //   state == NEW_CONNECTION
-
-  return (EMBER_SUCCESS == serialInitInternal(port));
-}
-
-static void handleBackchannelConnection(uint8_t port)
-{
-  // BugzId:12928 Close out sockets used by other children but not this one
-  int i;
-  for (i = 0; i < NUM_PORTS; i++) {
-    if (i != port) {
-      backchannelCloseConnection(i);
-    }
-  }
-
-  if (EMBER_SUCCESS
-      ==  backchannelMapStandardInputOutputToRemoteConnection(port)) {
-    if (port == SERIAL_PORT_CLI) {
-      fprintf(stdout, "Connected.\r\n");
-      fflush(stdout);
-    } // else
-      //   Raw port, don't print anything.
-  } else {
-    childCleanupAndExit();
-  }
-}
-
 static void childRun(uint8_t port)
 {
   childProcessPort = port;
 
   close(DATA_READER(port));
   close(CONTROL_WRITER(port));
-
-  if (backchannelEnable) {
-    handleBackchannelConnection(port);
-  } // else
-    //   don't do anything
 
   // This fixes a bug on Cygwin where a process that
   // holds onto an open file descriptor after a fork()
@@ -386,20 +310,6 @@ static void childRun(uint8_t port)
   // Normally the above function NEVER returns
   // If we get here it is an error.
   assert(0);
-}
-
-void emberSerialSetPrompt(const char* thePrompt)
-{
-  if (thePrompt == NULL) {
-    promptSet = false;
-    return;
-  }
-
-  // Substract one for the '>'
-  snprintf(prompt,
-           MAX_PROMPT_LENGTH - 1,
-           "%s>",
-           thePrompt);
 }
 
 static void setNonBlockingFD(int fd)
@@ -433,7 +343,6 @@ void emberSerialCleanup(void)
       childPid[port] = INVALID_PID;
     }
   }
-  gatewayBackchannelStop();
 }
 
 static void parentCleanupAfterChildDied(void)
@@ -460,10 +369,6 @@ static void parentCleanupAfterChildDied(void)
   close(CONTROL_WRITER(childPort));
   DATA_READER(childPort) = INVALID_FD;
   CONTROL_WRITER(childPort) = INVALID_FD;
-  // BugzId:12928 Parent needs to close its socket too
-  if (backchannelEnable) {
-    backchannelCloseConnection(childPort);
-  }
 }
 
 static void childCleanupAndExit(void)
@@ -472,28 +377,11 @@ static void childCleanupAndExit(void)
     writeHistory();
   }
   if (childProcessPort != -1) {
-    if (backchannelEnable) {
-      backchannelStopServer(childProcessPort);
-    }
     close(DATA_WRITER(childProcessPort));
     close(CONTROL_READER(childProcessPort));
   }
 
   exit(0);
-}
-
-// This works only for the command interpreter.
-// Loop and get pointers to all the strings of the available commands.
-void emberSerialCommandCompletionInit(EmberCommandEntry listOfCommands[])
-{
-#if READLINE_SUPPORT
-  allCommands = listOfCommands;
-  rl_attempted_completion_function = commandCompletion;
-  rl_completion_entry_function = filenameCompletion;
-#else
-  (void) listOfCommands;
-#endif
-  usingCommandInterpreter = true;
 }
 
 // This is for QA's cli
@@ -530,14 +418,6 @@ static bool readyForSerialInput(uint8_t port)
       // We assume this function is only used for CLI input.
       // If the CLI process died, then the parent should also
       // go away.
-      // BugzId:12928: Except in the case of backchannel CLI
-      // client, where parent cleans up and awaits a new client.
-      // For the RAW input, which is only accessible with the
-      // backchannel enabled, that child process may come and go
-      // and we don't need to worry about it.
-      if (backchannelEnable) {
-        return true; // Let caller know we didn't deliver go-ahead
-      }
       emberSerialCleanup();
       exit(-1);
     }
@@ -590,17 +470,6 @@ EmberStatus emberSerialReadByte(uint8_t port, uint8_t *dataByte)
 {
   static bool waitForEol = false;
   size_t bytes;
-
-  if (backchannelEnable
-      && !handleRemoteConnection(port)) {
-    if (port == SERIAL_PORT_CLI) {
-      // BugzId:12928 While waiting for new client, pretend serial port empty
-      // and set sendGoAhead to force a go-ahead when new client connects
-      sendGoAhead = true;
-      return EMBER_SERIAL_RX_EMPTY;
-    }
-    return EMBER_SERIAL_INVALID_PORT;
-  }
 
   // The command interpreter reads bytes until it gets an EOL.
   // The CLI reads bytes until it gets a "\r\n".
@@ -748,17 +617,12 @@ static void processSerialInput(uint8_t port)
     }
 
     if (port == SERIAL_PORT_CLI) {
-      // If we are operating in a backchannel environment, then STDIN has
-      // already been re-mapped to the correct socket.
-
       // This performs a malloc()
       readData = readline(prompt);
     } else {
       // Raw data
       readData = &(singleByte[0]);
-      bool success = (backchannelEnable
-                      ? (EMBER_SUCCESS == backchannelReceive(port, readData))
-                      : (1 != read(STDIN, readData, 1)));
+      bool success = (1 != read(STDIN, readData, 1));
 
       if (!success) {
         childCleanupAndExit();
@@ -826,23 +690,14 @@ EmberStatus emberSerialPrintfVarArg(uint8_t port, const char * formatString, va_
 {
   EmberStatus stat = EMBER_SERIAL_INVALID_PORT;
   char* newFormatString = transformEmberPrintfToStandardPrintf(formatString,
-                                                               !backchannelEnable);
+                                                               true);
   if (newFormatString == NULL) {
     return EMBER_NO_BUFFERS;
   }
-  if (backchannelEnable) {
-    if (handleRemoteConnection(port)) {
-      stat = backchannelClientVprintf(port, newFormatString, ap);
-      if (stat == EMBER_ERR_FATAL) {
-        // BugzId:12928 Defer cleanup of disappeared client to emberSerialReadByte()
-      }
-    }
-  } else {
-    stat = (0 == vprintf(newFormatString, ap)
-            ? EMBER_ERR_FATAL
-            : EMBER_SUCCESS);
-    fflush(stdout);
-  }
+  stat = (0 == vprintf(newFormatString, ap)
+          ? EMBER_ERR_FATAL
+          : EMBER_SUCCESS);
+  fflush(stdout);
   free(newFormatString);
   return stat;
 }
@@ -889,22 +744,9 @@ EmberStatus emberSerialWriteHex(uint8_t port, uint8_t dataByte)
 EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length)
 {
   EmberStatus stat = EMBER_ERR_FATAL;
-  if (backchannelEnable) {
-    if (handleRemoteConnection(port)) {
-      // Ideally we expect the "emberSerialWriteData()" call to be atomic,
-      // and not block.  We probably should try to determine if the write()
-      // will block before executing it.
-      stat = backchannelSend(port, data, length);
-      if (stat == EMBER_ERR_FATAL) {
-        // BugzId:12928 Defer cleanup of disappeared client to emberSerialReadByte()
-      }
-    } // else
-      //   failure, fall-thru
-  } else {
-    // Normal IO
-    if (fwrite(data, length, 1, stdout) == 1) {
-      stat = EMBER_SUCCESS;
-    }
+  // Normal IO
+  if (fwrite(data, length, 1, stdout) == 1) {
+    stat = EMBER_SUCCESS;
   }
   return stat;
 }
@@ -913,9 +755,7 @@ EmberStatus emberSerialWaitSend(uint8_t port)
 {
   (void) port;
 
-  if (!backchannelEnable) {
-    fflush(stdout);
-  }
+  fflush(stdout);
   return EMBER_SUCCESS;
 }
 

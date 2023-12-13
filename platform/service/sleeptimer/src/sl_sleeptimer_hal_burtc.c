@@ -28,6 +28,9 @@
  *
  ******************************************************************************/
 
+#include "em_device.h"
+#if defined(_SILICON_LABS_32B_SERIES_2)
+
 #include "sl_sleeptimer.h"
 #include "sli_sleeptimer_hal.h"
 #include "em_burtc.h"
@@ -317,4 +320,6 @@ void sli_sleeptimer_set_pm_em_requirement(void)
   }
 }
 #endif
+#endif
+
 #endif

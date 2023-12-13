@@ -39,7 +39,6 @@
                 .syntax  unified
                 .arch    armv8-m.main
 
-
                 .section    .stack
                 .align      9
                 #ifdef __STACK_SIZE
@@ -72,11 +71,11 @@
  __HeapLimit:
                 .size       __HeapLimit, . - __HeapLimit
 
-                #define __INITIAL_SP     __StackTop
+#define __INITIAL_SP     __StackTop
                 #if defined(SL_TRUSTZONE_SECURE)
-                #define __STACK_LIMIT    __StackLimit
+#define __STACK_LIMIT    __StackLimit
                 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-                #define __STACK_SEAL     __StackSeal
+#define __STACK_SEAL     __StackSeal
                 #endif
                 #endif // SL_TRUSTZONE_SECURE
 
@@ -102,7 +101,6 @@ __Vectors:
                 .long    sl_app_properties                  /*     Application properties */
                 .long    PendSV_Handler                     /*  -2 PendSV Handler */
                 .long    SysTick_Handler                    /*  -1 SysTick Handler */
-
 
     /* External interrupts */
                 .long    SMU_SECURE_IRQHandler   /* 0 - SMU_SECURE */
@@ -188,7 +186,6 @@ __Vectors_End:
                 .equ     __Vectors_Size, __Vectors_End - __Vectors
                 .size    __Vectors, . - __Vectors
 
-
                 .thumb
                 .section .text
                 .align   2
@@ -257,7 +254,7 @@ Reset_Handler:
 .L_loop2_done:
 
                 #ifndef __START
-                #define __START _start
+#define __START _start
                 #endif
                 bl      __START
 

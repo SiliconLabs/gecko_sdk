@@ -15,8 +15,9 @@ void ZAF_setNetworkLearnMode(E_NETWORK_LEARN_MODE_ACTION bMode)
 
   pAppHandle = ZAF_getAppHandle();
 
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_NETWORK_LEARN_MODE_START;
-  CommandPackage.uCommandParams.SetSmartStartLearnMode.eLearnMode = bMode;
+  SZwaveCommandPackage CommandPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_NETWORK_LEARN_MODE_START,
+    .uCommandParams.SetSmartStartLearnMode.eLearnMode = bMode
+  };
   QueueNotifyingSendToBack(pAppHandle->pZwCommandQueue, (uint8_t*)&CommandPackage, 0);
 }

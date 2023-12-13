@@ -741,4 +741,4 @@ typedef struct {
 /** @} End of group BGM24_I2C */
 /** @} End of group Parts */
 
-#endif /* BGM24_I2C_H */
+#endif // BGM24_I2C_H

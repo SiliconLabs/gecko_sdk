@@ -45,6 +45,6 @@ template_contribution:
     value: "simple_button_{{instance}}"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-simple-button
+    document: platform-driver/simple-button
 validation_helper:
   - path: button_led_validation.lua

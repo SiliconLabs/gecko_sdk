@@ -167,14 +167,14 @@ static const app_setting_wisun_t wisun_app_settings_default = {
 #endif
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
-    .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,
+    .type = SL_WISUN_PHY_CONFIG_FAN10,
     .config.fan10.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
     .config.fan10.op_class = WISUN_CONFIG_OPERATING_CLASS,
     .config.fan10.op_mode = WISUN_CONFIG_OPERATING_MODE,
   },
 #elif defined(WISUN_CONFIG_DEFAULT_PHY_FAN11)
   .phy = {
-    .type = WISUN_CONFIG_DEFAULT_PHY_FAN11,
+    .type = SL_WISUN_PHY_CONFIG_FAN11,
     .config.fan11.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
     .config.fan11.chan_plan_id = WISUN_CONFIG_CHANNEL_PLAN_ID,
     .config.fan11.phy_mode_id = WISUN_CONFIG_PHY_MODE_ID,

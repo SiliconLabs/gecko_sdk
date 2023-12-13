@@ -1,0 +1,26 @@
+id: "simple_rail_assistance"
+label: "Simple RAIL Assistance"
+package: "Flex"
+category: "Flex|RAIL|Utility"
+quality: "production"
+description: "Adds led and vcom helper functions"
+root_path: "app/flex/component/rail/simple_rail_assistance"
+
+requires:
+  - name: component_catalog
+
+include:
+  - path: "."
+    file_list:
+    - "path": "simple_rail_assistance.h"
+
+source:
+  - path: "simple_rail_assistance.c"
+
+provides:
+  - name: "simple_rail_assistance"
+
+template_contribution:
+#----------------- Component Catalog -----------------
+  - name: component_catalog
+    value: simple_rail_assistance

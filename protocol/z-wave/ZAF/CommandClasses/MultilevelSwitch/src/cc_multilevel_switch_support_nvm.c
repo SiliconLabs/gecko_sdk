@@ -27,12 +27,11 @@ bool
 cc_multilevel_switch_write(uint8_t multilevel_component_id, cc_multilevel_switch_t *multilevel_switch)
 {
   zpal_status_t status;
-  multilevel_switch_data_t multilevel_switch_data;
-
-  multilevel_switch_data.endpoint = multilevel_switch->endpoint;
-  multilevel_switch_data.current_value = ZAF_Actuator_GetCurrentValue(&multilevel_switch->actuator);
-
-  status = ZAF_nvm_write(CC_MULTILEVEL_SWITCH_OFFSET(multilevel_component_id), &multilevel_switch_data, sizeof(multilevel_switch_data_t));
+  multilevel_switch_data_t multilevel_switch_data = {
+    .endpoint = multilevel_switch->endpoint,
+    .current_value = ZAF_Actuator_GetCurrentValue(&multilevel_switch->actuator)
+  };
+  status = ZAF_nvm_write(CC_MULTILEVEL_SWITCH_OFFSET(multilevel_component_id), &multilevel_switch_data, sizeof(multilevel_switch_data));
 
   return status == ZPAL_STATUS_OK;
 }
@@ -41,9 +40,9 @@ bool
 cc_multilevel_switch_read(uint8_t multilevel_component_id, cc_multilevel_switch_t *multilevel_switch)
 {
   zpal_status_t status;
-  multilevel_switch_data_t multilevel_switch_data;
+  multilevel_switch_data_t multilevel_switch_data = { 0 };
 
-  status = ZAF_nvm_read(CC_MULTILEVEL_SWITCH_OFFSET(multilevel_component_id), &multilevel_switch_data, sizeof(multilevel_switch_data_t));
+  status = ZAF_nvm_read(CC_MULTILEVEL_SWITCH_OFFSET(multilevel_component_id), &multilevel_switch_data, sizeof(multilevel_switch_data));
   if (status != ZPAL_STATUS_OK) {
     return false;
   }

@@ -1,7 +1,7 @@
 project_name: psa_crypto_x509
 package: platform
 quality: production
-label: Platform - PSA Crypto X.509
+label: Platform Security - SoC PSA Crypto X.509
 description: >
   This example project uses opaque ECDSA keys to implement the X.509 standard for certificates in Mbed TLS.
 category: Example|Platform

@@ -37,14 +37,14 @@
 
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
+#include "instance/instance.hpp"
 #include "mac/mac_types.hpp"
 #include "radio/radio.hpp"
+#include "thread/child.hpp"
 #include "thread/mesh_forwarder.hpp"
 #include "thread/thread_netif.hpp"
-#include "thread/topology.hpp"
 
 namespace ot {
 

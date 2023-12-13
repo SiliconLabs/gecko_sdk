@@ -1,0 +1,18 @@
+label: ot-cli-ftd-tz-workspace
+description: >
+    Workspace to build trustzone enabled ot-cli-ftd application and accompanying bootloader.
+quality: evaluation
+
+project:
+  - path: ../../ot-tz-secure-app/ot-tz-secure-application.slcp
+    id: ot-tz-secure-application
+    output: ot-tz-secure-application
+  - path: ot-cli-ftd-tz-ns.slcp
+    id: ot-tz-nonsecure-application
+    output: ot-cli-ftd-tz-ns
+  - path: ../../../../../platform/bootloader/sample-apps/workspaces/Series-2/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp
+    id: application
+    output: bootloader-storage-internal-single
+
+post_build:
+    profile: ot-tz-workspace

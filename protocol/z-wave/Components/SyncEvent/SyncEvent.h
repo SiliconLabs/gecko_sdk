@@ -90,7 +90,7 @@ void SyncEventBind(SSyncEvent* pThis, void(*pFunction)(void));
 * \param pFunction Function pointer to function of type: void Foo(FooObject*)
 * \param pObject Object pointer to pass as argument to bound function
 */
-void SyncEventBindObject(SSyncEvent* pThis, void(*pFunction)(), void* pObject);
+void SyncEventBindObject(SSyncEvent* pThis, void(*pFunction)(void *), void* pObject);
 
 /**
 * \brief Invoke the SyncEvent
@@ -154,7 +154,7 @@ void SyncEventRetBind(SSyncEventRet* pThis, uint32_t(*pFunction)(void));
 * \param pFunction Function pointer to function of type: uint32_t Foo(FooObject*)
 * \param pObject Object pointer to pass as argument to bound function
 */
-void SyncEventRetBindObject(SSyncEventRet* pThis, uint32_t(*pFunction)(), void* pObject);
+void SyncEventRetBindObject(SSyncEventRet* pThis, uint32_t(*pFunction)(void *), void* pObject);
 
 /**
 * \brief Invoke the SyncEvent
@@ -226,7 +226,7 @@ void SyncEventArg1Bind(SSyncEventArg1* pThis, void(*pFunction)(uint32_t));
 * \param pFunction Function pointer to function of type: void Foo(FooObject*, uint32_t)
 * \param pObject Object pointer to pass as argument to bound function
 */
-void SyncEventArg1BindObject(SSyncEventArg1* pThis, void(*pFunction)(), void* pObject);
+void SyncEventArg1BindObject(SSyncEventArg1* pThis, void(*pFunction)(void *, uint32_t), void* pObject);
 
 /**
 * \brief Invoke the SyncEvent
@@ -287,10 +287,10 @@ void SyncEventArg2Bind(SSyncEventArg2* pThis, void(*pFunction)(uint32_t, uint32_
 * Once bound invocation will call function with pointer as argument.
 *
 * \param pThis SyncEvent object structure.
-* \param pFunction Function pointer to function of type: void Foo(FooObject*, uint32_t)
+* \param pFunction Function pointer to function of type: void Foo(FooObject*, uint32_t, uint32_t)
 * \param pObject Object pointer to pass as argument to bound function
 */
-void SyncEventArg2BindObject(SSyncEventArg2* pThis, void(*pFunction)(), void* pObject);
+void SyncEventArg2BindObject(SSyncEventArg2* pThis, void(*pFunction)(void *, uint32_t, uint32_t), void* pObject);
 
 /**
 * \brief Invoke the SyncEvent

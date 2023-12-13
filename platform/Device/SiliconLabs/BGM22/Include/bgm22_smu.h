@@ -1310,4 +1310,4 @@ typedef struct {
 /** @} End of group BGM22_SMU_CFGNS */
 /** @} End of group Parts */
 
-#endif /* BGM22_SMU_H */
+#endif // BGM22_SMU_H

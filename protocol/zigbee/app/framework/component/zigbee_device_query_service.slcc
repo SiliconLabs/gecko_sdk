@@ -1,22 +1,21 @@
 package: Zigbee
-description: This component queries new devices for their endpoints and clusters to
-  record information in the Device Database component.
+description: This component queries new devices for their endpoints and clusters to record information in the Device Database component.
 label: Device Query Service
 quality: production
 id: zigbee_device_query_service
 category: Zigbee|Utility
 provides:
-   - name: "zigbee_device_query_service"
+  - name: zigbee_device_query_service
 requires:
-   - name: "zigbee_device_database"
-   - name: "zigbee_concentrator"
+  - name: zigbee_device_database
+  - name: zigbee_concentrator
 config_file:
   - path: protocol/zigbee/app/framework/plugin/device-query-service/config/device-query-service-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/device-query-service/device-query-service.c
   - path: protocol/zigbee/app/framework/plugin/device-query-service/device-query-service-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/device-query-service
     file_list:

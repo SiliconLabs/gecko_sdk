@@ -1,0 +1,31 @@
+id: "ncp_btmesh_ae_client"
+label: "NCP Advertisement Extension Client"
+package: "Btmesh"
+description: >
+  NCP Advertisement Extension Client component enables the Silabs Configuration Client vendor model for the node.
+  Silabs Configuration Client can setup other nodes with Silabs Configuration Server Feature enabled (e.g. by the
+  Advertisement Extension Server component).
+  This is a proprietary feature which breaks compliance with AE in BT Mesh 1.1 specification.
+  This component is prepared for integration into NCP applications.
+
+  This is a No-Code component.
+category: "Bluetooth Mesh|Models|Proprietary"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_ae_client"
+tag:
+  - No-Code
+
+config_file:
+  - path: btmesh_ae_client.dcd
+    directory: btmeshconf
+provides:
+  - name: "ncp_btmesh_ae_client"
+requires:
+  - name: "btmesh_stack_advertiser_extended"
+  - name: "btmesh_stack_advertiser_legacy"
+  - name: "btmesh_stack_scanner_extended"
+  - name: "btmesh_stack_scanner_legacy"
+  - name: "btmesh_stack_silabs_config_client"
+
+validation_helper:
+  - path: "../../script/validation/ncp_soc_compatibility.lua"

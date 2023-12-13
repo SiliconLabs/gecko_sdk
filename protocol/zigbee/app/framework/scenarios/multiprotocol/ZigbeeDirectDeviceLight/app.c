@@ -27,6 +27,7 @@
 #include "app/framework/plugin/network-creator-security/network-creator-security.h"
 #include "app/framework/plugin/network-creator/network-creator.h"
 #include "app/framework/plugin/reporting/reporting.h"
+#include "stack/include/zigbee-security-manager.h"
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_TUNNELING_PRESENT
 #include "zigbee_direct_tunneling.h"
 #endif //SL_CATALOG_ZIGBEE_DIRECT_TUNNELING_PRESENT
@@ -380,9 +381,9 @@ static bool startPjoinAndIdentifying(uint16_t identifyTime)
 {
   EmberStatus status;
   EmberEUI64 wildcardEui64 = EMBER_NULL_EUI64;
-  EmberKeyData centralizedKey = ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY;
+  sl_zb_sec_man_key_t centralizedKey = ZIGBEE_3_CENTRALIZED_SECURITY_LINK_KEY;
 
-  emberAddTransientLinkKey(wildcardEui64, &centralizedKey);
+  sl_zb_sec_man_import_transient_key(wildcardEui64, &centralizedKey);
   status = emberPermitJoining(identifyTime);
 
   emberAfWriteServerAttribute(emberAfPrimaryEndpoint(),

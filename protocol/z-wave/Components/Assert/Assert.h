@@ -52,7 +52,7 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef void (*AssertCb_t)();
+typedef void (*AssertCb_t)(void);
 
 void Assert(const char* pFileName, int iLineNumber);
 /**

@@ -46,6 +46,8 @@ class Profile_Connect_Ocelot(Profile_Base_Ocelot):
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
 
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
         return profile
 
     def profile_calculate(self, model):

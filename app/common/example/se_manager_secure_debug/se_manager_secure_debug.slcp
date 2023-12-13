@@ -1,7 +1,7 @@
 project_name: se_manager_secure_debug
 package: platform
 quality: production
-label: Platform - SE Manager Secure Debug
+label: Platform Security - SoC SE Manager Secure Debug
 description: >
   This example project demonstrates the secure debug API of SE Manager.
 category: Example|Platform

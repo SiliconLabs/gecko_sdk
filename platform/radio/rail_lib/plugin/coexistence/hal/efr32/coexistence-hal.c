@@ -355,7 +355,10 @@ static void GPIOINT_InitSafe(void)
 
 void COEX_HAL_CallAtomic(COEX_AtomicCallback_t cb, void *arg)
 {
-  CORE_CRITICAL_SECTION((*cb)(arg); )
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  (*cb)(arg);
+  CORE_EXIT_CRITICAL();
 }
 
 bool COEX_HAL_ConfigPhySelect(COEX_HAL_GpioConfig_t *gpioConfig)
@@ -380,7 +383,7 @@ bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig)
   CMU_ClockEnable(cmuClock_PRS, true);
   // enable wifiTx interrupt if not already enabled
   if (gpioConfig->intNo == INVALID_INTERRUPT) {
-    sli_coex_enableGpioInt(gpioConfig, true, false);
+    sli_coex_enableGpioInt(gpioConfig, true, NULL);
   }
   // Connect WIFI_TX_CHANNEL to CONSUMER_MODEM_PAEN for signal identifier reset
   // via PRS

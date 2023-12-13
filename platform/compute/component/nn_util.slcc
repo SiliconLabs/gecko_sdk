@@ -1,0 +1,16 @@
+id: nn_util
+label: NN Utilities
+package: platform
+description: >
+  This component provides some NN (neural network) utilities.
+category: Platform|Compute
+quality: production
+root_path: platform/compute/nn
+source:
+  - path: src/sl_nn_util.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_nn_util.h
+provides:
+  - name: nn_util

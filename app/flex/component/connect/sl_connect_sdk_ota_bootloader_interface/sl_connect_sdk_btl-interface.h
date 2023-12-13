@@ -31,9 +31,6 @@
 #ifndef _SL_CONNECT_SDK_BOOTLOADER_INTERFACE_H_
 #define _SL_CONNECT_SDK_BOOTLOADER_INTERFACE_H_
 
-#define emberAfCorePrint(...)   emberSerialPrintf(0, __VA_ARGS__)
-#define emberAfCorePrintln(...) emberSerialPrintfLine(0, __VA_ARGS__)
-
 /**************************************************************************//**
  * Return if the bootloader has been initialized.
  *****************************************************************************/

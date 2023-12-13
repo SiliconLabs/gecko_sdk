@@ -15,7 +15,7 @@ requires:
   - name: mbedtls_md5
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_MD5
+    value: PSA_WANT_ALG_MD5 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_MD5 1"
 documentation:

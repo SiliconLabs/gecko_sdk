@@ -99,8 +99,8 @@ sl_status_t sl_si7210_configure(sl_i2cspm_t *i2cspm, sl_si7210_configure_t *conf
     return status;
   }
 
-  if ( (config->threshold == 0.0)
-       && (config->hysteresis == 0.0)
+  if ( (config->threshold == 0.0f)
+       && (config->hysteresis == 0.0f)
        && (config->polarity == 0)
        && (config->output_invert == 0) ) {
     /* Use default values in the device for all parameters */
@@ -556,7 +556,7 @@ uint8_t sl_si7210_calculate_sw_op(float threshold)
   uint8_t a;
   uint8_t swop;
 
-  th = (int) (threshold / 0.005);
+  th = (int) (threshold / 0.005f);
 
   if ( th == 0 ) {
     /* threshold = 0, when swop = 127 */
@@ -591,7 +591,7 @@ uint8_t sl_si7210_calculate_sw_hyst(float hysteresis, bool scale200mT)
   uint8_t a;
   uint8_t swhyst;
 
-  hyst = (int) (hysteresis / 0.005 + 0.5);
+  hyst = (int) (hysteresis / 0.005f + 0.5f);
 
   if ( scale200mT ) {
     hyst /= 10;
@@ -631,7 +631,7 @@ uint8_t sl_si7210_calculate_sw_tamper(float tamper, bool scale200mT)
   uint8_t a;
   uint8_t swtamp;
 
-  tamp = (int) (tamper / 0.005 + 0.5);
+  tamp = (int) (tamper / 0.005f + 0.5f);
 
   if ( scale200mT ) {
     tamp /= 10;

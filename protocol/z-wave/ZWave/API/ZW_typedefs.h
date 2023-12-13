@@ -45,9 +45,6 @@
 #define IS_NULL(x) (NULL == x)
 #define NON_NULL(x) (NULL != x)
 
-#define UNUSED(x) (void)x /* Hack to silence warning - Unreferenced local variable */
-#define UNUSED_CONST(x) if(x) ; /* Hack to silence warning - Unreferenced const variable */
-
 /* Gecko chips are little endian:
  *   https://www.silabs.com/community/mcu/32-bit/knowledge-base.entry.html/2017/11/08/endianness_of_silabs-xSJt
  *

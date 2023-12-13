@@ -70,7 +70,7 @@ sl_status_t app_timer_start(app_timer_t *timer,
 
   // Calculate timer period.
   tick_rate = configTICK_RATE_HZ;
-  delay = (timeout_ms * tick_rate) / (1000);
+  delay = (timeout_ms * tick_rate + 999) / (1000);
   if ( delay == 0 ) {
     // The timer resolution is too small for the requested timeout.
     return SL_STATUS_INVALID_PARAMETER;

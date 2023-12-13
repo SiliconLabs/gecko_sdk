@@ -71,11 +71,8 @@ static bool CmdClassWakeupNotification(void (*pCallback)(uint8_t txStatus, TX_ST
 
 static void CC_WakeUp_stayAwakeIfActive(void);
 
-static void TimerCallback(SSwTimer *pTimer)
+static void TimerCallback(__attribute__((unused)) SSwTimer *pTimer)
 {
-#if !defined(DEBUGPRINT)
-  UNUSED(pTimer);
-#endif
   /* It is assumed that an Deep Sleep persistent timer is used with this call back
    * (see AppTimerDeepSleepPersistentRegister()). Otherwise this function will not
    * be called if the timer expires while the device is sleeping in deep sleep
@@ -102,7 +99,8 @@ send_first_notification(void)
       (ERESETREASON_BROWNOUT == resetReason) ||
       (ERESETREASON_PIN == resetReason) ||
       (ERESETREASON_SOFTWARE == resetReason) ||
-      (ERESETREASON_WATCHDOG == resetReason)))
+      (ERESETREASON_WATCHDOG == resetReason) || 
+      (ERESETREASON_DEEP_SLEEP_WUT == resetReason)))
   {
     CC_WakeUp_notification_tx(NULL);
   }
@@ -114,7 +112,7 @@ send_first_notification(void)
  * Resets the saved node ID in NVM.
  */
 static void 
-CC_WakeUp_notificationMemorySetDefault()
+CC_WakeUp_notificationMemorySetDefault(void)
 {
   DPRINT("\r\nCCWdef");
 
@@ -143,6 +141,9 @@ init(void)
   if (NULL == wake_up_cc_power_lock) {
     wake_up_cc_power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
   }
+
+  // Change the zpal_pm_device_type here so that the device can reach the lowest level of power consumption
+  zpal_pm_set_device_type(ZPAL_PM_DEVICE_NOT_LISTENING);
 
   //Verify that a WAKEUPCCDATA file exists
   size_t   dataLen;
@@ -200,10 +201,8 @@ void CC_WakeUp_notification_tx(void (*pCallback)(uint8_t txStatus, TX_STATUS_TYP
   {
     if (NULL != pCallback)
     {
-      TX_STATUS_TYPE extendedTxStatus;
-      memset(&extendedTxStatus, 0, sizeof(TX_STATUS_TYPE));
-      uint8_t txStatus = TRANSMIT_COMPLETE_FAIL;
-      pCallback(txStatus, &extendedTxStatus);
+      TX_STATUS_TYPE extendedTxStatus = { 0 };
+      pCallback(TRANSMIT_COMPLETE_FAIL, &extendedTxStatus);
     }
     return;
   }
@@ -214,10 +213,8 @@ void CC_WakeUp_notification_tx(void (*pCallback)(uint8_t txStatus, TX_STATUS_TYP
 
   if (true != CmdClassWakeupNotification(ZCB_WakeUpNotificationCallback))
   {
-    TX_STATUS_TYPE extendedTxStatus;
-    memset(&extendedTxStatus, 0, sizeof(TX_STATUS_TYPE));
-    uint8_t txStatus = TRANSMIT_COMPLETE_FAIL;
-    ZCB_WakeUpNotificationCallback(txStatus, &extendedTxStatus);
+    TX_STATUS_TYPE extendedTxStatus = { 0 };
+    ZCB_WakeUpNotificationCallback(TRANSMIT_COMPLETE_FAIL, &extendedTxStatus);
   }
 }
 
@@ -233,7 +230,16 @@ static bool CmdClassWakeupNotification(void (*pCallback)(uint8_t txStatus, TX_ST
                                        WAKE_UP_NOTIFICATION_V2
   };
 
-  SZwaveTransmitPackage FramePackage;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendDataEx.FrameConfig.Handle = pCallback,
+    .uTransmitParams.SendDataEx.FrameConfig.TransmitOptions = ZWAVE_PLUS_TX_OPTIONS,
+    .uTransmitParams.SendDataEx.FrameConfig.iFrameLength = sizeof(WakeUpNotificationFrame),
+    .uTransmitParams.SendDataEx.SourceNodeId = 0x00,
+    .uTransmitParams.SendDataEx.TransmitOptions2 = 0x00,
+    .uTransmitParams.SendDataEx.TransmitSecurityOptions = S2_TXOPTION_VERIFY_DELIVERY,
+    .uTransmitParams.SendDataEx.eKeyType = GetHighestSecureLevel(pAppHandle->pNetworkInfo->SecurityKeys),
+    .eTransmitType = EZWAVETRANSMITTYPE_EX
+  };
 
   if ((0x00 < gWakeupCcData.MasterNodeId) && (ZW_MAX_NODES >= gWakeupCcData.MasterNodeId))
   {
@@ -243,18 +249,9 @@ static bool CmdClassWakeupNotification(void (*pCallback)(uint8_t txStatus, TX_ST
   {
     FramePackage.uTransmitParams.SendDataEx.DestNodeId = 1;
   }
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.Handle = pCallback;
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.TransmitOptions = ZWAVE_PLUS_TX_OPTIONS;
   memcpy(FramePackage.uTransmitParams.SendDataEx.FrameConfig.aFrame,
          WakeUpNotificationFrame,
          sizeof(WakeUpNotificationFrame));
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.iFrameLength = sizeof(WakeUpNotificationFrame);
-  FramePackage.uTransmitParams.SendDataEx.SourceNodeId = 0x00;
-  FramePackage.uTransmitParams.SendDataEx.TransmitOptions2 = 0x00;
-  FramePackage.uTransmitParams.SendDataEx.TransmitSecurityOptions = S2_TXOPTION_VERIFY_DELIVERY;
-  FramePackage.uTransmitParams.SendDataEx.eKeyType = GetHighestSecureLevel(pAppHandle->pNetworkInfo->SecurityKeys);
-
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
 
   // Put the package on queue (and dont wait for it)
   DPRINT("\r\nQNSTB");
@@ -297,12 +294,10 @@ static received_frame_status_t
 CC_WakeUp_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength,
+  __attribute__((unused)) uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER *pFrameOut,
   uint8_t * pFrameOutLength)
 {
-  UNUSED(cmdLength);
-
   switch(pCmd->ZW_Common.cmd)
   {
     case  WAKE_UP_INTERVAL_SET_V2:

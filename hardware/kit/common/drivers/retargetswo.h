@@ -52,7 +52,7 @@ void RETARGET_SwoInit(void);
 /**
  * @deprecated Use @ref RETARGET_SwoInit instead
  */
-#define setupSWOForPrint RETARGET_SwoInit
+#define setupSWOForPrint _Pragma("Warning \"'setupSWOForPrint' macro is deprecated\"") RETARGET_SwoInit
 
 #ifdef __cplusplus
 }

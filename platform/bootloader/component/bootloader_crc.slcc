@@ -3,6 +3,7 @@ label: Cyclic Redundancy Check
 package: bootloader
 description: >
   The Cyclic Redundancy Check component provides a software implementations of 16-bit and 32-bit cyclic redundancy check (CRC).
+  It is compatible with trustzone secure bootloaders and bootloaders without trustzone.
   A cyclic redundancy check (CRC) is an error-detecting code commonly used to detect accidental changes to
   digital data. Blocks of data entering these systems get a short check value attached, based on the remainder
   of a polynomial division of their contents. On retrieval, the calculation is repeated and, in the event the

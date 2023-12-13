@@ -77,6 +77,7 @@
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #endif // __linux__
+#include <math.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <stdio.h>
@@ -289,26 +290,6 @@ static bool sIsSyncingState = false;
 #endif
 
 #define OPENTHREAD_POSIX_LOG_TUN_PACKETS 0
-
-#if !defined(__linux__)
-static bool UnicastAddressIsSubscribed(otInstance *aInstance, const otNetifAddress *netAddr)
-{
-    const otNetifAddress *address = otIp6GetUnicastAddresses(aInstance);
-
-    while (address != nullptr)
-    {
-        if (memcmp(address->mAddress.mFields.m8, netAddr->mAddress.mFields.m8, sizeof(address->mAddress.mFields.m8)) ==
-            0)
-        {
-            return true;
-        }
-
-        address = address->mNext;
-    }
-
-    return false;
-}
-#endif
 
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 static const uint8_t allOnes[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -1131,6 +1112,8 @@ static void processTransmit(otInstance *aInstance)
         message = otIp6NewMessage(aInstance, &settings);
 #endif
         VerifyOrExit(message != nullptr, error = OT_ERROR_NO_BUFS);
+        otMessageSetLoopbackToHostAllowed(message, true);
+        otMessageSetOrigin(message, OT_MESSAGE_ORIGIN_HOST_UNTRUSTED);
     }
 
 #if OPENTHREAD_POSIX_LOG_TUN_PACKETS
@@ -1432,14 +1415,11 @@ static void processNetifAddrEvent(otInstance *aInstance, struct rt_msghdr *rtm)
             if (!addr.IsMulticast())
             {
                 otNetifAddress netAddr;
-                bool           subscribed;
 
                 netAddr.mAddress      = addr;
                 netAddr.mPrefixLength = NetmaskToPrefixLength(&netmask);
 
-                subscribed = UnicastAddressIsSubscribed(aInstance, &netAddr);
-
-                if (subscribed)
+                if (otIp6HasUnicastAddress(aInstance, &addr))
                 {
                     logAddrEvent(/* isAdd */ true, addr, OT_ERROR_ALREADY);
                     error = OT_ERROR_NONE;
@@ -1563,6 +1543,82 @@ exit:
 
 #endif
 
+#if defined(__linux__)
+
+#define ERR_RTA(errmsg, requestPayloadLength) \
+    ((struct rtattr *)((char *)(errmsg)) + NLMSG_ALIGN(sizeof(struct nlmsgerr)) + NLMSG_ALIGN(requestPayloadLength))
+
+// The format of NLMSG_ERROR is described below:
+//
+// ----------------------------------------------
+// | struct nlmsghdr - response header          |
+// ----------------------------------------------------------------
+// |    int error                               |                 |
+// ---------------------------------------------| struct nlmsgerr |
+// | struct nlmsghdr - original request header  |                 |
+// ----------------------------------------------------------------
+// | ** optionally (1) payload of the request   |
+// ----------------------------------------------
+// | ** optionally (2) extended ACK attrs       |
+// ----------------------------------------------
+//
+static void HandleNetlinkResponse(struct nlmsghdr *msg)
+{
+    const struct nlmsgerr *err;
+    const char            *errorMsg;
+    size_t                 rtaLength;
+    size_t                 requestPayloadLength = 0;
+    uint32_t               requestSeq           = 0;
+
+    if (msg->nlmsg_len < NLMSG_LENGTH(sizeof(struct nlmsgerr)))
+    {
+        otLogWarnPlat("[netif] Truncated netlink reply of request#%u", requestSeq);
+        ExitNow();
+    }
+
+    err        = reinterpret_cast<const nlmsgerr *>(NLMSG_DATA(msg));
+    requestSeq = err->msg.nlmsg_seq;
+
+    if (err->error == 0)
+    {
+        otLogInfoPlat("[netif] Succeeded to process request#%u", requestSeq);
+        ExitNow();
+    }
+
+    // For rtnetlink, `abs(err->error)` maps to values of `errno`.
+    // But this is not a requirement in RFC 3549.
+    errorMsg = strerror(abs(err->error));
+
+    // The payload of the request is omitted if NLM_F_CAPPED is set
+    if (!(msg->nlmsg_flags & NLM_F_CAPPED))
+    {
+        requestPayloadLength = NLMSG_PAYLOAD(&err->msg, 0);
+    }
+
+    rtaLength = NLMSG_PAYLOAD(msg, sizeof(struct nlmsgerr)) - requestPayloadLength;
+
+    for (struct rtattr *rta = ERR_RTA(err, requestPayloadLength); RTA_OK(rta, rtaLength);
+         rta                = RTA_NEXT(rta, rtaLength))
+    {
+        if (rta->rta_type == NLMSGERR_ATTR_MSG)
+        {
+            errorMsg = reinterpret_cast<const char *>(RTA_DATA(rta));
+            break;
+        }
+        else
+        {
+            otLogDebgPlat("[netif] Ignoring netlink response attribute %d (request#%u)", rta->rta_type, requestSeq);
+        }
+    }
+
+    otLogWarnPlat("[netif] Failed to process request#%u: %s", requestSeq, errorMsg);
+
+exit:
+    return;
+}
+
+#endif // defined(__linux__)
+
 static void processNetlinkEvent(otInstance *aInstance)
 {
     const size_t kMaxNetifEvent = 8192;
@@ -1624,20 +1680,8 @@ static void processNetlinkEvent(otInstance *aInstance)
 
 #else
         case NLMSG_ERROR:
-        {
-            const struct nlmsgerr *err = reinterpret_cast<const nlmsgerr *>(NLMSG_DATA(msg));
-
-            if (err->error == 0)
-            {
-                otLogInfoPlat("[netif] Succeeded to process request#%u", err->msg.nlmsg_seq);
-            }
-            else
-            {
-                otLogWarnPlat("[netif] Failed to process request#%u: %s", err->msg.nlmsg_seq, strerror(err->error));
-            }
-
+            HandleNetlinkResponse(msg);
             break;
-        }
 #endif
 
 #if defined(ROUTE_FILTER) || defined(RO_MSGFILTER) || defined(__linux__)
@@ -1645,7 +1689,7 @@ static void processNetlinkEvent(otInstance *aInstance)
             otLogWarnPlat("[netif] Unhandled/Unexpected netlink/route message (%d).", (int)msg->nlmsg_type);
             break;
 #else
-        // this platform doesn't support filtering, so we expect messages of other types...we just ignore them
+            // this platform doesn't support filtering, so we expect messages of other types...we just ignore them
 #endif
         }
     }
@@ -1659,7 +1703,9 @@ static void mldListenerInit(void)
 {
     struct ipv6_mreq mreq6;
 
-    sMLDMonitorFd          = SocketWithCloseExec(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6, kSocketNonBlock);
+    sMLDMonitorFd = SocketWithCloseExec(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6, kSocketNonBlock);
+    VerifyOrDie(sMLDMonitorFd != -1, OT_EXIT_FAILURE);
+
     mreq6.ipv6mr_interface = gNetifIndex;
     memcpy(&mreq6.ipv6mr_multiaddr, kMLDv2MulticastAddress.mFields.m8, sizeof(kMLDv2MulticastAddress.mFields.m8));
 
@@ -1934,6 +1980,25 @@ static void platformConfigureNetLink(void)
 #error "!! Unknown platform !!"
 #endif
     VerifyOrDie(sNetlinkFd >= 0, OT_EXIT_ERROR_ERRNO);
+
+#if defined(SOL_NETLINK)
+    {
+        int enable = 1;
+
+#if defined(NETLINK_EXT_ACK)
+        if (setsockopt(sNetlinkFd, SOL_NETLINK, NETLINK_EXT_ACK, &enable, sizeof(enable)) != 0)
+        {
+            otLogWarnPlat("[netif] Failed to enable NETLINK_EXT_ACK: %s", strerror(errno));
+        }
+#endif
+#if defined(NETLINK_CAP_ACK)
+        if (setsockopt(sNetlinkFd, SOL_NETLINK, NETLINK_CAP_ACK, &enable, sizeof(enable)) != 0)
+        {
+            otLogWarnPlat("[netif] Failed to enable NETLINK_CAP_ACK: %s", strerror(errno));
+        }
+#endif
+    }
+#endif
 
 #if defined(__linux__)
     {

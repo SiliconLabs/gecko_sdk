@@ -84,8 +84,6 @@ zaf_nvm_app_load_configuration(void)
 }
 
 ZW_WEAK void
-zaf_nvm_app_load_configuration_migration(uint32_t current_version, uint32_t saved_version)
+zaf_nvm_app_load_configuration_migration(__attribute__((unused)) uint32_t current_version, __attribute__((unused)) uint32_t saved_version)
 {
-  UNUSED(current_version);
-  UNUSED(saved_version);
 }

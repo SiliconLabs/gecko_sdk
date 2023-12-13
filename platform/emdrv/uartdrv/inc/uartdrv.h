@@ -45,9 +45,22 @@
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
 #include "em_leuart.h"
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
+
+#if (_SILICON_LABS_32B_SERIES > 2)
+#define UARTDRV_USE_PERIPHERAL
+#include "sl_peripheral_eusart.h"
+#else
 #include "em_eusart.h"
 #endif
+#endif
+
+#if defined(UARTDRV_USE_PERIPHERAL)
+#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE 0 // TODO (PLATFORM_MTL-8363): Remove when sl_gpio will be used.
+#include "sl_peripheral_gpio.h"
+#else
 #include "em_gpio.h"
+#endif
+
 #include "em_cmu.h"
 #include "ecode.h"
 #include "uartdrv_config.h"
@@ -88,17 +101,20 @@ extern "C" {
  * @addtogroup uartdrv_status_codes Status Codes
  * @{
  ******************************************************************************/
-#define UARTDRV_STATUS_RXEN     (1 << 0)  ///< The receiver is enabled.
-#define UARTDRV_STATUS_TXEN     (1 << 1)  ///< The transmitter is enabled.
-#define UARTDRV_STATUS_RXBLOCK  (1 << 3)  ///< The receiver is blocked; incoming frames will be discarded.
-#define UARTDRV_STATUS_TXTRI    (1 << 4)  ///< The transmitter is tristated.
-#define UARTDRV_STATUS_TXC      (1 << 5)  ///< A transmit operation is complete. No more data is available in the transmit buffer and shift register.
-#define UARTDRV_STATUS_TXBL     (1 << 6)  ///< The transmit buffer is empty.
-#define UARTDRV_STATUS_RXDATAV  (1 << 7)  ///< Data is available in the receive buffer.
-#define UARTDRV_STATUS_RXFULL   (1 << 8)  ///< The receive buffer is full.
-#define UARTDRV_STATUS_TXIDLE   (1 << 13) ///< The transmitter is idle.
+#define UARTDRV_STATUS_RXEN         (1 << 0)  ///< The receiver is enabled.
+#define UARTDRV_STATUS_TXEN         (1 << 1)  ///< The transmitter is enabled.
+#define UARTDRV_STATUS_RXBLOCK      (1 << 3)  ///< The receiver is blocked; incoming frames will be discarded.
+#define UARTDRV_STATUS_TXTRI        (1 << 4)  ///< The transmitter is tristated.
+#define UARTDRV_STATUS_TXC          (1 << 5)  ///< A transmit operation is complete. No more data is available in the transmit buffer and shift register.
+#define UARTDRV_STATUS_TXBL         (1 << 6)  ///< The transmit buffer is empty.
+#define UARTDRV_STATUS_RXDATAV      (1 << 7)  ///< Data is available in the receive buffer.
+#define UARTDRV_STATUS_RXFULL       (1 << 8)  ///< The receive buffer is full.
+#if defined(EUSART_STATUS_TXCANDTXIDLE)
+#define UARTDRV_STATUS_TXCANDTXIDLE (1 << 9)  ///< Set when both TXC and TXIDLE are set.
+#endif
+#define UARTDRV_STATUS_TXIDLE       (1 << 13) ///< The transmitter is idle.
 #if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
-#define UARTDRV_STATUS_RXIDLE   (1 << 12) ///< The Receiver is idle.
+#define UARTDRV_STATUS_RXIDLE       (1 << 12) ///< The Receiver is idle.
 #endif
 /** @} (end addtogroup status codes) */
 
@@ -250,12 +266,6 @@ typedef struct {
   uint8_t                    portLocationRts;   ///< A location number for the UART RTS pin.
 #endif
 } UARTDRV_InitUart_t;
-
-/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
-/// Deprecated UART driver instance initialization structure alias.
-/// @deprecated This structure is deprecated. Use UARTDRV_InitUart_t instead.
-typedef UARTDRV_InitUart_t UARTDRV_Init_t SL_DEPRECATED_API_SDK_4_1;
-/// @endcond
 #endif
 
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
@@ -295,25 +305,44 @@ typedef struct {
 /// It is required to initialize a driver instance.
 /// This structure is passed to @ref UARTDRV_InitEuart() when initializing a UARTDRV
 typedef struct {
-  EUSART_TypeDef              *port;                ///< The peripheral used for EUART
-  bool                        useLowFrequencyMode;  ///< Clock configuration of the EUART
-  uint32_t                    baudRate;             ///< EUART baud rate
-  GPIO_Port_TypeDef           txPort;               ///< Port for UART Tx pin.
-  GPIO_Port_TypeDef           rxPort;               ///< Port for UART Rx pin.
-  uint8_t                     txPin;                ///< Pin number for UART Tx.
-  uint8_t                     rxPin;                ///< Pin number for UART Rx.
-  uint8_t                     uartNum;              ///< EUART instance number.
-  EUSART_Stopbits_TypeDef     stopBits;             ///< Number of stop bits
-  EUSART_Parity_TypeDef       parity;               ///< Parity configuration
-  EUSART_OVS_TypeDef          oversampling;         ///< Oversampling mode.
-  EUSART_MajorityVote_TypeDef mvdis;                ///< Majority Vote Disable for 16x, 8x and 6x oversampling modes.
-  UARTDRV_FlowControlType_t   fcType;               ///< Flow control mode
-  GPIO_Port_TypeDef           ctsPort;              ///< CTS pin port number
-  uint8_t                     ctsPin;               ///< CTS pin number
-  GPIO_Port_TypeDef           rtsPort;              ///< RTS pin port number
-  uint8_t                     rtsPin;               ///< RTS pin number
-  UARTDRV_Buffer_FifoQueue_t  *rxQueue;             ///< Receive operation queue
-  UARTDRV_Buffer_FifoQueue_t  *txQueue;             ///< Transmit operation queue
+  EUSART_TypeDef                  *port;                ///< The peripheral used for EUART
+  bool                            useLowFrequencyMode;  ///< Clock configuration of the EUART
+  uint32_t                        baudRate;             ///< EUART baud rate
+#if defined(UARTDRV_USE_PERIPHERAL)
+  sl_gpio_port_t                  txPort;               ///< Port for UART Tx pin.
+  sl_gpio_port_t                  rxPort;               ///< Port for UART Rx pin.
+#else
+  GPIO_Port_TypeDef               txPort;               ///< Port for UART Tx pin.
+  GPIO_Port_TypeDef               rxPort;               ///< Port for UART Rx pin.
+#endif
+  uint8_t                         txPin;                ///< Pin number for UART Tx.
+  uint8_t                         rxPin;                ///< Pin number for UART Rx.
+  uint8_t                         uartNum;              ///< EUART instance number.
+#if defined(UARTDRV_USE_PERIPHERAL)
+  sl_hal_eusart_stop_bits_t       stopBits;             ///< Number of stop bits
+  sl_hal_eusart_parity_t          parity;               ///< Parity configuration
+  sl_hal_eusart_ovs_t             oversampling;         ///< Oversampling mode.
+  sl_hal_eusart_majority_vote_t   mvdis;                ///< Majority Vote Disable for 16x, 8x and 6x oversampling modes.
+#else
+  EUSART_Stopbits_TypeDef         stopBits;             ///< Number of stop bits
+  EUSART_Parity_TypeDef           parity;               ///< Parity configuration
+  EUSART_OVS_TypeDef              oversampling;         ///< Oversampling mode.
+  EUSART_MajorityVote_TypeDef     mvdis;                ///< Majority Vote Disable for 16x, 8x and 6x oversampling modes.
+#endif
+  UARTDRV_FlowControlType_t       fcType;               ///< Flow control mode
+#if defined(UARTDRV_USE_PERIPHERAL)
+  sl_gpio_port_t                  ctsPort;              ///< CTS pin port number
+  uint8_t                         ctsPin;               ///< CTS pin number
+  sl_gpio_port_t                  rtsPort;              ///< RTS pin port number
+  uint8_t                         rtsPin;               ///< RTS pin number
+#else
+  GPIO_Port_TypeDef               ctsPort;              ///< CTS pin port number
+  uint8_t                         ctsPin;               ///< CTS pin number
+  GPIO_Port_TypeDef               rtsPort;              ///< RTS pin port number
+  uint8_t                         rtsPin;               ///< RTS pin number
+#endif
+  UARTDRV_Buffer_FifoQueue_t      *rxQueue;             ///< Receive operation queue
+  UARTDRV_Buffer_FifoQueue_t      *txQueue;             ///< Transmit operation queue
 } UARTDRV_InitEuart_t;
 #endif
 
@@ -343,10 +372,17 @@ typedef struct UARTDRV_HandleData{
   UARTDRV_FlowControlState_t    fcSelfState;       // A current self flow control state
   UARTDRV_FlowControlState_t    fcSelfCfg;         // A self flow control override configuration
   UARTDRV_FlowControlState_t    fcPeerState;       // A current peer flow control state
+#if defined(UARTDRV_USE_PERIPHERAL)
+  sl_gpio_port_t                txPort;            // A Tx pin port number
+  sl_gpio_port_t                rxPort;            // An Rx pin port number
+  sl_gpio_port_t                ctsPort;           // A CTS pin port number
+  sl_gpio_port_t                rtsPort;           // An RTS pin port number
+#else
   GPIO_Port_TypeDef             txPort;            // A Tx pin port number
   GPIO_Port_TypeDef             rxPort;            // An Rx pin port number
   GPIO_Port_TypeDef             ctsPort;           // A CTS pin port number
   GPIO_Port_TypeDef             rtsPort;           // An RTS pin port number
+#endif
   uint8_t                       txPin;             // A Tx pin number
   uint8_t                       rxPin;             // An Tx pin number
   uint8_t                       ctsPin;            // A CTS pin number
@@ -443,43 +479,6 @@ Ecode_t UARTDRV_FlowControlSet(UARTDRV_Handle_t handle, UARTDRV_FlowControlState
 Ecode_t UARTDRV_FlowControlSetPeerStatus(UARTDRV_Handle_t handle, UARTDRV_FlowControlState_t state);
 
 Ecode_t UARTDRV_FlowControlIgnoreRestrain(UARTDRV_Handle_t handle);
-
-// --------------------------------
-// Deprecated items
-
-/***************************************************************************//**
- * @brief
- *    Initialize a U(S)ART driver instance.
- *
- * @deprecated
- *    Deprecated; Use @ref UARTDRV_InitUart() instead.
- *
- * @param[out] handle  A pointer to a UARTDRV handle, refer to @ref
- *                     UARTDRV_Handle_t.
- *
- * @param[in] initData A pointer to an initialization data structure,
- *                     refer to @ref UARTDRV_InitUart_t.
- *
- * @return
- *    @ref ECODE_EMDRV_UARTDRV_OK on success. On failure, an appropriate
- *    UARTDRV @ref Ecode_t is returned.
- ******************************************************************************/
-#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
-__STATIC_INLINE SL_DEPRECATED_API_SDK_4_1 Ecode_t UARTDRV_Init(UARTDRV_Handle_t handle,
-                                                               UARTDRV_InitUart_t *initData)
-{
-  return UARTDRV_InitUart(handle, initData);
-}
-#endif
-
-/// Set to 1 to include flow control support.
-/// @deprecated EMDRV_UARTDRV_HW_FLOW_CONTROL_ENABLE changed to
-/// to EMDRV_UARTDRV_FLOW_CONTROL_ENABLE.
-/// Translate to new name if old name is in use.
-#if defined(EMDRV_UARTDRV_HW_FLOW_CONTROL_ENABLE)
-#undef EMDRV_UARTDRV_FLOW_CONTROL_ENABLE
-#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE EMDRV_UARTDRV_HW_FLOW_CONTROL_ENABLE
-#endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
 sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void);

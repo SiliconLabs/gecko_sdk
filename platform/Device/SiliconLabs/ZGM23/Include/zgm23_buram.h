@@ -77,4 +77,4 @@ typedef struct {
 /** @} End of group ZGM23_BURAM */
 /** @} End of group Parts */
 
-#endif /* ZGM23_BURAM_H */
+#endif // ZGM23_BURAM_H

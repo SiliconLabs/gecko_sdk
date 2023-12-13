@@ -84,4 +84,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_SCRATCHPAD */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_SCRATCHPAD_H */
+#endif // EFR32ZG28_SCRATCHPAD_H

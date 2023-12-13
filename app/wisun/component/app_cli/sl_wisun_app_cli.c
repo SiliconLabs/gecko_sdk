@@ -43,7 +43,7 @@
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_cli_core.h"
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
-  #include "sl_wisun_app_core.h"
+  #include "sl_wisun_app_core_util.h"
   #include "sl_wisun_app_core_util_config.h"
 #endif
 
@@ -980,10 +980,10 @@ static sl_status_t _load_common_params_from_phy_cfg(void)
     // Explicit setting
   } else if (phy_cfg.type == SL_WISUN_PHY_CONFIG_EXPLICIT) {
 #if APP_CLI_ENABLE_EXPLICIT_CONFIG
-    _phy_common_params.ch0_frequency      = phy_cfg.config.explicit.ch0_frequency_khz;
-    _phy_common_params.number_of_channels = phy_cfg.config.explicit.number_of_channels;
-    _phy_common_params.channel_spacing    = phy_cfg.config.explicit.channel_spacing;
-    _phy_common_params.phy_mode_id        = phy_cfg.config.explicit.phy_mode_id;
+    _phy_common_params.ch0_frequency      = phy_cfg.config.explicit_plan.ch0_frequency_khz;
+    _phy_common_params.number_of_channels = phy_cfg.config.explicit_plan.number_of_channels;
+    _phy_common_params.channel_spacing    = phy_cfg.config.explicit_plan.channel_spacing;
+    _phy_common_params.phy_mode_id        = phy_cfg.config.explicit_plan.phy_mode_id;
 #else
     (void) 0U;
 #endif
@@ -1020,10 +1020,10 @@ static sl_status_t _store_common_params_to_phy_cfg(void)
     // Explicit setting
   } else if (_phy_common_params.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT) {
 #if APP_CLI_ENABLE_EXPLICIT_CONFIG
-    phy_cfg.config.explicit.ch0_frequency_khz  = _phy_common_params.ch0_frequency;
-    phy_cfg.config.explicit.number_of_channels = _phy_common_params.number_of_channels;
-    phy_cfg.config.explicit.channel_spacing    = _phy_common_params.channel_spacing;
-    phy_cfg.config.explicit.phy_mode_id        = _phy_common_params.phy_mode_id;
+    phy_cfg.config.explicit_plan.ch0_frequency_khz  = _phy_common_params.ch0_frequency;
+    phy_cfg.config.explicit_plan.number_of_channels = _phy_common_params.number_of_channels;
+    phy_cfg.config.explicit_plan.channel_spacing    = _phy_common_params.channel_spacing;
+    phy_cfg.config.explicit_plan.phy_mode_id        = _phy_common_params.phy_mode_id;
 #else
     (void) 0U;
 #endif

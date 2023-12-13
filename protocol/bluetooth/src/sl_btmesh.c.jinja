@@ -34,12 +34,19 @@ static const struct sli_bgapi_class * const btmesh_class_table[] =
 };
 {%- endif %}
 
+{%- for entry in btmesh_advertiser_init %}
+void {{ entry["function"] }}();
+{%- endfor %}
+
 void sl_btmesh_init(void)
 {
 {%- if bluetooth_api_ncp_host is not defined %}
   sl_btmesh_init_classes(btmesh_class_table);
 {%- endif %}
   {%- for entry in btmesh_stack_init %}
+  {{ entry["function"] }}();
+  {%- endfor %}
+  {%- for entry in btmesh_advertiser_init %}
   {{ entry["function"] }}();
   {%- endfor %}
 }

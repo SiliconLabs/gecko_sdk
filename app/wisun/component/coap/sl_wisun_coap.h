@@ -122,6 +122,36 @@ typedef struct sl_wisun_coap {
   sl_wisun_coap_version_t    version;
 } sl_wisun_coap_t;
 
+#if SL_WISUN_COAP_EASY_CLNT_SRV_INSTANCE_ENABLE
+/// Wi-SUN CoAP Server
+typedef struct sl_wisun_coap_srv {
+  /// socket id
+  int32_t sockid;
+  /// server address
+  sockaddr_in6_t addr;
+  /// data buffer
+  uint8_t *buf;
+  /// buffer size
+  uint32_t buf_size;
+  /// data size in buffer
+  int32_t data_size;
+} sl_wisun_coap_srv_t;
+
+/// Wi-SUN CoAP Client
+typedef struct sl_wisun_coap_clnt {
+  /// socket id
+  int32_t sockid;
+  /// client address
+  sockaddr_in6_t addr;
+  /// data buffer
+  uint8_t *buf;
+  /// buffer size
+  uint32_t buf_size;
+  /// data size in buffer
+  int32_t data_size;
+} sl_wisun_coap_clnt_t;
+#endif
+
 /** @} (end SL_WISUN_COAP_TYPES) */
 
 // -----------------------------------------------------------------------------
@@ -266,6 +296,100 @@ __STATIC_INLINE void sl_wisun_coap_destroy_payload_str(char *str)
 {
   sl_wisun_coap_free((void *) str);
 }
+
+#if SL_WISUN_COAP_EASY_CLNT_SRV_INSTANCE_ENABLE
+/**************************************************************************//**
+ * @brief Initialize CoAP server instance
+ * @param[in, out] srv CoAP server instance
+ * @param[in] addr CoAP server address structure
+ * @param[in] buf CoAP server buffer
+ * @param[in] buf_size CoAP server buffer size
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_init_srv(sl_wisun_coap_srv_t * const srv,
+                                   sockaddr_in6_t *addr,
+                                   uint8_t * const buf,
+                                   const uint32_t buf_size);
+
+/**************************************************************************//**
+ * @brief Initialize CoAP client instance
+ * @param[in, out] clnt CoAP client instance
+ * @param[in] addr CoAP client address structure
+ * @param[in] buf CoAP client buffer
+ * @param[in] buf_size CoAP client buffer size
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_init_clnt(sl_wisun_coap_clnt_t * const clnt,
+                                    sockaddr_in6_t *addr,
+                                    uint8_t * const buf,
+                                    const uint32_t buf_size);
+
+/**************************************************************************//**
+ * @brief CoAP server receive packet from CoAP client
+ * @param[in, out] srv CoAP server instance
+ * @param[in] clnt CoAP client instance
+ * @param[out] packet Received CoAP packet
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_srv_recvfrom(sl_wisun_coap_srv_t * const srv,
+                                       sl_wisun_coap_clnt_t * const clnt,
+                                       sl_wisun_coap_packet_t *packet);
+
+/**************************************************************************//**
+ * @brief CoAP server send packet to CoAP client
+ * @param[in] srv CoAP server instance
+ * @param[in] clnt CoAP client instance
+ * @param[in] packet Packet to send
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_srv_sendto(sl_wisun_coap_srv_t * const srv,
+                                     sl_wisun_coap_clnt_t * const clnt,
+                                     sl_wisun_coap_packet_t * const packet);
+
+/**************************************************************************//**
+ * @brief CoAP client receive packet from CoAP server
+ * @param[in, out] clnt CoAP client instance
+ * @param[in] srv CoAP server instance
+ * @param[out] packet Received CoAP packet
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_clnt_recvfrom(sl_wisun_coap_clnt_t * const clnt,
+                                        sl_wisun_coap_srv_t * const srv,
+                                        sl_wisun_coap_packet_t *packet);
+
+/**************************************************************************//**
+ * @brief CoAP client send packet to CoAP server
+ * @param[in] clnt CoAP client instance
+ * @param[in] srv CoAP server instance
+ * @param[in] packet Packet to send
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_clnt_sendto(sl_wisun_coap_clnt_t * const clnt,
+                                      sl_wisun_coap_srv_t * const srv,
+                                      sl_wisun_coap_packet_t * const packet);
+
+/**************************************************************************//**
+ * @brief Destroy CoAP server instance
+ * @param[in] srv CoAP server instance
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_destroy_srv(sl_wisun_coap_srv_t * const srv);
+
+/**************************************************************************//**
+ * @brief Destroy CoAP client instance
+ * @param[in] clnt CoAP client instance
+ * @return SL_STATUS_OK on success
+ *         SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t sl_wisun_coap_destroy_clnt(sl_wisun_coap_clnt_t * const clnt);
+#endif
 
 /** @}*/
 

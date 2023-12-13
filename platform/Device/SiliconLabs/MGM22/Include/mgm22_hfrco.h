@@ -218,4 +218,4 @@ typedef struct {
 /** @} End of group MGM22_HFRCO */
 /** @} End of group Parts */
 
-#endif /* MGM22_HFRCO_H */
+#endif // MGM22_HFRCO_H

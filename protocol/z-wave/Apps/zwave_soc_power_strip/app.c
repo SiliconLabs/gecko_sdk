@@ -84,11 +84,9 @@ zaf_event_distributor_app_zw_command_status(SZwaveCommandStatusPackage *Status)
  * See description for function prototype in ZW_basis_api.h.
  */
 ZW_APPLICATION_STATUS
-ApplicationInit(EResetReason_t eResetReason)
+ApplicationInit(__attribute__((unused)) EResetReason_t eResetReason)
 {
   SRadioConfig_t* RadioConfig;
-
-  UNUSED(eResetReason);
 
   DPRINT("Enabling watchdog\n");
   zpal_enable_watchdog(true);
@@ -248,10 +246,8 @@ ZCB_JobStatus(TRANSMISSION_RESULT * pTransmissionResult)
  * @brief Called every time the notification timer triggers.
  */
 void
-ZCB_NotificationTimerCallback(SSwTimer *pTimer)
+ZCB_NotificationTimerCallback(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
-
   JOB_STATUS jobStatus;
 
 

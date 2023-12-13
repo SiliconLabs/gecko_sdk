@@ -41,6 +41,11 @@ MISRAC_ENABLE
 // Debug
 #include "debug/btl_debug.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 // -----------------------------------------------------------------------------
 // Macros
 
@@ -2098,3 +2103,6 @@ static int32_t parser_finalize(ParserContext_t                   *parserContext,
   parserContext->internalState = GblParserStateDone;
   return BOOTLOADER_OK;
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

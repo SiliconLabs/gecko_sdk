@@ -36,8 +36,8 @@
 
 // <h> UART settings
 // <o SL_UARTDRV_LEUART_INSTANCE_BAUDRATE> Baud rate
-// <i> Default: 115200
-#define SL_UARTDRV_LEUART_INSTANCE_BAUDRATE        115200
+// <i> Default: 9600
+#define SL_UARTDRV_LEUART_INSTANCE_BAUDRATE        9600
 
 // <o SL_UARTDRV_LEUART_INSTANCE_PARITY> Parity mode to use
 // <leuartNoParity=> No Parity

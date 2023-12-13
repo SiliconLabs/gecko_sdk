@@ -61,7 +61,7 @@ static void
 extract_sensor_data(sensor_read_result_t*, int16_t);
 
 //Initialization of the IMU sensor
-sl_status_t Multilevel_sensor_imu_init()
+sl_status_t Multilevel_sensor_imu_init(void)
 {
   sl_imu_init();
   sl_imu_configure(IMU_SAMPLE_RATE);
@@ -69,7 +69,7 @@ sl_status_t Multilevel_sensor_imu_init()
 }
 
 // Disabling the accelerometer in the IMU sensor
-sl_status_t Multilevel_sensor_imu_deinit()
+sl_status_t Multilevel_sensor_imu_deinit(void)
 {
   return sl_imu_deinit();
 }
@@ -91,10 +91,9 @@ sl_status_t read_xyz_acceleration(int16_t *xyz_acceleration)
 }
 
 bool
-cc_multilevel_sensor_motion_axis_x_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_motion_axis_x_interface_read_value(sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(i_scale);
-  int16_t ma_x_data;
+  int16_t ma_x_data = 0;
 
   if (o_result != NULL) {
     memset(o_result, 0, sizeof(sensor_read_result_t));
@@ -110,10 +109,9 @@ cc_multilevel_sensor_motion_axis_x_interface_read_value(sensor_read_result_t* o_
 }
 
 bool
-cc_multilevel_sensor_motion_axis_y_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_motion_axis_y_interface_read_value(sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(i_scale);
-  int16_t ma_y_data;
+  int16_t ma_y_data = 0;
 
   if (o_result != NULL) {
     memset(o_result, 0, sizeof(sensor_read_result_t));
@@ -129,10 +127,9 @@ cc_multilevel_sensor_motion_axis_y_interface_read_value(sensor_read_result_t* o_
 }
 
 bool
-cc_multilevel_sensor_motion_axis_z_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_motion_axis_z_interface_read_value(sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(i_scale);
-  int16_t ma_z_data;
+  int16_t ma_z_data = 0;
 
   if (o_result != NULL) {
     memset(o_result, 0, sizeof(sensor_read_result_t));

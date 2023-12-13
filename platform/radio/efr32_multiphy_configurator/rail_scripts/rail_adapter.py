@@ -39,7 +39,8 @@ class RAILAdapter(object):
     0xA8030000: 4,
     0xA8040000: 5,
     0xB0000000: 6,
-    0xB5000000: 7
+    0xB5000000: 7,
+    0xA6040000: 8
   }
   import os
   current_dir =  os.path.dirname(os.path.abspath(__file__))

@@ -360,4 +360,4 @@ typedef struct {
 /** @} End of group EFR32BG27_PDM */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_PDM_H */
+#endif // EFR32BG27_PDM_H

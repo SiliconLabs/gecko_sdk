@@ -3,7 +3,7 @@ package: Btmesh
 label: Bluetooth Mesh - SoC DFU Distributor
 description: >
   Demonstrates the Firmware Distributor role based on the BT Mesh Model specification.
-  Distributor is responsible for delivering new firmware images to the Target nodes 
+  Distributor is responsible for delivering new firmware images to the Target nodes
   and monitoring the progress of the firmware update.
 
 category: Bluetooth Mesh Examples
@@ -24,17 +24,17 @@ component:
   - id: app_log
   - id: bluetooth_feature_system
   - id: bootloader_interface
+  - id: bt_post_build
   - id: btmesh_blob_transfer_server_recommended_instance_all
   - id: btmesh_distributor
   - id: btmesh_factory_reset
+  - id: btmesh_sar_config_server
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
-  - id: btmesh_stack_sar_config_server
   - id: btmesh_friend
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
-  - id: btmesh_sar_config_server
   - id: btmesh_stack
   - id: btmesh_target_node
   - id: btmesh_iv_update
@@ -77,8 +77,6 @@ readme:
   - path: ../../documentation/example/btmesh_soc_dfu_distributor/readme.md
 
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
   - path: ../../documentation/example/btmesh_soc_dfu_distributor/readme_img0.png
 
 configuration:
@@ -86,20 +84,24 @@ configuration:
     value: APP_LOG_LEVEL_INFO
   - name: NVM3_DEFAULT_NVM_SIZE
     value: "0x6000"
-  - name: BLOB_TRANSFER_SERVER_MAX_BLOCK_SIZE_LOG
-    value: 0xD
-  - name: BLOB_TRANSFER_SERVER_MAX_CHUNKS_PER_BLOCK
-    value: 64
   - name: SL_BOARD_ENABLE_DISPLAY
     value: 1
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_BT_CONFIG_BUFFER_SIZE
     value: 12600
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_DIST_MAX_BLOCK_SIZE_LOG_CFG_VAL
+    value: "0xB"
+  - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL
+    value: "0xB"
   - name: SL_BTMESH_CONFIG_MAX_PROV_BEARERS
     value: "3"
   - name: SL_BTMESH_FW_UPDATE_SERVER_FWID_CFG_VAL
     value: '"socbtmdist_v1"'
+  - name: SL_BTMESH_SAR_CONFIG_SERVER_CUSTOM_TRANSMITTER_CFG_VAL
+    value: 1
+  - name: SL_BTMESH_SAR_CONFIG_SERVER_TX_MULTICAST_RETRANS_INTERVAL_STEP_MS_CFG_VAL
+    value: 25
   - name: SL_GLIB_FONTNORMAL_8X8
     value: 0
   - name: SL_HEAP_SIZE

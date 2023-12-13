@@ -15,7 +15,13 @@ component:
   - id: gatt_configuration
   - id: bluetooth_feature_system
   - id: bluetooth_feature_gap
-  - id: bluetooth_feature_scanner
+
+  # Use legacy scanner to only scan advertisements that use legacy advertising
+  # PDUs. Include bluetooth_feature_extended_scanner if scanning extended
+  # advertising PDUs is also required. That component is not included currently
+  # for minimizing the application size.
+  - id: "bluetooth_feature_legacy_scanner"
+
   - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
@@ -26,6 +32,7 @@ component:
   - id: freertos_heap_3
   - id: rail_lib_multiprotocol
   - id: nvm3_lib
+  - id: ot_crash_handler
   - id: uartdrv_usart
     instance:
       - vcom
@@ -67,6 +74,18 @@ configuration:
     value: 4608
   - name: OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
     value: 0
+  - name: OPENTHREAD_CONFIG_LOG_OUTPUT
+    value: OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 768
+    condition: [ot_rtt_log]
+  - name: BUFFER_SIZE_UP
+    value: 128
+    condition: [ot_rtt_log, device_family_efr32mg1]
+  - name: BUFFER_SIZE_DOWN
+    value: 0
+    condition: [ot_rtt_log]
   - name: configTIMER_TASK_PRIORITY
     value: 53
 

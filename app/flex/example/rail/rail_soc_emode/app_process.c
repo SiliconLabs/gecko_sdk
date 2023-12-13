@@ -348,10 +348,16 @@ static void print_current_power_levels(RAIL_Handle_t rail_handle)
                  power_raw,
                  (RAIL_GetTxPower(rail_handle)));
   } else {
+#if defined(__IAR_SYSTEMS_ICC__)
+  #pragma diag_suppress=Pa205
+#endif
     app_log_info("Power:            %.1f/%.1fdBm\n",
                  (float)(power_deci_dbm) / 10.0,
                  (float)(RAIL_GetTxPowerDbm(rail_handle)) / 10.0);
   }
+#if defined(__IAR_SYSTEMS_ICC__)
+  #pragma diag_default=Pa205
+#endif
 }
 
 /*******************************************************************************
@@ -403,7 +409,7 @@ static void handle_periodic_tx(RAIL_Handle_t rail_handle)
     set_radio_to_idle_state(rail_handle);
     shedule_tx_config.when = sleep_period;
     app_log_info("Periodic Tx mode, period=%lu; EM%d (sleep); EM%d (active)\n",
-                 sleep_period, sleep_mode, 0);
+                 shedule_tx_config.when, sleep_mode, 0);
   }
 
   if (!packet_sending) {

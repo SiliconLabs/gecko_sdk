@@ -166,10 +166,10 @@
   - name: device_has_radio_dualband
   - name: device_has_radio_subghz
   - name: device_supports_bluetooth
-  - name: device_supports_bluetooth_coded_phy
   - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
+  - id: silabs_core_sl_malloc
 - requires:
   - name: cmsis_core
 - template_contribution:

@@ -1,31 +1,21 @@
 package: Zigbee
-description: This component is only for a trust center. It provides a set of APIs for
-  importing and exporting the backup info for a Smart Energy trust center.  It requires
-  extending to hook up import/export routines into an external storage device or network,
-  where the data may be saved to and restored from.
-  This component is extended to use token interface to perform a complete backup and
-  restore a trust center. The way it works is that it uses token interface APIs to
-  read all the available tokens on the NCP node and stores those on the host. The format
-  of the back up file is
-  Number of Tokens (1 byte)
-  Token0 (4 bytes) Token0Size(1 byte) Token0ArraySize(1 byte) Token0Data(Token0Size * Token0ArraySize)
-  Then a series of token data structure up to the last token.
+description: This component is only for a trust center. It provides a set of APIs for importing and exporting the backup info for a Smart Energy trust center.  It requires extending to hook up import/export routines into an external storage device or network, where the data may be saved to and restored from. This component is extended to use token interface to perform a complete backup and restore a trust center. The way it works is that it uses token interface APIs to read all the available tokens on the NCP node and stores those on the host. The format of the back up file is Number of Tokens (1 byte) Token0 (4 bytes) Token0Size(1 byte) Token0ArraySize(1 byte) Token0Data(Token0Size * Token0ArraySize) Then a series of token data structure up to the last token.
 
 label: Trust Center Backup
 quality: evaluation
 id: zigbee_trust_center_backup
 category: Zigbee|Trust Center
 provides:
-   - name: "zigbee_trust_center_backup"
+  - name: zigbee_trust_center_backup
 requires:
-   - name: "zigbee_network_find"
+  - name: zigbee_network_find
 config_file:
   - path: protocol/zigbee/app/framework/plugin/trust-center-backup/config/trust-center-backup-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/trust-center-backup/trust-center-backup.c
   - path: protocol/zigbee/app/framework/plugin/trust-center-backup/trust-center-backup-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/trust-center-backup/trust-center-backup-cli-posix.c
   - path: protocol/zigbee/app/framework/plugin/trust-center-backup/trust-center-backup-posix.c
 include:
@@ -53,9 +43,9 @@ template_contribution:
       handler: importKeyCommand
       help: Sets a key in the import data set.
       argument:
-      - type: uint8
-      - type: hex
-      - type: hex
+        - type: uint8
+        - type: hex
+        - type: hex
   - name: cli_command
     value:
       group: trust-center-backup
@@ -63,7 +53,7 @@ template_contribution:
       handler: setExtendedPanIdCommand
       help: Sets the extended PAN ID in the import data set.
       argument:
-      - type: hex
+        - type: hex
   - name: cli_command
     value:
       group: trust-center-backup
@@ -89,7 +79,7 @@ template_contribution:
       handler: sli_zigbee_af_tc_export_command
       help: Writes the TC backup data to a file.
       argument:
-      - type: string
+        - type: string
   - name: cli_command
     value:
       group: trust-center-backup
@@ -97,37 +87,29 @@ template_contribution:
       handler: sli_zigbee_af_tc_import_command
       help: Reads the TC Backup data from a file and bring the TC back online.
       argument:
-      - type: string
+        - type: string
   - name: cli_command
     value:
       group: trust-center-backup
       name: backup-tokens
       handler: sli_zigbee_af_trust_center_backup_save_tokens_to_file_cli
-      help: Reads all the tokens and saves in a file. Present file format is-
-            TotalTokenCount(1 byte)
-            Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes)
-            ToeknNId(4 Bytes) TokenNSize(1 byte) TokenNArraySize(1 Byte) TokenNData((Size * ArraySize) bytes)
+      help: Reads all the tokens and saves in a file. Present file format is- TotalTokenCount(1 byte) Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes) ToeknNId(4 Bytes) TokenNSize(1 byte) TokenNArraySize(1 Byte) TokenNData((Size * ArraySize) bytes)
       argument:
-      - type: string
+        - type: string
   - name: cli_command
     value:
       group: trust-center-backup
       name: restore-tokens
       handler: sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli
-      help: Reads all the tokens and saves in a file. Present file format is
-            TotalTokenCount(1 byte)
-            Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes)
-            ToeknNId(4 Bytes) TokenNSize(1 byte) TokenNArraySize(1 Byte) TokenNData((Size * ArraySize) bytes)
+      help: Reads all the tokens and saves in a file. Present file format is TotalTokenCount(1 byte) Toekn0Id(4 Bytes) Token0Size(1 byte) Token0ArraySize(1 Byte) Token0Data((Size * ArraySize) bytes) ToeknNId(4 Bytes) TokenNSize(1 byte) TokenNArraySize(1 Byte) TokenNData((Size * ArraySize) bytes)
       argument:
-      - type: string
+        - type: string
   - name: cli_command
     value:
       group: trust-center-backup
       name: reset-node
       handler: sli_zigbee_af_trust_center_backup_restore_reset_node_cli
-      help: Resets the node only available in trust center back up component. This should be called after
-            the tokens have been restored from host using the CLI sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli.
-            This command will perform a reset and reinitialize the node.
+      help: Resets the node only available in trust center back up component. This should be called after the tokens have been restored from host using the CLI sli_zigbee_af_trust_center_backup_restore_tokens_from_file_cli. This command will perform a reset and reinitialize the node.
   - name: cli_command
     value:
       group: trust-center-backup
@@ -135,7 +117,7 @@ template_contribution:
       handler: sli_zigbee_af_trust_center_backup_write_ncp_token_to_zigbeed_tokens_cli
       help: This command writes zigbeed tokens from a previously saved NCP nvm3 tokens file that is obtained by running the cli command plugin trust-center-backup backup-tokens token-File-name.
       argument:
-      - type: string
+        - type: string
 documentation:
   docset: zigbee
   document: zigbee-af-api/trust-center-backup

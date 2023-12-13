@@ -51,6 +51,11 @@
 #define SL_WIFI_CFG_SD_CONTROLLER_NAME             "sd0"
 #endif
 
+#if defined(__ICCARM__)
+/* Suppress warnings 'variable was set but never used' originating with IAR Embedded Workbench */
+#pragma diag_suppress=Pe550
+#endif
+
 static SD_BUS_HANDLE sd_bus_handle = 0;
 static bool sdio_enabled = false;
 #ifdef SLEEP_ENABLED

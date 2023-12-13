@@ -612,7 +612,9 @@ void halDisablePrs(uint8_t channel)
                   0);
 #elif defined(_SILICON_LABS_32B_SERIES_2)
   GPIO->PRSROUTE[0].ROUTEEN &= ~(0x1 << (channel + _GPIO_PRS_ROUTEEN_ASYNCH0PEN_SHIFT));
-  // PRS_FreeChannel(unsigned int ch, PRS_ChType_t type, GPIO_Port_TypeDef port, uint8_t pin)
+  PRS_SourceAsyncSignalSet(channel,
+                           PRS_ASYNC_CH_CTRL_SOURCESEL_DEFAULT,
+                           PRS_ASYNC_CH_CTRL_SIGSEL_DEFAULT);
 #else
   #error "Unsupported platform!"
 #endif
@@ -671,3 +673,12 @@ void halEnablePrs(uint8_t channel,
   #error "Unsupported platform!"
 #endif
 }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+bool halIsPrsChannelFree(uint8_t channel)
+{
+  return ((PRS->ASYNC_CH[channel].CTRL
+           & (_PRS_ASYNC_CH_CTRL_SOURCESEL_MASK | _PRS_ASYNC_CH_CTRL_SIGSEL_MASK))
+          == (PRS_ASYNC_CH_CTRL_SOURCESEL_DEFAULT | PRS_ASYNC_CH_CTRL_SIGSEL_DEFAULT));
+}
+#endif //_SILICON_LABS_32B_SERIES_2

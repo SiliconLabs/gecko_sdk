@@ -51,9 +51,13 @@
   #endif
 #endif
 
+#ifndef SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED
+  #define SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED 1
+#endif
+
 // Check consistency of configuration options.
 // Always include se_manager_check_config.h in order to assert that the
-// configuration options dependencies and restrictions are aok.
+// configuration options dependencies and restrictions are ok.
 #include "sl_se_manager_check_config.h"
 
 #endif // SL_SE_MANAGER_CONFIG_H

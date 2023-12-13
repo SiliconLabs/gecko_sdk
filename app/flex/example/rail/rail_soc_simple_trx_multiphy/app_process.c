@@ -33,13 +33,11 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
-#include "app_assert.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_rail_util_init.h"
 #include "app_process.h"
 #include "app_init.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
 #include "sl_flex_rail_package_assistant.h"
 #include "sl_flex_rail_config.h"
 
@@ -612,13 +610,9 @@ static void update_radio_channels(void)
  *****************************************************************************/
 static void toggle_led(uint16_t channel)
 {
-#if defined(SL_CATALOG_LED1_PRESENT)
   if (channel) {
-    sl_led_toggle(&sl_led_led1);
+    toggle_send_led();
   } else {
-    sl_led_toggle(&sl_led_led0);
+    toggle_receive_led();
   }
-#else
-  sl_led_toggle(&sl_led_led0);
-#endif
 }

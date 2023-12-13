@@ -86,7 +86,7 @@ sl_status_t app_certificate_append_string(app_certificate_t *certificate,
 
 void app_certificate_free(app_certificate_t *certificate)
 {
-  free(certificate);
+  sl_free(certificate);
 }
 
 sl_status_t app_certificate_parse(const app_certificate_t *certificate,

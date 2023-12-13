@@ -82,8 +82,8 @@
 #include "common/array.hpp"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/type_traits.hpp"
+#include "instance/instance.hpp"
 
 namespace ot {
 
@@ -511,16 +511,18 @@ private:
 
     static void HandleLinkMetricsReport(const otIp6Address        *aAddress,
                                         const otLinkMetricsValues *aMetricsValues,
-                                        uint8_t                    aStatus,
+                                        otLinkMetricsStatus        aStatus,
                                         void                      *aContext);
 
     void HandleLinkMetricsReport(const otIp6Address        *aAddress,
                                  const otLinkMetricsValues *aMetricsValues,
-                                 uint8_t                    aStatus);
+                                 otLinkMetricsStatus        aStatus);
 
-    static void HandleLinkMetricsMgmtResponse(const otIp6Address *aAddress, uint8_t aStatus, void *aContext);
+    static void HandleLinkMetricsMgmtResponse(const otIp6Address *aAddress,
+                                              otLinkMetricsStatus aStatus,
+                                              void               *aContext);
 
-    void HandleLinkMetricsMgmtResponse(const otIp6Address *aAddress, uint8_t aStatus);
+    void HandleLinkMetricsMgmtResponse(const otIp6Address *aAddress, otLinkMetricsStatus aStatus);
 
     static void HandleLinkMetricsEnhAckProbingIe(otShortAddress             aShortAddress,
                                                  const otExtAddress        *aExtAddress,
@@ -531,7 +533,7 @@ private:
                                           const otExtAddress        *aExtAddress,
                                           const otLinkMetricsValues *aMetricsValues);
 
-    const char *LinkMetricsStatusToStr(uint8_t aStatus);
+    const char *LinkMetricsStatusToStr(otLinkMetricsStatus aStatus);
 #endif // OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
 
     static void HandleDetachGracefullyResult(void *aContext);

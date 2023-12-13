@@ -10,6 +10,7 @@
 - provides:
   - name: brd4318a
   - name: hardware_board_from_stk
+  - name: hardware_board_from_xgm240-rb4318a
 - recommends:
   - id: brd4318a_a04
 - ui_hints:

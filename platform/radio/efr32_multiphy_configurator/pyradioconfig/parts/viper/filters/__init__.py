@@ -1,2 +1,0 @@
-from pyradioconfig.calculator_model_framework.Utils.ClassManager import ClassManager
-__all__ = ClassManager.getModuleNamesFromPath(__file__)

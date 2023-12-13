@@ -6,8 +6,8 @@ category: Zigbee|Utility
 quality: production
 
 provides:
-   - name: "zigbee_strong_random"
-   - name: "zigbee_strong_random_api_radio"
+  - name: zigbee_strong_random
+  - name: zigbee_strong_random_api_radio
 
 source:
   - path: protocol/zigbee/stack/framework/strong-random-api.c

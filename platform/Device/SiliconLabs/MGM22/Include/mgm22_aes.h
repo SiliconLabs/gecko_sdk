@@ -450,4 +450,4 @@ typedef struct {
 /** @} End of group MGM22_AES */
 /** @} End of group Parts */
 
-#endif /* MGM22_AES_H */
+#endif // MGM22_AES_H

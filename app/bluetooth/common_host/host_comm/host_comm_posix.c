@@ -43,8 +43,7 @@
 #include "named_socket.h"
 
 #if defined (CPC) && CPC == 1
-#include "cpc.h"
-static bool reset_on_start = true;
+#include "cpc_bt.h"
 #endif // defined (CPC) && CPC == 1
 
 // Default parameter values.
@@ -140,8 +139,8 @@ sl_status_t host_comm_init(void)
 #if defined (CPC) && CPC == 1
   } else if (cpc_conn) {
     handle_ptr = &handle;
-    HOST_COMM_API_INITIALIZE_NONBLOCK(cpc_tx, cpc_rx, cpc_rx_peek);
-    if (cpc_open(handle_ptr, cpc_instance_name, reset_on_start)) {
+    HOST_COMM_API_INITIALIZE_NONBLOCK(cpc_bt_tx, cpc_bt_rx, cpc_bt_rx_peek);
+    if (cpc_bt_open(handle_ptr, cpc_instance_name)) {
       app_log_critical("Connection to CPCd unsuccessful. Exiting.." APP_LOG_NL);
       exit(EXIT_FAILURE);
     }
@@ -194,10 +193,6 @@ sl_status_t host_comm_set_option(char option, char *value)
     case 'C':
       strncpy(cpc_instance_name, value, MAX_OPT_LEN);
       cpc_conn = true;
-      break;
-    // CPC no reset on start
-    case 'R':
-      reset_on_start = false;
       break;
 #endif // defined (CPC) && CPC == 1
     // Unknown option.
@@ -275,25 +270,33 @@ void *msg_recv_func(void *ptr)
   while (run) {
     int32_t len;
     len = host_comm_pk(handle_ptr);
-    if (len > sizeof(buf_in.buf)) {
-      // If readable data exceeds the buffer size then
-      // read it one by one to avoid overflow
-      len = 1;
-      app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
-    } else if (len < 0) {
+
+    if (len < 0) {
       // Peek is not supported, read data one by one
       len = 1;
+    } else if ((size_t)len > sizeof(buf_tmp.buf)) {
+      // If readable data exceeds the buffer size then read it one by one to avoid overflow
+      len = 1;
+      app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
     }
 
-    if ((len > 0) && (len <= (sizeof(buf_in.buf) - buf_in.len))) {
+    if (len > 0) {
       ret = host_comm_input(handle_ptr, len, buf_tmp.buf);
       pthread_mutex_lock(&mutex);
-      memcpy(&buf_in.buf[buf_in.len], &buf_tmp.buf[0], ret);
-      buf_in.len += ret;
-      pthread_mutex_unlock(&mutex);
+
+      if (ret <= (sizeof(buf_in.buf) - buf_in.len)) {
+        memcpy(&buf_in.buf[buf_in.len], &buf_tmp.buf[0], ret);
+        buf_in.len += ret;
+        pthread_mutex_unlock(&mutex);
+      } else {
+        pthread_mutex_unlock(&mutex);
+        app_log_error("Received data lost." APP_LOG_NL);
+      }
     } else {
+      // No data available
       app_sleep_us(RECV_FUNC_US_SLEEP);
     }
   }
+
   return 0;
 }

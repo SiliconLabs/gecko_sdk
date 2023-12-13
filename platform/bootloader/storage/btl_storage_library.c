@@ -26,6 +26,10 @@
 #include "btl_storage_internal.h"
 #include "bootloadinfo/btl_storage_bootloadinfo.h"
 #include <string.h>
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 const BootloaderStorageFunctions_t storageFunctions = {
   // Version number
@@ -444,3 +448,6 @@ bool storage_bootloadApplicationFromSlot(uint32_t slotId, uint32_t version)
 
   return bootloadFromSlot(&parseCtx, &parseCb);
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

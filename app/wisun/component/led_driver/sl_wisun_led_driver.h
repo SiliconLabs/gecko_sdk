@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_LED_DRIVER_H__
 #define __SL_WISUN_LED_DRIVER_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -118,5 +122,9 @@ sl_status_t sl_wisun_led_toggle(const sl_wisun_led_id_t led_id);
  * @return SL_STATUS_OK on success, SL_STATUS_FAIL on failure
  *****************************************************************************/
 sl_status_t sl_wisun_led_terminate(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

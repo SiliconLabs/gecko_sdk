@@ -27,7 +27,9 @@
  *
  ******************************************************************************/
 
-#include PLATFORM_HEADER
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 #include "cmsis-rtos-ipc-config.h"
 
 #include "stack/include/ember.h"
@@ -35,6 +37,7 @@
 #include "cmsis-rtos-support.h"
 #include "csp-command-utils.h"
 #include "csp-format.h"
+#include "csp-api-enum-gen.h"
 
 // TODO: This is for IAR, for GCC it should be "unsigned long"
 typedef unsigned int PointerType;
@@ -87,6 +90,7 @@ void emAfPluginCmsisRtosIpcInit(void)
 
 uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
 {
+  (void)apiCommandBuffer;
   // This API can not be called from the stack task (the stack task calls
   // stack APIs directly).
   assert(!isCurrentTaskStackTask());
@@ -101,6 +105,8 @@ uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
 
 void sendResponse(uint8_t *apiCommandBuffer, uint16_t commandLength)
 {
+  (void)apiCommandBuffer;
+  (void)commandLength;
   // This API must be called from the stack task.
   assert(isCurrentTaskStackTask());
   postResponsePendingFlag();
@@ -149,7 +155,7 @@ void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
   }
 
   // Write the callback command to the callback buffer.
-  MEMCOPY(emberGetBufferPointer(callbackBuffer[i]), callbackCommandBuffer, commandLength);
+  memcpy(emberGetBufferPointer(callbackBuffer[i]), callbackCommandBuffer, commandLength);
   free(callbackCommandBuffer);
   callbackBufferDescriptorPut.buffer_addr = &callbackBuffer[i];
   callbackBufferDescriptorPut.buffer_length = commandLength;
@@ -187,15 +193,18 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
   messageLength = callbackBufferDescriptorGet.buffer_length;
 
   if (callbackBufferPtr) {
-    uint8_t callbackData[MAX_STACK_CALLBACK_COMMAND_SIZE];
+    uint8_t *callbackData = (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
+    if (callbackData == NULL) {
+      return false;
+    }
     uint16_t commandId;
 
     // Lock the buffer system to prevent defragmentation while we access the
     // buffer.
     emberAfPluginCmsisRtosAcquireBufferSystemMutex();
-    MEMCOPY(callbackData,
-            emberGetBufferPointer(*callbackBufferPtr),
-            messageLength);
+    memcpy(callbackData,
+           emberGetBufferPointer(*callbackBufferPtr),
+           messageLength);
     // This assignment is safe because the vNCP acquires the buffer system mutex
     // before manipulating any entry in callbackBuffer[].
     *callbackBufferPtr = EMBER_NULL_BUFFER;
@@ -205,7 +214,7 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 
     handleIncomingCallbackCommand(commandId,
                                   callbackData + 2);
-
+    free(callbackData);
     return true;
   }
 
@@ -238,7 +247,16 @@ uint8_t *getApiCommandPointer()
 
 uint8_t *allocateCallbackCommandPointer()
 {
-  return (uint8_t *)malloc(MAX_STACK_API_COMMAND_SIZE);
+  return (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
+}
+
+void unknownCommandIdHandler(uint16_t commandId)
+{
+  uint16_t command_type = commandId & 0xFF00;
+  if (command_type == VNCP_CMD_ID) {
+    //The OS needs a response to unlock the blocking command
+    sendResponse(apiCommandData, 0);
+  }
 }
 
 //------------------------------------------------------------------------------

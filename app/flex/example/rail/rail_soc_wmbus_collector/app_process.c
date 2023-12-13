@@ -34,8 +34,7 @@
 #include "rail.h"
 #include "sl_component_catalog.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_wmbus_support.h"
 #include "em_emu.h"
 
@@ -87,6 +86,7 @@ void set_next_state(state_t next_state)
 void app_process_action(RAIL_Handle_t rail_handle)
 {
   (void) rail_handle;
+  uint64_t current_rail_err_tmp = current_rail_err;
 
   switch (state) {
     case S_PACKET_RECEIVED:
@@ -98,7 +98,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
       break;
     case S_RX_PACKET_ERROR:
       // Handle Rx error
-      app_log_error("Radio RX Error occurred\nEvents: %lld\n", current_rail_err);
+      app_log_error("Radio RX Error occurred\nEvents: %lld\n", current_rail_err_tmp);
       state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
       app_task_notify();
@@ -106,7 +106,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
       break;
     case S_CALIBRATION_ERROR:
       app_log_warning("Radio Calibration Error occurred\nEvents: %lld\nRAIL_Calibrate() result:%d\n",
-                      current_rail_err,
+                      current_rail_err_tmp,
                       calibration_status);
       state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -230,7 +230,7 @@ static void print_rx_packets(RAIL_Handle_t rail_handle)
       print_blocks(rx_fifo + sizeof(WMBUS_dll_header_t), dllHeader->lField - sizeof(WMBUS_dll_header_t) + 1);
     }
 
-    sl_led_toggle(&sl_led_led0);
+    toggle_receive_led();
 
     rx_packet_handle = RAIL_GetRxPacketInfo(rail_handle, RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   }

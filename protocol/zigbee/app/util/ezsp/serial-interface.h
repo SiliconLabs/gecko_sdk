@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief The interface down to the serial protocol being used to
- * transport EZSP frames (SPI/UART/USB).
+ * transport EZSP frames (SPI/UART).
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>

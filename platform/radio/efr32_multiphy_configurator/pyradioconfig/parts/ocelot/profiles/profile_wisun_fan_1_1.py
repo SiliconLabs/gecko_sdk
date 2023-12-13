@@ -15,18 +15,36 @@ class ProfileWisunFan1v1Ocelot(ProfileWisunFan1v1Jumbo):
         self._family = "ocelot"
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
+    def buildProfileModel(self, model):
+        # Build profile object and append it to the model
+        profile = self._makeProfile(model)
+
+        # Build inputs
+        self.build_required_profile_inputs(model, profile)
+        self.build_optional_profile_inputs(model, profile)
+        self.build_advanced_profile_inputs(model, profile)
+        self.build_hidden_profile_inputs(model, profile)
+        self.build_deprecated_profile_inputs(model, profile)
+
+        # Build outputs
+        self.build_register_profile_outputs(model, profile)
+        self.build_variable_profile_outputs(model, profile)
+        self.build_info_profile_outputs(model, profile)
+
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
+        return profile
+
     def build_required_profile_inputs(self, model, profile):
 
         self.make_required_input(profile, model.vars.wisun_reg_domain, "WiSUN",
                                      readable_name="Wi-SUN Regulatory Domain")
 
         self.make_required_input(profile, model.vars.wisun_phy_mode_id_select, "WiSUN",
-                                     readable_name="Wi-SUN PHY Operating Mode ID", value_limit_min=0,
-                                     value_limit_max=0x1F) #No OFDM support on Ocelot
+                                     readable_name="Wi-SUN PHY Operating Mode ID")
 
         self.make_required_input(profile, model.vars.wisun_channel_plan_id, "WiSUN",
-                                     readable_name="Wi-SUN Channel Plan ID", value_limit_min=0,
-                                     value_limit_max=63)
+                                     readable_name="Wi-SUN Channel Plan ID")
 
         self.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",
                                      readable_name="Crystal Frequency", value_limit_min=38000000,
@@ -70,6 +88,10 @@ class ProfileWisunFan1v1Ocelot(ProfileWisunFan1v1Jumbo):
         self.make_hidden_input(profile, model.vars.afc_run_mode, 'Advanced',
                                readable_name="AFC Run Mode")
 
+        self.make_hidden_input(profile, model.vars.modulation_index_for_ksi, "Advanced",
+                               readable_name="Modulation index used by ksi calculation",
+                               value_limit_min=0.0, value_limit_max=5.0, fractional_digits=2)
+
     def build_register_profile_outputs(self, model, profile):
         # Overriding this method to include modem regs for Ocelot
         family = self._family
@@ -111,7 +133,7 @@ class ProfileWisunFan1v1Ocelot(ProfileWisunFan1v1Jumbo):
         # This function calculates some variables/registers based on the PhyModeID
 
         # Read the profile inputs (not yet written to model vars)
-        wisun_phy_mode_id_select = model.profile.inputs.wisun_phy_mode_id_select.var_value
+        wisun_phy_mode_id_select = model.profile.inputs.wisun_phy_mode_id_select.var_value.value
         shaping_filter = model.profile.inputs.shaping_filter.var_value
         shaping_filter_param = model.profile.inputs.shaping_filter_param.var_value
         payload_white_en = model.profile.inputs.payload_white_en.var_value

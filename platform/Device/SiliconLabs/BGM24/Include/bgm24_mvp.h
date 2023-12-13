@@ -1383,4 +1383,4 @@ typedef struct {
 /** @} End of group BGM24_MVP */
 /** @} End of group Parts */
 
-#endif /* BGM24_MVP_H */
+#endif // BGM24_MVP_H

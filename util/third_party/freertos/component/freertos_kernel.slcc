@@ -15,6 +15,9 @@ config_file:
   - path: util/third_party/freertos/config/series2/FreeRTOSConfig.h
     file_id: freertos_config
     condition: [device_series_2]
+  - path: util/third_party/freertos/config/series3/FreeRTOSConfig.h
+    file_id: freertos_config
+    condition: [device_series_3]
 source:
   - path: util/third_party/freertos/cmsis/Source/cmsis_os2.c
   - path: util/third_party/freertos/kernel/croutine.c

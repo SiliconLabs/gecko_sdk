@@ -71,37 +71,37 @@ void ZAF_SetCPHandle(CP_Handle_t handle);
  * Get m_pAppHandles object
  * @return m_pAppHandles
  */
-SApplicationHandles* ZAF_getAppHandle();
+SApplicationHandles* ZAF_getAppHandle(void);
 
 /**
  * Get Protocol Info object
  * @return pProtocolInfo member of m_pAppHandles
  */
-const SProtocolInfo* ZAF_getProtocolInfo();
+const SProtocolInfo* ZAF_getProtocolInfo(void);
 
 /**
  * Get Notifying queue object. It is stored in m_pAppHandles
  * @return pZwTxQueue member of m_pAppHandles
  */
-SQueueNotifying* ZAF_getZwTxQueue();
+SQueueNotifying* ZAF_getZwTxQueue(void);
 
 /**
  * Get Notifying queue object used for ZW Command Queue.
  * @return pZwCommandQueue member of m_pAppHandles
  */
-SQueueNotifying* ZAF_getZwCommandQueue();
+SQueueNotifying* ZAF_getZwCommandQueue(void);
 
 /**
  * Get Network Statistics object.
  * @return pNetworkStatistics member of m_pAppHandles
  */
-const zpal_radio_network_stats_t* ZAF_getNetworkStatistics();
+const zpal_radio_network_stats_t* ZAF_getNetworkStatistics(void);
 
 /**
  * Get m_PowerLock object
  * @return m_PowerLock
  */
-zpal_pm_handle_t ZAF_getPowerLock();
+zpal_pm_handle_t ZAF_getPowerLock(void);
 
 /**
  * Returns the granted security keys.
@@ -117,7 +117,7 @@ uint8_t ZAF_GetSecurityKeys(void);
  * Any other module can request the address of the CP context to use the API
  * @return Pointer to Command Publisher context
  */
-CP_Handle_t ZAF_getCPHandle();
+CP_Handle_t ZAF_getCPHandle(void);
 
 
 /**

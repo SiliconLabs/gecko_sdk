@@ -56,4 +56,4 @@ typedef struct {
 
 /** @} End of group Parts */
 
-#endif /* EFM32PG22_DMA_DESCRIPTOR_H */
+#endif // EFM32PG22_DMA_DESCRIPTOR_H

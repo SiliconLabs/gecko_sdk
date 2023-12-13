@@ -23,6 +23,11 @@
 
 #include "api/btl_interface.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 #define LONG_TOKEN_BASE NULL
 
 NO_STRIPPING const ApplicationProperties_t appProperties = {
@@ -171,3 +176,7 @@ void halGetExtendedBootloaderVersion(uint32_t* getEmberVersion, uint32_t* custom
     *customerVersion = customer;
   }
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

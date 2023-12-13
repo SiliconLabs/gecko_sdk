@@ -325,6 +325,7 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
         self._addModelRegister(model, 'RAC.PACTRL.TXPASELSLICE', int, ModelVariableFormat.HEX)
 
     def _add_SYNTH_DSMCTRL_regs(self, model):
+        self._addModelRegister(model, 'SYNTH.DSMCTRLRX.DEMMODERX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DSMCTRLRX.DITHERDACRX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DSMCTRLRX.DITHERDSMINPUTRX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DSMCTRLRX.DITHERDSMOUTPUTRX', int, ModelVariableFormat.HEX)
@@ -338,6 +339,7 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
     def _add_RAC_SYTRIM_regs(self, model):
         self._addModelRegister(model, 'RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPSRCENRX', int, ModelVariableFormat.HEX)
+        self._addModelRegister(model, 'RAC.SYTRIM0.SYCHPLEVPSRCRX', int, ModelVariableFormat.HEX)
         pass
 
     def _add_RAC_RXTX_SY_regs(self, model):

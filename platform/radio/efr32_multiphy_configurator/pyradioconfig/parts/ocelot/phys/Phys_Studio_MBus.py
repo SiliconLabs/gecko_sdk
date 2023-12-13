@@ -51,6 +51,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
         # Xtal frequency
         phy.profile_inputs.xtal_frequency_hz.value = 39000000
 
+        phy.profile_inputs.deviation_tol_ppm.value = 300000          # Required for pro2 calc to set fdev compensation
+
         return phy
 
     # Owner: Efrain Gaxiola
@@ -337,6 +339,8 @@ class PHYS_Mbus_Studio_Ocelot(IPhy):
 
         # Xtal frequency
         phy.profile_inputs.xtal_frequency_hz.value = 39000000
+
+        phy.profile_inputs.deviation_tol_ppm.value = 300000          # Required for pro2 calc to set fdev compensation
 
         return phy
 

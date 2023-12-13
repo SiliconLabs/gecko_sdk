@@ -740,4 +740,4 @@
 #define PRS_PRORTC_CCV0                                 (PRS_ASYNC_PRORTC_CCV0)
 #define PRS_PRORTC_CCV1                                 (PRS_ASYNC_PRORTC_CCV1)
 
-#endif /* MGM21_PRS_SIGNALS_H */
+#endif // MGM21_PRS_SIGNALS_H

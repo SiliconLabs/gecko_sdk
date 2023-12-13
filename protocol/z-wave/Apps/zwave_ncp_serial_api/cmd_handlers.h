@@ -32,13 +32,13 @@ cmd_handler_map_t;
 #define CMD_HANDLER_SECTION "_cmd_handlers"
 
 #define ZW_ADD_CMD(cmd) \
-  static void cmd_handler_fcn_##cmd(const comm_interface_frame_ptr frame); /* Prototype */ \
+  static void cmd_handler_fcn_##cmd(__attribute__((unused)) const comm_interface_frame_ptr frame); /* Prototype */ \
   static const cmd_handler_map_t cmd_handler_##cmd __attribute__((__used__, __section__( CMD_HANDLER_SECTION ))) = {cmd,cmd_handler_fcn_##cmd}; \
-  static void cmd_handler_fcn_##cmd(const comm_interface_frame_ptr frame)
+  static void cmd_handler_fcn_##cmd(__attribute__((unused)) const comm_interface_frame_ptr frame)
 
 /**
  * Invoke command handler.
- * 
+ *
  * @param[in] frame Frame
  * @return true if handler for given @p frame was invoked, false if no handler was found
  */
@@ -65,6 +65,6 @@ void ZCB_ComplHandler_ZW_NodeManagement(LEARN_INFO_T *statusInfo);
 /**
  * @}
  * @}
- */ 
+ */
 
 #endif /* CMD_HANDLER_H_ */

@@ -20,21 +20,6 @@ The example redirects standard I/O to the virtual serial port (VCOM) of the kit.
 
 The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining `SE_MANAGER_PRINT=0` (default is 1) in the IDE setting (`Preprocessor->Defined symbols`).
 
-## SE Manager API
-
-The following SE Manager APIs are used in this example:
-
-* `sl_se_init`
-* `sl_se_deinit`
-* `sl_se_init_command_context`
-* `sl_se_deinit_command_context`
-* `sl_se_get_se_version`
-* `sl_se_get_upgrade_status_se_image`
-* `sl_se_check_se_image`
-* `sl_se_apply_se_image`
-* `sl_se_read_executed_command` (VSE only)
-* `sl_se_ack_command` (VSE only)
-
 ## Getting Started
 
 1. Upgrade the kit's firmware to the latest version (see `Adapter Firmware` under [General Device Information](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information) in Simplicity Studio 5 Users Guide).
@@ -52,8 +37,43 @@ The following SE Manager APIs are used in this example:
 4. The device should disconnect from the debugger when upgrading the HSE or VSE firmware.
 5. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
 
+## SE Manager API
+
+The following SE Manager APIs are used in this example:
+
+* `sl_se_init`
+* `sl_se_deinit`
+* `sl_se_init_command_context`
+* `sl_se_deinit_command_context`
+* `sl_se_get_se_version`
+* `sl_se_get_upgrade_status_se_image`
+* `sl_se_check_se_image`
+* `sl_se_apply_se_image`
+* `sl_se_read_executed_command` (VSE only)
+* `sl_se_ack_command` (VSE only)
+
+## Troubleshooting
+
+### Serial Port Settings
+
+Be sure to select the following settings to see the serial output of this example:
+
+* 115200 Baud Rate 
+* 8-N-1 configuration
+* Line terminator should be set to "None" if using Device Console in Simplicity Studio
+
+### Programming the Radio Board
+
+Before programming the radio board mounted on the mainboard, make sure the power supply switch is in the AEM position (right side) as shown below.
+
+![Radio board power supply switch](image/readme_img0.png)
+
 ## Resources
 
 [SE Manager API](https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager)
 
 [AN1222: Production Programming of Series 2 Devices](https://www.silabs.com/documents/public/application-notes/an1222-efr32xg2x-production-programming.pdf)
+
+## Report Bugs & Get Support
+
+You are always encouraged and welcome to report any issues you found to us via [Silicon Labs Community](https://community.silabs.com/).

@@ -27,10 +27,11 @@
  *
  ******************************************************************************/
 
+#include <string.h>
+#include <assert.h>
 #include "ota-broadcast-bootloader-client-config.h"
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 
 #include "ota-broadcast-bootloader-client.h"
 #include "ota-broadcast-bootloader-client-internal.h"
@@ -197,7 +198,7 @@ static void initSegmentsBitmask(void)
 #endif
 
   segmentBitmaskBufferPtr = emberGetBufferPointer(segmentBitmaskBuffer);
-  MEMSET(segmentBitmaskBufferPtr, 0x00, MISSING_SEGMENTS_BITMASK_LENGTH);
+  memset(segmentBitmaskBufferPtr, 0x00, MISSING_SEGMENTS_BITMASK_LENGTH);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   emberAfPluginCmsisRtosReleaseBufferSystemMutex();
@@ -408,7 +409,7 @@ static void sendMissingSegmentsResponse(EmberNodeId serverId,
     imageTag;
 
   if (allZerosBitmask) {
-    MEMSET(message + EMBER_OTA_BROADCAST_BOOTLOADER_PROTOCOL_MISSING_SEGS_RESP_BITMASK_OFFSET,
+    memset(message + EMBER_OTA_BROADCAST_BOOTLOADER_PROTOCOL_MISSING_SEGS_RESP_BITMASK_OFFSET,
            0x00,
            MISSING_SEGMENTS_BITMASK_LENGTH);
   } else {
@@ -613,9 +614,9 @@ static void historyTableRemoveEntry(uint8_t entryIndex)
   while (i != historyTableHeadIndex) {
     uint8_t destinationEntryIndex = (i > 0) ? i - 1 : HISTORY_TABLE_SIZE - 1;
 
-    MEMCOPY(&historyTable[destinationEntryIndex],
-            &historyTable[i],
-            sizeof(EmHistoryEntry));
+    memcpy(&historyTable[destinationEntryIndex],
+           &historyTable[i],
+           sizeof(EmHistoryEntry));
 
     i = (i + 1) % HISTORY_TABLE_SIZE;
   }

@@ -234,7 +234,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
   // calculate total packets
   test->statistic.tot_packets = test->statistic.nbr_rcv_snt_packets + test->statistic.udp_lost_pkt;
-  
+
   if (test->conn.run || !test->statistic.tot_packets) {
     test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
     test->conn.run = false;
@@ -311,18 +311,17 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
                                test->conn.buff,
                                SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
                                &test->conn.clnt_addr) == SL_IPERF_NW_API_ERROR) {
-      
       sl_iperf_test_log_verbose(test, "UDP Server: FINACK send error.\n");
       continue;
     }
-      sl_iperf_delay_ms(1000UL);
-      r = sl_iperf_socket_recvfrom(test->conn.socket_id,
-                                   test->conn.buff,
-                                   test->conn.buff_size,
-                                   &test->conn.clnt_addr);
-      if (r <= 0) {
-        break;
-      }
+    sl_iperf_delay_ms(1000UL);
+    r = sl_iperf_socket_recvfrom(test->conn.socket_id,
+                                 test->conn.buff,
+                                 test->conn.buff_size,
+                                 &test->conn.clnt_addr);
+    if (r <= 0) {
+      break;
+    }
   }
 
   sl_iperf_test_log_verbose(test, "UDP Server: FINACK has been sent.\n");

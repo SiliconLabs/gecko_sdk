@@ -7,8 +7,7 @@ ui_hints:
   visibility: never
 
 provides:
-  - name: "zigbee_msla_check"
-
+  - name: zigbee_msla_check
 description: When this component is present, the zigbeed application will perform the msla check in run time.
 
 documentation:

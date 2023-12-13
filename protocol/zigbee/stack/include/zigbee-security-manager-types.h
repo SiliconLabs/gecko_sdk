@@ -56,8 +56,6 @@ enum {
    * This is an indexed key table of size EMBER_KEY_TABLE_SIZE, so long as there
    * is sufficient nonvolatile memory to store keys. */
   SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK,
-  /** @brief Key type used to store Secure EZSP keys */
-  SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY,
   /** @brief This is the ZLL encryption key for use by algorithms that require it. */
   SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY,
   /** @brief For ZLL, this is the pre-configured link key used during classical ZigBee commissioning. */
@@ -73,22 +71,30 @@ enum {
 typedef uint8_t sl_zb_sec_man_key_type_t;
 
 /** @brief Derived keys are calculated when performing Zigbee crypto operations. The stack
- * makes use of these derivations. */
-enum {
+ * makes use of these derivations.
+ * Compounding derivations can be specified by using an or-equals on two derived types if
+ * applicable; this is limited to performing the key-transport, key-load, or verify-key hashes
+ * on either the TC Swap Out or TC Hashed Link keys.*/
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum sl_zb_sec_man_derived_key_type_t
+#else
+typedef uint16_t sl_zb_sec_man_derived_key_type_t;
+enum
+#endif
+{
   /** @brief Perform no derivation; use the key as is. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE = 0,
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE = 0x0000,
   /** @brief Perform the Key-Transport-Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY = 1,
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY = 0x0001,
   /** @brief Perform the Key-Load-Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY = 2,
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY = 0x0002,
   /** @brief Perform the Verify Key hash. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY = 3,
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY = 0x0004,
   /** @brief Perform a simple AES hash of the key for TC backup. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY = 4,
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY = 0x0008,
   /** @brief For a TC using hashed link keys, hashed the root key against the supplied EUI in context. */
-  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY = 5
+  SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY = 0x0010,
 };
-typedef uint8_t sl_zb_sec_man_derived_key_type_t;
 
 /**
  * @brief Security Manager context flags.

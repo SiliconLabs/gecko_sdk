@@ -18,9 +18,11 @@
 
 // <h>Zigbee Trust Center Network Key Update Periodic configuration
 
-// <o KEY_UPDATE_PERIOD_MINUTES> Key Update Period in minutes <1-35791>
+// <o KEY_UPDATE_PERIOD_MINUTES> Key Update Period in minutes <1-525601>
 // <i> Default: 30
-// <i> How often the NWK key is updated.
+// <i> This configuration is for the Trust Center to periodically initiate a NWK key update based on the parameters defined below.  It uses either a Broadcast based method, or a Unicast based method depending on whether the 'Trust Center NWK Key Update Broadcast' or 'Trust Center NWK Key Update Unicast' component has been included.
+// <i> NOTE: Trust centers should update the network key at least once per year. It is not recommended to update the network key more than once every 30 days except when required by the application or profile.
+// <i> NOTE: The default value of 30 minutes for Key Update Period/Units is to ensure that the network key update operation is observed and verified during development and test.  This value should be changed for production deployment; Zigbee R22 recommends a period of no less than 30 days.
 #define KEY_UPDATE_PERIOD_MINUTES   30
 
 // </h>

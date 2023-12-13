@@ -30,6 +30,10 @@
 #ifndef __SL_WISUN_NETWORK_MEASUREMENT_PING_GUI__
 #define __SL_WISUN_NETWORK_MEASUREMENT_PING_GUI__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -51,4 +55,9 @@
  *****************************************************************************/
 void sli_wisun_nwm_ping_form(void *args);
 void sli_wisun_nwm_test_result_form(void *args);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

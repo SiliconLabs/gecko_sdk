@@ -43,8 +43,8 @@
 #include "openthread-system.h" // for otSysEventSignalPending()
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/new.hpp"
+#include "instance/instance.hpp"
 
 #if OPENTHREAD_CONFIG_NCP_CPC_ENABLE
 

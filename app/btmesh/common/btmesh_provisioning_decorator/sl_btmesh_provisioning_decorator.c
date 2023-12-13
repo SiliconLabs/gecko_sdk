@@ -56,19 +56,6 @@
  * @{
  ******************************************************************************/
 
-/// High Priority
-#define HIGH_PRIORITY                  0
-/// No Timer Options
-#define NO_FLAGS                       0
-/// Callback has no parameters
-#define NO_CALLBACK_DATA               (void *)NULL
-
-// periodic timer handle
-static app_timer_t restart_timer;
-// periodic timer callback
-static void prov_decor_restart_timer_cb(app_timer_t *handle,
-                                        void *data);
-
 // -----------------------------------------------------------------------------
 // Provisioning Callbacks
 
@@ -174,17 +161,6 @@ void sl_btmesh_handle_provisioning_decorator_event(sl_btmesh_msg_t *evt)
 
     case sl_btmesh_evt_node_provisioning_failed_id: {
       sl_btmesh_on_node_provisioning_failed(evt->data.evt_node_provisioning_failed.result);
-
-      log_info("BT mesh system reset timer is started with %d ms timeout." NL,
-               SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL);
-
-      sl_status_t sc =
-        app_timer_start(&restart_timer,
-                        SL_BTMESH_PROVISIONING_DECORATOR_RESTART_TIMER_TIMEOUT_CFG_VAL,
-                        prov_decor_restart_timer_cb,
-                        NO_CALLBACK_DATA,
-                        false);
-      app_assert_status_f(sc, "Failed to start timer");
       break;
     }
 
@@ -192,19 +168,4 @@ void sl_btmesh_handle_provisioning_decorator_event(sl_btmesh_msg_t *evt)
       break;
   }
 }
-
-/***************************************************************************//**
- * Called when the restart timer expires.
- *
- * @param[in] handle  Pointer to the timer handle
- * @param[in] data    Pointer to callback data
- ******************************************************************************/
-static void prov_decor_restart_timer_cb(app_timer_t *handle,
-                                        void *data)
-{
-  (void)data;
-  (void)handle;
-  sl_bt_system_reset(0);
-}
-
 /** @} (end addtogroup ProvisioningDecorator) */

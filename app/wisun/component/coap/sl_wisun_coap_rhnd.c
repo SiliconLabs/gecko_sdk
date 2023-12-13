@@ -43,10 +43,11 @@
 #include "sl_status.h"
 #include "sl_mempool.h"
 #include "sl_wisun_app_core_util.h"
+#include "socket/socket.h"
 #include "sli_wisun_coap_rd.h"
 
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
-#include "socket.h"
+#include "socket/socket.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -110,16 +111,6 @@ __STATIC_INLINE void _coap_resource_mutex_release(void);
 static sl_wisun_coap_rhnd_resource_t *  _get_resource(const char * const uri_path);
 
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
-
-/**************************************************************************//**
- * @brief Is request packet?
- * @details helper function
- * @param[in] packet Packet
- * @return true Request packet
- * @return false Response or Empty packet
- *****************************************************************************/
-__STATIC_INLINE bool _is_request_packet(const sl_wisun_coap_packet_t * const packet);
-
 /**************************************************************************//**
  * @brief Thread function of Resource Handler Service
  * @details Thread function
@@ -174,8 +165,10 @@ static sl_wisun_coap_rhnd_resource_t _tmp_resources[SL_WISUN_COAP_RESOURCE_HND_M
 /// Resource storage mempool
 static sl_mempool_t _resources = { 0U };
 
+#if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
 /// Socket communication buffer to receive/send
 static uint8_t _rhnd_sock_buff[SL_WISUN_COAP_RESOURCE_HND_SOCK_BUFF_SIZE] = { 0 };
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -211,7 +204,7 @@ sl_status_t sl_wisun_coap_rhnd_resource_add(const sl_wisun_coap_rhnd_resource_t 
 
   _coap_resource_mutex_check_acquire();
 
-  // Check resource is alredy exist
+  // Check if resource already exists
   while (slot != NULL) {
     resource = (sl_wisun_coap_rhnd_resource_t *)slot->start_addr;
     if (!strncmp(resource->data.uri_path,
@@ -344,7 +337,6 @@ sl_status_t sl_wisun_coap_rhnd_reset_auto_response(const char * uri_path)
   return SL_STATUS_OK;
 }
 
-
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
 SL_WEAK void sl_wisun_coap_rhnd_service_resp_received_hnd(sl_wisun_coap_packet_t * req_packet)
 {
@@ -384,6 +376,14 @@ SL_WEAK void sl_wisun_coap_rhnd_service_resp_send_error_hnd(sl_wisun_coap_packet
 }
 #endif
 
+bool sl_wisun_coap_rhnd_is_request_packet(const sl_wisun_coap_packet_t * const packet)
+{
+  return (bool)(packet->msg_code == COAP_MSG_CODE_REQUEST_GET
+                || packet->msg_code == COAP_MSG_CODE_REQUEST_POST
+                || packet->msg_code == COAP_MSG_CODE_REQUEST_PUT
+                || packet->msg_code == COAP_MSG_CODE_REQUEST_DELETE);
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
@@ -416,7 +416,7 @@ __STATIC_INLINE void _coap_resource_mutex_release(void)
   assert(osMutexRelease(_wisun_coap_resource_mtx) == osOK);
 }
 
-static sl_wisun_coap_rhnd_resource_t *  _get_resource(const char * const uri_path)
+static sl_wisun_coap_rhnd_resource_t * _get_resource(const char * const uri_path)
 {
   sl_wisun_coap_rhnd_resource_t *resource = NULL;
   sl_mempool_block_hnd_t *slot            = _resources.blocks;
@@ -433,13 +433,6 @@ static sl_wisun_coap_rhnd_resource_t *  _get_resource(const char * const uri_pat
 }
 
 #if SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
-__STATIC_INLINE bool _is_request_packet(const sl_wisun_coap_packet_t * const packet)
-{
-  return (bool)(packet->msg_code == COAP_MSG_CODE_REQUEST_GET
-                || packet->msg_code == COAP_MSG_CODE_REQUEST_POST
-                || packet->msg_code == COAP_MSG_CODE_REQUEST_PUT
-                || packet->msg_code == COAP_MSG_CODE_REQUEST_DELETE);
-}
 
 static void _rhnd_thr_fnc(void * args)
 {
@@ -454,11 +447,11 @@ static void _rhnd_thr_fnc(void * args)
   socklen_t sock_len                            = 0UL;
   size_t resp_len                               = 0UL;
   uint16_t discovery_paylod_len                 = 0U;
-  static wisun_addr_t srv_addr                  = { 0U };
-  static wisun_addr_t clnt_addr                 = { 0U };
+  static sockaddr_in6_t srv_addr                  = { 0U };
+  static sockaddr_in6_t clnt_addr                 = { 0U };
 #if SL_WISUN_COAP_RD_SOCKET_REQUIRED
   int32_t sockid_rd                             = SOCKET_INVALID_ID;
-  static wisun_addr_t srv_addr_rd               = { 0U };
+  static sockaddr_in6_t srv_addr_rd               = { 0U };
 #endif
 
 // Clean-up code
@@ -479,25 +472,25 @@ static void _rhnd_thr_fnc(void * args)
     }
 
     // creating socket
-    sockid = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+    sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
     assert(sockid != SOCKET_INVALID_ID);
 
     // fill the server address structure
-    srv_addr.sin6_family = AF_WISUN;
+    srv_addr.sin6_family = AF_INET6;
     srv_addr.sin6_addr = in6addr_any;
     srv_addr.sin6_port = htons(SL_WISUN_COAP_RESOURCE_HND_SERVICE_PORT);
 
-    sock_len = sizeof(wisun_addr_t);
+    sock_len = sizeof(sockaddr_in6_t);
 
     // bind address to the socket
     r = bind(sockid, (const struct sockaddr *) &srv_addr, sock_len);
     assert(r != SOCKET_RETVAL_ERROR);
 
 #if SL_WISUN_COAP_RD_SOCKET_REQUIRED
-    sockid_rd = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+    sockid_rd = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
     assert(sockid_rd != SOCKET_INVALID_ID);
 
-    srv_addr_rd.sin6_family = AF_WISUN;
+    srv_addr_rd.sin6_family = AF_INET6;
     srv_addr_rd.sin6_addr = in6addr_any;
     srv_addr_rd.sin6_port = htons(SL_WISUN_COAP_RESOURCE_DISCOVERY_DEFAULT_PORT);
 
@@ -510,7 +503,7 @@ static void _rhnd_thr_fnc(void * args)
     // Receiver loop
     while (1) {
       // Dispatch
-      osDelay(1UL);
+      app_wisun_dispatch_thread();
 
       // Receive UDP packets
       sockid_active = sockid;
@@ -540,7 +533,7 @@ static void _rhnd_thr_fnc(void * args)
         sl_wisun_coap_print_packet(req_pkt, false);
 
         // Handling response and empty packets
-        if (!_is_request_packet(req_pkt)) {
+        if (!sl_wisun_coap_rhnd_is_request_packet(req_pkt)) {
           sl_wisun_coap_rhnd_service_resp_received_hnd(req_pkt);
           continue;
         }
@@ -554,8 +547,8 @@ static void _rhnd_thr_fnc(void * args)
           // Build response to resource discovery request
           resp_pkt = sli_wisun_coap_rd_build_response(discovery_payload, discovery_paylod_len, req_pkt);
           if (resp_pkt == NULL) {
-              __cleanup_service();
-              continue;
+            __cleanup_service();
+            continue;
           }
           // Resource request handling
         } else {

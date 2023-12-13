@@ -61,9 +61,9 @@ void app_led_toggle(sl_cli_command_arg_t *arguments)
   const char *meter_ip = NULL;
   uint8_t led_id = 0;
 
-  wisun_addr_t meter_addr = {
-    .sin6_family = AF_WISUN,
-    .sin6_addr.s6_addr = {
+  sockaddr_in6_t meter_addr = {
+    .sin6_family = AF_INET6,
+    .sin6_addr = {
       .address = { 0U },
     },
     .sin6_port = SL_WISUN_METER_PORT
@@ -77,7 +77,7 @@ void app_led_toggle(sl_cli_command_arg_t *arguments)
   if (meter_ip == NULL) {
     app_wisun_release_cli_mutex_and_return();
   }
-  if (inet_pton(AF_WISUN, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
+  if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\n");
   }
 
@@ -85,7 +85,9 @@ void app_led_toggle(sl_cli_command_arg_t *arguments)
     printf("[Failed: LED toggle request not prepared]\n");
   }
 
-  if (sl_wisun_coap_collector_send_led_toggle_request(&meter_addr) != SL_STATUS_OK) {
+  if (sl_wisun_coap_collector_send_led_toggle_request(&meter_addr) == SL_STATUS_OK) {
+    printf("[Led toggle request sent to %s]\n", meter_ip);
+  } else {
     printf("[Failed: Request not sent]\n");
   }
 

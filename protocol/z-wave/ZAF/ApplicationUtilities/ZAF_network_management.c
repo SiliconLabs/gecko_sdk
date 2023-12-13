@@ -31,9 +31,10 @@ void ZAF_SendINIF(void (*pCallback)(uint8_t txStatus, TX_STATUS_TYPE* extendedTx
 
   pAppHandle = ZAF_getAppHandle();
 
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.uTransmitParams.IncludedNodeInfo.Handle = pCallback;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_INCLUDEDNODEINFORMATION;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.IncludedNodeInfo.Handle = pCallback,
+    .eTransmitType = EZWAVETRANSMITTYPE_INCLUDEDNODEINFORMATION
+  };
 
   // Put the package on queue (and dont wait for it)
   if (EQUEUENOTIFYING_STATUS_SUCCESS != QueueNotifyingSendToBack(pAppHandle->pZwTxQueue, (uint8_t*)&FramePackage, 0))

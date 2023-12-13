@@ -2,9 +2,9 @@ project_name: usb_device_hid_freertos
 package: platform
 quality: production
 label: Platform - USB Device HID with FreeRTOS kernel
-description: > 
-  This example uses the USB stack HID Class with the FreeRTOS kernel to emulate a mouse. 
-  Once the usb device is connected to a computer, it will trigger continuous mouse mouvements.
+description: >
+  This example uses the USB stack HID Class with the FreeRTOS kernel to emulate a mouse.
+  Once the usb device is connected to a computer, it will trigger continuous mouse movements.
 category: Example|Platform
 filter:
   - name: "Device Type"
@@ -34,7 +34,7 @@ define:
   - name: DEBUG_EFM
 configuration:
   - name: configTOTAL_HEAP_SIZE
-    value: 40000  
+    value: 40000
 readme:
   - path: readme.md
 tag:

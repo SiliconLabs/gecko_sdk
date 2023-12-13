@@ -590,12 +590,10 @@ SE_Response_t SE_initPubkey(uint32_t key_type,
                             bool signature)
 SL_DEPRECATED_API_SDK_3_0;
 
-SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init);
-
 SE_Response_t SE_initPubkey(uint32_t key_type,
                             void* pubkey,
                             uint32_t numBytes,
-                            bool signature);
+                            bool signature) SL_DEPRECATED_API_SDK_4_4;
 
 #if defined(SEMAILBOX_PRESENT)
 
@@ -611,7 +609,7 @@ SE_Response_t SE_eraseUserData(void) SL_DEPRECATED_API_SDK_3_0;
 SE_Response_t SE_readPubkey(uint32_t key_type,
                             void* pubkey,
                             uint32_t numBytes,
-                            bool signature);
+                            bool signature) SL_DEPRECATED_API_SDK_4_4;
 
 // Debug commands
 SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status) SL_DEPRECATED_API_SDK_3_0;

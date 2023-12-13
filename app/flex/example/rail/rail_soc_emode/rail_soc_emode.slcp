@@ -27,6 +27,7 @@ component:
   - id: app_assert
   - id: sl_flex_rail_sleep
   - id: sl_flex_rail_package_assistant
+  - id: simple_rail_assistance
 #------------Memory Protection Unit-------------------
   - id: mpu
 #---------------------- CLI --------------------------

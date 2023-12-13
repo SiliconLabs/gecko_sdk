@@ -34,6 +34,11 @@
 #ifndef SL_SIMPLE_COM_ROBUST_H
 #define SL_SIMPLE_COM_ROBUST_H
 
+/***********************************************************************************************//**
+ * @addtogroup simple_com
+ * @{
+ **************************************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 #include "sl_status.h"
@@ -87,4 +92,5 @@ size_t sl_simple_com_robust_pack_data(uint8_t *packed_data_ptr,
 sl_simple_com_robust_result_t sl_simple_com_robust_unpack_data(uint8_t *data,
                                                                size_t len);
 
+/** @} (end addtogroup simple_com) */
 #endif // SL_SIMPLE_COM_ROBUST_H

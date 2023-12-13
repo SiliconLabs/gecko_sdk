@@ -17,6 +17,7 @@ include:
   - path: inc
     file_list:
       - path: sl_cpc.h
+      - path: sl_cpc_weak_prototypes.h
       - path: sli_cpc.h
       - path: sli_cpc_types.h
       - path: sli_cpc_system_common.h
@@ -24,10 +25,11 @@ include:
       - path: sli_cpc_hdlc.h
       - path: sli_cpc_crc.h
       - path: sli_cpc_debug.h
-      - path: sli_cpc_timer.h
+      - path: sli_cpc_trace.h
 provides:
   - name: cpc_core
 requires:
+  - name: cpc_timer_interface
   - name: sleeptimer
   - name: status
   - name: slist
@@ -38,7 +40,7 @@ requires:
   - name: sl_assert
 documentation:
     docset: gecko-platform
-    document: service/api/group-cpc
+    document: platform-cpc/cpc
 template_contribution:
   - name: component_catalog
     value: cpc

@@ -2,7 +2,7 @@ ARG SYSTEM_ARCH=arm32v7
 ARG BASE_CONTAINER=${SYSTEM_ARCH}/otbr_cpc
 FROM    ${BASE_CONTAINER}
 ARG SYSTEM_ARCH=arm32v7a # trick to make the build environment have the variable defined
-LABEL okToPrune="true"
+LABEL ok-to-prune="true"
 
 ARG DEBIAN_FRONTEND=noninteractive
 

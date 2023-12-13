@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
-#include "sl_wisun_coap_collector.h"
+#include "sl_wisun_app_core_util.h"
 #include "sl_status.h"
 
 // -----------------------------------------------------------------------------
@@ -65,12 +65,8 @@ void app_task(void *args)
   // connect to the wisun network
   app_wisun_connect_and_wait();
 
-  // prepare request
-  assert(sl_wisun_coap_collector_prepare_meas_request() == SL_STATUS_OK);
-
   while (1) {
-    sl_wisun_collector_measurement_request_loop();
-    msleep(1);
+    app_wisun_dispatch_thread();
   }
 }
 

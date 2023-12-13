@@ -40,12 +40,7 @@
 // Definitions
 
 #define MAX_NUM_CHANNELS      80                // Maximum CS channel number
-#define CS_MODE_CALIBRATION   0                 // Calibration CS mode
-#define CS_MODE_RTT           sl_bt_cs_mode_rtt   // RTT CS mode
-#define CS_MODE_RTP           sl_bt_cs_mode_pbr   // RTP CS mode
-#define CS_MODE_COMBINED      sl_bt_cs_mode_pbr_and_rtt   // Combined CS mode
 #define RTT_VALUE_LEN         6                 // RTT data field length
-#define LL_INVALID_TOA        0x800             // Invalid time value from LL
 #define PCT_DATA_MASK_LOW     0x00000FFF        // Tone PCT mask low
 #define PCT_DATA_MASK_HIGH    0x00FFF000        // Tone PCT mask high
 #define PCT_IQ_LEN            12                // PCT IQ sample length
@@ -53,11 +48,9 @@
 #define CS_PROCEDURE_ABORTED  0x0F              // All subsequent CS procedures aborted
 #define CS_SUBEVENT_ABORTED   0x0F              // Current CS subevent aborted
 #define BYTE_LEN              8                 // Byte length in bits
-#define INVALID_TIME_VALUE    0x80000000        // Invalid RTL library time value
-#define INVALID_RSSI_VALUE    0x80000000        // Invalid RTL library RSSI value
-#define TONE_PCT_INVALID      ((uint32_t)0xFFFFFF)      // Invalid tone PCT value
 #define MIN(a, b)             (((a) < (b)) ? (a) : (b)) // Minimum calculation
-#define DEFAULT_FREQUENCY_DELTA 2e6f                    // Channel frequency delta
+#define MAX_LOG_ERROR_CNT     15                // Introduced to avoid spamming errors indefinitely
+#define BIT_ERROR_RATE_MASK   0xF0              // CS bit error rate mask
 
 /// Check status code, log warning and return
 #define CHECK_STATUS_RETURN(sc, ...) \
@@ -82,14 +75,16 @@ typedef struct {
   int32_t               time_reflector[MAX_NUM_CHANNELS]; ///< Reflector time measurements
 } rtt_measurement_t;
 
-/// RTP measurement related data
+/// PBR measurement related data
 typedef struct {
-  sl_rtl_abr_rtp_data rtl_input;                ///< RTP data for RTL library
+  sl_rtl_abr_rtp_data rtl_input;                ///< PBR data for RTL library
   float initiator_i_samples[MAX_NUM_CHANNELS];  ///< IQ-data I-components from initiator
   float initiator_q_samples[MAX_NUM_CHANNELS];  ///< IQ-data Q-components from initiator
   float reflector_i_samples[MAX_NUM_CHANNELS];  ///< IQ-data I-components from reflector
   float reflector_q_samples[MAX_NUM_CHANNELS];  ///< IQ-data Q-components from reflector
-} rtp_measurement_t;
+  enum sl_rtl_abr_tone_quality initiator_tone_quality[MAX_NUM_CHANNELS]; ///< Tone quality from initiator
+  enum sl_rtl_abr_tone_quality reflector_tone_quality[MAX_NUM_CHANNELS]; ///< Tone quality from reflector
+} pbr_measurement_t;
 
 /// CS measurement data
 typedef struct {
@@ -102,7 +97,7 @@ typedef struct {
   uint32_t                reflector_procedure_cnt;  ///< Reflector procedure count
   cs_step_t               step_data;                ///< Step data container
   rtt_measurement_t       rtt_data;                 ///< RTT measurement data
-  rtp_measurement_t       rtp_data;                 ///< RTP measurement data
+  pbr_measurement_t       pbr_data;                 ///< PBR measurement data
   reflector_calibration_t reflector_calib;          ///< Reflector calibration data
   initiator_calibration_t initiator_calib;          ///< Initiator claibration data
 } cs_measurement_t;
@@ -155,7 +150,7 @@ static sl_status_t parse_rtt_step(const uint8_t *data,
                                   uint32_t      *read_cnt,
                                   cs_step_t     *step_data);
 static int16_t tone_pct_to_int(uint32_t tone_pct);
-static sl_status_t parse_rtp_step(const uint8_t *data,
+static sl_status_t parse_pbr_step(const uint8_t *data,
                                   uint32_t       data_size,
                                   uint32_t      *read_cnt,
                                   cs_step_t     *step_data);
@@ -169,7 +164,7 @@ static void set_restart_needed(cs_measurement_t *meas, bool needed);
 static sl_status_t add_rtt_data_to_measurement(rtt_measurement_t *meas,
                                                cs_step_t         *step_data,
                                                abr_role_t         role);
-static sl_status_t add_rtp_data_to_measurement(rtp_measurement_t *meas,
+static sl_status_t add_pbr_data_to_measurement(pbr_measurement_t *meas,
                                                cs_step_t         *step_data,
                                                abr_role_t         role);
 static sl_status_t add_calibration_data_to_measurement(cs_measurement_t  *meas,
@@ -181,6 +176,10 @@ static sl_status_t add_calibration_data_to_measurement(cs_measurement_t  *meas,
 
 /// CS parser state
 static abr_cs_parser_t cs_parser;
+
+static uint8_t log_error_counter = 0;
+
+static uint8_t bit_error_rate = 0;
 
 // -----------------------------------------------------------------------------
 // Public functions
@@ -203,7 +202,11 @@ sl_status_t abr_cs_parser_init(abr_cs_parser_configuration_t *config)
   }
   ret_log = abr_file_log_init(config->measurement_mode);
   if (ret_log != SL_STATUS_OK) {
-    app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+    if (log_error_counter < MAX_LOG_ERROR_CNT) {
+      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                    (unsigned int)ret_log);
+      log_error_counter++;
+    }
   }
   return ret;
 }
@@ -221,7 +224,11 @@ sl_status_t abr_cs_parser_configure(const uint8_t  *ch_data,
                                                  ch_data_len,
                                                  cs_parser.mode_0_steps);
     if (ret_log != SL_STATUS_OK) {
-      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+      if (log_error_counter < MAX_LOG_ERROR_CNT) {
+        app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                      (unsigned int)ret_log);
+        log_error_counter++;
+      }
     }
   } else {
     app_log_warning("Failed to set channel map!" APP_LOG_NL);
@@ -260,8 +267,9 @@ bool abr_cs_parser_procedure_restart_needed(uint8_t connection)
 
 sl_status_t abr_cs_parser_deinit(void)
 {
-  cs_parser.initialized = 0;
   sl_status_t ret = SL_STATUS_OK;
+  cs_parser.initialized = 0;
+  ret = abr_file_log_deinit();
   return ret;
 }
 
@@ -284,15 +292,15 @@ abr_cs_parser_get_measurement_data(uint8_t connection,
           memcpy(&meas_data->rtt_data,
                  (void *)&meas->rtt_data.rtl_input,
                  sizeof(sl_rtl_abr_rtt_data));
+          bit_error_rate = 0u;
           ret = SL_STATUS_OK;
           break;
-        case sl_bt_cs_mode_pbr: // Get RTP data
-          memcpy(&meas_data->rtp_data,
-                 (void *)&meas->rtp_data.rtl_input,
+        case sl_bt_cs_mode_pbr: // Get PBR data
+          memcpy(&meas_data->pbr_data,
+                 (void *)&meas->pbr_data.rtl_input,
                  sizeof(sl_rtl_abr_rtp_data));
+          bit_error_rate = 0u;
           ret = SL_STATUS_OK;
-          break;
-        case sl_bt_cs_mode_pbr_and_rtt:
           break;
         default:
           ret = SL_STATUS_INVALID_PARAMETER;
@@ -317,14 +325,29 @@ sl_status_t abr_cs_parser_cleanup_measurement(uint8_t connection)
   return ret;
 }
 
-void abr_cs_parser_store_distance(float *distance)
+uint8_t abr_cs_parser_get_cs_bit_error_rate()
 {
+  return bit_error_rate;
+}
+
+void abr_cs_parser_store_distance(float *distance, float *likeliness, float *rssi_distance)
+{
+#if !defined(HOST_TOOLCHAIN)
+  (void)distance;
+  (void)likeliness;
+  (void)rssi_distance;
+#else
   sl_status_t ret_log = SL_STATUS_OK;
   app_log_debug("Store distance for logging" APP_LOG_NL);
-  ret_log = abr_file_log_finalize_measurement_section(distance);
+  ret_log = abr_file_log_finalize_measurement_section(distance, likeliness, rssi_distance);
   if (ret_log != SL_STATUS_OK) {
-    app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+    if (log_error_counter < MAX_LOG_ERROR_CNT) {
+      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                    (unsigned int)ret_log);
+      log_error_counter++;
+    }
   }
+#endif // !defined(HOST_TOOLCHAIN)
 }
 
 // -----------------------------------------------------------------------------
@@ -358,7 +381,11 @@ static sl_status_t parse_event_result_data(sl_bt_evt_cs_result_t *cs_res,
   // Log the event header
   ret_log = abr_file_log_append_event_header(role, cs_res);
   if (ret_log != SL_STATUS_OK) {
-    app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+    if (log_error_counter < MAX_LOG_ERROR_CNT) {
+      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                    (unsigned int)ret_log);
+      log_error_counter++;
+    }
   }
 
   ret = parse_steps(cs_res, role, measurement);
@@ -369,7 +396,11 @@ static sl_status_t parse_event_result_data(sl_bt_evt_cs_result_t *cs_res,
     check_measurement_completed(measurement);
     ret_log = abr_file_log_assign_steps_to_event(role, cs_res->num_steps);
     if (ret_log != SL_STATUS_OK) {
-      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+      if (log_error_counter < MAX_LOG_ERROR_CNT) {
+        app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                      (unsigned int)ret_log);
+        log_error_counter++;
+      }
     }
   } else {
     app_log_info("Failed to parse steps, clearing measurement buffers." APP_LOG_NL);
@@ -409,10 +440,10 @@ static sl_status_t parse_steps(sl_bt_evt_cs_result_t *cs_res,
 
     if (ret == SL_STATUS_OK) {
       switch (meas->step_data.type) {
-        case MEASUREMENT_RTP:
+        case MEASUREMENT_PBR:
           if (role == ABR_DEVICE_INITIATOR) {
             if (!meas->initiator_ready) {
-              ret = add_rtp_data_to_measurement(&meas->rtp_data,
+              ret = add_pbr_data_to_measurement(&meas->pbr_data,
                                                 &meas->step_data,
                                                 role);
               if (cs_res->procedure_counter != 0) {
@@ -421,7 +452,7 @@ static sl_status_t parse_steps(sl_bt_evt_cs_result_t *cs_res,
             }
           } else { // Reflector
             if (!meas->reflector_ready) {
-              ret = add_rtp_data_to_measurement(&meas->rtp_data,
+              ret = add_pbr_data_to_measurement(&meas->pbr_data,
                                                 &meas->step_data,
                                                 role);
               if (cs_res->procedure_counter != 0) {
@@ -507,7 +538,7 @@ static sl_status_t parse_one_step(uint8_t   *data,
 
   // Step data
   switch (out->step_mode) {
-    case CS_MODE_CALIBRATION:
+    case ABR_MODE_CALIBRATION:
       if (role == ABR_DEVICE_INITIATOR) {
         ret = parse_calibration_initiator(data, data_size, read_cnt, out);
       } else {
@@ -515,13 +546,11 @@ static sl_status_t parse_one_step(uint8_t   *data,
       }
       break;
 
-    case sl_bt_cs_mode_rtt: // RTT
+    case ABR_MODE_RTT: // RTT
       ret = parse_rtt_step(data, data_size, read_cnt, out);
       break;
-    case sl_bt_cs_mode_pbr: // RTP
-      ret = parse_rtp_step(data, data_size, read_cnt, out);
-      break;
-    case sl_bt_cs_mode_pbr_and_rtt: // Combined
+    case ABR_MODE_PBR: // PBR
+      ret = parse_pbr_step(data, data_size, read_cnt, out);
       break;
 
     default:
@@ -530,7 +559,11 @@ static sl_status_t parse_one_step(uint8_t   *data,
 
   ret_log = abr_file_log_store_step(role, out);
   if (ret_log != SL_STATUS_OK) {
-    app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL, ret_log);
+    if (log_error_counter < MAX_LOG_ERROR_CNT) {
+      app_log_error("abr_file_log is not functional! No valid logs will be produced! (code: 0x%x)" APP_LOG_NL,
+                    (unsigned int)ret_log);
+      log_error_counter++;
+    }
   }
   return ret;
 }
@@ -575,19 +608,12 @@ static sl_status_t check_cs_event_flags(sl_bt_evt_cs_result_t *cs_res,
     return ret;
   }
 
-  // Empty event occured
+  // Empty event occurred
   if (cs_res->num_steps == 0) {
-    app_log_info("Empty CS result event occured!" APP_LOG_NL);
+    app_log_info("Empty CS result event occurred!" APP_LOG_NL);
     clear_measurement_buffer(meas);
     set_restart_needed(meas, true);
     ret = SL_STATUS_FAIL;
-  } // Procedure aborted
-  else if ((cs_res->procedure_done_status & CS_PROCEDURE_ABORTED)
-           == CS_PROCEDURE_ABORTED) {
-    app_log_info("Procedure aborted" APP_LOG_NL);
-    clear_measurement_buffer(meas);
-    set_restart_needed(meas, true);
-    ret = SL_STATUS_OK;
   } // Subevent aborted, no restart needed just clear the buffer
   else if ((cs_res->subevent_done_status & CS_SUBEVENT_ABORTED)
            == CS_SUBEVENT_ABORTED) {
@@ -610,15 +636,13 @@ static void update_measurement_flags(cs_measurement_t *meas,
 {
   if (meas != NULL) {
     if (role == ABR_DEVICE_INITIATOR) {
-      if ((meas->initiator_procedure_cnt > 0)
-          && (meas->initiator_procedure_cnt
-              >= meas->reflector_procedure_cnt)) {
+      if ((meas->initiator_procedure_cnt
+           >= meas->reflector_procedure_cnt)) {
         meas->initiator_ready = true;
       }
     } else { // Reflector
-      if ((meas->reflector_procedure_cnt > 0)
-          && (meas->reflector_procedure_cnt
-              >= meas->initiator_procedure_cnt)) {
+      if ((meas->reflector_procedure_cnt
+           >= meas->initiator_procedure_cnt)) {
         meas->reflector_ready = true;
       }
     }
@@ -655,18 +679,16 @@ static void check_measurement_completed(cs_measurement_t *meas)
         meas->rtt_data.rtl_input.rssi_d2 = meas->rtt_data.rssi_reflector;
         meas->rtt_data.rtl_input.time_d1 = meas->rtt_data.time_initiator;
         meas->rtt_data.rtl_input.time_d2 = meas->rtt_data.time_reflector;
-        // RTP measurement
-        meas->rtp_data.rtl_input.num_tones = cs_parser.num_tones;
-        meas->rtp_data.rtl_input.tones_frequency_delta_hz = DEFAULT_FREQUENCY_DELTA;
-        meas->rtp_data.rtl_input.blank_tone_indices = cs_parser.blank_tone_channels;
-        meas->rtp_data.rtl_input.num_blank_tone_indices
+        // PBR measurement
+        meas->pbr_data.rtl_input.blank_tone_indices = cs_parser.blank_tone_channels;
+        meas->pbr_data.rtl_input.num_blank_tone_indices
           = cs_parser.num_blank_tone_indices;
-        meas->rtp_data.rtl_input.tone_qualities_d1 = NULL;
-        meas->rtp_data.rtl_input.tone_qualities_d2 = NULL;
-        meas->rtp_data.rtl_input.i_samples_d1 = meas->rtp_data.initiator_i_samples;
-        meas->rtp_data.rtl_input.q_samples_d1 = meas->rtp_data.initiator_q_samples;
-        meas->rtp_data.rtl_input.i_samples_d2 = meas->rtp_data.reflector_i_samples;
-        meas->rtp_data.rtl_input.q_samples_d2 = meas->rtp_data.reflector_q_samples;
+        meas->pbr_data.rtl_input.tone_qualities_d1 = meas->pbr_data.initiator_tone_quality;
+        meas->pbr_data.rtl_input.tone_qualities_d2 = meas->pbr_data.reflector_tone_quality;
+        meas->pbr_data.rtl_input.i_samples_d1 = meas->pbr_data.initiator_i_samples;
+        meas->pbr_data.rtl_input.q_samples_d1 = meas->pbr_data.initiator_q_samples;
+        meas->pbr_data.rtl_input.i_samples_d2 = meas->pbr_data.reflector_i_samples;
+        meas->pbr_data.rtl_input.q_samples_d2 = meas->pbr_data.reflector_q_samples;
         meas->ready_to_process = true;
         app_log_debug("Measurement ready to process" APP_LOG_NL);
       } else {
@@ -698,6 +720,7 @@ static sl_status_t parse_rtt_step(const uint8_t *data,
                     data_size,
                     read_cnt,
                     &step_data->data.meas_rtt.packet_quality);
+    bit_error_rate += step_data->data.meas_rtt.packet_quality & BIT_ERROR_RATE_MASK;
     CHECK_STATUS_RETURN(ret, "Failed to read CS data!" APP_LOG_NL);
 
     ret = read_byte(data,
@@ -732,7 +755,7 @@ static sl_status_t parse_rtt_step(const uint8_t *data,
 }
 
 /***************************************************************************//**
- * Convert raw RTP tone PCT value to integer
+ * Convert raw PBR tone PCT value to integer
  * @param[in] tone_pct Raw tone PCT value.
  *
  * @return Converted tone PCT integer value.
@@ -745,7 +768,7 @@ static int16_t tone_pct_to_int(uint32_t tone_pct)
 }
 
 /***************************************************************************//**
- * Parse CS RTP step data.
+ * Parse CS PBR step data.
  * @param[in] data Step data field pointer.
  * @param[in] data_size Step data field size.
  * @param[in,out] read_cnt Data field byte read count.
@@ -753,7 +776,7 @@ static int16_t tone_pct_to_int(uint32_t tone_pct)
  *
  * @return Status code.
  ******************************************************************************/
-static sl_status_t parse_rtp_step(const uint8_t *data,
+static sl_status_t parse_pbr_step(const uint8_t *data,
                                   uint32_t       data_size,
                                   uint32_t      *read_cnt,
                                   cs_step_t     *step_data)
@@ -765,16 +788,16 @@ static sl_status_t parse_rtp_step(const uint8_t *data,
   sc = read_byte(data,
                  data_size,
                  read_cnt,
-                 &step_data->data.meas_rtp.antenna_permutation_index);
+                 &step_data->data.meas_pbr.antenna_permutation_index);
   CHECK_STATUS_RETURN(sc, "Failed to read CS data!" APP_LOG_NL);
   app_log_debug("antenna_permutation_index %hhu"APP_LOG_NL,
-                step_data->data.meas_rtp.antenna_permutation_index);
+                step_data->data.meas_pbr.antenna_permutation_index);
 
   // Calculate tone pct count based on step data size
   const uint32_t tone_pct_count =
     (step_data->step_data_length
-     - sizeof(step_data->data.meas_rtp.antenna_permutation_index))
-    / (sizeof(pct_octet) + sizeof(step_data->data.meas_rtp.tone_quality[0]));
+     - sizeof(step_data->data.meas_pbr.antenna_permutation_index))
+    / (sizeof(pct_octet) + sizeof(step_data->data.meas_pbr.tone_quality[0]));
 
   for (uint8_t i = 0; i < ANTENNA_PERMUTATION_MAX; i++) {
     // Check exit condition
@@ -794,31 +817,23 @@ static sl_status_t parse_rtp_step(const uint8_t *data,
                         + ((uint32_t)pct_octet[1] << 8)
                         + ((uint32_t)pct_octet[2] << 16);
 
-    // Check if tone_pct is invalid from the non extension slot
-    if ((tone_pct == TONE_PCT_INVALID) && (i == 0)) {
-      app_log_warning("incorrect pct %04x" APP_LOG_NL, tone_pct);
-      ret = SL_STATUS_FAIL;
-    } else {
-      app_log_debug("pct %04x"APP_LOG_NL, tone_pct);
-    }
-
-    step_data->data.meas_rtp.pct_i[i] =
+    step_data->data.meas_pbr.pct_i[i] =
       (float)tone_pct_to_int((tone_pct) & PCT_DATA_MASK_LOW);
-    step_data->data.meas_rtp.pct_q[i] =
+    step_data->data.meas_pbr.pct_q[i] =
       (float)tone_pct_to_int(((tone_pct) & PCT_DATA_MASK_HIGH) >> PCT_IQ_LEN);
 
-    app_log_debug("pcti %f, pctq %f"APP_LOG_NL, step_data->data.meas_rtp.pct_i[i],
-                  step_data->data.meas_rtp.pct_q[i]);
+    app_log_debug("pcti %f, pctq %f"APP_LOG_NL, step_data->data.meas_pbr.pct_i[i],
+                  step_data->data.meas_pbr.pct_q[i]);
 
     // Parsing tone quality
     sc = read_byte(data,
                    data_size,
                    read_cnt,
-                   &step_data->data.meas_rtp.tone_quality[i]);
+                   &step_data->data.meas_pbr.tone_quality[i]);
     CHECK_STATUS_RETURN(sc, "Failed to read CS data!" APP_LOG_NL);
   } // end for(... ANTENNA_PERMUTATION_MAX)
-  step_data->data.meas_rtp.pct_sample_num = tone_pct_count;
-  step_data->type = MEASUREMENT_RTP;
+  step_data->data.meas_pbr.pct_sample_num = tone_pct_count;
+  step_data->type = MEASUREMENT_PBR;
   return ret;
 }
 
@@ -839,6 +854,7 @@ static sl_status_t parse_calibration_reflector(const uint8_t* data,
   sl_status_t ret = SL_STATUS_OK;
   uint8_t data_octet;
   ret = read_byte(data, data_size, read_cnt, &out->data.reflector_calib.packet_quality);
+  bit_error_rate += out->data.reflector_calib.packet_quality & BIT_ERROR_RATE_MASK;
   CHECK_STATUS_RETURN(ret, "Failed to read CS data!" APP_LOG_NL);
 
   ret = read_byte(data, data_size, read_cnt, &data_octet);
@@ -868,6 +884,7 @@ static sl_status_t parse_calibration_initiator(const uint8_t* data,
   sl_status_t ret = SL_STATUS_OK;
   uint8_t data_octet;
   ret = read_byte(data, data_size, read_cnt, &out->data.initiator_calib.packet_quality);
+  bit_error_rate += out->data.initiator_calib.packet_quality & BIT_ERROR_RATE_MASK;
   CHECK_STATUS_RETURN(ret, "Failed to read CS data!" APP_LOG_NL);
 
   ret = read_byte(data, data_size, read_cnt, &data_octet);
@@ -908,7 +925,7 @@ static sl_status_t add_rtt_data_to_measurement(rtt_measurement_t *meas,
     int32_t rssi = (int32_t)step_data->data.meas_rtt.rssi;
     int32_t time = step_data->data.meas_rtt.tod_toa != LL_INVALID_TOA
                    ? step_data->data.meas_rtt.tod_toa
-                   : (int32_t)INVALID_TIME_VALUE;
+                   : (int32_t)ABR_CS_PARSER_INVALID_TIME_VALUE;
 
     if (role == ABR_DEVICE_INITIATOR) {
       if (meas->initiator_idx >= MAX_NUM_CHANNELS) {
@@ -931,14 +948,14 @@ static sl_status_t add_rtt_data_to_measurement(rtt_measurement_t *meas,
 }
 
 /***************************************************************************//**
- * Add parsed RTP data to measurement data.
+ * Add parsed PBR data to measurement data.
  * @param[out] meas CS measurement data.
  * @param[in] step_data Parsed step data.
  * @param[in] role ABR role.
  *
  * @return Status code.
  ******************************************************************************/
-static sl_status_t add_rtp_data_to_measurement(rtp_measurement_t *meas,
+static sl_status_t add_pbr_data_to_measurement(pbr_measurement_t *meas,
                                                cs_step_t         *step_data,
                                                abr_role_t         role)
 {
@@ -946,17 +963,21 @@ static sl_status_t add_rtp_data_to_measurement(rtp_measurement_t *meas,
   uint8_t channel_idx = 0;
 
   if (meas != NULL && step_data != NULL) {
-    channel_idx = step_data->step_channel / 2; // Calculate channel index from step_channel
+    channel_idx = step_data->step_channel; // Calculate channel index from step_channel
     if (channel_idx > MAX_NUM_CHANNELS) {
       app_log_warning("Incorrect PCT channel!" APP_LOG_NL);
       ret = SL_STATUS_FAIL;
     } else {
       if (role == ABR_DEVICE_INITIATOR) {
-        meas->initiator_i_samples[channel_idx] = step_data->data.meas_rtp.pct_i[0];
-        meas->initiator_q_samples[channel_idx] = step_data->data.meas_rtp.pct_q[0];
+        meas->initiator_i_samples[channel_idx] = step_data->data.meas_pbr.pct_i[0];
+        meas->initiator_q_samples[channel_idx] = step_data->data.meas_pbr.pct_q[0];
+        meas->initiator_tone_quality[channel_idx] = (step_data->data.meas_pbr.tone_quality[0]
+                                                     & ABR_CS_PARSER_TONE_QUALITY_MASK_LOW);
       } else { // Reflector
-        meas->reflector_i_samples[channel_idx] = step_data->data.meas_rtp.pct_i[0];
-        meas->reflector_q_samples[channel_idx] = step_data->data.meas_rtp.pct_q[0];
+        meas->reflector_i_samples[channel_idx] = step_data->data.meas_pbr.pct_i[0];
+        meas->reflector_q_samples[channel_idx] = step_data->data.meas_pbr.pct_q[0];
+        meas->reflector_tone_quality[channel_idx] = (step_data->data.meas_pbr.tone_quality[0]
+                                                     & ABR_CS_PARSER_TONE_QUALITY_MASK_LOW);
       }
       ret = SL_STATUS_OK;
     }
@@ -1054,10 +1075,10 @@ static void clear_measurement_buffer(cs_measurement_t *meas)
     memset(meas, 0, sizeof(cs_measurement_t));
     // Set RTT invalid data as empty values for RTL lib.
     for (uint8_t c = 0; c < MAX_NUM_CHANNELS; c++) {
-      meas->rtt_data.time_initiator[c] = INVALID_TIME_VALUE;
-      meas->rtt_data.time_reflector[c] = INVALID_TIME_VALUE;
-      meas->rtt_data.rssi_initiator[c] = INVALID_RSSI_VALUE;
-      meas->rtt_data.rssi_reflector[c] = INVALID_RSSI_VALUE;
+      meas->rtt_data.time_initiator[c] = ABR_CS_PARSER_INVALID_TIME_VALUE;
+      meas->rtt_data.time_reflector[c] = ABR_CS_PARSER_INVALID_TIME_VALUE;
+      meas->rtt_data.rssi_initiator[c] = ABR_CS_PARSER_INVALID_RSSI_VALUE;
+      meas->rtt_data.rssi_reflector[c] = ABR_CS_PARSER_INVALID_RSSI_VALUE;
     }
     meas->connection = conn;
   }
@@ -1088,7 +1109,6 @@ static sl_status_t set_channel_map(const uint8_t *channel_map,
 
   uint32_t num_channels = 0;
   uint32_t blank_tone_channels_index = 0;
-  uint32_t num_hadm_channels = 0;
   sl_status_t ret = SL_STATUS_NULL_POINTER;
 
   if (channel_map != NULL) {
@@ -1101,19 +1121,16 @@ static sl_status_t set_channel_map(const uint8_t *channel_map,
       for (uint8_t current_bit_index = 0;
            current_bit_index < sizeof(uint8_t) * BYTE_LEN;
            current_bit_index++) {
-        if (current_channel_map & (1 << current_bit_index)) {
-          num_hadm_channels++;
-        } else {
+        if ((current_channel_map & (1 << current_bit_index)) == 0) {
           cs_parser.blank_tone_channels[blank_tone_channels_index]
             = num_channels;
           blank_tone_channels_index++;
+          cs_parser.num_blank_tone_indices++;
         }
         num_channels++;
       }
     }
 
-    cs_parser.num_tones = num_hadm_channels;
-    app_log_info("RTL process %u channels" APP_LOG_NL, cs_parser.num_tones);
     ret = SL_STATUS_OK;
   }
   return ret;

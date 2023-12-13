@@ -14,6 +14,26 @@ class ProfileWisunFanOcelot(ProfileWisunFanJumbo):
         self._family = "ocelot"
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
+    def buildProfileModel(self, model):
+        # Build profile object and append it to the model
+        profile = self._makeProfile(model)
+
+        # Build inputs
+        self.build_required_profile_inputs(model, profile)
+        self.build_optional_profile_inputs(model, profile)
+        self.build_advanced_profile_inputs(model, profile)
+        self.build_hidden_profile_inputs(model, profile)
+        self.build_deprecated_profile_inputs(model, profile)
+
+        # Build outputs
+        self.build_register_profile_outputs(model, profile)
+        self.build_variable_profile_outputs(model, profile)
+        self.build_info_profile_outputs(model, profile)
+
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
+        return profile
+
     def build_optional_profile_inputs(self, model, profile):
         #Start with the same optional Profile Inputs as Series 1
         super().build_optional_profile_inputs(model, profile)
@@ -60,6 +80,10 @@ class ProfileWisunFanOcelot(ProfileWisunFanJumbo):
                                units_multiplier=UnitsMultiplier.KILO)
         self.make_hidden_input(profile, model.vars.afc_run_mode, 'Advanced',
                                readable_name="AFC Run Mode")
+
+        self.make_hidden_input(profile, model.vars.modulation_index_for_ksi, "Advanced",
+                               readable_name="Modulation index used by ksi calculation",
+                               value_limit_min=0.0, value_limit_max=5.0, fractional_digits=2)
 
     def build_register_profile_outputs(self, model, profile):
         # Overriding this method to include modem regs for Ocelot

@@ -31,7 +31,8 @@
 // Lockbits are placed in the topmost flash page
 #define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) -(FLASH_PAGE_SIZE))
 #if defined(BOOTLOADER_FALLBACK_LEGACY_KEY) && (BOOTLOADER_FALLBACK_LEGACY_KEY == 1)
-#include "em_se.h"
+#include "sl_se_manager.h"
+#include "sl_se_manager_util.h"
 #define PUBKEY_OFFSET_X (0x34C)
 #define PUBKEY_OFFSET_Y (0x36C)
 #endif

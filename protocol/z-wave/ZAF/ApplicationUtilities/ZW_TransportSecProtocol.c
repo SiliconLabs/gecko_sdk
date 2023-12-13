@@ -176,10 +176,8 @@ GetCommandClassList(
 }
 
 uint8_t
-Transport_OnLearnCompleted(node_id_t nodeID)
+Transport_OnLearnCompleted(__attribute__((unused)) node_id_t nodeID)
 {
-  UNUSED(nodeID);
-
   zaf_stay_awake();
 
   return true;
@@ -192,9 +190,8 @@ void ZAF_Transport_OnLearnCompleted(void)
 
 
 void
-ApplicationCommandHandler(void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
+ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
 {
-  UNUSED(pSubscriberContext);
   ZW_APPLICATION_TX_BUFFER *pCmd = &pRxPackage->uReceiveParams.Rx.Payload.rxBuffer;
   uint8_t cmdLength = pRxPackage->uReceiveParams.Rx.iLength;
   RECEIVE_OPTIONS_TYPE *rxOpt = &pRxPackage->uReceiveParams.Rx.RxOptions;

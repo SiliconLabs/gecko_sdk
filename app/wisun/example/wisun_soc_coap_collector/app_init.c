@@ -33,7 +33,6 @@
 // -----------------------------------------------------------------------------
 #include <assert.h>
 #include "app_init.h"
-#include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_coap_collector.h"

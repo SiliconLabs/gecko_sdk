@@ -13,13 +13,7 @@ requires:
   - name: zigbee_cluster_service
   - name: zigbee_signature_decode
   - name: silabs_core_sl_malloc
-  - name: zigbee_zcl_cli
-    condition:
-      - cli
   - name: zigbee_cli
-    condition:
-      - cli
-  - name: zigbee_core_cli
     condition:
       - cli
   - name: legacy_printf
@@ -31,7 +25,7 @@ config_file:
   - path: protocol/zigbee/app/framework/plugin/zcl-framework-core/config/zcl-framework-core-config.h
 
 define:
-  - name: "CONFIGURATION_HEADER"
+  - name: CONFIGURATION_HEADER
     value: "\"app/framework/util/config.h\""
 
 include:
@@ -142,7 +136,7 @@ source:
       - zigbee_debug_print
   - path: protocol/zigbee/app/framework/util/print-formatter.c
     condition:
-      - zigbee_debug_print  
+      - zigbee_debug_print
   - path: protocol/zigbee/app/framework/util/process-cluster-message.c
   - path: protocol/zigbee/app/framework/util/process-global-message.c
   - path: protocol/zigbee/app/framework/util/service-discovery-common.c
@@ -227,116 +221,116 @@ template_contribution:
       name: network
       shortcuts:
         - name: net
-      help: "Network related commands."
+      help: Network related commands.
 
   - name: cli_command
     value:
       group: network
       name: form
       handler: networkFormCommand
-      help: "Forms a network on a given channel, with a given TX Power and PAN ID."
+      help: Forms a network on a given channel, with a given TX Power and PAN ID.
       argument:
-      - type: uint8
-        help: "The channel on which to form the network"
-      - type: int8
-        help: "One-byte signed value indicating the TX Power that the radio should be set to"
-      - type: uint16
-        help: "The PAN ID on which to form the network"
+        - type: uint8
+          help: The channel on which to form the network
+        - type: int8
+          help: One-byte signed value indicating the TX Power that the radio should be set to
+        - type: uint16
+          help: The PAN ID on which to form the network
   - name: cli_command
     value:
       group: network
       name: join
       handler: networkJoinCommand
-      help: "Joins a network on a given channel, with a given TX Power and PAN ID."
+      help: Joins a network on a given channel, with a given TX Power and PAN ID.
       argument:
-      - type: uint8
-        help: "The channel on which to join the network"
-      - type: int8
-        help: "One-byte signed value indicating the TX Power that the radio should be set to"
-      - type: uint16
-        help: "The PAN ID on which to join the network"
+        - type: uint8
+          help: The channel on which to join the network
+        - type: int8
+          help: One-byte signed value indicating the TX Power that the radio should be set to
+        - type: uint16
+          help: The PAN ID on which to join the network
   - name: cli_command
     value:
       group: network
       name: pjoin
       handler: networkPermitJoinCommand
-      help: "Turns permit joining on for the amount of time indicated."
+      help: Turns permit joining on for the amount of time indicated.
       argument:
-      - type: uint8
-        help: "A single byte indicating how long the device should have permit joining turn on for. A value of 0xff turns permit join indefinitely."
+        - type: uint8
+          help: A single byte indicating how long the device should have permit joining turn on for. A value of 0xff turns permit join indefinitely.
   - name: cli_command
     value:
       group: network
       name: leave
       handler: networkLeaveCommand
-      help: "Leaves a network."
+      help: Leaves a network.
   - name: cli_command
     value:
       group: network
       name: rejoin
       handler: networkRejoinCommand
-      help: "ReJoins a network."
+      help: ReJoins a network.
       argument:
-      - type: uint8
-        help: "Boolean network key availability"
-      - type: uint32
-        help: "Channel mask"
+        - type: uint8
+          help: Boolean network key availability
+        - type: uint32
+          help: Channel mask
   - name: cli_command
     value:
       group: network
       name: rejoin-diff-device-type
       handler: networkRejoinDiffDeviceTypeCommand
-      help: "Rejoins an existing network in a secure or insecure manner with a different device type."
+      help: Rejoins an existing network in a secure or insecure manner with a different device type.
       argument:
-      - type: uint8
-        help: "Boolean network key availability"
-      - type: int32
-        help: "Channel mask"
-      - type: uint8
-        help: "An enumeration indicating the device type to rejoin as.The stack only accepts EMBER_END_DEVICE and EMBER_SLEEPY_END_DEVICE."  
+        - type: uint8
+          help: Boolean network key availability
+        - type: int32
+          help: Channel mask
+        - type: uint8
+          help: An enumeration indicating the device type to rejoin as.The stack only accepts EMBER_END_DEVICE and EMBER_SLEEPY_END_DEVICE.
   - name: cli_command
     value:
       group: network
       name: extpanid
       handler: networkExtendedPanIdCommand
-      help: "Writes the extended pan ID for the device."
+      help: Writes the extended pan ID for the device.
       argument:
-      - type: hex
-        help: "extpanid"
+        - type: hex
+          help: extpanid
   - name: cli_command
     value:
       group: network
       name: isopen
       handler: networkCheckPjoinCommand
-      help: "Checks network pjoin status."
+      help: Checks network pjoin status.
   - name: cli_command
     value:
       group: network
       name: broad-pjoin
       handler: networkPermitJoinCommand
-      help: "Permits joining on the network for a given number of seconds AND broadcasts a ZDO Mgmt Permit Joining request to all routers."
+      help: Permits joining on the network for a given number of seconds AND broadcasts a ZDO Mgmt Permit Joining request to all routers.
       argument:
-      - type: uint8
-        help: "A single byte indicating how long the device should have permit joining turned on for. A value of 0xff turns on permit join indefinitely."   
+        - type: uint8
+          help: A single byte indicating how long the device should have permit joining turned on for. A value of 0xff turns on permit join indefinitely.
 
    # network find cli
   - name: cli_group
     value:
       name: find
       group: network
-      help: "network find commands."
+      help: network find commands.
   - name: cli_command
     value:
       name: joinable
       group: find
       handler: findJoinableNetworkCommand
-      help: "findJoinableNetwork"
+      help: findJoinableNetwork
   - name: cli_command
     value:
       name: unused
       group: find
       handler: findUnusedPanIdCommand
-      help: "findUnusedPanId" 
+      help: findUnusedPanId
 
    #network cli      
   - name: cli_command
@@ -344,97 +338,97 @@ template_contribution:
       group: network
       name: change-channel
       handler: networkChangeChannelCommand
-      help: "Attempts to change device over to a different channel given in the channel argument."
+      help: Attempts to change device over to a different channel given in the channel argument.
       argument:
-      - type: uint8
-        help: "The channel to change to"
+        - type: uint8
+          help: The channel to change to
   - name: cli_command
     value:
       group: network
       name: set
       handler: networkSetCommand
-      help: "Sets the network index used by all future CLI commands.  Before executing a CLI command, the framework switches to this network.  After the command finishes executing, the framework switches back to the previous network.  The CLI uses the same network index until the device resets or it is changed through this command."
+      help: Sets the network index used by all future CLI commands.  Before executing a CLI command, the framework switches to this network.  After the command finishes executing, the framework switches back to the previous network.  The CLI uses the same network index until the device resets or it is changed through this command.
       argument:
-      - type: uint8
-        help: "index" 
+        - type: uint8
+          help: index
   - name: cli_command
     value:
       group: network
       name: init
       handler: networkInitCommand
-      help: "Initializes a network; this is a test command used for tc-swap-out testing."  
+      help: Initializes a network; this is a test command used for tc-swap-out testing.
   - name: cli_command
     value:
       group: network
       name: id
       handler: networkIdCommand
-      help: "Prints the current Node ID, EUI64, and Pan ID."
+      help: Prints the current Node ID, EUI64, and Pan ID.
   - name: cli_command
     value:
       group: network
       name: change-keep-alive-mode
       handler: changeKeepAliveModeCommand
-      help: "Switches between different keep alive modes supported by a router."
+      help: Switches between different keep alive modes supported by a router.
       argument:
-      - type: uint8
-        help: "Keep alive mode"
+        - type: uint8
+          help: Keep alive mode
   - name: cli_command
     value:
       group: network
       name: timeout-option-mask
       handler: networkChangeChildTimeoutOptionMaskCommand
-      help: "Attempts to change the child timeout option mask to filter out undesirable values (e.g. no more than 3 days)."
+      help: Attempts to change the child timeout option mask to filter out undesirable values (e.g. no more than 3 days).
       argument:
-      - type: uint16
-        help: "timeout option mask"
+        - type: uint16
+          help: timeout option mask
   - name: cli_command
     value:
       group: network
       name: multi-phy-start
       handler: networkMultiPhyStartCommand
-      help: "Used to start multi-PHY interface other than native and form the network. The stack uses same PanId as native radio network."
+      help: Used to start multi-PHY interface other than native and form the network. The stack uses same PanId as native radio network.
       argument:
-      - type: uint8
-        help: "page"
-      - type: uint8
-        help: "channel"
-      - type: int8
-        help: "power"
-      - type: uint8opt
-        help: "optionsMask (Bit 0 = Routers allowed, Bit 1 = Broadcast allowed)"
+        - type: uint8
+          help: page
+        - type: uint8
+          help: channel
+        - type: int8
+          help: power
+        - type: uint8opt
+          help: optionsMask (Bit 0 = Routers allowed, Bit 1 = Broadcast allowed)
   - name: cli_command
     value:
       group: network
       name: multi-phy-stop
       handler: networkMultiPhyStopCommand
-      help: "Terminates the multi-PHY interface"      
+      help: Terminates the multi-PHY interface
 
 # Keys CLI commands
   - name: cli_group
     value:
       name: keys
-      help: "Security keys related commands."
+      help: Security keys related commands.
   - name: cli_command
     value:
       name: print
       group: keys
       handler: keysPrintCommand
-      help: "Prints all security keys."
+      help: Prints all security keys.
   - name: cli_command
     value:
       name: delete
       group: keys
       handler: keysDeleteCommand
-      help: "Delete the specified link key index."
+      help: Delete the specified link key index.
       argument:
-      - type: uint8
-        help: "index"
+        - type: uint8
+          help: index
   - name: cli_command
     value:
       name: clear
       group: keys
       handler: keysClearCommand
-      help: "Clears all security keys."
+      help: Clears all security keys.
 
 # Option CLI commands
   - name: cli_group
@@ -442,539 +436,529 @@ template_contribution:
       name: option
       shortcuts:
         - name: opt
-      help: "Option related commands."
+      help: Option related commands.
 
   - name: cli_group
     value:
       name: plugin
       shortcuts:
         - name: plug
-      help: "Plugin CLI group related commands"
+      help: Plugin CLI group related commands
 # option
 # Binding table CLI commands
   - name: cli_group
     value:
       name: binding-table
       group: option
-      help: "Binding table related commands."
+      help: Binding table related commands.
   - name: cli_command
     value:
       name: print
       group: binding-table
       handler: optionBindingTablePrintCommand
-      help: "Prints the binding table to the command line."
+      help: Prints the binding table to the command line.
   - name: cli_command
     value:
       name: clear
       group: binding-table
       handler: optionBindingTableClearCommand
-      help: "Clears the binding table." 
+      help: Clears the binding table.
   - name: cli_command
     value:
       name: set
       group: binding-table
       handler: optionBindingTableSetCommand
-      help: "Sets the binding table"
+      help: Sets the binding table
       argument:
-      - type: uint8
-        help: "index"
-      - type: uint16
-        help: "cluster"
-      - type: uint8
-        help: "localEp"
-      - type: uint8
-        help: "remoteEp"      
-      - type: hex
-        help: "eui64"       
+        - type: uint8
+          help: index
+        - type: uint16
+          help: cluster
+        - type: uint8
+          help: localEp
+        - type: uint8
+          help: remoteEp
+        - type: hex
+          help: eui64
 
   #option print-rx-messages
   - name: cli_group
     value:
       name: print-rx-msgs
       group: option
-      help: "Enables/Disables printing of Rx messages."    
+      help: Enables/Disables printing of Rx messages.
   - name: cli_command
     value:
       name: enable
       group: print-rx-msgs
-      help: "Enables printing of Rx messages."
+      help: Enables printing of Rx messages.
       handler: optionPrintRxCommand
-      
+
   - name: cli_command
     value:
       name: disable
       group: print-rx-msgs
-      help: "Disables printing of Rx messages."
-      handler: optionPrintRxCommand    
+      help: Disables printing of Rx messages.
+      handler: optionPrintRxCommand
 
   - name: cli_command
     value:
       name: register
-      group: option 
-      help: ""   
+      group: option
+      help: ''
       handler: optionRegisterCommand
   - name: cli_command
     value:
       name: target
-      group: option 
-      help: ""   
+      group: option
+      help: ''
       handler: optionDiscoveryTargetCommand
       argument:
-      - type: uint16
-        help: "targetId" 
+        - type: uint16
+          help: targetId
   - name: cli_command
     value:
       name: disc
       group: option
       handler: optionDiscoverCommand
-      help: ""
+      help: ''
       argument:
-      - type: uint16
-        help: "profileId"
-      - type: uint16
-        help: "clusterId"
-  - name: cli_command
-    value:
-      name: edb
-      group: option 
-      help: ""   
-      handler: optionEndDeviceBindCommand
-      argument: 
-      - type: uint8
-        help: "endpointId"
-  #option apsretry
+        - type: uint16
+          help: profileId
+        - type: uint16
+          help: clusterId
   - name: cli_group
     value:
       name: apsretry
       group: option
-      help: "APS retry flag force commands"
+      help: APS retry flag force commands
   - name: cli_command
     value:
       name: "on"
-      group: apsretry 
-      help: ""   
-      handler: optionApsRetryCommand  
+      group: apsretry
+      help: ''
+      handler: optionApsRetryCommand
   - name: cli_command
     value:
       name: "off"
-      group: apsretry 
-      help: ""   
+      group: apsretry
+      help: ''
       handler: optionApsRetryCommand
   - name: cli_command
     value:
       name: default
-      group: apsretry 
-      help: ""   
-      handler: optionApsRetryCommand           
+      group: apsretry
+      help: ''
+      handler: optionApsRetryCommand
 
   #option security
   - name: cli_group
     value:
       name: security
       group: option
-      help: "Security related commands."
+      help: Security related commands.
   - name: cli_group
     value:
       name: aps
       group: security
-      help: "Security aps related commands."       
+      help: Security aps related commands.
   - name: cli_command
     value:
       name: "on"
-      group: aps 
-      help: ""   
+      group: aps
+      help: ''
       handler: optionApsSecurityCommand
   #(EMZIGBEE-6470)     
   - name: cli_command
     value:
       name: "off"
-      group: aps 
-      help: ""   
+      group: aps
+      help: ''
       handler: optionApsSecurityCommand
   - name: cli_command
     value:
       name: set-allow-trust-center-rejoin-using-well-known-key
-      group: security 
-      help: ""   
+      group: security
+      help: ''
       handler: optionSecurityAllowTrustCenterRejoinUsingWellKnownKey
       argument:
-      - type: uint8
-        help: "Bool: allow trust center rejoin using well-known key"
+        - type: uint8
+          help: 'Bool: allow trust center rejoin using well-known key'
   - name: cli_command
     value:
       name: set-allow-trust-center-rejoin-using-well-known-key-timeout
-      group: security 
-      help: ""   
-      handler: optionSecurityAllowTrustCenterRejoinUsingWellKnownKeyTimeout   
+      group: security
+      help: ''
+      handler: optionSecurityAllowTrustCenterRejoinUsingWellKnownKeyTimeout
       argument:
-      - type: uint16
-        help: "timeout"
+        - type: uint16
+          help: timeout
   - name: cli_command
     value:
       name: set-key-request-policy
-      group: security 
-      help: ""   
-      handler: optionSecuritySetKeyRequestPolicy   
+      group: security
+      help: ''
+      handler: optionSecuritySetKeyRequestPolicy
       argument:
-      - type: uint8
-        help: "TC link key request policy"
-      - type: uint8
-        help: "App link key request policy"         
-  
+        - type: uint8
+          help: TC link key request policy
+        - type: uint8
+          help: App link key request policy
+
   #change-key
   - name: cli_group
     value:
       name: changekey
       shortcuts:
         - name: changek
-      help: "changekey related commands."
+      help: changekey related commands.
   - name: cli_command
     value:
       name: link
-      group: changekey 
-      help: ""   
+      group: changekey
+      help: ''
       handler: changeKeyCommand
       argument:
-      - type: hex
-        help: "key"
+        - type: hex
+          help: key
   - name: cli_command
     value:
       name: network
-      group: changekey 
-      help: ""   
+      group: changekey
+      help: ''
       handler: changeKeyCommand
       argument:
-      - type: hex
-        help: "key"      
-      
-         
+        - type: hex
+          help: key
+
+
   #option 
   - name: cli_command
     value:
       name: link
-      group: option 
-      help: ""   
+      group: option
+      help: ''
       handler: optionLinkCommand
       argument:
-      - type: uint8
-        help: "index"
-      - type: hex
-        help: "eui64" 
-      - type: hex
-        help: "key"
+        - type: uint8
+          help: index
+        - type: hex
+          help: eui64
+        - type: hex
+          help: key
   - name: cli_command
     value:
       name: install-code
-      group: option 
-      help: ""   
+      group: option
+      help: ''
       handler: optionInstallCodeCommand
       argument:
-      - type: uint8
-        help: "index"
-      - type: hex
-        help: "eui64" 
-      - type: hex
-        help: "installCode"            
+        - type: uint8
+          help: index
+        - type: hex
+          help: eui64
+        - type: hex
+          help: installCode
 
 
   # zdo      
   - name: cli_group
     value:
       name: zdo
-      help: "Zdo related commands." 
+      help: Zdo related commands.
   - name: cli_command
     value:
       name: route
       group: zdo
       handler: zdoRouteRequestCommand
-      help: "Sends a ZDO route request command to the target."
+      help: Sends a ZDO route request command to the target.
       argument:
-      - type: uint16
-        help: "target"
-      - type: uint8
-        help: "index"
+        - type: uint16
+          help: target
+        - type: uint8
+          help: index
   - name: cli_command
     value:
       name: power
       group: zdo
       handler: zdoPowerDescriptorRequestCommand
-      help: "Sends a ZDO Power Descriptor Request to the target device."
+      help: Sends a ZDO Power Descriptor Request to the target device.
       argument:
-      - type: uint16
-        help: "target"
+        - type: uint16
+          help: target
   - name: cli_command
     value:
       name: mgmt-lqi
       group: zdo
       handler: zdoMgmtLqiCommand
-      help: "Sends a ZDO MGMT-LQI (LQI Table) Request to the target device."
+      help: Sends a ZDO MGMT-LQI (LQI Table) Request to the target device.
       argument:
-      - type: uint16
-        help: "target"
-      - type: uint8
-        help: "startIndex"
+        - type: uint16
+          help: target
+        - type: uint8
+          help: startIndex
   - name: cli_command
     value:
       name: mgmt-bind
       group: zdo
       handler: zdoMgmtBindCommand
-      help: "Sends a ZDO MGMT-Bind (Binding Table) Request to the target device."
+      help: Sends a ZDO MGMT-Bind (Binding Table) Request to the target device.
       argument:
-      - type: uint16
-        help: "target"
-      - type: uint8
-        help: "startIndex"
+        - type: uint16
+          help: target
+        - type: uint8
+          help: startIndex
   - name: cli_command
     value:
       name: leave
       group: zdo
       handler: zdoLeaveRequestCommand
-      help: "Sends a ZDO Management Leave command to the target device."
+      help: Sends a ZDO Management Leave command to the target device.
       argument:
-      - type: uint16
-        help: "target"
-      - type: uint8
-        help: "removeChildren"
-      - type: uint8
-        help: "rejoin"
+        - type: uint16
+          help: target
+        - type: uint8
+          help: removeChildren
+        - type: uint8
+          help: rejoin
   - name: cli_group
     value:
       name: unbind
       group: zdo
-      help: "Zdo unbind related commands."
+      help: Zdo unbind related commands.
   #TODO: following could not be ported, because the actual command is called "group"  (EMZIGBEE-6470)        
   - name: cli_command
     value:
-      name: "group"
+      name: group
       group: unbind
       handler: zdoUnbindGroupCommand
-      help: "Sends an unbind request for a multicast binding to the target device."
+      help: Sends an unbind request for a multicast binding to the target device.
       argument:
-      - type: uint16
-        help: "target"
-      - type: hex
-        help: "source eui64"
-      - type: uint8
-        help: "source endpoint"
-      - type: uint16
-        help: "clusterID"
-      - type: uint16
-        help: "groupAddress"
+        - type: uint16
+          help: target
+        - type: hex
+          help: source eui64
+        - type: uint8
+          help: source endpoint
+        - type: uint16
+          help: clusterID
+        - type: uint16
+          help: groupAddress
   - name: cli_command
     value:
       name: unicast
       group: unbind
       handler: zdoUnbindUnicastCommand
-      help: "Sends an unbind request for a unicast binding to the target device."
+      help: Sends an unbind request for a unicast binding to the target device.
       argument:
-      - type: uint16
-        help: "target"
-      - type: hex
-        help: "source eui64"
-      - type: uint8
-        help: "source endpoint"
-      - type: uint16
-        help: "clusterID"
-      - type: hex
-        help: "destinationEUI64" 
-      - type: uint8
-        help: "destination endpoint"
+        - type: uint16
+          help: target
+        - type: hex
+          help: source eui64
+        - type: uint8
+          help: source endpoint
+        - type: uint16
+          help: clusterID
+        - type: hex
+          help: destinationEUI64
+        - type: uint8
+          help: destination endpoint
   - name: cli_command
     value:
       name: active
       group: zdo
       handler: zdoActiveEpCommand
-      help: "Sends an active endpoint request to the device with the given short ID."
+      help: Sends an active endpoint request to the device with the given short ID.
       argument:
-      - type: uint16
-        help: "nodeId"
+        - type: uint16
+          help: nodeId
   - name: cli_command
     value:
       name: bind
       group: zdo
       handler: zdoBindCommand
-      help: "Sends a ZDO Bind command to a device specified in the command arguments."
+      help: Sends a ZDO Bind command to a device specified in the command arguments.
       argument:
-      - type: uint16
-        help: "Destination"
-      - type: uint8
-        help: "Source endpoint"
-      - type: uint8
-        help: "Destination endpoint"     
-      - type: uint16
-        help: "clusterID"
-      - type: hex
-        help: "remoteEUI64"  
-      - type: hex
-        help: "destEUI64"
+        - type: uint16
+          help: Destination
+        - type: uint8
+          help: Source endpoint
+        - type: uint8
+          help: Destination endpoint
+        - type: uint16
+          help: clusterID
+        - type: hex
+          help: remoteEUI64
+        - type: hex
+          help: destEUI64
   - name: cli_command
     value:
       name: node
       group: zdo
       handler: zdoNodeCommand
-      help: "Sends a node descriptor request to a given target device."
+      help: Sends a node descriptor request to a given target device.
       argument:
-      - type: uint16
-        help: "target"
+        - type: uint16
+          help: target
   - name: cli_command
     value:
       name: match
       group: zdo
       handler: zdoMatchCommand
-      help: "Sends a matchDescriptorsRequest to the given destination with the given profile."
+      help: Sends a matchDescriptorsRequest to the given destination with the given profile.
       argument:
-      - type: uint16
-        help: "nodeId"
-      - type: uint16
-        help: "profile"
+        - type: uint16
+          help: nodeId
+        - type: uint16
+          help: profile
   - name: cli_command
     value:
       name: simple
       group: zdo
       handler: zdoSimpleCommand
-      help: "Sends a simple descriptor request for the short address and endpoint specified."
+      help: Sends a simple descriptor request for the short address and endpoint specified.
       argument:
-      - type: uint16
-        help: "dest"
-      - type: uint8
-        help: "targetEndpoint"
+        - type: uint16
+          help: dest
+        - type: uint8
+          help: targetEndpoint
   - name: cli_command
     value:
       name: ieee
       group: zdo
       handler: zdoIeeeAddressRequestCommand
-      help: "Requests an IEEE address based on a given node ID."
+      help: Requests an IEEE address based on a given node ID.
       argument:
-      - type: uint16
-        help: "nodeId"
+        - type: uint16
+          help: nodeId
   - name: cli_command
     value:
       name: nwk
       group: zdo
       handler: zdoNwkAddressRequestCommand
-      help: "Sends a network address request for the given IEEE address."
+      help: Sends a network address request for the given IEEE address.
       argument:
-      - type: hex
-        help: "ieee"
+        - type: hex
+          help: ieee
   - name: cli_group
     value:
       name: nwk-upd
       group: zdo
-      help: "Zdo nwk-upd related commands."       
+      help: Zdo nwk-upd related commands.
   - name: cli_command
     value:
       name: scan-chan-mask
       group: nwk-upd
       handler: zdoNetworkUpdateScanCommand
-      help: "Performs an energy scan on given channel mask."
+      help: Performs an energy scan on given channel mask.
       argument:
-      - type: uint16
-        help: "targetNodeId"
-      - type: uint8
-        help: "scanDuration"
-      - type: uint16
-        help: "scanCount"
-      - type: uint32
-        help: "channelMask" 
+        - type: uint16
+          help: targetNodeId
+        - type: uint8
+          help: scanDuration
+        - type: uint16
+          help: scanCount
+        - type: uint32
+          help: channelMask
   - name: cli_command
     value:
       name: set
       group: nwk-upd
       handler: zdoNetworkUpdateSetCommand
-      help: "Broadcasts the ID of the new network manager and active channels."
+      help: Broadcasts the ID of the new network manager and active channels.
       argument:
-      - type: uint16
-        help: "nwkMgeId" 
-      - type: uint32
-        help: "channelMask"            
+        - type: uint16
+          help: nwkMgeId
+        - type: uint32
+          help: channelMask
   - name: cli_command
     value:
       name: scan
       group: nwk-upd
       handler: zdoNetworkUpdateScanCommand
-      help: "Performs an energy scan."
+      help: Performs an energy scan.
       argument:
-      - type: uint16
-        help: "targetNodeId"
-      - type: uint8
-        help: "scanDuration"
-      - type: uint16
-        help: "scanCount"
+        - type: uint16
+          help: targetNodeId
+        - type: uint8
+          help: scanDuration
+        - type: uint16
+          help: scanCount
   - name: cli_command
     value:
       name: chanPg
       group: nwk-upd
       handler: zdoNetworkUpdateChannelCommand
-      help: "Sends an update channel page req. The stack sends nwk enhanced update req for non-zero page."
+      help: Sends an update channel page req. The stack sends nwk enhanced update req for non-zero page.
       argument:
-      - type: uint8
-        help: "channel" 
-      - type: uint8
-        help: "page"
+        - type: uint8
+          help: channel
+        - type: uint8
+          help: page
   - name: cli_command
     value:
       name: chan
       group: nwk-upd
       handler: zdoNetworkUpdateChannelCommand
-      help: "Sends an update channel request."
+      help: Sends an update channel request.
       argument:
-      - type: uint8
-        help: "channel"
+        - type: uint8
+          help: channel
   - name: cli_group
     value:
       name: out-cl-list
       group: zdo
-      help: "Zdo out-cl-list related commands."       
+      help: Zdo out-cl-list related commands.
   - name: cli_command
     value:
       name: add
       group: out-cl-list
       handler: zdoAddClusterCommand
-      help: "Adds clusters to the known client (out) clusters on this device."
+      help: Adds clusters to the known client (out) clusters on this device.
       argument:
-      - type: uint16
-        help: "clusterId"
+        - type: uint16
+          help: clusterId
   - name: cli_command
     value:
       name: clear
       group: out-cl-list
       handler: zdoClearClusterCommand
-      help: "Clears the ZDO list of client (out) clusters."      
+      help: Clears the ZDO list of client (out) clusters.
   - name: cli_group
     value:
       name: in-cl-list
       group: zdo
-      help: "Zdo in-cl-list related commands."       
+      help: Zdo in-cl-list related commands.
   - name: cli_command
     value:
       name: add
       group: in-cl-list
       handler: zdoAddClusterCommand
-      help: "Adds clusters to the known client (in) clusters on this device."
+      help: Adds clusters to the known client (in) clusters on this device.
       argument:
-      - type: uint16
-        help: "clusterId"
+        - type: uint16
+          help: clusterId
   - name: cli_command
     value:
       name: clear
       group: in-cl-list
       handler: zdoClearClusterCommand
-      help: "Clears the ZDO list of client (in) clusters."
+      help: Clears the ZDO list of client (in) clusters.
 
    # print group    
   - name: cli_group
     value:
       name: print
-      help: "print related commands." 
+      help: print related commands.
   - name: cli_command
     value:
       name: attr
       group: print
       handler: emberAfPrintAttributeTable
-      help: "Prints attribute."
+      help: Prints attribute.
   - name: cli_command
     value:
       name: time
       group: print
       handler: printTimeCommand
-      help: "Prints time."    
+      help: Prints time.

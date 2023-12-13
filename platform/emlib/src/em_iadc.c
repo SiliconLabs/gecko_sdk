@@ -59,10 +59,16 @@
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 // Validation of IADC register block pointer reference for assert statements.
+#if defined(IADC_NUM)
+#define IADC_REF_VALID(ref)    (IADC_NUM(ref) != -1)
+#else
 #if (IADC_COUNT == 1)
 #define IADC_REF_VALID(ref)    ((ref) == IADC0)
+#define IADC_NUM(ref)          (((ref) == IADC0) ? 0 : -1)
 #elif (IADC_COUNT == 2)
 #define IADC_REF_VALID(ref)    (((ref) == IADC0) || ((ref) == IADC1))
+#define IADC_NUM(ref)          (((ref) == IADC0) ? 0 : ((ref) == IADC1) ? 1 : -1)
+#endif
 #endif
 
 // Max IADC clock rates
@@ -70,10 +76,19 @@
 #define IADC_ANA_CLK_HIGH_SPEED_MAX_FREQ    20000000UL
 #define IADC_ANA_CLK_NORMAL_MAX_FREQ        10000000UL
 #define IADC_ANA_CLK_HIGH_ACCURACY_MAX_FREQ  5000000UL
+#if defined (_IADC_CFG_ADCMODE_HIGHSPEED)
+#define IADC_ANA_CLK_MAX_FREQ(adcMode) (                          \
+    (adcMode) == iadcCfgModeNormal ? IADC_ANA_CLK_NORMAL_MAX_FREQ \
+    : ((adcMode) == iadcCfgModeHighSpeed                          \
+       ? IADC_ANA_CLK_HIGH_SPEED_MAX_FREQ                         \
+       : IADC_ANA_CLK_HIGH_ACCURACY_MAX_FREQ)                     \
+    )
+#else
 #define IADC_ANA_CLK_MAX_FREQ(adcMode) (                          \
     (adcMode) == iadcCfgModeNormal ? IADC_ANA_CLK_NORMAL_MAX_FREQ \
     : IADC_ANA_CLK_HIGH_ACCURACY_MAX_FREQ                         \
     )
+#endif
 
 #define IADC_ROUND_D2I(n) (int)((n) < 0.0f ? ((n) - 0.5f) : ((n) + 0.5f))
 
@@ -83,15 +98,24 @@
 #define IADC1_SCANENTRIES IADC1_ENTRIES
 #define IADC1_FIFOENTRIES 0x4UL
 
+#if defined(IADC_ENTRIES)
+#define IADC_SCANENTRIES(iadc) IADC_ENTRIES(IADC_NUM(iadc))
+#else
 #define IADC_SCANENTRIES(iadc) (        \
     (iadc) == IADC0 ? IADC0_SCANENTRIES \
     : 0UL)
-#define IADC_CONFIGNUM(iadc) (        \
-    (iadc) == IADC0 ? IADC0_CONFIGNUM \
+#endif
+
+#if !defined(IADC_CONFIGNUM)
+#define IADC_CONFIGNUM(iadc) (    \
+    (iadc) == 0 ? IADC0_CONFIGNUM \
     : 0UL)
+#endif
+
 #define IADC_FIFOENTRIES(iadc) (        \
     (iadc) == IADC0 ? IADC0_FIFOENTRIES \
     : 0UL)
+
 #define IADC_CMU_CLOCK(iadc) (       \
     (iadc) == IADC0 ? cmuClock_IADC0 \
     : cmuClock_IADC0)
@@ -267,7 +291,7 @@ void IADC_init(IADC_TypeDef *iadc,
                     & _IADC_CMPTHR_ADLT_MASK);
 
   // Write configurations
-  for (config = 0; config < IADC_CONFIGNUM(iadc); config++) {
+  for (config = 0; config < IADC_CONFIGNUM(IADC_NUM(iadc)); config++) {
     // Find min allowed ADC_CLK prescaler setting for given mode
     adcMode = allConfigs->configs[config].adcMode;
     wantedPrescale = allConfigs->configs[config].adcClkPrescale;
@@ -828,7 +852,7 @@ void IADC_reset(IADC_TypeDef *iadc)
   iadc->SINGLEFIFOCFG   = _IADC_SINGLEFIFOCFG_RESETVALUE;
   iadc->SCANFIFOCFG     = _IADC_SCANFIFOCFG_RESETVALUE;
 
-  for (i = 0; i < IADC_CONFIGNUM(iadc); i++) {
+  for (i = 0; i < IADC_CONFIGNUM(IADC_NUM(iadc)); i++) {
     iadc->CFG[i].CFG    = _IADC_CFG_RESETVALUE;
     iadc->CFG[i].SCALE  = _IADC_SCALE_RESETVALUE;
     iadc->CFG[i].SCHED  = _IADC_SCHED_RESETVALUE;

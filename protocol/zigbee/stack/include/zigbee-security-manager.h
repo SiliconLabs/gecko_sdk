@@ -129,10 +129,11 @@ sl_status_t sl_zb_sec_man_export_link_key_by_eui(EmberEUI64 eui,
  * This function simply checks for the existence of a key, it doesn't care if the key is authorized or not.
  * This function searches in a few different places, and it may always return true if certain bits/policies are set.
  * E.g: On trust center, this function always returns true if hashed link keys are used
- *      or if EMBER_TRUST_CENTER_GLOBAL_LINK_KEY is set
+ * (EMBER_TRUST_CENTER_USES_HASHED_LINK_KEY), or if EMBER_TRUST_CENTER_GLOBAL_LINK_KEY is set.
  *
- * @param remoteDevice The long address of a some other device in the network.
- * @return bool Returns true if a link key is available.
+ * @param eui The long address of some other device in the network.
+ * @return bool Returns true if a link key can be retrieved/computed for securing messages sent to the remote EUI
+ * passed as argument.  Returns false if a link key is not available for that EUI.
  */
 bool sl_zb_sec_man_have_link_key(EmberEUI64 eui);
 
@@ -505,6 +506,28 @@ sl_status_t sl_zb_sec_man_update_symmetric_passphrase_eui(EmberEUI64 old_eui64,
  */
 #define sl_zb_sec_man_symmetric_passphrase_update_allowed(address) \
   (sl_zb_sec_man_find_symmetric_passphrase_key_table_index(address) == 0xFF)
+
+/**
+ * @brief Checks whether a new link key with a device can be stored.
+ *
+ * @param eui64 device address
+ * @return True if a new link key could be stored (there is either an
+ * existing entry with this device's EUI64 or a free entry for a new device),
+ * false if not (table is full).
+ */
+bool sl_zigbee_sec_man_link_key_slot_available(EmberEUI64 eui64);
+
+/**
+ * @brief Check whether the key referenced by a given context has a specified value.
+ * This API is only compatible with keys that permit the standard Zigbee encryption algorithm
+ * and have a core key type that is not SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL.
+ *
+ * @param context Reference to the key being checked
+ * @param test_key Value to test for
+ *
+ * @return True if the key referenced by context has the value test_key, false otherwise.
+ */
+bool sl_zb_sec_man_compare_key_to_value(sl_zb_sec_man_context_t* context, const sl_zb_sec_man_key_t* test_key);
 
 // Internal APIs
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

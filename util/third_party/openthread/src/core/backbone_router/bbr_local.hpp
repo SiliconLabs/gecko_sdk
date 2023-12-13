@@ -59,6 +59,7 @@
 #include "common/locator.hpp"
 #include "common/log.hpp"
 #include "common/non_copyable.hpp"
+#include "common/time_ticker.hpp"
 #include "net/netif.hpp"
 #include "thread/network_data.hpp"
 
@@ -72,6 +73,8 @@ namespace BackboneRouter {
  */
 class Local : public InstanceLocator, private NonCopyable
 {
+    friend class ot::TimeTicker;
+
 public:
     /**
      * Represents Backbone Router state.
@@ -82,6 +85,16 @@ public:
         kStateDisabled  = OT_BACKBONE_ROUTER_STATE_DISABLED,  ///< Backbone function is disabled.
         kStateSecondary = OT_BACKBONE_ROUTER_STATE_SECONDARY, ///< Secondary Backbone Router.
         kStatePrimary   = OT_BACKBONE_ROUTER_STATE_PRIMARY,   ///< The Primary Backbone Router.
+    };
+
+    /**
+     * Represents registration mode used as input to `AddService()` method.
+     *
+     */
+    enum RegisterMode : uint8_t
+    {
+        kDecideBasedOnState, ///< Decide based on current state.
+        kForceRegistration,  ///< Force registration regardless of current state.
     };
 
     /**
@@ -137,16 +150,14 @@ public:
     /**
      * Registers Backbone Router Dataset to Leader.
      *
-     * @param[in]  aForce True to force registration regardless of current state.
-     *                    False to decide based on current state.
-     *
+     * @param[in]  aMode  The registration mode to use (decide based on current state or force registration).
      *
      * @retval kErrorNone            Successfully added the Service entry.
      * @retval kErrorInvalidState    Not in the ready state to register.
      * @retval kErrorNoBufs          Insufficient space to add the Service entry.
      *
      */
-    Error AddService(bool aForce = false);
+    Error AddService(RegisterMode aMode);
 
     /**
      * Indicates whether or not the Backbone Router is Primary.
@@ -245,7 +256,7 @@ public:
      * Applies the Mesh Local Prefix.
      *
      */
-    void ApplyMeshLocalPrefix(void);
+    void ApplyNewMeshLocalPrefix(void);
 
     /**
      * Updates the subscription of All Domain Backbone Routers Multicast Address.
@@ -270,6 +281,7 @@ public:
 private:
     void SetState(State aState);
     void RemoveService(void);
+    void HandleTimeTick(void);
     void AddDomainPrefixToNetworkData(void);
     void RemoveDomainPrefixFromNetworkData(void);
     void SequenceNumberIncrease(void);
@@ -284,6 +296,7 @@ private:
     State    mState;
     uint32_t mMlrTimeout;
     uint16_t mReregistrationDelay;
+    uint16_t mRegistrationTimeout;
     uint8_t  mSequenceNumber;
     uint8_t  mRegistrationJitter;
 

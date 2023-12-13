@@ -24,6 +24,7 @@
 #include "zigbee-security-manager-vault-support.h"
 #include "security_manager.h"
 #include "hal.h"
+#include "em_system.h"
 
 // Externs
 extern bool sli_zigbee_is_null_key(EmberKeyData * key);
@@ -64,6 +65,9 @@ static bool zb_sec_is_key_present(uint32_t key_id);
 
 // This bit indicates if entry in the key table is a Symmetric Passphrase
 #define KEY_TABLE_SYMMETRIC_PASSPHRASE      (BIT(7))
+
+//forward declaration
+static void zb_sec_man_validate_psa_key_attributes(sl_zb_sec_man_context_t *context, psa_key_id_t key_id, psa_key_attributes_t *attributes);
 
 void sli_zigbee_security_hardware_init(void)
 {
@@ -111,11 +115,6 @@ sl_status_t sl_zb_sec_man_delete_key(sl_zb_sec_man_context_t* context)
       status = sl_zb_sec_man_delete_key_table_key(context);
       key_handled = true;
       break;
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY:
-      key_id = ZB_PSA_KEY_ID_SECURE_EZSP_KEY;
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
 #if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
     case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
       key_id = ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY;
@@ -146,63 +145,57 @@ sl_status_t sl_zb_sec_man_delete_key(sl_zb_sec_man_context_t* context)
   return status;
 }
 
+psa_key_id_t sli_zigbee_sec_man_get_psa_id_from_context(const sl_zb_sec_man_context_t* context)
+{
+  sl_status_t status = SL_STATUS_FAIL;
+  switch (context->core_key_type) {
+    case SL_ZB_SEC_MAN_KEY_TYPE_NETWORK:
+      return ((context->key_index == 0) ? ZB_PSA_KEY_ID_ACTIVE_NWK_KEY : ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY);
+    case SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK:
+      return ZB_PSA_KEY_ID_PRECONFIGURED_APS_KEY;
+    case SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT:
+    {
+      EmberTransientKeyData transientKey;
+      status = find_transient_key((sl_zb_sec_man_context_t*)context, &transientKey);
+      if (status == SL_STATUS_OK) {
+        return transientKey.psa_id;
+      }
+      return 0;
+    }
+    case SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK:
+    {
+      status = find_link_key_table_key((sl_zb_sec_man_context_t*)context);
+      if (status == SL_STATUS_OK) {
+        return (context->key_index + ZB_PSA_KEY_ID_LINK_KEY_TABLE_START);
+      }
+      return 0;
+    }
+#if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
+    case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
+      return ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY;
+    case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY:
+      return ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY;
+#endif // defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
+#if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
+    case SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY:
+      return ZB_PSA_KEY_ID_GP_PROXY_TABLE_START + context->key_index;
+    case SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY:
+      return ZB_PSA_KEY_ID_GP_SINK_TABLE_START + context->key_index;
+#endif // defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
+    case SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL:
+      return zb_sec_man_internal_key_psa_id;
+    default:
+      return 0;
+  }
+}
+
 sl_status_t sl_zb_sec_man_load_key_context(sl_zb_sec_man_context_t* context)
 {
   sl_status_t status = SL_STATUS_OK;
 
-  switch (context->core_key_type) {
-    case SL_ZB_SEC_MAN_KEY_TYPE_NETWORK:
-      zb_sm_context_psa_key_id = (context->key_index == 0) ? ZB_PSA_KEY_ID_ACTIVE_NWK_KEY : ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY;
-      break;
-    case SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_PRECONFIGURED_APS_KEY;
-      break;
-    case SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT:
-    {
-      EmberTransientKeyData transientKey;
-      status = find_transient_key(context, &transientKey);
-      if (status == SL_STATUS_OK) {
-        zb_sm_context_psa_key_id = transientKey.psa_id;
-      }
-    }
-    break;
-    case SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK:
-    {
-      status = find_link_key_table_key(context);
-      if (status == SL_STATUS_OK) {
-        zb_sm_context_psa_key_id = context->key_index + ZB_PSA_KEY_ID_LINK_KEY_TABLE_START;
-      }
-    }
-    break;
-#if defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_SECURE_EZSP_KEY:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_SECURE_EZSP_KEY;
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_NCP_SECURE_EZSP_PRESENT)
-#if defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_ENCRYPTION_KEY:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY;
-      break;
-    case SL_ZB_SEC_MAN_KEY_TYPE_ZLL_PRECONFIGURED_KEY:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY;
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_LIGHT_LINK_PRESENT)
-#if defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_PROXY_TABLE_KEY:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_GP_PROXY_TABLE_START + context->key_index;
-      break;
-    case SL_ZB_SEC_MAN_KEY_TYPE_GREEN_POWER_SINK_TABLE_KEY:
-      zb_sm_context_psa_key_id = ZB_PSA_KEY_ID_GP_SINK_TABLE_START + context->key_index;
-      break;
-#endif // defined(SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT)
-    case SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL:
-      zb_sm_context_psa_key_id = zb_sec_man_internal_key_psa_id;
-      break;
-    default:
-      return SL_STATUS_INVALID_TYPE;
-  }
+  zb_sm_context_psa_key_id = sli_zigbee_sec_man_get_psa_id_from_context(context);
 
-  if (status != SL_STATUS_OK || zb_sm_context_psa_key_id == 0) {
+  if (zb_sm_context_psa_key_id == 0) {
     return SL_STATUS_NOT_FOUND;
   }
 
@@ -211,6 +204,9 @@ sl_status_t sl_zb_sec_man_load_key_context(sl_zb_sec_man_context_t* context)
 
   if (test_status != PSA_SUCCESS) {
     return SL_STATUS_NOT_FOUND;
+  } else if (zb_sm_context_psa_key_id >= ZB_PSA_KEY_ID_MIN
+             && zb_sm_context_psa_key_id <= ZB_PSA_KEY_ID_MAX) {
+    zb_sec_man_validate_psa_key_attributes(context, zb_sm_context_psa_key_id, &test_key_attributes);
   }
 
   if (context->derived_type != SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE) {
@@ -242,6 +238,39 @@ sl_status_t sl_zb_sec_man_load_key_context(sl_zb_sec_man_context_t* context)
   return status;
 }
 
+//Ensure that a persistent key's attributes are consistent with the expectations of current stack version.
+//Re-import them with updated attributes if they are not.
+void zb_sec_man_validate_psa_key_attributes(sl_zb_sec_man_context_t *context, psa_key_id_t key_id, psa_key_attributes_t *attributes)
+{
+  psa_key_location_t current_location = PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
+  psa_algorithm_t current_alg = psa_get_key_algorithm(attributes);
+  bool reimported = false;
+  if (context->core_key_type == SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK && current_alg == 0) {
+    sl_zb_sec_man_key_t plaintext_key;
+    (void) sl_zb_sec_man_export_key(context, &plaintext_key);
+    (void) sl_zb_sec_man_import_key(context, &plaintext_key);
+    reimported = true;
+  }
+#if defined (SEMAILBOX_PRESENT)
+  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault && current_location == PSA_KEY_LOCATION_LOCAL_STORAGE && !reimported) {
+    //This API is not called on volatile keys so new persistence will always be default/persistent.
+    psa_key_lifetime_t new_lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_DEFAULT, PSA_KEY_LOCATION_SLI_SE_OPAQUE);
+    psa_set_key_lifetime(attributes, new_lifetime);
+    //Used so sl_sec_man_copy_key doesn't change the context key ID
+    psa_key_id_t key_id_copy = key_id;
+    (void) sl_sec_man_copy_key(key_id, attributes, &key_id_copy);
+    reimported = true;
+  }
+#endif // defined (SEMAILBOX_PRESENT)
+  if (reimported) {
+    uint8_t current_version = 0;
+    zb_sec_man_fetch_version_key(&current_version);
+    if (current_version < ZB_SEC_MAN_CURRENT_VERSION_KEY) {
+      zb_sec_man_store_version_key();
+    }
+  }
+}
+
 void zb_sec_man_backup_key_context(bool direction)
 {
   if (direction) {
@@ -262,37 +291,49 @@ sl_status_t zb_sec_man_derive_key(sl_zb_sec_man_key_t* source_key,
   //callers must set the core key type correctly to ensure that
   //key derivation is done correctly.
 
-  switch (context->derived_type) {
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY:
-    {
-      tag = DERIVE_TRANSPORT_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*)derived_key);
-      break;
+  bool has_first_derivation = false;
+  zb_sm_context_psa_key_id = sli_zigbee_sec_man_get_psa_id_from_context(context);
+
+  if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY) != 0) {
+    emberAesHashSimple(EMBER_ENCRYPTION_KEY_SIZE,
+                       (const uint8_t*) source_key,
+                       (uint8_t* ) derived_key);
+    has_first_derivation = true;
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY) != 0) {
+    sl_zb_sec_man_hmac_aes_mmo(context->eui64, EUI64_SIZE, (uint8_t*) derived_key);
+    has_first_derivation = true;
+  }
+  if (has_first_derivation) {
+    //If key has multiple valid derived types, it will be one from the previous cases
+    //and one from the following (as some derived types are treated more like ordinary link keys).
+    //Import and load the first derivation in at this point, to have the second derivation operation computed from it.
+    if (zb_sec_man_derived_key_psa_id != 0) {
+      (void) sl_sec_man_destroy_key(zb_sec_man_derived_key_psa_id);
     }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY:
-    {
-      tag = DERIVE_LOAD_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
-      break;
+    psa_status_t sec_man_status = sl_sec_man_import_key(&zb_sec_man_derived_key_psa_id,
+                                                        ZB_PSA_KEY_TYPE,
+                                                        context->psa_key_alg_permission,
+                                                        ZB_PSA_KEY_USAGE,
+                                                        PSA_KEY_LIFETIME_VOLATILE,
+                                                        (const uint8_t*)&derived_key->key,
+                                                        EMBER_ENCRYPTION_KEY_SIZE);
+    if (sec_man_status != PSA_SUCCESS) {
+      return SL_STATUS_FAIL;
     }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY:
-    {
-      tag = DERIVE_VERIFY_KEY_TAG;
-      sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_SWAP_OUT_KEY:
-    {
-      emberAesHashSimple(EMBER_ENCRYPTION_KEY_SIZE,
-                         (const uint8_t*) source_key,
-                         (uint8_t* ) derived_key);
-      break;
-    }
-    case SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_TC_HASHED_LINK_KEY:
-      sl_zb_sec_man_hmac_aes_mmo(context->eui64, EUI64_SIZE, (uint8_t*) derived_key);
-      break;
-    default:
-      return SL_STATUS_INVALID_PARAMETER;
+    zb_sm_context_psa_key_id = zb_sec_man_derived_key_psa_id;
+  }
+  if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_TRANSPORT_KEY) != 0) {
+    tag = DERIVE_TRANSPORT_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*)derived_key);
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_KEY_LOAD_KEY) != 0) {
+    tag = DERIVE_LOAD_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
+  } else if ((context->derived_type & SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_VERIFY_KEY) != 0) {
+    tag = DERIVE_VERIFY_KEY_TAG;
+    sl_zb_sec_man_hmac_aes_mmo(&tag, 1, (uint8_t*) derived_key);
+  }
+  if (context->derived_type == SL_ZB_SEC_MAN_DERIVED_KEY_TYPE_NONE) {
+    return SL_STATUS_INVALID_PARAMETER;
   }
   return SL_STATUS_OK;
 }
@@ -322,8 +363,6 @@ sl_status_t zb_sec_man_store_nwk_key(sl_zb_sec_man_context_t* context,
   return status;
 }
 
-#define ZB_SEC_MAN_CURRENT_VERSION_KEY 0x01
-#define ZB_SEC_MAN_CURRENT_VERSION_KEY_SIZE 1
 sl_status_t zb_sec_man_store_version_key(void)
 {
   psa_status_t status = PSA_ERROR_GENERIC_ERROR;
@@ -855,41 +894,6 @@ sl_status_t sl_zb_sec_man_delete_transient_key(sl_zb_sec_man_context_t* context)
   return (sec_man_status == PSA_SUCCESS) ? SL_STATUS_OK : SL_STATUS_FAIL;
 }
 
-sl_status_t zb_sec_man_store_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key)
-{
-  // NOTE no need to check key type because calls to this should be multiplexed into by key type(?)
-  uint32_t key_id = ZB_PSA_KEY_ID_SECURE_EZSP_KEY;
-  // NOTE multiple imports do not perform an update - must clear the key before importing...
-  (void) sl_sec_man_destroy_key(key_id);
-  psa_status_t sec_status =
-    sl_sec_man_import_key(
-      &key_id,
-      ZB_PSA_KEY_TYPE,
-      context->psa_key_alg_permission,
-      ZB_PSA_KEY_USAGE,
-      PSA_KEY_PERSISTENCE_DEFAULT,
-      plaintext_key->key,
-      EMBER_ENCRYPTION_KEY_SIZE);
-  return sec_status == PSA_SUCCESS ? SL_STATUS_OK : SL_STATUS_FAIL;
-}
-
-sl_status_t zb_sec_man_fetch_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key)
-{
-  // NOTE no need to check key type because calls to this should be multiplexed into by key type(?)
-  uint32_t key_id = ZB_PSA_KEY_ID_SECURE_EZSP_KEY;
-  size_t psa_key_len = EMBER_ENCRYPTION_KEY_SIZE;
-  psa_status_t sec_status =
-    sl_sec_man_export_key(
-      key_id,
-      plaintext_key->key,
-      EMBER_ENCRYPTION_KEY_SIZE,
-      // NOTE unused...
-      &psa_key_len);
-  return sec_status == PSA_SUCCESS ? SL_STATUS_OK : SL_STATUS_FAIL;
-}
-
 sl_status_t zb_sec_man_store_internal_key(UNUSED sl_zb_sec_man_context_t* context,
                                           sl_zb_sec_man_key_t* plaintext_key)
 {
@@ -1045,4 +1049,46 @@ void zb_sec_man_delete_all_keys(void)
   for (psa_id = ZB_PSA_KEY_ID_ACTIVE_NWK_KEY; psa_id < ZB_PSA_KEY_ID_GP_SINK_TABLE_END; psa_id++) {
     (void)zb_sec_man_delete_key_by_psa_id(psa_id);
   }
+}
+
+bool sl_zb_sec_man_compare_key_to_value(sl_zb_sec_man_context_t* context, const sl_zb_sec_man_key_t* test_key)
+{
+  //Perform the same operation on a stored key and test value to see whether they are same,
+  //without requiring that the stored key be extracted outside of Secure Vault.
+
+  //This function uses the internal/one-off key slot for its own purposes, so is incompatible with a context
+  //pointing to the same slot as they would conflict.
+  if (context->core_key_type == SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL) {
+    return false;
+  }
+
+  //Set up some arbitrary data to encrypt with.
+  #define TEST_NONCE { 0x01, 0x01, 0x02, 0x03, 0x05, 0x08, 0x0D, 0x15, 0x22, 0x37, 0x59, 0x90, 0xE9 }
+  #define TEST_PACKET { 0xF0, 0xE1, 0xD2, 0xC3, 0xB4, 0xA5, 0x96, 0x87, 0x78, 0x69, 0x5A, 0x4B, 0x3C, 0x2D, 0x1E, 0x0F }
+  #define TEST_PACKET_LENGTH 16
+
+  const uint8_t test_nonce[NONCE_LENGTH] = TEST_NONCE;
+  const uint8_t test_packet[TEST_PACKET_LENGTH] = TEST_PACKET;
+  //Specify some part of test_packet as authentication data.  4 is an arbitrary value.
+  #define KEY_COMPARE_AUTH_LENGTH 4
+  #define TEST_MIC_LENGTH 4
+
+  //Buffers for encryption output
+  uint8_t output_unknown[TEST_PACKET_LENGTH + TEST_MIC_LENGTH];
+  uint8_t output_known[TEST_PACKET_LENGTH + TEST_MIC_LENGTH];
+  sl_zb_sec_man_load_key_context(context);
+  //Use AES-CCM for this test as it is permitted by ZB_PSA_ALG
+  sl_zb_sec_man_aes_ccm((uint8_t*)&test_nonce, true, (uint8_t*)&test_packet, KEY_COMPARE_AUTH_LENGTH, TEST_PACKET_LENGTH, output_unknown);
+  sl_zb_sec_man_context_t test_context;
+  sl_zb_sec_man_init_context(&test_context);
+  test_context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
+  sl_zb_sec_man_import_key(&test_context, (sl_zb_sec_man_key_t*)test_key);
+  sl_zb_sec_man_load_key_context(&test_context);
+  sl_zb_sec_man_aes_ccm((uint8_t*)&test_nonce, true, (uint8_t*)&test_packet, KEY_COMPARE_AUTH_LENGTH, TEST_PACKET_LENGTH, output_known);
+
+  if (MEMCOMPARE(output_unknown, output_known, TEST_MIC_LENGTH + TEST_PACKET_LENGTH) == 0) {
+    return true;
+  }
+
+  return false;
 }

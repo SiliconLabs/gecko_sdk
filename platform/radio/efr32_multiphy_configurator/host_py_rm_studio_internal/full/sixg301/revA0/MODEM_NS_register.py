@@ -9,10 +9,10 @@ class RM_Register_MODEM_NS_IPVERSION(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IPVERSION, self).__init__(rmio, label,
-            0xb8014000, 0x000,
+            0xb0214000, 0x000,
             'IPVERSION', 'MODEM_NS.IPVERSION', 'read-only',
             u"",
-            0x00000003, 0xFFFFFFFF,
+            0x00000006, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -25,7 +25,7 @@ class RM_Register_MODEM_NS_EN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_EN, self).__init__(rmio, label,
-            0xb8014000, 0x004,
+            0xb0214000, 0x004,
             'EN', 'MODEM_NS.EN', 'read-write',
             u"",
             0x00000000, 0x00000001,
@@ -41,10 +41,10 @@ class RM_Register_MODEM_NS_IF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IF, self).__init__(rmio, label,
-            0xb8014000, 0x008,
+            0xb0214000, 0x008,
             'IF', 'MODEM_NS.IF', 'read-write',
             u"",
-            0x00000000, 0x3FFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -56,8 +56,8 @@ class RM_Register_MODEM_NS_IF(Base_RM_Register):
         self.zz_fdict['TXPRESENT'] = self.TXPRESENT
         self.TXRAMPDONE = RM_Field_MODEM_NS_IF_TXRAMPDONE(self)
         self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
-        self.LDTNOARR = RM_Field_MODEM_NS_IF_LDTNOARR(self)
-        self.zz_fdict['LDTNOARR'] = self.LDTNOARR
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_IF_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
         self.PHDSADET = RM_Field_MODEM_NS_IF_PHDSADET(self)
         self.zz_fdict['PHDSADET'] = self.PHDSADET
         self.PHYUNCODEDET = RM_Field_MODEM_NS_IF_PHYUNCODEDET(self)
@@ -80,8 +80,8 @@ class RM_Register_MODEM_NS_IF(Base_RM_Register):
         self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
         self.RXTIMNF = RM_Field_MODEM_NS_IF_RXTIMNF(self)
         self.zz_fdict['RXTIMNF'] = self.RXTIMNF
-        self.FRCTIMOUT = RM_Field_MODEM_NS_IF_FRCTIMOUT(self)
-        self.zz_fdict['FRCTIMOUT'] = self.FRCTIMOUT
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_IF_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
         self.ETS = RM_Field_MODEM_NS_IF_ETS(self)
         self.zz_fdict['ETS'] = self.ETS
         self.CFGANTPATTRD = RM_Field_MODEM_NS_IF_CFGANTPATTRD(self)
@@ -108,6 +108,10 @@ class RM_Register_MODEM_NS_IF(Base_RM_Register):
         self.zz_fdict['SIDET'] = self.SIDET
         self.SIRESET = RM_Field_MODEM_NS_IF_SIRESET(self)
         self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_IF_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_IF_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
         self.__dict__['zz_frozen'] = True
 
 
@@ -115,10 +119,10 @@ class RM_Register_MODEM_NS_IEN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IEN, self).__init__(rmio, label,
-            0xb8014000, 0x00C,
+            0xb0214000, 0x00C,
             'IEN', 'MODEM_NS.IEN', 'read-write',
             u"",
-            0x00000000, 0x3FFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -130,8 +134,8 @@ class RM_Register_MODEM_NS_IEN(Base_RM_Register):
         self.zz_fdict['TXPRESENT'] = self.TXPRESENT
         self.TXRAMPDONE = RM_Field_MODEM_NS_IEN_TXRAMPDONE(self)
         self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
-        self.LDTNOARR = RM_Field_MODEM_NS_IEN_LDTNOARR(self)
-        self.zz_fdict['LDTNOARR'] = self.LDTNOARR
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_IEN_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
         self.PHDSADET = RM_Field_MODEM_NS_IEN_PHDSADET(self)
         self.zz_fdict['PHDSADET'] = self.PHDSADET
         self.PHYUNCODEDET = RM_Field_MODEM_NS_IEN_PHYUNCODEDET(self)
@@ -154,8 +158,8 @@ class RM_Register_MODEM_NS_IEN(Base_RM_Register):
         self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
         self.RXTIMNF = RM_Field_MODEM_NS_IEN_RXTIMNF(self)
         self.zz_fdict['RXTIMNF'] = self.RXTIMNF
-        self.FRCTIMOUT = RM_Field_MODEM_NS_IEN_FRCTIMOUT(self)
-        self.zz_fdict['FRCTIMOUT'] = self.FRCTIMOUT
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_IEN_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
         self.ETS = RM_Field_MODEM_NS_IEN_ETS(self)
         self.zz_fdict['ETS'] = self.ETS
         self.CFGANTPATTRD = RM_Field_MODEM_NS_IEN_CFGANTPATTRD(self)
@@ -182,6 +186,10 @@ class RM_Register_MODEM_NS_IEN(Base_RM_Register):
         self.zz_fdict['SIDET'] = self.SIDET
         self.SIRESET = RM_Field_MODEM_NS_IEN_SIRESET(self)
         self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_IEN_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_IEN_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
         self.__dict__['zz_frozen'] = True
 
 
@@ -189,10 +197,10 @@ class RM_Register_MODEM_NS_SEQIF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SEQIF, self).__init__(rmio, label,
-            0xb8014000, 0x010,
+            0xb0214000, 0x010,
             'SEQIF', 'MODEM_NS.SEQIF', 'read-write',
             u"",
-            0x00000000, 0x3FFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -204,8 +212,8 @@ class RM_Register_MODEM_NS_SEQIF(Base_RM_Register):
         self.zz_fdict['TXPRESENT'] = self.TXPRESENT
         self.TXRAMPDONE = RM_Field_MODEM_NS_SEQIF_TXRAMPDONE(self)
         self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
-        self.LDTNOARR = RM_Field_MODEM_NS_SEQIF_LDTNOARR(self)
-        self.zz_fdict['LDTNOARR'] = self.LDTNOARR
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_SEQIF_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
         self.PHDSADET = RM_Field_MODEM_NS_SEQIF_PHDSADET(self)
         self.zz_fdict['PHDSADET'] = self.PHDSADET
         self.PHYUNCODEDET = RM_Field_MODEM_NS_SEQIF_PHYUNCODEDET(self)
@@ -228,8 +236,8 @@ class RM_Register_MODEM_NS_SEQIF(Base_RM_Register):
         self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
         self.RXTIMNF = RM_Field_MODEM_NS_SEQIF_RXTIMNF(self)
         self.zz_fdict['RXTIMNF'] = self.RXTIMNF
-        self.FRCTIMOUT = RM_Field_MODEM_NS_SEQIF_FRCTIMOUT(self)
-        self.zz_fdict['FRCTIMOUT'] = self.FRCTIMOUT
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_SEQIF_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
         self.ETS = RM_Field_MODEM_NS_SEQIF_ETS(self)
         self.zz_fdict['ETS'] = self.ETS
         self.CFGANTPATTRD = RM_Field_MODEM_NS_SEQIF_CFGANTPATTRD(self)
@@ -256,6 +264,10 @@ class RM_Register_MODEM_NS_SEQIF(Base_RM_Register):
         self.zz_fdict['SIDET'] = self.SIDET
         self.SIRESET = RM_Field_MODEM_NS_SEQIF_SIRESET(self)
         self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_SEQIF_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_SEQIF_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
         self.__dict__['zz_frozen'] = True
 
 
@@ -263,10 +275,10 @@ class RM_Register_MODEM_NS_SEQIEN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SEQIEN, self).__init__(rmio, label,
-            0xb8014000, 0x014,
+            0xb0214000, 0x014,
             'SEQIEN', 'MODEM_NS.SEQIEN', 'read-write',
             u"",
-            0x00000000, 0x3FFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -278,8 +290,8 @@ class RM_Register_MODEM_NS_SEQIEN(Base_RM_Register):
         self.zz_fdict['TXPRESENT'] = self.TXPRESENT
         self.TXRAMPDONE = RM_Field_MODEM_NS_SEQIEN_TXRAMPDONE(self)
         self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
-        self.LDTNOARR = RM_Field_MODEM_NS_SEQIEN_LDTNOARR(self)
-        self.zz_fdict['LDTNOARR'] = self.LDTNOARR
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_SEQIEN_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
         self.PHDSADET = RM_Field_MODEM_NS_SEQIEN_PHDSADET(self)
         self.zz_fdict['PHDSADET'] = self.PHDSADET
         self.PHYUNCODEDET = RM_Field_MODEM_NS_SEQIEN_PHYUNCODEDET(self)
@@ -302,8 +314,8 @@ class RM_Register_MODEM_NS_SEQIEN(Base_RM_Register):
         self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
         self.RXTIMNF = RM_Field_MODEM_NS_SEQIEN_RXTIMNF(self)
         self.zz_fdict['RXTIMNF'] = self.RXTIMNF
-        self.FRCTIMOUT = RM_Field_MODEM_NS_SEQIEN_FRCTIMOUT(self)
-        self.zz_fdict['FRCTIMOUT'] = self.FRCTIMOUT
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_SEQIEN_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
         self.ETS = RM_Field_MODEM_NS_SEQIEN_ETS(self)
         self.zz_fdict['ETS'] = self.ETS
         self.CFGANTPATTRD = RM_Field_MODEM_NS_SEQIEN_CFGANTPATTRD(self)
@@ -330,6 +342,10 @@ class RM_Register_MODEM_NS_SEQIEN(Base_RM_Register):
         self.zz_fdict['SIDET'] = self.SIDET
         self.SIRESET = RM_Field_MODEM_NS_SEQIEN_SIRESET(self)
         self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_SEQIEN_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_SEQIEN_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
         self.__dict__['zz_frozen'] = True
 
 
@@ -337,7 +353,7 @@ class RM_Register_MODEM_NS_STATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS, self).__init__(rmio, label,
-            0xb8014000, 0x018,
+            0xb0214000, 0x018,
             'STATUS', 'MODEM_NS.STATUS', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -366,8 +382,6 @@ class RM_Register_MODEM_NS_STATUS(Base_RM_Register):
         self.zz_fdict['VITERBIDEMODFRAMEDET'] = self.VITERBIDEMODFRAMEDET
         self.STAMPSTATE = RM_Field_MODEM_NS_STATUS_STAMPSTATE(self)
         self.zz_fdict['STAMPSTATE'] = self.STAMPSTATE
-        self.TRECSDSAADET = RM_Field_MODEM_NS_STATUS_TRECSDSAADET(self)
-        self.zz_fdict['TRECSDSAADET'] = self.TRECSDSAADET
         self.CORR = RM_Field_MODEM_NS_STATUS_CORR(self)
         self.zz_fdict['CORR'] = self.CORR
         self.WEAKSYMBOLS = RM_Field_MODEM_NS_STATUS_WEAKSYMBOLS(self)
@@ -379,7 +393,7 @@ class RM_Register_MODEM_NS_STATUS2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS2, self).__init__(rmio, label,
-            0xb8014000, 0x01C,
+            0xb0214000, 0x01C,
             'STATUS2', 'MODEM_NS.STATUS2', 'read-only',
             u"",
             0x00000000, 0xFFFCFFFF,
@@ -405,10 +419,10 @@ class RM_Register_MODEM_NS_STATUS3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS3, self).__init__(rmio, label,
-            0xb8014000, 0x020,
+            0xb0214000, 0x020,
             'STATUS3', 'MODEM_NS.STATUS3', 'read-only',
             u"",
-            0x00000000, 0x0FFFFFFF,
+            0x00000000, 0x0EFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -420,8 +434,6 @@ class RM_Register_MODEM_NS_STATUS3(Base_RM_Register):
         self.zz_fdict['LRDSALIVE'] = self.LRDSALIVE
         self.COHDSALIVE = RM_Field_MODEM_NS_STATUS3_COHDSALIVE(self)
         self.zz_fdict['COHDSALIVE'] = self.COHDSALIVE
-        self.LRDSADET = RM_Field_MODEM_NS_STATUS3_LRDSADET(self)
-        self.zz_fdict['LRDSADET'] = self.LRDSADET
         self.COHDSADET = RM_Field_MODEM_NS_STATUS3_COHDSADET(self)
         self.zz_fdict['COHDSADET'] = self.COHDSADET
         self.SYNCSECPEAKABTH = RM_Field_MODEM_NS_STATUS3_SYNCSECPEAKABTH(self)
@@ -435,7 +447,7 @@ class RM_Register_MODEM_NS_STATUS4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS4, self).__init__(rmio, label,
-            0xb8014000, 0x024,
+            0xb0214000, 0x024,
             'STATUS4', 'MODEM_NS.STATUS4', 'read-only',
             u"",
             0x00000000, 0x01FF01FF,
@@ -453,7 +465,7 @@ class RM_Register_MODEM_NS_STATUS5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS5, self).__init__(rmio, label,
-            0xb8014000, 0x028,
+            0xb0214000, 0x028,
             'STATUS5', 'MODEM_NS.STATUS5', 'read-only',
             u"",
             0x00000000, 0x000001FF,
@@ -469,7 +481,7 @@ class RM_Register_MODEM_NS_STATUS6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS6, self).__init__(rmio, label,
-            0xb8014000, 0x02C,
+            0xb0214000, 0x02C,
             'STATUS6', 'MODEM_NS.STATUS6', 'read-only',
             u"",
             0x00000000, 0xC00FFFFF,
@@ -491,10 +503,10 @@ class RM_Register_MODEM_NS_STATUS7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_STATUS7, self).__init__(rmio, label,
-            0xb8014000, 0x030,
+            0xb0214000, 0x030,
             'STATUS7', 'MODEM_NS.STATUS7', 'read-only',
             u"",
-            0x00000000, 0xBFFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -506,6 +518,8 @@ class RM_Register_MODEM_NS_STATUS7(Base_RM_Register):
         self.zz_fdict['CFEPHDIFF'] = self.CFEPHDIFF
         self.MINCOSTPASS = RM_Field_MODEM_NS_STATUS7_MINCOSTPASS(self)
         self.zz_fdict['MINCOSTPASS'] = self.MINCOSTPASS
+        self.MUTECNTDONE = RM_Field_MODEM_NS_STATUS7_MUTECNTDONE(self)
+        self.zz_fdict['MUTECNTDONE'] = self.MUTECNTDONE
         self.CFEDSADET = RM_Field_MODEM_NS_STATUS7_CFEDSADET(self)
         self.zz_fdict['CFEDSADET'] = self.CFEDSADET
         self.__dict__['zz_frozen'] = True
@@ -515,10 +529,10 @@ class RM_Register_MODEM_NS_TIMDETSTATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_TIMDETSTATUS, self).__init__(rmio, label,
-            0xb8014000, 0x034,
+            0xb0214000, 0x034,
             'TIMDETSTATUS', 'MODEM_NS.TIMDETSTATUS', 'read-only',
             u"",
-            0x00000000, 0x1F0FFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -532,6 +546,8 @@ class RM_Register_MODEM_NS_TIMDETSTATUS(Base_RM_Register):
         self.zz_fdict['TIMDETPASS'] = self.TIMDETPASS
         self.TIMDETINDEX = RM_Field_MODEM_NS_TIMDETSTATUS_TIMDETINDEX(self)
         self.zz_fdict['TIMDETINDEX'] = self.TIMDETINDEX
+        self.DETSTATE = RM_Field_MODEM_NS_TIMDETSTATUS_DETSTATE(self)
+        self.zz_fdict['DETSTATE'] = self.DETSTATE
         self.__dict__['zz_frozen'] = True
 
 
@@ -539,23 +555,37 @@ class RM_Register_MODEM_NS_FSMSTATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_FSMSTATUS, self).__init__(rmio, label,
-            0xb8014000, 0x038,
+            0xb0214000, 0x038,
             'FSMSTATUS', 'MODEM_NS.FSMSTATUS', 'read-only',
             u"",
-            0x00000000, 0x00FFFFFF,
+            0x00000000, 0xF7FFFF0F,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.DETSTATE = RM_Field_MODEM_NS_FSMSTATUS_DETSTATE(self)
-        self.zz_fdict['DETSTATE'] = self.DETSTATE
-        self.DSASTATE = RM_Field_MODEM_NS_FSMSTATUS_DSASTATE(self)
-        self.zz_fdict['DSASTATE'] = self.DSASTATE
+        self.TRECSDSADET = RM_Field_MODEM_NS_FSMSTATUS_TRECSDSADET(self)
+        self.zz_fdict['TRECSDSADET'] = self.TRECSDSADET
+        self.TRECSDSADET2 = RM_Field_MODEM_NS_FSMSTATUS_TRECSDSADET2(self)
+        self.zz_fdict['TRECSDSADET2'] = self.TRECSDSADET2
+        self.LRDSADET = RM_Field_MODEM_NS_FSMSTATUS_LRDSADET(self)
+        self.zz_fdict['LRDSADET'] = self.LRDSADET
+        self.EHDSSSDSADET = RM_Field_MODEM_NS_FSMSTATUS_EHDSSSDSADET(self)
+        self.zz_fdict['EHDSSSDSADET'] = self.EHDSSSDSADET
         self.LRBLESTATE = RM_Field_MODEM_NS_FSMSTATUS_LRBLESTATE(self)
         self.zz_fdict['LRBLESTATE'] = self.LRBLESTATE
         self.NBBLESTATE = RM_Field_MODEM_NS_FSMSTATUS_NBBLESTATE(self)
         self.zz_fdict['NBBLESTATE'] = self.NBBLESTATE
         self.ANTDIVSTATE = RM_Field_MODEM_NS_FSMSTATUS_ANTDIVSTATE(self)
         self.zz_fdict['ANTDIVSTATE'] = self.ANTDIVSTATE
+        self.EHDSTATE = RM_Field_MODEM_NS_FSMSTATUS_EHDSTATE(self)
+        self.zz_fdict['EHDSTATE'] = self.EHDSTATE
+        self.FRAMEDETDONE0 = RM_Field_MODEM_NS_FSMSTATUS_FRAMEDETDONE0(self)
+        self.zz_fdict['FRAMEDETDONE0'] = self.FRAMEDETDONE0
+        self.FRAMEDETDONE1 = RM_Field_MODEM_NS_FSMSTATUS_FRAMEDETDONE1(self)
+        self.zz_fdict['FRAMEDETDONE1'] = self.FRAMEDETDONE1
+        self.FRAMEDETDONE2 = RM_Field_MODEM_NS_FSMSTATUS_FRAMEDETDONE2(self)
+        self.zz_fdict['FRAMEDETDONE2'] = self.FRAMEDETDONE2
+        self.FRAMEDETDONE3 = RM_Field_MODEM_NS_FSMSTATUS_FRAMEDETDONE3(self)
+        self.zz_fdict['FRAMEDETDONE3'] = self.FRAMEDETDONE3
         self.__dict__['zz_frozen'] = True
 
 
@@ -563,7 +593,7 @@ class RM_Register_MODEM_NS_FREQOFFEST(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_FREQOFFEST, self).__init__(rmio, label,
-            0xb8014000, 0x03C,
+            0xb0214000, 0x03C,
             'FREQOFFEST', 'MODEM_NS.FREQOFFEST', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -583,7 +613,7 @@ class RM_Register_MODEM_NS_AFCADJRX(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_AFCADJRX, self).__init__(rmio, label,
-            0xb8014000, 0x040,
+            0xb0214000, 0x040,
             'AFCADJRX', 'MODEM_NS.AFCADJRX', 'read-write',
             u"",
             0x00000000, 0xF1F7FFFF,
@@ -603,7 +633,7 @@ class RM_Register_MODEM_NS_AFCADJTX(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_AFCADJTX, self).__init__(rmio, label,
-            0xb8014000, 0x044,
+            0xb0214000, 0x044,
             'AFCADJTX', 'MODEM_NS.AFCADJTX', 'read-write',
             u"",
             0x00000000, 0xF1F7FFFF,
@@ -623,7 +653,7 @@ class RM_Register_MODEM_NS_MIXCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_MIXCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x048,
+            0xb0214000, 0x048,
             'MIXCTRL', 'MODEM_NS.MIXCTRL', 'read-write',
             u"",
             0x00000000, 0x00000010,
@@ -639,7 +669,7 @@ class RM_Register_MODEM_NS_CTRL0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL0, self).__init__(rmio, label,
-            0xb8014000, 0x04C,
+            0xb0214000, 0x04C,
             'CTRL0', 'MODEM_NS.CTRL0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -681,7 +711,7 @@ class RM_Register_MODEM_NS_CTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x050,
+            0xb0214000, 0x050,
             'CTRL1', 'MODEM_NS.CTRL1', 'read-write',
             u"",
             0x00000000, 0xFFFFDDFF,
@@ -715,7 +745,7 @@ class RM_Register_MODEM_NS_CTRL2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL2, self).__init__(rmio, label,
-            0xb8014000, 0x054,
+            0xb0214000, 0x054,
             'CTRL2', 'MODEM_NS.CTRL2', 'read-write',
             u"",
             0x00001000, 0xFFFFFFFF,
@@ -753,7 +783,7 @@ class RM_Register_MODEM_NS_CTRL3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL3, self).__init__(rmio, label,
-            0xb8014000, 0x058,
+            0xb0214000, 0x058,
             'CTRL3', 'MODEM_NS.CTRL3', 'read-write',
             u"",
             0x00008000, 0xFFFFFF8F,
@@ -785,7 +815,7 @@ class RM_Register_MODEM_NS_CTRL4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL4, self).__init__(rmio, label,
-            0xb8014000, 0x05C,
+            0xb0214000, 0x05C,
             'CTRL4', 'MODEM_NS.CTRL4', 'read-write',
             u"",
             0x03000000, 0xBFFFFFFF,
@@ -825,7 +855,7 @@ class RM_Register_MODEM_NS_CTRL5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL5, self).__init__(rmio, label,
-            0xb8014000, 0x060,
+            0xb0214000, 0x060,
             'CTRL5', 'MODEM_NS.CTRL5', 'read-write',
             u"",
             0x00000000, 0x6F7FFFFE,
@@ -867,7 +897,7 @@ class RM_Register_MODEM_NS_CTRL6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CTRL6, self).__init__(rmio, label,
-            0xb8014000, 0x064,
+            0xb0214000, 0x064,
             'CTRL6', 'MODEM_NS.CTRL6', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -919,7 +949,7 @@ class RM_Register_MODEM_NS_TXBR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_TXBR, self).__init__(rmio, label,
-            0xb8014000, 0x068,
+            0xb0214000, 0x068,
             'TXBR', 'MODEM_NS.TXBR', 'read-write',
             u"",
             0x00000000, 0x00FFFFFF,
@@ -937,7 +967,7 @@ class RM_Register_MODEM_NS_RXBR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_RXBR, self).__init__(rmio, label,
-            0xb8014000, 0x06C,
+            0xb0214000, 0x06C,
             'RXBR', 'MODEM_NS.RXBR', 'read-write',
             u"",
             0x00000000, 0x00001FFF,
@@ -957,7 +987,7 @@ class RM_Register_MODEM_NS_CF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CF, self).__init__(rmio, label,
-            0xb8014000, 0x070,
+            0xb0214000, 0x070,
             'CF', 'MODEM_NS.CF', 'read-write',
             u"",
             0x00000000, 0xCFFFFFFF,
@@ -985,7 +1015,7 @@ class RM_Register_MODEM_NS_PRE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PRE, self).__init__(rmio, label,
-            0xb8014000, 0x074,
+            0xb0214000, 0x074,
             'PRE', 'MODEM_NS.PRE', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1017,7 +1047,7 @@ class RM_Register_MODEM_NS_TIMING(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_TIMING, self).__init__(rmio, label,
-            0xb8014000, 0x080,
+            0xb0214000, 0x080,
             'TIMING', 'MODEM_NS.TIMING', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1051,7 +1081,7 @@ class RM_Register_MODEM_NS_DSSS0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DSSS0, self).__init__(rmio, label,
-            0xb8014000, 0x084,
+            0xb0214000, 0x084,
             'DSSS0', 'MODEM_NS.DSSS0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1067,7 +1097,7 @@ class RM_Register_MODEM_NS_MODINDEX(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_MODINDEX, self).__init__(rmio, label,
-            0xb8014000, 0x088,
+            0xb0214000, 0x088,
             'MODINDEX', 'MODEM_NS.MODINDEX', 'read-write',
             u"",
             0x00000000, 0x03FFFFFF,
@@ -1093,7 +1123,7 @@ class RM_Register_MODEM_NS_AFC(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_AFC, self).__init__(rmio, label,
-            0xb8014000, 0x08C,
+            0xb0214000, 0x08C,
             'AFC', 'MODEM_NS.AFC', 'read-write',
             u"",
             0x00000000, 0xFFFFFC00,
@@ -1131,7 +1161,7 @@ class RM_Register_MODEM_NS_AFCADJLIM(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_AFCADJLIM, self).__init__(rmio, label,
-            0xb8014000, 0x090,
+            0xb0214000, 0x090,
             'AFCADJLIM', 'MODEM_NS.AFCADJLIM', 'read-write',
             u"",
             0x00000000, 0x0003FFFF,
@@ -1147,7 +1177,7 @@ class RM_Register_MODEM_NS_SHAPING0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING0, self).__init__(rmio, label,
-            0xb8014000, 0x094,
+            0xb0214000, 0x094,
             'SHAPING0', 'MODEM_NS.SHAPING0', 'read-write',
             u"",
             0x22130A04, 0xFFFFFFFF,
@@ -1169,7 +1199,7 @@ class RM_Register_MODEM_NS_SHAPING1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING1, self).__init__(rmio, label,
-            0xb8014000, 0x098,
+            0xb0214000, 0x098,
             'SHAPING1', 'MODEM_NS.SHAPING1', 'read-write',
             u"",
             0x4F4A4132, 0xFFFFFFFF,
@@ -1191,7 +1221,7 @@ class RM_Register_MODEM_NS_SHAPING2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING2, self).__init__(rmio, label,
-            0xb8014000, 0x09C,
+            0xb0214000, 0x09C,
             'SHAPING2', 'MODEM_NS.SHAPING2', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1213,7 +1243,7 @@ class RM_Register_MODEM_NS_SHAPING3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING3, self).__init__(rmio, label,
-            0xb8014000, 0x0A0,
+            0xb0214000, 0x0A0,
             'SHAPING3', 'MODEM_NS.SHAPING3', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1235,7 +1265,7 @@ class RM_Register_MODEM_NS_SHAPING4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING4, self).__init__(rmio, label,
-            0xb8014000, 0x0A4,
+            0xb0214000, 0x0A4,
             'SHAPING4', 'MODEM_NS.SHAPING4', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1257,7 +1287,7 @@ class RM_Register_MODEM_NS_SHAPING5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING5, self).__init__(rmio, label,
-            0xb8014000, 0x0A8,
+            0xb0214000, 0x0A8,
             'SHAPING5', 'MODEM_NS.SHAPING5', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1279,7 +1309,7 @@ class RM_Register_MODEM_NS_SHAPING6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING6, self).__init__(rmio, label,
-            0xb8014000, 0x0AC,
+            0xb0214000, 0x0AC,
             'SHAPING6', 'MODEM_NS.SHAPING6', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1301,7 +1331,7 @@ class RM_Register_MODEM_NS_SHAPING7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING7, self).__init__(rmio, label,
-            0xb8014000, 0x0B0,
+            0xb0214000, 0x0B0,
             'SHAPING7', 'MODEM_NS.SHAPING7', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1323,7 +1353,7 @@ class RM_Register_MODEM_NS_SHAPING8(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING8, self).__init__(rmio, label,
-            0xb8014000, 0x0B4,
+            0xb0214000, 0x0B4,
             'SHAPING8', 'MODEM_NS.SHAPING8', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1345,7 +1375,7 @@ class RM_Register_MODEM_NS_SHAPING9(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING9, self).__init__(rmio, label,
-            0xb8014000, 0x0B8,
+            0xb0214000, 0x0B8,
             'SHAPING9', 'MODEM_NS.SHAPING9', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1367,7 +1397,7 @@ class RM_Register_MODEM_NS_SHAPING10(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING10, self).__init__(rmio, label,
-            0xb8014000, 0x0BC,
+            0xb0214000, 0x0BC,
             'SHAPING10', 'MODEM_NS.SHAPING10', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1389,7 +1419,7 @@ class RM_Register_MODEM_NS_SHAPING11(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING11, self).__init__(rmio, label,
-            0xb8014000, 0x0C0,
+            0xb0214000, 0x0C0,
             'SHAPING11', 'MODEM_NS.SHAPING11', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1411,7 +1441,7 @@ class RM_Register_MODEM_NS_SHAPING12(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING12, self).__init__(rmio, label,
-            0xb8014000, 0x0C4,
+            0xb0214000, 0x0C4,
             'SHAPING12', 'MODEM_NS.SHAPING12', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1433,7 +1463,7 @@ class RM_Register_MODEM_NS_SHAPING13(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING13, self).__init__(rmio, label,
-            0xb8014000, 0x0C8,
+            0xb0214000, 0x0C8,
             'SHAPING13', 'MODEM_NS.SHAPING13', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1455,7 +1485,7 @@ class RM_Register_MODEM_NS_SHAPING14(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING14, self).__init__(rmio, label,
-            0xb8014000, 0x0CC,
+            0xb0214000, 0x0CC,
             'SHAPING14', 'MODEM_NS.SHAPING14', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1477,7 +1507,7 @@ class RM_Register_MODEM_NS_SHAPING15(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SHAPING15, self).__init__(rmio, label,
-            0xb8014000, 0x0D0,
+            0xb0214000, 0x0D0,
             'SHAPING15', 'MODEM_NS.SHAPING15', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1495,11 +1525,33 @@ class RM_Register_MODEM_NS_SHAPING15(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Register_MODEM_NS_OOKSHAPING(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_OOKSHAPING, self).__init__(rmio, label,
+            0xb0214000, 0x0D4,
+            'OOKSHAPING', 'MODEM_NS.OOKSHAPING', 'read-write',
+            u"",
+            0x00000000, 0x0007FFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.OOKSHAPINGEN = RM_Field_MODEM_NS_OOKSHAPING_OOKSHAPINGEN(self)
+        self.zz_fdict['OOKSHAPINGEN'] = self.OOKSHAPINGEN
+        self.OOKSHAPINGSTEP = RM_Field_MODEM_NS_OOKSHAPING_OOKSHAPINGSTEP(self)
+        self.zz_fdict['OOKSHAPINGSTEP'] = self.OOKSHAPINGSTEP
+        self.OOKSHAPINGRATE = RM_Field_MODEM_NS_OOKSHAPING_OOKSHAPINGRATE(self)
+        self.zz_fdict['OOKSHAPINGRATE'] = self.OOKSHAPINGRATE
+        self.OOKSHAPINGLUTSIZE = RM_Field_MODEM_NS_OOKSHAPING_OOKSHAPINGLUTSIZE(self)
+        self.zz_fdict['OOKSHAPINGLUTSIZE'] = self.OOKSHAPINGLUTSIZE
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Register_MODEM_NS_RAMPCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_RAMPCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x0D8,
+            0xb0214000, 0x0D8,
             'RAMPCTRL', 'MODEM_NS.RAMPCTRL', 'read-write',
             u"",
             0x00000555, 0x00FF1FFF,
@@ -1523,7 +1575,7 @@ class RM_Register_MODEM_NS_RAMPLEV(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_RAMPLEV, self).__init__(rmio, label,
-            0xb8014000, 0x0DC,
+            0xb0214000, 0x0DC,
             'RAMPLEV', 'MODEM_NS.RAMPLEV', 'read-write',
             u"",
             0x009F9F9F, 0x00FFFFFF,
@@ -1543,7 +1595,7 @@ class RM_Register_MODEM_NS_ANARAMPCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANARAMPCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x0E0,
+            0xb0214000, 0x0E0,
             'ANARAMPCTRL', 'MODEM_NS.ANARAMPCTRL', 'read-write',
             u"",
             0x00000A00, 0x00001E06,
@@ -1565,7 +1617,7 @@ class RM_Register_MODEM_NS_DCCOMP(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DCCOMP, self).__init__(rmio, label,
-            0xb8014000, 0x110,
+            0xb0214000, 0x110,
             'DCCOMP', 'MODEM_NS.DCCOMP', 'read-write',
             u"",
             0x00000030, 0x001FFFFF,
@@ -1597,7 +1649,7 @@ class RM_Register_MODEM_NS_DCCOMPFILTINIT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DCCOMPFILTINIT, self).__init__(rmio, label,
-            0xb8014000, 0x114,
+            0xb0214000, 0x114,
             'DCCOMPFILTINIT', 'MODEM_NS.DCCOMPFILTINIT', 'read-write',
             u"",
             0x00000000, 0x7FFFFFFF,
@@ -1617,7 +1669,7 @@ class RM_Register_MODEM_NS_DCESTI(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DCESTI, self).__init__(rmio, label,
-            0xb8014000, 0x118,
+            0xb0214000, 0x118,
             'DCESTI', 'MODEM_NS.DCESTI', 'read-only',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -1635,13 +1687,15 @@ class RM_Register_MODEM_NS_SRCCHF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SRCCHF, self).__init__(rmio, label,
-            0xb8014000, 0x11C,
+            0xb0214000, 0x11C,
             'SRCCHF', 'MODEM_NS.SRCCHF', 'read-write',
             u"",
-            0x00000000, 0x8FFFF000,
+            0x000000FC, 0x8FFFF3FF,
             0x00001000, 0x00002000,
             0x00003000)
 
+        self.CHMUTETIMER = RM_Field_MODEM_NS_SRCCHF_CHMUTETIMER(self)
+        self.zz_fdict['CHMUTETIMER'] = self.CHMUTETIMER
         self.SRCRATIO2 = RM_Field_MODEM_NS_SRCCHF_SRCRATIO2(self)
         self.zz_fdict['SRCRATIO2'] = self.SRCRATIO2
         self.SRCENABLE2 = RM_Field_MODEM_NS_SRCCHF_SRCENABLE2(self)
@@ -1655,7 +1709,7 @@ class RM_Register_MODEM_NS_INTAFC(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_INTAFC, self).__init__(rmio, label,
-            0xb8014000, 0x120,
+            0xb0214000, 0x120,
             'INTAFC', 'MODEM_NS.INTAFC', 'read-write',
             u"",
             0x00000000, 0x00FFFFFF,
@@ -1681,180 +1735,14 @@ class RM_Register_MODEM_NS_INTAFC(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_DSATHD0(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSATHD0, self).__init__(rmio, label,
-            0xb8014000, 0x124,
-            'DSATHD0', 'MODEM_NS.DSATHD0', 'read-write',
-            u"",
-            0x07830464, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SPIKETHD = RM_Field_MODEM_NS_DSATHD0_SPIKETHD(self)
-        self.zz_fdict['SPIKETHD'] = self.SPIKETHD
-        self.UNMODTHD = RM_Field_MODEM_NS_DSATHD0_UNMODTHD(self)
-        self.zz_fdict['UNMODTHD'] = self.UNMODTHD
-        self.FDEVMINTHD = RM_Field_MODEM_NS_DSATHD0_FDEVMINTHD(self)
-        self.zz_fdict['FDEVMINTHD'] = self.FDEVMINTHD
-        self.FDEVMAXTHD = RM_Field_MODEM_NS_DSATHD0_FDEVMAXTHD(self)
-        self.zz_fdict['FDEVMAXTHD'] = self.FDEVMAXTHD
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_DSATHD1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSATHD1, self).__init__(rmio, label,
-            0xb8014000, 0x128,
-            'DSATHD1', 'MODEM_NS.DSATHD1', 'read-write',
-            u"",
-            0x3AC81388, 0x7FFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.POWABSTHD = RM_Field_MODEM_NS_DSATHD1_POWABSTHD(self)
-        self.zz_fdict['POWABSTHD'] = self.POWABSTHD
-        self.POWRELTHD = RM_Field_MODEM_NS_DSATHD1_POWRELTHD(self)
-        self.zz_fdict['POWRELTHD'] = self.POWRELTHD
-        self.DSARSTCNT = RM_Field_MODEM_NS_DSATHD1_DSARSTCNT(self)
-        self.zz_fdict['DSARSTCNT'] = self.DSARSTCNT
-        self.RSSIJMPTHD = RM_Field_MODEM_NS_DSATHD1_RSSIJMPTHD(self)
-        self.zz_fdict['RSSIJMPTHD'] = self.RSSIJMPTHD
-        self.FREQLATDLY = RM_Field_MODEM_NS_DSATHD1_FREQLATDLY(self)
-        self.zz_fdict['FREQLATDLY'] = self.FREQLATDLY
-        self.PWRFLTBYP = RM_Field_MODEM_NS_DSATHD1_PWRFLTBYP(self)
-        self.zz_fdict['PWRFLTBYP'] = self.PWRFLTBYP
-        self.AMPFLTBYP = RM_Field_MODEM_NS_DSATHD1_AMPFLTBYP(self)
-        self.zz_fdict['AMPFLTBYP'] = self.AMPFLTBYP
-        self.PWRDETDIS = RM_Field_MODEM_NS_DSATHD1_PWRDETDIS(self)
-        self.zz_fdict['PWRDETDIS'] = self.PWRDETDIS
-        self.FREQSCALE = RM_Field_MODEM_NS_DSATHD1_FREQSCALE(self)
-        self.zz_fdict['FREQSCALE'] = self.FREQSCALE
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_DSATHD2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSATHD2, self).__init__(rmio, label,
-            0xb8014000, 0x12C,
-            'DSATHD2', 'MODEM_NS.DSATHD2', 'read-write',
-            u"",
-            0x0C660664, 0x7FFFFEFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.POWABSTHDLOG = RM_Field_MODEM_NS_DSATHD2_POWABSTHDLOG(self)
-        self.zz_fdict['POWABSTHDLOG'] = self.POWABSTHDLOG
-        self.JUMPDETEN = RM_Field_MODEM_NS_DSATHD2_JUMPDETEN(self)
-        self.zz_fdict['JUMPDETEN'] = self.JUMPDETEN
-        self.FDADJTHD = RM_Field_MODEM_NS_DSATHD2_FDADJTHD(self)
-        self.zz_fdict['FDADJTHD'] = self.FDADJTHD
-        self.PMDETPASSTHD = RM_Field_MODEM_NS_DSATHD2_PMDETPASSTHD(self)
-        self.zz_fdict['PMDETPASSTHD'] = self.PMDETPASSTHD
-        self.FREQESTTHD = RM_Field_MODEM_NS_DSATHD2_FREQESTTHD(self)
-        self.zz_fdict['FREQESTTHD'] = self.FREQESTTHD
-        self.INTERFERDET = RM_Field_MODEM_NS_DSATHD2_INTERFERDET(self)
-        self.zz_fdict['INTERFERDET'] = self.INTERFERDET
-        self.PMDETFORCE = RM_Field_MODEM_NS_DSATHD2_PMDETFORCE(self)
-        self.zz_fdict['PMDETFORCE'] = self.PMDETFORCE
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_DSATHD3(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSATHD3, self).__init__(rmio, label,
-            0xb8014000, 0x130,
-            'DSATHD3', 'MODEM_NS.DSATHD3', 'read-write',
-            u"",
-            0x07830464, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SPIKETHDLO = RM_Field_MODEM_NS_DSATHD3_SPIKETHDLO(self)
-        self.zz_fdict['SPIKETHDLO'] = self.SPIKETHDLO
-        self.UNMODTHDLO = RM_Field_MODEM_NS_DSATHD3_UNMODTHDLO(self)
-        self.zz_fdict['UNMODTHDLO'] = self.UNMODTHDLO
-        self.FDEVMINTHDLO = RM_Field_MODEM_NS_DSATHD3_FDEVMINTHDLO(self)
-        self.zz_fdict['FDEVMINTHDLO'] = self.FDEVMINTHDLO
-        self.FDEVMAXTHDLO = RM_Field_MODEM_NS_DSATHD3_FDEVMAXTHDLO(self)
-        self.zz_fdict['FDEVMAXTHDLO'] = self.FDEVMAXTHDLO
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_DSATHD4(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSATHD4, self).__init__(rmio, label,
-            0xb8014000, 0x134,
-            'DSATHD4', 'MODEM_NS.DSATHD4', 'read-write',
-            u"",
-            0x00821388, 0x07FFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.POWABSTHDLO = RM_Field_MODEM_NS_DSATHD4_POWABSTHDLO(self)
-        self.zz_fdict['POWABSTHDLO'] = self.POWABSTHDLO
-        self.ARRTOLERTHD0LO = RM_Field_MODEM_NS_DSATHD4_ARRTOLERTHD0LO(self)
-        self.zz_fdict['ARRTOLERTHD0LO'] = self.ARRTOLERTHD0LO
-        self.ARRTOLERTHD1LO = RM_Field_MODEM_NS_DSATHD4_ARRTOLERTHD1LO(self)
-        self.zz_fdict['ARRTOLERTHD1LO'] = self.ARRTOLERTHD1LO
-        self.SWTHD = RM_Field_MODEM_NS_DSATHD4_SWTHD(self)
-        self.zz_fdict['SWTHD'] = self.SWTHD
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_DSACTRL(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DSACTRL, self).__init__(rmio, label,
-            0xb8014000, 0x138,
-            'DSACTRL', 'MODEM_NS.DSACTRL', 'read-write',
-            u"",
-            0x000A2090, 0xFFEFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.DSAMODE = RM_Field_MODEM_NS_DSACTRL_DSAMODE(self)
-        self.zz_fdict['DSAMODE'] = self.DSAMODE
-        self.ARRTHD = RM_Field_MODEM_NS_DSACTRL_ARRTHD(self)
-        self.zz_fdict['ARRTHD'] = self.ARRTHD
-        self.ARRTOLERTHD0 = RM_Field_MODEM_NS_DSACTRL_ARRTOLERTHD0(self)
-        self.zz_fdict['ARRTOLERTHD0'] = self.ARRTOLERTHD0
-        self.ARRTOLERTHD1 = RM_Field_MODEM_NS_DSACTRL_ARRTOLERTHD1(self)
-        self.zz_fdict['ARRTOLERTHD1'] = self.ARRTOLERTHD1
-        self.SCHPRD = RM_Field_MODEM_NS_DSACTRL_SCHPRD(self)
-        self.zz_fdict['SCHPRD'] = self.SCHPRD
-        self.FREQAVGSYM = RM_Field_MODEM_NS_DSACTRL_FREQAVGSYM(self)
-        self.zz_fdict['FREQAVGSYM'] = self.FREQAVGSYM
-        self.TRANRSTDSA = RM_Field_MODEM_NS_DSACTRL_TRANRSTDSA(self)
-        self.zz_fdict['TRANRSTDSA'] = self.TRANRSTDSA
-        self.DSARSTON = RM_Field_MODEM_NS_DSACTRL_DSARSTON(self)
-        self.zz_fdict['DSARSTON'] = self.DSARSTON
-        self.GAINREDUCDLY = RM_Field_MODEM_NS_DSACTRL_GAINREDUCDLY(self)
-        self.zz_fdict['GAINREDUCDLY'] = self.GAINREDUCDLY
-        self.LOWDUTY = RM_Field_MODEM_NS_DSACTRL_LOWDUTY(self)
-        self.zz_fdict['LOWDUTY'] = self.LOWDUTY
-        self.RESTORE = RM_Field_MODEM_NS_DSACTRL_RESTORE(self)
-        self.zz_fdict['RESTORE'] = self.RESTORE
-        self.AGCBAUDEN = RM_Field_MODEM_NS_DSACTRL_AGCBAUDEN(self)
-        self.zz_fdict['AGCBAUDEN'] = self.AGCBAUDEN
-        self.AMPJUPTHD = RM_Field_MODEM_NS_DSACTRL_AMPJUPTHD(self)
-        self.zz_fdict['AMPJUPTHD'] = self.AMPJUPTHD
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_MODEM_NS_DIGMIXCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DIGMIXCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x13C,
+            0xb0214000, 0x13C,
             'DIGMIXCTRL', 'MODEM_NS.DIGMIXCTRL', 'read-write',
             u"",
-            0x00000000, 0x007FFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -1866,126 +1754,18 @@ class RM_Register_MODEM_NS_DIGMIXCTRL(Base_RM_Register):
         self.zz_fdict['MIXERCONJ'] = self.MIXERCONJ
         self.DIGMIXFB = RM_Field_MODEM_NS_DIGMIXCTRL_DIGMIXFB(self)
         self.zz_fdict['DIGMIXFB'] = self.DIGMIXFB
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_VITERBIDEMOD(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_VITERBIDEMOD, self).__init__(rmio, label,
-            0xb8014000, 0x140,
-            'VITERBIDEMOD', 'MODEM_NS.VITERBIDEMOD', 'read-write',
-            u"",
-            0x00206100, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.VTDEMODEN = RM_Field_MODEM_NS_VITERBIDEMOD_VTDEMODEN(self)
-        self.zz_fdict['VTDEMODEN'] = self.VTDEMODEN
-        self.HARDDECISION = RM_Field_MODEM_NS_VITERBIDEMOD_HARDDECISION(self)
-        self.zz_fdict['HARDDECISION'] = self.HARDDECISION
-        self.VITERBIKSI1 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI1(self)
-        self.zz_fdict['VITERBIKSI1'] = self.VITERBIKSI1
-        self.VITERBIKSI2 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI2(self)
-        self.zz_fdict['VITERBIKSI2'] = self.VITERBIKSI2
-        self.VITERBIKSI3 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI3(self)
-        self.zz_fdict['VITERBIKSI3'] = self.VITERBIKSI3
-        self.SYNTHAFC = RM_Field_MODEM_NS_VITERBIDEMOD_SYNTHAFC(self)
-        self.zz_fdict['SYNTHAFC'] = self.SYNTHAFC
-        self.CORRCYCLE = RM_Field_MODEM_NS_VITERBIDEMOD_CORRCYCLE(self)
-        self.zz_fdict['CORRCYCLE'] = self.CORRCYCLE
-        self.CORRSTPSIZE = RM_Field_MODEM_NS_VITERBIDEMOD_CORRSTPSIZE(self)
-        self.zz_fdict['CORRSTPSIZE'] = self.CORRSTPSIZE
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_VTCORRCFG0(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_VTCORRCFG0, self).__init__(rmio, label,
-            0xb8014000, 0x144,
-            'VTCORRCFG0', 'MODEM_NS.VTCORRCFG0', 'read-write',
-            u"",
-            0x123556B7, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.EXPECTPATT = RM_Field_MODEM_NS_VTCORRCFG0_EXPECTPATT(self)
-        self.zz_fdict['EXPECTPATT'] = self.EXPECTPATT
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_VTCORRCFG1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_VTCORRCFG1, self).__init__(rmio, label,
-            0xb8014000, 0x148,
-            'VTCORRCFG1', 'MODEM_NS.VTCORRCFG1', 'read-write',
-            u"",
-            0x5020C000, 0xF7FDFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.VITERBIKSI3WB = RM_Field_MODEM_NS_VTCORRCFG1_VITERBIKSI3WB(self)
-        self.zz_fdict['VITERBIKSI3WB'] = self.VITERBIKSI3WB
-        self.KSI3SWENABLE = RM_Field_MODEM_NS_VTCORRCFG1_KSI3SWENABLE(self)
-        self.zz_fdict['KSI3SWENABLE'] = self.KSI3SWENABLE
-        self.VTFRQLIM = RM_Field_MODEM_NS_VTCORRCFG1_VTFRQLIM(self)
-        self.zz_fdict['VTFRQLIM'] = self.VTFRQLIM
-        self.EXPSYNCLEN = RM_Field_MODEM_NS_VTCORRCFG1_EXPSYNCLEN(self)
-        self.zz_fdict['EXPSYNCLEN'] = self.EXPSYNCLEN
-        self.EXPECTHT = RM_Field_MODEM_NS_VTCORRCFG1_EXPECTHT(self)
-        self.zz_fdict['EXPECTHT'] = self.EXPECTHT
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_VTTRACK(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_VTTRACK, self).__init__(rmio, label,
-            0xb8014000, 0x14C,
-            'VTTRACK', 'MODEM_NS.VTTRACK', 'read-write',
-            u"",
-            0x0D803B88, 0x3FFF3FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.FREQTRACKMODE = RM_Field_MODEM_NS_VTTRACK_FREQTRACKMODE(self)
-        self.zz_fdict['FREQTRACKMODE'] = self.FREQTRACKMODE
-        self.TIMTRACKTHD = RM_Field_MODEM_NS_VTTRACK_TIMTRACKTHD(self)
-        self.zz_fdict['TIMTRACKTHD'] = self.TIMTRACKTHD
-        self.TIMEACQUTHD = RM_Field_MODEM_NS_VTTRACK_TIMEACQUTHD(self)
-        self.zz_fdict['TIMEACQUTHD'] = self.TIMEACQUTHD
-        self.TIMGEAR = RM_Field_MODEM_NS_VTTRACK_TIMGEAR(self)
-        self.zz_fdict['TIMGEAR'] = self.TIMGEAR
-        self.FREQBIAS = RM_Field_MODEM_NS_VTTRACK_FREQBIAS(self)
-        self.zz_fdict['FREQBIAS'] = self.FREQBIAS
-        self.HIPWRTHD = RM_Field_MODEM_NS_VTTRACK_HIPWRTHD(self)
-        self.zz_fdict['HIPWRTHD'] = self.HIPWRTHD
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_VTBLETIMING(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_VTBLETIMING, self).__init__(rmio, label,
-            0xb8014000, 0x150,
-            'VTBLETIMING', 'MODEM_NS.VTBLETIMING', 'read-write',
-            u"",
-            0x00000000, 0x8000FFF7,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.VTBLETIMINGSEL = RM_Field_MODEM_NS_VTBLETIMING_VTBLETIMINGSEL(self)
-        self.zz_fdict['VTBLETIMINGSEL'] = self.VTBLETIMINGSEL
-        self.VTBLETIMINGCLKSEL = RM_Field_MODEM_NS_VTBLETIMING_VTBLETIMINGCLKSEL(self)
-        self.zz_fdict['VTBLETIMINGCLKSEL'] = self.VTBLETIMINGCLKSEL
-        self.TIMINGDELAY = RM_Field_MODEM_NS_VTBLETIMING_TIMINGDELAY(self)
-        self.zz_fdict['TIMINGDELAY'] = self.TIMINGDELAY
-        self.FLENOFF = RM_Field_MODEM_NS_VTBLETIMING_FLENOFF(self)
-        self.zz_fdict['FLENOFF'] = self.FLENOFF
-        self.DISDEMODOF = RM_Field_MODEM_NS_VTBLETIMING_DISDEMODOF(self)
-        self.zz_fdict['DISDEMODOF'] = self.DISDEMODOF
+        self.RXBRINTSHIFT = RM_Field_MODEM_NS_DIGMIXCTRL_RXBRINTSHIFT(self)
+        self.zz_fdict['RXBRINTSHIFT'] = self.RXBRINTSHIFT
+        self.HOPPINGSRC = RM_Field_MODEM_NS_DIGMIXCTRL_HOPPINGSRC(self)
+        self.zz_fdict['HOPPINGSRC'] = self.HOPPINGSRC
+        self.FWHOPPING = RM_Field_MODEM_NS_DIGMIXCTRL_FWHOPPING(self)
+        self.zz_fdict['FWHOPPING'] = self.FWHOPPING
+        self.BLEORZB = RM_Field_MODEM_NS_DIGMIXCTRL_BLEORZB(self)
+        self.zz_fdict['BLEORZB'] = self.BLEORZB
+        self.MULTIPHYHOP = RM_Field_MODEM_NS_DIGMIXCTRL_MULTIPHYHOP(self)
+        self.zz_fdict['MULTIPHYHOP'] = self.MULTIPHYHOP
+        self.DSSSCFECOMBO = RM_Field_MODEM_NS_DIGMIXCTRL_DSSSCFECOMBO(self)
+        self.zz_fdict['DSSSCFECOMBO'] = self.DSSSCFECOMBO
         self.__dict__['zz_frozen'] = True
 
 
@@ -1993,7 +1773,7 @@ class RM_Register_MODEM_NS_BREST(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_BREST, self).__init__(rmio, label,
-            0xb8014000, 0x154,
+            0xb0214000, 0x154,
             'BREST', 'MODEM_NS.BREST', 'read-only',
             u"",
             0x00000000, 0x000007FF,
@@ -2011,7 +1791,7 @@ class RM_Register_MODEM_NS_AUTOCG(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_AUTOCG, self).__init__(rmio, label,
-            0xb8014000, 0x158,
+            0xb0214000, 0x158,
             'AUTOCG', 'MODEM_NS.AUTOCG', 'read-write',
             u"",
             0x00000000, 0x0000FFFF,
@@ -2027,7 +1807,7 @@ class RM_Register_MODEM_NS_CGCLKSTOP(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CGCLKSTOP, self).__init__(rmio, label,
-            0xb8014000, 0x15C,
+            0xb0214000, 0x15C,
             'CGCLKSTOP', 'MODEM_NS.CGCLKSTOP', 'read-write',
             u"",
             0x00000000, 0x0000FFFF,
@@ -2043,7 +1823,7 @@ class RM_Register_MODEM_NS_POE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_POE, self).__init__(rmio, label,
-            0xb8014000, 0x160,
+            0xb0214000, 0x160,
             'POE', 'MODEM_NS.POE', 'read-only',
             u"",
             0x00000000, 0x03FF03FF,
@@ -2061,7 +1841,7 @@ class RM_Register_MODEM_NS_DIRECTMODE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DIRECTMODE, self).__init__(rmio, label,
-            0xb8014000, 0x164,
+            0xb0214000, 0x164,
             'DIRECTMODE', 'MODEM_NS.DIRECTMODE', 'read-write',
             u"",
             0x0000010C, 0x00001F0F,
@@ -2083,7 +1863,7 @@ class RM_Register_MODEM_NS_LONGRANGE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE, self).__init__(rmio, label,
-            0xb8014000, 0x168,
+            0xb0214000, 0x168,
             'LONGRANGE', 'MODEM_NS.LONGRANGE', 'read-write',
             u"",
             0x00FA53E8, 0x7FFFFFFF,
@@ -2109,7 +1889,7 @@ class RM_Register_MODEM_NS_LONGRANGE1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE1, self).__init__(rmio, label,
-            0xb8014000, 0x16C,
+            0xb0214000, 0x16C,
             'LONGRANGE1', 'MODEM_NS.LONGRANGE1', 'read-write',
             u"",
             0x40000000, 0xFFFF7FFF,
@@ -2141,7 +1921,7 @@ class RM_Register_MODEM_NS_LONGRANGE2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE2, self).__init__(rmio, label,
-            0xb8014000, 0x170,
+            0xb0214000, 0x170,
             'LONGRANGE2', 'MODEM_NS.LONGRANGE2', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2163,7 +1943,7 @@ class RM_Register_MODEM_NS_LONGRANGE3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE3, self).__init__(rmio, label,
-            0xb8014000, 0x174,
+            0xb0214000, 0x174,
             'LONGRANGE3', 'MODEM_NS.LONGRANGE3', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2185,7 +1965,7 @@ class RM_Register_MODEM_NS_LONGRANGE4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE4, self).__init__(rmio, label,
-            0xb8014000, 0x178,
+            0xb0214000, 0x178,
             'LONGRANGE4', 'MODEM_NS.LONGRANGE4', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2211,7 +1991,7 @@ class RM_Register_MODEM_NS_LONGRANGE5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE5, self).__init__(rmio, label,
-            0xb8014000, 0x17C,
+            0xb0214000, 0x17C,
             'LONGRANGE5', 'MODEM_NS.LONGRANGE5', 'read-write',
             u"",
             0x00000000, 0x0FFFFFFF,
@@ -2239,7 +2019,7 @@ class RM_Register_MODEM_NS_LONGRANGE6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LONGRANGE6, self).__init__(rmio, label,
-            0xb8014000, 0x180,
+            0xb0214000, 0x180,
             'LONGRANGE6', 'MODEM_NS.LONGRANGE6', 'read-write',
             u"",
             0x00000000, 0xFFF7FFFF,
@@ -2261,10 +2041,10 @@ class RM_Register_MODEM_NS_LRFRC(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_LRFRC, self).__init__(rmio, label,
-            0xb8014000, 0x184,
+            0xb0214000, 0x184,
             'LRFRC', 'MODEM_NS.LRFRC', 'read-write',
             u"",
-            0x00000101, 0x000001FF,
+            0x00000101, 0x000FFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2274,6 +2054,8 @@ class RM_Register_MODEM_NS_LRFRC(Base_RM_Register):
         self.zz_fdict['FRCACKTIMETHD'] = self.FRCACKTIMETHD
         self.LRCORRMODE = RM_Field_MODEM_NS_LRFRC_LRCORRMODE(self)
         self.zz_fdict['LRCORRMODE'] = self.LRCORRMODE
+        self.LRDSACORRTHD = RM_Field_MODEM_NS_LRFRC_LRDSACORRTHD(self)
+        self.zz_fdict['LRDSACORRTHD'] = self.LRDSACORRTHD
         self.__dict__['zz_frozen'] = True
 
 
@@ -2281,7 +2063,7 @@ class RM_Register_MODEM_NS_COH0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_COH0, self).__init__(rmio, label,
-            0xb8014000, 0x188,
+            0xb0214000, 0x188,
             'COH0', 'MODEM_NS.COH0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2313,7 +2095,7 @@ class RM_Register_MODEM_NS_COH1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_COH1, self).__init__(rmio, label,
-            0xb8014000, 0x18C,
+            0xb0214000, 0x18C,
             'COH1', 'MODEM_NS.COH1', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2335,7 +2117,7 @@ class RM_Register_MODEM_NS_COH2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_COH2, self).__init__(rmio, label,
-            0xb8014000, 0x190,
+            0xb0214000, 0x190,
             'COH2', 'MODEM_NS.COH2', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2361,7 +2143,7 @@ class RM_Register_MODEM_NS_COH3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_COH3, self).__init__(rmio, label,
-            0xb8014000, 0x194,
+            0xb0214000, 0x194,
             'COH3', 'MODEM_NS.COH3', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -2399,10 +2181,10 @@ class RM_Register_MODEM_NS_CMD(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CMD, self).__init__(rmio, label,
-            0xb8014000, 0x198,
+            0xb0214000, 0x198,
             'CMD', 'MODEM_NS.CMD', 'write-only',
             u"",
-            0x00000000, 0x0000003B,
+            0x00000000, 0x8000003B,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2416,6 +2198,8 @@ class RM_Register_MODEM_NS_CMD(Base_RM_Register):
         self.zz_fdict['AFCTXCLEAR'] = self.AFCTXCLEAR
         self.AFCRXCLEAR = RM_Field_MODEM_NS_CMD_AFCRXCLEAR(self)
         self.zz_fdict['AFCRXCLEAR'] = self.AFCRXCLEAR
+        self.HOPPINGSTART = RM_Field_MODEM_NS_CMD_HOPPINGSTART(self)
+        self.zz_fdict['HOPPINGSTART'] = self.HOPPINGSTART
         self.__dict__['zz_frozen'] = True
 
 
@@ -2423,7 +2207,7 @@ class RM_Register_MODEM_NS_SYNCPROPERTIES(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYNCPROPERTIES, self).__init__(rmio, label,
-            0xb8014000, 0x1A4,
+            0xb0214000, 0x1A4,
             'SYNCPROPERTIES', 'MODEM_NS.SYNCPROPERTIES', 'read-write',
             u"",
             0x00000000, 0x0001FF00,
@@ -2441,7 +2225,7 @@ class RM_Register_MODEM_NS_DIGIGAINCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_DIGIGAINCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x1A8,
+            0xb0214000, 0x1A8,
             'DIGIGAINCTRL', 'MODEM_NS.DIGIGAINCTRL', 'read-write',
             u"",
             0x00000000, 0x000001FF,
@@ -2465,10 +2249,10 @@ class RM_Register_MODEM_NS_PRSCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PRSCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x1AC,
+            0xb0214000, 0x1AC,
             'PRSCTRL', 'MODEM_NS.PRSCTRL', 'read-write',
             u"",
-            0x00000000, 0x000FFFFF,
+            0x00000000, 0x003FFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -2492,6 +2276,8 @@ class RM_Register_MODEM_NS_PRSCTRL(Base_RM_Register):
         self.zz_fdict['ANT1SEL'] = self.ANT1SEL
         self.IFADCCLKSEL = RM_Field_MODEM_NS_PRSCTRL_IFADCCLKSEL(self)
         self.zz_fdict['IFADCCLKSEL'] = self.IFADCCLKSEL
+        self.SISEL = RM_Field_MODEM_NS_PRSCTRL_SISEL(self)
+        self.zz_fdict['SISEL'] = self.SISEL
         self.__dict__['zz_frozen'] = True
 
 
@@ -2499,7 +2285,7 @@ class RM_Register_MODEM_NS_PADEBUG(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PADEBUG, self).__init__(rmio, label,
-            0xb8014000, 0x1B0,
+            0xb0214000, 0x1B0,
             'PADEBUG', 'MODEM_NS.PADEBUG', 'read-write',
             u"",
             0x00000000, 0x00001E00,
@@ -2517,43 +2303,11 @@ class RM_Register_MODEM_NS_PADEBUG(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_REALTIMCFE(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_REALTIMCFE, self).__init__(rmio, label,
-            0xb8014000, 0x1B4,
-            'REALTIMCFE', 'MODEM_NS.REALTIMCFE', 'read-write',
-            u"",
-            0x001F81F4, 0xE87FFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.MINCOSTTHD = RM_Field_MODEM_NS_REALTIMCFE_MINCOSTTHD(self)
-        self.zz_fdict['MINCOSTTHD'] = self.MINCOSTTHD
-        self.RTSCHWIN = RM_Field_MODEM_NS_REALTIMCFE_RTSCHWIN(self)
-        self.zz_fdict['RTSCHWIN'] = self.RTSCHWIN
-        self.RTSCHMODE = RM_Field_MODEM_NS_REALTIMCFE_RTSCHMODE(self)
-        self.zz_fdict['RTSCHMODE'] = self.RTSCHMODE
-        self.TRACKINGWIN = RM_Field_MODEM_NS_REALTIMCFE_TRACKINGWIN(self)
-        self.zz_fdict['TRACKINGWIN'] = self.TRACKINGWIN
-        self.SYNCACQWIN = RM_Field_MODEM_NS_REALTIMCFE_SYNCACQWIN(self)
-        self.zz_fdict['SYNCACQWIN'] = self.SYNCACQWIN
-        self.EXTENSCHBYP = RM_Field_MODEM_NS_REALTIMCFE_EXTENSCHBYP(self)
-        self.zz_fdict['EXTENSCHBYP'] = self.EXTENSCHBYP
-        self.SINEWEN = RM_Field_MODEM_NS_REALTIMCFE_SINEWEN(self)
-        self.zz_fdict['SINEWEN'] = self.SINEWEN
-        self.VTAFCFRAME = RM_Field_MODEM_NS_REALTIMCFE_VTAFCFRAME(self)
-        self.zz_fdict['VTAFCFRAME'] = self.VTAFCFRAME
-        self.RTCFEEN = RM_Field_MODEM_NS_REALTIMCFE_RTCFEEN(self)
-        self.zz_fdict['RTCFEEN'] = self.RTCFEEN
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_MODEM_NS_ETSCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ETSCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x1B8,
+            0xb0214000, 0x1B8,
             'ETSCTRL', 'MODEM_NS.ETSCTRL', 'read-write',
             u"",
             0x00000000, 0x3FFFF7FF,
@@ -2573,7 +2327,7 @@ class RM_Register_MODEM_NS_ETSTIM(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ETSTIM, self).__init__(rmio, label,
-            0xb8014000, 0x1BC,
+            0xb0214000, 0x1BC,
             'ETSTIM', 'MODEM_NS.ETSTIM', 'read-write',
             u"",
             0x00000000, 0x0003FFFF,
@@ -2591,7 +2345,7 @@ class RM_Register_MODEM_NS_ANTSWCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTSWCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x1C0,
+            0xb0214000, 0x1C0,
             'ANTSWCTRL', 'MODEM_NS.ANTSWCTRL', 'read-write',
             u"",
             0x003C0000, 0x01FFFFFF,
@@ -2619,7 +2373,7 @@ class RM_Register_MODEM_NS_ANTSWCTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTSWCTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x1C4,
+            0xb0214000, 0x1C4,
             'ANTSWCTRL1', 'MODEM_NS.ANTSWCTRL1', 'read-write',
             u"",
             0x0006AAAA, 0x00FFFFFF,
@@ -2635,7 +2389,7 @@ class RM_Register_MODEM_NS_ANTSWSTART(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTSWSTART, self).__init__(rmio, label,
-            0xb8014000, 0x1C8,
+            0xb0214000, 0x1C8,
             'ANTSWSTART', 'MODEM_NS.ANTSWSTART', 'read-write',
             u"",
             0x00000000, 0x0003FFFF,
@@ -2651,7 +2405,7 @@ class RM_Register_MODEM_NS_ANTSWEND(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTSWEND, self).__init__(rmio, label,
-            0xb8014000, 0x1CC,
+            0xb0214000, 0x1CC,
             'ANTSWEND', 'MODEM_NS.ANTSWEND', 'read-write',
             u"",
             0x00000000, 0x0003FFFF,
@@ -2663,81 +2417,11 @@ class RM_Register_MODEM_NS_ANTSWEND(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_TRECPMPATT(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_TRECPMPATT, self).__init__(rmio, label,
-            0xb8014000, 0x1D0,
-            'TRECPMPATT', 'MODEM_NS.TRECPMPATT', 'read-write',
-            u"",
-            0x55555555, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.PMEXPECTPATT = RM_Field_MODEM_NS_TRECPMPATT_PMEXPECTPATT(self)
-        self.zz_fdict['PMEXPECTPATT'] = self.PMEXPECTPATT
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_TRECPMDET(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_TRECPMDET, self).__init__(rmio, label,
-            0xb8014000, 0x1D4,
-            'TRECPMDET', 'MODEM_NS.TRECPMDET', 'read-write',
-            u"",
-            0x00000047, 0xBEFFCFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.PMACQUINGWIN = RM_Field_MODEM_NS_TRECPMDET_PMACQUINGWIN(self)
-        self.zz_fdict['PMACQUINGWIN'] = self.PMACQUINGWIN
-        self.PMCOSTVALTHD = RM_Field_MODEM_NS_TRECPMDET_PMCOSTVALTHD(self)
-        self.zz_fdict['PMCOSTVALTHD'] = self.PMCOSTVALTHD
-        self.PMTIMEOUTSEL = RM_Field_MODEM_NS_TRECPMDET_PMTIMEOUTSEL(self)
-        self.zz_fdict['PMTIMEOUTSEL'] = self.PMTIMEOUTSEL
-        self.PHSCALE = RM_Field_MODEM_NS_TRECPMDET_PHSCALE(self)
-        self.zz_fdict['PHSCALE'] = self.PHSCALE
-        self.PMMINCOSTTHD = RM_Field_MODEM_NS_TRECPMDET_PMMINCOSTTHD(self)
-        self.zz_fdict['PMMINCOSTTHD'] = self.PMMINCOSTTHD
-        self.COSTHYST = RM_Field_MODEM_NS_TRECPMDET_COSTHYST(self)
-        self.zz_fdict['COSTHYST'] = self.COSTHYST
-        self.PREAMSCH = RM_Field_MODEM_NS_TRECPMDET_PREAMSCH(self)
-        self.zz_fdict['PREAMSCH'] = self.PREAMSCH
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_TRECSCFG(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_TRECSCFG, self).__init__(rmio, label,
-            0xb8014000, 0x1D8,
-            'TRECSCFG', 'MODEM_NS.TRECSCFG', 'read-write',
-            u"",
-            0x30020004, 0xF1FF5FFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.TRECSOSR = RM_Field_MODEM_NS_TRECSCFG_TRECSOSR(self)
-        self.zz_fdict['TRECSOSR'] = self.TRECSOSR
-        self.DTIMLOSSTHD = RM_Field_MODEM_NS_TRECSCFG_DTIMLOSSTHD(self)
-        self.zz_fdict['DTIMLOSSTHD'] = self.DTIMLOSSTHD
-        self.DTIMLOSSEN = RM_Field_MODEM_NS_TRECSCFG_DTIMLOSSEN(self)
-        self.zz_fdict['DTIMLOSSEN'] = self.DTIMLOSSEN
-        self.PMOFFSET = RM_Field_MODEM_NS_TRECSCFG_PMOFFSET(self)
-        self.zz_fdict['PMOFFSET'] = self.PMOFFSET
-        self.SDSCALE = RM_Field_MODEM_NS_TRECSCFG_SDSCALE(self)
-        self.zz_fdict['SDSCALE'] = self.SDSCALE
-        self.SOFTD = RM_Field_MODEM_NS_TRECSCFG_SOFTD(self)
-        self.zz_fdict['SOFTD'] = self.SOFTD
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_MODEM_NS_CFGANTPATT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CFGANTPATT, self).__init__(rmio, label,
-            0xb8014000, 0x1DC,
+            0xb0214000, 0x1DC,
             'CFGANTPATT', 'MODEM_NS.CFGANTPATT', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -2753,13 +2437,21 @@ class RM_Register_MODEM_NS_COCURRMODE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_COCURRMODE, self).__init__(rmio, label,
-            0xb8014000, 0x1E0,
+            0xb0214000, 0x1E0,
             'COCURRMODE', 'MODEM_NS.COCURRMODE', 'read-write',
             u"",
-            0x00000000, 0x80000000,
+            0x00000004, 0xC0FFFC1F,
             0x00001000, 0x00002000,
             0x00003000)
 
+        self.CORRCHKMUTE = RM_Field_MODEM_NS_COCURRMODE_CORRCHKMUTE(self)
+        self.zz_fdict['CORRCHKMUTE'] = self.CORRCHKMUTE
+        self.DSSSDSACHK = RM_Field_MODEM_NS_COCURRMODE_DSSSDSACHK(self)
+        self.zz_fdict['DSSSDSACHK'] = self.DSSSDSACHK
+        self.TRECSDSACHK = RM_Field_MODEM_NS_COCURRMODE_TRECSDSACHK(self)
+        self.zz_fdict['TRECSDSACHK'] = self.TRECSDSACHK
+        self.DSSSCONCURRENT = RM_Field_MODEM_NS_COCURRMODE_DSSSCONCURRENT(self)
+        self.zz_fdict['DSSSCONCURRENT'] = self.DSSSCONCURRENT
         self.CONCURRENT = RM_Field_MODEM_NS_COCURRMODE_CONCURRENT(self)
         self.zz_fdict['CONCURRENT'] = self.CONCURRENT
         self.__dict__['zz_frozen'] = True
@@ -2769,7 +2461,7 @@ class RM_Register_MODEM_NS_CHFCOE00(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE00, self).__init__(rmio, label,
-            0xb8014000, 0x1E4,
+            0xb0214000, 0x1E4,
             'CHFCOE00', 'MODEM_NS.CHFCOE00', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -2789,7 +2481,7 @@ class RM_Register_MODEM_NS_CHFCOE01(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE01, self).__init__(rmio, label,
-            0xb8014000, 0x1E8,
+            0xb0214000, 0x1E8,
             'CHFCOE01', 'MODEM_NS.CHFCOE01', 'read-write',
             u"",
             0x00000000, 0x003FFFFF,
@@ -2807,7 +2499,7 @@ class RM_Register_MODEM_NS_CHFCOE02(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE02, self).__init__(rmio, label,
-            0xb8014000, 0x1EC,
+            0xb0214000, 0x1EC,
             'CHFCOE02', 'MODEM_NS.CHFCOE02', 'read-write',
             u"",
             0x00000000, 0x007FFFFF,
@@ -2825,7 +2517,7 @@ class RM_Register_MODEM_NS_CHFCOE03(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE03, self).__init__(rmio, label,
-            0xb8014000, 0x1F0,
+            0xb0214000, 0x1F0,
             'CHFCOE03', 'MODEM_NS.CHFCOE03', 'read-write',
             u"",
             0x00000000, 0x00FFFFFF,
@@ -2843,7 +2535,7 @@ class RM_Register_MODEM_NS_CHFCOE04(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE04, self).__init__(rmio, label,
-            0xb8014000, 0x1F4,
+            0xb0214000, 0x1F4,
             'CHFCOE04', 'MODEM_NS.CHFCOE04', 'read-write',
             u"",
             0x00000000, 0x0FFFFFFF,
@@ -2861,7 +2553,7 @@ class RM_Register_MODEM_NS_CHFCOE05(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE05, self).__init__(rmio, label,
-            0xb8014000, 0x1F8,
+            0xb0214000, 0x1F8,
             'CHFCOE05', 'MODEM_NS.CHFCOE05', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -2879,7 +2571,7 @@ class RM_Register_MODEM_NS_CHFCOE06(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE06, self).__init__(rmio, label,
-            0xb8014000, 0x1FC,
+            0xb0214000, 0x1FC,
             'CHFCOE06', 'MODEM_NS.CHFCOE06', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -2897,7 +2589,7 @@ class RM_Register_MODEM_NS_CHFCOE10(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE10, self).__init__(rmio, label,
-            0xb8014000, 0x200,
+            0xb0214000, 0x200,
             'CHFCOE10', 'MODEM_NS.CHFCOE10', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -2917,7 +2609,7 @@ class RM_Register_MODEM_NS_CHFCOE11(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE11, self).__init__(rmio, label,
-            0xb8014000, 0x204,
+            0xb0214000, 0x204,
             'CHFCOE11', 'MODEM_NS.CHFCOE11', 'read-write',
             u"",
             0x00000000, 0x003FFFFF,
@@ -2935,7 +2627,7 @@ class RM_Register_MODEM_NS_CHFCOE12(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE12, self).__init__(rmio, label,
-            0xb8014000, 0x208,
+            0xb0214000, 0x208,
             'CHFCOE12', 'MODEM_NS.CHFCOE12', 'read-write',
             u"",
             0x00000000, 0x007FFFFF,
@@ -2953,7 +2645,7 @@ class RM_Register_MODEM_NS_CHFCOE13(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE13, self).__init__(rmio, label,
-            0xb8014000, 0x20C,
+            0xb0214000, 0x20C,
             'CHFCOE13', 'MODEM_NS.CHFCOE13', 'read-write',
             u"",
             0x00000000, 0x00FFFFFF,
@@ -2971,7 +2663,7 @@ class RM_Register_MODEM_NS_CHFCOE14(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE14, self).__init__(rmio, label,
-            0xb8014000, 0x210,
+            0xb0214000, 0x210,
             'CHFCOE14', 'MODEM_NS.CHFCOE14', 'read-write',
             u"",
             0x00000000, 0x0FFFFFFF,
@@ -2989,7 +2681,7 @@ class RM_Register_MODEM_NS_CHFCOE15(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE15, self).__init__(rmio, label,
-            0xb8014000, 0x214,
+            0xb0214000, 0x214,
             'CHFCOE15', 'MODEM_NS.CHFCOE15', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -3007,7 +2699,7 @@ class RM_Register_MODEM_NS_CHFCOE16(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCOE16, self).__init__(rmio, label,
-            0xb8014000, 0x218,
+            0xb0214000, 0x218,
             'CHFCOE16', 'MODEM_NS.CHFCOE16', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3025,7 +2717,7 @@ class RM_Register_MODEM_NS_CHFCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x21C,
+            0xb0214000, 0x21C,
             'CHFCTRL', 'MODEM_NS.CHFCTRL', 'read-write',
             u"",
             0x00000000, 0xB0000003,
@@ -3047,7 +2739,7 @@ class RM_Register_MODEM_NS_CHFLATENCYCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFLATENCYCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x220,
+            0xb0214000, 0x220,
             'CHFLATENCYCTRL', 'MODEM_NS.CHFLATENCYCTRL', 'read-write',
             u"",
             0x00000000, 0x00000003,
@@ -3063,7 +2755,7 @@ class RM_Register_MODEM_NS_FRMSCHTIME(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_FRMSCHTIME, self).__init__(rmio, label,
-            0xb8014000, 0x224,
+            0xb0214000, 0x224,
             'FRMSCHTIME', 'MODEM_NS.FRMSCHTIME', 'read-write',
             u"",
             0x00000040, 0xE000FFFF,
@@ -3085,7 +2777,7 @@ class RM_Register_MODEM_NS_PREFILTCOEFF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PREFILTCOEFF, self).__init__(rmio, label,
-            0xb8014000, 0x228,
+            0xb0214000, 0x228,
             'PREFILTCOEFF', 'MODEM_NS.PREFILTCOEFF', 'read-write',
             u"",
             0x3B3B3B3B, 0xFFFFFFFF,
@@ -3101,7 +2793,7 @@ class RM_Register_MODEM_NS_RXRESTART(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_RXRESTART, self).__init__(rmio, label,
-            0xb8014000, 0x22C,
+            0xb0214000, 0x22C,
             'RXRESTART', 'MODEM_NS.RXRESTART', 'read-write',
             u"",
             0x00001860, 0xC0011FF1,
@@ -3131,7 +2823,7 @@ class RM_Register_MODEM_NS_SQ(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SQ, self).__init__(rmio, label,
-            0xb8014000, 0x230,
+            0xb0214000, 0x230,
             'SQ', 'MODEM_NS.SQ', 'read-write',
             u"",
             0x00000000, 0xFFFF0003,
@@ -3151,7 +2843,7 @@ class RM_Register_MODEM_NS_SQEXT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SQEXT, self).__init__(rmio, label,
-            0xb8014000, 0x234,
+            0xb0214000, 0x234,
             'SQEXT', 'MODEM_NS.SQEXT', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3169,7 +2861,7 @@ class RM_Register_MODEM_NS_SQI(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SQI, self).__init__(rmio, label,
-            0xb8014000, 0x238,
+            0xb0214000, 0x238,
             'SQI', 'MODEM_NS.SQI', 'read-write',
             u"",
             0x00000000, 0x00FF0001,
@@ -3187,7 +2879,7 @@ class RM_Register_MODEM_NS_ANTDIVCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTDIVCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x23C,
+            0xb0214000, 0x23C,
             'ANTDIVCTRL', 'MODEM_NS.ANTDIVCTRL', 'read-write',
             u"",
             0x00000000, 0x000007FF,
@@ -3209,7 +2901,7 @@ class RM_Register_MODEM_NS_ANTDIVFW(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ANTDIVFW, self).__init__(rmio, label,
-            0xb8014000, 0x240,
+            0xb0214000, 0x240,
             'ANTDIVFW', 'MODEM_NS.ANTDIVFW', 'read-write',
             u"",
             0x00000000, 0x80000003,
@@ -3229,10 +2921,10 @@ class RM_Register_MODEM_NS_PHDMODANTDIV(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PHDMODANTDIV, self).__init__(rmio, label,
-            0xb8014000, 0x244,
+            0xb0214000, 0x244,
             'PHDMODANTDIV', 'MODEM_NS.PHDMODANTDIV', 'read-write',
             u"",
-            0x0000000F, 0x40FF1FFF,
+            0x0000000F, 0x40FFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3251,7 +2943,7 @@ class RM_Register_MODEM_NS_PHANTDECSION(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PHANTDECSION, self).__init__(rmio, label,
-            0xb8014000, 0x248,
+            0xb0214000, 0x248,
             'PHANTDECSION', 'MODEM_NS.PHANTDECSION', 'read-write',
             u"",
             0x00000000, 0xF007FFFF,
@@ -3277,10 +2969,10 @@ class RM_Register_MODEM_NS_PHDMODCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_PHDMODCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x24C,
+            0xb0214000, 0x24C,
             'PHDMODCTRL', 'MODEM_NS.PHDMODCTRL', 'read-write',
             u"",
-            0x01DF0004, 0xFFFFFFFF,
+            0x01C70004, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3296,6 +2988,12 @@ class RM_Register_MODEM_NS_PHDMODCTRL(Base_RM_Register):
         self.zz_fdict['PMDETEN'] = self.PMDETEN
         self.REMODOSR = RM_Field_MODEM_NS_PHDMODCTRL_REMODOSR(self)
         self.zz_fdict['REMODOSR'] = self.REMODOSR
+        self.CHPWRQUAL = RM_Field_MODEM_NS_PHDMODCTRL_CHPWRQUAL(self)
+        self.zz_fdict['CHPWRQUAL'] = self.CHPWRQUAL
+        self.AGCBAUDEN = RM_Field_MODEM_NS_PHDMODCTRL_AGCBAUDEN(self)
+        self.zz_fdict['AGCBAUDEN'] = self.AGCBAUDEN
+        self.BCRTRECSCONC = RM_Field_MODEM_NS_PHDMODCTRL_BCRTRECSCONC(self)
+        self.zz_fdict['BCRTRECSCONC'] = self.BCRTRECSCONC
         self.REMODDWN = RM_Field_MODEM_NS_PHDMODCTRL_REMODDWN(self)
         self.zz_fdict['REMODDWN'] = self.REMODDWN
         self.REMODOUTSEL = RM_Field_MODEM_NS_PHDMODCTRL_REMODOUTSEL(self)
@@ -3304,10 +3002,10 @@ class RM_Register_MODEM_NS_PHDMODCTRL(Base_RM_Register):
         self.zz_fdict['REMODEN'] = self.REMODEN
         self.BCRDETECTOR = RM_Field_MODEM_NS_PHDMODCTRL_BCRDETECTOR(self)
         self.zz_fdict['BCRDETECTOR'] = self.BCRDETECTOR
-        self.BCRTRECSCONC = RM_Field_MODEM_NS_PHDMODCTRL_BCRTRECSCONC(self)
-        self.zz_fdict['BCRTRECSCONC'] = self.BCRTRECSCONC
         self.BCRLEGACYCONC = RM_Field_MODEM_NS_PHDMODCTRL_BCRLEGACYCONC(self)
         self.zz_fdict['BCRLEGACYCONC'] = self.BCRLEGACYCONC
+        self.FASTHOPPINGEN = RM_Field_MODEM_NS_PHDMODCTRL_FASTHOPPINGEN(self)
+        self.zz_fdict['FASTHOPPINGEN'] = self.FASTHOPPINGEN
         self.__dict__['zz_frozen'] = True
 
 
@@ -3315,7 +3013,7 @@ class RM_Register_MODEM_NS_SICORR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SICORR, self).__init__(rmio, label,
-            0xb8014000, 0x250,
+            0xb0214000, 0x250,
             'SICORR', 'MODEM_NS.SICORR', 'read-write',
             u"",
             0x00000000, 0x7FFFFFFF,
@@ -3337,10 +3035,10 @@ class RM_Register_MODEM_NS_SICTRL0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SICTRL0, self).__init__(rmio, label,
-            0xb8014000, 0x254,
+            0xb0214000, 0x254,
             'SICTRL0', 'MODEM_NS.SICTRL0', 'read-write',
             u"",
-            0x00000000, 0x7FFFFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3350,8 +3048,8 @@ class RM_Register_MODEM_NS_SICTRL0(Base_RM_Register):
         self.zz_fdict['NOISETHRESH'] = self.NOISETHRESH
         self.PEAKNUMTHRESHLW = RM_Field_MODEM_NS_SICTRL0_PEAKNUMTHRESHLW(self)
         self.zz_fdict['PEAKNUMTHRESHLW'] = self.PEAKNUMTHRESHLW
-        self.SWPEAKNUMADJ = RM_Field_MODEM_NS_SICTRL0_SWPEAKNUMADJ(self)
-        self.zz_fdict['SWPEAKNUMADJ'] = self.SWPEAKNUMADJ
+        self.PEAKNUMADJ = RM_Field_MODEM_NS_SICTRL0_PEAKNUMADJ(self)
+        self.zz_fdict['PEAKNUMADJ'] = self.PEAKNUMADJ
         self.NOISETHRESHADJ = RM_Field_MODEM_NS_SICTRL0_NOISETHRESHADJ(self)
         self.zz_fdict['NOISETHRESHADJ'] = self.NOISETHRESHADJ
         self.FREQNOMINAL = RM_Field_MODEM_NS_SICTRL0_FREQNOMINAL(self)
@@ -3365,10 +3063,10 @@ class RM_Register_MODEM_NS_SICTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SICTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x258,
+            0xb0214000, 0x258,
             'SICTRL1', 'MODEM_NS.SICTRL1', 'read-write',
             u"",
-            0x00000000, 0x1FFFFFFF,
+            0x00000000, 0x3FFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3390,6 +3088,8 @@ class RM_Register_MODEM_NS_SICTRL1(Base_RM_Register):
         self.zz_fdict['SOFTCLIPBYPASS'] = self.SOFTCLIPBYPASS
         self.SOFTCLIPTHRESH = RM_Field_MODEM_NS_SICTRL1_SOFTCLIPTHRESH(self)
         self.zz_fdict['SOFTCLIPTHRESH'] = self.SOFTCLIPTHRESH
+        self.SYMIDENTDIS = RM_Field_MODEM_NS_SICTRL1_SYMIDENTDIS(self)
+        self.zz_fdict['SYMIDENTDIS'] = self.SYMIDENTDIS
         self.__dict__['zz_frozen'] = True
 
 
@@ -3397,10 +3097,10 @@ class RM_Register_MODEM_NS_SISTATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SISTATUS, self).__init__(rmio, label,
-            0xb8014000, 0x25C,
+            0xb0214000, 0x25C,
             'SISTATUS', 'MODEM_NS.SISTATUS', 'read-only',
             u"",
-            0x00000000, 0x0FFFFFFF,
+            0x00000000, 0x3FFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3412,10 +3112,10 @@ class RM_Register_MODEM_NS_SISTATUS(Base_RM_Register):
         self.zz_fdict['LWPEAKCOUNT'] = self.LWPEAKCOUNT
         self.NARROWCOUNT = RM_Field_MODEM_NS_SISTATUS_NARROWCOUNT(self)
         self.zz_fdict['NARROWCOUNT'] = self.NARROWCOUNT
-        self.TIMELOCK = RM_Field_MODEM_NS_SISTATUS_TIMELOCK(self)
-        self.zz_fdict['TIMELOCK'] = self.TIMELOCK
         self.SUPERCHIPFAIL = RM_Field_MODEM_NS_SISTATUS_SUPERCHIPFAIL(self)
         self.zz_fdict['SUPERCHIPFAIL'] = self.SUPERCHIPFAIL
+        self.TIMELOCK = RM_Field_MODEM_NS_SISTATUS_TIMELOCK(self)
+        self.zz_fdict['TIMELOCK'] = self.TIMELOCK
         self.SUPERCHIPPASS = RM_Field_MODEM_NS_SISTATUS_SUPERCHIPPASS(self)
         self.zz_fdict['SUPERCHIPPASS'] = self.SUPERCHIPPASS
         self.TIMEOFFSET = RM_Field_MODEM_NS_SISTATUS_TIMEOFFSET(self)
@@ -3433,7 +3133,7 @@ class RM_Register_MODEM_NS_CFGANTPATTEXT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CFGANTPATTEXT, self).__init__(rmio, label,
-            0xb8014000, 0x260,
+            0xb0214000, 0x260,
             'CFGANTPATTEXT', 'MODEM_NS.CFGANTPATTEXT', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -3449,10 +3149,10 @@ class RM_Register_MODEM_NS_SICTRL2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SICTRL2, self).__init__(rmio, label,
-            0xb8014000, 0x264,
+            0xb0214000, 0x264,
             'SICTRL2', 'MODEM_NS.SICTRL2', 'read-write',
             u"",
-            0x00000000, 0x000FFFFF,
+            0x00000000, 0x7FFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -3474,6 +3174,10 @@ class RM_Register_MODEM_NS_SICTRL2(Base_RM_Register):
         self.zz_fdict['CORRNUM'] = self.CORRNUM
         self.NARROWPULSETHRESH = RM_Field_MODEM_NS_SICTRL2_NARROWPULSETHRESH(self)
         self.zz_fdict['NARROWPULSETHRESH'] = self.NARROWPULSETHRESH
+        self.PEAKNUMADJEN = RM_Field_MODEM_NS_SICTRL2_PEAKNUMADJEN(self)
+        self.zz_fdict['PEAKNUMADJEN'] = self.PEAKNUMADJEN
+        self.SISTARTDELAY = RM_Field_MODEM_NS_SICTRL2_SISTARTDELAY(self)
+        self.zz_fdict['SISTARTDELAY'] = self.SISTARTDELAY
         self.__dict__['zz_frozen'] = True
 
 
@@ -3481,7 +3185,7 @@ class RM_Register_MODEM_NS_CHFSWCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_CHFSWCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x268,
+            0xb0214000, 0x268,
             'CHFSWCTRL', 'MODEM_NS.CHFSWCTRL', 'read-write',
             u"",
             0x00000000, 0x0003FFFF,
@@ -3493,57 +3197,207 @@ class RM_Register_MODEM_NS_CHFSWCTRL(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_DUALTIM(Base_RM_Register):
+class RM_Register_MODEM_NS_FWHOPPINGCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DUALTIM, self).__init__(rmio, label,
-            0xb8014000, 0x26C,
-            'DUALTIM', 'MODEM_NS.DUALTIM', 'read-write',
+        super(RM_Register_MODEM_NS_FWHOPPINGCTRL, self).__init__(rmio, label,
+            0xb0214000, 0x274,
+            'FWHOPPINGCTRL', 'MODEM_NS.FWHOPPINGCTRL', 'read-write',
             u"",
-            0x00000000, 0x803C03FF,
+            0x00000000, 0x80000000,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.MINCOSTTHD2 = RM_Field_MODEM_NS_DUALTIM_MINCOSTTHD2(self)
-        self.zz_fdict['MINCOSTTHD2'] = self.MINCOSTTHD2
-        self.SYNCACQWIN2 = RM_Field_MODEM_NS_DUALTIM_SYNCACQWIN2(self)
-        self.zz_fdict['SYNCACQWIN2'] = self.SYNCACQWIN2
-        self.DUALTIMEN = RM_Field_MODEM_NS_DUALTIM_DUALTIMEN(self)
-        self.zz_fdict['DUALTIMEN'] = self.DUALTIMEN
+        self.FWUSELATCH = RM_Field_MODEM_NS_FWHOPPINGCTRL_FWUSELATCH(self)
+        self.zz_fdict['FWUSELATCH'] = self.FWUSELATCH
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_DIGMIXCTRL1(Base_RM_Register):
+class RM_Register_MODEM_NS_FSWIF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_DIGMIXCTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x270,
-            'DIGMIXCTRL1', 'MODEM_NS.DIGMIXCTRL1', 'read-write',
+        super(RM_Register_MODEM_NS_FSWIF, self).__init__(rmio, label,
+            0xb0214000, 0x278,
+            'FSWIF', 'MODEM_NS.FSWIF', 'read-write',
             u"",
-            0x00000000, 0x003FFFFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.DIGMIXFREQNXT = RM_Field_MODEM_NS_DIGMIXCTRL1_DIGMIXFREQNXT(self)
-        self.zz_fdict['DIGMIXFREQNXT'] = self.DIGMIXFREQNXT
-        self.PHYNXT = RM_Field_MODEM_NS_DIGMIXCTRL1_PHYNXT(self)
-        self.zz_fdict['PHYNXT'] = self.PHYNXT
+        self.TXFRAMESENT = RM_Field_MODEM_NS_FSWIF_TXFRAMESENT(self)
+        self.zz_fdict['TXFRAMESENT'] = self.TXFRAMESENT
+        self.TXSYNCSENT = RM_Field_MODEM_NS_FSWIF_TXSYNCSENT(self)
+        self.zz_fdict['TXSYNCSENT'] = self.TXSYNCSENT
+        self.TXPRESENT = RM_Field_MODEM_NS_FSWIF_TXPRESENT(self)
+        self.zz_fdict['TXPRESENT'] = self.TXPRESENT
+        self.TXRAMPDONE = RM_Field_MODEM_NS_FSWIF_TXRAMPDONE(self)
+        self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_FSWIF_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
+        self.PHDSADET = RM_Field_MODEM_NS_FSWIF_PHDSADET(self)
+        self.zz_fdict['PHDSADET'] = self.PHDSADET
+        self.PHYUNCODEDET = RM_Field_MODEM_NS_FSWIF_PHYUNCODEDET(self)
+        self.zz_fdict['PHYUNCODEDET'] = self.PHYUNCODEDET
+        self.PHYCODEDET = RM_Field_MODEM_NS_FSWIF_PHYCODEDET(self)
+        self.zz_fdict['PHYCODEDET'] = self.PHYCODEDET
+        self.RXTIMDET = RM_Field_MODEM_NS_FSWIF_RXTIMDET(self)
+        self.zz_fdict['RXTIMDET'] = self.RXTIMDET
+        self.RXPREDET = RM_Field_MODEM_NS_FSWIF_RXPREDET(self)
+        self.zz_fdict['RXPREDET'] = self.RXPREDET
+        self.RXFRAMEDET0 = RM_Field_MODEM_NS_FSWIF_RXFRAMEDET0(self)
+        self.zz_fdict['RXFRAMEDET0'] = self.RXFRAMEDET0
+        self.RXFRAMEDET1 = RM_Field_MODEM_NS_FSWIF_RXFRAMEDET1(self)
+        self.zz_fdict['RXFRAMEDET1'] = self.RXFRAMEDET1
+        self.RXTIMLOST = RM_Field_MODEM_NS_FSWIF_RXTIMLOST(self)
+        self.zz_fdict['RXTIMLOST'] = self.RXTIMLOST
+        self.RXPRELOST = RM_Field_MODEM_NS_FSWIF_RXPRELOST(self)
+        self.zz_fdict['RXPRELOST'] = self.RXPRELOST
+        self.RXFRAMEDETOF = RM_Field_MODEM_NS_FSWIF_RXFRAMEDETOF(self)
+        self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
+        self.RXTIMNF = RM_Field_MODEM_NS_FSWIF_RXTIMNF(self)
+        self.zz_fdict['RXTIMNF'] = self.RXTIMNF
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_FSWIF_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
+        self.ETS = RM_Field_MODEM_NS_FSWIF_ETS(self)
+        self.zz_fdict['ETS'] = self.ETS
+        self.CFGANTPATTRD = RM_Field_MODEM_NS_FSWIF_CFGANTPATTRD(self)
+        self.zz_fdict['CFGANTPATTRD'] = self.CFGANTPATTRD
+        self.RXRESTARTRSSIMAPRE = RM_Field_MODEM_NS_FSWIF_RXRESTARTRSSIMAPRE(self)
+        self.zz_fdict['RXRESTARTRSSIMAPRE'] = self.RXRESTARTRSSIMAPRE
+        self.RXRESTARTRSSIMASYNC = RM_Field_MODEM_NS_FSWIF_RXRESTARTRSSIMASYNC(self)
+        self.zz_fdict['RXRESTARTRSSIMASYNC'] = self.RXRESTARTRSSIMASYNC
+        self.SQDET = RM_Field_MODEM_NS_FSWIF_SQDET(self)
+        self.zz_fdict['SQDET'] = self.SQDET
+        self.SQNOTDET = RM_Field_MODEM_NS_FSWIF_SQNOTDET(self)
+        self.zz_fdict['SQNOTDET'] = self.SQNOTDET
+        self.ANTDIVRDY = RM_Field_MODEM_NS_FSWIF_ANTDIVRDY(self)
+        self.zz_fdict['ANTDIVRDY'] = self.ANTDIVRDY
+        self.SOFTRESETDONE = RM_Field_MODEM_NS_FSWIF_SOFTRESETDONE(self)
+        self.zz_fdict['SOFTRESETDONE'] = self.SOFTRESETDONE
+        self.SQPRENOTDET = RM_Field_MODEM_NS_FSWIF_SQPRENOTDET(self)
+        self.zz_fdict['SQPRENOTDET'] = self.SQPRENOTDET
+        self.SQFRAMENOTDET = RM_Field_MODEM_NS_FSWIF_SQFRAMENOTDET(self)
+        self.zz_fdict['SQFRAMENOTDET'] = self.SQFRAMENOTDET
+        self.SQAFCOUTOFBAND = RM_Field_MODEM_NS_FSWIF_SQAFCOUTOFBAND(self)
+        self.zz_fdict['SQAFCOUTOFBAND'] = self.SQAFCOUTOFBAND
+        self.SIDET = RM_Field_MODEM_NS_FSWIF_SIDET(self)
+        self.zz_fdict['SIDET'] = self.SIDET
+        self.SIRESET = RM_Field_MODEM_NS_FSWIF_SIRESET(self)
+        self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_FSWIF_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_FSWIF_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_SRCCHF1(Base_RM_Register):
+class RM_Register_MODEM_NS_FSWIEN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SRCCHF1, self).__init__(rmio, label,
-            0xb8014000, 0x274,
-            'SRCCHF1', 'MODEM_NS.SRCCHF1', 'read-write',
+        super(RM_Register_MODEM_NS_FSWIEN, self).__init__(rmio, label,
+            0xb0214000, 0x27C,
+            'FSWIEN', 'MODEM_NS.FSWIEN', 'read-write',
             u"",
-            0x00000000, 0x00007FFF,
+            0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.SRCRATIO2NEXT = RM_Field_MODEM_NS_SRCCHF1_SRCRATIO2NEXT(self)
-        self.zz_fdict['SRCRATIO2NEXT'] = self.SRCRATIO2NEXT
+        self.TXFRAMESENT = RM_Field_MODEM_NS_FSWIEN_TXFRAMESENT(self)
+        self.zz_fdict['TXFRAMESENT'] = self.TXFRAMESENT
+        self.TXSYNCSENT = RM_Field_MODEM_NS_FSWIEN_TXSYNCSENT(self)
+        self.zz_fdict['TXSYNCSENT'] = self.TXSYNCSENT
+        self.TXPRESENT = RM_Field_MODEM_NS_FSWIEN_TXPRESENT(self)
+        self.zz_fdict['TXPRESENT'] = self.TXPRESENT
+        self.TXRAMPDONE = RM_Field_MODEM_NS_FSWIEN_TXRAMPDONE(self)
+        self.zz_fdict['TXRAMPDONE'] = self.TXRAMPDONE
+        self.RXFRAMEDET2 = RM_Field_MODEM_NS_FSWIEN_RXFRAMEDET2(self)
+        self.zz_fdict['RXFRAMEDET2'] = self.RXFRAMEDET2
+        self.PHDSADET = RM_Field_MODEM_NS_FSWIEN_PHDSADET(self)
+        self.zz_fdict['PHDSADET'] = self.PHDSADET
+        self.PHYUNCODEDET = RM_Field_MODEM_NS_FSWIEN_PHYUNCODEDET(self)
+        self.zz_fdict['PHYUNCODEDET'] = self.PHYUNCODEDET
+        self.PHYCODEDET = RM_Field_MODEM_NS_FSWIEN_PHYCODEDET(self)
+        self.zz_fdict['PHYCODEDET'] = self.PHYCODEDET
+        self.RXTIMDET = RM_Field_MODEM_NS_FSWIEN_RXTIMDET(self)
+        self.zz_fdict['RXTIMDET'] = self.RXTIMDET
+        self.RXPREDET = RM_Field_MODEM_NS_FSWIEN_RXPREDET(self)
+        self.zz_fdict['RXPREDET'] = self.RXPREDET
+        self.RXFRAMEDET0 = RM_Field_MODEM_NS_FSWIEN_RXFRAMEDET0(self)
+        self.zz_fdict['RXFRAMEDET0'] = self.RXFRAMEDET0
+        self.RXFRAMEDET1 = RM_Field_MODEM_NS_FSWIEN_RXFRAMEDET1(self)
+        self.zz_fdict['RXFRAMEDET1'] = self.RXFRAMEDET1
+        self.RXTIMLOST = RM_Field_MODEM_NS_FSWIEN_RXTIMLOST(self)
+        self.zz_fdict['RXTIMLOST'] = self.RXTIMLOST
+        self.RXPRELOST = RM_Field_MODEM_NS_FSWIEN_RXPRELOST(self)
+        self.zz_fdict['RXPRELOST'] = self.RXPRELOST
+        self.RXFRAMEDETOF = RM_Field_MODEM_NS_FSWIEN_RXFRAMEDETOF(self)
+        self.zz_fdict['RXFRAMEDETOF'] = self.RXFRAMEDETOF
+        self.RXTIMNF = RM_Field_MODEM_NS_FSWIEN_RXTIMNF(self)
+        self.zz_fdict['RXTIMNF'] = self.RXTIMNF
+        self.RXFRAMEDET3 = RM_Field_MODEM_NS_FSWIEN_RXFRAMEDET3(self)
+        self.zz_fdict['RXFRAMEDET3'] = self.RXFRAMEDET3
+        self.ETS = RM_Field_MODEM_NS_FSWIEN_ETS(self)
+        self.zz_fdict['ETS'] = self.ETS
+        self.CFGANTPATTRD = RM_Field_MODEM_NS_FSWIEN_CFGANTPATTRD(self)
+        self.zz_fdict['CFGANTPATTRD'] = self.CFGANTPATTRD
+        self.RXRESTARTRSSIMAPRE = RM_Field_MODEM_NS_FSWIEN_RXRESTARTRSSIMAPRE(self)
+        self.zz_fdict['RXRESTARTRSSIMAPRE'] = self.RXRESTARTRSSIMAPRE
+        self.RXRESTARTRSSIMASYNC = RM_Field_MODEM_NS_FSWIEN_RXRESTARTRSSIMASYNC(self)
+        self.zz_fdict['RXRESTARTRSSIMASYNC'] = self.RXRESTARTRSSIMASYNC
+        self.SQDET = RM_Field_MODEM_NS_FSWIEN_SQDET(self)
+        self.zz_fdict['SQDET'] = self.SQDET
+        self.SQNOTDET = RM_Field_MODEM_NS_FSWIEN_SQNOTDET(self)
+        self.zz_fdict['SQNOTDET'] = self.SQNOTDET
+        self.ANTDIVRDY = RM_Field_MODEM_NS_FSWIEN_ANTDIVRDY(self)
+        self.zz_fdict['ANTDIVRDY'] = self.ANTDIVRDY
+        self.SOFTRESETDONE = RM_Field_MODEM_NS_FSWIEN_SOFTRESETDONE(self)
+        self.zz_fdict['SOFTRESETDONE'] = self.SOFTRESETDONE
+        self.SQPRENOTDET = RM_Field_MODEM_NS_FSWIEN_SQPRENOTDET(self)
+        self.zz_fdict['SQPRENOTDET'] = self.SQPRENOTDET
+        self.SQFRAMENOTDET = RM_Field_MODEM_NS_FSWIEN_SQFRAMENOTDET(self)
+        self.zz_fdict['SQFRAMENOTDET'] = self.SQFRAMENOTDET
+        self.SQAFCOUTOFBAND = RM_Field_MODEM_NS_FSWIEN_SQAFCOUTOFBAND(self)
+        self.zz_fdict['SQAFCOUTOFBAND'] = self.SQAFCOUTOFBAND
+        self.SIDET = RM_Field_MODEM_NS_FSWIEN_SIDET(self)
+        self.zz_fdict['SIDET'] = self.SIDET
+        self.SIRESET = RM_Field_MODEM_NS_FSWIEN_SIRESET(self)
+        self.zz_fdict['SIRESET'] = self.SIRESET
+        self.HOPPING = RM_Field_MODEM_NS_FSWIEN_HOPPING(self)
+        self.zz_fdict['HOPPING'] = self.HOPPING
+        self.NOISEDET = RM_Field_MODEM_NS_FSWIEN_NOISEDET(self)
+        self.zz_fdict['NOISEDET'] = self.NOISEDET
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_FSWSPARE(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_FSWSPARE, self).__init__(rmio, label,
+            0xb0214000, 0x280,
+            'FSWSPARE', 'MODEM_NS.FSWSPARE', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.FSWSPARE = RM_Field_MODEM_NS_FSWSPARE_FSWSPARE(self)
+        self.zz_fdict['FSWSPARE'] = self.FSWSPARE
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_SIDSSS0(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_SIDSSS0, self).__init__(rmio, label,
+            0xb0214000, 0x284,
+            'SIDSSS0', 'MODEM_NS.SIDSSS0', 'read-write',
+            u"",
+            0x3675EE07, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.SIDSSS0 = RM_Field_MODEM_NS_SIDSSS0_SIDSSS0(self)
+        self.zz_fdict['SIDSSS0'] = self.SIDSSS0
         self.__dict__['zz_frozen'] = True
 
 
@@ -3551,7 +3405,7 @@ class RM_Register_MODEM_NS_IRCAL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IRCAL, self).__init__(rmio, label,
-            0xb8014000, 0x290,
+            0xb0214000, 0x290,
             'IRCAL', 'MODEM_NS.IRCAL', 'read-write',
             u"",
             0x00000000, 0x0000FFBF,
@@ -3577,7 +3431,7 @@ class RM_Register_MODEM_NS_IRCALCOEF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IRCALCOEF, self).__init__(rmio, label,
-            0xb8014000, 0x294,
+            0xb0214000, 0x294,
             'IRCALCOEF', 'MODEM_NS.IRCALCOEF', 'read-only',
             u"",
             0x00000000, 0x7FFF7FFF,
@@ -3595,7 +3449,7 @@ class RM_Register_MODEM_NS_IRCALCOEFWR0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_IRCALCOEFWR0, self).__init__(rmio, label,
-            0xb8014000, 0x298,
+            0xb0214000, 0x298,
             'IRCALCOEFWR0', 'MODEM_NS.IRCALCOEFWR0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3613,11 +3467,33 @@ class RM_Register_MODEM_NS_IRCALCOEFWR0(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Register_MODEM_NS_IRCALCOEFWR1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_IRCALCOEFWR1, self).__init__(rmio, label,
+            0xb0214000, 0x29C,
+            'IRCALCOEFWR1', 'MODEM_NS.IRCALCOEFWR1', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.CRVWD = RM_Field_MODEM_NS_IRCALCOEFWR1_CRVWD(self)
+        self.zz_fdict['CRVWD'] = self.CRVWD
+        self.CRVWEN = RM_Field_MODEM_NS_IRCALCOEFWR1_CRVWEN(self)
+        self.zz_fdict['CRVWEN'] = self.CRVWEN
+        self.CIVWD = RM_Field_MODEM_NS_IRCALCOEFWR1_CIVWD(self)
+        self.zz_fdict['CIVWD'] = self.CIVWD
+        self.CIVWEN = RM_Field_MODEM_NS_IRCALCOEFWR1_CIVWEN(self)
+        self.zz_fdict['CIVWEN'] = self.CIVWEN
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Register_MODEM_NS_ADCTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADCTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x2A0,
+            0xb0214000, 0x2A0,
             'ADCTRL1', 'MODEM_NS.ADCTRL1', 'read-write',
             u"",
             0x00080000, 0xFFFFFFFF,
@@ -3633,7 +3509,7 @@ class RM_Register_MODEM_NS_ADCTRL2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADCTRL2, self).__init__(rmio, label,
-            0xb8014000, 0x2A4,
+            0xb0214000, 0x2A4,
             'ADCTRL2', 'MODEM_NS.ADCTRL2', 'read-write',
             u"",
             0x00000001, 0xFFFFFFFF,
@@ -3649,7 +3525,7 @@ class RM_Register_MODEM_NS_ADQUAL0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL0, self).__init__(rmio, label,
-            0xb8014000, 0x2A8,
+            0xb0214000, 0x2A8,
             'ADQUAL0', 'MODEM_NS.ADQUAL0', 'read-only',
             u"",
             0x00000000, 0x03FF03FF,
@@ -3667,7 +3543,7 @@ class RM_Register_MODEM_NS_ADQUAL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL1, self).__init__(rmio, label,
-            0xb8014000, 0x2AC,
+            0xb0214000, 0x2AC,
             'ADQUAL1', 'MODEM_NS.ADQUAL1', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3685,7 +3561,7 @@ class RM_Register_MODEM_NS_ADQUAL2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL2, self).__init__(rmio, label,
-            0xb8014000, 0x2B0,
+            0xb0214000, 0x2B0,
             'ADQUAL2', 'MODEM_NS.ADQUAL2', 'read-only',
             u"",
             0x00000000, 0x03FF03FF,
@@ -3703,7 +3579,7 @@ class RM_Register_MODEM_NS_ADQUAL3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL3, self).__init__(rmio, label,
-            0xb8014000, 0x2B4,
+            0xb0214000, 0x2B4,
             'ADQUAL3', 'MODEM_NS.ADQUAL3', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3721,7 +3597,7 @@ class RM_Register_MODEM_NS_ADQUAL4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL4, self).__init__(rmio, label,
-            0xb8014000, 0x2B8,
+            0xb0214000, 0x2B8,
             'ADQUAL4', 'MODEM_NS.ADQUAL4', 'read-write',
             u"",
             0x0200003F, 0xC3FF003F,
@@ -3741,7 +3617,7 @@ class RM_Register_MODEM_NS_ADQUAL5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL5, self).__init__(rmio, label,
-            0xb8014000, 0x2BC,
+            0xb0214000, 0x2BC,
             'ADQUAL5', 'MODEM_NS.ADQUAL5', 'read-write',
             u"",
             0x0000FFFF, 0x0001FFFF,
@@ -3757,7 +3633,7 @@ class RM_Register_MODEM_NS_ADQUAL6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL6, self).__init__(rmio, label,
-            0xb8014000, 0x2C0,
+            0xb0214000, 0x2C0,
             'ADQUAL6', 'MODEM_NS.ADQUAL6', 'read-write',
             u"",
             0x0000FFFF, 0xFFFFFFFF,
@@ -3775,7 +3651,7 @@ class RM_Register_MODEM_NS_ADQUAL7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL7, self).__init__(rmio, label,
-            0xb8014000, 0x2C4,
+            0xb0214000, 0x2C4,
             'ADQUAL7', 'MODEM_NS.ADQUAL7', 'read-write',
             u"",
             0x000003FF, 0x03FF03FF,
@@ -3793,7 +3669,7 @@ class RM_Register_MODEM_NS_ADQUAL8(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL8, self).__init__(rmio, label,
-            0xb8014000, 0x2C8,
+            0xb0214000, 0x2C8,
             'ADQUAL8', 'MODEM_NS.ADQUAL8', 'read-write',
             u"",
             0x0000FFFF, 0x3F31FFFF,
@@ -3813,7 +3689,7 @@ class RM_Register_MODEM_NS_ADQUAL9(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL9, self).__init__(rmio, label,
-            0xb8014000, 0x2CC,
+            0xb0214000, 0x2CC,
             'ADQUAL9', 'MODEM_NS.ADQUAL9', 'read-only',
             u"",
             0x00000000, 0x0001FFFF,
@@ -3829,7 +3705,7 @@ class RM_Register_MODEM_NS_ADQUAL10(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADQUAL10, self).__init__(rmio, label,
-            0xb8014000, 0x2D0,
+            0xb0214000, 0x2D0,
             'ADQUAL10', 'MODEM_NS.ADQUAL10', 'read-only',
             u"",
             0x00000000, 0x0001FFFF,
@@ -3845,7 +3721,7 @@ class RM_Register_MODEM_NS_ADFSM0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM0, self).__init__(rmio, label,
-            0xb8014000, 0x2D4,
+            0xb0214000, 0x2D4,
             'ADFSM0', 'MODEM_NS.ADFSM0', 'read-write',
             u"",
             0x00000000, 0x7FFFFFFF,
@@ -3881,7 +3757,7 @@ class RM_Register_MODEM_NS_ADFSM1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM1, self).__init__(rmio, label,
-            0xb8014000, 0x2D8,
+            0xb0214000, 0x2D8,
             'ADFSM1', 'MODEM_NS.ADFSM1', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3899,7 +3775,7 @@ class RM_Register_MODEM_NS_ADFSM2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM2, self).__init__(rmio, label,
-            0xb8014000, 0x2DC,
+            0xb0214000, 0x2DC,
             'ADFSM2', 'MODEM_NS.ADFSM2', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3917,7 +3793,7 @@ class RM_Register_MODEM_NS_ADFSM3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM3, self).__init__(rmio, label,
-            0xb8014000, 0x2E0,
+            0xb0214000, 0x2E0,
             'ADFSM3', 'MODEM_NS.ADFSM3', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3935,7 +3811,7 @@ class RM_Register_MODEM_NS_ADFSM4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM4, self).__init__(rmio, label,
-            0xb8014000, 0x2E4,
+            0xb0214000, 0x2E4,
             'ADFSM4', 'MODEM_NS.ADFSM4', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3953,7 +3829,7 @@ class RM_Register_MODEM_NS_ADFSM5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM5, self).__init__(rmio, label,
-            0xb8014000, 0x2E8,
+            0xb0214000, 0x2E8,
             'ADFSM5', 'MODEM_NS.ADFSM5', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3969,7 +3845,7 @@ class RM_Register_MODEM_NS_ADFSM6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM6, self).__init__(rmio, label,
-            0xb8014000, 0x2EC,
+            0xb0214000, 0x2EC,
             'ADFSM6', 'MODEM_NS.ADFSM6', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -3987,7 +3863,7 @@ class RM_Register_MODEM_NS_ADFSM7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM7, self).__init__(rmio, label,
-            0xb8014000, 0x2F0,
+            0xb0214000, 0x2F0,
             'ADFSM7', 'MODEM_NS.ADFSM7', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4005,7 +3881,7 @@ class RM_Register_MODEM_NS_ADFSM8(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM8, self).__init__(rmio, label,
-            0xb8014000, 0x2F4,
+            0xb0214000, 0x2F4,
             'ADFSM8', 'MODEM_NS.ADFSM8', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4023,7 +3899,7 @@ class RM_Register_MODEM_NS_ADFSM9(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM9, self).__init__(rmio, label,
-            0xb8014000, 0x2F8,
+            0xb0214000, 0x2F8,
             'ADFSM9', 'MODEM_NS.ADFSM9', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4041,7 +3917,7 @@ class RM_Register_MODEM_NS_ADFSM10(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM10, self).__init__(rmio, label,
-            0xb8014000, 0x2FC,
+            0xb0214000, 0x2FC,
             'ADFSM10', 'MODEM_NS.ADFSM10', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4059,7 +3935,7 @@ class RM_Register_MODEM_NS_ADFSM11(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM11, self).__init__(rmio, label,
-            0xb8014000, 0x300,
+            0xb0214000, 0x300,
             'ADFSM11', 'MODEM_NS.ADFSM11', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4077,7 +3953,7 @@ class RM_Register_MODEM_NS_ADFSM12(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM12, self).__init__(rmio, label,
-            0xb8014000, 0x304,
+            0xb0214000, 0x304,
             'ADFSM12', 'MODEM_NS.ADFSM12', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4095,7 +3971,7 @@ class RM_Register_MODEM_NS_ADFSM13(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM13, self).__init__(rmio, label,
-            0xb8014000, 0x308,
+            0xb0214000, 0x308,
             'ADFSM13', 'MODEM_NS.ADFSM13', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4113,7 +3989,7 @@ class RM_Register_MODEM_NS_ADFSM14(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM14, self).__init__(rmio, label,
-            0xb8014000, 0x30C,
+            0xb0214000, 0x30C,
             'ADFSM14', 'MODEM_NS.ADFSM14', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4131,7 +4007,7 @@ class RM_Register_MODEM_NS_ADFSM15(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM15, self).__init__(rmio, label,
-            0xb8014000, 0x310,
+            0xb0214000, 0x310,
             'ADFSM15', 'MODEM_NS.ADFSM15', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4149,7 +4025,7 @@ class RM_Register_MODEM_NS_ADFSM16(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM16, self).__init__(rmio, label,
-            0xb8014000, 0x314,
+            0xb0214000, 0x314,
             'ADFSM16', 'MODEM_NS.ADFSM16', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4167,7 +4043,7 @@ class RM_Register_MODEM_NS_ADFSM17(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM17, self).__init__(rmio, label,
-            0xb8014000, 0x318,
+            0xb0214000, 0x318,
             'ADFSM17', 'MODEM_NS.ADFSM17', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4185,7 +4061,7 @@ class RM_Register_MODEM_NS_ADFSM18(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM18, self).__init__(rmio, label,
-            0xb8014000, 0x31C,
+            0xb0214000, 0x31C,
             'ADFSM18', 'MODEM_NS.ADFSM18', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4201,7 +4077,7 @@ class RM_Register_MODEM_NS_ADFSM19(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM19, self).__init__(rmio, label,
-            0xb8014000, 0x320,
+            0xb0214000, 0x320,
             'ADFSM19', 'MODEM_NS.ADFSM19', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4219,7 +4095,7 @@ class RM_Register_MODEM_NS_ADFSM20(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM20, self).__init__(rmio, label,
-            0xb8014000, 0x324,
+            0xb0214000, 0x324,
             'ADFSM20', 'MODEM_NS.ADFSM20', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4237,7 +4113,7 @@ class RM_Register_MODEM_NS_ADFSM21(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM21, self).__init__(rmio, label,
-            0xb8014000, 0x328,
+            0xb0214000, 0x328,
             'ADFSM21', 'MODEM_NS.ADFSM21', 'read-write',
             u"",
             0x00000000, 0x000101FF,
@@ -4265,7 +4141,7 @@ class RM_Register_MODEM_NS_ADFSM22(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM22, self).__init__(rmio, label,
-            0xb8014000, 0x32C,
+            0xb0214000, 0x32C,
             'ADFSM22', 'MODEM_NS.ADFSM22', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4283,7 +4159,7 @@ class RM_Register_MODEM_NS_ADFSM23(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM23, self).__init__(rmio, label,
-            0xb8014000, 0x330,
+            0xb0214000, 0x330,
             'ADFSM23', 'MODEM_NS.ADFSM23', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4301,7 +4177,7 @@ class RM_Register_MODEM_NS_ADFSM24(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM24, self).__init__(rmio, label,
-            0xb8014000, 0x334,
+            0xb0214000, 0x334,
             'ADFSM24', 'MODEM_NS.ADFSM24', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4319,7 +4195,7 @@ class RM_Register_MODEM_NS_ADFSM25(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM25, self).__init__(rmio, label,
-            0xb8014000, 0x338,
+            0xb0214000, 0x338,
             'ADFSM25', 'MODEM_NS.ADFSM25', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4337,7 +4213,7 @@ class RM_Register_MODEM_NS_ADFSM26(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM26, self).__init__(rmio, label,
-            0xb8014000, 0x33C,
+            0xb0214000, 0x33C,
             'ADFSM26', 'MODEM_NS.ADFSM26', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4355,7 +4231,7 @@ class RM_Register_MODEM_NS_ADFSM27(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM27, self).__init__(rmio, label,
-            0xb8014000, 0x340,
+            0xb0214000, 0x340,
             'ADFSM27', 'MODEM_NS.ADFSM27', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4373,7 +4249,7 @@ class RM_Register_MODEM_NS_ADFSM28(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM28, self).__init__(rmio, label,
-            0xb8014000, 0x344,
+            0xb0214000, 0x344,
             'ADFSM28', 'MODEM_NS.ADFSM28', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4391,7 +4267,7 @@ class RM_Register_MODEM_NS_ADFSM29(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM29, self).__init__(rmio, label,
-            0xb8014000, 0x348,
+            0xb0214000, 0x348,
             'ADFSM29', 'MODEM_NS.ADFSM29', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4409,7 +4285,7 @@ class RM_Register_MODEM_NS_ADFSM30(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADFSM30, self).__init__(rmio, label,
-            0xb8014000, 0x34C,
+            0xb0214000, 0x34C,
             'ADFSM30', 'MODEM_NS.ADFSM30', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4425,7 +4301,7 @@ class RM_Register_MODEM_NS_ADPC1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC1, self).__init__(rmio, label,
-            0xb8014000, 0x350,
+            0xb0214000, 0x350,
             'ADPC1', 'MODEM_NS.ADPC1', 'read-write',
             u"",
             0x01200040, 0xFFFF7FFF,
@@ -4451,7 +4327,7 @@ class RM_Register_MODEM_NS_ADPC2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC2, self).__init__(rmio, label,
-            0xb8014000, 0x354,
+            0xb0214000, 0x354,
             'ADPC2', 'MODEM_NS.ADPC2', 'read-write',
             u"",
             0x000000A0, 0x3FFFFFFF,
@@ -4475,7 +4351,7 @@ class RM_Register_MODEM_NS_ADPC3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC3, self).__init__(rmio, label,
-            0xb8014000, 0x358,
+            0xb0214000, 0x358,
             'ADPC3', 'MODEM_NS.ADPC3', 'read-write',
             u"",
             0x01005008, 0x03FFFFFF,
@@ -4507,7 +4383,7 @@ class RM_Register_MODEM_NS_ADPC4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC4, self).__init__(rmio, label,
-            0xb8014000, 0x35C,
+            0xb0214000, 0x35C,
             'ADPC4', 'MODEM_NS.ADPC4', 'read-write',
             u"",
             0x1F1F1F1F, 0x1F1F1F1F,
@@ -4529,7 +4405,7 @@ class RM_Register_MODEM_NS_ADPC5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC5, self).__init__(rmio, label,
-            0xb8014000, 0x360,
+            0xb0214000, 0x360,
             'ADPC5', 'MODEM_NS.ADPC5', 'read-write',
             u"",
             0x1B1F1F1F, 0x1F1F1F1F,
@@ -4551,7 +4427,7 @@ class RM_Register_MODEM_NS_ADPC6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC6, self).__init__(rmio, label,
-            0xb8014000, 0x364,
+            0xb0214000, 0x364,
             'ADPC6', 'MODEM_NS.ADPC6', 'read-write',
             u"",
             0x11131518, 0x1F1F1F1F,
@@ -4573,7 +4449,7 @@ class RM_Register_MODEM_NS_ADPC7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC7, self).__init__(rmio, label,
-            0xb8014000, 0x368,
+            0xb0214000, 0x368,
             'ADPC7', 'MODEM_NS.ADPC7', 'read-write',
             u"",
             0x0C0D0E10, 0x1F1F1F1F,
@@ -4595,7 +4471,7 @@ class RM_Register_MODEM_NS_ADPC8(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC8, self).__init__(rmio, label,
-            0xb8014000, 0x36C,
+            0xb0214000, 0x36C,
             'ADPC8', 'MODEM_NS.ADPC8', 'read-write',
             u"",
             0x2F87C145, 0xFFFFFF7F,
@@ -4621,7 +4497,7 @@ class RM_Register_MODEM_NS_ADPC9(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC9, self).__init__(rmio, label,
-            0xb8014000, 0x370,
+            0xb0214000, 0x370,
             'ADPC9', 'MODEM_NS.ADPC9', 'read-write',
             u"",
             0x00000000, 0x01FFFFFF,
@@ -4645,7 +4521,7 @@ class RM_Register_MODEM_NS_ADPC10(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_ADPC10, self).__init__(rmio, label,
-            0xb8014000, 0x374,
+            0xb0214000, 0x374,
             'ADPC10', 'MODEM_NS.ADPC10', 'read-write',
             u"",
             0x00000000, 0x0001FFFF,
@@ -4667,7 +4543,7 @@ class RM_Register_MODEM_NS_HADMCTRL0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMCTRL0, self).__init__(rmio, label,
-            0xb8014000, 0x3C0,
+            0xb0214000, 0x3C0,
             'HADMCTRL0', 'MODEM_NS.HADMCTRL0', 'read-write',
             u"",
             0x00000000, 0xFC00703F,
@@ -4707,7 +4583,7 @@ class RM_Register_MODEM_NS_HADMCTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMCTRL1, self).__init__(rmio, label,
-            0xb8014000, 0x3C4,
+            0xb0214000, 0x3C4,
             'HADMCTRL1', 'MODEM_NS.HADMCTRL1', 'read-write',
             u"",
             0x00040000, 0xFFC7FF07,
@@ -4729,7 +4605,7 @@ class RM_Register_MODEM_NS_HADMSTATUS0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS0, self).__init__(rmio, label,
-            0xb8014000, 0x3C8,
+            0xb0214000, 0x3C8,
             'HADMSTATUS0', 'MODEM_NS.HADMSTATUS0', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4747,7 +4623,7 @@ class RM_Register_MODEM_NS_HADMSTATUS1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS1, self).__init__(rmio, label,
-            0xb8014000, 0x3CC,
+            0xb0214000, 0x3CC,
             'HADMSTATUS1', 'MODEM_NS.HADMSTATUS1', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4765,7 +4641,7 @@ class RM_Register_MODEM_NS_HADMSTATUS2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS2, self).__init__(rmio, label,
-            0xb8014000, 0x3D0,
+            0xb0214000, 0x3D0,
             'HADMSTATUS2', 'MODEM_NS.HADMSTATUS2', 'read-only',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -4785,7 +4661,7 @@ class RM_Register_MODEM_NS_HADMSTATUS3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS3, self).__init__(rmio, label,
-            0xb8014000, 0x3D4,
+            0xb0214000, 0x3D4,
             'HADMSTATUS3', 'MODEM_NS.HADMSTATUS3', 'read-only',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -4805,7 +4681,7 @@ class RM_Register_MODEM_NS_HADMSTATUS4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS4, self).__init__(rmio, label,
-            0xb8014000, 0x3D8,
+            0xb0214000, 0x3D8,
             'HADMSTATUS4', 'MODEM_NS.HADMSTATUS4', 'read-only',
             u"",
             0x00000000, 0x7FFF7FFF,
@@ -4823,7 +4699,7 @@ class RM_Register_MODEM_NS_HADMSTATUS5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS5, self).__init__(rmio, label,
-            0xb8014000, 0x3DC,
+            0xb0214000, 0x3DC,
             'HADMSTATUS5', 'MODEM_NS.HADMSTATUS5', 'read-only',
             u"",
             0x00000000, 0x7FFF7FFF,
@@ -4841,7 +4717,7 @@ class RM_Register_MODEM_NS_HADMSTATUS6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_HADMSTATUS6, self).__init__(rmio, label,
-            0xb8014000, 0x3E0,
+            0xb0214000, 0x3E0,
             'HADMSTATUS6', 'MODEM_NS.HADMSTATUS6', 'read-only',
             u"",
             0x00000000, 0xFFF0FFFF,
@@ -4861,10 +4737,10 @@ class RM_Register_MODEM_NS_EHDSSSCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_EHDSSSCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x414,
+            0xb0214000, 0x414,
             'EHDSSSCTRL', 'MODEM_NS.EHDSSSCTRL', 'read-write',
             u"",
-            0x000FE3DC, 0x01FFFFFF,
+            0x001FA3DC, 0xFEFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -4878,8 +4754,14 @@ class RM_Register_MODEM_NS_EHDSSSCTRL(Base_RM_Register):
         self.zz_fdict['FREQCORREN'] = self.FREQCORREN
         self.DSSSFRQLIM = RM_Field_MODEM_NS_EHDSSSCTRL_DSSSFRQLIM(self)
         self.zz_fdict['DSSSFRQLIM'] = self.DSSSFRQLIM
-        self.OPMODE = RM_Field_MODEM_NS_EHDSSSCTRL_OPMODE(self)
-        self.zz_fdict['OPMODE'] = self.OPMODE
+        self.DSSSDSATHD = RM_Field_MODEM_NS_EHDSSSCTRL_DSSSDSATHD(self)
+        self.zz_fdict['DSSSDSATHD'] = self.DSSSDSATHD
+        self.DSSSPMTIMEOUT = RM_Field_MODEM_NS_EHDSSSCTRL_DSSSPMTIMEOUT(self)
+        self.zz_fdict['DSSSPMTIMEOUT'] = self.DSSSPMTIMEOUT
+        self.DSSSFRMTIMEOUT = RM_Field_MODEM_NS_EHDSSSCTRL_DSSSFRMTIMEOUT(self)
+        self.zz_fdict['DSSSFRMTIMEOUT'] = self.DSSSFRMTIMEOUT
+        self.DUALDSA = RM_Field_MODEM_NS_EHDSSSCTRL_DUALDSA(self)
+        self.zz_fdict['DUALDSA'] = self.DUALDSA
         self.__dict__['zz_frozen'] = True
 
 
@@ -4887,7 +4769,7 @@ class RM_Register_MODEM_NS_EHDSSSCFG0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_EHDSSSCFG0, self).__init__(rmio, label,
-            0xb8014000, 0x418,
+            0xb0214000, 0x418,
             'EHDSSSCFG0', 'MODEM_NS.EHDSSSCFG0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -4903,7 +4785,7 @@ class RM_Register_MODEM_NS_EHDSSSCFG1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_EHDSSSCFG1, self).__init__(rmio, label,
-            0xb8014000, 0x41C,
+            0xb0214000, 0x41C,
             'EHDSSSCFG1', 'MODEM_NS.EHDSSSCFG1', 'read-write',
             u"",
             0x3207D080, 0x7FFFFFFF,
@@ -4923,10 +4805,10 @@ class RM_Register_MODEM_NS_EHDSSSCFG2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_EHDSSSCFG2, self).__init__(rmio, label,
-            0xb8014000, 0x420,
+            0xb0214000, 0x420,
             'EHDSSSCFG2', 'MODEM_NS.EHDSSSCFG2', 'read-write',
             u"",
-            0x356260FA, 0x3FFFFFFF,
+            0x356260FA, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -4940,6 +4822,34 @@ class RM_Register_MODEM_NS_EHDSSSCFG2(Base_RM_Register):
         self.zz_fdict['DSSSCORRSCHWIN'] = self.DSSSCORRSCHWIN
         self.ONESYMBOLMBDD = RM_Field_MODEM_NS_EHDSSSCFG2_ONESYMBOLMBDD(self)
         self.zz_fdict['ONESYMBOLMBDD'] = self.ONESYMBOLMBDD
+        self.DSSSDSAQUALEN = RM_Field_MODEM_NS_EHDSSSCFG2_DSSSDSAQUALEN(self)
+        self.zz_fdict['DSSSDSAQUALEN'] = self.DSSSDSAQUALEN
+        self.MAXSCHMODE = RM_Field_MODEM_NS_EHDSSSCFG2_MAXSCHMODE(self)
+        self.zz_fdict['MAXSCHMODE'] = self.MAXSCHMODE
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_EHDSSSCFG3(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_EHDSSSCFG3, self).__init__(rmio, label,
+            0xb0214000, 0x424,
+            'EHDSSSCFG3', 'MODEM_NS.EHDSSSCFG3', 'read-write',
+            u"",
+            0x30000578, 0x3FF0FFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.DSSSDASMAXTHD = RM_Field_MODEM_NS_EHDSSSCFG3_DSSSDASMAXTHD(self)
+        self.zz_fdict['DSSSDASMAXTHD'] = self.DSSSDASMAXTHD
+        self.DSSSFOETRACKGEAR = RM_Field_MODEM_NS_EHDSSSCFG3_DSSSFOETRACKGEAR(self)
+        self.zz_fdict['DSSSFOETRACKGEAR'] = self.DSSSFOETRACKGEAR
+        self.DSSSADSCHWINTIMOUT = RM_Field_MODEM_NS_EHDSSSCFG3_DSSSADSCHWINTIMOUT(self)
+        self.zz_fdict['DSSSADSCHWINTIMOUT'] = self.DSSSADSCHWINTIMOUT
+        self.OPMODE = RM_Field_MODEM_NS_EHDSSSCFG3_OPMODE(self)
+        self.zz_fdict['OPMODE'] = self.OPMODE
+        self.DSSSINITIMLEN = RM_Field_MODEM_NS_EHDSSSCFG3_DSSSINITIMLEN(self)
+        self.zz_fdict['DSSSINITIMLEN'] = self.DSSSINITIMLEN
         self.__dict__['zz_frozen'] = True
 
 
@@ -4947,7 +4857,7 @@ class RM_Register_MODEM_NS_SYMBOL2CHIP0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYMBOL2CHIP0, self).__init__(rmio, label,
-            0xb8014000, 0x424,
+            0xb0214000, 0x428,
             'SYMBOL2CHIP0', 'MODEM_NS.SYMBOL2CHIP0', 'read-write',
             u"",
             0xD9C3522E, 0xFFFFFFFF,
@@ -4959,123 +4869,11 @@ class RM_Register_MODEM_NS_SYMBOL2CHIP0(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_SYMBOL2CHIP1(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP1, self).__init__(rmio, label,
-            0xb8014000, 0x428,
-            'SYMBOL2CHIP1', 'MODEM_NS.SYMBOL2CHIP1', 'read-write',
-            u"",
-            0xED9C3522, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH1 = RM_Field_MODEM_NS_SYMBOL2CHIP1_SYM2CH1(self)
-        self.zz_fdict['SYM2CH1'] = self.SYM2CH1
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP2(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP2, self).__init__(rmio, label,
-            0xb8014000, 0x42C,
-            'SYMBOL2CHIP2', 'MODEM_NS.SYMBOL2CHIP2', 'read-write',
-            u"",
-            0x2ED9C352, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH2 = RM_Field_MODEM_NS_SYMBOL2CHIP2_SYM2CH2(self)
-        self.zz_fdict['SYM2CH2'] = self.SYM2CH2
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP3(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP3, self).__init__(rmio, label,
-            0xb8014000, 0x430,
-            'SYMBOL2CHIP3', 'MODEM_NS.SYMBOL2CHIP3', 'read-write',
-            u"",
-            0x22ED9C35, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH3 = RM_Field_MODEM_NS_SYMBOL2CHIP3_SYM2CH3(self)
-        self.zz_fdict['SYM2CH3'] = self.SYM2CH3
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP4(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP4, self).__init__(rmio, label,
-            0xb8014000, 0x434,
-            'SYMBOL2CHIP4', 'MODEM_NS.SYMBOL2CHIP4', 'read-write',
-            u"",
-            0x522ED9C3, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH4 = RM_Field_MODEM_NS_SYMBOL2CHIP4_SYM2CH4(self)
-        self.zz_fdict['SYM2CH4'] = self.SYM2CH4
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP5(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP5, self).__init__(rmio, label,
-            0xb8014000, 0x438,
-            'SYMBOL2CHIP5', 'MODEM_NS.SYMBOL2CHIP5', 'read-write',
-            u"",
-            0x3522ED9C, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH5 = RM_Field_MODEM_NS_SYMBOL2CHIP5_SYM2CH5(self)
-        self.zz_fdict['SYM2CH5'] = self.SYM2CH5
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP6(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP6, self).__init__(rmio, label,
-            0xb8014000, 0x43C,
-            'SYMBOL2CHIP6', 'MODEM_NS.SYMBOL2CHIP6', 'read-write',
-            u"",
-            0xC3522ED9, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH6 = RM_Field_MODEM_NS_SYMBOL2CHIP6_SYM2CH6(self)
-        self.zz_fdict['SYM2CH6'] = self.SYM2CH6
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIP7(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP7, self).__init__(rmio, label,
-            0xb8014000, 0x440,
-            'SYMBOL2CHIP7', 'MODEM_NS.SYMBOL2CHIP7', 'read-write',
-            u"",
-            0x9C3522ED, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH7 = RM_Field_MODEM_NS_SYMBOL2CHIP7_SYM2CH7(self)
-        self.zz_fdict['SYM2CH7'] = self.SYM2CH7
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_MODEM_NS_SYMBOL2CHIP8(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYMBOL2CHIP8, self).__init__(rmio, label,
-            0xb8014000, 0x444,
+            0xb0214000, 0x444,
             'SYMBOL2CHIP8', 'MODEM_NS.SYMBOL2CHIP8', 'read-write',
             u"",
             0x8C96077B, 0xFFFFFFFF,
@@ -5087,123 +4885,11 @@ class RM_Register_MODEM_NS_SYMBOL2CHIP8(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_SYMBOL2CHIP9(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIP9, self).__init__(rmio, label,
-            0xb8014000, 0x448,
-            'SYMBOL2CHIP9', 'MODEM_NS.SYMBOL2CHIP9', 'read-write',
-            u"",
-            0xB8C96077, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CH9 = RM_Field_MODEM_NS_SYMBOL2CHIP9_SYM2CH9(self)
-        self.zz_fdict['SYM2CH9'] = self.SYM2CH9
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPA(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPA, self).__init__(rmio, label,
-            0xb8014000, 0x44C,
-            'SYMBOL2CHIPA', 'MODEM_NS.SYMBOL2CHIPA', 'read-write',
-            u"",
-            0x7B8C9607, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHA = RM_Field_MODEM_NS_SYMBOL2CHIPA_SYM2CHA(self)
-        self.zz_fdict['SYM2CHA'] = self.SYM2CHA
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPB(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPB, self).__init__(rmio, label,
-            0xb8014000, 0x450,
-            'SYMBOL2CHIPB', 'MODEM_NS.SYMBOL2CHIPB', 'read-write',
-            u"",
-            0x77B8C960, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHB = RM_Field_MODEM_NS_SYMBOL2CHIPB_SYM2CHB(self)
-        self.zz_fdict['SYM2CHB'] = self.SYM2CHB
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPC(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPC, self).__init__(rmio, label,
-            0xb8014000, 0x454,
-            'SYMBOL2CHIPC', 'MODEM_NS.SYMBOL2CHIPC', 'read-write',
-            u"",
-            0x077B8C96, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHC = RM_Field_MODEM_NS_SYMBOL2CHIPC_SYM2CHC(self)
-        self.zz_fdict['SYM2CHC'] = self.SYM2CHC
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPD(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPD, self).__init__(rmio, label,
-            0xb8014000, 0x458,
-            'SYMBOL2CHIPD', 'MODEM_NS.SYMBOL2CHIPD', 'read-write',
-            u"",
-            0x6077B8C9, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHD = RM_Field_MODEM_NS_SYMBOL2CHIPD_SYM2CHD(self)
-        self.zz_fdict['SYM2CHD'] = self.SYM2CHD
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPE(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPE, self).__init__(rmio, label,
-            0xb8014000, 0x45C,
-            'SYMBOL2CHIPE', 'MODEM_NS.SYMBOL2CHIPE', 'read-write',
-            u"",
-            0x96077B8C, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHE = RM_Field_MODEM_NS_SYMBOL2CHIPE_SYM2CHE(self)
-        self.zz_fdict['SYM2CHE'] = self.SYM2CHE
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Register_MODEM_NS_SYMBOL2CHIPF(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_SYMBOL2CHIPF, self).__init__(rmio, label,
-            0xb8014000, 0x460,
-            'SYMBOL2CHIPF', 'MODEM_NS.SYMBOL2CHIPF', 'read-write',
-            u"",
-            0xC96077B8, 0xFFFFFFFF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.SYM2CHF = RM_Field_MODEM_NS_SYMBOL2CHIPF_SYM2CHF(self)
-        self.zz_fdict['SYM2CHF'] = self.SYM2CHF
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_MODEM_NS_SPARE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SPARE, self).__init__(rmio, label,
-            0xb8014000, 0x470,
+            0xb0214000, 0x470,
             'SPARE', 'MODEM_NS.SPARE', 'read-write',
             u"",
             0x00000000, 0x000000FF,
@@ -5219,7 +4905,7 @@ class RM_Register_MODEM_NS_SYNC0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYNC0, self).__init__(rmio, label,
-            0xb8014000, 0x480,
+            0xb0214000, 0x480,
             'SYNC0', 'MODEM_NS.SYNC0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -5235,7 +4921,7 @@ class RM_Register_MODEM_NS_SYNC1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYNC1, self).__init__(rmio, label,
-            0xb8014000, 0x484,
+            0xb0214000, 0x484,
             'SYNC1', 'MODEM_NS.SYNC1', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -5251,7 +4937,7 @@ class RM_Register_MODEM_NS_SYNC2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYNC2, self).__init__(rmio, label,
-            0xb8014000, 0x488,
+            0xb0214000, 0x488,
             'SYNC2', 'MODEM_NS.SYNC2', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -5263,33 +4949,51 @@ class RM_Register_MODEM_NS_SYNC2(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Register_MODEM_NS_SYNC3(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_SYNC3, self).__init__(rmio, label,
+            0xb0214000, 0x48C,
+            'SYNC3', 'MODEM_NS.SYNC3', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.SYNC3 = RM_Field_MODEM_NS_SYNC3_SYNC3(self)
+        self.zz_fdict['SYNC3'] = self.SYNC3
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Register_MODEM_NS_SYNCWORDCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_SYNCWORDCTRL, self).__init__(rmio, label,
-            0xb8014000, 0x49C,
+            0xb0214000, 0x490,
             'SYNCWORDCTRL', 'MODEM_NS.SYNCWORDCTRL', 'read-write',
             u"",
-            0x00000000, 0xC0FFFFFF,
+            0x00000000, 0xE30FFF1F,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.SYNC0BITS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC0BITS(self)
-        self.zz_fdict['SYNC0BITS'] = self.SYNC0BITS
-        self.SYNC1BITS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC1BITS(self)
-        self.zz_fdict['SYNC1BITS'] = self.SYNC1BITS
-        self.SYNC2BITS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC2BITS(self)
-        self.zz_fdict['SYNC2BITS'] = self.SYNC2BITS
+        self.SYNCBITS2TH = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNCBITS2TH(self)
+        self.zz_fdict['SYNCBITS2TH'] = self.SYNCBITS2TH
         self.SYNC0ERRORS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC0ERRORS(self)
         self.zz_fdict['SYNC0ERRORS'] = self.SYNC0ERRORS
         self.SYNC1ERRORS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC1ERRORS(self)
         self.zz_fdict['SYNC1ERRORS'] = self.SYNC1ERRORS
         self.SYNC2ERRORS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC2ERRORS(self)
         self.zz_fdict['SYNC2ERRORS'] = self.SYNC2ERRORS
+        self.SYNC3ERRORS = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNC3ERRORS(self)
+        self.zz_fdict['SYNC3ERRORS'] = self.SYNC3ERRORS
+        self.SYNCSWFEC = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNCSWFEC(self)
+        self.zz_fdict['SYNCSWFEC'] = self.SYNCSWFEC
+        self.DUALSYNC2TH = RM_Field_MODEM_NS_SYNCWORDCTRL_DUALSYNC2TH(self)
+        self.zz_fdict['DUALSYNC2TH'] = self.DUALSYNC2TH
         self.DUALSYNC = RM_Field_MODEM_NS_SYNCWORDCTRL_DUALSYNC(self)
         self.zz_fdict['DUALSYNC'] = self.DUALSYNC
-        self.TRISYNC = RM_Field_MODEM_NS_SYNCWORDCTRL_TRISYNC(self)
-        self.zz_fdict['TRISYNC'] = self.TRISYNC
+        self.SYNCDET2TH = RM_Field_MODEM_NS_SYNCWORDCTRL_SYNCDET2TH(self)
+        self.zz_fdict['SYNCDET2TH'] = self.SYNCDET2TH
         self.__dict__['zz_frozen'] = True
 
 
@@ -5297,10 +5001,10 @@ class RM_Register_MODEM_NS_TXCORR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_TXCORR, self).__init__(rmio, label,
-            0xb8014000, 0x4A0,
+            0xb0214000, 0x4A0,
             'TXCORR', 'MODEM_NS.TXCORR', 'read-write',
             u"",
-            0x00000000, 0x07FFFFFF,
+            0x00000000, 0x0001FFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -5312,7 +5016,21 @@ class RM_Register_MODEM_NS_TXCORR(Base_RM_Register):
         self.zz_fdict['TXGAINIMB'] = self.TXGAINIMB
         self.TXPHSIMB = RM_Field_MODEM_NS_TXCORR_TXPHSIMB(self)
         self.zz_fdict['TXPHSIMB'] = self.TXPHSIMB
-        self.TXFREQCORR = RM_Field_MODEM_NS_TXCORR_TXFREQCORR(self)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_TXFREQCORR(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_TXFREQCORR, self).__init__(rmio, label,
+            0xb0214000, 0x4A4,
+            'TXFREQCORR', 'MODEM_NS.TXFREQCORR', 'read-write',
+            u"",
+            0x00000000, 0x0007FFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.TXFREQCORR = RM_Field_MODEM_NS_TXFREQCORR_TXFREQCORR(self)
         self.zz_fdict['TXFREQCORR'] = self.TXFREQCORR
         self.__dict__['zz_frozen'] = True
 
@@ -5321,10 +5039,10 @@ class RM_Register_MODEM_NS_TXMISC(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_MODEM_NS_TXMISC, self).__init__(rmio, label,
-            0xb8014000, 0x4A4,
+            0xb0214000, 0x4A8,
             'TXMISC', 'MODEM_NS.TXMISC', 'read-write',
             u"",
-            0x0000000E, 0x01FFFFFF,
+            0x0000002E, 0xC1FFFFBF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -5340,8 +5058,6 @@ class RM_Register_MODEM_NS_TXMISC(Base_RM_Register):
         self.zz_fdict['TXIQSWAP'] = self.TXIQSWAP
         self.TXDACFORMAT = RM_Field_MODEM_NS_TXMISC_TXDACFORMAT(self)
         self.zz_fdict['TXDACFORMAT'] = self.TXDACFORMAT
-        self.TXDACFORCE = RM_Field_MODEM_NS_TXMISC_TXDACFORCE(self)
-        self.zz_fdict['TXDACFORCE'] = self.TXDACFORCE
         self.TXDCI = RM_Field_MODEM_NS_TXMISC_TXDCI(self)
         self.zz_fdict['TXDCI'] = self.TXDCI
         self.TXDCQ = RM_Field_MODEM_NS_TXMISC_TXDCQ(self)
@@ -5350,6 +5066,328 @@ class RM_Register_MODEM_NS_TXMISC(Base_RM_Register):
         self.zz_fdict['BR2M'] = self.BR2M
         self.TXMOD = RM_Field_MODEM_NS_TXMISC_TXMOD(self)
         self.zz_fdict['TXMOD'] = self.TXMOD
+        self.TXDOFORCEI = RM_Field_MODEM_NS_TXMISC_TXDOFORCEI(self)
+        self.zz_fdict['TXDOFORCEI'] = self.TXDOFORCEI
+        self.TXDOFORCEQ = RM_Field_MODEM_NS_TXMISC_TXDOFORCEQ(self)
+        self.zz_fdict['TXDOFORCEQ'] = self.TXDOFORCEQ
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_TXDACVAL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_TXDACVAL, self).__init__(rmio, label,
+            0xb0214000, 0x4AC,
+            'TXDACVAL', 'MODEM_NS.TXDACVAL', 'read-write',
+            u"",
+            0x80FF0000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.TXFORCEDI = RM_Field_MODEM_NS_TXDACVAL_TXFORCEDI(self)
+        self.zz_fdict['TXFORCEDI'] = self.TXFORCEDI
+        self.TXFORCEDQ = RM_Field_MODEM_NS_TXDACVAL_TXFORCEDQ(self)
+        self.zz_fdict['TXFORCEDQ'] = self.TXFORCEDQ
+        self.TXIDLEI = RM_Field_MODEM_NS_TXDACVAL_TXIDLEI(self)
+        self.zz_fdict['TXIDLEI'] = self.TXIDLEI
+        self.TXIDLEQ = RM_Field_MODEM_NS_TXDACVAL_TXIDLEQ(self)
+        self.zz_fdict['TXIDLEQ'] = self.TXIDLEQ
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_VITERBIDEMOD(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_VITERBIDEMOD, self).__init__(rmio, label,
+            0xb0214000, 0x500,
+            'VITERBIDEMOD', 'MODEM_NS.VITERBIDEMOD', 'read-write',
+            u"",
+            0x00206100, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.VTDEMODEN = RM_Field_MODEM_NS_VITERBIDEMOD_VTDEMODEN(self)
+        self.zz_fdict['VTDEMODEN'] = self.VTDEMODEN
+        self.HARDDECISION = RM_Field_MODEM_NS_VITERBIDEMOD_HARDDECISION(self)
+        self.zz_fdict['HARDDECISION'] = self.HARDDECISION
+        self.VITERBIKSI1 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI1(self)
+        self.zz_fdict['VITERBIKSI1'] = self.VITERBIKSI1
+        self.VITERBIKSI2 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI2(self)
+        self.zz_fdict['VITERBIKSI2'] = self.VITERBIKSI2
+        self.VITERBIKSI3 = RM_Field_MODEM_NS_VITERBIDEMOD_VITERBIKSI3(self)
+        self.zz_fdict['VITERBIKSI3'] = self.VITERBIKSI3
+        self.SYNTHAFC = RM_Field_MODEM_NS_VITERBIDEMOD_SYNTHAFC(self)
+        self.zz_fdict['SYNTHAFC'] = self.SYNTHAFC
+        self.CORRCYCLE = RM_Field_MODEM_NS_VITERBIDEMOD_CORRCYCLE(self)
+        self.zz_fdict['CORRCYCLE'] = self.CORRCYCLE
+        self.CORRSTPSIZE = RM_Field_MODEM_NS_VITERBIDEMOD_CORRSTPSIZE(self)
+        self.zz_fdict['CORRSTPSIZE'] = self.CORRSTPSIZE
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_VTCORRCFG0(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_VTCORRCFG0, self).__init__(rmio, label,
+            0xb0214000, 0x504,
+            'VTCORRCFG0', 'MODEM_NS.VTCORRCFG0', 'read-write',
+            u"",
+            0x123556B7, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.EXPECTPATT = RM_Field_MODEM_NS_VTCORRCFG0_EXPECTPATT(self)
+        self.zz_fdict['EXPECTPATT'] = self.EXPECTPATT
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_VTCORRCFG1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_VTCORRCFG1, self).__init__(rmio, label,
+            0xb0214000, 0x508,
+            'VTCORRCFG1', 'MODEM_NS.VTCORRCFG1', 'read-write',
+            u"",
+            0x5020C000, 0xF7FDFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.VITERBIKSI3WB = RM_Field_MODEM_NS_VTCORRCFG1_VITERBIKSI3WB(self)
+        self.zz_fdict['VITERBIKSI3WB'] = self.VITERBIKSI3WB
+        self.KSI3SWENABLE = RM_Field_MODEM_NS_VTCORRCFG1_KSI3SWENABLE(self)
+        self.zz_fdict['KSI3SWENABLE'] = self.KSI3SWENABLE
+        self.VTFRQLIM = RM_Field_MODEM_NS_VTCORRCFG1_VTFRQLIM(self)
+        self.zz_fdict['VTFRQLIM'] = self.VTFRQLIM
+        self.EXPSYNCLEN = RM_Field_MODEM_NS_VTCORRCFG1_EXPSYNCLEN(self)
+        self.zz_fdict['EXPSYNCLEN'] = self.EXPSYNCLEN
+        self.EXPECTHT = RM_Field_MODEM_NS_VTCORRCFG1_EXPECTHT(self)
+        self.zz_fdict['EXPECTHT'] = self.EXPECTHT
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_VTTRACK(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_VTTRACK, self).__init__(rmio, label,
+            0xb0214000, 0x50C,
+            'VTTRACK', 'MODEM_NS.VTTRACK', 'read-write',
+            u"",
+            0x0D803B88, 0x3FFF3FFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.FREQTRACKMODE = RM_Field_MODEM_NS_VTTRACK_FREQTRACKMODE(self)
+        self.zz_fdict['FREQTRACKMODE'] = self.FREQTRACKMODE
+        self.TIMTRACKTHD = RM_Field_MODEM_NS_VTTRACK_TIMTRACKTHD(self)
+        self.zz_fdict['TIMTRACKTHD'] = self.TIMTRACKTHD
+        self.TIMEACQUTHD = RM_Field_MODEM_NS_VTTRACK_TIMEACQUTHD(self)
+        self.zz_fdict['TIMEACQUTHD'] = self.TIMEACQUTHD
+        self.TIMGEAR = RM_Field_MODEM_NS_VTTRACK_TIMGEAR(self)
+        self.zz_fdict['TIMGEAR'] = self.TIMGEAR
+        self.FREQBIAS = RM_Field_MODEM_NS_VTTRACK_FREQBIAS(self)
+        self.zz_fdict['FREQBIAS'] = self.FREQBIAS
+        self.HIPWRTHD = RM_Field_MODEM_NS_VTTRACK_HIPWRTHD(self)
+        self.zz_fdict['HIPWRTHD'] = self.HIPWRTHD
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_VTBLETIMING(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_VTBLETIMING, self).__init__(rmio, label,
+            0xb0214000, 0x510,
+            'VTBLETIMING', 'MODEM_NS.VTBLETIMING', 'read-write',
+            u"",
+            0x00000000, 0x8000FFF7,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.VTBLETIMINGSEL = RM_Field_MODEM_NS_VTBLETIMING_VTBLETIMINGSEL(self)
+        self.zz_fdict['VTBLETIMINGSEL'] = self.VTBLETIMINGSEL
+        self.VTBLETIMINGCLKSEL = RM_Field_MODEM_NS_VTBLETIMING_VTBLETIMINGCLKSEL(self)
+        self.zz_fdict['VTBLETIMINGCLKSEL'] = self.VTBLETIMINGCLKSEL
+        self.TIMINGDELAY = RM_Field_MODEM_NS_VTBLETIMING_TIMINGDELAY(self)
+        self.zz_fdict['TIMINGDELAY'] = self.TIMINGDELAY
+        self.FLENOFF = RM_Field_MODEM_NS_VTBLETIMING_FLENOFF(self)
+        self.zz_fdict['FLENOFF'] = self.FLENOFF
+        self.DISDEMODOF = RM_Field_MODEM_NS_VTBLETIMING_DISDEMODOF(self)
+        self.zz_fdict['DISDEMODOF'] = self.DISDEMODOF
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_REALTIMCFE(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_REALTIMCFE, self).__init__(rmio, label,
+            0xb0214000, 0x514,
+            'REALTIMCFE', 'MODEM_NS.REALTIMCFE', 'read-write',
+            u"",
+            0x001F81F4, 0xE87FFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.MINCOSTTHD = RM_Field_MODEM_NS_REALTIMCFE_MINCOSTTHD(self)
+        self.zz_fdict['MINCOSTTHD'] = self.MINCOSTTHD
+        self.RTSCHWIN = RM_Field_MODEM_NS_REALTIMCFE_RTSCHWIN(self)
+        self.zz_fdict['RTSCHWIN'] = self.RTSCHWIN
+        self.RTSCHMODE = RM_Field_MODEM_NS_REALTIMCFE_RTSCHMODE(self)
+        self.zz_fdict['RTSCHMODE'] = self.RTSCHMODE
+        self.TRACKINGWIN = RM_Field_MODEM_NS_REALTIMCFE_TRACKINGWIN(self)
+        self.zz_fdict['TRACKINGWIN'] = self.TRACKINGWIN
+        self.SYNCACQWIN = RM_Field_MODEM_NS_REALTIMCFE_SYNCACQWIN(self)
+        self.zz_fdict['SYNCACQWIN'] = self.SYNCACQWIN
+        self.EXTENSCHBYP = RM_Field_MODEM_NS_REALTIMCFE_EXTENSCHBYP(self)
+        self.zz_fdict['EXTENSCHBYP'] = self.EXTENSCHBYP
+        self.SINEWEN = RM_Field_MODEM_NS_REALTIMCFE_SINEWEN(self)
+        self.zz_fdict['SINEWEN'] = self.SINEWEN
+        self.VTAFCFRAME = RM_Field_MODEM_NS_REALTIMCFE_VTAFCFRAME(self)
+        self.zz_fdict['VTAFCFRAME'] = self.VTAFCFRAME
+        self.RTCFEEN = RM_Field_MODEM_NS_REALTIMCFE_RTCFEEN(self)
+        self.zz_fdict['RTCFEEN'] = self.RTCFEEN
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_TRECPMPATT(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_TRECPMPATT, self).__init__(rmio, label,
+            0xb0214000, 0x518,
+            'TRECPMPATT', 'MODEM_NS.TRECPMPATT', 'read-write',
+            u"",
+            0x55555555, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.PMEXPECTPATT = RM_Field_MODEM_NS_TRECPMPATT_PMEXPECTPATT(self)
+        self.zz_fdict['PMEXPECTPATT'] = self.PMEXPECTPATT
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_TRECPMDET(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_TRECPMDET, self).__init__(rmio, label,
+            0xb0214000, 0x51C,
+            'TRECPMDET', 'MODEM_NS.TRECPMDET', 'read-write',
+            u"",
+            0x00000047, 0xBEFFCFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.PMACQUINGWIN = RM_Field_MODEM_NS_TRECPMDET_PMACQUINGWIN(self)
+        self.zz_fdict['PMACQUINGWIN'] = self.PMACQUINGWIN
+        self.PMCOSTVALTHD = RM_Field_MODEM_NS_TRECPMDET_PMCOSTVALTHD(self)
+        self.zz_fdict['PMCOSTVALTHD'] = self.PMCOSTVALTHD
+        self.PMTIMEOUTSEL = RM_Field_MODEM_NS_TRECPMDET_PMTIMEOUTSEL(self)
+        self.zz_fdict['PMTIMEOUTSEL'] = self.PMTIMEOUTSEL
+        self.PHSCALE = RM_Field_MODEM_NS_TRECPMDET_PHSCALE(self)
+        self.zz_fdict['PHSCALE'] = self.PHSCALE
+        self.PMMINCOSTTHD = RM_Field_MODEM_NS_TRECPMDET_PMMINCOSTTHD(self)
+        self.zz_fdict['PMMINCOSTTHD'] = self.PMMINCOSTTHD
+        self.COSTHYST = RM_Field_MODEM_NS_TRECPMDET_COSTHYST(self)
+        self.zz_fdict['COSTHYST'] = self.COSTHYST
+        self.PREAMSCH = RM_Field_MODEM_NS_TRECPMDET_PREAMSCH(self)
+        self.zz_fdict['PREAMSCH'] = self.PREAMSCH
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_TRECSCFG(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_TRECSCFG, self).__init__(rmio, label,
+            0xb0214000, 0x520,
+            'TRECSCFG', 'MODEM_NS.TRECSCFG', 'read-write',
+            u"",
+            0x03010004, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.TRECSOSR = RM_Field_MODEM_NS_TRECSCFG_TRECSOSR(self)
+        self.zz_fdict['TRECSOSR'] = self.TRECSOSR
+        self.DTIMLOSSTHD = RM_Field_MODEM_NS_TRECSCFG_DTIMLOSSTHD(self)
+        self.zz_fdict['DTIMLOSSTHD'] = self.DTIMLOSSTHD
+        self.DTIMLOSSEN = RM_Field_MODEM_NS_TRECSCFG_DTIMLOSSEN(self)
+        self.zz_fdict['DTIMLOSSEN'] = self.DTIMLOSSEN
+        self.PMOFFSET = RM_Field_MODEM_NS_TRECSCFG_PMOFFSET(self)
+        self.zz_fdict['PMOFFSET'] = self.PMOFFSET
+        self.SOFTDSW = RM_Field_MODEM_NS_TRECSCFG_SOFTDSW(self)
+        self.zz_fdict['SOFTDSW'] = self.SOFTDSW
+        self.SDSCALE = RM_Field_MODEM_NS_TRECSCFG_SDSCALE(self)
+        self.zz_fdict['SDSCALE'] = self.SDSCALE
+        self.SOFTD = RM_Field_MODEM_NS_TRECSCFG_SOFTD(self)
+        self.zz_fdict['SOFTD'] = self.SOFTD
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_DUALTIM(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_DUALTIM, self).__init__(rmio, label,
+            0xb0214000, 0x528,
+            'DUALTIM', 'MODEM_NS.DUALTIM', 'read-write',
+            u"",
+            0x00000000, 0x807C03FF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.MINCOSTTHD2 = RM_Field_MODEM_NS_DUALTIM_MINCOSTTHD2(self)
+        self.zz_fdict['MINCOSTTHD2'] = self.MINCOSTTHD2
+        self.SYNCACQWIN2 = RM_Field_MODEM_NS_DUALTIM_SYNCACQWIN2(self)
+        self.zz_fdict['SYNCACQWIN2'] = self.SYNCACQWIN2
+        self.DUALTIMEN = RM_Field_MODEM_NS_DUALTIM_DUALTIMEN(self)
+        self.zz_fdict['DUALTIMEN'] = self.DUALTIMEN
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_EXPECTPATTDUAL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_EXPECTPATTDUAL, self).__init__(rmio, label,
+            0xb0214000, 0x52C,
+            'EXPECTPATTDUAL', 'MODEM_NS.EXPECTPATTDUAL', 'read-write',
+            u"",
+            0x123556B7, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.EXPECTPATTDUAL = RM_Field_MODEM_NS_EXPECTPATTDUAL_EXPECTPATTDUAL(self)
+        self.zz_fdict['EXPECTPATTDUAL'] = self.EXPECTPATTDUAL
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_AUXADCIFCTRL(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_AUXADCIFCTRL, self).__init__(rmio, label,
+            0xb0214000, 0x540,
+            'AUXADCIFCTRL', 'MODEM_NS.AUXADCIFCTRL', 'read-write',
+            u"",
+            0x00000011, 0x0000003F,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.AUXADCIFRESET = RM_Field_MODEM_NS_AUXADCIFCTRL_AUXADCIFRESET(self)
+        self.zz_fdict['AUXADCIFRESET'] = self.AUXADCIFRESET
+        self.AUXADCIFCYCLE = RM_Field_MODEM_NS_AUXADCIFCTRL_AUXADCIFCYCLE(self)
+        self.zz_fdict['AUXADCIFCYCLE'] = self.AUXADCIFCYCLE
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_AUXADCIFDOUT(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_AUXADCIFDOUT, self).__init__(rmio, label,
+            0xb0214000, 0x544,
+            'AUXADCIFDOUT', 'MODEM_NS.AUXADCIFDOUT', 'read-only',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.AUXADCDATAI = RM_Field_MODEM_NS_AUXADCIFDOUT_AUXADCDATAI(self)
+        self.zz_fdict['AUXADCDATAI'] = self.AUXADCDATAI
+        self.AUXADCDATAQ = RM_Field_MODEM_NS_AUXADCIFDOUT_AUXADCDATAQ(self)
+        self.zz_fdict['AUXADCDATAQ'] = self.AUXADCDATAQ
         self.__dict__['zz_frozen'] = True
 
 

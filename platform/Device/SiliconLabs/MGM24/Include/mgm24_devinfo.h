@@ -973,4 +973,4 @@ typedef struct {
 /** @} End of group MGM24_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* MGM24_DEVINFO_H */
+#endif // MGM24_DEVINFO_H

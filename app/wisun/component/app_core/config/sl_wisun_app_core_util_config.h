@@ -92,6 +92,11 @@
 // <o APP_MAIN_STACK_SIZE_WORD> Recommended Application thread stack size
 // <i> Default: 256 word
 #define APP_MAIN_STACK_SIZE_WORD                    256
+
+// <o APP_THREAD_LP_DISPATCH_MS> Thread dispatch delay for low power mode
+// <i> Default: 1000
+#define APP_THREAD_LP_DISPATCH_MS                   1000
+
 // </h> Wi-SUN Application thread setup
 
 // <<< end of configuration section >>>

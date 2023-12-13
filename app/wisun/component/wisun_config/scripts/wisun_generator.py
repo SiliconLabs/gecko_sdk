@@ -61,7 +61,7 @@ def get_input_output_path():
 
     return wisunconf_path, str(args.output), restrictions_pathes
 
-def config_generate(only_radio, config, template_dir:str, c_jinja_file_name:str, h_jinja_file_name:str):
+def config_generate(config, template_dir:str, c_jinja_file_name:str, h_jinja_file_name:str):
     """It generates the configuration embedded source files .c and .h files based on jinja template files.
 
     :param config: Read configuration from the .json shaped configuration file
@@ -90,10 +90,10 @@ def config_generate(only_radio, config, template_dir:str, c_jinja_file_name:str,
             mac_list.append(re.findall("[a-fA-F0-9][a-fA-F0-9]", mac_list_address))
 
     template = env.get_template(c_jinja_file_name)
-    c_output = template.render(only_radio=only_radio, config=config, macAddress=mac_address, macList=mac_list)
+    c_output = template.render(config=config, macAddress=mac_address, macList=mac_list)
 
     template = env.get_template(h_jinja_file_name)
-    h_output = template.render(only_radio=only_radio, config=config, macAddress=mac_address, macList=mac_list)
+    h_output = template.render(config=config, macAddress=mac_address, macList=mac_list)
 
     return c_output, h_output
 
@@ -216,13 +216,15 @@ if __name__ == "__main__":
 
     if wisunconf['allowedChannels']:
         calculate_channel_mask(ch_int_lst, wisunconf['allowedChannels'])
+        wisunconf['allowedChannelsStr'] = ','.join(wisunconf['allowedChannels'])
     else:
-        for i in range(32):
+        for _ in range(32):
             ch_int_lst.append(255)
-
+        wisunconf['allowedChannelsStr'] = "0-255"
     wisunconf['allowedChannels'] = [hex(ch) for ch in ch_int_lst]
-    # getting restricions and defining the config data which is used, which is not
-    only_radio = False
+
+    if wisunconf['modeSwitchPhys']:
+        wisunconf['modeSwitchPhyModeIds'] = sorted([phy['phyModeId'] for phy in wisunconf['modeSwitchPhys']])
 
     if restrictions_pathes is not None:
         hidden_tabs = []
@@ -241,14 +243,9 @@ if __name__ == "__main__":
         for tab in hidden_tabs:
             for prop in config_struct[tab]:
                 wisunconf[prop] = None
-    
-        # Check for special case of visibleTabs
-        if len(merged_visible_tabs) == 1 and "radio" in merged_visible_tabs:
-            only_radio = True
 
     # using jinja templates it generates the source fils' strings
-    wisun_config_c_file, wisun_config_h_file = config_generate(only_radio=only_radio,
-                                                               config=wisunconf,
+    wisun_config_c_file, wisun_config_h_file = config_generate(config=wisunconf,
                                                                template_dir="../templates",
                                                                c_jinja_file_name="sl_wisun_config.c.jinja",
                                                                h_jinja_file_name="sl_wisun_config.h.jinja")

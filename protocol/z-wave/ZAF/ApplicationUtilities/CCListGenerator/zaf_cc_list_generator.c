@@ -139,10 +139,8 @@ static bool fill_lists_from_config(zaf_cc_config_entry_latest_t const * const p_
   return false;
 }
 
-static bool fill_lists(CC_handler_map_latest_t const * const p_cc_entry, zaf_cc_context_t context)
+static bool fill_lists(CC_handler_map_latest_t const * const p_cc_entry, __attribute__((unused)) zaf_cc_context_t context)
 {
-  UNUSED(context);
-
   // Inserted directly on the list
   switch (p_cc_entry->CC) {
     case COMMAND_CLASS_ZWAVEPLUS_INFO:
@@ -202,7 +200,7 @@ void zafi_cc_list_generator_get_lists(uint8_t endpoint, zaf_cc_list_t **unsecure
   }
 }
 
-void zafi_cc_list_generator_generate()
+void zafi_cc_list_generator_generate(void)
 {
   uint8_t requested_security_keys;
   uint8_t number_of_endpoints;

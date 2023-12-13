@@ -18,11 +18,6 @@
 
 // <h>Zigbee Green Power Server configuration
 
-// <o EMBER_AF_PLUGIN_GREEN_POWER_SERVER_HIDDEN_PROXY_ZCL_MESSAGE_SRC_ENDPOINT> Hidden ZCL Message Proxy Endpoint <1-240>
-// <i> Default: 1
-// <i> This is a local endpoint is used to send/receive
-#define EMBER_AF_PLUGIN_GREEN_POWER_SERVER_HIDDEN_PROXY_ZCL_MESSAGE_SRC_ENDPOINT   1
-
 // <o EMBER_AF_PLUGIN_GREEN_POWER_SERVER_ZCL_MESSAGE_DST_ENDPOINT> ZCL Message Default Destination Endpoint <1-240>
 // <i> Default: 1
 // <i> This is the default destination endpoint for all translated ZCL messages from GPDF commands.

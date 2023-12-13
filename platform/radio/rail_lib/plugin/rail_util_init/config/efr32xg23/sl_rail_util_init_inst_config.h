@@ -71,6 +71,9 @@
 // <SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1=> Z-Wave United States, Long Range 1
 // <SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2=> Z-Wave United States, Long Range 2
 // <SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE=> Z-Wave United States, Long Range End Device
+// <SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR1=> Z-Wave European Union, Long Range 1
+// <SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR2=> Z-Wave European Union, Long Range 2
+// <SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR_END_DEVICE=> Z-Wave European Union, Long Range End Device
 // <i> Default: SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU
 #define SL_RAIL_UTIL_INIT_PROTOCOL_INSTANCE_DEFAULT  SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU
 // <o SL_RAIL_UTIL_INIT_PROTOCOL_PROPRIETARY_INSTANCE_INDEX> Proprietary Radio Config Index (if Proprietary radio config selected, use index X of channelConfigs[X])

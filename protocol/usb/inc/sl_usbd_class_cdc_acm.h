@@ -253,6 +253,27 @@ sl_status_t sl_usbd_cdc_acm_read(uint8_t  subclass_nbr,
                                  uint32_t *p_xfer_len);
 
 /****************************************************************************************************//**
+ * @brief    Receive data on the CDC ACM serial emulation subclass asynchronously.
+ *
+ * @param    subclass_nbr    CDC ACM serial emulation subclass instance number.
+ *
+ * @param    p_buf           Pointer to the destination buffer to receive data.
+ *
+ * @param    buf_len         Number of octets to receive.
+ *
+ * @param    async_fnct      Function that will be invoked upon completion of receive operation.
+ *
+ * @param    p_async_arg     Pointer to the argument that will be passed as parameter of 'async_fnct'.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_acm_read_async(uint8_t                      subclass_nbr,
+                                       uint8_t                      *p_buf,
+                                       uint32_t                     buf_len,
+                                       sl_usbd_cdc_async_function_t async_fnct,
+                                       void                         *p_async_arg);
+
+/****************************************************************************************************//**
  * @brief    Send data on the CDC ACM serial emulation subclass.
  *
  * @param    subclass_nbr    CDC ACM serial emulation subclass instance number.
@@ -274,6 +295,27 @@ sl_status_t sl_usbd_cdc_acm_write(uint8_t  subclass_nbr,
                                   uint32_t buf_len,
                                   uint16_t timeout,
                                   uint32_t *p_xfer_len);
+
+/****************************************************************************************************//**
+ * @brief    Send data on the CDC ACM serial emulation subclass asynchronously.
+ *
+ * @param    subclass_nbr    CDC ACM serial emulation subclass instance number.
+ *
+ * @param    p_buf           Pointer to the buffer of data that will be transmitted.
+ *
+ * @param    buf_len         Number of octets to transmit.
+ *
+ * @param    async_fnct      Function that will be invoked upon completion of transfer operation.
+ *
+ * @param    p_async_arg     Pointer to the argument that will be passed as parameter of 'async_fnct'.
+ *
+ * @return   Returns SL_STATUS_OK on success or another SL_STATUS code on failure.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_acm_write_async(uint8_t                      subclass_nbr,
+                                        uint8_t                      *p_buf,
+                                        uint32_t                     buf_len,
+                                        sl_usbd_cdc_async_function_t async_fnct,
+                                        void                         *p_async_arg);
 
 /****************************************************************************************************//**
  * @brief    Return the state of control lines.

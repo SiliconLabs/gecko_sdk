@@ -46,9 +46,13 @@ config_file:
 - path: "platform/emdrv/dmadrv/config/s2_16ch/dmadrv_config.h"
   condition: [ 'device_sdid_220' ]
 - path: "platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h"
+  condition: [ 'device_sdid_225' ]
+- path: "platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h"
   condition: [ 'device_sdid_230' ]
 - path: "platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h"
   condition: [ 'device_sdid_235' ]
+- path: "platform/emdrv/dmadrv/config/s3_8ch/dmadrv_config.h"
+  condition: [ 'device_sdid_300' ]
 source:
 - path: "platform/emdrv/dmadrv/src/dmadrv.c"
 - path: "platform/emdrv/dmadrv/src/dmactrl.c"
@@ -64,11 +68,13 @@ provides:
 requires:
   - name: "emlib_dma"
     condition: ["device_has_dma"]
-  - name: "emlib_ldma"
+  - name: lld_ldma
     condition: ["device_has_ldma"]
   - name: "emlib_cmu"
+    condition: [device_series_0]
   - name: "ecode"
   - name: "enum"
+  - name: "emlib_core"
 documentation:
     docset: gecko-platform
     document: driver/api/group-dmadrv

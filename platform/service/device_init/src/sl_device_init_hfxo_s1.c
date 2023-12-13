@@ -65,7 +65,7 @@ sl_status_t sl_device_init_hfxo(void)
   }
 
   if (ctune != -1) {
-    hfxoInit.ctuneSteadyState = ctune;
+    hfxoInit.ctuneSteadyState = (uint16_t)ctune;
   }
 
   SystemHFXOClockSet(SL_DEVICE_INIT_HFXO_FREQ);

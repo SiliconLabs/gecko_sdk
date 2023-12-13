@@ -1,0 +1,53 @@
+project_name: bootloader-uart-xmodem-zwave
+package: Z-Wave
+quality: production
+label: Bootloader - NCP UART XMODEM (For Z-Wave Applications)
+description: >
+  Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu,
+  where an XMODEM transfer can be started by sending ASCII '1', or the
+  application can be started by sending ASCII '2'. This is the recommended UART
+  bootloader for the EmberZNet and Connect protocol stacks.
+category: Z-Wave|Bootloaders
+
+filter:
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "MCU"
+    value: ["Bootloader"]
+
+component:
+  - id: bootloader_core
+  - id: bootloader_crc
+  - id: bootloader_aes_sha_ecdsa
+  - id: bootloader_delay_driver
+  - id: bootloader_image_parser
+  - id: bootloader_token_management
+  - id: bootloader_serial_driver
+  - id: bootloader_xmodem_parser
+  - id: bootloader_uart_xmodem
+  - id: bootloader_debug
+  - id: bootloader_app_upgrade_version
+
+requires:
+  - name: bootloader_gbl_compression_lz4
+
+configuration:
+  - name: SL_VCOM_ENABLE
+    value: 1
+  - name: BOOTLOADER_ENFORCE_SIGNED_UPGRADE
+    value: 1
+  - name: BOOTLOADER_WRITE_DISABLE
+    value: 1
+  - name: BOOTLOADER_VERSION_MAIN_CUSTOMER
+    value: 1
+  - name: APPLICATION_VERIFICATION_SKIP_EM4_RST
+    value: 1
+  - name: BOOTLOADER_FALLBACK_LEGACY_KEY
+    value: 0
+    
+post_build:
+  profile: bootloader

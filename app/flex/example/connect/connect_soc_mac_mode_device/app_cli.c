@@ -31,6 +31,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "em_chip.h"
+#include "em_cmu.h"
 #include "app_log.h"
 #include "app_common.h"
 #include "app_init.h"

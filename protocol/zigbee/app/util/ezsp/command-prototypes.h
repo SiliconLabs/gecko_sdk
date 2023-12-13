@@ -1786,13 +1786,6 @@ EmberStatus ezspGetCurrentSecurityState(
   // Return: The security configuration in use by the stack.
   EmberCurrentSecurityState *state);
 
-// Gets a Security Key based on the passed key type.
-// Return: The success or failure code of the operation.
-EmberStatus ezspGetKey(
-  EmberKeyType keyType,
-  // Return: The structure containing the key and its associated data.
-  EmberKeyStruct *keyStruct);
-
 // Exports a key from security manager based on passed context.
 void ezspExportKey(
   // Metadata to identify the requested key.
@@ -1818,30 +1811,6 @@ void ezspSwitchNetworkKeyHandler(
   // The sequence number of the new network key.
   uint8_t sequenceNumber);
 
-// Retrieves the key table entry at the specified index.
-// Return: EMBER_TABLE_ENTRY_ERASED if the index is an erased key entry.
-// EMBER_INDEX_OUT_OF_RANGE if the passed index is not valid. EMBER_SUCCESS on
-// success.
-EmberStatus ezspGetKeyTableEntry(
-  // The index of the entry in the table to retrieve.
-  uint8_t index,
-  // Return: The results retrieved by the stack.
-  EmberKeyStruct *keyStruct);
-
-// Sets the key table entry at the specified index.
-// Return: EMBER_KEY_INVALID if the passed key data is using one of the reserved
-// key values. EMBER_INDEX_OUT_OF_RANGE if passed index is not valid.
-// EMBER_SUCCESS on success.
-EmberStatus ezspSetKeyTableEntry(
-  // The index of the entry in the table to set.
-  uint8_t index,
-  // The address of the partner device that shares the key
-  EmberEUI64 address,
-  // This bool indicates whether the key is a Link or a Master Key
-  bool linkKey,
-  // The actual key data associated with the table entry.
-  EmberKeyData *keyData);
-
 // This function searches through the Key Table and tries to find the entry that
 // matches the passed search criteria.
 // Return: This indicates the index of the entry that matches the search
@@ -1853,22 +1822,6 @@ uint8_t ezspFindKeyTableEntry(
   // This indicates whether to search for an entry that contains a link key
   // or a master key. true means to search for an entry with a Link Key.
   bool linkKey);
-
-// This function updates an existing entry in the key table or adds a new one.
-// It first searches the table for an existing entry that matches the passed
-// EUI64 address. If no entry is found, it searches for the first free entry. If
-// successful, it updates the key data and resets the associated incoming frame
-// counter. If it fails to find an existing entry and no free one exists, it
-// returns a failure.
-// Return: The success or failure error code of the operation.
-EmberStatus ezspAddOrUpdateKeyTableEntry(
-  // The address of the partner device associated with the Key.
-  EmberEUI64 address,
-  // An indication of whether this is a Link Key (true) or Master Key
-  // (false)
-  bool linkKey,
-  // The actual key data associated with the entry.
-  EmberKeyData *keyData);
 
 // This function sends an APS TransportKey command containing the current trust
 // center link key. The node to which the command is sent is specified via the
@@ -1939,38 +1892,8 @@ void ezspZigbeeKeyEstablishmentHandler(
   // establishment failed.
   EmberKeyStatus status);
 
-// This is a function to add a temporary link key for a joining device. The key
-// will get timed out after a defined timeout period if the device does not
-// update its link key with the Trust Center.
-// Return: The success or failure of adding a transient key.
-EmberStatus ezspAddTransientLinkKey(
-  // This is the IEEE address of the partner that the device successfully
-  // established a key with. This value is all zeros on a failure.
-  EmberEUI64 partner,
-  // The transient key data for the joining device.
-  EmberKeyData *transientKey);
-
 // Clear all of the transient link keys from RAM.
 void ezspClearTransientLinkKeys(void);
-
-// This is a function to get the transient link key structure in the transient
-// key table. The EUI of the passed in key structure is searched and, if a match
-// is found, the rest of the key structure is filled in.
-// Return: The success or failure of getting the transient key.
-EmberStatus ezspGetTransientLinkKey(
-  // The IEEE address to look up the transient key for.
-  EmberEUI64 eui,
-  // Return: The transient key structure that is filled in upon success.
-  EmberTransientKeyData *transientKeyData);
-
-// Gets the transient link key at the index specified in the transient key
-// table.
-// Return: The success or failure of getting the transient key.
-EmberStatus ezspGetTransientKeyTableEntry(
-  // The index in the transient key table to fetch data from.
-  uint8_t index,
-  // Return: The transient key structure that is filled in upon success.
-  EmberTransientKeyData *transientKeyData);
 
 // Retrieve information about the current and alternate network key, excluding
 // their contents.
@@ -2923,41 +2846,9 @@ EmberStatus ezspGpSinkCommission(
 // Clears all entries within the translation table.
 void ezspGpTranslationTableClear(void);
 
-//------------------------------------------------------------------------------
-// Secure EZSP Frames
-//------------------------------------------------------------------------------
-
-// Set the Security Key of the Secure EZSP Protocol.
-// Return: An EzspStatus value indicating success or the reason for failure.
-EzspStatus ezspSetSecurityKey(
-  // The key to use for the Secure EZSP Protocol.
-  EmberKeyData *key,
-  // The security type to be used for the Secure EZSP Protocol.
-  SecureEzspSecurityType securityType);
-
-// Set the Host-side Security Parameters of the Secure EZSP Protocol.
-// Return: An EzspStatus value indicating success or the reason for failure.
-EzspStatus ezspSetSecurityParameters(
-  // The security level to be used for the Secure EZSP communication.
-  SecureEzspSecurityLevel securityLevel,
-  // The Host-side random number to be used for Session ID generation.
-  SecureEzspRandomNumber *hostRandomNumber,
-  // Return: The NCP-side random number to be used for Session ID
-  // generation.
-  SecureEzspRandomNumber *returnNcpRandomNumber);
-
-// Resets security key and security parameters of the Secure EZSP protocol. Node
-// leaves the network before doing so for security reasons.
-// Return: An EzspStatus value indicating success or the reason for failure.
-EzspStatus ezspResetToFactoryDefaults(void);
-
-// Get the security key status on the NCP: whether the security key is set or
-// not and what the security type is.
-// Return: An EzspStatus value indicating whether the security key is set or
-// not.
-EzspStatus ezspGetSecurityKeyStatus(
-  // Return: The security type set at NCP for the Secure EZSP Protocol.
-  SecureEzspSecurityType *returnSecurityType);
+// Return number of active entries in sink table.
+// Return: Number of active entries in sink table.
+uint8_t ezspGpSinkTableGetNumberOfActiveEntries(void);
 
 //------------------------------------------------------------------------------
 // Token Interface Frames

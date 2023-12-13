@@ -187,3 +187,8 @@ void emberGpSinkTableSetSecurityFrameCounter(uint8_t index,
   (void)index;
   (void)sfc;
 }
+
+uint8_t emberGpSinkTableGetNumberOfActiveEntries(void)
+{
+  return 0;
+}

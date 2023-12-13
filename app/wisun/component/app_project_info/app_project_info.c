@@ -141,6 +141,10 @@
 #define __calc_freertos_full_version(__major, __minor, __patch) \
   ((uint32_t)(__major) * 10000UL + (uint32_t)(__minor) * 100UL + (uint32_t)(__patch))
 
+/// Calculate App Full version
+#define __calc_app_full_version(__major, __minor, __patch) \
+  ((uint32_t)(__major) * 10000UL + (uint32_t)(__minor) * 100UL + (uint32_t)(__patch))
+
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -350,6 +354,22 @@ static app_project_info_version_t _versions[] = {
     .patch   = { .available = true, .val = MBEDTLS_VERSION_PATCH },
     .version = { .available = true, .val = MBEDTLS_VERSION_NUMBER },
   #endif
+    .initializer = NULL,
+    .next = NULL
+  },
+#endif
+
+#if APP_PROJECT_INFO_APP_VERSION_ENABLED
+  {
+    .id   = APP_PROJECT_INFO_VERSION_ID_APP,
+    .name = "App",
+    .info = "Full version: major * 10000 + minor * 100 + patch",
+    .major   = { .available = true, .val = APP_PROJECT_INFO_APP_VERSION_MAJOR },
+    .minor   = { .available = true, .val = APP_PROJECT_INFO_APP_VERSION_MINOR },
+    .patch   = { .available = true, .val = APP_PROJECT_INFO_APP_VERSION_PATCH },
+    .version = { .available = true, .val = __calc_app_full_version(APP_PROJECT_INFO_APP_VERSION_MAJOR,
+                                                                   APP_PROJECT_INFO_APP_VERSION_MINOR,
+                                                                   APP_PROJECT_INFO_APP_VERSION_PATCH) },
     .initializer = NULL,
     .next = NULL
   },

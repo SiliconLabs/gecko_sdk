@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -44,18 +44,28 @@
 #endif
 
 // Use (user defined) application config file to define OpenThread configurations
-#ifdef   SL_OPENTHREAD_APPLICATION_CONFIG_FILE
+#ifdef SL_OPENTHREAD_APPLICATION_CONFIG_FILE
 #include SL_OPENTHREAD_APPLICATION_CONFIG_FILE
 #endif
 
 // Use (pre-defined) stack features config file available for applications built
 // with Simplicity Studio
-#ifdef   SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
+#ifdef SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
 #include SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
 #endif
 
 #include "board_config.h"
-#include "em_msc.h"
+#include "em_device.h"
+
+/**
+ * @def OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE
+ *
+ * Allow triggering a platform reset to bootloader mode, if supported.
+ *
+ */
+#if defined(SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT)
+#define OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE 1
+#endif
 
 /**
  * @def OPENTHREAD_CONFIG_PLATFORM_MAC_KEYS_EXPORTABLE_ENABLE
@@ -118,7 +128,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE 	23
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE 23
 #endif
 
 /**
@@ -128,7 +138,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN 	0
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN 0
 #endif
 
 /**
@@ -138,7 +148,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX 	24
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX 24
 #endif
 
 /**
@@ -148,7 +158,7 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK 	0x1ffffff
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK 0x1ffffff
 #endif
 
 /**
@@ -180,6 +190,24 @@
  */
 #ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
 #define OPENTHREAD_CONFIG_UPTIME_ENABLE OPENTHREAD_FTD
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT
+ *
+ * The default supervision check timeout interval (in seconds) used by a device in child state. Set to zero to disable
+ * the supervision check process on the child.
+ *
+ * The check timeout interval can be changed using `otChildSupervisionSetCheckTimeout()`.
+ *
+ * If the sleepy child does not hear from its parent within the specified timeout interval, it initiates the re-attach
+ * process (MLE Child Update Request/Response exchange with its parent).
+ *
+ * Setting to zero by default as this is an optional feature that can lead to unexpected detach behavior.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT
+#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT 0
 #endif
 
 /**
@@ -272,7 +300,8 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE
-#define OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2))
+#define OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE \
+    (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2))
 #endif
 
 /**
@@ -287,12 +316,12 @@
 #endif
 
 /**
-  * @def OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_TIMING_ENABLE
-  *
-  * Define to 1 to enable software reception target time logic.
-  * RCPs only.
-  *
-  */
+ * @def OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_TIMING_ENABLE
+ *
+ * Define to 1 to enable software reception target time logic.
+ * RCPs only.
+ *
+ */
 #ifndef OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_TIMING_ENABLE
 #define OPENTHREAD_CONFIG_MAC_SOFTWARE_RX_TIMING_ENABLE 0
 #endif
@@ -331,11 +360,11 @@
 #endif
 
 /**
-  * @def OPENTHREAD_CONFIG_TCP_ENABLE
-  *
-  * Define as 1 to enable TCPlp (low power TCP defined in Thread spec).
-  *
-  */
+ * @def OPENTHREAD_CONFIG_TCP_ENABLE
+ *
+ * Define as 1 to enable TCPlp (low power TCP defined in Thread spec).
+ *
+ */
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE
 #define OPENTHREAD_CONFIG_TCP_ENABLE 0
 #endif
@@ -394,14 +423,14 @@
 #endif
 
 /**
-* @def OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET
-*
-* This is the offset in ITS where the persistent keys are stored.
-* For Silabs OT applications, this needs to be in the range of 
-* 0x20000 to 0x2ffff.
-*
-*/
-#define OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET  0x20000
+ * @def OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET
+ *
+ * This is the offset in ITS where the persistent keys are stored.
+ * For Silabs OT applications, this needs to be in the range of
+ * 0x20000 to 0x2ffff.
+ *
+ */
+#define OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET 0x20000
 
 /**
  * @def OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
@@ -413,22 +442,26 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+#if OPENTHREAD_RADIO
+#define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 0
+#else
 #define OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE 1
+#endif
 #endif
 
 /**
-  * @def OPENTHREAD_CONFIG_CRYPTO_LIB
-  *
-  * Selects the crypto backend library for OpenThread.
-  *
-  * There are several options available, but we enable PSA if key references are
-  * available.  Otherwise, mbedTLS is used as default (see src/core/config/crypto.h)
-  *
-  * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
-  * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
-  * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_PLATFORM
-  *
-  */
+ * @def OPENTHREAD_CONFIG_CRYPTO_LIB
+ *
+ * Selects the crypto backend library for OpenThread.
+ *
+ * There are several options available, but we enable PSA if key references are
+ * available.  Otherwise, mbedTLS is used as default (see src/core/config/crypto.h)
+ *
+ * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
+ * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+ * - @sa OPENTHREAD_CONFIG_CRYPTO_LIB_PLATFORM
+ *
+ */
 #if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
 #define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 #endif
@@ -520,7 +553,7 @@
  *
  */
 #ifndef SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
-#define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE  32
+#define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE 32
 #endif
 
 #endif // OPENTHREAD_CORE_EFR32_CONFIG_H_

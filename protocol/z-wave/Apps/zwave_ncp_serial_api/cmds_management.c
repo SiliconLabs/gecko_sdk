@@ -45,14 +45,11 @@
 #define MAX( x, y ) ( ( x ) > ( y ) ? ( x ) : ( y ) )
 #endif // MAX
 
-void func_id_serial_api_get_init_data(uint8_t inputLength,
-                                      const uint8_t *pInputBuffer,
+void func_id_serial_api_get_init_data(__attribute__((unused)) uint8_t inputLength,
+                                      __attribute__((unused)) const uint8_t *pInputBuffer,
                                       uint8_t *pOutputBuffer,
                                       uint8_t *pOutputLength)
 {
-  UNUSED(inputLength);
-  UNUSED(pInputBuffer);
-
   *pOutputLength = 5;
   BYTE_IN_AR(pOutputBuffer, 0) = SERIAL_API_VER;
   BYTE_IN_AR(pOutputBuffer, 1) = 0; /* Flag byte - default: controller api, no timer support, no primary, no SUC */
@@ -89,13 +86,11 @@ void func_id_serial_api_get_init_data(uint8_t inputLength,
 }
 
 #ifdef ZW_CONTROLLER
-void func_id_serial_api_get_LR_nodes(uint8_t inputLength,
+void func_id_serial_api_get_LR_nodes(__attribute__((unused)) uint8_t inputLength,
                                      const uint8_t *pInputBuffer,
                                      uint8_t *pOutputBuffer,
                                      uint8_t *pOutputLength)
 {
-   UNUSED(inputLength);
-
   //RES | 0xDA | MORE_NODES | BITMASK_OFFSET | BITMASK_LEN | BITMASK_ARRAY
 
   /*
@@ -133,14 +128,14 @@ zpal_tx_power_t
 GetMaxSupportedTxPower(void)
 {
   const SApplicationHandles *pAppHandles = ZAF_getAppHandle();
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_ZW_GET_TX_POWER_MAX_SUPPORTED;
-
+  SZwaveCommandPackage CommandPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_ZW_GET_TX_POWER_MAX_SUPPORTED
+  };
   // Put the Command on queue (and dont wait for it, queue must be empty)
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(pAppHandles->pZwCommandQueue, (uint8_t *)&CommandPackage, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage result;
+    SZwaveCommandStatusPackage result = { 0 };
     if (GetCommandResponse(&result, EZWAVECOMMANDSTATUS_ZW_GET_TX_POWER_MAX_SUPPORTED))
     {
       return result.Content.GetTxPowerMaximumSupported.tx_power_max_supported;
@@ -373,6 +368,7 @@ void func_id_serial_api_setup(uint8_t inputLength,
     {
       /* Set the global Node ID base type if input value is valid */
         nodeIdBaseType = pInputBuffer[1];
+        SaveApplicationNodeIdBaseType(nodeIdBaseType);
         cmdRes = true;
     }
     BYTE_IN_AR(pOutputBuffer, i++) = cmdRes;
@@ -430,12 +426,11 @@ void func_id_serial_api_setup(uint8_t inputLength,
   *pOutputLength = i;
 }
 
-void func_id_serial_api_get_nvr(uint8_t inputLength,
+void func_id_serial_api_get_nvr(__attribute__((unused)) uint8_t inputLength,
                                 const uint8_t *pInputBuffer,
                                 uint8_t *pOutputBuffer,
                                 uint8_t *pOutputLength)
 {
-    UNUSED(inputLength);
     uint8_t offset  = pInputBuffer[0];
     uint8_t bLength = pInputBuffer[1];
     uint8_t  dataLen = 0;
@@ -510,7 +505,7 @@ bool InitiateShutdown( ZW_Void_Callback_t pCallback)
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(pAppHandles->pZwCommandQueue, (uint8_t *)&shutdown, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage result;
+    SZwaveCommandStatusPackage result = { 0 };
     if (GetCommandResponse(&result, EZWAVECOMMANDSTATUS_ZW_INITIATE_SHUTDOWN))
     {
       return result.Content.InitiateShutdownStatus.result;

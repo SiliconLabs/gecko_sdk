@@ -42,12 +42,6 @@
 // </e>
 
 // <h> Project Configuration
-// <q SL_RAIL_UTIL_INIT_BLE_SUPPORT_BLE_ENABLE> Enable Bluetooth Support
-// <i> Default: 0
-#define SL_RAIL_UTIL_INIT_BLE_SUPPORT_BLE_ENABLE 0
-// <q SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE> Enable Scheduler Support (for DMP)
-// <i> Default: 0
-#define SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE 1
 // <q SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_BLE_ENABLE> Enable RAIL Init Complete Callback
 // <i> Default: 0
 #define SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_BLE_ENABLE 1

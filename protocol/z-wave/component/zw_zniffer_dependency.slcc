@@ -1,0 +1,38 @@
+id: zw_zniffer_dependency
+label: Z-Wave Zniffer Application Dependency
+category: Z-Wave
+description: >
+  This component contains header files because of the zniffer component dependencies.
+package: Z-Wave
+quality: production
+include:
+ - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zw_zaf/s2
+   file_list:
+     - path: zaf_config.h
+ - path: protocol/z-wave/ZAF/CommandClasses/Common
+   file_list:
+     - path: CC_Common.h
+ - path: protocol/z-wave/ZAF/TransportLayer/inc
+   file_list:
+     - path: zaf_transport_tx.h
+ - path: protocol/z-wave/ZAF/CommandClasses/MultiChan/inc
+   file_list:
+     - path: multichannel.h
+ - path: protocol/z-wave/ZAF/configuration/inc
+   file_list:
+     - path: zaf_config_api.h
+ - path: protocol/z-wave/ZAF/ApplicationUtilities/CCListGenerator
+   file_list:
+     - path: zaf_cc_list_generator.h
+ - path: protocol/z-wave/ZAF/CommandClasses/Association/inc
+   file_list:
+     - path: association_plus_base.h
+ - path: protocol/z-wave/ZAF/ApplicationUtilities/CCListGenerator
+   file_list:
+     - path: zaf_cc_list_generator.h
+ - path: protocol/z-wave/ZAF/CommandClasses/Association/config
+   file_list:
+     - path: cc_association_config.h
+ - path: protocol/z-wave/ZAF/CommandClasses/Supervision/inc
+   file_list:
+     - path: CC_Supervision.h

@@ -34,8 +34,8 @@
 #include "neighbor_table.hpp"
 
 #include "common/code_utils.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
+#include "instance/instance.hpp"
 #include "thread/dua_manager.hpp"
 
 namespace ot {
@@ -165,6 +165,15 @@ Neighbor *NeighborTable::FindNeighbor(const Ip6::Address &aIp6Address, Neighbor:
 
 exit:
     return neighbor;
+}
+
+Neighbor *NeighborTable::FindRxOnlyNeighborRouter(const Mac::ExtAddress &aExtAddress)
+{
+    Mac::Address macAddress;
+
+    macAddress.SetExtended(aExtAddress);
+
+    return FindRxOnlyNeighborRouter(macAddress);
 }
 
 Neighbor *NeighborTable::FindRxOnlyNeighborRouter(const Mac::Address &aMacAddress)
@@ -309,6 +318,13 @@ void NeighborTable::Signal(Event aEvent, const Neighbor &aNeighbor)
                                                      DuaManager::kAddressRemoved);
 #endif
         break;
+
+#if OPENTHREAD_FTD
+    case kRouterAdded:
+    case kRouterRemoved:
+        Get<RouterTable>().SignalTableChanged();
+        break;
+#endif
 
     default:
         break;

@@ -457,18 +457,17 @@ uint32_t sl_iperf_formatted_bandwidth_from_bytes(const sl_iperf_opt_bw_format fo
   }
 }
 
-#if 1
 uint32_t sl_iperf_bytes_from_formatted_bandwidth(const sl_iperf_opt_bw_format format, const uint32_t amount_bandwidth)
 {
   switch (format) {
     case SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC:
       return amount_bandwidth / SL_IPERF_DATA_BYTE_TO_BIT_ML;
     case SL_IPERF_OPT_BW_FORMAT_KBITS_PER_SEC:
-      return amount_bandwidth / SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_DATA_KBIT_TO_BIT_ML;
+      return amount_bandwidth * SL_IPERF_DATA_KBIT_TO_BIT_ML / SL_IPERF_DATA_BYTE_TO_BIT_ML;
     case SL_IPERF_OPT_BW_FORMAT_MBITS_PER_SEC:
-      return amount_bandwidth / SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_DATA_MBIT_TO_BIT_ML;
+      return amount_bandwidth * SL_IPERF_DATA_MBIT_TO_BIT_ML / SL_IPERF_DATA_BYTE_TO_BIT_ML;
     case SL_IPERF_OPT_BW_FORMAT_GBITS_PER_SEC:
-      return amount_bandwidth / SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_DATA_GBIT_TO_BIT_ML;
+      return amount_bandwidth * SL_IPERF_DATA_GBIT_TO_BIT_ML / SL_IPERF_DATA_BYTE_TO_BIT_ML;
     case SL_IPERF_OPT_BW_FORMAT_BYTES_PER_SEC:
       return amount_bandwidth;
     case SL_IPERF_OPT_BW_FORMAT_KBYTES_PER_SEC:
@@ -481,7 +480,6 @@ uint32_t sl_iperf_bytes_from_formatted_bandwidth(const sl_iperf_opt_bw_format fo
       return 0LU;
   }
 }
-#endif
 
 void sl_iperf_test_fill_buffer_with_pattern(sl_iperf_test_t * const test)
 {
@@ -702,7 +700,7 @@ static void _calculate_formatted_bw(const sl_iperf_opt_bw_format bw_format,
   }
 
   byteps_val = (uint32_t) (((uint64_t) bytes * SL_IPERF_TIME_S_TO_MS_ML) / time_ms);
-  bitps_val = (byteps_val * SL_IPERF_DATA_BYTE_TO_BIT_ML);
+  bitps_val = (uint32_t) (((uint64_t) bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_TIME_S_TO_MS_ML) / time_ms);
 
   switch (bw_format) {
     case SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC:
@@ -756,7 +754,7 @@ bool sl_iperf_test_check_time(const sl_iperf_test_t * const test)
 {
 #if (0U < SL_IPERF_MAX_TEST_TIMEOUT_MS)
   return (bool)((sl_iperf_get_timestamp_ms() - test->statistic.ts_start_ms)
-                 < (test->opt.duration_ms + SL_IPERF_MAX_TEST_TIMEOUT_MS));
+                < (test->opt.duration_ms + SL_IPERF_MAX_TEST_TIMEOUT_MS));
 #else
   return true;
 #endif

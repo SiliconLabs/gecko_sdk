@@ -30,6 +30,8 @@
 #ifndef EM_CORE_GENERIC_H
 #define EM_CORE_GENERIC_H
 
+#include <stdint.h>
+
 /***************************************************************************//**
  * @addtogroup core
  * @{

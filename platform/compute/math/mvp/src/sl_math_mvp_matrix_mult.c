@@ -140,8 +140,11 @@ sl_status_t sl_math_mvp_matrix_mult_f16(const sl_math_matrix_f16_t *input_a, con
   }
   sli_mvp_pb_end_loop(p);
 
-  sli_mvp_pb_execute_program(p);
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
   #else
+
   sli_mvp_cmd_enable();
 
   // Program array controllers.
@@ -199,10 +202,7 @@ sl_status_t sl_math_mvp_matrix_mult_f16(const sl_math_matrix_f16_t *input_a, con
 
   // Start program.
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
-
   #endif
 
-  sli_mvp_cmd_wait_for_completion();
-
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return sli_mvp_cmd_wait_for_completion();
 }

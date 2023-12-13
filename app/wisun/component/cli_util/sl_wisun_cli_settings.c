@@ -426,7 +426,7 @@ sl_status_t app_settings_get_ip_address(char *value_str,
                                         const app_settings_entry_t *entry)
 {
   sl_status_t ret;
-  sl_wisun_ip_address_t address;
+  in6_addr_t address;
   sl_wisun_ip_address_type_t address_type = SL_WISUN_IP_ADDRESS_TYPE_GLOBAL;
   (void)key_str;
 

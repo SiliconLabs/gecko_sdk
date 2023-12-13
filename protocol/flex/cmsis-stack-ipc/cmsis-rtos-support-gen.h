@@ -17,7 +17,6 @@
 // *** Generated file. Do not edit! ***
 // vNCP Version: 1.0
 
-#include PLATFORM_HEADER
 #include "ember-types.h"
 
 void emAfPluginCmsisStackStatusHandler(EmberStatus status);

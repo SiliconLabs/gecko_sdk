@@ -58,7 +58,7 @@ void app_init(void)
   GPIO_PinModeSet((GPIO_Port_TypeDef)SWDIO_PORT, SWDIO_PIN, gpioModePushPull, 1);
 
   // Initialize GPIO for RESET pin
-  GPIO_PinModeSet((GPIO_Port_TypeDef)RESET_PORT, RESET_PIN, gpioModePushPull, 1);
+  GPIO_PinModeSet((GPIO_Port_TypeDef)RESET_PORT, RESET_PIN, gpioModeWiredAnd, 1);
 }
 
 // -----------------------------------------------------------------------------

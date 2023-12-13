@@ -50,7 +50,7 @@ extern "C" {
  * }
  *
  * void
- * TXHandlerFromISR(zpal_radio_event_t txStatus)
+ * TXHandlerFromISR(zpal_radio_event_t txEvent)
  * {
  *   // Tx complete handle in ISR context
  * }
@@ -128,15 +128,15 @@ extern "C" {
  * }
  *
  * void
- * TXHandlerFromISR(zpal_radio_event_t txStatus)
+ * TXHandlerFromISR(zpal_radio_event_t txEvent)
  * {
  *   uint8_t status;
  *
- *   if ((ZPAL_RADIO_EVENT_TX_FAIL == txStatus) || (ZPAL_RADIO_EVENT_TX_FAIL_LBT == txStatus))
+ *   if ((ZPAL_RADIO_EVENT_TX_FAIL == txEvent) || (ZPAL_RADIO_EVENT_TX_FAIL_LBT == txEvent))
  *   {
  *     status = TX_FAILED;
  *   }
- *   else if (txStatus & ZPAL_RADIO_EVENT_FLAG_BEAM)
+ *   else if (txEvent & ZPAL_RADIO_EVENT_FLAG_BEAM)
  *   {
  *     status = TX_BEAM_SUCCESS;
  *   }
@@ -400,21 +400,29 @@ typedef struct
  */
 typedef enum
 {
-  ZPAL_RADIO_EVENT_IDLE,
-  ZPAL_RADIO_EVENT_RX,                          ///< Frame received
-  ZPAL_RADIO_EVENT_TX,                          ///< Transmit complete
-  ZPAL_RADIO_EVENT_RX_FLIRS,
-  ZPAL_RADIO_EVENT_RX_BEAM,                     ///< Beam received
+  ZPAL_RADIO_EVENT_NONE,
+  ZPAL_RADIO_EVENT_RX_COMPLETE,                 ///< Frame received
+  ZPAL_RADIO_EVENT_TX_COMPLETE,                 ///< Transmit complete
+  ZPAL_RADIO_EVENT_RX_BEAM_COMPLETE,            ///< Beam received
+  ZPAL_RADIO_EVENT_TX_BEAM_COMPLETE,            ///< Beam sent
   ZPAL_RADIO_EVENT_RX_ABORT,                    ///< Receive was aborted
   ZPAL_RADIO_EVENT_TX_FAIL,                     ///< Transmit failed
   ZPAL_RADIO_EVENT_TX_FAIL_LBT,                 ///< Transmit failed because of an LBT failure
-  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			    ///< Radio needs calibration
+  ZPAL_RADIO_EVENT_RXTX_CALIBRATE,			        ///< Radio needs calibration
   ZPAL_RADIO_EVENT_MASK = 0x1F,
-  ZPAL_RADIO_EVENT_FLAG_PACKET = 0x20,          ///< The frmae was a normal package
-  ZPAL_RADIO_EVENT_FLAG_BEAM = 0x40,            ///< The frame was a wakeup beam
   ZPAL_RADIO_EVENT_FLAG_SUCCESS = 0x80,         ///< Indicates a successful event
+  ZPAL_RADIO_EVENT_TX_TIMEOUT = 254,
   ZPAL_RADIO_EVENT_RX_TIMEOUT = 255             ///< Indicates Rx event started but never completed after 10 secs
 } zpal_radio_event_t;
+
+typedef enum
+{
+  ZPAL_RADIO_STATUS_IDLE,
+  ZPAL_RADIO_STATUS_RX,                         /// RX in progress
+  ZPAL_RADIO_STATUS_TX,                         /// TX in progress
+  ZPAL_RADIO_STATUS_TX_BEAM,                    /// Beam TX in progress
+  ZPAL_RADIO_STATUS_RX_BEAM                     /// Beam RX in progress
+} zpal_radio_status_t;
 
 typedef void (*zpal_radio_callback_t)(zpal_radio_event_t event);
 

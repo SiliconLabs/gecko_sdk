@@ -245,4 +245,4 @@ typedef struct {
 /** @} End of group EFR32BG22_ICACHE */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_ICACHE_H */
+#endif // EFR32BG22_ICACHE_H

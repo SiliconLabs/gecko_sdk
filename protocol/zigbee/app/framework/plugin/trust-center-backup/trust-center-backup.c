@@ -104,7 +104,7 @@ EmberStatus emberTrustCenterImportBackupAndStartNetwork(const EmberAfTrustCenter
       status = emberEraseKeyTableEntry(i);
     } else {
       // Copy key data to a local to get around compiler warning about
-      // passing "const" data into 'emberSetKeyTableEntry()'
+      // passing "const" data into 'sl_zb_sec_man_import_link_key()'
       EmberKeyData key;
       MEMMOVE(emberKeyContents(&key),
               emberKeyContents(&(backup->keyList[i].key)),

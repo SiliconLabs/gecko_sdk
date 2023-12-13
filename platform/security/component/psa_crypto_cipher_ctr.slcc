@@ -11,9 +11,12 @@ requires:
   - name: psa_crypto_aes
   - name: mbedtls_cipher_ctr
     condition: [device_series_0]
+  - name: sl_si91x_psa_aes
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CTR
+    value: PSA_WANT_ALG_CTR 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CTR 1"
     condition: [mbedtls_cipher_ctr]

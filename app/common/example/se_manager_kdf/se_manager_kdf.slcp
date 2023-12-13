@@ -1,7 +1,7 @@
 project_name: se_manager_kdf
 package: platform
 quality: production
-label: Platform - SE Manager Key Derivation (HKDF and PBKDF2)
+label: Platform Security - SoC SE Manager Key Derivation (HKDF and PBKDF2)
 description: >
   This example project demonstrates the key derivation (HKDF and PBKDF2) API of SE Manager.
 category: Example|Platform

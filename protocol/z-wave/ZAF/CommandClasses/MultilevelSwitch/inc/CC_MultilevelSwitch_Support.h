@@ -104,20 +104,20 @@ uint8_t cc_multilevel_switch_get_last_on_value(cc_multilevel_switch_t * p_switch
  *
  * @return uint8_t Min value of all multilevel switches.
  */
-uint8_t cc_multilevel_switch_get_min_value();
+uint8_t cc_multilevel_switch_get_min_value(void);
 
 /**
  * Returns the max value of all multilevel switches.
  *
  * @return uint8_t Max value of all multilevel switches.
  */
-uint8_t cc_multilevel_switch_get_max_value();
+uint8_t cc_multilevel_switch_get_max_value(void);
 
 void cc_multilevel_switch_support_cb(struct cc_multilevel_switch_t * p_switch);
 
-cc_multilevel_switch_t *cc_multilevel_switch_support_config_get_switches();
-uint8_t cc_multilevel_switch_support_config_get_length_switches();
-uint8_t cc_multilevel_switch_support_config_get_default_duration();
+cc_multilevel_switch_t *cc_multilevel_switch_support_config_get_switches(void);
+uint8_t cc_multilevel_switch_support_config_get_length_switches(void);
+uint8_t cc_multilevel_switch_support_config_get_default_duration(void);
 
 /**
  * @}

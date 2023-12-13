@@ -34,7 +34,6 @@
 #include PLATFORM_HEADER
 #include "app_log.h"
 #include "ember.h"
-#include "hal.h"
 #include "app_framework_common.h"
 // Ensure that psa is initialized corretly
 #include "psa/crypto.h"

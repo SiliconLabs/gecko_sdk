@@ -42,6 +42,8 @@
 
 #define EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME "Delayed Join"
 
+#define EMBER_AF_PLUGIN_DELAYED_JOIN_MAXIMUM_TIMEOUT_SUPPORTED_S   65
+
 /**
  * @name API
  * @{
@@ -53,6 +55,18 @@
  *
  */
 void emberAfPluginDelayedJoinSetNetworkKeyTimeout(uint8_t timeout);
+
+/**
+ * @brief Set the activation state of Delayed Join component
+ *
+ * @param enable Indicates whether to activate the Delayed Join functionality
+ */
+void emberAfPluginDelayedJoinActivate(bool activated);
+
+/**
+ * @brief Return true if the TC is delaying in sending the network key to newly joining devices
+ */
+bool emberAfPluginDelayedJoinIsActivated(void);
 
 /** @} */ // end of name APIs
 /** @} */ // end of delayed-join

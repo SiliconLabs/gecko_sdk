@@ -1,3 +1,12 @@
-Zigbee EmberZNet SDK 7.3.2.0
-- Targeted quality improvements and bug fixes
-  
+Zigbee EmberZNet SDK 7.4.0.0
+Zigbee:
+- Zigbee R23 compliance
+- Zigbee Smart Energy 1.4a compliance - production
+- Zigbee GP 1.1.2 compliance - Alpha
+- MG27 support - production
+- Improved support for Secure Vault parts
+- Sleepy support on NCP SPI (non-CPC) applications – Alpha
+Multi-Protocol:
+- Concurrent Listening support (RCP) – MG21 and MG24 
+- Concurrent Multiprotocol (CMP) Zigbee NCP + OpenThread RCP – production
+- Dynamic Multiprotocol Bluetooth + Concurrent Multiprotocol (CMP) Zigbee and OpenThread support on SoC

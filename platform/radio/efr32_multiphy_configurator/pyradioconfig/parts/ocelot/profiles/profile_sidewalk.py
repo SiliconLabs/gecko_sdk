@@ -18,6 +18,26 @@ class ProfileSidewalkOcelot(ProfileSidewalkNerio):
         self._family = "ocelot"
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
+    def buildProfileModel(self, model):
+        # Build profile object and append it to the model
+        profile = self._makeProfile(model)
+
+        # Build inputs
+        self.build_required_profile_inputs(model, profile)
+        self.build_optional_profile_inputs(model, profile)
+        self.build_advanced_profile_inputs(model, profile)
+        self.build_hidden_profile_inputs(model, profile)
+        self.build_deprecated_profile_inputs(model, profile)
+
+        # Build outputs
+        self.build_register_profile_outputs(model, profile)
+        self.build_variable_profile_outputs(model, profile)
+        self.build_info_profile_outputs(model, profile)
+
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
+        return profile
+
     def build_optional_profile_inputs(self, model, profile):
         super().build_optional_profile_inputs(model, profile)
         # Add additional inputs
@@ -42,6 +62,9 @@ class ProfileSidewalkOcelot(ProfileSidewalkNerio):
         IProfile.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
                                    readable_name="Frequency Offset Compensation (AFC) Limit", value_limit_min=0,
                                    value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
+        IProfile.make_hidden_input(profile, model.vars.modulation_index_for_ksi, "Advanced",
+                                   readable_name="Modulation index used by ksi calculation",
+                                   value_limit_min=0.0, value_limit_max=5.0, fractional_digits=2)
 
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_ocelot(model, profile)

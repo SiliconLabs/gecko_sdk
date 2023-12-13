@@ -194,4 +194,4 @@ typedef struct {
 /** @} End of group MGM21_LFRCO */
 /** @} End of group Parts */
 
-#endif /* MGM21_LFRCO_H */
+#endif // MGM21_LFRCO_H

@@ -19,8 +19,8 @@ include:
     - path: "sl_wisun_udp_client.h"
 
 requires:
-  - name: "sl_wisun_socket"
   - name: "sl_wisun_app_core"
+  - name: "sl_wisun_trace_util"
 
 ui_hints:
   visibility: never  

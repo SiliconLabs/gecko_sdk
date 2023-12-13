@@ -75,8 +75,8 @@
 
 #define NO_FLAGS              0      ///< No flags used for message
 #define IMMEDIATE             0      ///< Immediate transition time is 0 seconds
-#define NO_CALLBACK_DATA      (void *)NULL   ///< Callback has no parameters
-#define HIGH_PRIORITY         0              ///< High Priority
+#define NO_CALLBACK_DATA      NULL   ///< Callback has no parameters
+#define HIGH_PRIORITY         0      ///< High Priority
 /// Values greater than max 37200000 are treated as unknown remaining time
 #define UNKNOWN_REMAINING_TIME      40000000
 

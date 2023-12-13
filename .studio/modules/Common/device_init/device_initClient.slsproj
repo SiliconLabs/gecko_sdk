@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="com.silabs.sdk.exx32.common.device_init" label="device_init SW" contentRoot="$(sdkInstallationPath:default())/platform/service/device_init">
+  <property key="category" value="efm32|Common"/>
+  <folder name="device_init" uri="src" includeAllFiles="true" />
+  <includePath uri="inc" />
+</project>

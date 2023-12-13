@@ -16,10 +16,8 @@
 #include "zaf_event_distributor_soc.h"
 
 static void
-user_code_app_event_handler(const uint8_t event, const void *data)
+user_code_app_event_handler(__attribute__((unused)) const uint8_t event, __attribute__((unused)) const void *data)
 {
-  UNUSED(data);
-
   switch (event) {
     case CC_USER_CODE_EVENT_VALIDATE_VALID:
       zaf_event_distributor_enqueue_cc_event(COMMAND_CLASS_DOOR_LOCK, CC_DOOR_LOCK_CODE_EVENT_TOGGLE, NULL);

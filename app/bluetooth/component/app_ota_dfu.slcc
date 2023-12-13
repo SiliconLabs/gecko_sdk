@@ -11,32 +11,26 @@ quality: production
 root_path: app/bluetooth/common/app_ota_dfu
 tag:
   - No-Code
-
 config_file:
   - path: app_ota_dfu.xml
     directory: btconf
-
 source:
   - path: sl_bt_app_ota_dfu.c
   - path: rtos/sl_bt_app_ota_dfu_freertos.c
     condition:
-      - "freertos"
+      - freertos
   - path: rtos/sl_bt_app_ota_dfu_micriumos.c
     condition:
-      - "micriumos_kernel"
-
+      - micriumos_kernel
 include:
   - path: .
     file_list:
       - path: sl_bt_app_ota_dfu.h
       - path: sli_bt_app_ota_dfu.h
-
 provides:
   - name: app_ota_dfu
-
 conflicts:
   - name: in_place_ota_dfu
-
 requires:
   - name: app_assert
   - name: bluetooth_feature_connection
@@ -46,7 +40,6 @@ requires:
   - name: bootloader_interface
   - name: gatt_configuration
   - name: power_manager
-
 template_contribution:
   - name: event_handler
     value:
@@ -73,4 +66,6 @@ template_contribution:
       event: sleep_on_isr_exit
       include: sl_bt_app_ota_dfu.h
       handler: sl_bt_app_ota_dfu_sleep_on_isr_exit
-
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/app-ota-dfu

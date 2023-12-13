@@ -21,6 +21,9 @@
 #include "sl_system_init.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
+#ifdef EZSP_SPI
+#include "zigbee_app_framework_common.h"
+#endif // EZSP_SPI
 #endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "sl_system_kernel.h"
@@ -65,7 +68,11 @@ int main(void)
 
     // Let the CPU go to sleep if the system allow it.
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#ifdef EZSP_SPI
+    sl_zigbee_app_framework_sleep_tick();
+#else
     sl_power_manager_sleep();
+#endif
 #endif // SL_CATALOG_POWER_MANAGER_PRESENT
   }
 #endif // SL_CATALOG_KERNEL_PRESENT

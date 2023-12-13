@@ -1,7 +1,7 @@
 project_name: psa_crypto_ecdh
 package: platform
 quality: production
-label: Platform - PSA Crypto ECDH
+label: Platform Security - SoC PSA Crypto ECDH
 description: >
   This example project demonstrates the ECDH key agreement API.
 category: Example|Platform

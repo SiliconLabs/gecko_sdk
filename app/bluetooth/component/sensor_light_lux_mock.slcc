@@ -1,0 +1,32 @@
+id: sensor_light_lux_mock
+label: Ambient light and UV index sensor (Mock)
+package: Bluetooth
+description: Ambient light and UV index sensor (Mock) driver abstraction.
+category: Bluetooth|Application|Miscellaneous
+quality: production
+root_path: app/bluetooth/common/sensor_light
+tag:
+  - No-Code
+source:
+  - path: sl_sensor_light_lux_mock.c
+include:
+  - path: ../sensor_lux
+    file_list:
+      - path: sl_sensor_lux.h
+  - path: .
+    file_list:
+      - path: sl_sensor_light.h
+      - path: sl_sensor_light_lux_mock.h
+config_file:
+  - path: config/sl_sensor_light_config.h
+    condition: [btmesh_stack]
+provides:
+  - name: sensor_lux
+  - name: sensor_light
+  - name: sensor_light_lux_mock
+template_contribution:
+  - name: component_catalog
+    value: sensor_light_lux_mock
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/sensor-light-lux-mock

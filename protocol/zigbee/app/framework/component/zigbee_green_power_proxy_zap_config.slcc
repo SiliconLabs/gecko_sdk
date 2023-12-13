@@ -1,15 +1,15 @@
-package: "Zigbee"
-id: "zigbee_green_power_proxy_zap_config"
-label: "Green Power Proxy Zap Config"
+package: Zigbee
+id: zigbee_green_power_proxy_zap_config
+label: Green Power Proxy Zap Config
 category: Zigbee|Green Power
-quality: "production"
-description: "This component provides Green Power Proxy zap config file which can be used on NCP applications"
+quality: production
+description: This component provides Green Power Proxy zap config file which can be used on NCP applications
 provides:
-  - name: "zigbee_green_power_proxy_zap_config"
+  - name: zigbee_green_power_proxy_zap_config
 
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-common/config/zcl/zcl_config_gp_proxy.zap
 
 template_contribution:
   - name: component_catalog
-    value: zigbee_green_power_proxy_zap_config 
+    value: zigbee_green_power_proxy_zap_config

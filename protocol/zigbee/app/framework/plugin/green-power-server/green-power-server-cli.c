@@ -25,6 +25,10 @@
 #include "green-power-server.h"
 #include "green-power-common.h"
 
+#ifndef EZSP_HOST
+#include "stack/gp/gp-sink-table.h"
+#endif //!EZSP_HOST
+
 bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler(uint8_t options,
                                                                                  uint16_t gpmAddrForSecurity,
                                                                                  uint16_t gpmAddrForPairing,

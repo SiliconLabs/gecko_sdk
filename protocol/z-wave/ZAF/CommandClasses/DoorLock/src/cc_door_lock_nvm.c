@@ -43,9 +43,9 @@ void
 cc_door_lock_migrate(void)
 {
   #ifdef ZW_MIGRATION_TO_7_19
+
   zpal_status_t status;
-  cc_door_lock_data_t application_data;
-  cc_door_lock_data_t door_lock_data;
+  cc_door_lock_data_t application_data = { 0 };
 
   // On initial implementation of DoorLock Command Class
   // This information belonged to the application
@@ -57,10 +57,11 @@ cc_door_lock_migrate(void)
   if (status != ZPAL_STATUS_OK) {
     return;
   }
-
-  door_lock_data.type = cc_door_lock_get_operation_type();
-  door_lock_data.insideDoorHandleMode  = cc_door_lock_get_supported_inside_handles();
-  door_lock_data.outsideDoorHandleMode = cc_door_lock_get_supported_outside_handles();
+  cc_door_lock_data_t door_lock_data = {
+    .type = cc_door_lock_get_operation_type(),
+    .insideDoorHandleMode  = cc_door_lock_get_supported_inside_handles(),
+    .outsideDoorHandleMode = cc_door_lock_get_supported_outside_handles()
+  };
 
   if (application_data.type != door_lock_data.type
       || application_data.insideDoorHandleMode != door_lock_data.insideDoorHandleMode

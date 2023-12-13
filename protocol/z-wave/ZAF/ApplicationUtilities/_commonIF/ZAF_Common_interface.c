@@ -78,9 +78,8 @@ CP_Handle_t ZAF_getCPHandle()
   return m_CmdPublisherHandle;
 }
 
-bool isFLiRS(const SAppNodeInfo_t * pAppNodeInfo)
+bool isFLiRS(__attribute__((unused)) const SAppNodeInfo_t * pAppNodeInfo)
 {
-  UNUSED(pAppNodeInfo);
   return zaf_get_app_node_info()->DeviceOptionsMask & (APPLICATION_FREQ_LISTENING_MODE_1000ms ^ APPLICATION_FREQ_LISTENING_MODE_250ms);
 }
 

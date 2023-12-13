@@ -1,0 +1,1243 @@
+[
+  {
+    "mid": "0x0000",
+    "name": "Configuration Server",
+    "multiplicity": "1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0001",
+    "name": "Configuration Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0002",
+    "name": "Health Server",
+    "multiplicity": "1..*",
+    "element_constraint": "primary_any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0003",
+    "name": "Health Client",
+    "multiplicity": "0..*",
+    "element_constraint": "primary_any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0004",
+    "name": "Remote Provisioning Server",
+    "multiplicity": "0..*",
+    "element_constraint": "primary_any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0005",
+    "name": "Remote Provisioning Client",
+    "multiplicity": "0..*",
+    "element_constraint": "primary_any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0006",
+    "name": "Directed Forwarding Configuration Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Configuration Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x0007",
+    "name": "Directed Forwarding Configuration Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0008",
+    "name": "Bridge Configuration Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Configuration Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x0009",
+    "name": "Bridge Configuration Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x000A",
+    "name": "Mesh Private Beacon Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Configuration Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x000B",
+    "name": "Mesh Private Beacon Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x000C",
+    "name": "On-Demand Private Proxy Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [
+      {
+        "model": "Solicitation PDU RPL Configuration Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Mesh Private Beacon Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x000D",
+    "name": "On-Demand Private Proxy Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x000E",
+    "name": "SAR Configuration Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x000F",
+    "name": "SAR Configuration Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0010",
+    "name": "Opcodes Aggregator Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "mixed",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0011",
+    "name": "Opcodes Aggregator Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "mixed",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0012",
+    "name": "Large Composition Data Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Configuration Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x0013",
+    "name": "Large Composition Data Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "devkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x0014",
+    "name": "Solicitation PDU RPL Configuration Server",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "On-Demand Private Proxy Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x0015",
+    "name": "Solicitation PDU RPL Configuration Client",
+    "multiplicity": "0..1",
+    "element_constraint": "primary",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1000",
+    "name": "Generic OnOff Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1001",
+    "name": "Generic OnOff Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1002",
+    "name": "Generic Level Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1003",
+    "name": "Generic Level Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1004",
+    "name": "Generic Default Transition Time Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1005",
+    "name": "Generic Default Transition Time Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1006",
+    "name": "Generic Power OnOff Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Generic Power OnOff Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic OnOff Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1007",
+    "name": "Generic Power OnOff Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Generic Power OnOff Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Power OnOff Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Default Transition Time Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1008",
+    "name": "Generic Power OnOff Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1009",
+    "name": "Generic Power Level Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Generic Power Level Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Power OnOff Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Level Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x100A",
+    "name": "Generic Power Level Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Generic Power Level Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Power Level Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Power OnOff Setup Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x100B",
+    "name": "Generic Power Level Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x100C",
+    "name": "Generic Battery Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x100D",
+    "name": "Generic Battery Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x100E",
+    "name": "Generic Location Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Generic Location Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x100F",
+    "name": "Generic Location Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Generic Location Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1010",
+    "name": "Generic Location Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1011",
+    "name": "Generic Admin Property Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Generic User Property Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1012",
+    "name": "Generic Manufacturer Property Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Generic User Property Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1013",
+    "name": "Generic User Property Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1014",
+    "name": "Generic Client Property Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1015",
+    "name": "Generic Property Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1100",
+    "name": "Sensor Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Sensor Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x1101",
+    "name": "Sensor Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Sensor Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Sensor Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1102",
+    "name": "Sensor Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1200",
+    "name": "Time Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Time Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x1201",
+    "name": "Time Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Time Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1202",
+    "name": "Time Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1203",
+    "name": "Scene Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Scene Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x1204",
+    "name": "Scene Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Scene Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Scene Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Default Transition Time Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1205",
+    "name": "Scene Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1206",
+    "name": "Scheduler Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Scheduler Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": []
+  },
+  {
+    "mid": "0x1207",
+    "name": "Scheduler Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Scheduler Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Scheduler Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1208",
+    "name": "Scheduler Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1300",
+    "name": "Light Lightness Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light Lightness Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Power OnOff Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Level Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1301",
+    "name": "Light Lightness Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Generic Power OnOff Setup Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1302",
+    "name": "Light Lightness Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1303",
+    "name": "Light CTL Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light CTL Temperature Server",
+        "element_constraint": "other_larger_elem_index"
+      },
+      {
+        "model": "Light CTL Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1304",
+    "name": "Light CTL Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light CTL Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light CTL Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Light Lightness Setup Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1305",
+    "name": "Light CTL Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1306",
+    "name": "Light CTL Temperature Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light CTL Server",
+        "element_constraint": "other_smaller_elem_index"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Level Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1307",
+    "name": "Light HSL Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light HSL Hue Server",
+        "element_constraint": "other_larger_elem_index"
+      },
+      {
+        "model": "Light HSL Saturation Server",
+        "element_constraint": "other_larger_elem_index"
+      },
+      {
+        "model": "Light HSL Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1308",
+    "name": "Light HSL Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light HSL Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light HSL Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Light Lightness Setup Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1309",
+    "name": "Light HSL Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x130A",
+    "name": "Light HSL Hue Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light HSL Server",
+        "element_constraint": "other_smaller_elem_index"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Level Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x130B",
+    "name": "Light HSL Saturation Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light HSL Server",
+        "element_constraint": "other_smaller_elem_index"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Generic Level Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x130C",
+    "name": "Light xyL Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light xyL Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x130D",
+    "name": "Light xyL Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "Light xyL Server",
+        "element_constraint": "main"
+      },
+      {
+        "model": "Light Lightness Setup Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x130E",
+    "name": "Light xyL Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x130F",
+    "name": "Light LC Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light LC Setup Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light Lightness Server",
+        "element_constraint": "other_smaller_elem_index"
+      },
+      {
+        "model": "Generic OnOff Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1310",
+    "name": "Light LC Setup Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Light LC Server",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "Light LC Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1311",
+    "name": "Light LC Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": true,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1400",
+    "name": "BLOB Transfer Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1401",
+    "name": "BLOB Transfer Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": []
+  },
+  {
+    "mid": "0x1402",
+    "name": "Firmware Update Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "BLOB Transfer Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1403",
+    "name": "Firmware Update Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [],
+    "extends": [
+      {
+        "model": "BLOB Transfer Client",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1404",
+    "name": "Firmware Distribution Server",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": true,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Firmware Update Client",
+        "element_constraint": "main"
+      },
+      {
+        "model": "BLOB Transfer Client",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "BLOB Transfer Server",
+        "element_constraint": "main"
+      }
+    ]
+  },
+  {
+    "mid": "0x1405",
+    "name": "Firmware Distribution Client",
+    "multiplicity": "0..*",
+    "element_constraint": "any",
+    "publication_support": false,
+    "subscription_support": false,
+    "security": "appkey",
+    "corresponds": [
+      {
+        "model": "Firmware Update Client",
+        "element_constraint": "main"
+      }
+    ],
+    "extends": [
+      {
+        "model": "BLOB Transfer Client",
+        "element_constraint": "main"
+      }
+    ]
+  }
+]

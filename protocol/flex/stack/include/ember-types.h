@@ -39,10 +39,14 @@
 #ifndef __EMBER_TYPES_H__
 #define __EMBER_TYPES_H__
 
+#ifdef EMBER_TEST
 #include PLATFORM_HEADER
+#endif
+#include "sl_common.h"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include "stack/config/ember-configuration-defaults.h"
@@ -212,7 +216,7 @@ enum
 /**
  * @brief Message length in bytes.
  */
-typedef uint8_t EmberMessageLength;
+typedef uint16_t EmberMessageLength;
 
 /**
  * @brief Message options.
@@ -272,7 +276,7 @@ typedef struct {
    */
   uint8_t *payload;
   /**
-   * The millisecond system time returned by ::halCommonGetInt32uMillisecondTick()
+   * The millisecond system time returned by ::emberGetInt32uMillisecondTick()
    * at the time the sync word was detected.
    */
   uint32_t timestamp;
@@ -321,7 +325,7 @@ typedef struct {
    */
   int8_t ackRssi;
   /**
-   * The millisecond system time returned by ::halCommonGetInt32uMillisecondTick()
+   * The millisecond system time returned by ::sl_sleeptimer
    * at the time the sync word was transmitted.
    */
   uint32_t timestamp;
@@ -436,7 +440,7 @@ typedef struct {
    */
   uint8_t *payload;
   /**
-   * The millisecond system time returned by ::halCommonGetInt32uMillisecondTick()
+   * The millisecond system time returned by ::sl_sleeptimer
    * at the time the sync word was detected.
    */
   uint32_t timestamp;
@@ -482,7 +486,7 @@ typedef struct {
    */
   int8_t ackRssi;
   /**
-   * The millisecond system time returned by ::halCommonGetInt32uMillisecondTick()
+   * The millisecond system time returned by ::sl_sleeptimer
    * at the time the sync word was transmitted.
    */
   uint32_t timestamp;
@@ -594,7 +598,7 @@ typedef struct {
  * The main loop passes the array to ::emberRunEvents() to call
  * the handlers of any events whose time has arrived.
  */
-typedef PGM struct EmberEventData_S {
+typedef const struct EmberEventData_S {
   /** The control structure for the event. */
   EmberEventControl *control;
   /** The procedure to call when the event fires. */

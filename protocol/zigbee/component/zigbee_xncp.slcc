@@ -3,7 +3,6 @@ label: XNCP
 package: Zigbee
 category: Zigbee|NCP
 quality: production
-
 description: Provides the functionality for an NCP device to communicate custom EZSP frames with a host.
 
 provides:
@@ -13,11 +12,11 @@ requires:
   - name: zigbee_xncp_implementation
   - name: zigbee_xncp_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_ncp
 
 recommends:
-  - id: zigbee_xncp_source
+  - id: zigbee_xncp_library_internal
 
 include:
   - path: protocol/zigbee/app/xncp

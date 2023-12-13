@@ -379,6 +379,14 @@ void sl_rail_mux_set_coex_counter_handler(RAIL_Handle_t railHandle,
 sl_rail_util_ieee802154_stack_status_t sl_rail_mux_ieee802154_on_event(RAIL_Handle_t railHandle,
                                                                        sl_rail_util_ieee802154_stack_event_t stack_event,
                                                                        uint32_t supplement);
+RAIL_Status_t sl_rail_mux_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHandle,
+                                                            bool enable);
+
+RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle);
+
+#ifdef HIGH_SPEED_PHY
+void sl_rail_mux_set_high_bw_phy_index(RAIL_Handle_t railHandle);
+#endif //HIGH_SPEED_PHY
 
 /**
  * In a MUX configuration, where a single radio is used concurrently
@@ -422,7 +430,8 @@ sl_status_t sli_rail_mux_lock_radio (RAIL_Handle_t railHandle);
 sl_status_t sli_rail_mux_unlock_radio (RAIL_Handle_t railHandle);
 
 RAIL_Status_t sl_rail_mux_GetChannel(RAIL_Handle_t railHandle, uint16_t *channel);
-
+uint16_t sl_rail_mux_GetTxPacketsRemaining(RAIL_Handle_t railHandle);
+void sl_rail_mux_ResetFifo(RAIL_Handle_t railHandle, bool txFifo, bool rxFifo);
 //------------------------------------------------------------------------------
 // Internals
 

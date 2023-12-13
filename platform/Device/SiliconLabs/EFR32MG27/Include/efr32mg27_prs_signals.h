@@ -879,4 +879,4 @@
 #define PRS_LFRCO_SDM                                          (PRS_ASYNC_LFRCO_SDM)
 #define PRS_LFRCO_TCMEAS                                       (PRS_ASYNC_LFRCO_TCMEAS)
 
-#endif /* EFR32MG27_PRS_SIGNALS_H */
+#endif // EFR32MG27_PRS_SIGNALS_H

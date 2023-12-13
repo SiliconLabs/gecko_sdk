@@ -432,6 +432,10 @@ void SystemInit2(void)
   uint32_t startOfAppSpace = (uint32_t)mainStageTable.startOfAppSpace;
 
   // Sanity check application program counter
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
   uint32_t pc = *(uint32_t *)(startOfAppSpace + 4);
   if (pc == 0xFFFFFFFF) {
     // Sanity check failed; enter the bootloader
@@ -439,6 +443,9 @@ void SystemInit2(void)
     enterApp = false;
     verifyApp = false;
   }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #if defined(_SILICON_LABS_32B_SERIES_2) && defined(CRYPTOACC_PRESENT)
   // fih_delay_init is applicable for vse devices
   fih_delay_init();

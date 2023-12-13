@@ -31,17 +31,43 @@ extern "C" {
 #include "sl_btmesh_dcd.h"
 #include "sl_btmesh_config.h"
 #include "sl_btmesh.h"
+#include "sl_btmesh_capi_types.h"
 
 {%- macro u8tohex(val) %}
-{{ "0x%02x"|format(val.__and__(255)) }}
+{{ "0x%02X"|format(val.__and__(255)) }}
 {%- endmacro %}
 
 {%- macro u16toa(val) %}
-{{ "0x%02x, 0x%02x"|format(val.__and__(255), val.__rshift__(8)) }}
+{{ "0x%02X, 0x%02X"|format(val.__and__(255), val.__rshift__(8)) }}
 {%- endmacro %}
 
 {%- macro u16tohex(val) %}
-{{ "0x%04x"|format(val) }}
+{{ "0x%04X"|format(val) }}
+{%- endmacro %}
+
+{%- macro model_vmid_hex(mdl) %}
+  {% if mdl.is_sig_model() -%}
+{{u16tohex(mdl.mid)}}
+  {%- else -%}
+{{u16tohex(mdl.cid)}}-{{u16tohex(mdl.mid)}}
+  {%- endif %}
+{%- endmacro %}
+
+{%- macro model_type(mdl) %}
+{% if mdl.is_sig_model() %}SIG{% else %}Vendor{% endif %}
+{%- endmacro %}
+
+{%- macro model_inst_info(mdl) %}
+{{ mdl.name }} ({{ model_vmid_hex(mdl) }}) on {{mdl.elem.name}} ({{ mdl.elem_index }}) element
+{%- endmacro %}
+
+{%- macro model_item_header_info(mdl) %}
+{% if mdl.model_item_format_short_supported %}
+  {% set format = "0 (short)" %}
+{% else %}
+  {% set format = "1 (long)" %}
+{% endif %}
+Corresponding_Present = {{ mdl.corresponding_present | int }}, Format = {{ format }}, Extended_Items_Count = {{ mdl.extends_count }}
 {%- endmacro %}
 
 #define U16TOA(A) ((A) & 0xFF), ((A) >> 8)
@@ -59,14 +85,14 @@ const uint8_t __mesh_dcd[] = {
     {{ u8tohex(elem.num_v) }}, /* Number of Vendor Models = {{ elem.num_v }} */
   {% if elem.num_s > 0 %}
     /* SIG Models */
-    {% for model in elem.sig_models %}
-      U16TOA({{ u16tohex(model.mid) }}), /* {{ model.name }} */
+    {% for mdl in elem.sig_models %}
+      U16TOA({{ u16tohex(mdl.mid) }}), /* {{ mdl.name }} */
     {% endfor %}
   {% endif %}
   {% if elem.num_v > 0 %}
     /* Vendor Models */
-    {% for model in elem.vendor_models %}
-      U16TOA({{ u16tohex(model.cid) }}), U16TOA({{ u16tohex(model.mid) }}), /* {{ model.name }} */
+    {% for mdl in elem.vendor_models %}
+      U16TOA({{ u16tohex(mdl.cid) }}), U16TOA({{ u16tohex(mdl.mid) }}), /* {{ mdl.name }} */
     {% endfor %}
   {% endif %}
 {% endfor %}
@@ -74,6 +100,88 @@ const uint8_t __mesh_dcd[] = {
 
 const size_t __mesh_dcd_len = sizeof(__mesh_dcd);
 const uint8_t *__mesh_dcd_ptr = __mesh_dcd;
+
+const uint8_t __mesh_dcd_page_1[] = {
+{% for elem in dcd.elements %}
+
+  /* Element: {{ elem.name }} ({{elem.elem_index}}) */
+  {{ u8tohex(elem.num_s) }}, /* Number of SIG Models = {{ elem.num_s }} */
+  {{ u8tohex(elem.num_v) }}, /* Number of Vendor Models = {{ elem.num_v }} */
+  {% for mdl in elem.models %}
+
+    /* {{ model_type(mdl) }} Model {{ mdl.mdl_index }}: {{ mdl.name }} ({{ model_vmid_hex(mdl) }}) */
+    {{ u8tohex(mdl.model_item_header) }}, /* {{ model_item_header_info(mdl) }} */
+    {% if mdl.corresponding_present %}
+    {{ u8tohex(mdl.corresponding_group.id) }}, /* Corresponding_Group_ID: {{ mdl.corresponding_group.id }} */
+      {% for cg_mdl in mdl.corresponding_group.mdl_insts | sort(attribute="vmid") %}
+          /*  - {{ model_inst_info(cg_mdl) }} */
+      {% endfor %}
+    {% endif %}
+    {% if mdl.extends_count > 0 %}
+          /* Extended_Model_Items */
+    {% endif %}
+    {% for ext_mdl in mdl.extends  | sort(attribute="vmid") %}
+      {% set ext_mdl_item = mdl.get_extended_model_item(ext_mdl) %}
+      {% if mdl.model_item_format_short_supported %}
+    {{ u8tohex(ext_mdl_item.model_item_short_bin) }}, /*  - {{ model_inst_info(ext_mdl) }} */
+          /*    Element_Offset = {{ ext_mdl_item.elem_offset }}, Model_Item_Index = {{ ext_mdl_item.model_index }} */
+      {% else %}
+          /* - {{ model_inst_info(ext_mdl) }} */
+    {{ u8tohex(ext_mdl_item.elem_offset_long_bin) }}, /*   Element_Offset = {{ ext_mdl_item.elem_offset }} */
+    {{ u8tohex(ext_mdl_item.model_item_index_long_bin) }}, /*   Model_Item_Index = {{ ext_mdl_item.model_index }} */
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+{%- endfor %}
+};
+
+{% if profiles.profile_data|length > 0 %}
+const uint8_t __mesh_dcd_page_2[] = {
+{% for profile in profiles.profile_data %}
+  /* {{ profile.name }} */
+  U16TOA({{ u16tohex(profile.uuid) }}), /* Mesh profile ID */
+  {{ u8tohex(profile.ver_maj) }},  /* Version Major */
+  {{ u8tohex(profile.ver_min) }},  /* Version Minor */
+  {{ u8tohex(profile.ver_z) }},  /* Version .Z */
+  {{ u8tohex(profile.offsets|length) }},  /* Offset length */
+    /* Offset list */
+  {% for offset in profile.offsets %}
+    {{ u8tohex(offset) }},
+  {% endfor %}
+  U16TOA({{ u16tohex(profile.additional_data|length) }}),  /* Additional data length */
+    /* Additional data list */
+  {% for data in profile.additional_data %}
+    {{ u8tohex(offset) }},
+  {% endfor %}
+
+{% endfor %}
+};
+{% endif %}
+
+const mesh_dcd_page_t __mesh_dcd_pages[] = {
+    {
+        /* DCD Page 1 */
+        .page_number = 1,
+        .size = sizeof(__mesh_dcd_page_1),
+        .data = __mesh_dcd_page_1
+    },
+  {% if profiles.profile_data|length > 0 %}
+    {
+        /* DCD Page 2 */
+        .page_number = 2,
+        .size = sizeof(__mesh_dcd_page_2),
+        .data = __mesh_dcd_page_2
+    },
+  {% endif %}
+    {
+        /* List terminator */
+        .page_number = 0,
+        .size = 0,
+        .data = NULL
+    }
+};
+
+const mesh_dcd_page_t *__mesh_dcd_pages_ptr = __mesh_dcd_pages;
 
 const mesh_memory_config_t __mesh_memory_config = {
   .max_elements = SL_BTMESH_CONFIG_MAX_ELEMENTS,

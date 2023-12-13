@@ -5,7 +5,7 @@ quality: production
 id: zigbee_fragmentation
 category: Zigbee|Utility
 provides:
-   - name: zigbee_fragmentation
+  - name: zigbee_fragmentation
 config_file:
   - path: protocol/zigbee/app/framework/plugin/fragmentation/config/fragmentation-config.h
 source:
@@ -52,8 +52,8 @@ template_contribution:
       handler: sli_zigbee_af_fragmentation_set_window_size_command
       help: Sets the receive window size.  By definition in the Smart Energy profile it must be set to 1 but this allows it to be changed.
       argument:
-      - type: uint8
-        help: The max number of the blocks received before an APS ack is generated
+        - type: uint8
+          help: The max number of the blocks received before an APS ack is generated
   - name: cli_command
     value:
       group: fragmentation
@@ -61,8 +61,8 @@ template_contribution:
       handler: sli_zigbee_af_fragmentation_artificial_block_drop_command
       help: Artificially drops the block number defined by the passed argument only once, and then allows it upon a retry.
       argument:
-      - type: uint8
-        help: The block number to artificially drop to force a retry - set to 0xFF to disable
+        - type: uint8
+          help: The block number to artificially drop to force a retry - set to 0xFF to disable
 
 documentation:
   docset: zigbee

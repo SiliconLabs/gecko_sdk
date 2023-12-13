@@ -223,7 +223,7 @@ typedef void
  * given
  * @param response_flags Response flags
  *
- * @return bg_err_success if response was sent; an error otherwise
+ * @return SL_STATUS_OK if response was sent; an error otherwise
  */
 sl_status_t
 mesh_lib_generic_server_respond(uint16_t model_id,
@@ -255,7 +255,7 @@ mesh_lib_generic_server_respond(uint16_t model_id,
  * in case there is no state transition ongoing a zero value should be
  * given
  *
- * @return bg_err_success if update was done; an error otherwise
+ * @return SL_STATUS_OK if update was done; an error otherwise
  */
 sl_status_t
 mesh_lib_generic_server_update(uint16_t model_id,
@@ -276,7 +276,7 @@ mesh_lib_generic_server_update(uint16_t model_id,
  * @param kind Type of data to be published; some models have only
  * one type of data to publish while others may have multiple
  *
- * @return bg_err_success if publishing was done; an error otherwise
+ * @return SL_STATUS_OK if publishing was done; an error otherwise
  */
 sl_status_t
 mesh_lib_generic_server_publish(uint16_t model_id,
@@ -365,7 +365,7 @@ typedef void
  * @param kind Type of state to get; some server models may have only
  * one kind of state to query while others may have several
  *
- * @return bg_err_success if request was made, an error code otherwise
+ * @return SL_STATUS_OK if request was made, an error code otherwise
  */
 sl_status_t
 mesh_lib_generic_client_get(uint16_t model_id,
@@ -395,7 +395,7 @@ mesh_lib_generic_client_get(uint16_t model_id,
  * setting the immediate value, in milliseconds
  * @param request_flags Request flags
  *
- * @return bg_err_success if request was made, an error code otherwise
+ * @return SL_STATUS_OK if request was made, an error code otherwise
  */
 sl_status_t
 mesh_lib_generic_client_set(uint16_t model_id,
@@ -426,7 +426,7 @@ mesh_lib_generic_client_set(uint16_t model_id,
  * setting the immediate value, in milliseconds
  * @param request_flags Request flags
  *
- * @return bg_err_success if publishing was done; an error otherwise
+ * @return SL_STATUS_OK if publishing was done; an error otherwise
  */
 sl_status_t
 mesh_lib_generic_client_publish(uint16_t model_id,

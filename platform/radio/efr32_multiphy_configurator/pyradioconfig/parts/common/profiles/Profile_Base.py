@@ -121,6 +121,8 @@ class Profile_Base(IProfile):
 
         build_ircal_sw_vars(model, profile)
 
+        buildStudioLogOutput(model, profile)
+
         return profile
 
 

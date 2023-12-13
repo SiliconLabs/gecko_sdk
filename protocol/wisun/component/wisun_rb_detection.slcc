@@ -1,0 +1,97 @@
+id: "wisun_rb_detection"
+label: "Wi-SUN Radio Board detection"
+description: "Radio board template contributions to the component catalog."
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+
+ui_hints:
+  visibility: never
+
+provides:
+  - name: "wisun_rb_detection"
+
+template_contribution:
+  - name: component_catalog
+    value: "BRD4163A"
+    condition:
+    - "brd4163a"
+  - name: component_catalog
+    value: "BRD4164A"
+    condition:
+    - "brd4164a"
+  - name: component_catalog
+    value: "BRD4170A"
+    condition:
+    - "brd4170a"
+  - name: component_catalog
+    value: "BRD4172A"
+    condition:
+    - "brd4172a"
+  - name: component_catalog
+    value: "BRD4173A"
+    condition:
+    - "brd4173a"
+  - name: component_catalog
+    value: "BRD4253A"
+    condition:
+    - "brd4253a"
+  - name: component_catalog
+    value: "BRD4254A"
+    condition:
+    - "brd4254a"
+  - name: component_catalog
+    value: "BRD4270A"
+    condition:
+    - "brd4270a"
+  - name: component_catalog
+    value: "BRD4270B"
+    condition:
+    - "brd4270b"
+  - name: component_catalog
+    value: "BRD4271A"
+    condition:
+    - "brd4271a"
+  - name: component_catalog
+    value: "BRD4272A"
+    condition:
+    - "brd4272a"
+  - name: component_catalog
+    value: "BRD4273A"
+    condition:
+    - "brd4273a"
+  - name: component_catalog
+    value: "BRD4274A"
+    condition:
+    - "brd4274a"
+  - name: component_catalog
+    value: "BRD4400A"
+    condition:
+    - "brd4400a"
+  - name: component_catalog
+    value: "BRD4400B"
+    condition:
+    - "brd4400b"
+  - name: component_catalog
+    value: "BRD4400C"
+    condition:
+    - "brd4400c"
+  - name: component_catalog
+    value: "BRD4401A"
+    condition:
+    - "brd4401a"
+  - name: component_catalog
+    value: "BRD4401B"
+    condition:
+    - "brd4401b"
+  - name: component_catalog
+    value: "BRD4401C"
+    condition:
+    - "brd4401c"
+  - name: component_catalog
+    value: "BRD2705A"
+    condition:
+    - "brd2705a"
+
+  - name: component_catalog
+    value: wisun_rb_detection

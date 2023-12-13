@@ -92,9 +92,6 @@ enum {
   // parameter (((1 << duration) + 1) * 15ms), when responding to a beacon
   // request.
   EZSP_CONFIG_BEACON_JITTER_DURATION            = 0x20,
-  // The time the coordinator will wait (in seconds) for a second end device
-  // bind request to arrive.
-  EZSP_CONFIG_END_DEVICE_BIND_TIMEOUT           = 0x21,
   // The number of PAN id conflict reports that must be received by the network
   // manager within one minute to trigger a PAN id change.
   EZSP_CONFIG_PAN_ID_CONFLICT_REPORT_THRESHOLD  = 0x22,
@@ -314,10 +311,11 @@ enum {
   EZSP_VALUE_FORCE_TX_AFTER_FAILED_CCA_ATTEMPTS = 0x3A,
   // The length of time, in seconds, that a trust center will store a transient
   // link key that a device can use to join its network. A transient key is
-  // added with a call to emberAddTransientLinkKey. After the transient key is
-  // added, it will be removed once this amount of time has passed. A joining
-  // device will not be able to use that key to join until it is added again on
-  // the trust center. The default value is 300 seconds (5 minutes).
+  // added with a call to sl_zb_sec_man_import_transient_key. After the
+  // transient key is added, it will be removed once this amount of time has
+  // passed. A joining device will not be able to use that key to join until it
+  // is added again on the trust center. The default value is 300 seconds (5
+  // minutes).
   EZSP_VALUE_TRANSIENT_KEY_TIMEOUT_S            = 0x3B,
   // Cumulative energy usage metric since the last value reset of the coulomb
   // counter plugin. Setting this value will reset the coulomb counter.
@@ -342,9 +340,12 @@ enum {
   // Return information about the key storage on an NCP.  Returns 0 if keys are
   // in classic key storage, and 1 if they are located in PSA key storage. Read
   // only.
-  EZSP_VALUE_KEY_STORAGE_VERSION                = 0x44
+  EZSP_VALUE_KEY_STORAGE_VERSION                = 0x44,
+  // Return activation state about TC Delayed Join on an NCP.  A return value of
+  // 0 indicates that the feature is not activated.
+  EZSP_VALUE_DELAYED_JOIN_ACTIVATION            = 0x45
 };
-#define EZSP_VALUE_ID_MAX  0x44
+#define EZSP_VALUE_ID_MAX  0x45
 
 //------------------------------------------------------------------------------
 // Identifies a value based on specified characteristics. Each set of
@@ -915,24 +916,17 @@ enum {
 // Security Frames
   EZSP_SET_INITIAL_SECURITY_STATE               = 0x0068,
   EZSP_GET_CURRENT_SECURITY_STATE               = 0x0069,
-  EZSP_GET_KEY                                  = 0x006a,
   EZSP_EXPORT_KEY                               = 0x0114,
   EZSP_IMPORT_KEY                               = 0x0115,
   EZSP_SWITCH_NETWORK_KEY_HANDLER               = 0x006e,
-  EZSP_GET_KEY_TABLE_ENTRY                      = 0x0071,
-  EZSP_SET_KEY_TABLE_ENTRY                      = 0x0072,
   EZSP_FIND_KEY_TABLE_ENTRY                     = 0x0075,
-  EZSP_ADD_OR_UPDATE_KEY_TABLE_ENTRY            = 0x0066,
   EZSP_SEND_TRUST_CENTER_LINK_KEY               = 0x0067,
   EZSP_ERASE_KEY_TABLE_ENTRY                    = 0x0076,
   EZSP_CLEAR_KEY_TABLE                          = 0x00B1,
   EZSP_REQUEST_LINK_KEY                         = 0x0014,
   EZSP_UPDATE_TC_LINK_KEY                       = 0x006C,
   EZSP_ZIGBEE_KEY_ESTABLISHMENT_HANDLER         = 0x009B,
-  EZSP_ADD_TRANSIENT_LINK_KEY                   = 0x00AF,
   EZSP_CLEAR_TRANSIENT_LINK_KEYS                = 0x006B,
-  EZSP_GET_TRANSIENT_LINK_KEY                   = 0x00CE,
-  EZSP_GET_TRANSIENT_KEY_TABLE_ENTRY            = 0x006D,
   EZSP_GET_NETWORK_KEY_INFO                     = 0x0116,
   EZSP_GET_APS_KEY_INFO                         = 0x010C,
   EZSP_IMPORT_LINK_KEY                          = 0x010E,
@@ -1046,12 +1040,7 @@ enum {
   EZSP_GP_SINK_TABLE_SET_SECURITY_FRAME_COUNTER = 0x00F5,
   EZSP_GP_SINK_COMMISSION                       = 0x010A,
   EZSP_GP_TRANSLATION_TABLE_CLEAR               = 0x010B,
-
-// Secure EZSP Frames
-  EZSP_SET_SECURITY_KEY                         = 0x00CA,
-  EZSP_SET_SECURITY_PARAMETERS                  = 0x00CB,
-  EZSP_RESET_TO_FACTORY_DEFAULTS                = 0x00CC,
-  EZSP_GET_SECURITY_KEY_STATUS                  = 0x00CD,
+  EZSP_GP_SINK_TABLE_GET_NUMBER_OF_ACTIVE_ENTRIES = 0x0118,
 
 // Token Interface Frames
   EZSP_GET_TOKEN_COUNT                          = 0x0100,

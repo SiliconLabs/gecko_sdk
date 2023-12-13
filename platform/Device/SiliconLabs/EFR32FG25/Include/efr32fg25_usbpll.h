@@ -228,4 +228,4 @@ typedef struct {
 /** @} End of group EFR32FG25_USBPLL */
 /** @} End of group Parts */
 
-#endif /* EFR32FG25_USBPLL_H */
+#endif // EFR32FG25_USBPLL_H

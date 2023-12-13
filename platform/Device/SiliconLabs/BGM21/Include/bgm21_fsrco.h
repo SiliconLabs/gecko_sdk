@@ -72,4 +72,4 @@ typedef struct {
 /** @} End of group BGM21_FSRCO */
 /** @} End of group Parts */
 
-#endif /* BGM21_FSRCO_H */
+#endif // BGM21_FSRCO_H

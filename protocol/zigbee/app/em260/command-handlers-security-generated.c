@@ -12,7 +12,6 @@
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
 #include "ezsp-enum.h"
-#include "secure-ezsp-types.h"
 #include "app/em260/command-context.h"
 #include "stack/include/cbke-crypto-engine.h"
 #include "stack/include/zigbee-security-manager.h"
@@ -35,6 +34,8 @@
 #include "zigbee-device-stack.h"
 #include "ember-duty-cycle.h"
 #include "multi-phy.h"
+#include "stack/gp/gp-sink-table.h"
+#include "stack/gp/gp-proxy-table.h"
 
 bool sli_zigbee_af_process_ezsp_command_security(uint16_t commandId)
 {
@@ -56,17 +57,6 @@ bool sli_zigbee_af_process_ezsp_command_security(uint16_t commandId)
       status = emberGetCurrentSecurityState(&state);
       appendInt8u(status);
       appendEmberCurrentSecurityState(&state);
-      break;
-    }
-
-    case EZSP_GET_KEY: {
-      EmberStatus status;
-      EmberKeyType keyType;
-      EmberKeyStruct keyStruct;
-      keyType = fetchInt8u();
-      status = emberGetKey(keyType, &keyStruct);
-      appendInt8u(status);
-      appendEmberKeyStruct(&keyStruct);
       break;
     }
 
@@ -92,32 +82,6 @@ bool sli_zigbee_af_process_ezsp_command_security(uint16_t commandId)
       break;
     }
 
-    case EZSP_GET_KEY_TABLE_ENTRY: {
-      EmberStatus status;
-      uint8_t index;
-      EmberKeyStruct keyStruct;
-      index = fetchInt8u();
-      status = emberGetKeyTableEntry(index, &keyStruct);
-      appendInt8u(status);
-      appendEmberKeyStruct(&keyStruct);
-      break;
-    }
-
-    case EZSP_SET_KEY_TABLE_ENTRY: {
-      EmberStatus status;
-      uint8_t index;
-      uint8_t address[8];
-      bool linkKey;
-      EmberKeyData keyData;
-      index = fetchInt8u();
-      fetchInt8uArray(8, address);
-      linkKey = fetchInt8u();
-      fetchEmberKeyData(&keyData);
-      status = emberSetKeyTableEntry(index, address, linkKey, &keyData);
-      appendInt8u(status);
-      break;
-    }
-
     case EZSP_FIND_KEY_TABLE_ENTRY: {
       uint8_t index;
       uint8_t address[8];
@@ -126,19 +90,6 @@ bool sli_zigbee_af_process_ezsp_command_security(uint16_t commandId)
       linkKey = fetchInt8u();
       index = emberFindKeyTableEntry(address, linkKey);
       appendInt8u(index);
-      break;
-    }
-
-    case EZSP_ADD_OR_UPDATE_KEY_TABLE_ENTRY: {
-      EmberStatus status;
-      uint8_t address[8];
-      bool linkKey;
-      EmberKeyData keyData;
-      fetchInt8uArray(8, address);
-      linkKey = fetchInt8u();
-      fetchEmberKeyData(&keyData);
-      status = emberAddOrUpdateKeyTableEntry(address, linkKey, &keyData);
-      appendInt8u(status);
       break;
     }
 
@@ -187,41 +138,8 @@ bool sli_zigbee_af_process_ezsp_command_security(uint16_t commandId)
       break;
     }
 
-    case EZSP_ADD_TRANSIENT_LINK_KEY: {
-      EmberStatus status;
-      uint8_t partner[8];
-      EmberKeyData transientKey;
-      fetchInt8uArray(8, partner);
-      fetchEmberKeyData(&transientKey);
-      status = emberAfEzspAddTransientLinkKeyCommandCallback(partner, &transientKey);
-      appendInt8u(status);
-      break;
-    }
-
     case EZSP_CLEAR_TRANSIENT_LINK_KEYS: {
       emberClearTransientLinkKeys();
-      break;
-    }
-
-    case EZSP_GET_TRANSIENT_LINK_KEY: {
-      EmberStatus status;
-      uint8_t eui[8];
-      EmberTransientKeyData transientKeyData;
-      fetchInt8uArray(8, eui);
-      status = emberAfEzspGetTransientLinkKeyCommandCallback(eui, &transientKeyData);
-      appendInt8u(status);
-      appendEmberTransientKeyData(&transientKeyData);
-      break;
-    }
-
-    case EZSP_GET_TRANSIENT_KEY_TABLE_ENTRY: {
-      EmberStatus status;
-      uint8_t index;
-      EmberTransientKeyData transientKeyData;
-      index = fetchInt8u();
-      status = emberGetTransientKeyTableEntry(index, &transientKeyData);
-      appendInt8u(status);
-      appendEmberTransientKeyData(&transientKeyData);
       break;
     }
 

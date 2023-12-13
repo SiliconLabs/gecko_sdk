@@ -94,7 +94,7 @@
     }                             \
 } while (0)
 
-/***************************************************************************//**
+/*******************************************************************************
  * Handler for state change
  *
  * Takes care of entry actions.
@@ -103,6 +103,37 @@
  ******************************************************************************/
 static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t *const self,
                                               sli_btmesh_blob_transfer_server_state_t state);
+
+/*******************************************************************************
+ * Allocates block buffer based on block size and instance configuration.
+ *
+ * If Block Buffer Memory Type is configured to Heap then the block buffer is
+ * allocated from the heap memory.
+ * If Block Buffer Memory Type is configured to Static then the link time
+ * allocated block buffer is returned unless its size is not sufficient which
+ * is handled by returning NULL pointer.
+ * See SL_BTMESH_BLOB_TRANSFER_SERVER_INSTANCE_BLOCK_BUFFER_TYPE_CFG_VAL
+ * configuration option for further details.
+ *
+ * @param[in] self Pointer to the BLOB Transfer Server model instance
+ * @param[in] block_size Size of buffer to allocate
+ * @returns Pointer to the allocated BLOB Block buffer
+ * @retval NULL Memory allocation failed
+ ******************************************************************************/
+static uint8_t *alloc_block_buffer(const sli_btmesh_blob_transfer_server_t *const self,
+                                   uint32_t block_size);
+
+/*******************************************************************************
+ * Deallocates block buffer based on pointer and instance configuration.
+ *
+ * If Block Buffer Memory Type is configured to Heap then the block buffer is
+ * deallocated otherwise it is a no-operation.
+ *
+ * @param[in] self Pointer to the BLOB Transfer Server model instance
+ * @param[in] block_buffer Pointer to the previously allocated block buffer
+ ******************************************************************************/
+static void free_block_buffer(const sli_btmesh_blob_transfer_server_t *const self,
+                              void *block_buffer);
 
 void sl_btmesh_blob_transfer_server_inst_init(sli_btmesh_blob_transfer_server_t *const self,
                                               uint32_t max_blob_size)
@@ -206,7 +237,7 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
       self->blob_size = msg->blob_size;
       // Set expected block size
       self->blob_block_size = 1 << msg->block_size_log;
-      self->block_buffer = sl_malloc(self->blob_block_size);
+      self->block_buffer = alloc_block_buffer(self, self->blob_block_size);
       // Check allocation result
       if (self->block_buffer == NULL) {
         log_critical("Block buffer allocation failed!" NL);
@@ -394,6 +425,7 @@ void sl_btmesh_blob_transfer_server_on_event(sl_btmesh_msg_t const *evt)
   }
 }
 
+// Handler for state change
 static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t *const self,
                                               sli_btmesh_blob_transfer_server_state_t state)
 {
@@ -411,7 +443,7 @@ static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t 
       self->blob_size = UINT32_MAX;
       // Set progress to Unknown, i.e. 0xFFFFFFFF
       self->progress = UINT32_MAX;
-      sl_free(self->block_buffer);
+      free_block_buffer(self, self->block_buffer);
       self->block_buffer = NULL;
       break;
     case SLI_BTMESH_BLOB_TRANSFER_SERVER_IDLE_DONE: {
@@ -426,7 +458,7 @@ static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t 
       // Notify user that transfer has completed
       sl_btmesh_blob_transfer_server_transfer_done(&self->blob_id);
 #endif // SL_BTMESH_BLOB_TRANSFER_SERVER_TRANSFER_DONE_CALLBACK_CFG_VAL
-      sl_free(self->block_buffer);
+      free_block_buffer(self, self->block_buffer);
       break;
     }
     case SLI_BTMESH_BLOB_TRANSFER_SERVER_ACTIVE:
@@ -478,6 +510,35 @@ static void blob_transfer_server_state_change(sli_btmesh_blob_transfer_server_t 
         sl_btmesh_blob_storage_delete_unmanaged_slots_start();
         break;
     }
+  }
+}
+
+// Allocates block buffer based on block size and instance configuration.
+static uint8_t *alloc_block_buffer(const sli_btmesh_blob_transfer_server_t *const self,
+                                   uint32_t block_size)
+{
+  uint8_t *block_buffer = NULL;
+  if (self->config->block_buffer == NULL) {
+    // Block buffer shall be allocated from heap
+    block_buffer = sl_malloc(block_size);
+  } else {
+    // Static block buffer was allocated statically at link time
+    if (block_size <= self->config->block_buffer_size) {
+      block_buffer = self->config->block_buffer;
+    } else {
+      block_buffer = NULL;
+    }
+  }
+  return block_buffer;
+}
+
+// Deallocates block buffer based on pointer and instance configuration.
+static void free_block_buffer(const sli_btmesh_blob_transfer_server_t *const self,
+                              void *block_buffer)
+{
+  if (self->config->block_buffer == NULL) {
+    // Block buffer was allocated from heap so it shall be deallocated
+    sl_free(block_buffer);
   }
 }
 

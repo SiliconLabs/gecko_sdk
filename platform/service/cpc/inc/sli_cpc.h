@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
  * @file
- * @brief CPC
+ * @brief CPC Internal Definitions
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
@@ -53,8 +53,18 @@
 #include "sli_cpc_security.h"
 #endif
 
+#if defined(SL_CATALOG_CPC_JOURNAL_PRESENT)
+#include "sl_cpc_journal.h"
+#else
+#define SL_CPC_JOURNAL_RECORD_ERROR(string, value) ((void)(string), (void)(value))
+#define SL_CPC_JOURNAL_RECORD_WARNING(string, value) ((void)(string), (void)(value))
+#define SL_CPC_JOURNAL_RECORD_INFO(string, value) ((void)(string), (void)(value))
+#define SL_CPC_JOURNAL_RECORD_DEBUG(string, value) ((void)(string), (void)(value))
+#define SL_CPC_JOURNAL_RECORD_TRACE(string, value) ((void)(string), (void)(value))
+#endif
+
 #if (!defined(SL_CATALOG_EMLIB_CORE_PRESENT))
-#include "cpc_mcu.h"
+#include "mcu.h"
 #else
 #include "em_core.h"
 #include "sl_atomic.h"
@@ -69,7 +79,7 @@
 #define MCU_ATOMIC_STORE        sl_atomic_store
 #endif
 
-#define SLI_CPC_PROTOCOL_VERSION            (4)
+#define SLI_CPC_PROTOCOL_VERSION            (5)
 
 #define SLI_CPC_ENDPOINT_SYSTEM             (1)
 
@@ -180,15 +190,29 @@
 #endif
 
 // Frame Flags
-#define SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE    (0x01 << 0)   // I-frame is enabled by default; This flag MUST be set to disable the i-frame support by the endpoint
-#define SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE     (0x01 << 1)   // U-frame is disabled by default; This flag MUST be set to enable u-frame support by the endpoint
-#define SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE  (0x01 << 2)
+// I-Frame is enabled by default; this flag MUST be set to disable the I-Frame support by the endpoint
+#define SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE             (0x01 << 0)
+// U-Frame is disabled by default; this flag MUST be set to enable U-Frame support by the endpoint
+#define SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE              (0x01 << 1)
+// Disable non-poll/final U-Frame
+#define SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE (0x01 << 2)
+// Disable encryption
+// SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION              (0x01 << 3) is defined in public header
+// Endpoint was opened using legacy API
+#define SL_CPC_ENDPOINT_FLAG_LEGACY_API                 (0x01 << 4)
+
+// Legacy Flags
+#define SL_CPC_OPEN_ENDPOINT_FLAG_IFRAME_DISABLE        SL_CPC_ENDPOINT_FLAG_IFRAME_DISABLE
+#define SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_ENABLE         SL_CPC_ENDPOINT_FLAG_UFRAME_ENABLE
+#define SL_CPC_OPEN_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE
+// SL_CPC_OPEN_ENDPOINT_FLAG_DISABLE_ENCRYPTION         is defined in public header
 
 // SL_CPC_FLAG_NO_BLOCK = 0x01 << 0
 #define SL_CPC_FLAG_UNNUMBERED_INFORMATION      (0x01 << 1)
-#define SL_CPC_FLAG_UNNUMBERED_POLL             (0x01 << 2)
+#define SL_CPC_FLAG_UNNUMBERED_POLL_FINAL       (0x01 << 2)
 #define SL_CPC_FLAG_UNNUMBERED_ACKNOWLEDGE      (0x01 << 3)
-#define SL_CPC_FLAG_INFORMATION_FINAL           (0x01 << 4)
+#define SL_CPC_FLAG_INFORMATION_POLL_FINAL      (0x01 << 4)
+#define SL_CPC_FLAG_BLOCKING_WRITE              (0x01 << 5)
 
 /// @brief Enumeration representing the possible id
 SL_ENUM(sl_cpc_service_endpoint_id_t){
@@ -245,10 +269,6 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
   SL_CPC_ENDPOINT_LAST_ID_MARKER,      // DO NOT USE THIS ENDPOINT ID
 };
 
-#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
-#define SL_CPC_ON_FINAL_PRESENT
-#endif
-
 #define SLI_CPC_SERVICE_ENDPOINT_ID_START     ((uint8_t)SL_CPC_ENDPOINT_SYSTEM)
 #define SLI_CPC_SERVICE_ENDPOINT_ID_END       ((uint8_t)SL_CPC_ENDPOINT_LAST_ID_MARKER - 1)
 #define SLI_CPC_SERVICE_ENDPOINT_MAX_COUNT    (SLI_CPC_SERVICE_ENDPOINT_ID_END - SLI_CPC_SERVICE_ENDPOINT_ID_START + 1)
@@ -263,7 +283,9 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
  * CMD_PROPERTY_GET::PROP_ENDPOINT_STATES.
  *
  ******************************************************************************/
+#ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 #define SL_CPC_ENDPOINT_MAX_COUNT  256
 
@@ -274,6 +296,10 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
 
 #ifndef SLI_CPC_SYSTEM_COMMAND_BUFFER_COUNT
 #define SLI_CPC_SYSTEM_COMMAND_BUFFER_COUNT 5
+#endif
+
+#ifndef SLI_CPC_SYSTEM_COMMAND_HANDLE_COUNT
+#define SLI_CPC_SYSTEM_COMMAND_HANDLE_COUNT 2
 #endif
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
@@ -291,6 +317,7 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
 #define SLI_CPC_MIN_RE_TRANSMIT_TIMEOUT_MS     (5)
 #define SLI_CPC_DISCONNECTION_NOTIFICATION_TIMEOUT_MS  (1000)
 #define SLI_CPC_MIN_RE_TRANSMIT_TIMEOUT_MINIMUM_VARIATION_MS (5)
+#define SLI_CPC_SYSTEM_CMD_TIMEOUT_MS           (10000)
 
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
 #if (SL_CPC_RX_PAYLOAD_MAX_LENGTH > 4079)
@@ -339,27 +366,6 @@ SL_ENUM(sl_cpc_service_endpoint_id_t){
                                              + (MIN(SL_CPC_TRANSMIT_WINDOW_MAX_SIZE * SLI_CPC_ENDPOINT_COUNT, \
                                                     SLI_CPC_BUFFER_HANDLE_MAX_COUNT)))
 
-#define SLI_CPC_POP_BUFFER_HANDLE_LIST(head_ptr, item_type) ({    \
-    sl_slist_node_t *item_node = sl_slist_pop(head_ptr);          \
-    item_type *item = SL_SLIST_ENTRY(item_node, item_type, node); \
-    if (item != NULL) {                                           \
-      EFM_ASSERT(item->handle != NULL);                           \
-      EFM_ASSERT(item->handle->ref_count > 0);                    \
-      item->handle->ref_count--;                                  \
-    }                                                             \
-    item_node;                                                    \
-  })
-
-#define SLI_CPC_REMOVE_BUFFER_HANDLE_FROM_LIST(head_ptr, item_ptr, item_type) ({ \
-    EFM_ASSERT(item_ptr != NULL);                                                \
-    item_type *item = *item_ptr;                                                 \
-    EFM_ASSERT(item != NULL);                                                    \
-    EFM_ASSERT(item->handle != NULL);                                            \
-    EFM_ASSERT(item->handle->ref_count > 0);                                     \
-    item->handle->ref_count--;                                                   \
-    sl_slist_remove(head_ptr, &item->node);                                      \
-  })
-
 #if SL_CPC_USER_ENDPOINT_MAX_COUNT > 10
 #error "SL_CPC_USER_ENDPOINT_MAX_COUNT must be less than 10"
 #endif
@@ -384,57 +390,60 @@ SL_ENUM(sl_cpc_reject_reason_t){
   SL_CPC_REJECT_ERROR
 };
 
-SL_ENUM(sl_cpc_buffer_type_t) {
-  SL_CPC_UNKNOWN_BUFFER,
-  SL_CPC_RX_BUFFER,
-  SL_CPC_HDLC_REJECT_BUFFER
+SL_ENUM(sl_cpc_buffer_handle_type_t) {
+  SL_CPC_UNKNOWN_BUFFER_HANDLE,
+  SL_CPC_RX_INTERNAL_BUFFER_HANDLE,
+  SL_CPC_RX_USER_BUFFER_HANDLE,
+  SL_CPC_TX_REJECT_BUFFER_HANDLE,
+  SL_CPC_TX_DATA_BUFFER_HANDLE,
+  SL_CPC_TX_SFRAME_BUFFER_HANDLE,
 };
-
-typedef struct {
-  void *hdlc_header;
-  void *data;
-#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-  void *security_tag;
-#endif
-  uint16_t data_length;
-  uint8_t fcs[2];
-  uint8_t control;
-  uint8_t address;
-  uint8_t ref_count;
-  sl_cpc_buffer_type_t buffer_type;
-  sl_cpc_endpoint_t *endpoint;
-  sl_cpc_reject_reason_t reason;
-  void *arg;
-  bool on_write_complete_pending;
-} sl_cpc_buffer_handle_t;
-
-typedef struct {
-  uint8_t id;
-  sl_cpc_on_write_completed_t on_iframe_write_completed;
-  sl_cpc_on_write_completed_t on_uframe_write_completed;
-  void *arg;
-} sl_cpc_endpoint_closed_arg_t;
-
-typedef struct {
-  sl_slist_node_t node;
-  sl_cpc_buffer_handle_t *handle;
-} sl_cpc_transmit_queue_item_t;
-
-typedef struct {
-  sl_slist_node_t node;
-  void *data;
-  uint16_t data_length;
-  sl_cpc_buffer_type_t buffer_type;
-} sl_cpc_receive_queue_item_t;
 
 typedef void (*sl_cpc_dispatcher_fnct_t)(void *data);
 
+/**
+ * @brief This structure defines cpc dispatcher handle.
+ */
 typedef struct {
-  sl_slist_node_t node;
-  sl_cpc_dispatcher_fnct_t fnct;
-  void *data;
-  bool submitted;
+  sl_slist_node_t node;                            ///< node
+  sl_cpc_dispatcher_fnct_t fnct;                   ///< fnct
+  void *data;                                      ///< data
+  bool submitted;                                  ///< submitted
 } sl_cpc_dispatcher_handle_t;
+
+/**
+ * @brief This structure defines cpc buffer handle.
+ */
+typedef struct {
+  void *hdlc_header;                               ///< hdlc header
+  void *data;                                      ///< data
+#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
+  void *security_tag;
+#endif
+  uint16_t data_length;                            ///< data_length
+  uint8_t fcs[2];                                  ///< fcs
+  uint8_t control;                                 ///< control
+  uint8_t address;                                 ///< address
+  uint8_t ref_count;                               ///< ref count
+  sl_cpc_buffer_handle_type_t type;                ///< buffer handle type
+  sl_cpc_endpoint_t *endpoint;                     ///< endpoint
+  sl_cpc_reject_reason_t reason;                   ///< reason
+  void *arg;                                       ///< arg
+  bool on_write_complete_pending;                  ///< on write complete pending
+  sl_status_t write_status;                        ///< write status
+  sl_slist_node_t driver_node;                     ///< driver node
+  sl_slist_node_t core_node;                       ///< core node
+} sl_cpc_buffer_handle_t;
+
+/**
+ * @brief This structure defines cpc receive queue item.
+ */
+typedef struct {
+  sl_slist_node_t node;                            ///< node
+  void *data;                                      ///< data
+  uint16_t data_length;                            ///< data length
+  sl_cpc_buffer_handle_type_t buffer_type;         ///< buffer handle type
+} sl_cpc_receive_queue_item_t;
 
 #ifdef __cplusplus
 extern "C"
@@ -442,6 +451,36 @@ extern "C"
 #endif
 // -----------------------------------------------------------------------------
 // Prototypes
+
+/***************************************************************************//**
+ * Initialize Silicon Labs Internal Service endpoint.
+ *
+ * @param[in] endpoint_handle  Endpoint Handle.
+ *
+ * @param[in] id  Endpoint ID.
+ *
+ * @param[in] flags  Initialization flags. Reserved for future used
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sli_cpc_init_service_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                          sl_cpc_service_endpoint_id_t id,
+                                          uint8_t flags);
+
+/***************************************************************************//**
+ * Initialize temporary endpoint.
+ *
+ * @param[in] endpoint_handle  Endpoint Handle.
+ *
+ * @param[out] id  Endpoint ID.
+ *
+ * @param[in] flags  Initialization flags. Reserved for future used
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sli_cpc_init_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                            uint8_t *id,
+                                            uint8_t flags);
 
 /***************************************************************************//**
  * Open Silicon Labs Internal Service endpoint.
@@ -492,7 +531,23 @@ sl_status_t sli_cpc_open_temporary_endpoint(sl_cpc_endpoint_handle_t *endpoint_h
 /***************************************************************************//**
  * Initialize CPC buffers' handling module.
  ******************************************************************************/
-void sli_cpc_init_buffers(void);
+sl_status_t sli_cpc_memory_init(void);
+
+/***************************************************************************//**
+ * @brief Get a handle to a CPC write buffer.
+ *
+ * Retrieves a handle for write operations. In environments with RTOS,
+ * it handles semaphore acquisition based on the given timeout.
+ *
+ * @param[out] handle  Pointer to store the retrieved buffer handle.
+ * @param[in] block    If true, the function blocks until the buffer is available or
+ *                     timeout occurs; non-blocking otherwise.
+ * @param[in] timeout  Timeout for buffer availability in milliseconds used only when
+ *                     RTOS is used.
+ *
+ * @return             Status code indicating operation result
+ ******************************************************************************/
+sl_status_t sli_cpc_get_write_buffer_handle(sl_cpc_buffer_handle_t **handle, bool block, uint32_t timeout);
 
 /***************************************************************************//**
  * Get a CPC buffer handle.
@@ -502,7 +557,7 @@ void sli_cpc_init_buffers(void);
  *
  * @return Status code.
  ******************************************************************************/
-sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle);
+sl_status_t sli_cpc_get_buffer_handle(sl_cpc_buffer_handle_t **handle, sl_cpc_buffer_handle_type_t type);
 
 /***************************************************************************//**
  * Get a CPC header buffer.
@@ -561,7 +616,7 @@ sl_status_t sli_cpc_get_buffer_handle_for_rx(sl_cpc_buffer_handle_t **handle);
  *
  * @return Status code.
  ******************************************************************************/
-sl_status_t sli_cpc_drop_buffer_handle(sl_cpc_buffer_handle_t *handle);
+sl_status_t sli_cpc_free_buffer_handle(sl_cpc_buffer_handle_t *handle);
 
 /***************************************************************************//**
  * Allocate queue item and push data buffer in receive queue then free
@@ -577,31 +632,13 @@ sl_status_t sli_cpc_push_back_rx_data_in_receive_queue(sl_cpc_buffer_handle_t *h
                                                        uint16_t data_length);
 
 /***************************************************************************//**
- * Free CPC buffer.
+ * Free CPC HDLC header.
  *
  * @param[in] buffer  Pointer to hdlc header to free.
  *
  * @return Status code.
  ******************************************************************************/
 sl_status_t sli_cpc_free_hdlc_header(void *data);
-
-/***************************************************************************//**
- * Free CPC system command buffer.
- *
- * @param[in] item Pointer to system command buffer to free.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_free_command_buffer(sli_cpc_system_cmd_t *item);
-
-/***************************************************************************//**
- * Get a a system command buffer.
- *
- * @param[out] item Address of the variable that will receive the item pointer.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_get_system_command_buffer(sli_cpc_system_cmd_t **item);
 
 /***************************************************************************//**
  * Get a receive queue item.
@@ -632,43 +669,7 @@ sl_status_t sli_cpc_push_receive_queue_item_to_postponed_list(sl_cpc_receive_que
  *
  * @param[in] item  Pointer to item to free.
  ******************************************************************************/
-void sli_cpc_drop_receive_queue_item(sl_cpc_receive_queue_item_t *item);
-
-/***************************************************************************//**
- * Get a transmit queue item.
- *
- * @param[out] item  Address of the variable that will receive the item pointer.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_get_transmit_queue_item(sl_cpc_transmit_queue_item_t **item);
-
-/***************************************************************************//**
- * Free transmit queue item.
- *
- * @param[in] item  Pointer to item to free.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_free_transmit_queue_item(sl_cpc_transmit_queue_item_t *item);
-
-/***************************************************************************//**
- * Get a transmit queue item for S-Frame.
- *
- * @param[out] item  Address of the variable that will receive the item pointer.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_get_sframe_transmit_queue_item(sl_cpc_transmit_queue_item_t **item);
-
-/***************************************************************************//**
- * Free transmit queue item from S-Frame pool.
- *
- * @param[in] item  Pointer to item to free.
- *
- * @return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_free_sframe_transmit_queue_item(sl_cpc_transmit_queue_item_t *item);
+void sli_cpc_free_receive_queue_item(sl_cpc_receive_queue_item_t *item);
 
 /***************************************************************************//**
  * Get an endoint.
@@ -696,38 +697,49 @@ void sli_cpc_free_endpoint(sl_cpc_endpoint_t *endpoint);
 sl_status_t sli_cpc_free_rx_buffer(void *data);
 
 /***************************************************************************//**
- * Get endpoint closed argument item.
- *
- *@param[out] endpoint  Address of the variable that will receive the argument
- *                      item pointer.
- *
- *@return Status code.
- ******************************************************************************/
-sl_status_t sli_cpc_get_closed_arg(sl_cpc_endpoint_closed_arg_t **arg);
-
-/***************************************************************************//**
- * Free endpoint closed argument.
- *
- * @param[in] endpoint  Pointer to endpoint to free.
- ******************************************************************************/
-void sli_cpc_free_closed_arg(sl_cpc_endpoint_closed_arg_t *arg);
-
-/***************************************************************************//**
  * Signal process needed.
  ******************************************************************************/
 void sli_cpc_signal_event(sl_cpc_signal_type_t signal_type);
 
 /***************************************************************************//**
- * Push back a list item containing an allocated buffer handle.
- * This list must then be popped using the macro SLI_CPC_POP_BUFFER_HANDLE_LIST.
+ * Push back a list item containing an allocated buffer handle for the core
  ******************************************************************************/
-void sli_cpc_push_back_buffer_handle(sl_slist_node_t **head, sl_slist_node_t *item, sl_cpc_buffer_handle_t *buf_handle);
+void sli_cpc_push_back_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle);
 
 /***************************************************************************//**
- * Push a list item containing an allocated buffer handle.
- * This list must then be popped using the macro SLI_CPC_POP_BUFFER_HANDLE_LIST.
+ * Pop a buffer handle from a list owned by the CPC core
  ******************************************************************************/
-void sli_cpc_push_buffer_handle(sl_slist_node_t **head, sl_slist_node_t *item, sl_cpc_buffer_handle_t *buf_handle);
+sl_cpc_buffer_handle_t* sli_cpc_pop_core_buffer_handle(sl_slist_node_t **head);
+
+/***************************************************************************//**
+ * Remove a list item containing an allocated buffer handle for the core
+ ******************************************************************************/
+void sli_cpc_remove_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buffer_handle);
+
+/***************************************************************************//**
+ * Push a list item containing an allocated buffer handle for the core
+ ******************************************************************************/
+void sli_cpc_push_core_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle);
+
+/***************************************************************************//**
+ * Pop a buffer handle from a list owned by the CPC driver
+ ******************************************************************************/
+sl_cpc_buffer_handle_t* sli_cpc_pop_driver_buffer_handle(sl_slist_node_t **head);
+
+/***************************************************************************//**
+ * Remove a buffer handle from a list owned by the CPC driver
+ ******************************************************************************/
+void sli_cpc_remove_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buffer_handle);
+
+/***************************************************************************//**
+ * Push a buffer handle to a list.
+ ******************************************************************************/
+void sli_cpc_push_back_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle);
+
+/***************************************************************************//**
+ * Push a list item containing an allocated buffer handle for the driver
+ ******************************************************************************/
+void sli_cpc_push_driver_buffer_handle(sl_slist_node_t **head, sl_cpc_buffer_handle_t *buf_handle);
 
 /***************************************************************************//**
  * Get a buffer to store a security tag.
@@ -752,10 +764,18 @@ sl_status_t sli_cpc_free_security_tag_buffer(void *tag_buffer);
  * Initialize CPC System Endpoint.
  *
  * @brief
- *   This function initializes the system endpoint module by opening the system
- *   endpoint. This function must be called after CPC init.
+ *   This function initializes the system endpoint module.
  ******************************************************************************/
 sl_status_t sli_cpc_system_init(void);
+
+/***************************************************************************//**
+ * Start CPC System Endpoint.
+ *
+ * @brief
+ *   This function starts the system endpoint module by opening the system
+ *   endpoint. This function must be called after CPC init.
+ ******************************************************************************/
+sl_status_t sli_cpc_system_start(void);
 
 /***************************************************************************//**
  * Process the system endpoint.
@@ -805,19 +825,116 @@ void sli_cpc_dispatcher_cancel(sl_cpc_dispatcher_handle_t *handle);
 void sli_cpc_dispatcher_process(void);
 
 /***************************************************************************//**
- * Notify the user that an endpoint on the host has closed.
+ * Notify the core that remote is connecting to this endpoint if ready.
+ *
+ * @return Status code.
  ******************************************************************************/
-void sli_cpc_remote_disconnected(uint8_t endpoint_id);
+sl_status_t sli_cpc_remote_connecting(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state);
 
 /***************************************************************************//**
- * Endpoint was closed, notify the host.
+ * Notify the user that an endpoint was opened by the host/primary.
  ******************************************************************************/
-sl_status_t sli_cpc_send_disconnection_notification(uint8_t endpoint_id);
+void sli_cpc_remote_connected(uint8_t endpoint_id, sl_status_t status);
+
+/***************************************************************************//**
+ * Notify the core that the remote has requested a connection shutdown.
+ *
+ * @return Status code.
+ ******************************************************************************/
+sl_status_t sli_cpc_remote_shutdown(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state);
+
+/***************************************************************************//**
+ * Completed the endpoint disconnection handshake.
+ *
+ * @note Endpoint must be locked by caller.
+ ******************************************************************************/
+void sli_cpc_endpoint_disconnected(uint8_t endpoint_id);
+
+/***************************************************************************//**
+ * Notify the user that an endpoint on the host has closed.
+ ******************************************************************************/
+void sli_cpc_remote_terminated(uint8_t endpoint_id, sl_cpc_endpoint_state_t *reply_state);
+
+/***************************************************************************//**
+ * Endpoint was opened, notify the host.
+ ******************************************************************************/
+sl_status_t sli_cpc_send_opening_notification(uint8_t endpoint_id);
+
+/***************************************************************************//**
+ * Endpoint connection was terminated, notify the host.
+ ******************************************************************************/
+sl_status_t sli_cpc_send_terminate_notification(uint8_t endpoint_id);
+
+/***************************************************************************//**
+ * Endpoint connection shutdown, notify the host.
+ ******************************************************************************/
+sl_status_t sli_cpc_send_shutdown_request(uint8_t endpoint_id);
 
 /***************************************************************************//**
  * Called on re-transmition of frame.
  ******************************************************************************/
-void sli_cpc_on_frame_retransmit(sl_cpc_transmit_queue_item_t* item);
+void sli_cpc_on_frame_retransmit(sl_cpc_buffer_handle_t* frame);
+
+/***************************************************************************//**
+ * Called on expiration of retransmit timer
+ ******************************************************************************/
+void sli_cpc_on_retransmit_timer_expiration(sl_cpc_buffer_handle_t *frame);
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************//**
+ * Notify the core that the remote sent an unsolicited opening notification.
+ ******************************************************************************/
+void sli_cpc_remote_open_unsolicited(uint8_t id);
+
+/***************************************************************************//**
+ * Notify the core that the remote sent an unsolicited shutdown request.
+ ******************************************************************************/
+void sli_cpc_remote_shutdown_unsolicited(uint8_t id);
+
+/***************************************************************************//**
+ * Called when the secondary has reset.
+ ******************************************************************************/
+void sli_cpc_reset(void);
+
+/***************************************************************************/ /**
+ * Checks if CPC has been initialized
+ *
+ * @retval  SL_STATUS_OK              If sl_cpc_init was called
+ * @retval  SL_STATUS_NOT_INITIALIZED If sl_cpc_init has not yet been called
+ ******************************************************************************/
+sl_status_t sli_cpc_is_initialized(void);
+#endif
+
+/***************************************************************************//**
+ * Set the maximum payload length that the remote can receive
+ ******************************************************************************/
+void sli_cpc_set_remote_tx_max_payload_length(uint16_t remote_tx_max_payload_length);
+// -----------------------------------------------------------------------------
+// Driver to core notifications
+
+/***************************************************************************//**
+ * Notifies core of rx completion.
+ ******************************************************************************/
+void sli_cpc_notify_rx_data_from_drv(void);
+
+/***************************************************************************//**
+ * Notifies core of tx completion by the driver.
+ *
+ * @param buffer_handle Pointer to the buffer handle that was transmitted.
+ ******************************************************************************/
+void sli_cpc_notify_tx_data_by_drv(sl_cpc_buffer_handle_t *buffer_handle);
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+/***************************************************************************//**
+ * Notifies core of a freed transmit item
+ ******************************************************************************/
+void sli_cpc_notify_tx_item_freed(void);
+
+/***************************************************************************//**
+ * Notifies core of a freed buffer handle
+ ******************************************************************************/
+void sli_cpc_notify_buffer_handle_freed(void);
+#endif
 
 /** @} (end addtogroup cpc) */
 

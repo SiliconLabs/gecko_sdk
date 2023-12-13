@@ -91,31 +91,6 @@ bool Tlv::IsValid(const Tlv &aTlv)
     return rval;
 }
 
-const Tlv *Tlv::FindTlv(const uint8_t *aTlvsStart, uint16_t aTlvsLength, Type aType)
-{
-    const Tlv *tlv;
-    const Tlv *end = reinterpret_cast<const Tlv *>(aTlvsStart + aTlvsLength);
-
-    for (tlv = reinterpret_cast<const Tlv *>(aTlvsStart); tlv < end; tlv = tlv->GetNext())
-    {
-        VerifyOrExit((tlv + 1) <= end, tlv = nullptr);
-        VerifyOrExit(!tlv->IsExtended() ||
-                         (reinterpret_cast<const ExtendedTlv *>(tlv) + 1 <= reinterpret_cast<const ExtendedTlv *>(end)),
-                     tlv = nullptr);
-        VerifyOrExit(tlv->GetNext() <= end, tlv = nullptr);
-
-        if (tlv->GetType() == aType)
-        {
-            ExitNow();
-        }
-    }
-
-    tlv = nullptr;
-
-exit:
-    return tlv;
-}
-
 NameData NetworkNameTlv::GetNetworkName(void) const
 {
     uint8_t len = GetLength();
@@ -209,6 +184,20 @@ void ChannelTlv::SetChannel(uint16_t aChannel)
 
     SetChannelPage(channelPage);
     mChannel = HostSwap16(aChannel);
+}
+
+const char *StateTlv::StateToString(State aState)
+{
+    static const char *const kStateStrings[] = {
+        "Pending", // (0) kPending,
+        "Accept",  // (1) kAccept
+        "Reject",  // (2) kReject,
+    };
+
+    static_assert(0 == kPending, "kPending value is incorrect");
+    static_assert(1 == kAccept, "kAccept value is incorrect");
+
+    return aState == kReject ? kStateStrings[2] : kStateStrings[aState];
 }
 
 bool ChannelMaskBaseTlv::IsValid(void) const

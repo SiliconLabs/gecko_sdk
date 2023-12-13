@@ -57,14 +57,35 @@
 #define PUBLIC_DEVICE_ADDRESS         0
 #define STATIC_RANDOM_ADDRESS         1
 
+/******************************************************************************
+ * This component still has the style of Bluetooth BGAPI version 2.0 (last used
+ * on 19Q4 GSDK) where the advertising data generation and setting are coupled
+ * in the context of starting Bluetooth advertiser.
+ *
+ * New Bluetooth BGAPIs separated advertising data setting from starting the
+ * advertiser. As a result some types are not used since BGAPI 3.0 on 20Q2 GSDK.
+ * Define these types locally in this file so that the CLI host and device keep
+ * to be functional as before.
+ *****************************************************************************/
+
+// The advertising broadcast discoverable mode, equivalent to the deprecated
+// BGAPI enum sl_bt_advertiser_broadcast. This mode doesn't exist in latest API.
+// Semantically it is the same as sl_bt_advertiser_non_discoverable.
+#define BGAPI_ADVERTISER_MODE_BROADCAST    3
+
+// The advertising user-data discoverable mode, equivalent to the deprecated
+// enum sl_bt_advertiser_user_data. This mode does not exist in latest BGAPI
+// which has no concept of user-data discoverable mode.
+#define BGAPI_ADVERTISER_MODE_USER_DATA    4
+
 static sl_status_t bleGenerateAdvertisingData(uint8_t adv_handle,
                                               uint8_t discoverable_mode)
 {
-  if (discoverable_mode == advertiser_broadcast) {
-    // The broadcast mode is mapped to advertiser_non_discoverable
+  if (discoverable_mode == BGAPI_ADVERTISER_MODE_BROADCAST) {
+    // The broadcast mode is mapped to sl_bt_advertiser_non_discoverable
     // in the context of Bluetooth stack generating the
     // advertising data.
-    discoverable_mode = advertiser_non_discoverable;
+    discoverable_mode = sl_bt_advertiser_non_discoverable;
   }
 
   sl_status_t status = sl_bt_legacy_advertiser_generate_data(adv_handle, discoverable_mode);
@@ -145,14 +166,14 @@ void emberAfPluginBleSetGapModeCommand(sl_cli_command_arg_t *arguments)
   uint8_t discoverable_mode = sl_cli_get_argument_uint8(arguments, 1);
   uint8_t connectable_mode = sl_cli_get_argument_uint8(arguments, 2);
 
-  if (discoverable_mode > advertiser_user_data
-      || connectable_mode > advertiser_connectable_non_scannable) {
+  if (discoverable_mode > BGAPI_ADVERTISER_MODE_USER_DATA
+      || connectable_mode > sl_bt_advertiser_connectable_non_scannable) {
     sl_zigbee_app_debug_print("Invalid params");
     return;
   }
 
   sl_status_t status = SL_STATUS_OK;
-  if (discoverable_mode < advertiser_user_data) {
+  if (discoverable_mode < BGAPI_ADVERTISER_MODE_USER_DATA) {
     // Other discovery modes than user_data rely on the Bluetooth stack
     // generating the advertising data.
     status = bleGenerateAdvertisingData(adv_handle, discoverable_mode);
@@ -176,14 +197,14 @@ void emberAfPluginBleSetBt5GapModeCommand(sl_cli_command_arg_t *arguments)
   uint8_t connectable_mode = sl_cli_get_argument_uint8(arguments, 2);
   uint16_t max_events = sl_cli_get_argument_uint16(arguments, 3);
 
-  if (discoverable_mode > advertiser_user_data
-      || connectable_mode > advertiser_connectable_non_scannable) {
+  if (discoverable_mode > BGAPI_ADVERTISER_MODE_USER_DATA
+      || connectable_mode > sl_bt_advertiser_connectable_non_scannable) {
     sl_zigbee_app_debug_print("Invalid params");
     return;
   }
 
   sl_status_t status = SL_STATUS_OK;
-  if (discoverable_mode < advertiser_user_data) {
+  if (discoverable_mode < BGAPI_ADVERTISER_MODE_USER_DATA) {
     // Other discovery modes than user_data rely on the Bluetooth stack
     // generating the advertising data.
     status = bleGenerateAdvertisingData(adv_handle, discoverable_mode);
@@ -213,7 +234,7 @@ void emberAfPluginBleSetBt5GapModeCommand(sl_cli_command_arg_t *arguments)
 void emberAfPluginBleGapStartScanCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t discovery_mode = sl_cli_get_argument_uint8(arguments, 0);
-  if (discovery_mode > scanner_discover_observation) {
+  if (discovery_mode > sl_bt_scanner_discover_observation) {
     sl_zigbee_app_debug_print("Invalid params");
     return;
   }
@@ -251,8 +272,8 @@ void emberAfPluginBleGapScanConfigCommand(sl_cli_command_arg_t *arguments)
   }
 
   sl_status_t status = sl_bt_scanner_set_parameters(mode,
-                                                    (uint16_t)(interval / 0.625),
-                                                    (uint16_t)(window / 0.625));
+                                                    (uint16_t)(interval),
+                                                    (uint16_t)(window));
 
   if (status == SL_STATUS_OK) {
     sl_zigbee_app_debug_print("success\n");

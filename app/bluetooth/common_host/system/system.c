@@ -76,6 +76,9 @@ void sl_system_init(void)
 #ifdef SL_CATALOG_APP_TIMER_PRESENT
   app_timer_init();
 #endif // SL_CATALOG_APP_TIMER_PRESENT
+#ifdef SL_CATALOG_NCP_RESET_PRESENT
+  ncp_reset_init();
+#endif // SL_CATALOG_NCP_RESET_PRESENT
 }
 
 void sl_system_process_action(void)

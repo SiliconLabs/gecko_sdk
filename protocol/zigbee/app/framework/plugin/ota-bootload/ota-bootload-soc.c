@@ -16,7 +16,7 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-
+#include "../../platform/service/legacy_hal/inc/bootloader-interface-app.h"
 //------------------------------------------------------------------------------
 // Globals
 

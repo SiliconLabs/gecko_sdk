@@ -38,7 +38,7 @@ void reset_resetWithReason(uint16_t resetReason)
 
 void reset_setResetReason(uint16_t resetReason)
 {
-  reset_setResetReason(resetReason);
+  reset_nsc_setResetReason(resetReason);
 }
 
 uint16_t reset_getResetReason(void)

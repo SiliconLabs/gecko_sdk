@@ -57,12 +57,15 @@ extern "C" {
 
 #define ESL_LIB_TLV_HEADER_LEN                 (sizeof(esl_lib_tlv_t))
 
+// -------------------------------
+// Periodic advertisement default settings definition
+
 // Periodic advertisement interval for PAwR train.
 // Value in units of 1.25 ms.
-#define ESL_LIB_PERIODIC_ADV_MIN_INTERVAL_DEFAULT  1233
+#define ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT          1233
 // Number of subevents, practically has to be equal to the supported number
 // of ESL groups.
-#define ESL_LIB_PERIODIC_ADV_MAX_INTERVAL_DEFAULT ESL_LIB_PERIODIC_ADV_MIN_INTERVAL_DEFAULT
+#define ESL_LIB_PAWR_MAX_INTERVAL_DEFAULT          ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT
 // Scalable up to 7140 tags in 28 groups
 #define ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT        28
 // 55 ms
@@ -77,6 +80,21 @@ extern "C" {
 // Number of subevent response slots, 23 is the absolute maximum of possible
 // opcodes in a single sync packet of 48 bytes (= max. payload by ESLP spec)
 #define ESL_LIB_PAWR_RESPONSE_SLOT_COUNT_DEFAULT   23
+
+// -------------------------------
+// Periodic advertisement absolute limits definition from Bluetooth Core spec 5.4
+#define ESL_LIB_PAWR_MIN_PA_INTERVAL               0x6
+#define ESL_LIB_PAWR_MAX_PA_INTERVAL               0xffff
+#define ESL_LIB_PAWR_MIN_NUM_SUBEVENTS             0x01
+#define ESL_LIB_PAWR_MAX_NUM_SUBEVENTS             0x80
+#define ESL_LIB_PAWR_MIN_SUBEVENT_INTERVAL         0x6
+#define ESL_LIB_PAWR_MAX_SUBEVENT_INTERVAL         0xff
+#define ESL_LIB_PAWR_MIN_RESPONSE_SLOT_DELAY       0x1
+#define ESL_LIB_PAWR_MAX_RESPONSE_SLOT_DELAY       0xfe
+#define ESL_LIB_PAWR_MIN_RESPONSE_SLOT_SPACING     0x2
+#define ESL_LIB_PAWR_MAX_RESPONSE_SLOT_SPACING     0xff
+#define ESL_LIB_PAWR_MIN_NUM_RESPONSE_SLOTS        0x01
+#define ESL_LIB_PAWR_MAX_NUM_RESPONSE_SLOTS        0xff
 
 // -------------------------------
 // General type definitions
@@ -223,6 +241,7 @@ typedef enum esl_lib_evt_type_e {
   ESL_LIB_EVT_CONNECTION_OPENED,
   ESL_LIB_EVT_BONDING_DATA,
   ESL_LIB_EVT_BONDING_FINISHED,
+  ESL_LIB_EVT_PAWR_CONFIG,
   ESL_LIB_EVT_PAWR_STATUS,
   ESL_LIB_EVT_PAWR_RESPONSE,
   ESL_LIB_EVT_PAWR_DATA_REQUEST,

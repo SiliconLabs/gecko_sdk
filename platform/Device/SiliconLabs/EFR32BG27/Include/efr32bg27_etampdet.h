@@ -643,4 +643,4 @@ typedef struct {
 /** @} End of group EFR32BG27_ETAMPDET */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_ETAMPDET_H */
+#endif // EFR32BG27_ETAMPDET_H

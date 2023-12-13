@@ -1012,4 +1012,4 @@ typedef struct {
 /** @} End of group MGM21_TIMER */
 /** @} End of group Parts */
 
-#endif /* MGM21_TIMER_H */
+#endif // MGM21_TIMER_H

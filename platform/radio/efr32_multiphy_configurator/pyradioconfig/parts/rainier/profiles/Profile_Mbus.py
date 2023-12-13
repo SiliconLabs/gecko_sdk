@@ -1,10 +1,11 @@
-from pyradioconfig.parts.viper.profiles.Profile_Mbus import profile_mbus_viper
+from pyradioconfig.parts.bobcat.profiles.Profile_Mbus import Profile_Mbus_Bobcat
 from pyradioconfig.parts.rainier.profiles.sw_profile_outputs_common import SwProfileOutputsCommonRainier
 from pyradioconfig.parts.common.profiles.profile_common import *
 from pyradioconfig.parts.common.profiles.rainier_regs import build_modem_regs_rainier
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 
-class ProfileMbusRainier(profile_mbus_viper):
+
+class ProfileMbusRainier(Profile_Mbus_Bobcat):
 
     def __init__(self):
         super().__init__()

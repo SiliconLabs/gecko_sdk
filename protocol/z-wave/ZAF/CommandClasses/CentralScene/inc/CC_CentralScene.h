@@ -94,7 +94,7 @@ cc_central_scene_t * cc_central_scene_config_get_scenes_attributes(void);
  * Returns number of supported scenes
  * @return Total amount of scenes supported by the app.
  */
-uint8_t cc_central_scene_config_get_number_of_scenes();
+uint8_t cc_central_scene_config_get_number_of_scenes(void);
 
 /**
  * Returns supported attributes for a given scene
@@ -114,7 +114,7 @@ uint8_t cc_central_scene_config_get_attribute_bitmask(uint8_t scene_number);
  * @return True if all keys are identical,
  *         False if different key attributes supported
  */
-uint8_t cc_central_scene_config_get_identical();
+uint8_t cc_central_scene_config_get_identical(void);
 
 /**
  * @}

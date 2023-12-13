@@ -70,15 +70,14 @@ cc_multilevel_sensor_air_temperature_interface_deinit(void)
 }
 
 bool
-cc_multilevel_sensor_ambient_light_interface_deinit()
+cc_multilevel_sensor_ambient_light_interface_deinit(void)
 {
   return true;
 }
 
 bool
-cc_multilevel_sensor_humidity_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_humidity_interface_read_value(sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(i_scale);
   uint32_t rh_data = 32;
 
   DPRINTF("Humidity: %d\n", rh_data);
@@ -126,9 +125,8 @@ cc_multilevel_sensor_air_temperature_interface_read_value(sensor_read_result_t* 
 }
 
 bool
-cc_multilevel_sensor_ambient_light_interface_read_value(sensor_read_result_t* o_result, uint8_t i_scale)
+cc_multilevel_sensor_ambient_light_interface_read_value(sensor_read_result_t* o_result, __attribute__((unused)) uint8_t i_scale)
 {
-  UNUSED(i_scale);
   uint32_t al_data_int = 32000;
 
   memset(o_result, 0, sizeof(sensor_read_result_t));

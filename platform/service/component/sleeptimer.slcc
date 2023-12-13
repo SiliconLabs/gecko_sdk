@@ -2,13 +2,13 @@ id: sleeptimer
 label: Sleep Timer
 package: platform
 description: >
-  The Sleeptimer driver provides software timers, delays, timekeeping and date 
-  functionalities using a low-frequency real-time clock peripheral. Sleep Timer 
+  The Sleeptimer driver provides software timers, delays, timekeeping and date
+  functionalities using a low-frequency real-time clock peripheral. Sleep Timer
   uses one Hardware Timer and creates multiple software timer instances.
-  Sleep Timer can be used for creating timers which are tightly integrated with power 
-  management. The Power Manager requires precision timing to have all clocks ready on 
+  Sleep Timer can be used for creating timers which are tightly integrated with power
+  management. The Power Manager requires precision timing to have all clocks ready on
   time, so that wakeup happens a little bit earlier to prepare the system to be ready
-  at the right time. 
+  at the right time.
 category: Services|Timers
 quality: production
 config_file:
@@ -28,9 +28,11 @@ source:
     condition: [device_has_burtc]
     unless: [device_series_0]
   - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_timer.c
-    condition: [device_has_timer]
+    condition: [device_has_timer, device_series_2]
   - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_timer.c
-    condition: [device_has_wtimer]
+    condition: [device_has_timer, device_series_1]
+  - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_timer.c
+    condition: [device_has_wtimer, device_series_1]
   - path: platform/service/sleeptimer/src/sli_sleeptimer_hal.h
 include:
   - path: platform/service/sleeptimer/inc
@@ -39,20 +41,18 @@ include:
       - path: sli_sleeptimer.h
 provides:
   - name: sleeptimer
-    condition: [device]
-  - name: sleeptimer_core
 requires:
-  - name: emlib_cmu
-    condition: [device_efx]
-  - name: emlib_common
-    condition: [device_efx]
-  - name: emlib_core
-  - name: emlib_prs
-    condition: [device_has_sysrtc]
   - name: atomic
   - name: status
   - name: sl_assert
   - name: sl_common
+  - name: emlib_cmu
+    condition: [device_efx]
+  - name: lld_common
+    condition: [device_efx]
+  - name: emlib_core
+  - name: lld_prs
+    condition: [device_has_sysrtc]
   - name: emlib_rtcc
     condition: [device_has_rtcc]
   - name: emlib_rtc
@@ -60,11 +60,13 @@ requires:
   - name: peripheral_sysrtc
     condition: [device_has_sysrtc]
   - name: emlib_burtc
-    condition: [device_has_burtc]
-  - name: emlib_timer
+    condition: [device_has_burtc, device_series_2]
+  - name: lld_timer
     condition: [device_has_timer]
-  - name: emlib_timer
+  - name: lld_timer
     condition: [device_has_wtimer]
+  - name: sleeptimer_si91x
+    condition: [device_si91x]
   - name: hostbased_sleeptimer
     condition: [win32]
 template_contribution:

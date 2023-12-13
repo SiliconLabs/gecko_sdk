@@ -76,6 +76,8 @@ static uuid_128 command_uuid;
 static uint16_t oob_capabilities = 0;
 /// The state of the current command
 static command_state_t command_state = INIT;
+/// Flag for configuration status
+static bool config_ready = false;
 /// The command in use
 static command_t command = NONE;
 /// Remote provisioner server address
@@ -273,6 +275,7 @@ void handle_remote_provision(void)
   static bd_addr mac = { 0 };
   switch (command_state) {
     case START: {
+      config_ready = false;
       bool param_ready = true;
       prov_mode_t prov_mode = btmesh_app_prov_get_mode();
       if (prov_mode == PROV_UI_MODE) {
@@ -306,14 +309,17 @@ void handle_remote_provision(void)
       btmesh_app_prov_handle_cbp(APP_NETKEY_IDX, command_uuid, mac, HOST_PROV_PB_REMOTE);
       break;
     case FINISHED: {
-      prov_mode_t prov_mode = btmesh_app_prov_get_mode();
-      app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
-      app_log_nl();
-      app_log_info("Provisioning finished" APP_LOG_NEW_LINE);
-      if (prov_mode == PROV_UI_MODE) {
-        btmesh_app_remote_prov_end_of_cmd();
-      } else {
-        exit(EXIT_SUCCESS);
+      if (true == config_ready) {
+        prov_mode_t prov_mode = btmesh_app_prov_get_mode();
+        app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
+        config_ready = false;
+        app_log_nl();
+        app_log_info("Provisioning finished" APP_LOG_NEW_LINE);
+        if (prov_mode == PROV_UI_MODE) {
+          btmesh_app_remote_prov_end_of_cmd();
+        } else {
+          exit(EXIT_SUCCESS);
+        }
       }
       break;
     }
@@ -377,6 +383,7 @@ void btmesh_app_on_provision_failed(void)
 
 void btmesh_app_on_node_configuration_end(void)
 {
+  config_ready = true;
   if (command_state == IN_PROGRESS) {
     command_state = FINISHED;
   }

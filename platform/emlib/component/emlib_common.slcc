@@ -17,6 +17,12 @@ include:
     - path: "em_version.h"
 provides:
   - name: "emlib_common"
+  - name: "lld_common"
+    condition: [device_series_0]
+  - name: "lld_common"
+    condition: [device_series_1]
+  - name: "lld_common"
+    condition: [device_series_2]
 requires:
   - name: "cmsis_core"
   - name: "device"

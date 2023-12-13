@@ -47,6 +47,15 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
+      name: "reboot_and_install_fw"
+      handler: "app_fw_reboot_and_install"
+      help: "Reboot and install firmware"
+      shortcuts:
+        - name: "fr"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
       name: "firmware_update_status"
       handler: "app_fw_update_status"
       help: "Get firmware update status"

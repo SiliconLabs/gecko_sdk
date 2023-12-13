@@ -881,9 +881,18 @@ SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
 
 #if defined(SEMAILBOX_PRESENT)
     uint8_t pubkey[64];
-    res = SE_readPubkey(SE_KEY_TYPE_BOOT, &pubkey, 64, false);
-    if (res != SE_RESPONSE_OK) {
-      return SE_RESPONSE_ABORT;
+    {
+      EFM_ASSERT(!((size_t)pubkey & 3U));
+      // SE command structures
+      SE_Command_t commandPubkeyRead = SE_COMMAND_DEFAULT(SE_COMMAND_READ_PUBKEY | SE_KEY_TYPE_BOOT);
+      SE_DataTransfer_t pubkeyData = SE_DATATRANSFER_DEFAULT(pubkey, sizeof(pubkey));
+      SE_addDataOutput(&commandPubkeyRead, &pubkeyData);
+      SE_executeCommand(&commandPubkeyRead);
+      res = SE_readCommandResponse();
+      if (res != SE_RESPONSE_OK) {
+        return SE_RESPONSE_ABORT;
+      }
+      res = SE_RESPONSE_INVALID_COMMAND;
     }
 #endif
   }

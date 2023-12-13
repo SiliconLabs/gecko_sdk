@@ -79,7 +79,7 @@
 /// Immediate transition time is 0 seconds
 #define IMMEDIATE                       0
 /// Callback has no parameters
-#define NO_CALLBACK_DATA                (void *)NULL
+#define NO_CALLBACK_DATA                NULL
 /// High Priority
 #define HIGH_PRIORITY                   0
 /// Values greater than max 37200000 are treated as unknown remaining time

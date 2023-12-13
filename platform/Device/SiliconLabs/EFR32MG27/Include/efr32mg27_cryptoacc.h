@@ -980,4 +980,4 @@ typedef struct {
 /** @} End of group EFR32MG27_CRYPTOACC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_CRYPTOACC_H */
+#endif // EFR32MG27_CRYPTOACC_H

@@ -913,4 +913,4 @@ typedef struct {
 /** @} End of group EFR32MG22_EUSART */
 /** @} End of group Parts */
 
-#endif /* EFR32MG22_EUSART_H */
+#endif // EFR32MG22_EUSART_H

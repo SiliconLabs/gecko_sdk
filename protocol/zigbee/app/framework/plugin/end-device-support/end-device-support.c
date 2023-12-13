@@ -53,7 +53,9 @@ static State states[EMBER_SUPPORTED_NETWORKS] = { { 0 } };
 bool sli_zigbee_af_enable_poll_completed_callback = ENABLE_POLL_COMPLETED_CALLBACK_DEFAULT;
 
 #ifndef EMBER_AF_HAS_END_DEVICE_NETWORK
+#ifndef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
   #error "End device support only allowed on end devices."
+#endif
 #endif
 
 // *****************************************************************************

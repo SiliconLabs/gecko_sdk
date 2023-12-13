@@ -4,7 +4,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 124
+          flash: 106
           ram: 20
       board:
         rf_bands:
@@ -14,7 +14,7 @@ tag:
           - pti
         io:
           allow_shared: false
-          led: 2+
+          led: 0+
           button: 2+
           display: true
   

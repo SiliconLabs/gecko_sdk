@@ -12,7 +12,6 @@ quality: production
 root_path: app/bluetooth/common/simple_com
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_simple_com_config.h
   - path: config/sl_simple_com_freertos_config.h
@@ -56,14 +55,14 @@ requires:
   - name: emlib_cmu
   - name: sleeptimer
     condition:
-      - "device_sdid_80"
+      - device_sdid_80
 define:
-  - name: "EFR32BG1_USART_E202_WORKAROUND"
-    value: "1"
+  - name: EFR32BG1_USART_E202_WORKAROUND
+    value: 1
     condition:
-      - "device_sdid_80"
+      - device_sdid_80
 template_file:
-  - path: "template/sl_simple_com_isr.c.jinja"
+  - path: template/sl_simple_com_isr.c.jinja
     condition: [uartdrv_instance]
 template_contribution:
   - name: component_catalog
@@ -93,3 +92,6 @@ template_contribution:
       handler: sl_simple_com_step
     unless:
       - kernel
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/simple-com

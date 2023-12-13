@@ -73,8 +73,8 @@
 #define IMMEDIATE                      0
 /// High Priority
 #define HIGH_PRIORITY                  0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA               (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA               NULL
 /// Maximum lightness percentage value
 #define LIGHTNESS_PCT_MAX              100
 /// Maximum lightness value

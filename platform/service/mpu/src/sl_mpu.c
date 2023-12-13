@@ -163,8 +163,8 @@ void sl_mpu_disable_execute_from_ram(void)
     sr_size = mpu_region_size / MPU_SUBREGION_NBR;
     // Check if sr_size is zero to satisfy MISRA
     sr_size = (sr_size != 0) ? sr_size : MPU_SUBREGION_USE_MIN_SIZE / MPU_SUBREGION_NBR;
-    srd_msk = (1u << ((mpu_region_end - RAMFUNC_SECTION_END) / sr_size)) - 1u;
-    srd_msk = srd_msk << (((RAMFUNC_SECTION_END - mpu_region_begin - 1u) / sr_size) + 1u);
+    srd_msk = (uint8_t)((1u << ((mpu_region_end - RAMFUNC_SECTION_END) / sr_size)) - 1u);
+    srd_msk = (uint8_t)(srd_msk << (((RAMFUNC_SECTION_END - mpu_region_begin - 1u) / sr_size) + 1u));
     srd_msk |= (1u << ((RAMFUNC_SECTION_BEGIN - mpu_region_begin) / sr_size)) - 1u;
 
     region_size_encoded = mpu_region_size_encode(mpu_region_size);
@@ -201,7 +201,6 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
 
 #ifdef ARM_MPU_ARMV8_H
   uint32_t rbar;
-  uint8_t index_region = 0u;
   uint8_t is_overlapping = 0u;
   uint32_t prev_base_address = 0u;
   uint32_t prev_limit_address = 0u;
@@ -217,7 +216,7 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
                      : (address_end  - (address_end % 32u));
 
     // The scanning to check the overlapping region
-    for (index_region = 0; index_region < region_nbr; index_region++) {
+    for (uint8_t index_region = 0; index_region < region_nbr; index_region++) {
       // Set to the previous region number
       MPU->RNR = index_region;
 
@@ -227,17 +226,20 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
       prev_limit_address = (MPU->RLAR & MPU_RLAR_LIMIT_Msk);
 
       // Check the overlapping region
-      if (((mpu_region_begin == prev_base_address) && (mpu_region_end == prev_limit_address))) {
+      if ((mpu_region_begin == prev_base_address) && (mpu_region_end == prev_limit_address)) {
         // The new region is the same as the previous region
         is_overlapping = 1;
         status = SL_STATUS_OK;
-        break;
       } else if (!((mpu_region_begin > prev_limit_address) || (mpu_region_end < prev_base_address))) {
         // The new region is invalid
         is_overlapping = 1;
         status = SL_STATUS_INVALID_RANGE;
+      }
+
+      if (is_overlapping == 1) {
         break;
       }
+
       MPU->RNR &= ~MPU_RNR_REGION_Msk;
     }
 
@@ -271,8 +273,8 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
   sr_size = mpu_region_size / MPU_SUBREGION_NBR;
   // Check if sr_size is zero to satisfy MISRA
   sr_size = (sr_size != 0) ? sr_size : MPU_SUBREGION_USE_MIN_SIZE / MPU_SUBREGION_NBR;
-  srd_msk = (1u << (((mpu_region_end - address_end) + (sr_size - 1)) / sr_size)) - 1u;
-  srd_msk = srd_msk << ((address_end - mpu_region_begin - 1u) / sr_size);
+  srd_msk = (uint8_t)((1u << (((mpu_region_end - address_end) + (sr_size - 1)) / sr_size)) - 1u);
+  srd_msk = (uint8_t)(srd_msk << ((address_end - mpu_region_begin - 1u) / sr_size));
   srd_msk |= (1u << (((address_begin - mpu_region_begin) + (sr_size - 1)) / sr_size)) - 1u;
 
   if (srd_msk == 0xFF) {

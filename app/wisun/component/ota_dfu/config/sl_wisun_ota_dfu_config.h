@@ -63,6 +63,10 @@
 // <s SL_WISUN_OTA_DFU_URI_PATH> OTA DFU resource URI path
 #define SL_WISUN_OTA_DFU_URI_PATH                   "/ota/dfu"
 
+// <q SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED> Enable auto reboot and install
+// <i> Default value: 1
+#define SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED       1U
+
 // <q SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED> Enable host notification
 // <i> Default value: 1
 #define SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED        1U

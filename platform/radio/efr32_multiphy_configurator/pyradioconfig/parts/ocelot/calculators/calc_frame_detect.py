@@ -356,9 +356,15 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
             self._reg_write(model.vars.MODEM_CTRL5_DSSSCTD, 0)
 
     def calc_preamble_string(self, model):
+        encoding = model.vars.symbol_encoding.value
         preamble_pattern = model.vars.preamble_pattern.value
         preamble_pattern_len = model.vars.preamble_pattern_len.value
         preamble_length = model.vars.preamble_length.value #This is the TX preamble length
+
+        if encoding == model.vars.symbol_encoding.var_enum.DSSS:
+            # : Preamble base pattern is irrelevant if DSSS is enabled. Preamble bits are always substituted with
+            # : Base chip sequence (i.e. base patttern = 0)
+            preamble_pattern = 0
 
         repeats = int(preamble_length / preamble_pattern_len)
         preamble_pattern_string = ('{:0' + str(preamble_pattern_len) + 'b}').format(preamble_pattern)
@@ -468,7 +474,19 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
         # syncword flipped, so to fix it, we invert the preamble pattern and sync word register
         # to undo the fsk mapping flip.
         encoding = model.vars.symbol_encoding.value
-        if encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester:
+
+        # For 4FSK + BCR, syncword inversion is required due to limitations of BCR syncword detection block
+        fsk_symbol_map = model.vars.fsk_symbol_map.value
+        modulation_type = model.vars.modulation_type.value
+        demod_select = model.vars.demod_select.value
+
+        if encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester or \
+                (fsk_symbol_map in [model.vars.fsk_symbol_map.var_enum.MAP1,
+                                   model.vars.fsk_symbol_map.var_enum.MAP3,
+                                   model.vars.fsk_symbol_map.var_enum.MAP5,
+                                   model.vars.fsk_symbol_map.var_enum.MAP7] and \
+                        demod_select == model.vars.demod_select.var_enum.BCR and \
+                        modulation_type == model.vars.modulation_type.var_enum.FSK4):
             syncword_mask = (1 << syncword_length) - 1
             syncword0_reg ^= syncword_mask
             syncword1_reg ^= syncword_mask
@@ -483,7 +501,19 @@ class CALC_Frame_Detect_Ocelot(CALC_Frame_Detect):
 
         encoding = model.vars.symbol_encoding.value
         manchester_map = model.vars.manchester_mapping.value
-        if encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester:
+
+        # For 4FSK + BCR, syncword written in SYNC0/1 is inversed from actual
+        fsk_symbol_map = model.vars.fsk_symbol_map.value
+        modulation_type = model.vars.modulation_type.value
+        demod_select = model.vars.demod_select.value
+
+        if encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester or \
+                (fsk_symbol_map in [model.vars.fsk_symbol_map.var_enum.MAP1,
+                                   model.vars.fsk_symbol_map.var_enum.MAP3,
+                                   model.vars.fsk_symbol_map.var_enum.MAP5,
+                                   model.vars.fsk_symbol_map.var_enum.MAP7] and \
+                        demod_select == model.vars.demod_select.var_enum.BCR and \
+                        modulation_type == model.vars.modulation_type.var_enum.FSK4):
             syncword_mask = (1 << syncword_length) - 1
             syncword0_reg ^= syncword_mask
             syncword1_reg ^= syncword_mask

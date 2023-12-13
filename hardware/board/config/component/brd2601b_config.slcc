@@ -60,6 +60,16 @@
       instance: btn1
     path: brd2601b/sl_cpc_gpio_expander_gpio_btn1_config.h
   - override:
+      component: cpc_primary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: exp
+    path: brd2601b/sl_cpc_drv_uart_eusart_exp_config.h
+  - override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: exp
+    path: brd2601b/sl_cpc_drv_uart_usart_exp_config.h
+  - override:
       component: cpc_secondary_driver_spi_eusart
       file_id: cpc_drv_secondary_spi_eusart_config
       instance: exp
@@ -71,24 +81,24 @@
     path: brd2601b/sl_cpc_drv_secondary_spi_usart_exp_config.h
   - override:
       component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_secondary_uart_eusart_config
+      file_id: cpc_drv_uart_eusart_config
       instance: vcom
-    path: brd2601b/sl_cpc_drv_secondary_uart_eusart_vcom_config.h
+    path: brd2601b/sl_cpc_drv_uart_eusart_vcom_config.h
   - override:
       component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_secondary_uart_eusart_config
+      file_id: cpc_drv_uart_eusart_config
       instance: exp
-    path: brd2601b/sl_cpc_drv_secondary_uart_eusart_exp_config.h
+    path: brd2601b/sl_cpc_drv_uart_eusart_exp_config.h
   - override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: vcom
-    path: brd2601b/sl_cpc_drv_secondary_uart_usart_vcom_config.h
+    path: brd2601b/sl_cpc_drv_uart_usart_vcom_config.h
   - override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: exp
-    path: brd2601b/sl_cpc_drv_secondary_uart_usart_exp_config.h
+    path: brd2601b/sl_cpc_drv_uart_usart_exp_config.h
   - override:
       component: device_init_hfxo
       file_id: device_init_hfxo_config

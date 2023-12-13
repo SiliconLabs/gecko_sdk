@@ -33,7 +33,9 @@
 
 #include "em_device.h"
 #include "sl_common.h"
+#if defined(_SILICON_LABS_32B_SERIES) && (_SILICON_LABS_32B_SERIES <= 2)
 #include "em_system.h"
+#endif
 #include "em_bus.h"
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)

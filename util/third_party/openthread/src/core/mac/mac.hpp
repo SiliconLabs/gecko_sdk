@@ -73,7 +73,7 @@ namespace Mac {
 
 constexpr uint32_t kDataPollTimeout =
     OPENTHREAD_CONFIG_MAC_DATA_POLL_TIMEOUT; ///< Timeout for receiving Data Frame (in msec).
-constexpr uint32_t kSleepDelay = 300;        ///< Max sleep delay when frame is pending (in msec)
+constexpr uint32_t kSleepDelay = 300;        ///< Max sleep delay when frame is pending (in msec).
 
 constexpr uint16_t kScanDurationDefault = OPENTHREAD_CONFIG_MAC_SCAN_DURATION; ///< Duration per channel (in msec).
 
@@ -86,6 +86,8 @@ constexpr uint8_t kDefaultMaxFrameRetriesIndirect = OPENTHREAD_CONFIG_MAC_DEFAUL
 constexpr uint8_t kMaxFrameRetriesCsl             = 0;
 
 constexpr uint8_t kTxNumBcast = OPENTHREAD_CONFIG_MAC_TX_NUM_BCAST; ///< Num of times broadcast frame is tx.
+
+constexpr uint16_t kMinCslIePeriod = OPENTHREAD_CONFIG_MAC_CSL_MIN_PERIOD;
 
 /**
  * Defines the function pointer called on receiving an IEEE 802.15.4 Beacon during an Active Scan.
@@ -620,12 +622,15 @@ public:
     uint16_t GetCslPeriod(void) const { return mCslPeriod; }
 
     /**
-     * Gets the CSL period.
+     * Gets the CSL period in milliseconds.
+     *
+     * If the CSL period cannot be represented exactly in milliseconds, return the rounded value to the nearest
+     * millisecond.
      *
      * @returns CSL period in milliseconds.
      *
      */
-    uint32_t GetCslPeriodMs(void) const { return mCslPeriod * kUsPerTenSymbols / 1000; }
+    uint32_t GetCslPeriodInMsec(void) const;
 
     /**
      * Sets the CSL period.
@@ -634,6 +639,16 @@ public:
      *
      */
     void SetCslPeriod(uint16_t aPeriod);
+
+    /**
+     * This method converts a given CSL period in units of 10 symbols to microseconds.
+     *
+     * @param[in] aPeriodInTenSymbols   The CSL period in unit of 10 symbols.
+     *
+     * @returns The converted CSL period value in microseconds corresponding to @p aPeriodInTenSymbols.
+     *
+     */
+    static uint32_t CslPeriodToUsec(uint16_t aPeriodInTenSymbols);
 
     /**
      * Indicates whether CSL is started at the moment.
@@ -680,7 +695,6 @@ public:
     {
         mLinks.GetSubMac().SetCslParentAccuracy(aCslAccuracy);
     }
-
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE && OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
@@ -705,6 +719,36 @@ public:
      */
     bool IsRadioFilterEnabled(void) const { return mLinks.GetSubMac().IsRadioFilterEnabled(); }
 #endif
+
+    /**
+     * Sets the region code.
+     *
+     * The radio region format is the 2-bytes ascii representation of the ISO 3166 alpha-2 code.
+     *
+     * @param[in]  aRegionCode  The radio region code. The `aRegionCode >> 8` is first ascii char
+     *                          and the `aRegionCode & 0xff` is the second ascii char.
+     *
+     * @retval  kErrorFailed          Other platform specific errors.
+     * @retval  kErrorNone            Successfully set region code.
+     * @retval  kErrorNotImplemented  The feature is not implemented.
+     *
+     */
+    Error SetRegion(uint16_t aRegionCode);
+
+    /**
+     * Get the region code.
+     *
+     * The radio region format is the 2-bytes ascii representation of the ISO 3166 alpha-2 code.
+     *
+     * @param[out] aRegionCode  The radio region code. The `aRegionCode >> 8` is first ascii char
+     *                          and the `aRegionCode & 0xff` is the second ascii char.
+     *
+     * @retval  kErrorFailed          Other platform specific errors.
+     * @retval  kErrorNone            Successfully set region code.
+     * @retval  kErrorNotImplemented  The feature is not implemented.
+     *
+     */
+    Error GetRegion(uint16_t &aRegionCode) const;
 
 private:
     static constexpr uint16_t kMaxCcaSampleCount = OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW;

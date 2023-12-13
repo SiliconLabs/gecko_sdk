@@ -199,14 +199,14 @@ void sl_zwave_platform_startup(void);
  * Gets Z-Wave Protocol Build number
  * @return Z-Wave Protocol Build number
  */
-uint16_t ZW_GetProtocolBuildNumber();
+uint16_t ZW_GetProtocolBuildNumber(void);
 
 /**
  * Gets Z-Wave Protocol git hash
  *
  * @return uint8_t* Z-Wave Protocol git hash
  */
-uint8_t* ZW_GetProtocolGitHash();
+uint8_t* ZW_GetProtocolGitHash(void);
 
 /**
  * @} // BASIS

@@ -25,6 +25,7 @@ component:
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_nvm
   - id: bootloader_interface
+  - id: bt_post_build
   - id: btmesh_dcd_configuration
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_generic_server
@@ -34,6 +35,7 @@ component:
   - id: btmesh_stack
   - id: mpu
   - id: ncp
+  - id: ncp_btmesh_user_cmd
   - id: rail_util_pti
   - id: uartdrv_usart
     instance:
@@ -59,8 +61,6 @@ readme:
   - path: ../../documentation/example/btmesh_ncp_empty/readme.md
 
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img0.png
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img1.png
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img2.png
@@ -128,7 +128,7 @@ configuration:
   - name: SL_SIMPLE_COM_TX_BUF_SIZE
     value: "768"
   - name: SL_STACK_SIZE
-    value: "0x1000"
+    value: "0x1100"
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
     value: uartdrvFlowControlNone
     condition:

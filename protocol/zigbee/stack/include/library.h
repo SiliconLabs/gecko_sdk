@@ -107,7 +107,7 @@ enum {
 #define EMBER_LIBRARY_NAMES \
   "Zigbee Pro",             \
   "Binding",                \
-  "End Device Bind",        \
+  "", /*"End Device Bind"*/ \
   "Security Core",          \
   "Security Link Keys",     \
   "",  /*"Alarm",*/         \

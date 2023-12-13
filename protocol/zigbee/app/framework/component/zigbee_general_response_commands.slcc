@@ -1,16 +1,13 @@
 package: Zigbee
-description: Silicon Labs implementation of general response commands. The component is only
-  intended to assist with debugging, as the implemented callbacks simply parse incoming
-  general response commands and print the results. Before production, this component
-  should be replaced with code that acts on the responses in an appropriate way.
+description: Silicon Labs implementation of general response commands. The component is only intended to assist with debugging, as the implemented callbacks simply parse incoming general response commands and print the results. Before production, this component should be replaced with code that acts on the responses in an appropriate way.
 id: zigbee_general_response_commands
 label: General Response Commands
 category: Zigbee|Utility
 quality: production
 provides:
-   - name: "zigbee_general_response_commands"
+  - name: zigbee_general_response_commands
 source:
-  - path: protocol/zigbee/app/framework/plugin/general-response-commands/general-response-commands.c  
+  - path: protocol/zigbee/app/framework/plugin/general-response-commands/general-response-commands.c
 template_contribution:
   - name: component_catalog
     value: zigbee_general_response_commands

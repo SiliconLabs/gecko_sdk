@@ -1014,13 +1014,11 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
           return PSA_ERROR_HARDWARE_FAILURE;
         }
 
-        // Check how many bytes of padding to subtract.
-        uint8_t pad_bytes = tmp_buf[15];
-
         // Check all padding bytes.
+        size_t pad_bytes = 0;
         status = sli_psa_validate_pkcs7_padding(tmp_buf,
                                                 16,
-                                                pad_bytes);
+                                                &pad_bytes);
         if (status != PSA_SUCCESS) {
           return status;
         }
@@ -2092,10 +2090,10 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
           break;
         }
 
-        size_t padding_bytes = out_buf[15];
+        size_t padding_bytes = 0;
         status = sli_psa_validate_pkcs7_padding(out_buf,
                                                 16,
-                                                padding_bytes);
+                                                &padding_bytes);
 
         if (status == PSA_SUCCESS) {
           // The padding was valid.

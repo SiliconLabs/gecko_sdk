@@ -2,15 +2,15 @@ id: device_init
 label: "Automatic Device Initialization"
 package: platform
 description: >
-  This component automatically handles the installation of all required device 
+  This component automatically handles the installation of all required device
   components for proper MCU operation. The hardware peripherals that will
   be initialized will depend on the specific device's capabilities. Individual
-  component configuration can be edited by selecting from the "Peripherals" 
-  sub-menu. 
+  component configuration can be edited by selecting from the "Peripherals"
+  sub-menu.
 
   In the event that the user wants to implement its own initialization routine
-  for any of the peripherals under the "Peripherals" sub-menu, it is recommended 
-  to uninstall this component, as well as the corresponding peripheral's 
+  for any of the peripherals under the "Peripherals" sub-menu, it is recommended
+  to uninstall this component, as well as the corresponding peripheral's
   initialization component.
 category: Services|Device Initialization
 quality: production
@@ -26,6 +26,8 @@ requires:
     condition: [device_sdid_205, bluetooth_stack]
   - name: device_init_lfrco
     condition: [device_sdid_215, bluetooth_stack]
+  - name: device_init_lfrco
+    condition: [device_sdid_225, bluetooth_stack]
   - name: device_init_hfxo
     condition: [hardware_board_has_hfxo]
   - name: device_init_usbpll
@@ -41,6 +43,9 @@ requires:
     condition: [hardware_board]
 recommends:
   - id: device_init_hfrco
+template_contribution:
+  - name: component_catalog
+    value: device_init
 validation_helper:
   - path: device_init_validation.lua
 documentation:

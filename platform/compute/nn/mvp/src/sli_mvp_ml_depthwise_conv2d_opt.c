@@ -47,6 +47,7 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
   int8_t *output                       = params->output;
   int prog_index                       = 0;
   __ALIGNED(4) const float16_t zero[2] = { .0f, .0f };
+  sl_status_t status;
 
   if (execute) {
     if ((((uint32_t)bias & 0x1U) != 0U)
@@ -303,12 +304,13 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen_opt(const sli_mvp_ml_depthwise_co
           SLI_MVP_NORST
           );
 
-        sli_mvp_prog_execute(p, false);
+        if ((status = sli_mvp_prog_execute(p, false)) != SL_STATUS_OK) {
+          return status;
+        }
         prog_index ^= 1;
       }
     }
   }
 
-  sli_mvp_cmd_wait_for_completion();
-  return SL_STATUS_OK;
+  return sli_mvp_cmd_wait_for_completion();
 }

@@ -80,6 +80,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_is_module
+  - name: hardware_board_has_hfxo_freq_40mhz
   - name: hardware_board_has_hfxo
   - name: device_security_vault
   - name: device_dcdc_buck
@@ -170,6 +171,7 @@
   - name: device_compute_mvp
 - recommends:
   - id: trustzone_unaware
+  - id: silabs_core_sl_malloc
 - requires:
   - name: cmsis_core
   - name: BGM241SD22VNA_config

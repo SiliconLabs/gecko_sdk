@@ -42,6 +42,7 @@
 #include "sl_enum.h"
 #include "sl_status.h"
 #include "sl_slist.h"
+#include "sl_common.h"
 #include "sl_cpc_config.h"
 
 #include <stddef.h>
@@ -89,34 +90,49 @@ SL_ENUM(sl_cpc_user_endpoint_id_t){
 
 /// @brief Enumeration representing the possible endpoint state.
 SL_ENUM(sl_cpc_endpoint_state_t){
-  SL_CPC_STATE_OPEN = 0,                      ///< State open
+  SL_CPC_STATE_FREED = 0,                     ///< State freed
+  SL_CPC_STATE_OPEN,                          ///< State open
   SL_CPC_STATE_CLOSED,                        ///< State close
   SL_CPC_STATE_CLOSING,                       ///< State closing
+  SL_CPC_STATE_CONNECTING,                    ///< Connecting to remote's endpoint
+  SL_CPC_STATE_CONNECTED,                     ///< Connected to remote's endpoint
+  SL_CPC_STATE_SHUTTING_DOWN,                 ///< Transmissions shutting down
+  SL_CPC_STATE_SHUTDOWN,                      ///< Transmissions shutdown
+  SL_CPC_STATE_REMOTE_SHUTDOWN,               ///< Remote transmissions shutdown
+  SL_CPC_STATE_DISCONNECTED,                  ///< Connection terminated
   SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE, ///< Error state, destination unreachable
   SL_CPC_STATE_ERROR_SECURITY_INCIDENT,       ///< Error state, security incident
   SL_CPC_STATE_ERROR_FAULT,                   ///< Error state, fault
-  SL_CPC_STATE_FREED,                         ///< State freed
 };
 
 /// @brief Enumeration representing the possible configurable options for an endpoint.
 SL_ENUM(sl_cpc_endpoint_option_t){
-  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE = 0,     ///< Set callback for iframe received notification
-  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG,     ///< Set callback argument for iframe received notification
-  SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, ///< Set callback for write complete notification
-  SL_CPC_ENDPOINT_ON_ERROR,                  ///< Set callback for error notification
-  SL_CPC_ENDPOINT_ON_ERROR_ARG,              ///< Set callback argument for error notification
+  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE = 0,     ///< Set callback for iframe received notification.
+  SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE_ARG,     ///< Set callback argument for iframe received notification.
+  SL_CPC_ENDPOINT_ON_IFRAME_WRITE_COMPLETED, ///< Set callback for write complete notification.
+  SL_CPC_ENDPOINT_ON_ERROR,                  ///< Set callback for error notification.
+  SL_CPC_ENDPOINT_ON_ERROR_ARG,              ///< Set callback argument for error notification.
+  SL_CPC_ENDPOINT_ON_CONNECT,                ///< Set callback when host/primary connects to endpoint.
+  SL_CPC_ENDPOINT_ON_CONNECT_ARG,            ///< Set callback argument for connect notification.
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  SL_CPC_ENDPOINT_SHUTDOWN_TIMEOUT,          ///< Set shutdown timeout, in ticks.
+  SL_CPC_ENDPOINT_WRITE_TIMEOUT,             ///< Set the timeout time for blocking write in ticks.
+#endif
   // Private options
-  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE,
-  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE_ARG,
-  SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED,
-  SL_CPC_ENDPOINT_ON_POLL,
-  SL_CPC_ENDPOINT_ON_POLL_ARG,
-  SL_CPC_ENDPOINT_ON_FINAL,
-  SL_CPC_ENDPOINT_ON_FINAL_ARG,
+  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE,         ///< Set callback for uframe received notification.
+  SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE_ARG,     ///< Set callback argument for uframe received notification.
+  SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED, ///< Set callback for write complete notification.
+  SL_CPC_ENDPOINT_ON_POLL,                   ///< Set callback for on poll notification.
+  SL_CPC_ENDPOINT_ON_POLL_ARG,               ///< Set callback argument for on poll notification.
+  SL_CPC_ENDPOINT_ON_FINAL,                  ///< Set callback for on final notification.
+  SL_CPC_ENDPOINT_ON_FINAL_ARG,              ///< Set callback argument for on final notification.
 };
 
-#define SL_CPC_OPEN_ENDPOINT_FLAG_NONE                      0
-#define SL_CPC_OPEN_ENDPOINT_FLAG_DISABLE_ENCRYPTION        (0x01 << 3)
+#define SL_CPC_ENDPOINT_FLAG_NONE                      0           ///< sl cpc open endpoint flag none
+#define SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION        (0x01 << 3) ///< sl cpc open endpoint flag disable encryption
+
+#define SL_CPC_OPEN_ENDPOINT_FLAG_NONE                      SL_CPC_ENDPOINT_FLAG_NONE
+#define SL_CPC_OPEN_ENDPOINT_FLAG_DISABLE_ENCRYPTION        SL_CPC_ENDPOINT_FLAG_DISABLE_ENCRYPTION
 
 /***************************************************************************//**
  * Typedef for the user - supplied callback function which is called when
@@ -157,14 +173,32 @@ typedef void (*sl_cpc_on_data_reception_t)(uint8_t endpoint_id, void *arg);
  ******************************************************************************/
 typedef void (*sl_cpc_on_error_callback_t)(uint8_t endpoint_id, void *arg);
 
-/// @brief Struct representing an CPC endpoint handle.
+/***************************************************************************//**
+ * Typedef for the user-supplied callback function which is called when
+ * CPC connection to a secondary completes, successfully or not.
+ *
+ * @note  If several users connect to the same endpoint on the host side, this
+ *        callback will only be called only when the first connection occurs.
+ *
+ * @param endpoint_id   Endpoint ID
+ *
+ * @param arg   User-specific argument.
+ *
+ * @param status        Indicate if the connection was successful or not:
+ *                        SL_STATUS_OK        successfully connected
+ *                        SL_STATUS_TIMEOUT   operation timed out
+ *                        SL_STATUS_NOT_READY secondary's endpoint is not ready
+ ******************************************************************************/
+typedef void (*sl_cpc_on_connect_callback_t)(uint8_t endpoint_id, void *arg, sl_status_t status);
+
+/** @brief Struct representing an CPC endpoint handle. */
 typedef struct {
   void *ep;           ///< Endpoint object; Do not touch
   uint8_t id;         ///< Endpoint ID; Do not touch
   uint32_t ref_count; ///< Endpoint reference counter; Do not touch
 } sl_cpc_endpoint_handle_t;
 
-/// @brief Struct representing CPC Core debug stats.
+/** @brief Struct representing CPC Core debug stats. */
 typedef struct {
   uint32_t rxd_packet;                            ///< Number of packet received
   uint32_t rxd_data_frame;                        ///< Number of frame with payload (dataframe);
@@ -224,13 +258,13 @@ typedef struct {
   uint32_t invalid_payload_checksum;            ///< Total number of frame received with invalid frame checksum
 } sl_cpc_core_debug_counters_t;
 
-/// @brief Struct representing a memory pool handle.
+/** @brief Struct representing a memory pool handle. */
 typedef struct sl_cpc_mem_pool_handle_t {
   void *pool_handle;            ///< Pool handle; Do not touch
   uint32_t used_block_cnt;      ///< Number of block in use
 } sl_cpc_mem_pool_handle_t;
 
-/// @brief Struct representing a memory pool debug.
+/** @brief Struct representing a memory pool debug. */
 typedef struct {
   sl_cpc_mem_pool_handle_t *buffer_handle;            ///< Buffer handle object memory pool usage
   sl_cpc_mem_pool_handle_t *hdlc_header;              ///< HDLC object memory pool usage
@@ -238,12 +272,10 @@ typedef struct {
   sl_cpc_mem_pool_handle_t *rx_buffer;                ///< RX buffer memory pool usage
   sl_cpc_mem_pool_handle_t *endpoint;                 ///< Endpoint object memory pool usage
   sl_cpc_mem_pool_handle_t *rx_queue_item;            ///< RX queue object memory pool usage
-  sl_cpc_mem_pool_handle_t *tx_queue_item;            ///< TX queue object memory pool usage
-  sl_cpc_mem_pool_handle_t *endpoint_closed_arg_item; ///< Endpoint closing object memory pool usage
   sl_cpc_mem_pool_handle_t *system_command;           ///< System endpoint object memory pool usage
 } sl_cpc_debug_memory_t;
 
-/// @brief Struct representing a core debug
+/** @brief Struct representing a core debug. */
 #if ((SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1) \
   || (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1))
 typedef struct {
@@ -256,22 +288,21 @@ typedef struct {
 } sl_cpc_core_debug_t;
 #endif
 
-#define SL_CPC_USER_ENDPOINT_ID_START     ((uint8_t)SL_CPC_ENDPOINT_USER_ID_0)
-#define SL_CPC_USER_ENDPOINT_ID_END       ((uint8_t)(SL_CPC_ENDPOINT_USER_ID_0 + SL_CPC_USER_ENDPOINT_MAX_COUNT - 1))
+#define SL_CPC_USER_ENDPOINT_ID_START     ((uint8_t)SL_CPC_ENDPOINT_USER_ID_0)                                        ///< sl cpc endpoint id start.
+#define SL_CPC_USER_ENDPOINT_ID_END       ((uint8_t)(SL_CPC_ENDPOINT_USER_ID_0 + SL_CPC_USER_ENDPOINT_MAX_COUNT - 1)) ///< sl cpc user endpoint id end.
 
-#define SL_CPC_FLAG_NO_BLOCK    0x01
+#define SL_CPC_FLAG_NO_BLOCK    0x01                                                                                  ///< sl cpc flag no block.
 
-#if (SL_CPC_ENDPOINT_SECURITY_ENABLED >= 1)
-#define SL_CPC_TX_PAYLOAD_MAX_LENGTH (4079)
-#else
-#define SL_CPC_TX_PAYLOAD_MAX_LENGTH (4087)
-#endif
+#define SLI_CPC_SECURITY_TAG_LENGTH 8                                                                                 ///< sli cpc security tag length.
+#define SLI_CPC_LDMA_DESCRIPTOR_MAX_SIZE 2048                                                                         ///< sli cpc ldma desciptor max size.
+#define SLI_CPC_HEADER_SIZE 7                                                                                         ///< sli cpc header size.
+#define SLI_CPC_PAYLOAD_CRC_SIZE 2                                                                                    ///< sli cpc payload crc size.
 
-/// @deprecated use SL_CPC_TX_PAYLOAD_MAX_LENGTH instead
-#define SL_CPC_APP_DATA_MAX_LENGTH SL_CPC_TX_PAYLOAD_MAX_LENGTH
+#define SL_CPC_TX_PAYLOAD_MAX_LENGTH  ((2 * SLI_CPC_LDMA_DESCRIPTOR_MAX_SIZE) - SLI_CPC_HEADER_SIZE - SLI_CPC_PAYLOAD_CRC_SIZE) ///< sl cpc tx payload max length.
+#define SL_CPC_TX_PAYLOAD_MAX_LENGTH_WITH_SECURITY (SL_CPC_TX_PAYLOAD_MAX_LENGTH - SLI_CPC_SECURITY_TAG_LENGTH)                 ///< sl cpc tx payload max lenght with security.
 
-#define SL_CPC_TRANSMIT_WINDOW_MIN_SIZE  1
-#define SL_CPC_TRANSMIT_WINDOW_MAX_SIZE  1
+#define SL_CPC_TRANSMIT_WINDOW_MIN_SIZE  1         ///< sl cpc transmit window min size.
+#define SL_CPC_TRANSMIT_WINDOW_MAX_SIZE  1         ///< sl cpc transmit window max size.
 
 /// @brief Global variable that contains the core debug information
 #if ((SL_CPC_DEBUG_CORE_EVENT_COUNTERS == 1) \
@@ -285,7 +316,8 @@ extern sl_cpc_core_debug_t sl_cpc_core_debug;
 /***************************************************************************/ /**
  * Initialize CPC module.
  *
- * @return Status code.
+ * @retval  SL_STATUS_OK    CPC stack initialized successfully.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 sl_status_t sl_cpc_init(void);
 
@@ -297,6 +329,43 @@ void sl_cpc_process_action(void);
 #endif
 
 /***************************************************************************/ /**
+ * Initalize a user endpoint. Following the successful initialization of an endpoint,
+ * successive attempts to initialize an endpoint of the same ID will fail until the
+ * endpoint is freed.
+ *
+ * @param[in,out] endpoint_handle  Endpoint handle.
+ *
+ * @param[in] id  Endpoint ID [90 to 99].
+ *
+ * @param[in] flags   Initialization flags. Reserved for future used
+ *
+ * @retval  SL_STATUS_OK    Initialized endpoint successfully.
+ * @retval  Other sl_status_t if error occurred.
+ ******************************************************************************/
+sl_status_t sl_cpc_init_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                      sl_cpc_user_endpoint_id_t id,
+                                      uint8_t flags);
+
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+/***************************************************************************/ /**
+ * Connect endpoint to remote. (CPC Primary only)
+ * Ths function will always block until the remote connects if no flag is specified.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ *
+ * @param[in] flags            Optional flags:
+ *                             SL_CPC_FLAG_NO_BLOCK  Cause the function to return SL_STATUS_IN_PROGRESS
+ *                                                   immediately in RTOS.
+ *
+ * @retval  SL_STATUS_OK            Endpoint connection successful.
+ * @retval  SL_STATUS_IN_PROGRESS   Connection in progress.
+ * @retval  Other sl_status_t if error occurred.
+ ******************************************************************************/
+sl_status_t sl_cpc_connect_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle, uint8_t flags);
+#endif
+
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+/***************************************************************************/ /**
  * Open user endpoint.
  *
  * @param[in] endpoint_handle  Endpoint handle.
@@ -307,14 +376,49 @@ void sl_cpc_process_action(void);
  *                      SL_CPC_OPEN_ENDPOINT_FLAG_NONE                Default behaviors
  *                      SL_CPC_OPEN_ENDPOINT_FLAG_DISABLE_ENCRYPTION  Disable encryption on the endpoint
  *
- * @param[in] tx_window_size  Transmit window size.
+ * @param[in] tx_window_size  The maximum number of packets that can be sent before
+ *                            waiting for an acknowledge from the primary.
+ *                            Currently, only a value of 1 is supported.
  *
- * @return Status code.
+ * @retval  SL_STATUS_OK    User endpoint opened successfully.
+ * @retval  Other sl_status_t if error occurred.
+ *
+ * @note This function will be deprecated in the future. Use
+ * `sl_cpc_init_user_endpoint()` and `sl_cpc_listen_endpoint()` instead.
  ******************************************************************************/
 sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
                                       sl_cpc_user_endpoint_id_t id,
                                       uint8_t flags,
                                       uint8_t tx_window_size);
+
+/***************************************************************************/ /**
+ * Put an endpoint in listening mode, waiting for the remote to connect to it.
+ * This function will always block until the remote connects if no flag is specified.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ * @param[in] flags            Optional flags:
+ *                             SL_CPC_FLAG_NO_BLOCK  Cause the function to return SL_STATUS_IN_PROGRESS
+ *                                                   immediately in RTOS.
+ *
+ * @retval SL_STATUS_OK                 Remote successfully connected
+ * @retval SL_STATUS_IN_PROGRESS        Waiting for remote to connect
+ * @retval Other sl_status_t if error occurred.
+ ******************************************************************************/
+sl_status_t sl_cpc_listen_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle, uint8_t flags);
+
+/***************************************************************************/ /**
+ * Close endpoint.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ *
+ * @retval  SL_STATUS_OK    Closed endpoint successfully.
+ * @retval  Other sl_status_t if error occurred.
+ *
+ * @note This function will be deprecated in the future. Use
+ * `sl_cpc_terminate_endpoint()` and `sl_cpc_free_endpoint()` instead.
+ ******************************************************************************/
+sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle);
+#endif
 
 /***************************************************************************/ /**
  * Set endpoint option.
@@ -328,6 +432,10 @@ sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
  * @return Status code.
  *
  * @note Public options are:
+ * SL_CPC_ENDPOINT_ON_CONNECT: Set a callback that will be called when
+ *                             connection is established with the remote.
+ *
+ * SL_CPC_ENDPOINT_ON_CONNECT_ARG: Set an on connect argument.
  *
  * SL_CPC_ENDPOINT_ON_IFRAME_RECEIVE: Set an on iframe receive callback.
  *                                    value is a sl_cpc_on_data_reception_t type.
@@ -342,28 +450,78 @@ sl_status_t sl_cpc_open_user_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
  *                           sl_cpc_on_error_callback_t type.
  *
  * SL_CPC_ENDPOINT_ON_ERROR_ARG: Set an on error callback argument.
+ *
+ * SL_CPC_ENDPOINT_SHUTDOWN_TIMEOUT: (RTOS Only) Set shutdown handshake timeout,
+ *                                   in ticks.
+ *
+ * SL_CPC_ENDPOINT_WRITE_TIMEOUT: (RTOS Only) Set the timeout time for blocking
+ *                                write in ticks.
+ *
+ * @retval  SL_STATUS_OK    Set endpoint option successfully.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 sl_status_t sl_cpc_set_endpoint_option(sl_cpc_endpoint_handle_t *endpoint_handle,
                                        sl_cpc_endpoint_option_t option,
                                        void *value);
 
 /***************************************************************************/ /**
- * Close endpoint.
+ * Shutdown endpoint connection. Any pending TX frame will attempt to be transmitted.
  *
  * @param[in] endpoint_handle  Endpoint handle.
  *
- * @return Status code.
+ * @param[in] flags   Optional flags:
+ *                        SL_CPC_FLAG_NO_BLOCK  Cause the function to return SL_STATUS_IN_PROGRESS
+ *                                              immediately in RTOS data still pending TX.
+ *
+ * @note  In RTOS, this function is blocking by default. Use the
+ *        SL_CPC_FLAG_NO_BLOCK flag to execute without blocking.
+ *
+ * @retval SL_STATUS_OK Endpoint connection successfully shutdown.
+ * @retval Other sl_status_t if error occurred in CPC core
  ******************************************************************************/
-sl_status_t sl_cpc_close_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle);
+sl_status_t sl_cpc_shutdown_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                     uint8_t flags);
 
 /***************************************************************************/ /**
- * Abort read; Allow unblockling task in blocked by a read.
+ * Terminate an endpoint, effectively dropping any pending TX and RX frame.
+ *
+ * In RTOS, this function will always block until all frames have been dropped.
+ *
+ * @note  This function must be called before attempting to reconnect an endpoint
+ *        to the remote.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ *
+ * @param[in] flags   Termination flags. Reserved for future use
+ *
+ * @retval SL_STATUS_OK                 Endpoint connection successfully terminated.
+ * @retval SL_STATUS_IN_PROGRESS        Termination in progress, keep calling until
+ *                                      return value is SL_STATUS_OK.
+ * @retval Other sl_status_t if error occurred in CPC core
+ ******************************************************************************/
+sl_status_t sl_cpc_terminate_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
+                                      uint8_t flags);
+
+/***************************************************************************/ /**
+ * Free the memory associated to an endpoint so it can be reused.
+ *
+ * @param[in] endpoint_handle  Endpoint handle.
+ *
+ * @retval SL_STATUS_OK                 Endpoint successfully freed.
+ * @retval SL_STATUS_INVALID_STATE      Endpoint must be terminated before freed.
+ * @retval Other sl_status_t if error occurred in CPC core
+ ******************************************************************************/
+sl_status_t sl_cpc_free_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle);
+
+/***************************************************************************/ /**
+ * Abort read; Allow unblocking task in blocked by a read.
+ *
+ * @note This function can be called from an ISR.
  *
  * @param[in] endpoint_handle   Endpoint handle.
  *
- * @return Status code.
- *
- * @note This function can be called from an ISR.
+ * @retval  SL_STATUS_OK    Successfully aborted read operation.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 sl_status_t sl_cpc_abort_read(sl_cpc_endpoint_handle_t *endpoint_handle);
@@ -377,11 +535,12 @@ sl_status_t sl_cpc_abort_read(sl_cpc_endpoint_handle_t *endpoint_handle);
  * @param[out] data_length      Length of the data contained in the buffer.
  * @param[in] timeout           Timeout in ticks for the read operation. (Requires RTOS).
  *                              Note: No effect if SL_CPC_FLAG_NO_BLOCK is provided as a flag
- * @param[in] flags             Optional flags. i.g. SL_CPC_FLAG_NO_BLOCK.
- *                              Note: SL_CPC_FLAG_NO_BLOCK will cause the function to return
- *                                    SL_STATUS_EMPTY on kernel applications
+ * @param[in] flags             Optional flags:
+ *                              SL_CPC_FLAG_NO_BLOCK  Cause the function to return SL_STATUS_EMPTY
+ *                                                    immediately in RTOS if no data available.
  *
- * @return Status code.
+ * @retval  SL_STATUS_OK    Successfully read data from endpoint.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
                         void **data,
@@ -392,15 +551,19 @@ sl_status_t sl_cpc_read(sl_cpc_endpoint_handle_t *endpoint_handle,
 /***************************************************************************/ /**
  * Write data.
  *
+ * @note This function cannot be called from an ISR.
+ *
+ * @note When the write buffer is encrypted, the original content is lost
+ *       and replaced by its encrypted counterpart.
+ *
  * @param[in] endpoint_handle   Endpoint handle.
  * @param[in] data              Pointer to data buffer.
  * @param[in] data_length       Length of the data contained in the buffer.
- * @param[in] flags             Optional flags.
+ * @param[in] flag              Internal flag, do not use.
  * @param[in] on_write_completed_arg  Argument that will be passed to on_write_completed().
  *
- * @return Status code.
- *
- * @note This function cannot be called from an ISR.
+ * @retval  SL_STATUS_OK    Successfully wrote data to endpoint.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 sl_status_t sl_cpc_write(sl_cpc_endpoint_handle_t *endpoint_handle,
                          void* data,
@@ -431,9 +594,20 @@ bool sl_cpc_get_endpoint_encryption(sl_cpc_endpoint_handle_t *endpoint_handle);
  *
  * @param[in] data  Pointer to data buffer to free.
  *
- * @return Status code.
+ * @retval  SL_STATUS_OK    Successfully freed buffer.
+ * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 sl_status_t sl_cpc_free_rx_buffer(void *data);
+
+/***************************************************************************//**
+ * Get the maximum payload length that the remote can receive.
+ *
+ * @param[in] endpoint_handle Endpoint handle.
+ *
+ * @return the maximum tx payload length in function of whether the encryption
+ *         is enabled on the endpoint or not
+ ******************************************************************************/
+uint16_t sl_cpc_get_tx_max_payload_length(sl_cpc_endpoint_handle_t *endpoint_handle);
 
 // -----------------------------------------------------------------------------
 // Internal Prototypes only to be used by Power Manager module.

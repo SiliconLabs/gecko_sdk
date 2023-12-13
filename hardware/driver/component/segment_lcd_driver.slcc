@@ -1,0 +1,51 @@
+id: segment_lcd_driver
+package: platform
+label: Segment LCD
+description: >
+  Driver for the segment LCD
+category: Platform|Board Drivers
+quality: production
+root_path: hardware/driver/segment_lcd
+provides:
+  - name: segment_lcd_driver
+requires:
+  - name: emlib_cmu
+  - name: emlib_gpio
+  - name: emlib_lcd
+  - name: status
+  - name: device_has_lcd
+  - name: hardware_board_has_segment_lcd
+include:
+  - path: inc
+    file_list:
+      - path: sl_segmentlcd.h
+  - path: inc/brd2600a/
+    file_list:
+      - path: sl_segmentlcd_pin_config.h
+    condition: [brd2600a]
+  - path: inc/brd2504a/
+    file_list:
+      - path: sl_segmentlcd_pin_config.h
+    condition: [brd2504a]
+  - path: inc/brd2506a/
+    file_list:
+      - path: sl_segmentlcd_pin_config.h
+    condition: [brd2506a]
+source:
+  - path: src/sl_segmentlcd.c
+config_file:
+  - path: config/ce322_1002/sl_segmentlcd_config.h
+    file_id: sl_segmentlcd_config
+    condition: [brd2600a]
+  - path: config/ce322_1002/sl_segmentlcd_config.h
+    file_id: sl_segmentlcd_config
+    condition: [brd2504a]
+  - path: config/cl010_1087/sl_segmentlcd_config.h
+    file_id: sl_segmentlcd_config
+    condition: [brd2506a]
+template_contribution:
+  - name: component_catalog
+    value: segment_lcd_driver
+documentation:
+    docset: gecko-platform
+    document: platform-hardware-driver/segment_lcd

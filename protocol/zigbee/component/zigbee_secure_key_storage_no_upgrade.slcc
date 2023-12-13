@@ -1,0 +1,19 @@
+id: zigbee_secure_key_storage_no_upgrade
+package: Zigbee
+label: Zigbee Secure Key Storage No Upgrade
+description: |-
+  This component exists to free up associated code space for builds that do not need the relevant backwards compatibility.
+  For developer who doesn't want to use Zigbee Secure Key Storage Upgrade by default can install this component.
+category: Zigbee|Utility
+quality: production
+
+provides:
+  - name: zigbee_secure_key_storage_upgrade_common
+  - name: zigbee_secure_key_storage_no_upgrade
+
+requires:
+  - name: zigbee_secure_key_storage
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_secure_key_storage_no_upgrade

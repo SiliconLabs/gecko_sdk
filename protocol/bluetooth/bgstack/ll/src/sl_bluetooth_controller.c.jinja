@@ -33,6 +33,10 @@
 #include "sl_bt_accept_list_config.h"
 #endif
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+#include "sl_bluetooth_cs_config.h"
+#endif
+
 #ifndef SL_BT_CONFIG_MAX_CONNECTIONS
 #define SL_BT_CONFIG_MAX_CONNECTIONS 0
 #endif
@@ -73,11 +77,21 @@ void sl_bt_controller_init(void)
 #endif // SL_CATALOG_KERNEL_PRESENT
 
   sl_btctrl_init_ll();
+
   {%- for entry in bluetooth_controller_init %}
   {%-   if entry["function"] is string %}
   {{ entry["function"] }};
   {%-   endif %}
   {%- endfor %}
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
+  struct sl_btctrl_cs_config cs_config = { 0 };
+  cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;
+  cs_config.procedures = SL_BT_CONFIG_MAX_CS_PROCEDURES;
+  sl_btctrl_init_cs(&cs_config);
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT or SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT
+
+  sl_btctrl_init_basic(SL_BT_CONFIG_MAX_CONNECTIONS, SL_BT_CONFIG_USER_ADVERTISERS, SL_BT_CONFIG_ACCEPT_LIST_SIZE);
 
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_init_privacy();
@@ -97,13 +111,17 @@ void sl_bt_controller_init(void)
   sl_btctrl_configure_completed_packets_reporting(SL_BT_CONTROLLER_COMPLETED_PACKETS_THRESHOLD,
                                                   SL_BT_CONTROLLER_COMPLETED_PACKETS_EVENTS_TIMEOUT);
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT)
+  sl_btctrl_configure_max_queued_adv_reports(SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS);
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT
 }
 
 sl_status_t sl_bt_ll_deinit();
 
 void sl_bt_controller_deinit(void)
 {
-  if(sl_btctrl_is_initialized() == false){    
+  if(sl_btctrl_is_initialized() == false){
     return;
   }
 
@@ -111,6 +129,9 @@ void sl_bt_controller_deinit(void)
   sl_btctrl_allocate_resolving_list_memory(0);
 #endif
   {%-for entry in bluetooth_controller_init |reverse if entry["deinit"] is string%}
+
+  sl_bt_ll_deinit();
+
   {{ entry["deinit"] }};
   {%- endfor %}
 

@@ -129,12 +129,7 @@ configuration:
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
-    value: "1"
-#------------- RAIL init, Multi-protocol Support -----
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
 #------------- RAIL init, Auto Transitions -----------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE

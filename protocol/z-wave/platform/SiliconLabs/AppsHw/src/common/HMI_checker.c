@@ -81,7 +81,7 @@ static bool m_checking_enabled = false;
 /**
  * Turns on all available LEDs on all boards to check them and their connection across boards.
  */
-static void checkLEDsOnEXPBoard()
+static void checkLEDsOnEXPBoard(void)
 {
   Board_SetLed(BOARD_LED1, LED_ON);
   Board_SetLed(BOARD_LED2, LED_ON);
@@ -166,7 +166,7 @@ void HMIChecker_buttonEventHandler(BUTTON_EVENT btnEvent)
 /**
  * Initializes the module.
  */
-void HMIChecker_Init()
+void HMIChecker_Init(void)
 {
 //  sl_led_init((sl_led_t *)&m_sl_led);
 

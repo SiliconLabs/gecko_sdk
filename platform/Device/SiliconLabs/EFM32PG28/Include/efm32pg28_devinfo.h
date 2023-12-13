@@ -1005,4 +1005,4 @@ typedef struct {
 /** @} End of group EFM32PG28_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* EFM32PG28_DEVINFO_H */
+#endif // EFM32PG28_DEVINFO_H

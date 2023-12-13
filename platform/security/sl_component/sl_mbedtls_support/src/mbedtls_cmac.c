@@ -137,7 +137,7 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
 
-  type = ctx->MBEDTLS_PRIVATE(cipher_info)->MBEDTLS_PRIVATE(type);
+  type = (mbedtls_cipher_type_t)ctx->MBEDTLS_PRIVATE(cipher_info)->MBEDTLS_PRIVATE(type);
 
   switch ( type ) {
     case MBEDTLS_CIPHER_AES_128_ECB:

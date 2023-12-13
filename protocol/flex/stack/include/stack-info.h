@@ -457,6 +457,12 @@ EmberStatus emberMacGetParentAddress(EmberMacAddress *parentAddress);
  */
 uint32_t emberStackIdleTimeMs(uint16_t *currentStackTasks);
 
+/** @brief Return the current time in milliseconds.
+ *
+ * @return Current time in milliseconds.
+ */
+uint32_t emberGetInt32uMillisecondTick(void);
+
 /** @brief Return a bitmask indicating the stack's current tasks.
  *
  *  The mask ::EMBER_HIGH_PRIORITY_TASKS defines which tasks are

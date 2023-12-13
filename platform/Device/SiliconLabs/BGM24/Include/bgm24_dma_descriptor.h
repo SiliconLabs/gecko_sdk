@@ -56,4 +56,4 @@ typedef struct {
 
 /** @} End of group Parts */
 
-#endif /* BGM24_DMA_DESCRIPTOR_H */
+#endif // BGM24_DMA_DESCRIPTOR_H

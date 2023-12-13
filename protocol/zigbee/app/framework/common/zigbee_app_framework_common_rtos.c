@@ -31,12 +31,25 @@
 #include "zigbee_app_framework_common.h"
 #include "zigbee_rtos_task_config.h"
 
+#ifdef SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_UPGRADE_PRESENT
+#include "zigbee-secure-key-storage-upgrade.h"
+#endif // SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_UPGRADE_PRESENT
+
 //------------------------------------------------------------------------------
 // Tasks variables and defines
 
 #define ZIGBEE_STACK_TASK_PRIORITY SL_ZIGBEE_OS_STACK_TASK_PRIORITY
 #define ZIGBEE_TASK_YIELD 0x0001U
-#define ZIGBEE_TASK_SEMAPHORE_MAX_COUNT 255
+// NOTE: Why is this sempahore max count 2?
+// In zigbee_stack_task_yield, there is some time between when we check to see
+// if we can yield and when we actually yield. Between those 2 lines of code,
+// there can be an ISR that fires that needs the zigbee task to wake up
+// If the count is 1, this event will get missed.
+// To prevent the race condition, we set the count to 2.
+// By doing this, if the race condition occurs, the zigbee task
+// will yield, but because the count is not yet 0, it will run one more
+// time and therefore process the ISR related event right away.
+#define ZIGBEE_TASK_SEMAPHORE_MAX_COUNT 2
 #define ZIGBEE_TASK_SEMAPHORE_INITIAL_COUNT 0
 
 //Zigbee stack size is specified in bytes
@@ -64,6 +77,15 @@ static void zigbee_stack_task_yield(void);
 
 void sl_zigbee_common_rtos_wakeup_stack_task(void)
 {
+  // NOTE: This semaphore is not really used to protect any resources
+  // It is a way to get the zigbee task to run and yield
+  // Initial value of the semaphore is 0. So we will block when we try to acquire
+  // Once a CLI task or ISR releases the semaphore, this task will be able to run
+  // We do not use OS event flags here for the following reason
+  // If multiple ISR events cause the flag to get set many times before the task is able to run
+  // then, these get queued and eventually run when the OS timer task runs. This  could
+  // cause an event queue overflow if there is a higher priority task. Therefore, we use a
+  // semaphore in its place.
   osStatus_t retVal = osSemaphoreRelease(zigbee_task_semaphore_id);
   assert(retVal != osErrorParameter);
 }
@@ -114,6 +136,9 @@ static void zigbee_task(void *p_arg)
 #ifdef EMBER_AF_NCP
   sli_zigbee_ncp_init_callback();
 #endif
+#ifdef SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_UPGRADE_PRESENT
+  sli_zb_sec_man_upgrade_key_storage();
+#endif // SL_CATALOG_ZIGBEE_SECURE_KEY_STORAGE_UPGRADE_PRESENT
 
   while (true) {
     sli_zigbee_stack_tick_callback();
@@ -144,6 +169,15 @@ static void zigbee_stack_task_yield(void)
     yield_time_ticks = osWaitForever;
   }
 
+  // NOTE: This semaphore is not really used to protect any resources
+  // It is a way to get the zigbee task to run and yield
+  // Initial value of the semaphore is 0. So we will block when we try to acquire
+  // Once a CLI task or ISR releases the semaphore, this task will be able to run
+  // We do not use OS event flags here for the following reason
+  // If multiple ISR events cause the flag to get set many times before the task is able to run
+  // then, these get queued and eventually run when the OS timer task runs. This  could
+  // cause an event queue overflow if there is a higher priority task. Therefore, we use a
+  // semaphore in its place.
   if (yield_time_ticks > 0) {
     osStatus_t retVal = osSemaphoreAcquire(zigbee_task_semaphore_id, yield_time_ticks);
     assert((retVal != osErrorParameter) && (retVal != osErrorResource));

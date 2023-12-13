@@ -900,4 +900,4 @@ typedef struct {
 /** @} End of group BGM22_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* BGM22_DEVINFO_H */
+#endif // BGM22_DEVINFO_H

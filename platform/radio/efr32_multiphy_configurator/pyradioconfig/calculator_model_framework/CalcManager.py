@@ -14,6 +14,7 @@ from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import Unkn
     InvalidOptionOverride, UnknownProfileException
 from pyradioconfig.calculator_model_framework.Utils.FileUtilities import FileUtilities
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
+from pyradioconfig.calculator_model_framework.Utils.ModelChecking import ModelChecking, ModelCheckingError
 from pyradioconfig.calculator_model_framework.exceptions.exceptions import *
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pyradioconfig.calculator_model_framework.interfaces.idefault_phy import IDefaultPhy
@@ -985,15 +986,23 @@ class CalcManager(object):
             phy_group_name = 'No_Group'
             phy_name = 'No_PHY_Name'
 
-        #First check to make sure all required Profile Inputs are present
-        #We do not check for unit_test_part because it intentionally does not follow this rule
-        #Also skip the old sim PHYs as they are not well formed (just pokes)
-        if (model_instance.part_family.lower() != "unit_test_part") and (phy_group_name not in sim_test_phy_groups):
-            for profile_input in model_instance.profile.inputs:
-                if profile_input.input_type == ModelInputType.REQUIRED and profile_input.default is None:
-                    assert profile_input.var_value is not None, "Required Profile Input %s is not populated for %s" % (profile_input.var_name, phy_name)
+        input_error_list, input_errorstr = ModelChecking.check_all_profile_inputs_populated(model_instance)
 
         result_code, error_message = self.execute_calc_fuctions(model_instance)
+
+        ## Runtime post-calculation validation ##
+        output_error_list, output_errorstr = ModelChecking.check_all_profile_outputs_calculated(model_instance)
+        regexist_error_list, bitwidth_error_list, reg_errorstr = ModelChecking.check_regs(model_instance)
+        calc_error_list, calc_errorstr = ModelChecking.check_all_calcs_ran(model_instance)
+
+        # Raise exception if model checking fails
+        try:
+            assert (len(output_error_list), len(regexist_error_list), len(bitwidth_error_list), len(calc_error_list))\
+                   == (0, 0, 0, 0)
+        except AssertionError:
+            raise ModelCheckingError(f"Model checking failed! \n"
+                                       f"{input_errorstr}\n{output_errorstr}\n{reg_errorstr}\n{calc_errorstr}\n")
+
         return result_code, error_message
 
     def calculate_phy(self, phy_name=None, optional_inputs=None):
@@ -1477,9 +1486,11 @@ class CalcManager(object):
         Human_Readable.print_modem_model_values_v2(output_path_cfg, phy_name, model_instance, show_do_not_care=show_do_not_care, phy_guid=phy_guid)
 
     @staticmethod
-    def get_list_of_parts_supported():
+    def get_list_of_parts_supported(incl_unit_test_part=False):
         parts_list = []
-        exclude_list = ['common', 'unit_test_part']
+        exclude_list = ['common']
+        if not incl_unit_test_part:
+            exclude_list.append('unit_test_part')
         parts_location = os.path.dirname(parts.__file__)
         for dirname in os.listdir(parts_location):
             if not dirname.startswith('_') and dirname not in exclude_list:

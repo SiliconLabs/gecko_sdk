@@ -247,8 +247,8 @@ void printInfo(sl_cli_command_arg_t *arguments)
     return;
   }
 
-  emberAfGetNetworkParameters(&type,
-                              &parameters);
+  EmberStatus status = emberAfGetNetworkParameters(&type,
+                                                   &parameters);
 
   emberAfAppPrintln("Stack Profile: %d", emberAfGetStackProfile());
   emberAfAppPrintln("Configured Node Type (%d): %p",
@@ -257,11 +257,18 @@ void printInfo(sl_cli_command_arg_t *arguments)
   emberAfAppPrintln("Running Node Type    (%d): %p\n",
                     type,
                     nodeTypeStrings[type]);
+
+  if (status == EMBER_NOT_JOINED) {
+    emberAfAppPrintln("Node is not joined - info is not available");
+    return;
+  }
+
   emberAfAppPrintln("Channel:       %d", parameters.radioChannel);
-  emberAfAppPrintln("Node ID:       0x%2x", id);
+  emberAfAppPrintln("Node ID:       0x%2X", id);
   emberAfAppPrintln("PAN ID:        0x%2X", parameters.panId);
   emberAfAppPrint("Extended PAN:  ");
   emberAfPrintBigEndianEui64(parameters.extendedPanId);
+  emberAfAppPrintln("");
   emberAfAppPrintln("\nNWK Update ID: 0x%X\n", parameters.nwkUpdateId);
 
   emberAfAppPrintln("NWK Manager ID: 0x%2X", parameters.nwkManagerId);

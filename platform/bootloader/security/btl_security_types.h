@@ -20,7 +20,9 @@
 #include "config/btl_config.h"
 #include "core/btl_util.h"
 #include "em_device.h"
-
+#if defined(SEMAILBOX_PRESENT) && defined(SE_MANAGER_CONFIG_FILE)
+#include SE_MANAGER_CONFIG_FILE
+#endif
 MISRAC_DISABLE
 #if defined(SEMAILBOX_PRESENT)
 #include "sl_se_manager.h"
@@ -58,7 +60,11 @@ typedef struct AesCtrContext {
 #endif
   size_t                  offsetInBlock;    ///< @brief Position in block of last
                                             ///< byte en/decrypted
+#if defined(SEMAILBOX_PRESENT) && defined(SE_MANAGER_CONFIG_FILE)
+  uint8_t                 streamBlock[16U * BOOTLOADER_AES_CTR_NUM_BLOCKS_BUFFERED];  ///< Current CTR encrypted block
+#else
   uint8_t                 streamBlock[16];  ///< Current CTR encrypted block
+#endif
   uint8_t                 counter[16];      ///< Current counter/CCM value
 } AesCtrContext_t;
 

@@ -108,7 +108,7 @@ sl_status_t adv_cte_start(void)
   // Start extended advertising and disable connections.
   if (sc == SL_STATUS_OK) {
     sc = sl_bt_extended_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_non_connectable,
+                                         sl_bt_extended_advertiser_non_connectable,
                                          SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER);
   }
 

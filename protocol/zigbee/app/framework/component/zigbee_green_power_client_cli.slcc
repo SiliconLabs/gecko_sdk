@@ -1,37 +1,36 @@
 package: Zigbee
-description: A component implementing the client-side CLI functionality of the Green Power
-  cluster.
+description: A component implementing the client-side CLI functionality of the Green Power cluster.
 label: Green Power Client CLI
 quality: production
 id: zigbee_green_power_client_cli
 category: Zigbee|Green Power
 provides:
-   - name: "zigbee_green_power_client_cli"
+  - name: zigbee_green_power_client_cli
 source:
   - path: protocol/zigbee/app/framework/plugin/green-power-client/green-power-client-cli.c
     condition:
-      - "cli"
-      - "zigbee_green_power_client"
+      - cli
+      - zigbee_green_power_client
   - path: protocol/zigbee/app/framework/plugin/green-power-client/green-power-client.c
     condition:
-      - "cli"
-      - "zigbee_green_power_client"
+      - cli
+      - zigbee_green_power_client
   - path: protocol/zigbee/app/framework/plugin/green-power-common/green-power-cli.c
     condition:
-      - "cli"
+      - cli
     unless:
-      - "zigbee_green_power_client"
+      - zigbee_green_power_client
 include:
   - path: protocol/zigbee/app/framework/plugin/green-power-client
     file_list:
       - path: green-power-client.h
         condition:
-          - "zigbee_green_power_client"
+          - zigbee_green_power_client
   - path: protocol/zigbee/stack/gp
     file_list:
       - path: gp-proxy-table.h
         condition:
-          - "zigbee_gp"
+          - zigbee_gp
 template_contribution:
   - name: component_catalog
     value: zigbee_green_power_client_cli
@@ -47,13 +46,13 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientSetProxyEntry
       help: Sets a proxy table entry.
       argument:
-      - type: uint8
-        help: Index to proxy table
-      - type: uint32
-        help: GPD Source ID
-      - type: uint16
-        help: Sinks node address
-      - type: uint32
+        - type: uint8
+          help: Index to proxy table
+        - type: uint32
+          help: GPD Source ID
+        - type: uint16
+          help: Sinks node address
+        - type: uint32
   - name: cli_command
     value:
       group: green-power-client
@@ -61,10 +60,10 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientAddSink
       help: Adds a sink for a given GPD.
       argument:
-      - type: uint32
-        help: GPD Source ID
-      - type: hex
-        help: Sinks IEEE address
+        - type: uint32
+          help: GPD Source ID
+        - type: hex
+          help: Sinks IEEE address
   - name: cli_command
     value:
       group: green-power-client
@@ -72,10 +71,10 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientAddGroupcastSink
       help: Adds a groupcast sink for a given GPD.
       argument:
-      - type: uint32
-        help: GPD Source ID
-      - type: uint16
-        help: Sink group
+        - type: uint32
+          help: GPD Source ID
+        - type: uint16
+          help: Sink group
   - name: cli_command
     value:
       group: green-power-client
@@ -83,8 +82,8 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientRemoveProxyTableEntry
       help: Removes a given GPD from the proxy table.
       argument:
-      - type: uint32
-        help: GPD Source ID
+        - type: uint32
+          help: GPD Source ID
   - name: cli_command
     value:
       group: green-power-client
@@ -92,10 +91,10 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientAddSink
       help: Removes a sink for a given GPD.  If it is the last sink, removes the proxy table entry.
       argument:
-      - type: uint32
-        help: GPD Source ID
-      - type: hex
-        help: Sinks IEEE address
+        - type: uint32
+          help: GPD Source ID
+        - type: hex
+          help: Sinks IEEE address
   - name: cli_command
     value:
       group: green-power-client
@@ -115,10 +114,10 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientDuplicateFilteringTest
       help: Used to instrument the current device receiving a message, in order to test the duplicate message filtering functionality.
       argument:
-      - type: uint8
-      - type: uint32
-        help: Source ID of the fake incoming message
-      - type: uint8
+        - type: uint8
+        - type: uint32
+          help: Source ID of the fake incoming message
+        - type: uint8
   - name: cli_command
     value:
       group: green-power-client
@@ -126,6 +125,6 @@ template_contribution:
       handler: emberAfPluginGreenPowerClientSetKey
       help: Used to set the key for a proxy table entry.
       argument:
-      - type: uint8
-      - type: hex
-        help: Source ID of the fake incoming message
+        - type: uint8
+        - type: hex
+          help: Source ID of the fake incoming message

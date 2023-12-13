@@ -1,0 +1,16 @@
+label: ZWave_SoC_PowerStrip_Solution
+description: >
+  Demonstrates Power Strip application combined with OTA bootloader. 
+  The Z-Wave certified Power Strip application shows an extension 
+  block implementation used to turn on several devices that are connected 
+  to power. Examples include lights, appliances, etc.
+quality: production
+project:
+  - path: ../../Apps/zwave_soc_power_strip/zwave_soc_power_strip.slcp
+    id: application
+    output: app
+  - path: ../../UCBootLoader/series2/bootloader-storage-internal-single-512k_ota.slcp
+    id: bootloader
+    output: boot
+post_build:
+  profile: zwave_soc_power_strip_ws_postbuild

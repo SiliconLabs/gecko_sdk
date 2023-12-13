@@ -551,212 +551,212 @@ typedef enum IRQn{
 #define EMU_BASE               (EMU_S_BASE)                  /* EMU base address */
 #else
 #define EMU_BASE               (EMU_NS_BASE)                 /* EMU base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_EMU_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_EMU_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_CMU_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_CMU_S) && (SL_TRUSTZONE_PERIPHERAL_CMU_S != 0)))
 #define CMU_BASE               (CMU_S_BASE)                  /* CMU base address */
 #else
 #define CMU_BASE               (CMU_NS_BASE)                 /* CMU base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_CMU_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_CMU_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_HFXO0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_HFXO0_S) && (SL_TRUSTZONE_PERIPHERAL_HFXO0_S != 0)))
 #define HFXO0_BASE             (HFXO0_S_BASE)                /* HFXO0 base address */
 #else
 #define HFXO0_BASE             (HFXO0_NS_BASE)               /* HFXO0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_HFXO0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_HFXO0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_HFRCO0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_HFRCO0_S) && (SL_TRUSTZONE_PERIPHERAL_HFRCO0_S != 0)))
 #define HFRCO0_BASE            (HFRCO0_S_BASE)               /* HFRCO0 base address */
 #else
 #define HFRCO0_BASE            (HFRCO0_NS_BASE)              /* HFRCO0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_HFRCO0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_HFRCO0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_FSRCO_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_FSRCO_S) && (SL_TRUSTZONE_PERIPHERAL_FSRCO_S != 0)))
 #define FSRCO_BASE             (FSRCO_S_BASE)                /* FSRCO base address */
 #else
 #define FSRCO_BASE             (FSRCO_NS_BASE)               /* FSRCO base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_FSRCO_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_FSRCO_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_DPLL0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_DPLL0_S) && (SL_TRUSTZONE_PERIPHERAL_DPLL0_S != 0)))
 #define DPLL0_BASE             (DPLL0_S_BASE)                /* DPLL0 base address */
 #else
 #define DPLL0_BASE             (DPLL0_NS_BASE)               /* DPLL0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_DPLL0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_DPLL0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LFXO_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LFXO_S) && (SL_TRUSTZONE_PERIPHERAL_LFXO_S != 0)))
 #define LFXO_BASE              (LFXO_S_BASE)                 /* LFXO base address */
 #else
 #define LFXO_BASE              (LFXO_NS_BASE)                /* LFXO base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LFXO_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LFXO_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LFRCO_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LFRCO_S) && (SL_TRUSTZONE_PERIPHERAL_LFRCO_S != 0)))
 #define LFRCO_BASE             (LFRCO_S_BASE)                /* LFRCO base address */
 #else
 #define LFRCO_BASE             (LFRCO_NS_BASE)               /* LFRCO base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LFRCO_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LFRCO_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ULFRCO_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_ULFRCO_S) && (SL_TRUSTZONE_PERIPHERAL_ULFRCO_S != 0)))
 #define ULFRCO_BASE            (ULFRCO_S_BASE)               /* ULFRCO base address */
 #else
 #define ULFRCO_BASE            (ULFRCO_NS_BASE)              /* ULFRCO base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_ULFRCO_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_ULFRCO_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_MSC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_MSC_S) && (SL_TRUSTZONE_PERIPHERAL_MSC_S != 0)))
 #define MSC_BASE               (MSC_S_BASE)                  /* MSC base address */
 #else
 #define MSC_BASE               (MSC_NS_BASE)                 /* MSC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_MSC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_MSC_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ICACHE0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_ICACHE0_S) && (SL_TRUSTZONE_PERIPHERAL_ICACHE0_S != 0)))
 #define ICACHE0_BASE           (ICACHE0_S_BASE)              /* ICACHE0 base address */
 #else
 #define ICACHE0_BASE           (ICACHE0_NS_BASE)             /* ICACHE0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_ICACHE0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_ICACHE0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_PRS_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_PRS_S) && (SL_TRUSTZONE_PERIPHERAL_PRS_S != 0)))
 #define PRS_BASE               (PRS_S_BASE)                  /* PRS base address */
 #else
 #define PRS_BASE               (PRS_NS_BASE)                 /* PRS base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_PRS_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_PRS_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_GPIO_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_GPIO_S) && (SL_TRUSTZONE_PERIPHERAL_GPIO_S != 0)))
 #define GPIO_BASE              (GPIO_S_BASE)                 /* GPIO base address */
 #else
 #define GPIO_BASE              (GPIO_NS_BASE)                /* GPIO base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_GPIO_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_GPIO_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LDMA_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LDMA_S) && (SL_TRUSTZONE_PERIPHERAL_LDMA_S != 0)))
 #define LDMA_BASE              (LDMA_S_BASE)                 /* LDMA base address */
 #else
 #define LDMA_BASE              (LDMA_NS_BASE)                /* LDMA base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LDMA_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LDMA_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S) && (SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S != 0)))
 #define LDMAXBAR_BASE          (LDMAXBAR_S_BASE)             /* LDMAXBAR base address */
 #else
 #define LDMAXBAR_BASE          (LDMAXBAR_NS_BASE)            /* LDMAXBAR base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LDMAXBAR_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_TIMER0_S) && (SL_TRUSTZONE_PERIPHERAL_TIMER0_S != 0)))
 #define TIMER0_BASE            (TIMER0_S_BASE)               /* TIMER0 base address */
 #else
 #define TIMER0_BASE            (TIMER0_NS_BASE)              /* TIMER0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_TIMER0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER1_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_TIMER1_S) && (SL_TRUSTZONE_PERIPHERAL_TIMER1_S != 0)))
 #define TIMER1_BASE            (TIMER1_S_BASE)               /* TIMER1 base address */
 #else
 #define TIMER1_BASE            (TIMER1_NS_BASE)              /* TIMER1 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER1_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_TIMER1_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER2_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_TIMER2_S) && (SL_TRUSTZONE_PERIPHERAL_TIMER2_S != 0)))
 #define TIMER2_BASE            (TIMER2_S_BASE)               /* TIMER2 base address */
 #else
 #define TIMER2_BASE            (TIMER2_NS_BASE)              /* TIMER2 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER2_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_TIMER2_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_TIMER3_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_TIMER3_S) && (SL_TRUSTZONE_PERIPHERAL_TIMER3_S != 0)))
 #define TIMER3_BASE            (TIMER3_S_BASE)               /* TIMER3 base address */
 #else
 #define TIMER3_BASE            (TIMER3_NS_BASE)              /* TIMER3 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_TIMER3_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_TIMER3_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_USART0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_USART0_S) && (SL_TRUSTZONE_PERIPHERAL_USART0_S != 0)))
 #define USART0_BASE            (USART0_S_BASE)               /* USART0 base address */
 #else
 #define USART0_BASE            (USART0_NS_BASE)              /* USART0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_USART0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_USART0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_USART1_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_USART1_S) && (SL_TRUSTZONE_PERIPHERAL_USART1_S != 0)))
 #define USART1_BASE            (USART1_S_BASE)               /* USART1 base address */
 #else
 #define USART1_BASE            (USART1_NS_BASE)              /* USART1 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_USART1_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_USART1_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_USART2_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_USART2_S) && (SL_TRUSTZONE_PERIPHERAL_USART2_S != 0)))
 #define USART2_BASE            (USART2_S_BASE)               /* USART2 base address */
 #else
 #define USART2_BASE            (USART2_NS_BASE)              /* USART2 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_USART2_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_USART2_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_BURTC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_BURTC_S) && (SL_TRUSTZONE_PERIPHERAL_BURTC_S != 0)))
 #define BURTC_BASE             (BURTC_S_BASE)                /* BURTC base address */
 #else
 #define BURTC_BASE             (BURTC_NS_BASE)               /* BURTC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_BURTC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_BURTC_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_I2C1_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_I2C1_S) && (SL_TRUSTZONE_PERIPHERAL_I2C1_S != 0)))
 #define I2C1_BASE              (I2C1_S_BASE)                 /* I2C1 base address */
 #else
 #define I2C1_BASE              (I2C1_NS_BASE)                /* I2C1 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_I2C1_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_I2C1_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LVGD_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LVGD_S) && (SL_TRUSTZONE_PERIPHERAL_LVGD_S != 0)))
 #define LVGD_BASE              (LVGD_S_BASE)                 /* LVGD base address */
 #else
 #define LVGD_BASE              (LVGD_NS_BASE)                /* LVGD base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LVGD_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LVGD_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SYSCFG_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_SYSCFG_S) && (SL_TRUSTZONE_PERIPHERAL_SYSCFG_S != 0)))
 #define SYSCFG_BASE            (SYSCFG_S_BASE)               /* SYSCFG base address */
 #else
 #define SYSCFG_BASE            (SYSCFG_NS_BASE)              /* SYSCFG base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_SYSCFG_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_SYSCFG_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_BURAM_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_BURAM_S) && (SL_TRUSTZONE_PERIPHERAL_BURAM_S != 0)))
 #define BURAM_BASE             (BURAM_S_BASE)                /* BURAM base address */
 #else
 #define BURAM_BASE             (BURAM_NS_BASE)               /* BURAM base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_BURAM_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_BURAM_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_GPCRC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_GPCRC_S) && (SL_TRUSTZONE_PERIPHERAL_GPCRC_S != 0)))
 #define GPCRC_BASE             (GPCRC_S_BASE)                /* GPCRC base address */
 #else
 #define GPCRC_BASE             (GPCRC_NS_BASE)               /* GPCRC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_GPCRC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_GPCRC_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_RADIOAES_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_RADIOAES_S) && (SL_TRUSTZONE_PERIPHERAL_RADIOAES_S != 0)))
 #define RADIOAES_BASE          (RADIOAES_S_BASE)             /* RADIOAES base address */
 #else
 #define RADIOAES_BASE          (RADIOAES_NS_BASE)            /* RADIOAES base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_RADIOAES_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_RADIOAES_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_BUFC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_BUFC_S) && (SL_TRUSTZONE_PERIPHERAL_BUFC_S != 0)))
 #define BUFC_BASE              (BUFC_S_BASE)                 /* BUFC base address */
 #else
 #define BUFC_BASE              (BUFC_NS_BASE)                /* BUFC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_BUFC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_BUFC_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SMU_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_SMU_S) && (SL_TRUSTZONE_PERIPHERAL_SMU_S != 0)))
 #define SMU_BASE               (SMU_S_BASE)                  /* SMU base address */
 #else
 #define SMU_BASE               (SMU_S_BASE)                  /* SMU base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_SMU_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_SMU_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_RTCC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_RTCC_S) && (SL_TRUSTZONE_PERIPHERAL_RTCC_S != 0)))
 #define RTCC_BASE              (RTCC_S_BASE)                 /* RTCC base address */
 #else
 #define RTCC_BASE              (RTCC_NS_BASE)                /* RTCC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_RTCC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_RTCC_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_LETIMER0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_LETIMER0_S) && (SL_TRUSTZONE_PERIPHERAL_LETIMER0_S != 0)))
 #define LETIMER0_BASE          (LETIMER0_S_BASE)             /* LETIMER0 base address */
 #else
 #define LETIMER0_BASE          (LETIMER0_NS_BASE)            /* LETIMER0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_LETIMER0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_LETIMER0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_IADC0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_IADC0_S) && (SL_TRUSTZONE_PERIPHERAL_IADC0_S != 0)))
 #define IADC0_BASE             (IADC0_S_BASE)                /* IADC0 base address */
 #else
 #define IADC0_BASE             (IADC0_NS_BASE)               /* IADC0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_IADC0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_IADC0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ACMP0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_ACMP0_S) && (SL_TRUSTZONE_PERIPHERAL_ACMP0_S != 0)))
 #define ACMP0_BASE             (ACMP0_S_BASE)                /* ACMP0 base address */
 #else
 #define ACMP0_BASE             (ACMP0_NS_BASE)               /* ACMP0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_ACMP0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_ACMP0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_ACMP1_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_ACMP1_S) && (SL_TRUSTZONE_PERIPHERAL_ACMP1_S != 0)))
 #define ACMP1_BASE             (ACMP1_S_BASE)                /* ACMP1 base address */
 #else
 #define ACMP1_BASE             (ACMP1_NS_BASE)               /* ACMP1 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_ACMP1_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_ACMP1_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_I2C0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_I2C0_S) && (SL_TRUSTZONE_PERIPHERAL_I2C0_S != 0)))
 #define I2C0_BASE              (I2C0_S_BASE)                 /* I2C0 base address */
 #else
 #define I2C0_BASE              (I2C0_NS_BASE)                /* I2C0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_I2C0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_I2C0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_HFRCOEM23_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_HFRCOEM23_S) && (SL_TRUSTZONE_PERIPHERAL_HFRCOEM23_S != 0)))
 #define HFRCOEM23_BASE         (HFRCOEM23_S_BASE)            /* HFRCOEM23 base address */
 #else
 #define HFRCOEM23_BASE         (HFRCOEM23_NS_BASE)           /* HFRCOEM23 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_HFRCOEM23_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_HFRCOEM23_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_WDOG0_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_WDOG0_S) && (SL_TRUSTZONE_PERIPHERAL_WDOG0_S != 0)))
 #define WDOG0_BASE             (WDOG0_S_BASE)                /* WDOG0 base address */
 #else
 #define WDOG0_BASE             (WDOG0_NS_BASE)               /* WDOG0 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_WDOG0_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_WDOG0_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_WDOG1_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_WDOG1_S) && (SL_TRUSTZONE_PERIPHERAL_WDOG1_S != 0)))
 #define WDOG1_BASE             (WDOG1_S_BASE)                /* WDOG1 base address */
 #else
 #define WDOG1_BASE             (WDOG1_NS_BASE)               /* WDOG1 base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_WDOG1_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_WDOG1_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_SEMAILBOX_HOST_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_SEMAILBOX_HOST_S) && (SL_TRUSTZONE_PERIPHERAL_SEMAILBOX_HOST_S != 0)))
 #define SEMAILBOX_HOST_BASE    (SEMAILBOX_S_HOST_BASE)       /* SEMAILBOX_HOST base address */
 #else
 #define SEMAILBOX_HOST_BASE    (SEMAILBOX_S_HOST_BASE)       /* SEMAILBOX_HOST base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_SEMAILBOX_HOST_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_SEMAILBOX_HOST_S
 #if ((defined(SL_TRUSTZONE_SECURE) && !defined(SL_TRUSTZONE_PERIPHERAL_PRORTC_S)) || (defined(SL_TRUSTZONE_PERIPHERAL_PRORTC_S) && (SL_TRUSTZONE_PERIPHERAL_PRORTC_S != 0)))
 #define PRORTC_BASE            (PRORTC_S_BASE)               /* PRORTC base address */
 #else
 #define PRORTC_BASE            (PRORTC_NS_BASE)              /* PRORTC base address */
-#endif /* SL_TRUSTZONE_PERIPHERAL_PRORTC_S */
+#endif // SL_TRUSTZONE_PERIPHERAL_PRORTC_S
 
 #define DEVINFO_BASE           (0x0FE08000UL) /* DEVINFO base address */
 /** @} End of group EFR32MG21A010F768IM32_Peripheral_Base */

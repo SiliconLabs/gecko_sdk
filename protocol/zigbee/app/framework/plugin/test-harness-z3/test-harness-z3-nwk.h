@@ -21,8 +21,9 @@
 #define NWK_LEAVE_COMMAND           (0x04)
 #define NWK_REJOIN_REQUEST_COMMAND  (0x06)
 #define NWK_REJOIN_RESPONSE_COMMAND (0x07)
-
+#define NWK_NETWORK_UPDATE_COMMAND  (0x0a)
 // -----------------------------------------------------------------------------
 // Globals
 
 extern bool sli_zigbee_af_test_harness_z3_ignore_leave_commands;
+extern bool sli_zigbee_af_test_harness_z3_ignore_rejoin_commands;

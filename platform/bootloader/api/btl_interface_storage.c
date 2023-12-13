@@ -24,7 +24,10 @@
 #ifndef BTL_ASSERT
 #define BTL_ASSERT(x)
 #endif
-
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 // -----------------------------------------------------------------------------
 // Static variables
 
@@ -568,3 +571,6 @@ int32_t bootloader_eraseRawStorage(uint32_t address,
 
   return retVal;
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

@@ -557,13 +557,14 @@ sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flag
   uint32_t time = 0;
 
   CORE_ENTER_ATOMIC();
-  // parse list and retrieve first timer with HF requirement.
+  // parse list and retrieve first timer with option flags requirement.
   current = timer_head;
   while (current != NULL) {
     // save time remaining for timer.
     time += current->delta;
     // Check if the current timer has the flags requested
-    if (current->option_flags == option_flags) {
+    if (current->option_flags == option_flags
+        || option_flags == SL_SLEEPTIMER_ANY_FLAG) {
       // Substract time since last compare match.
       if (time > (sleeptimer_hal_get_counter() - last_delta_update_count)) {
         time -= (sleeptimer_hal_get_counter() - last_delta_update_count);

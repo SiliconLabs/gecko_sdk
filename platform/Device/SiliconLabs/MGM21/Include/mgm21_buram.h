@@ -77,4 +77,4 @@ typedef struct {
 /** @} End of group MGM21_BURAM */
 /** @} End of group Parts */
 
-#endif /* MGM21_BURAM_H */
+#endif // MGM21_BURAM_H

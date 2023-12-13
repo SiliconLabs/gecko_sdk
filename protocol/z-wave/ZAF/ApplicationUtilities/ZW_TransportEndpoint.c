@@ -67,7 +67,7 @@ static CTransportEndpoint_t myTransportEndpoint =
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
 
-void ZW_TransportEndpoint_Init()
+void ZW_TransportEndpoint_Init(void)
 {
   myTransportEndpoint.flag_supervision_encap = false;
 }
@@ -125,7 +125,7 @@ ZAF_Transmit(
   uint8_t *pData,
   size_t   dataLength,
   TRANSMIT_OPTIONS_TYPE_SINGLE_EX *pTxOptionsEx,
-  ZAF_TX_Callback_t pCallback)
+  __attribute__((unused)) ZAF_TX_Callback_t pCallback)
 {
   if (EINCLUSIONSTATE_EXCLUDED == ZAF_GetInclusionState())
   {
@@ -153,43 +153,30 @@ ZAF_Transmit(
     return ZAF_ENQUEUE_STATUS_BUFFER_OVERRUN;
   }
 
-#ifdef HOST_SECURITY_INCLUDED
-  UNUSED(pCallback);
-  SZwaveTransmitPackage TransmitPackage;
-  memset(&TransmitPackage, 0, sizeof(TransmitPackage));
-  TransmitPackage.eTransmitType = EZWAVETRANSMITTYPE_SECURE;
-  SSecureSendData *params = &TransmitPackage.uTransmitParams.SendDataParams;
-  params->connection.remote.is_multicast = false;
-  params->data_length = dataLength;
-  memcpy(params->data, pData, params->data_length);
-  params->tx_options.number_of_responses = 0;
-  params->ptxCompleteCallback = (void *)pCallback;
-  params->connection.remote.address.node_id = pTxOptionsEx->pDestNode->node.nodeId;
-  result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&TransmitPackage, 0);
-#else
   CmdClassMultiChannelEncapsulate(&pData,
                                   &dataLength,
                                   pTxOptionsEx);
 
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.uTransmitParams.SendDataEx.DestNodeId = pTxOptionsEx->pDestNode->node.nodeId;
+  SZwaveTransmitPackage FramePackage =  {
+    .uTransmitParams.SendDataEx.DestNodeId = pTxOptionsEx->pDestNode->node.nodeId,
+    .uTransmitParams.SendDataEx.FrameConfig.TransmitOptions = pTxOptionsEx->txOptions,
+    .uTransmitParams.SendDataEx.FrameConfig.iFrameLength = (uint8_t)dataLength,
+    .uTransmitParams.SendDataEx.SourceNodeId = 0x0000,
+    .uTransmitParams.SendDataEx.TransmitOptions2 = 0x00,
+    .uTransmitParams.SendDataEx.TransmitSecurityOptions = pTxOptionsEx->txSecOptions,
+    .uTransmitParams.SendDataEx.eKeyType = pTxOptionsEx->pDestNode->nodeInfo.security,
+    .eTransmitType = EZWAVETRANSMITTYPE_EX
+  };
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
   FramePackage.uTransmitParams.SendDataEx.FrameConfig.Handle = (ZW_TX_Callback_t)pCallback;
 #pragma GCC diagnostic pop
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.TransmitOptions = pTxOptionsEx->txOptions;
   memcpy(FramePackage.uTransmitParams.SendDataEx.FrameConfig.aFrame, pData, dataLength);
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.iFrameLength = (uint8_t)dataLength;
-  FramePackage.uTransmitParams.SendDataEx.SourceNodeId = 0x0000;
-  FramePackage.uTransmitParams.SendDataEx.TransmitOptions2 = 0x00;
-  FramePackage.uTransmitParams.SendDataEx.TransmitSecurityOptions = pTxOptionsEx->txSecOptions;
-  FramePackage.uTransmitParams.SendDataEx.eKeyType = pTxOptionsEx->pDestNode->nodeInfo.security;
 
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
+
 
   // Put the package on queue (and don't wait for it)
   result = (EZAF_EnqueueStatus_t)QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t*)&FramePackage, QUEUE_NOTIFYING_SEND_MAX_WAIT);
-#endif
   return result;
 }
 
@@ -198,28 +185,28 @@ void Transport_ApplicationCommandHandler(
     uint8_t cmdLength,
     RECEIVE_OPTIONS_TYPE * rxOpt)
 {
-  RECEIVE_OPTIONS_TYPE_EX rxOptEx;
-  rxOptEx.rxStatus = rxOpt->rxStatus;
-  rxOptEx.securityKey = rxOpt->securityKey;
-  rxOptEx.sourceNode.nodeId = rxOpt->sourceNode;
-  rxOptEx.sourceNode.endpoint = 0;
-  rxOptEx.destNode.nodeId = rxOpt->destNode;
-  rxOptEx.destNode.endpoint = 0;
-  rxOptEx.destNode.BitAddress = 0;
+  RECEIVE_OPTIONS_TYPE_EX rxOptEx = {
+    .rxStatus = rxOpt->rxStatus,
+    .securityKey = rxOpt->securityKey,
+    .sourceNode.nodeId = rxOpt->sourceNode,
+    .sourceNode.endpoint = 0,
+    .destNode.nodeId = rxOpt->destNode,
+    .destNode.endpoint = 0,
+    .destNode.BitAddress = 0,
   // If applicable, supervision CC will fill in Supervision data in rxOptEx.
-  rxOptEx.bSupervisionActive = 0;
+    .bSupervisionActive = 0
+  };
+  cc_handler_input_t input = {
+    .rx_options = &rxOptEx,
+    .frame = pCmd,
+    .length = cmdLength
+  };
 
-  cc_handler_input_t input;
-  memset((uint8_t *)&input, 0, sizeof(cc_handler_input_t));
-  input.rx_options = &rxOptEx;
-  input.frame = pCmd;
-  input.length = cmdLength;
-
-  ZW_APPLICATION_TX_BUFFER bufferOut;
-  memset((uint8_t *)&bufferOut, 0, sizeof(bufferOut));
-  cc_handler_output_t output;
-  output.frame = &bufferOut;
-  output.length = 0;
+  ZW_APPLICATION_TX_BUFFER bufferOut = { 0 };
+  cc_handler_output_t output = {
+    .frame = &bufferOut,
+    .length = 0
+  };
   // Ignore output.duration - it is not expected that zaf_transport_tx() will use it
 
   received_frame_status_t status = invoke_cc_handler(&input, &output);
@@ -227,7 +214,7 @@ void Transport_ApplicationCommandHandler(
   if (RECEIVED_FRAME_STATUS_CC_NOT_FOUND != status) {
     if (0 < output.length && RECEIVED_FRAME_STATUS_FAIL != status) {
       // The CC handler put something into the output buffer => Transmit it.
-      zaf_tx_options_t tx_options;
+      zaf_tx_options_t tx_options = { 0 };
       zaf_transport_rx_to_tx_options(&rxOptEx, &tx_options);
       (void) zaf_transport_tx((uint8_t *)output.frame, output.length, NULL, &tx_options);
     }
@@ -247,6 +234,11 @@ RxToTxOptions( RECEIVE_OPTIONS_TYPE_EX *rxopt,     /* IN  receive options to con
 {
   static TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptionsEx;
   static MULTICHAN_NODE_ID destNode;
+
+  // Here we reset struct using memset because struct are static & reused
+  memset(&txOptionsEx,0,sizeof(txOptionsEx));
+  memset(&destNode,0,sizeof(destNode));
+
   txOptionsEx.pDestNode = &destNode;
   *txopt = &txOptionsEx;
 
@@ -254,7 +246,6 @@ RxToTxOptions( RECEIVE_OPTIONS_TYPE_EX *rxopt,     /* IN  receive options to con
   destNode.node.endpoint = rxopt->sourceNode.endpoint;
   destNode.nodeInfo.BitMultiChannelEncap = (rxopt->sourceNode.endpoint == 0) ? 0 : 1;
   destNode.nodeInfo.security = rxopt->securityKey;
-
 
   txOptionsEx.txOptions = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
   if (rxopt->rxStatus & RECEIVE_STATUS_LOW_POWER)
@@ -308,12 +299,9 @@ SetFlagSupervisionEncap(bool flag)
 
 ZW_WEAK received_frame_status_t
 Transport_ApplicationCommandHandlerEx(
-  RECEIVE_OPTIONS_TYPE_EX *rxOpt,
-  ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength)
+  __attribute__((unused)) RECEIVE_OPTIONS_TYPE_EX *rxOpt,
+  __attribute__((unused)) ZW_APPLICATION_TX_BUFFER *pCmd,
+  __attribute__((unused)) uint8_t cmdLength)
 {
-  UNUSED(rxOpt);
-  UNUSED(pCmd);
-  UNUSED(cmdLength);
   return RECEIVED_FRAME_STATUS_NO_SUPPORT;
 }

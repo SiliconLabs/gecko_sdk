@@ -3,19 +3,75 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.0 {#section-7-21-0}
+
+## SPAN synchronization
+Unsollicited request from end devices will now have S2_TXOPTION_VERIFY_DELIVERY enabled by default to allow SPAN synchronization.
+
+## Portable Controller Application
+The portable controller application has been removed in this version. Last version supporting this application is 7.20.
+
+## ZPAL Power Manager
+The maximum number of power manager handlers has been reduced from 20 to 17. This number includes both stack-side and application-side handlers.
+
+## Application user-specified versioning
+A new boolean parameter is introduced into Simplicity Studio. When the user creates a new application,
+the user can choose whether their application uses the Z-Wave SDK Version, or a specific version
+he is free to define.
+
+## OTW Update of Serial API controller
+In version 7.20 of the Z-Wave SDK, The Serial API Controller application's
+Product ID, used for validation during OTW updates had been changed to include
+a Generic and Specific Device Type.\
+This prevented updating devices running version 7.19 or lower of the Serial
+API Controller to more recent versions.
+
+To address this incompatibility, the Specific and Generic Device Type bytes of
+the Product ID, defined in `application_properties_config.h`
+(used by the struct `sl_app_properties` of the bootloader)
+have been reverted to their previous values of 0.\
+This only affects the Product ID; the application still reports the new Device
+Type values in its Node Information Frame.\
+Note that these values can be changed on the fly using the Serial API command `SERIAL_API_APPL_NODE_INFORMATION`.
+
+The following update paths for this application are not possible using the
+pre-built binaries:
+
+- 7.19 or lower to 7.20
+- 7.20 to 7.21 or higher
+
+However, firmwares that are not affected by this incompatibility can be created manually, as described in the README of the application.
+
+## Z-Wave NVM instance configurable from Simplicity Studio
+A configurable component (ZPAL Z-Wave NVM instance) has been created to help user to configure the Z-Wave NVM stack instance from Simplicity Studio. This NVM instance is used on series 700 to store ZAF and user application's data. GSDK and Z-Wave stack data are stored in the default NVM instance (which is configurable from the NVM3 Default Config component).\
+On other series, all data are stored in the NVM default instance. So this component is available only in projects using series 700.
+
+## Improve NVM management on series 700
+Add periodic repacks for Z-Wave NVM instance on series 700 in zpal. Avoid to repack this NVM instance on NVM write (which could create latency in wireless communication).\
+NVM default instance already has a periodic repack.
+
+## Controller's NVM data update
+Controller's datas in NVM have been updated in order to save the nodeId length (Classic Z-Wave or Long Range Z-Wave). A migration script is required to update data in NVM.
+This script is enable by installing slc component "Migration from V7.20 (to V7.21)" in the controller project.
+
 # 7.20.2 {#section-7-20-2}
 
 ## zwave_soc_led_bulb Moved to NonCertifiableApps
 The zwave_soc_led_bulb (LED Bulb) application is no longer certified, so this application
 is moved from `Apps` to `NonCertifiableApps` folder.
 
+# 7.20.1 {#section-7-20-1}
+
+## ZAF Retention Register
+Added module for retention registers. Application can now use `ZAF_retention_register_read` and `ZAF_retention_register_write` to read and write retention registers not used by ZAF, protocol and PAL. `ZAF_retention_register_count` can be used to get the number of registers available for application use. Register index starts from 0.
+
 # 7.20.0 {#section-7-20-0}
 
 ## ZAF Application Name
-Storing the name of applications is now handled by the `zaf_appname` component.  
+Storing the name of applications is now handled by the `zaf_appname` component.\
 The name is stored as a string by default.
 By installing an additional component, `zaf_appname_nvm`, the name can be saved
-to the non-volatile memory as well.  
+to the non-volatile memory as well.\
 When multiple Z-Wave devices are connected, this feature can speed up the
 process of identifying which application is flashed on each device.
 
@@ -36,42 +92,42 @@ is now `ZAF_TX_Callback_t`.
 Note that `ZAF_Transmit()` does not set `S2_TXOPTION_VERIFY_DELIVERY` by default,
 as it was with `Transport_SendRequestEP()`. This flag can be set in
 `ZAF_Transmit()`, by enabling it in `TransmitSecurityOptions`.
-It is not recommended to use this API directly. Applications should use the ZAF 
-Transport Queue to ensure that only one frame is sent from the application to 
+It is not recommended to use this API directly, applications should use the ZAF
+Transport Queue to ensure that only one frame is sent from the application to
 the protocol at one time.
 
-### ZAF_Transmit Migrated to zaf_transport_tx
-In order to ensure a single entry point for frames from the application to the 
+### ZAF_Transmit migrated to zaf_transport_tx
+In order to ensure a single entry point for frames from the application to the
 protocol, ZAF_Transmit is not being called directly by Command Classes.
 
 ## ZAF Transport Queue
-This module implements a transport queue in the ZAF layer. This queue
-ensures that there is only a single entry point for a frame from the 
-application. This adds a new feature to the applications, the ability to "send and 
-forget", which means the user only has to send to the queue, and the rest of the 
-process is taken care of, such as Send Central Scene Notification and Send Basic 
-Set in sequence. The queue size is configurable and it can bet set by 
-`ZAF_TRANSPORT_CONFIG_QUEUE_SIZE`. The default is 2.
+This module implements a transport queue in the application level. This queue
+ensures that there is only a single entry point for a frame from the
+application. This adds a new feature to applications, the ability to "send and
+forget", which means the user only has to send to the queue, and the rest of the
+process is taken care of. i.e. Send Central Scene Notification and Send Basic
+Set in sequence. The queue size is configurable and it can bet set by
+`ZAF_TRANSPORT_CONFIG_QUEUE_SIZE`, the default is 2.
 
 
 ## ZAF TX Mutex Removed
 This module was used to ensure that a shared buffer frame was only used by one
 module at the same time. It was very relevant for 500 series to reduce the RAM
 usage as no stack was available for the tasks, however it became irrelevant for
-700 series and forward. This module was only being used by the ZW Transport 
-Multicast module at this point. The buffer was moved to the module itself and 
-the TX Mutex module was removed, therefore the `ZAF_tx_mutex.h` no longer 
+700 series and forward. This module was only being used by the ZW Transport
+Multicast module at this point. The buffer was moved to the module itself and
+the TX Mutex module was removed, therefore the `ZAF_tx_mutex.h` no longer
 exists.
 
 ## Merge agi.c/h into CC_AssociationGroupInfo.c/h
-The agi.c/h module does not exist anymore as the contents 
+The agi.c/h module does not exist anymore as the contents
 of the files have been merged into CC_AssociationGroupInfo. This should reduce some complexity
 since data does not have to be passed between the different modules, and should reduce flash and ram consumption.
 
-## ZAF Event Helper Module Removed
-This module was only used by the event distributor SoC to enqueue events into 
-the application event queue. Therefore this functionality was moved into the 
-event distributor SoC.
+## ZAF Event Helper module removed
+This modules was only used by the event distributor soc to enqueue events into
+the application event queue therefore this functionality was moved into the
+event distributor soc.
 
 The interface changes are listed below:
 
@@ -82,7 +138,7 @@ The interface changes are listed below:
 | `ZAF_EventHelperEventEnqueue`         | `->` | `zaf_event_distributor_enqueue_app_event`            |
 | `ZAF_EventHelperEventEnqueueFromISR`  | `->` | `zaf_event_distributor_enqueue_app_event_from_isr`   |
 
-The functions that still exist take the same arguments as before. They are 
+The functions that still exist takes the same arguments as before. They are
 defined in `zaf_event_distributor_soc.h`
 
 ## Application Name Configurable
@@ -90,33 +146,33 @@ Each application's name is configurable. It can be changed by specifying the
 configuration entry named `ZAF_APP_NAME` in the SLC project description.
 Printing the application's name, reset reason, and SDK version was moved to ZAF_PrintAppInfo().
 
-## Eliminating the config_app.h Files
-config_app.h files were eliminated from sample applications, and the contents of the headers 
+## Eliminating the config_app.h files
+config_app.h files were eliminated from sample applications, and the content of the headers
 were moved to the project source files. Exceptions to this are version numbers, previously stored in these files.
 Version numbers have been moved to a configurable SLC component.
-The APP_VERSION_MAJOR, APP_VERSION_MINOR, and APP_VERSION_PATCH numbers 
-are now configurable via the zw_version component in the Simplicity Studio GUI. 
-Users still get the original Silicon Labs version numbers by default, 
+The APP_VERSION_MAJOR, APP_VERSION_MINOR, and APP_VERSION_PATCH numbers
+are now configurable via the zw_version component in the studio GUI.
+Users still get the original Silicon Labs version numbers by default,
 but it is also possible to change them as described above.
 
-## Common Hardware Functions
-Each application would implement its own `<App>_hw_init` function and have 
-its own `<App>_hw.h` header. The applications that go to deep sleep also had
-their own `<APP>_hw_deep_sleep_wakeup_handler` function. These two common 
-functions have been consolidated in `app_hw.h` as `app_hw_init` and 
-`app_hw_deep_sleep_wakeup_handler`. `app_hw_init` MUST be implemented by the 
+## Common hardware functions
+Each application would implement each own `<App>_hw_init` function and have
+their own `<App>_hw.h` header. The applications that go to deep sleep also had
+their own `<APP>_hw_deep_sleep_wakeup_handler` function. These two common
+functions have been consolidate in a `app_hw.h` as `app_hw_init` and
+`app_hw_deep_sleep_wakeup_handler`. `app_hw_init` MUST be implemented by the
 application while `app_hw_deep_sleep_wakeup_handler` should only be implemented
 by applications that can go into deep sleep.
 
 ## Application's Source Code
 
-Each application's source code was moved from \<application_name\>.c to app.c file. 
-The app.h headers were also removed with the function `app_init()`. Because of this 
+Application's source codes were moved from \<application_name\>.c to app.c file.
+The app.h headers were also removed with the function `app_init()`. Because of this
 the function calls were removed from the main.c file.
 
 ## Board Indicator Moved into ZAF
 
-Board indicator LED is initialized in ZAF_Init() and the default idle status is also set in it. 
+Board indicator LED is initialized in ZAF_Init() and the default idle status is set also in it.
 `Board_IndicateStatus()` is available so it can be used freely in the code.
 
 ## Command Classes
@@ -137,13 +193,13 @@ List of handlers compatible with `REGISTER_CC_V5()`:
  * CC_MultilevelSwitch_handler()
  * CC_MultiChannel_handler()
 
-### Folder Structure and Private/Public Headers
-Some command classes have more than two source files and header files. This is 
-because the command class contains a lot of logic, and therefore splitting into 
+### Folder structure and private/public headers
+Some command classes have more than two source files and header files. This is
+because the command class contains a lot of logic therefore splitting into
 more than one source and one header file makes sense for readability.
-In order to allow interaction between two source files, private headers were 
-introduced and to avoid confusion a new folder structure is used. The source 
-files and private header are placed in `src` while the public headers are 
+In order to allow interaction between two source files, private header were
+introduced and to avoid confusion a new folder structure is used. The source
+files and private header are placed in `src` while the public headers are
 placed in `inc`.
 
 All Command Classes have been structured to have `inc`, `src` and in some cases, `config` folder.
@@ -235,17 +291,17 @@ state_events:
 ### CC Wake Up
 Applications that included the Command Class Wake Up had to call three functions
 in response to the `EVENT_SYSTEM_LEARNMODE_FINISHED` event. These functions were
-`CC_WakeUp_stayAwake10s`, `CC_WakeUp_AutoStayAwakeAfterInclusion` and 
+`CC_WakeUp_stayAwake10s`, `CC_WakeUp_AutoStayAwakeAfterInclusion` and
 `CC_WakeUp_startWakeUpNotificationTimer` if the inclusion state is not excluded.
-Now this is handled by ZAF. This is done by implementing the weak function 
+Now this is handled by ZAF. This is done by implementing the weak function
 `zaf_learn_mode_finished`.
 
 ## Application Events Abstracted
 Some sample applications contained events that contained hardware-specific names.
 Those names were based on how the Silicon Labs port would generate those events.
 
-Many events had the BUTTON keyword and it was removed from event names so 
-`EVENT_APP_BUTTON_<event>` becomes `EVENT_APP_<event>`. Below is the list 
+Many events had the BUTTON keyword and it was removed from event names so
+`EVENT_APP_BUTTON_<event>` becomes `EVENT_APP_<event>`. Below is the list
 of renamed events for each application that did **NOT** follow this pattern.
 
 ### zwave_soc_switch_on_off
@@ -266,24 +322,24 @@ of renamed events for each application that did **NOT** follow this pattern.
 In order to make apps smaller and easier to start with, all implementation common to all apps
 that did not require additional configuration from the user has been moved to ZAF.
 
-### Features Moved Out of Apps to ZAF
-All sample applications would keep a local pointer to the `AppHandles` passed by 
-the `ApplicationTask`. This parameter is already passed to ZAF in the `ZAF_Init`,
-therefore the applications no longer need to keep a local pointer. They 
-should use the functions from `ZAF_Common_interface.h` to retrieve the data 
+### Features moved out of apps to ZAF
+All sample application would keep a local pointer to the `AppHandles` passed by
+the `ApplicationTask`. This parameter is already passed to ZAF in the `ZAF_Init`
+therefore the Applications don't need to keep a local pointer anymore. They
+should use the functions from `ZAF_Common_interface.h` to retrieve the data
 needed from the `AppHandles`
 
-They also had to call `zaf_event_distributor_init` in the `ApplicationTask`. 
-This is not necessary anymore as this functions is called by ZAF in the 
+They also had to call `zaf_event_distributor_init` in the `ApplicationTask`.
+This is not necessary anymore as this functions is called by ZAF in the
 `ZAF_Init`
 
 The sample applications that support the CC Firmware Update also had to call
 `cc_firmware_update_send_status_report` in `ApplicationTask` after `ZAF_Init`.
 This is not needed anymore because the CC Firmware Update handles it internally.
 
-### New Weak Function on EVENT_SYSTEM_LEARNMODE_FINISHED
-A new weak function was introduced in ZAF, `zaf_learn_mode_finished`. This 
-function can be used by Command Classes that need to execute an action in 
+### New weak function on EVENT_SYSTEM_LEARNMODE_FINISHED
+A new weak function was introduced in ZAF, `zaf_learn_mode_finished`. This
+function can be used by Command Classes that need to execute an action in
 response to this event. Currently only the Command Class Wake Up utilizes this
 functionality.
 
@@ -352,7 +408,7 @@ Instead of using `REQUESTED_SECURITY_KEYS`, it is now possible to select any com
 The configuration of number of end points, previously defined as `NUMBER_OF_ENDPOINTS`,
 was renamed to `ZAF_CONFIG_NUMBER_OF_END_POINTS` and moved  to `zaf_config.h`.
 
-## Application Initialization 
+## Application Initialization
 
 `ZAF_setApplicationData()` was removed. The parameters of this function must instead be passed to `ZAF_Init()`.
 
@@ -391,7 +447,7 @@ This ensures that the initialization and reset are performed by ZAF.
 
 The functions used to read/write from Non-Volatile Memory `zpal_nvm_read(handle, key, object, object_size)`
 and `zpal_nvm_write(handle, key, object, object_size)` are replaced by `ZAF_nvm_app_read(key, object, object_size)`
-and `ZAF_nvm_app_write(key, object, object_size)`. The new functions work without needing a pointer to 
+and `ZAF_nvm_app_write(key, object, object_size)`. The new functions work without needing a pointer to
 the file system as an input. The application file system must be opened by calling `ZAF_nvm_app_init()`
 at initialization so it is avaliable to be used by `ZAF_nvm_app_read()` and `ZAF_nvm_app_write()`.
 
@@ -399,7 +455,7 @@ ZAF filesystem can be used with `ZAF_nvm` module. `ZAF_FILE_ID_BASE` was removed
 
 ### Removed LED_RGB and Timer Components
 
-Timer components were used to control `RGB_LED`, but these components are replaced by the Silicon Labs component "SL_SIMPLE_RGB_PWM_LED". 
+Timer components were used to control `RGB_LED`, but these components are replaced by the Silicon Labs component "SL_SIMPLE_RGB_PWM_LED".
 After this release these components are no longer available.
 
 The following functions were removed from *platform/SiliconLabs/AppsHW/inc/board.h*:
@@ -426,7 +482,7 @@ ZAF is also responsible for handling the device reset using the "NVM SOC" compon
 
 #### Removed State Machine from Applications
 
-All sample applications had a state machine implemented into them. It is no longer needed, making 
+All sample applications had a state machine implemented into them. It is no longer needed, making
 the applications simpler and allowing more responsibility to be given to ZAF.
 Applications can still implement a state machine if the use case requires but our sample applications
 use cases do not require state machines.
@@ -450,7 +506,7 @@ not.
 
 All sample applications implemented their own event distributor component. However, it was the same
 between all sample applications, with the only difference being if the application allowed for pooling
-or full event driven. This logic has been moved into ZAF in the component event distributor and the 
+or full event driven. This logic has been moved into ZAF in the component event distributor and the
 logic has not changed.
 
 Two types of distributor have been implemented: NCP and SOC
@@ -467,24 +523,24 @@ applications that run controller and host on the same chip.
 
 #### NVM SOC
 
-All SOC sample applications use this component as it contains all the NVM logic expected to be 
-common among them. It is responsible for resetting the APP NVM, Load Default Configuration and 
+All SOC sample applications use this component as it contains all the NVM logic expected to be
+common among them. It is responsible for resetting the APP NVM, Load Default Configuration and
 Setting Default Configuration. It contains handlers that can be used for custom behaviors in
 the application level.
 
 ### AppPowerDownCallBack
 
 This function replaces the ZAF Power Module Wrapper for more optimized code. Instead of registering a callback
-which was called as the last step just before the chip entered deep sleep hibernate, a new weakly-defined function 
-`ZW_AppPowerDownCallBack` is provided. 
+which was called as the last step just before the chip entered deep sleep hibernate, a new weakly-defined function
+`ZW_AppPowerDownCallBack` is provided.
 
 ### ZAF Power Module Wrapper - Deprecated
 
 The ZAF Power Module Wrapper is no longer supported. It was responsible for registering functions that would
-be called as the last step just before the chip enters deep sleep hibernate. 
+be called as the last step just before the chip enters deep sleep hibernate.
 
 It is important to highlight that the protocol still supports the `EZWAVECOMMANDTYPE_PM_SET_POWERDOWN_CALLBACK`
-for registering such callbacks at run time. However, we recommend that the weakly-defined function 
+for registering such callbacks at run time. However, we recommend that the weakly-defined function
 `ZW_AppPowerDownCallBack` is used instead. Since the DeepSleepTimer is no longer using the protocol
 command, we reduced the `MAX_POWERDOWN_CALLBACKS` from 4 to 3.
 
@@ -493,9 +549,9 @@ command, we reduced the `MAX_POWERDOWN_CALLBACKS` from 4 to 3.
 The following component IDs were renamed in order to comply with the snake case naming convention
 
 - `zw_cc_centralscene` renamed to `zw_cc_central_scene`
-- `zw_cc_colorswitch` renamed to `zw_cc_color_switch` 
-- `zw_cc_doorlock` renamed to `zw_cc_door_lock` 
-- `zw_cc_multilevelsensor` renamed to `zw_cc_multilevel_sensor` 
+- `zw_cc_colorswitch` renamed to `zw_cc_color_switch`
+- `zw_cc_doorlock` renamed to `zw_cc_door_lock`
+- `zw_cc_multilevelsensor` renamed to `zw_cc_multilevel_sensor`
 - `zw_cc_multilevelswitchsupport` renamed to `zw_cc_multilevel_switch_support`
 
 ## Command Classes {#cc-id}
@@ -540,8 +596,8 @@ classes not from the SDK need to follow this standard. This requirement is simil
 
 ### I/O Interface for CCs
 
-Some Command Classes have a new level of abstraction, the I/O interface. This interface has the 
-functions used to read, write, and sometimes migrate the data. This level of abstraction allows the 
+Some Command Classes have a new level of abstraction, the I/O interface. This interface has the
+functions used to read, write, and sometimes migrate the data. This level of abstraction allows the
 user to disable and enable data persistency seamlessly.
 
 CCs that support this interface:
@@ -557,7 +613,7 @@ CCs that support this interface:
 
 ### CC Association
 
-The `AssociationInit()` function was removed and the initialization performed by this function was split into two 
+The `AssociationInit()` function was removed and the initialization performed by this function was split into two
 separate functions: `init()` and `reset()`. These two functions are now passed as callbacks to the `REGISTER_CC_V4` macro.
 This ensures that the initialization and reset are performed by ZAF, instead of the user code.
 
@@ -626,9 +682,9 @@ Non-Volatile Memory can be used to store the configuration values by installing 
 The Command Class Color Switch was refactored to no longer require initialization on the application
 level. The initialization is now handled internally by ZAF on `ZAF_Init`.
 
-The color configuration is now also handled by the Command Class and not the application. 
-The configuration is available using the `Z-Wave Command Class Configurator`. The array of 
-all colors supported by the application is no longer needed since it is created by the Command Class 
+The color configuration is now also handled by the Command Class and not the application.
+The configuration is available using the `Z-Wave Command Class Configurator`. The array of
+all colors supported by the application is no longer needed since it is created by the Command Class
 based on the configuration.
 
 The functionality that each color component had in its callback function has been removed. Now
@@ -638,20 +694,20 @@ function defined in the command class `cc_color_switch_refresh_cb`.
 
 ### CC Door Lock
 
-The Door Lock Command Class has been refactored so that all logic related to the Command Class is handled 
-internally by it. The Command Class had five extern functions that had to be implemented by the application. 
-`CC_DoorLock_OperationSet_handler`, `CC_DoorLock_OperationGet_handler`, `CC_DoorLock_ConfigurationSet_handler`, `CC_DoorLock_ConfigurationGet_handler` and 
-`CC_DoorLock_CapabilitiesGet_handler`. These functions are now implemented inside the command class 
+The Door Lock Command Class has been refactored so that all logic related to the Command Class is handled
+internally by it. The Command Class had five extern functions that had to be implemented by the application.
+`CC_DoorLock_OperationSet_handler`, `CC_DoorLock_OperationGet_handler`, `CC_DoorLock_ConfigurationSet_handler`, `CC_DoorLock_ConfigurationGet_handler` and
+`CC_DoorLock_CapabilitiesGet_handler`. These functions are now implemented inside the command class
 and six new functions were created:
 
 - `CC_DoorLock_Toggle` to toggle the door lock mode.
-- `cc_door_lock_latch_status_handler` to be called when the latch status changes (HW specific function). 
+- `cc_door_lock_latch_status_handler` to be called when the latch status changes (HW specific function).
 - `cc_door_lock_bolt_status_handler` to be called when the bolt status changes (HW specific function).
 - `CC_DoorLock_update` to set door conditions (LED) from door handle mode and state.
 - `CC_DoorLock_SetOutsideDoorHandleState` to set the Outside Door Handle State for a specific handle.
 - `CC_DoorLock_ClearOutsideDoorHandleState` to clear the Outside Door Handle State for a specific handle.
 
-The configuration is now also handled by the Command Class and not the application. The configuration is available 
+The configuration is now also handled by the Command Class and not the application. The configuration is available
 using the `Z-Wave Command Class Configurator`.
 
 All type redefinitions and function redefinitions kept for backwards compatibility were removed.
@@ -659,7 +715,7 @@ All type redefinitions and function redefinitions kept for backwards compatibili
 The Door Lock data is now owned by the Command Class and not the application. In our sample
 application the data was stored in `FILE_ID_APPLICATIONDATA` and code to migrate this information
 from the application into the command class was added with this assumption. If an application is storing
-this information in another file ID, the define `DOOR_LOCK_DATA_LEGACY_FILE_ID` in `cc_door_lock_nvm.c` 
+this information in another file ID, the define `DOOR_LOCK_DATA_LEGACY_FILE_ID` in `cc_door_lock_nvm.c`
 needs to be changed to match this other file ID
 
 ### CC Firmware Update Metadata
@@ -704,18 +760,18 @@ recommends. If anything else is desired, CC_ManufacturerSpecific.c can be altere
 
 ### CC Multilevel Sensor
 
-The sensor configuration is now also handled by the Command Class and not the application. 
+The sensor configuration is now also handled by the Command Class and not the application.
 The configuration is available using the `Z-Wave Command Class Configurator`.
 The `sensor_interface_t` and `cc_configuration_t` in the application are no longer needed.
 
-In `sensor_interface_t` three callbacks are now weak functions in the Command Class:  
-`cc_multilevel_sensor_{{sensor_instance}}_interface_init`, `cc_multilevel_sensor_{{sensor_instance}}_interface_deinit` 
-and `cc_multilevel_sensor_{{sensor_instance}}_interface_read_value`. The functions' behavior and parameters 
+In `sensor_interface_t` three callbacks are now weak functions in the Command Class:
+`cc_multilevel_sensor_{{sensor_instance}}_interface_init`, `cc_multilevel_sensor_{{sensor_instance}}_interface_deinit`
+and `cc_multilevel_sensor_{{sensor_instance}}_interface_read_value`. The functions' behavior and parameters
 were not changed so renaming them should be enough.
 
-In the `cc_configuration_init` function one of the parameters was the `cc_configuration_io_interface_t`, 
-which defined two callback functions for reading and writing. These functions are now two weak functions 
-defined inside the Command Class: `cc_configuration_io_write` and `cc_configuration_io_read`. 
+In the `cc_configuration_init` function one of the parameters was the `cc_configuration_io_interface_t`,
+which defined two callback functions for reading and writing. These functions are now two weak functions
+defined inside the Command Class: `cc_configuration_io_write` and `cc_configuration_io_read`.
 The functions' behavior and parameters were not changed so renaming them should be enough.
 
 ### CC Multilevel Switch
@@ -723,9 +779,9 @@ The functions' behavior and parameters were not changed so renaming them should 
 The Command Class Multilevel Switch was refactored to no longer require initialization on the application
 level. The initialization is now handled internally by ZAF on `ZAF_Init`.
 
-The switch configuration is now also handled by the Command Class and not the application. 
-The configuration is available using the `Z-Wave Command Class Configurator`. The array of 
-all switches supported by the application is no longer needed since it is created by the Command Class 
+The switch configuration is now also handled by the Command Class and not the application.
+The configuration is available using the `Z-Wave Command Class Configurator`. The array of
+all switches supported by the application is no longer needed since it is created by the Command Class
 based on the configuration.
 
 In the `cc_multilevel_switch_init` one of the parameters was a callback function. This function is now a weak
@@ -759,14 +815,14 @@ The `cc_supervision_get_received_handler(...)` and `cc_supervision_report_recive
 
 ### CC User Code
 
-The User Code Command Class has been refactored so that all logic related to the Command Class is handled 
-internally by it. The Command Class had four extern functions that had to be implemented by the application. 
-`CC_UserCode_Set_handler`, `CC_UserCode_getId_handler`, `CC_UserCode_Report_handler` and 
-`CC_UserCode_UsersNumberReport_handler`. These functions are now implemented inside the command class 
-and two new functions were created: 
+The User Code Command Class has been refactored so that all logic related to the Command Class is handled
+internally by it. The Command Class had four extern functions that had to be implemented by the application.
+`CC_UserCode_Set_handler`, `CC_UserCode_getId_handler`, `CC_UserCode_Report_handler` and
+`CC_UserCode_UsersNumberReport_handler`. These functions are now implemented inside the command class
+and two new functions were created:
 
-- `CC_UserCode_reset_data` to reset all the data persisted by the 
-command class. 
+- `CC_UserCode_reset_data` to reset all the data persisted by the
+command class.
 - `CC_UserCode_Validate` that contains all the validation logic.
 
 Two configuration parameters related to this Command Class that belonged in the application now belong in the Command Class: `CC_USER_CODE_MAX_IDS` (formerly known as `USER_ID_MAX`)

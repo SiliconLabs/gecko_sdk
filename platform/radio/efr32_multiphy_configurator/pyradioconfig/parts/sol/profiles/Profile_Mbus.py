@@ -16,4 +16,4 @@ class Profile_Mbus_Sol(Profile_Mbus_Ocelot):
 
     def mbus_profile_radio_common(self, model):
         super().mbus_profile_radio_common(model)
-        model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1
+        model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz

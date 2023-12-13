@@ -42,8 +42,6 @@ static void signal_handler(int sig)
 {
   (void)sig;
   run = false;
-  // Deinitialize the application.
-  app_deinit();
 }
 
 int main(int argc, char *argv[])
@@ -69,6 +67,9 @@ int main(int argc, char *argv[])
     // Application process.
     app_process_action();
   }
+
+  // Deinitialize the application.
+  app_deinit();
 
   return EXIT_SUCCESS;
 }

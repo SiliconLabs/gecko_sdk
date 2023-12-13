@@ -251,6 +251,9 @@ void sl_pwm_led_set_color(void *led_handler, uint16_t color)
   uint32_t level_increments = TIMER_TopGet(led->timer) / (led->resolution - 1);
   led->level = color;
 
+  // Ensure that the color level value does not exceed the timer's size.
+  EFM_ASSERT((led->level * level_increments) <= TIMER_MaxCount(led->timer));
+
   sl_pwm_led_stop(led);
   TIMER_CompareBufSet(led->timer, led->channel, led->level * level_increments);
   sl_pwm_led_start(led);

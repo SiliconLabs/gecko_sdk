@@ -1,7 +1,7 @@
 project_name: se_manager_hash
 package: platform
 quality: production
-label: Platform - SE Manager Hash
+label: Platform Security - SoC SE Manager Hash
 description: >
   This example project demonstrates the Hash API of SE Manager.
 category: Example|Platform

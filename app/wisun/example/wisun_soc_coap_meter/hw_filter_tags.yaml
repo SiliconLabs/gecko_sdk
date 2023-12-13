@@ -4,8 +4,8 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 719
-          ram: 135
+          flash: 728
+          ram: 137
       board:
         rf_bands:
           - 434|470|490|868|915

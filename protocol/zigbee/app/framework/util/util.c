@@ -36,7 +36,10 @@
 #endif
 //------------------------------------------------------------------------------
 // Forward Declarations
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+void initSuppressionTable(void);
+bool checkSuppression(void);
+#endif
 //------------------------------------------------------------------------------
 // Globals
 
@@ -101,6 +104,15 @@ static const uint8_t emberAfAnalogDiscreteThresholds[] = {
 
 uint8_t sli_zigbee_af_extended_pan_id[EXTENDED_PAN_ID_SIZE] = { 0, 0, 0, 0, 0, 0, 0, 0, };
 
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+#define MAX_SUPPRESSION_ENTRIES 5
+typedef struct {
+  uint16_t clusterId;
+  bool isClientCluster;
+  uint8_t commandId;
+} SuppressionTableEntry;
+static SuppressionTableEntry suppressionTable[MAX_SUPPRESSION_ENTRIES];
+#endif // #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
 //------------------------------------------------------------------------------
 
 // Device enabled/disabled functions
@@ -663,6 +675,16 @@ EmberStatus emberAfSendResponseWithCallback(EmberAfMessageSentFunction callback)
     emberAfDebugPrintln("ZCL Util: no response at user request");
     return EMBER_SUCCESS;
   }
+
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  // Check for cluster or command response suppression.
+  if (checkSuppression()) {
+    emberAfDebugPrintln("ZCL Util: response suppressed");
+    return EMBER_SUCCESS;
+  } else {
+    emberAfDebugPrintln("ZCL Util: response allowed");
+  }
+#endif // #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
 
   // Make sure we are respecting the request APS options
   // there are seemingly some calls to emberAfSendResponse
@@ -1270,3 +1292,124 @@ WEAK(EmberAfDifferenceType emberAfGetDiffCallback(EmberAfDifferenceType value1,
 {
   return 0;
 }
+
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+// Called from emberAfInit()
+void initSuppressionTable(void)
+{
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    // It should suffice just to initialize the cluster id.
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    entry->clusterId = 0xffff;
+  }
+}
+
+bool checkSuppression(void)
+{
+  bool isLocal = sli_zigbee_af_current_command->clusterSpecific;
+  uint8_t isClientCluster = sli_zigbee_af_current_command->direction;
+  uint16_t clusterId = sli_zigbee_af_current_command->apsFrame->clusterId;
+  uint8_t commandId = sli_zigbee_af_current_command->commandId;
+
+  emberAfDebugPrintln("incoming cmd: lcl %d cls %d dir %d cmd %d", isLocal, clusterId, isClientCluster, commandId);
+
+  return emberAfGetSuppressCluster(clusterId, isClientCluster)
+         || (emberAfGetSuppressCommand(clusterId, isClientCluster, commandId) && isLocal);
+}
+
+EmberAfStatus emberAfSetSuppressCluster(uint16_t clusterId, bool isClientCluster)
+{
+  // The command works as a toggle, so we first search for an existing entry to unset.
+  uint8_t freeEntry = 0xff;
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    if (clusterId == entry->clusterId
+        && isClientCluster == entry->isClientCluster
+        && 0xff == entry->commandId) {
+      entry->clusterId = 0xffff;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    } else if (entry->clusterId == 0xffff && freeEntry == 0xff) {
+      freeEntry = i;
+    }
+  }
+
+  // No match, so we need to add a new entry.
+  if (freeEntry != 0xff) {
+    SuppressionTableEntry *entry = &suppressionTable[freeEntry];
+    entry->clusterId = clusterId;
+    entry->isClientCluster = isClientCluster;
+    entry->commandId = 0xff;
+    return EMBER_ZCL_STATUS_SUCCESS;
+  }
+  return EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
+}
+
+bool emberAfGetSuppressCluster(uint16_t clusterId, bool isClientCluster)
+{
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    if (clusterId == entry->clusterId
+        && isClientCluster == entry->isClientCluster
+        && 0xff == entry->commandId) {
+      emberAfDebugPrintln("emberAfGetSuppressCluster match: isClient = %d, cluster = %2X", isClientCluster, clusterId);
+      return true;
+    }
+  }
+  return false;
+}
+
+EmberAfStatus emberAfSetSuppressCommand(uint16_t clusterId, bool isClientCluster, uint8_t commandId)
+{
+  // The command works as a toggle, so we first search for an existing entry to unset.
+  uint8_t freeEntry = 0xff;
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    if (clusterId == entry->clusterId
+        && isClientCluster == entry->isClientCluster
+        && commandId == entry->commandId) {
+      entry->clusterId = 0xffff;
+      entry->commandId = 0xff;
+      return EMBER_ZCL_STATUS_SUCCESS;
+    } else if (entry->clusterId == 0xffff && freeEntry == 0xff) {
+      freeEntry = i;
+    }
+  }
+
+  // No match, so we need to add a new entry.
+  if (freeEntry != 0xff) {
+    SuppressionTableEntry *entry = &suppressionTable[freeEntry];
+    entry->clusterId = clusterId;
+    entry->isClientCluster = isClientCluster;
+    entry->commandId = commandId;
+    return EMBER_ZCL_STATUS_SUCCESS;
+  }
+  return EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
+}
+
+bool emberAfGetSuppressCommand(uint16_t clusterId, bool isClientCluster, uint8_t commandId)
+{
+  emberAfDebugPrintln("emberAfGetSuppressCommand: isClient = %d, cluster = %2X", isClientCluster, clusterId);
+
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    if (clusterId == entry->clusterId
+        && isClientCluster == entry->isClientCluster
+        && commandId == entry->commandId) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void emberAfPrintSuppressionTable(void)
+{
+  emberAfAppPrintln("");
+  emberAfAppPrintln("clstr side cmd");
+  for (uint8_t i = 0; i < MAX_SUPPRESSION_ENTRIES; i++) {
+    SuppressionTableEntry *entry = &suppressionTable[i];
+    emberAfAppPrintln("%2X   %d   %X", entry->clusterId,
+                      entry->isClientCluster,
+                      entry->commandId);
+  }
+}
+#endif // #ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT

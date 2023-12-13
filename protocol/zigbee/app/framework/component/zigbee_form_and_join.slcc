@@ -1,15 +1,11 @@
 package: Zigbee
-description: This is the original Form and Join library (given as source code) that
-  provides a simple approach to form on an unused pan ID, or find any open network
-  that can be joined to.  This functionality can be paired with the network-find plugin.  However
-  both are superseded by the Network Steering component, which provides a more robust and
-  complete solution.
+description: This is the original Form and Join library (given as source code) that provides a simple approach to form on an unused pan ID, or find any open network that can be joined to.  This functionality can be paired with the network-find plugin.  However both are superseded by the Network Steering component, which provides a more robust and complete solution.
 id: zigbee_form_and_join
 label: Form and Join Library
 category: Zigbee|Network Form and Join
 quality: production
 provides:
-   - name: "zigbee_form_and_join"
+  - name: zigbee_form_and_join
 source:
   - path: protocol/zigbee/app/framework/plugin/form-and-join/form-and-join-afv2.c
   - path: protocol/zigbee/app/util/common/form-and-join.c
@@ -31,7 +27,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: sli_zigbee_af_form_and_join_init_callback  
+      function_name: sli_zigbee_af_form_and_join_init_callback
   - name: zigbee_stack_callback
     value:
       callback_type: mark_buffers

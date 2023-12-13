@@ -22,9 +22,6 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
-#ifdef SL_CATALOG_ZIGBEE_SECURE_EZSP_PRESENT
-#define EMBER_AF_PLUGIN_SECURE_EZSP
-#endif
 
 #include "stack/include/ember-types.h"
 #include "stack/include/error.h"
@@ -150,9 +147,6 @@ EzspStatus ezspGetEndpointFlags(uint8_t endpoint,
 // //----------------------------------------------------------------
 // // Special Handling for AES functions.
 
-// Secure EZSP plugin provides the implementation for these functions
-#if !defined(EMBER_AF_PLUGIN_SECURE_EZSP)
-
 // This is a copy of the function available on the SOC.  It would be a waste
 // to have this be an actual EZSP call.
 void emberAesMmoHashInit(EmberAesMmoHashContext *context)
@@ -223,8 +217,6 @@ EmberStatus emberAesHashSimple(uint8_t totalLength,
   MEMMOVE(result, context.result, 16);
   return status;
 }
-
-#endif // !EMBER_AF_PLUGIN_SECURE_EZSP
 
 //------------------------------------------------------------------------------
 // SOC function names that are available on the host in a different
@@ -559,36 +551,6 @@ static uint8_t responseReceived(void)
     if (HIGH_BYTE(responseFrameControl) & EZSP_EXTENDED_FRAME_CONTROL_RESERVED_MASK) {
       // reject if unsupported frame
       status = EZSP_ERROR_UNSUPPORTED_CONTROL;
-    } else if ((HIGH_BYTE(responseFrameControl) & EZSP_EXTENDED_FRAME_CONTROL_SECURITY_MASK)
-               == EZSP_EXTENDED_FRAME_CONTROL_SECURE) {
-      // if security bit is enabled in extended frame control byte,
-      // then decode the packet
-      if (sli_zigbee_secure_ezsp_is_on()) {
-        status = sli_zigbee_secure_ezsp_decode();
-        responseFrameId = sli_zigbee_ezsp_get_frame_id();;
-        if (responseFrameId == EZSP_INVALID_COMMAND) {
-          status = serialGetResponseByte(parametersIndex);
-        }
-      } else {
-        status = EZSP_ERROR_SECURITY_PARAMETERS_NOT_SET;
-      }
-    } else {
-      // if parameters pending, only allow certain commands
-      if (sli_zigbee_secure_ezsp_parameters_are_pending()
-          && responseFrameId != EZSP_SET_SECURITY_PARAMETERS
-          && responseFrameId != EZSP_SET_SECURITY_KEY
-          && responseFrameId != EZSP_RESET_TO_FACTORY_DEFAULTS
-          && responseFrameId != EZSP_GET_SECURITY_KEY_STATUS
-          && responseFrameId != EZSP_VERSION
-          && responseFrameId != EZSP_GET_VALUE) {
-        status = EZSP_ERROR_SECURITY_PARAMETERS_NOT_SET;
-      }
-
-      // reject if security established, unless it is reset command
-      if (sli_zigbee_secure_ezsp_is_on()
-          && responseFrameId != EZSP_RESET_TO_FACTORY_DEFAULTS) {
-        status = EZSP_ERROR_UNSECURE_FRAME;
-      }
     }
   } else {
     // use legacy ezsp frame format
@@ -660,14 +622,7 @@ static EzspStatus sendCommand(void)
   if (serialGetResponseByte(EZSP_FRAME_ID_INDEX) == EZSP_VERSION && (!initialEzspVersionSent)) {
     initialEzspVersionSent = true;
   } else {
-    if (sli_zigbee_secure_ezsp_is_on()
-        && sli_zigbee_ezsp_get_frame_id() != EZSP_RESET_TO_FACTORY_DEFAULTS) {
-      serialSetCommandByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX,
-                           (EZSP_EXTENDED_FRAME_CONTROL_SECURE | EZSP_EXTENDED_FRAME_FORMAT_VERSION));
-      sli_zigbee_secure_ezsp_encode();
-    } else {
-      serialSetCommandByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX, EZSP_EXTENDED_FRAME_FORMAT_VERSION);
-    }
+    serialSetCommandByte(EZSP_EXTENDED_FRAME_CONTROL_HB_INDEX, EZSP_EXTENDED_FRAME_FORMAT_VERSION);
   }
 
   uint16_t length = ezspWritePointer - ezspFrameContents;

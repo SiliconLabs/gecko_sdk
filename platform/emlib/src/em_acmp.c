@@ -529,9 +529,18 @@ void ACMP_ChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef negSel,
 
   /* Make sure that posSel and negSel channel selectors don't both
    * use odd or even pins. */
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  EFM_ASSERT(!((((posSel >= _ACMP_INPUTCTRL_POSSEL_EXTPA)
+                 && (posSel <= _ACMP_INPUTCTRL_POSSEL_EXTPD))
+                || (posSel >= _ACMP_INPUTCTRL_POSSEL_PA0))
+               && (negSel >= _ACMP_INPUTCTRL_NEGSEL_PA0)
+               && (posSel % 2 == negSel % 2)));
+#else
   EFM_ASSERT(!((posSel >= _ACMP_INPUTCTRL_POSSEL_PA0)
                && (negSel >= _ACMP_INPUTCTRL_NEGSEL_PA0)
                && (posSel % 2 == negSel % 2)));
+
+#endif
 #endif
 
 #if defined(_ACMP_INPUTCTRL_MASK)

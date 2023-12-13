@@ -5,15 +5,15 @@ label: ZLL Utility Server Cluster
 category: Zigbee|Zigbee Light Link
 quality: production
 provides:
-   - name: "zigbee_zll_utility_server"
+  - name: zigbee_zll_utility_server
 source:
-  - path: protocol/zigbee/app/framework/plugin/zll-utility-server/zll-utility-server.c  
+  - path: protocol/zigbee/app/framework/plugin/zll-utility-server/zll-utility-server.c
 template_contribution:
   - name: component_catalog
     value: zigbee_zll_utility_server
   - name: cluster_service
     value:
-       cluster_id: "0x1000"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"       
-       service_function: "emberAfZllCommissioningClusterServerCommandParse"
+      cluster_id: '0x1000'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfZllCommissioningClusterServerCommandParse

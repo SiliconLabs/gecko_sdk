@@ -11,3 +11,7 @@ ui_hints:
 
 provides:
   - name: "wisun_cli"
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_cli

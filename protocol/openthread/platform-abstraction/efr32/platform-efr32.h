@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ extern otInstance *sInstance;
 
 // Global reference to rail handle
 #ifndef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT
-#define gRailHandle emPhyRailHandle   // use gRailHandle in the OpenThread PAL.
+#define gRailHandle emPhyRailHandle // use gRailHandle in the OpenThread PAL.
 #endif
 
 extern RAIL_Handle_t gRailHandle; // coex needs the emPhyRailHandle symbol.
@@ -154,6 +154,12 @@ void efr32LogInit(void);
 void efr32LogDeinit(void);
 
 /**
+ * Print reset info.
+ *
+ */
+void efr32PrintResetInfo(void);
+
+/**
  * Set 802.15.4 CCA mode
  *
  * A call to this function should be made after RAIL has been
@@ -177,5 +183,7 @@ RAIL_Status_t efr32RadioSetCcaMode(uint8_t aMode);
  */
 
 bool efr32AllowSleepCallback(void);
+
+otError railStatusToOtError(RAIL_Status_t status);
 
 #endif // PLATFORM_EFR32_H_

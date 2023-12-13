@@ -18,7 +18,7 @@
 #include "DebugPrint.h"
 
 // Event distributor object
-static SEventDistributor g_EventDistributor;
+static SEventDistributor g_EventDistributor = { 0 };
 
 static void EventHandlerZwRx(void);
 static void EventHandlerZwCommandStatus(void);
@@ -37,7 +37,7 @@ static const EventDistributorEventHandler g_aEventHandlerTable[6] =
 static void EventHandlerZwRx(void)
 {
   SApplicationHandles* pAppHandles;
-  SZwaveReceivePackage RxPackage;
+  SZwaveReceivePackage RxPackage = { 0 };
 
   pAppHandles = ZAF_getAppHandle();
 
@@ -72,7 +72,7 @@ static void EventHandlerZwRx(void)
 static void EventHandlerZwCommandStatus(void)
 {
   SApplicationHandles* pAppHandles;
-  SZwaveCommandStatusPackage Status;
+  SZwaveCommandStatusPackage Status = { 0 };
 
   pAppHandles = ZAF_getAppHandle();
 
@@ -142,13 +142,11 @@ const SEventDistributor *zaf_event_distributor_get(void)
 }
 
 ZW_WEAK void
-zaf_event_distributor_app_zw_rx(SZwaveReceivePackage *RxPackage)
+zaf_event_distributor_app_zw_rx(__attribute__((unused)) SZwaveReceivePackage *RxPackage)
 {
-  UNUSED(RxPackage);
 }
 
 ZW_WEAK void
-zaf_event_distributor_app_zw_command_status(SZwaveCommandStatusPackage *Status)
+zaf_event_distributor_app_zw_command_status(__attribute__((unused)) SZwaveCommandStatusPackage *Status)
 {
-  UNUSED(Status);
 }

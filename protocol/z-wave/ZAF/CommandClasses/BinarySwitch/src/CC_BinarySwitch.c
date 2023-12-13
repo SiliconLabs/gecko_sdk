@@ -29,7 +29,7 @@
 static cc_binary_switch_t * mp_switches;
 static uint8_t m_switch_count;
 
-static void 
+static void
 CC_BinarySwitch_report_stx(zaf_tx_options_t *tx_options, void* p_switch);
 
 /****************************************************************************/
@@ -126,7 +126,7 @@ static void actuator_callback(s_Actuator * p_actuator)
        * Transmit Supervision Report, but ignore return value. The transmitter of Supervision Get
        * must retransmit if not receiving a Supervision Report.
        */
-      zaf_tx_options_t tx_options;
+      zaf_tx_options_t tx_options = { 0 };
       zaf_transport_rx_to_tx_options(&p_switch->rxOpt, &tx_options);
       CmdClassSupervisionReportSend(&tx_options,
                                     p_switch->rxOpt.sessionId, // This is last status update, no need to set anything.
@@ -215,7 +215,7 @@ static received_frame_status_t CC_BinarySwitch_handler(
 
       if (0 == input->frame->ZW_SwitchBinarySetV2Frame.duration || 0xFF == input->frame->ZW_SwitchBinarySetV2Frame.duration) {
         /*
-         * Disable Supervision status updates as the change will be instant with a duration of zero or 
+         * Disable Supervision status updates as the change will be instant with a duration of zero or
          * default duration of 0xFF.
          *
          * Setting the Supervision status update to zero will purposely disable the transmission
@@ -248,23 +248,24 @@ static received_frame_status_t CC_BinarySwitch_handler(
   return RECEIVED_FRAME_STATUS_SUCCESS;
 }
 
-static void 
+static void
 CC_BinarySwitch_report_stx(zaf_tx_options_t *tx_options, void* p_switch)
 {
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
   cc_binary_switch_t *p_switch_data = (cc_binary_switch_t *)p_switch;
 
-  txBuf.ZW_SwitchBinaryReportV2Frame.cmdClass     = COMMAND_CLASS_SWITCH_BINARY;
-  txBuf.ZW_SwitchBinaryReportV2Frame.cmd          = SWITCH_BINARY_REPORT;
-  txBuf.ZW_SwitchBinaryReportV2Frame.currentValue = p_switch_data->old_value;
   uint8_t target_value = ZAF_Actuator_GetTargetValue(&p_switch_data->actuator);
   // Encode target value in accordance with CC:0025.02.03.11.004.
   target_value = encode_value(target_value);
-  txBuf.ZW_SwitchBinaryReportV2Frame.targetValue  = target_value;
-  txBuf.ZW_SwitchBinaryReportV2Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator);
+  tx_options->use_supervision = true;
 
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_SwitchBinaryReportV2Frame.cmdClass     = COMMAND_CLASS_SWITCH_BINARY,
+    .ZW_SwitchBinaryReportV2Frame.cmd          = SWITCH_BINARY_REPORT,
+    .ZW_SwitchBinaryReportV2Frame.currentValue = p_switch_data->old_value,
+    .ZW_SwitchBinaryReportV2Frame.targetValue  = target_value,
+    .ZW_SwitchBinaryReportV2Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator)
+  };
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_SWITCH_BINARY_REPORT_V2_FRAME),
                           ZAF_TSE_TXCallback,
@@ -308,7 +309,7 @@ static inline void set_endpoint(cc_binary_switch_t * p_switch)
 
 static inline void clear_rxopts(cc_binary_switch_t * p_switch)
 {
-  memset((uint8_t *)&p_switch->rxOpt, 0, sizeof(RECEIVE_OPTIONS_TYPE_EX));
+  memset((uint8_t *)&p_switch->rxOpt, 0, sizeof(p_switch->rxOpt));
 }
 
 void cc_binary_switch_set(cc_binary_switch_t * p_switch, uint8_t value)
@@ -329,9 +330,8 @@ uint8_t cc_binary_switch_get_current_value(cc_binary_switch_t * p_switch)
   return ZAF_Actuator_GetCurrentValue(&p_switch->actuator);
 }
 
-ZW_WEAK void cc_binary_switch_handler(cc_binary_switch_t * p_switch)
+ZW_WEAK void cc_binary_switch_handler(__attribute__((unused)) cc_binary_switch_t * p_switch)
 {
-  UNUSED(p_switch);
 }
 
 /**************************************************************************************************
@@ -355,7 +355,7 @@ static void basic_set_mapper(ZW_APPLICATION_TX_BUFFER* pFrame)
 static void basic_get_mapper(uint8_t endpoint, uint8_t * p_current_value, uint8_t * p_target_value, uint8_t * p_duration)
 {
   cc_binary_switch_t * p_switch = find_switch_by_endpoint(endpoint);
-  
+
   if (NULL == p_switch) {
     return;
   }

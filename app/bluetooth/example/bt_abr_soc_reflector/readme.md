@@ -1,6 +1,6 @@
 # SoC - ABR reflector
 
-The Bluetooth SoC-ABR reflector is a project that you can use to test the Accurate Bluetooth Ranging feature. In the provided ABR setup, the reflector measures the phase of the received signal and sends this information back to the initiator. The initiator will calculate the disctance, the measured values are not available on the reflector side.
+The Bluetooth SoC-ABR reflector is a project that you can use to test the Accurate Bluetooth Ranging feature. In the provided ABR setup, the reflector measures the phase of the received signal and sends this information back to the initiator. The initiator will calculate the distance, the measured values are not available on the reflector side.
 
 ## Getting Started
 Bulid and flash the sample application.

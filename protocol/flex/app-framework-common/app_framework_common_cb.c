@@ -29,10 +29,8 @@
 
 #include "app_framework_common.h"
 
-#include "hal.h"
-
-WEAK(bool emberAfCommonOkToEnterLowPowerCallback(bool enter_em2,
-                                                 uint32_t duration_ms))
+SL_WEAK bool emberAfCommonOkToEnterLowPowerCallback(bool enter_em2,
+                                                    uint32_t duration_ms)
 {
   (void)enter_em2;
   (void)duration_ms;

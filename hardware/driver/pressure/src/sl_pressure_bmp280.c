@@ -150,6 +150,6 @@ static uint8_t pressure_sampling_period_to_register_value(float sampling_period,
     return 7UL;
   } else {
     // Use this formula to get register value that gives the sampling period.
-    return (uint8_t)round(log(sampling_period / 62.5f) / log(2)) + 1;
+    return (uint8_t)(round(log((double)(sampling_period / 62.5f)) / log(2) )) + 1;
   }
 }

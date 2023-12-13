@@ -17,7 +17,7 @@
 
 #include "sl_mvp_ml_depthwise_conv2d.h"
 #include "sl_math_mvp.h"
-#include "sl_mvp_util.h"
+#include "sl_nn_util.h"
 #include "sl_mvp_program_area.h"
 #include "sl_common.h"
 #include <cstdlib>
@@ -674,13 +674,13 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
                                        &status);
 
           // Set up filter array
-          const int nonparallel_filter_offset = sli_mvp_util_offset_nhwc(filter_height,
-                                                                         filter_width,
-                                                                         filter_depth,
-                                                                         0,
-                                                                         filter_y_start,
-                                                                         filter_x_start,
-                                                                         out_channel_start);
+          const int nonparallel_filter_offset = sli_nn_calc_offset_nhwc(filter_height,
+                                                                        filter_width,
+                                                                        filter_depth,
+                                                                        0,
+                                                                        filter_y_start,
+                                                                        filter_x_start,
+                                                                        out_channel_start);
           v_ptr = const_cast<int8_t*>(&filter[nonparallel_filter_offset]);
           sli_mvp_pb_config_array_full(p->p,
                                        SLI_MVP_ARRAY(2),
@@ -861,7 +861,9 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
 
           // Execute the program
           if (execute) {
-            sli_mvp_pb_execute_program(p);
+            if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+              return status;
+            }
           } else {
             mvp_prog_cnt++;
           }
@@ -871,11 +873,13 @@ sl_status_t sli_mvp_ml_depthwise_conv2d_s8_gen(const sli_mvp_ml_depthwise_conv2d
   } // out_x_range
 
   if (execute) {
-    sli_mvp_cmd_wait_for_completion();
-    sl_math_mvp_clamp_i8(params->output,
-                         batches * output_height * output_width * output_depth,
-                         params->output_activation_min,
-                         params->output_activation_max);
+    if ((status = sli_mvp_cmd_wait_for_completion()) != SL_STATUS_OK) {
+      return status;
+    }
+    status = sl_math_mvp_clamp_i8(params->output,
+                                  batches * output_height * output_width * output_depth,
+                                  params->output_activation_min,
+                                  params->output_activation_max);
   } else {
     int computations = filter_height * filter_width
                        * output_height * output_width * output_depth;

@@ -40,9 +40,23 @@
 #endif // SL_CATALOG_BTMESH_LPN_PRESENT
 
 #include "sli_btmesh_blob_transfer_server_instances.h"
-
 {% for inst in btmesh_blob_transfer_server_instance | sort -%}
 #include "sl_btmesh_blob_transfer_server_{{ inst | lower }}_config.h"
+{% endfor %}
+
+{% for inst in btmesh_blob_transfer_server_instance | sort -%}
+#define SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_STATIC         \
+        ((SL_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_TYPE_CFG_VAL) \
+        == (SL_BTMESH_BLOB_TRANSFER_SERVER_MEMORY_STATIC))
+{% endfor %}
+{% for inst in btmesh_blob_transfer_server_instance | sort -%}
+#define SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_SIZE  \
+        (1 << (SL_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_MAX_BLOCK_SIZE_LOG_CFG_VAL))
+{% endfor %}
+{% for inst in btmesh_blob_transfer_server_instance | sort -%}
+#if SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_STATIC
+static uint8_t blob_transfer_server_{{ inst | lower }}_block_buffer[SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_SIZE];
+#endif
 {% endfor %}
 {% for inst in btmesh_blob_transfer_server_instance | sort -%}
 #if SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_LPN_HIGH_THROUGHPUT_MODE_ACTIVE
@@ -55,6 +69,13 @@ const sli_btmesh_blob_transfer_server_config_t sli_btmesh_blob_transfer_server_{
   .high_throughput_timer = &blob_transfer_server_{{ inst | lower }}_high_throughput_timer,
   #else
   .high_throughput_timer = NULL,
+  #endif
+  #if SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_STATIC
+  .block_buffer = &blob_transfer_server_{{ inst | lower }}_block_buffer,
+  .block_buffer_size = SLI_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_BLOCK_BUFFER_SIZE,
+  #else
+  .block_buffer = NULL,
+  .block_buffer_size = 0,
   #endif
   .elem_index = SL_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_ELEM_INDEX,
   .max_chunks_per_block = SL_BTMESH_BLOB_TRANSFER_SERVER_{{ inst | upper }}_MAX_CHUNKS_PER_BLOCK_CFG_VAL,

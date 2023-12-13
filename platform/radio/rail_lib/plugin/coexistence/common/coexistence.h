@@ -22,6 +22,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_RAIL_UTIL_COEX_WIFI_SIMULATOR_PRESENT) && !defined(SL_CATALOG_RAIL_UTIL_COEX_EXT_WIFI_HAL_PRESENT)
+#include "rail_util_coex_wifi_simulator_config.h"
+#endif
 #ifdef TEST_COEX_HAL_CONFIG
   #include "coexistence-hal-config.h"
 #endif //TEST_COEX_HAL_CONFIG

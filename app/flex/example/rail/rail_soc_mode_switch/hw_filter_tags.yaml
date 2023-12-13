@@ -14,6 +14,6 @@ tag:
           - pti
         io:
           allow_shared: false
-          led: 2+
+          led: 1+
           button: 2+
   

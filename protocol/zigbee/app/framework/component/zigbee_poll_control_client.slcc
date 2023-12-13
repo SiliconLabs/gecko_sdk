@@ -1,19 +1,18 @@
 package: Zigbee
-description: Silicon Labs implementation of Poll Control client cluster.  The component
-  responds in kind to check-in commands from the paired Poll Control server.
+description: Silicon Labs implementation of Poll Control client cluster.  The component responds in kind to check-in commands from the paired Poll Control server.
 label: Poll Control Client Cluster
 quality: production
 id: zigbee_poll_control_client
 category: Zigbee|Cluster Library|Home Automation
 provides:
-   - name: "zigbee_poll_control_client"
+  - name: zigbee_poll_control_client
 config_file:
   - path: protocol/zigbee/app/framework/plugin/poll-control-client/config/poll-control-client-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/poll-control-client/poll-control-client.c
   - path: protocol/zigbee/app/framework/plugin/poll-control-client/poll-control-client-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/poll-control-client
     file_list:
@@ -23,10 +22,10 @@ template_contribution:
     value: zigbee_poll_control_client
   - name: cluster_service
     value:
-       cluster_id: "0x0020"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"
-       service_function: "emberAfPollControlClusterClientCommandParse"    
+      cluster_id: '0x0020'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfPollControlClusterClientCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -39,8 +38,8 @@ template_contribution:
       handler: mode
       help: Sets the fast polling mode.
       argument:
-      - type: int8
-        help: The fast polling mode
+        - type: int8
+          help: The fast polling mode
   - name: cli_command
     value:
       group: poll-control-client
@@ -48,8 +47,8 @@ template_contribution:
       handler: timeout
       help: Sets the fast polling timeout.
       argument:
-      - type: uint16
-        help: The fast polling timeout
+        - type: uint16
+          help: The fast polling timeout
   - name: cli_command
     value:
       group: poll-control-client
@@ -57,8 +56,8 @@ template_contribution:
       handler: respond
       help: Sets the response mode.
       argument:
-      - type: int8
-        help: The response mode
+        - type: int8
+          help: The response mode
   - name: cli_command
     value:
       group: poll-control-client

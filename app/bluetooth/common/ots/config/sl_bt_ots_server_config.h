@@ -30,6 +30,11 @@
 #ifndef SL_BT_OTS_SERVER_CONFIG_H
 #define SL_BT_OTS_SERVER_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup ots_server
+ * @{
+ **************************************************************************************************/
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> General settings
@@ -43,4 +48,5 @@
 
 // <<< end of configuration section >>>
 
+/** @} (end addtogroup ots_server) */
 #endif // SL_BT_OTS_SERVER_INSTANCE_CONFIG_H

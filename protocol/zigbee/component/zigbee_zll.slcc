@@ -3,7 +3,6 @@ label: Zigbee light link
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
 description: Provides the functionality to support Zigbee Light Link (ZLL) functionality on a device.
 
 provides:
@@ -14,10 +13,10 @@ requires:
   - name: zigbee_zll_implementation
   - name: zigbee_zll_library
     condition:
-     - zigbee_force_libraries
+      - zigbee_use_release_libraries
 
 recommends:
-  - id: zigbee_zll_source
+  - id: zigbee_zll_library_internal
 
 include:
   - path: protocol/zigbee/stack/include
@@ -62,26 +61,26 @@ template_contribution:
     value:
       callback_type: zll_touch_link_target
       function_name: sli_zigbee_af_zll_touch_link_target_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_address_assignment
       function_name: sli_zigbee_af_zll_address_assignment_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_scan_complete
       function_name: sli_zigbee_af_zll_scan_complete_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: zll_network_found
       function_name: sli_zigbee_af_zll_network_found_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
 
 
 

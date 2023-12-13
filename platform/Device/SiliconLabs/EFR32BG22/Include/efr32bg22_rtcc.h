@@ -419,4 +419,4 @@ typedef struct {
 /** @} End of group EFR32BG22_RTCC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_RTCC_H */
+#endif // EFR32BG22_RTCC_H

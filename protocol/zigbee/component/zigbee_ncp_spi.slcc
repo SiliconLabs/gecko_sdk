@@ -3,7 +3,6 @@ label: NCP SPI
 package: Zigbee
 category: Zigbee|NCP
 quality: production
-
 description: Provides the functionality for a network coprocessor (NCP) application to communicate with a host over SPI.
 
 provides:
@@ -19,11 +18,11 @@ requires:
   - name: zigbee_ncp_spi_implementation
   - name: zigbee_ncp_spi_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_ncp_framework
 
 recommends:
-  - id: zigbee_ncp_spi_source
+  - id: zigbee_ncp_spi_library_internal
 
 define:
   - name: EZSP_SPI

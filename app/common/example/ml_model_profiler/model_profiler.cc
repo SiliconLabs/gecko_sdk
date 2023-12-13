@@ -22,7 +22,7 @@
 #endif
 #if defined(SL_CATALOG_MVP_PRESENT)
 #include "sl_mvp.h"
-#include "sl_mvp_util.h"
+#include "sl_nn_util.h"
 #endif
 
 #include "sl_tflite_micro_model.h"
@@ -120,7 +120,7 @@ void print_matrix_3d_u8(int height, int width, int depth, const uint8_t *data)
     printf("//   Channel = %d,  Y = 0..%d,  X = 0..%d ->\n", ch, height - 1, width - 1);
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
-        int index = sli_mvp_util_offset_nhwc(height, width, depth, 0, x, y, ch);
+        int index = sli_nn_calc_offset_nhwc(height, width, depth, 0, x, y, ch);
         val = data[index];
         printf("0x%02X, ", val);
       }
@@ -133,7 +133,7 @@ void print_matrix_3d_u8(int height, int width, int depth, const uint8_t *data)
     printf("//   Y = %d,  X = 0..%d,  Channel = 0..%d ->\n", y, width - 1, depth - 1);
     for (int x = 0; x < width; x++) {
       for (int ch = 0; ch < depth; ch++) {
-        int index = sli_mvp_util_offset_nhwc(height, width, depth, 0, x, y, ch);
+        int index = sli_nn_calc_offset_nhwc(height, width, depth, 0, x, y, ch);
         val = data[index];
         printf("0x%02X, ", val);
       }
@@ -181,9 +181,8 @@ void harvest_output_matrix(int operation_index)
 // Subclass tflite::MicroProfiler to get Invoke() hooks from model layers.
 class SlProfiler : public tflite::MicroProfilerInterface {
 public:
-  SlProfiler() : total_cpu_cycles_(0), total_mvp_instructions_(0),
-    total_mvp_programs_(0), total_mvp_stall_cycles_(0),
-    operation_index_(0)
+  SlProfiler() : cpu_cycles(0), total_cpu_cycles_(0), total_mvp_instructions_(0),
+    total_mvp_programs_(0), total_mvp_stall_cycles_(0), operation_index_(0)
   {
   }
 
@@ -298,7 +297,7 @@ bool model_profiler_init(void)
   tflite::MicroOpResolver &resolver = sl_tflite_micro_opcode_resolver();
 
   // Figure out how much memory we need for the TensorArena.
-  if (!sl_tflite_micro_estimate_arena_size(model, resolver, &arena_size)) {
+  if (sl_tflite_micro_estimate_arena_size(model, resolver, &arena_size) != SL_STATUS_OK) {
     printf("Could not estimate arena size!");
     return false;
   }

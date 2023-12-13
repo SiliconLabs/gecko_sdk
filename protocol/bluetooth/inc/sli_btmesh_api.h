@@ -75,6 +75,7 @@ enum sli_btmesh_class_id
     sli_btmesh_solicitation_config_client_class_id = 0x69,
     sli_btmesh_on_demand_private_proxy_server_class_id = 0x6a,
     sli_btmesh_silabs_config_server_class_id = 0x6b,
+    sli_btmesh_diagnostic_class_id = 0x6c,
 };
 
 enum sli_btmesh_command_id
@@ -90,8 +91,6 @@ enum sli_btmesh_command_id
     sli_btmesh_node_init_oob_command_id = 0x05,
     sli_btmesh_node_set_ivrecovery_mode_command_id = 0x06,
     sli_btmesh_node_get_ivrecovery_mode_command_id = 0x07,
-    sli_btmesh_node_get_statistics_command_id = 0x09,
-    sli_btmesh_node_clear_statistics_command_id = 0x0a,
     sli_btmesh_node_set_net_relay_delay_command_id = 0x0b,
     sli_btmesh_node_get_net_relay_delay_command_id = 0x0c,
     sli_btmesh_node_get_ivupdate_state_command_id = 0x0d,
@@ -257,8 +256,6 @@ enum sli_btmesh_command_id
     sli_btmesh_test_get_local_heartbeat_subscription_command_id = 0x15,
     sli_btmesh_test_get_local_heartbeat_publication_command_id = 0x16,
     sli_btmesh_test_set_local_heartbeat_publication_command_id = 0x17,
-    sli_btmesh_test_set_local_config_command_id = 0x18,
-    sli_btmesh_test_get_local_config_command_id = 0x19,
     sli_btmesh_test_add_local_key_command_id = 0x1a,
     sli_btmesh_test_remove_local_key_command_id = 0x1b,
     sli_btmesh_test_update_local_key_command_id = 0x1c,
@@ -585,6 +582,13 @@ enum sli_btmesh_command_id
     sli_btmesh_silabs_config_server_get_model_enable_command_id = 0x05,
     sli_btmesh_silabs_config_server_set_network_pdu_command_id = 0x06,
     sli_btmesh_silabs_config_server_get_network_pdu_command_id = 0x07,
+    sli_btmesh_diagnostic_init_command_id = 0x00,
+    sli_btmesh_diagnostic_deinit_command_id = 0x01,
+    sli_btmesh_diagnostic_enable_relay_command_id = 0x02,
+    sli_btmesh_diagnostic_disable_relay_command_id = 0x03,
+    sli_btmesh_diagnostic_get_relay_command_id = 0x04,
+    sli_btmesh_diagnostic_get_statistics_command_id = 0x05,
+    sli_btmesh_diagnostic_clear_statistics_command_id = 0x06,
 };
 
 enum sli_btmesh_response_id
@@ -600,8 +604,6 @@ enum sli_btmesh_response_id
     sli_btmesh_node_init_oob_response_id = 0x05,
     sli_btmesh_node_set_ivrecovery_mode_response_id = 0x06,
     sli_btmesh_node_get_ivrecovery_mode_response_id = 0x07,
-    sli_btmesh_node_get_statistics_response_id = 0x09,
-    sli_btmesh_node_clear_statistics_response_id = 0x0a,
     sli_btmesh_node_set_net_relay_delay_response_id = 0x0b,
     sli_btmesh_node_get_net_relay_delay_response_id = 0x0c,
     sli_btmesh_node_get_ivupdate_state_response_id = 0x0d,
@@ -767,8 +769,6 @@ enum sli_btmesh_response_id
     sli_btmesh_test_get_local_heartbeat_subscription_response_id = 0x15,
     sli_btmesh_test_get_local_heartbeat_publication_response_id = 0x16,
     sli_btmesh_test_set_local_heartbeat_publication_response_id = 0x17,
-    sli_btmesh_test_set_local_config_response_id = 0x18,
-    sli_btmesh_test_get_local_config_response_id = 0x19,
     sli_btmesh_test_add_local_key_response_id = 0x1a,
     sli_btmesh_test_remove_local_key_response_id = 0x1b,
     sli_btmesh_test_update_local_key_response_id = 0x1c,
@@ -1095,6 +1095,13 @@ enum sli_btmesh_response_id
     sli_btmesh_silabs_config_server_get_model_enable_response_id = 0x05,
     sli_btmesh_silabs_config_server_set_network_pdu_response_id = 0x06,
     sli_btmesh_silabs_config_server_get_network_pdu_response_id = 0x07,
+    sli_btmesh_diagnostic_init_response_id = 0x00,
+    sli_btmesh_diagnostic_deinit_response_id = 0x01,
+    sli_btmesh_diagnostic_enable_relay_response_id = 0x02,
+    sli_btmesh_diagnostic_disable_relay_response_id = 0x03,
+    sli_btmesh_diagnostic_get_relay_response_id = 0x04,
+    sli_btmesh_diagnostic_get_statistics_response_id = 0x05,
+    sli_btmesh_diagnostic_clear_statistics_response_id = 0x06,
 };
 
 enum sli_btmesh_event_id
@@ -1342,6 +1349,7 @@ enum sli_btmesh_event_id
     sli_btmesh_silabs_config_server_tx_changed_event_id = 0x00,
     sli_btmesh_silabs_config_server_model_option_changed_event_id = 0x01,
     sli_btmesh_silabs_config_server_network_pdu_changed_event_id = 0x02,
+    sli_btmesh_diagnostic_relay_event_id = 0x00,
 };
 
 PACKSTRUCT( struct sl_bt_rsp_error_s
@@ -2517,25 +2525,6 @@ PACKSTRUCT( struct sl_btmesh_cmd_test_set_local_heartbeat_publication_s
 });
 
 typedef struct sl_btmesh_cmd_test_set_local_heartbeat_publication_s sl_btmesh_cmd_test_set_local_heartbeat_publication_t;
-
-
-PACKSTRUCT( struct sl_btmesh_cmd_test_set_local_config_s
-{
-    uint16_t id;
-    uint16_t netkey_index;
-    uint8array value;
-});
-
-typedef struct sl_btmesh_cmd_test_set_local_config_s sl_btmesh_cmd_test_set_local_config_t;
-
-
-PACKSTRUCT( struct sl_btmesh_cmd_test_get_local_config_s
-{
-    uint16_t id;
-    uint16_t netkey_index;
-});
-
-typedef struct sl_btmesh_cmd_test_get_local_config_s sl_btmesh_cmd_test_get_local_config_t;
 
 
 PACKSTRUCT( struct sl_btmesh_cmd_test_add_local_key_s
@@ -5542,23 +5531,6 @@ PACKSTRUCT( struct sl_btmesh_rsp_node_get_ivrecovery_mode_s
 typedef struct sl_btmesh_rsp_node_get_ivrecovery_mode_s sl_btmesh_rsp_node_get_ivrecovery_mode_t;
 
 
-PACKSTRUCT( struct sl_btmesh_rsp_node_get_statistics_s
-{
-    uint16_t result;
-    uint8array statistics;
-});
-
-typedef struct sl_btmesh_rsp_node_get_statistics_s sl_btmesh_rsp_node_get_statistics_t;
-
-
-PACKSTRUCT( struct sl_btmesh_rsp_node_clear_statistics_s
-{
-    uint16_t result;
-});
-
-typedef struct sl_btmesh_rsp_node_clear_statistics_s sl_btmesh_rsp_node_clear_statistics_t;
-
-
 PACKSTRUCT( struct sl_btmesh_rsp_node_set_net_relay_delay_s
 {
     uint16_t result;
@@ -6933,23 +6905,6 @@ PACKSTRUCT( struct sl_btmesh_rsp_test_set_local_heartbeat_publication_s
 });
 
 typedef struct sl_btmesh_rsp_test_set_local_heartbeat_publication_s sl_btmesh_rsp_test_set_local_heartbeat_publication_t;
-
-
-PACKSTRUCT( struct sl_btmesh_rsp_test_set_local_config_s
-{
-    uint16_t result;
-});
-
-typedef struct sl_btmesh_rsp_test_set_local_config_s sl_btmesh_rsp_test_set_local_config_t;
-
-
-PACKSTRUCT( struct sl_btmesh_rsp_test_get_local_config_s
-{
-    uint16_t result;
-    uint8array data;
-});
-
-typedef struct sl_btmesh_rsp_test_get_local_config_s sl_btmesh_rsp_test_get_local_config_t;
 
 
 PACKSTRUCT( struct sl_btmesh_rsp_test_add_local_key_s
@@ -9742,6 +9697,64 @@ PACKSTRUCT( struct sl_btmesh_rsp_silabs_config_server_get_network_pdu_s
 typedef struct sl_btmesh_rsp_silabs_config_server_get_network_pdu_s sl_btmesh_rsp_silabs_config_server_get_network_pdu_t;
 
 
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_init_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_init_s sl_btmesh_rsp_diagnostic_init_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_deinit_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_deinit_s sl_btmesh_rsp_diagnostic_deinit_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_enable_relay_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_enable_relay_s sl_btmesh_rsp_diagnostic_enable_relay_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_disable_relay_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_disable_relay_s sl_btmesh_rsp_diagnostic_disable_relay_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_get_relay_s
+{
+    uint16_t result;
+    uint32_t relay_counter;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_get_relay_s sl_btmesh_rsp_diagnostic_get_relay_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_get_statistics_s
+{
+    uint16_t result;
+    uint8array statistics;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_get_statistics_s sl_btmesh_rsp_diagnostic_get_statistics_t;
+
+
+PACKSTRUCT( struct sl_btmesh_rsp_diagnostic_clear_statistics_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_diagnostic_clear_statistics_s sl_btmesh_rsp_diagnostic_clear_statistics_t;
+
+
 
 PACKSTRUCT( struct sl_btmesh_packet {
   uint32_t   header;
@@ -9863,8 +9876,6 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_test_get_local_model_pub_t                     cmd_test_get_local_model_pub;
     sl_btmesh_cmd_test_set_local_heartbeat_subscription_t        cmd_test_set_local_heartbeat_subscription;
     sl_btmesh_cmd_test_set_local_heartbeat_publication_t         cmd_test_set_local_heartbeat_publication;
-    sl_btmesh_cmd_test_set_local_config_t                        cmd_test_set_local_config;
-    sl_btmesh_cmd_test_get_local_config_t                        cmd_test_get_local_config;
     sl_btmesh_cmd_test_add_local_key_t                           cmd_test_add_local_key;
     sl_btmesh_cmd_test_remove_local_key_t                        cmd_test_remove_local_key;
     sl_btmesh_cmd_test_update_local_key_t                        cmd_test_update_local_key;
@@ -10161,8 +10172,6 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_node_init_oob_t                                rsp_node_init_oob;
     sl_btmesh_rsp_node_set_ivrecovery_mode_t                     rsp_node_set_ivrecovery_mode;
     sl_btmesh_rsp_node_get_ivrecovery_mode_t                     rsp_node_get_ivrecovery_mode;
-    sl_btmesh_rsp_node_get_statistics_t                          rsp_node_get_statistics;
-    sl_btmesh_rsp_node_clear_statistics_t                        rsp_node_clear_statistics;
     sl_btmesh_rsp_node_set_net_relay_delay_t                     rsp_node_set_net_relay_delay;
     sl_btmesh_rsp_node_get_net_relay_delay_t                     rsp_node_get_net_relay_delay;
     sl_btmesh_rsp_node_get_ivupdate_state_t                      rsp_node_get_ivupdate_state;
@@ -10328,8 +10337,6 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_test_get_local_heartbeat_subscription_t        rsp_test_get_local_heartbeat_subscription;
     sl_btmesh_rsp_test_get_local_heartbeat_publication_t         rsp_test_get_local_heartbeat_publication;
     sl_btmesh_rsp_test_set_local_heartbeat_publication_t         rsp_test_set_local_heartbeat_publication;
-    sl_btmesh_rsp_test_set_local_config_t                        rsp_test_set_local_config;
-    sl_btmesh_rsp_test_get_local_config_t                        rsp_test_get_local_config;
     sl_btmesh_rsp_test_add_local_key_t                           rsp_test_add_local_key;
     sl_btmesh_rsp_test_remove_local_key_t                        rsp_test_remove_local_key;
     sl_btmesh_rsp_test_update_local_key_t                        rsp_test_update_local_key;
@@ -10656,6 +10663,13 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_silabs_config_server_get_model_enable_t        rsp_silabs_config_server_get_model_enable;
     sl_btmesh_rsp_silabs_config_server_set_network_pdu_t         rsp_silabs_config_server_set_network_pdu;
     sl_btmesh_rsp_silabs_config_server_get_network_pdu_t         rsp_silabs_config_server_get_network_pdu;
+    sl_btmesh_rsp_diagnostic_init_t                              rsp_diagnostic_init;
+    sl_btmesh_rsp_diagnostic_deinit_t                            rsp_diagnostic_deinit;
+    sl_btmesh_rsp_diagnostic_enable_relay_t                      rsp_diagnostic_enable_relay;
+    sl_btmesh_rsp_diagnostic_disable_relay_t                     rsp_diagnostic_disable_relay;
+    sl_btmesh_rsp_diagnostic_get_relay_t                         rsp_diagnostic_get_relay;
+    sl_btmesh_rsp_diagnostic_get_statistics_t                    rsp_diagnostic_get_statistics;
+    sl_btmesh_rsp_diagnostic_clear_statistics_t                  rsp_diagnostic_clear_statistics;
     sl_btmesh_evt_node_initialized_t                             evt_node_initialized;
     sl_btmesh_evt_node_provisioned_t                             evt_node_provisioned;
     sl_btmesh_evt_node_config_get_t                              evt_node_config_get;
@@ -10895,6 +10909,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_evt_silabs_config_server_tx_changed_t              evt_silabs_config_server_tx_changed;
     sl_btmesh_evt_silabs_config_server_model_option_changed_t    evt_silabs_config_server_model_option_changed;
     sl_btmesh_evt_silabs_config_server_network_pdu_changed_t     evt_silabs_config_server_network_pdu_changed;
+    sl_btmesh_evt_diagnostic_relay_t                             evt_diagnostic_relay;
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;
 });

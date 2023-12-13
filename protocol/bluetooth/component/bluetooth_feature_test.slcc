@@ -13,3 +13,6 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_test
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-test

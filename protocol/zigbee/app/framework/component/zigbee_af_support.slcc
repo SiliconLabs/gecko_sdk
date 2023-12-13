@@ -1,14 +1,14 @@
-package: "Zigbee"
-id: "zigbee_af_support"
-label: "Application Framework Support Component"
+package: Zigbee
+id: zigbee_af_support
+label: Application Framework Support Component
 category: Zigbee|Green Power
-quality: "production"
-description: "This component provides AF implementation which can be used on NCP applications"
+quality: production
+description: This component provides AF implementation which can be used on NCP applications
 provides:
-  - name: "zigbee_af_support"
+  - name: zigbee_af_support
 
 requires:
-  - name: "zigbee_green_power_adapter"
+  - name: zigbee_green_power_adapter
     condition:
       - zigbee_ncp
 
@@ -57,7 +57,7 @@ template_file:
   - path: protocol/zigbee/app/framework/util/template/zigbee_zcl_callback_dispatcher.c.jinja
   - path: protocol/zigbee/app/framework/util/template/zigbee_af_cluster_functions.h.jinja
   - path: protocol/zigbee/app/framework/util/template/zigbee_af_token_headers.h.jinja
-  
+
 template_contribution:
   - name: component_catalog
     value: zigbee_af_support

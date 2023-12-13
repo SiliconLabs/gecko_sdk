@@ -28,9 +28,6 @@
  *
  ******************************************************************************/
 
-// -------------------------------------
-// Includes
-
 #include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
@@ -41,8 +38,16 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/platform.h"
 
-// -------------------------------------
-// Implementation
+#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  #include "mbedtls/sha512.h"
+#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
+  #include "mbedtls/sha256.h"
+#else
+  #error "NV seed entropy requested, but no entropy accumulator available"
+#endif
+
+// -----------------------------------------------------------------------------
+// Defines
 
 #ifndef SLI_NV_SEED_NVM3_ID
 /** This NVM3 ID has been specifically allocated for the purpose of storing a
@@ -51,7 +56,13 @@
 #define SLI_NV_SEED_NVM3_ID  (0x870FFUL)
 #endif
 
+// -----------------------------------------------------------------------------
+// Static variables
+
 static int sli_nv_seed_has_been_opened = 0;
+
+// -----------------------------------------------------------------------------
+// Static functions
 
 static int sli_nv_seed_init(void)
 {
@@ -71,7 +82,7 @@ static int sli_nv_seed_init(void)
 static int sli_nv_seed_generate(uint8_t *buffer, size_t requested_length)
 {
   int ret;
-#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
   uint8_t hash_buffer[64];
   mbedtls_sha512_context ctx;
   mbedtls_sha512_init(&ctx);
@@ -94,7 +105,7 @@ static int sli_nv_seed_generate(uint8_t *buffer, size_t requested_length)
   if (ret != 0) {
     goto exit;
   }
-#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
+  #else
   uint8_t hash_buffer[32];
   mbedtls_sha256_context ctx;
   mbedtls_sha256_init(&ctx);
@@ -117,25 +128,26 @@ static int sli_nv_seed_generate(uint8_t *buffer, size_t requested_length)
   if (ret != 0) {
     goto exit;
   }
-#else
-#error "NV seed entropy requested, but no entropy accumulator available"
-#endif
+  #endif
   if (sizeof(hash_buffer) < requested_length) {
     ret = MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
   }
 
   exit:
-#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
   mbedtls_sha512_free(&ctx);
-#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
+  #else
   mbedtls_sha256_free(&ctx);
-#endif
+  #endif
 
   if (ret == 0) {
     memcpy(buffer, hash_buffer, requested_length);
   }
   return ret;
 }
+
+// -----------------------------------------------------------------------------
+// Public functions
 
 /**
  * This function implements the signature expected by the mbed TLS entropy

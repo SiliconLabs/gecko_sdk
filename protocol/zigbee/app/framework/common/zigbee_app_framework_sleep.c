@@ -29,6 +29,12 @@
 #include "sl_power_manager.h"
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "af.h"
+#else // !SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
+#ifdef EMBER_AF_NCP
+#include "app/util/ezsp/ezsp-protocol.h"
+#include "serial-interface.h"
+#endif // EMBER_AF_NCP
+#include "stack/core/ember-multi-network.h"
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 #include "em_common.h"
 
@@ -76,6 +82,20 @@ static sl_sleeptimer_timer_handle_t wakeup_timer_id;
 #include "force-sleep-wakeup.h"
 #endif // SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 
+#if !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
+static uint32_t next_sleep_ms = 0;
+
+uint32_t get_next_sleep_tick_ms()
+{
+  return next_sleep_ms;
+}
+
+void set_next_sleep_tick_ms(uint32_t ms_to_next_event)
+{
+  next_sleep_ms = ms_to_next_event;
+}
+#endif // !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
+
 void sli_zigbee_app_framework_sleep_init(void)
 {
   // This next line is a workaround for RAIL_LIB-6303 and can go away once that
@@ -110,7 +130,11 @@ bool sli_zigbee_app_framework_is_ok_to_sleep(void)
   }
   #endif //#ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 
+#if !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
+  duration_ms = get_next_sleep_tick_ms();
+#else
   duration_ms = sli_zigbee_app_framework_set_pm_requirements_and_get_ms_to_next_wakeup();
+#endif // !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
   // Limit the value of sleep duration to what the sleep timer allows
   uint32_t max_millisecond_allowed_by_sleeptimer = sl_sleeptimer_get_max_ms32_conversion();
   duration_ms = SL_MIN(duration_ms, max_millisecond_allowed_by_sleeptimer);
@@ -317,6 +341,101 @@ WEAK(bool emberAfPluginIdleSleepOkToSleepCallback(uint32_t durationMs))
 {
   return true;
 }
+
+#if !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
+extern uint8_t sleepMode;
+extern void halNcpClearWakeFlag(void);
+extern void halHostSerialPowerdown(void);
+extern void halHostSerialPowerup(void);
+
+void sleep_tick(uint32_t *ms_to_next_event, bool *enter_em2)
+{
+  uint32_t ms_to_next_stack_event;
+  uint32_t ms_to_next_app_event;
+  uint16_t stack_tasks;
+  *ms_to_next_event = 0;
+  *enter_em2 = false;
+
+  // If sleepMode is reserved value 0x03, don't idle or sleep. Useful for debug.
+  // Don't sleep or idle if:
+  //    * ASH or SPI is busy.
+  //    * There are messages waiting to be sent.
+  //    * Incomming messages are being processed.
+  //    * The node is a sleepy device and the radio is on.
+  stack_tasks = emberCurrentStackTasks();
+  if ((sleepMode == EZSP_FRAME_CONTROL_RESERVED_SLEEP)
+      || !serialOkToSleep()
+      || (stack_tasks & (EMBER_OUTGOING_MESSAGES | EMBER_INCOMING_MESSAGES))
+      || ((sli_zigbee_node_type == EMBER_SLEEPY_END_DEVICE) & (stack_tasks & EMBER_RADIO_IS_ON))) {
+    return;
+  }
+
+  // Sleep or idle until it is time for the next event.
+  ms_to_next_stack_event = emberMsToNextStackEvent();
+  ms_to_next_app_event = sli_zigbee_ms_to_next_app_framework_event();
+  *ms_to_next_event = SL_MIN(ms_to_next_stack_event, ms_to_next_app_event);
+
+  if (sleepMode == EZSP_FRAME_CONTROL_POWER_DOWN \
+      && serialOkToSleep()
+      && !(stack_tasks & EMBER_OUTGOING_MESSAGES)) {
+    // Sleep until an external interrupt wakes us up
+    *ms_to_next_event = MAX_INT32U_VALUE;
+  }
+
+  if ((sleepMode == EZSP_FRAME_CONTROL_DEEP_SLEEP)
+      || (sleepMode == EZSP_FRAME_CONTROL_POWER_DOWN)) {
+    if (em1_requirement_set) {
+      // Allow the system to enter em2
+      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+      em1_requirement_set = false;
+    }
+    *enter_em2 = true;
+  } else {
+    // The NCP always idles its processor whenever possible
+    if (!em1_requirement_set) {
+      // Prevent the system from entering em2
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+      em1_requirement_set = true;
+    }
+  }
+
+  return;
+}
+
+void sl_zigbee_app_framework_sleep_tick()
+{
+  uint32_t ms_to_next_event = 0;
+  bool enter_em2 = false;
+  INTERRUPTS_OFF();
+  // get next event ms and whether NCP can go into EM2
+  sleep_tick(&ms_to_next_event, &enter_em2);
+  set_next_sleep_tick_ms(ms_to_next_event);
+  if (enter_em2) {
+    emberStackPowerDown();
+    serialPowerDown();
+  }
+  // enter sleep with PRIMASK set and BASEPRI cleared
+  CORE_CriticalDisableIrq();
+  INTERRUPTS_ON();
+  // go to sleep
+  sl_power_manager_sleep();
+  CORE_CriticalEnableIrq();
+  // if we are going back from EM2
+  if (enter_em2) {
+    emberStackPowerUp();
+    serialPowerUp();
+    if (serialHostIsActive()) {
+      // If the Host woke us up, we switch back to idle until the next command
+      // arrives with new sleep mode instructions.
+      sleepMode = EZSP_FRAME_CONTROL_IDLE;
+
+      // If we had a Wake transaction pending, we're done with it now, so clear
+      // the state flag. (We had to wait until the wakeup process completed to do this.)
+      halNcpClearWakeFlag();
+    }
+  }
+}
+#endif // !defined(SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT) && defined(EZSP_SPI)
 
 #else //!SL_CATALOG_POWER_MANAGER_PRESENT - NO POWER MANAGER -
 

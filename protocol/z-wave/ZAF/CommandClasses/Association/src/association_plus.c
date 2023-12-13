@@ -91,7 +91,7 @@ ASSOCIATION_NODE_LIST;
 
 /* Default values */
 
-static ASSOCIATION_GROUP groups[ZAF_CONFIG_NUMBER_OF_END_POINTS + 1][CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT];
+static ASSOCIATION_GROUP groups[ZAF_CONFIG_NUMBER_OF_END_POINTS + 1][CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT] = { 0 };
 
 uint8_t numberOfGroupMappingEntries = 0;
 
@@ -146,7 +146,14 @@ static inline bool HasEndpoint(destination_info_t * pNode)
  */
 static inline destination_info_t * GetNode(uint8_t endpoint, uint8_t groupID, uint8_t index)
 {
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
   return &groups[endpoint][groupID - 1].subGrp[index];
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 /**
@@ -396,7 +403,7 @@ AssociationAddNode(
   uint8_t maxNodesInGroup = get_max_nodes_in_group(groupID, endpoint);
 
   destination_info_t * pCurrentNode;
-  destination_info_t newNode;
+  destination_info_t newNode = { 0 };
   newNode.node.nodeId = pNodeToAdd->nodeId;
   newNode.node.endpoint = pNodeToAdd->endpoint;
   newNode.node.BitAddress = pNodeToAdd->BitAddress;
@@ -480,7 +487,7 @@ AssociationRemove(
 {
   uint8_t j;
   uint8_t * pCmdByteWise = (uint8_t *)pCmd;
-  ASSOCIATION_NODE_LIST list;
+  ASSOCIATION_NODE_LIST list = { 0 };
   uint8_t maxNumberOfGroups;
 
   /*Only setup lifeline for rootdevice*/
@@ -720,7 +727,7 @@ NVM_Action(NVM_ACTION action)
   zpal_status_t status = ZPAL_STATUS_FAIL;
   size_t   dataLen = 0;
   bool     forceClearMem = false;
-  SAssociationInfo associationInfo;  // This can become a large allocation on the stack
+  SAssociationInfo associationInfo = { 0 };  // This can become a large allocation on the stack
   SAssociationInfo* pSource = &associationInfo;
 
   switch(action)
@@ -742,9 +749,6 @@ NVM_Action(NVM_ACTION action)
        */
       if ((ZPAL_STATUS_OK != status) || (ZAF_FILE_SIZE_ASSOCIATIONINFO != dataLen) || (true == forceClearMem))
       {
-        //Write default Association Info file
-        memset(&associationInfo, 0 , sizeof(SAssociationInfo));
-
         generateAssociationAndWrite(action, &associationInfo);
       }
       else
@@ -758,7 +762,6 @@ NVM_Action(NVM_ACTION action)
     case NVM_ACTION_READ_DATA:
 
       ZAF_nvm_read(ZAF_FILE_ID_ASSOCIATIONINFO, &associationInfo, sizeof(SAssociationInfo));
-
 
       for(i = 0; i < CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT; i++)
       {
@@ -851,7 +854,7 @@ e_cmd_handler_return_code_t handleAssociationSet(
     uint8_t commandClass)
 {
   uint8_t i = 0;
-  ASSOCIATION_NODE_LIST list;
+  ASSOCIATION_NODE_LIST list = { 0 };
 
   const uint8_t group_count = CC_AGI_groupCount_handler(ep);
 
@@ -877,10 +880,11 @@ e_cmd_handler_return_code_t handleAssociationSet(
 
 
   for(i = 0; i < list.noOfNodes; i++) {
-    MULTICHAN_DEST_NODE_ID node;
-    node.nodeId = (node_id_t)(list.pNodeId[i]);
-    node.endpoint = 0;
-    node.BitAddress = 0;
+    MULTICHAN_DEST_NODE_ID node = {
+      .nodeId = (node_id_t)(list.pNodeId[i]),
+      .endpoint = 0,
+      .BitAddress = 0
+    };
 
     if (0 == node.nodeId) {
       allNodesAdded = false;
@@ -899,10 +903,11 @@ e_cmd_handler_return_code_t handleAssociationSet(
   bool multiChannelAssociation = (list.noOfMulchanNodes > 0) ? true : false;
 
   for(i = 0; i < list.noOfMulchanNodes; i++) {
-    MULTICHAN_DEST_NODE_ID node;
-    node.nodeId = (node_id_t)(list.pMulChanNodeId[i].nodeId);
-    node.endpoint = list.pMulChanNodeId[i].endpoint;
-    node.BitAddress = list.pMulChanNodeId[i].BitAddress;
+    MULTICHAN_DEST_NODE_ID node = {
+      .nodeId = (node_id_t)(list.pMulChanNodeId[i].nodeId),
+      .endpoint = list.pMulChanNodeId[i].endpoint,
+      .BitAddress = list.pMulChanNodeId[i].BitAddress
+    };
 
     if (0 == list.pMulChanNodeId[i].nodeId) {
       allNodesAdded = false;
@@ -1139,7 +1144,7 @@ void AssociationGetDestinationInit(destination_info_t * pFirstDestination)
  * It iterates through all nodes in the associatedDestinationArray as initialized from the association list.
  * The initialization was done in AssociationGetDestinationInit().
  */
-destination_info_t * AssociationGetNextSinglecastDestination()
+destination_info_t * AssociationGetNextSinglecastDestination(void)
 {
   destination_info_t * pNode = NULL;
 
@@ -1302,7 +1307,7 @@ TRANSMIT_OPTIONS_TYPE_EX * ReqNodeList(
 {
   NODE_LIST_STATUS status;
   uint8_t grpId = 0;
-  static TRANSMIT_OPTIONS_TYPE_EX txOptions;
+  static TRANSMIT_OPTIONS_TYPE_EX txOptions = { 0 };
   txOptions.txOptions = ZWAVE_PLUS_TX_OPTIONS;
   txOptions.sourceEndpoint = sourceEndpoint;
 
@@ -1354,3 +1359,4 @@ TRANSMIT_OPTIONS_TYPE_EX * ReqNodeList(
 
   return NULL;
 }
+

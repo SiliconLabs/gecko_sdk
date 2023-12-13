@@ -149,6 +149,11 @@
 #define ECC_RAM0_SYNDROMES_INIT (MPAHBRAM_CTRL_ECCWEN)
 #define ECC_RAM0_CORRECTION_EN  (MPAHBRAM_CTRL_ECCEN)
 
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+#define ECC_RAM1_SYNDROMES_INIT (MPAHBRAM_CTRL_ECCWEN)
+#define ECC_RAM1_CORRECTION_EN  (MPAHBRAM_CTRL_ECCEN)
+#endif
+
 #define ECC_IF_REG         (DMEM->IF)
 /* number of AHB ports is between 1 and 4 */
 #if defined(MPAHBRAM_IF_AHB3ERR1B)
@@ -168,6 +173,27 @@
 #endif /* #if defined(if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) */
 
 #define ECC_RAM_SIZE_MAX   (RAM_MEM_SIZE)
+
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+
+#define ECC_RAM0_MEM_BASE   (DMEM0_RAM0_RAM_MEM_BASE)
+#define ECC_RAM0_MEM_SIZE   (DMEM0_RAM0_RAM_MEM_SIZE)
+#define ECC_RAM1_MEM_BASE   (DMEM1_RAM0_RAM_MEM_BASE)
+#define ECC_RAM1_MEM_SIZE   (DMEM1_RAM0_RAM_MEM_SIZE)
+
+#define ECC_CTRL0_REG       (DMEM0->CTRL)
+#define ECC_CTRL1_REG       (DMEM1->CTRL)
+
+#define ECC_IFC0_REG        (DMEM0->IF_CLR)
+#define ECC_IFC1_REG        (DMEM1->IF_CLR)
+#define ECC_IFC_MASK        (_MPAHBRAM_IF_MASK)
+
+#define ECC_FAULT_CTRL0_REG (DMEM0->CTRL)
+#define ECC_FAULT_CTRL1_REG (DMEM1->CTRL)
+#define ECC_FAULT_EN        (MPAHBRAM_CTRL_ECCERRFAULTEN)
+
+#else
+
 #define ECC_RAM0_MEM_BASE  (SRAM_BASE)
 #define ECC_RAM0_MEM_SIZE  (SRAM_SIZE)
 
@@ -187,6 +213,8 @@
 #define ECC_FAULT_CTRL_REG (DMEM->CTRL)
 #define ECC_FAULT_EN       (MPAHBRAM_CTRL_ECCERRFAULTEN)
 #endif
+
+#endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
 
 #else
 
@@ -1540,8 +1568,21 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 {
   volatile uint32_t *ramptr = (volatile uint32_t *) eccBank->base;
   const uint32_t *endptr = (const uint32_t *) (eccBank->base + eccBank->size);
-  volatile uint32_t *ctrlreg = &ECC_CTRL_REG;
+  volatile uint32_t *ctrlreg;
   uint32_t enableEcc;
+
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  if (eccBank->base == ECC_RAM0_MEM_BASE) {
+    ctrlreg = &ECC_CTRL0_REG;
+  } else if (eccBank->base == ECC_RAM1_MEM_BASE) {
+    ctrlreg = &ECC_CTRL1_REG;
+  } else {
+    EFM_ASSERT(0);
+    return;
+  }
+#else
+  ctrlreg = &ECC_CTRL_REG;
+#endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
 
   EFM_ASSERT(ramptr < endptr);
 
@@ -1551,10 +1592,21 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
   /* MPAHBRAM ECC requires both ECCEN and ECCWEN to be set for the syndromes
      to be written in ECC */
   enableEcc = eccBank->correctionEnable;
-  /* Enable ECC syndrome write */
-  ECC_CTRL_REG |= eccBank->initSyndromeEnable;
 
+  /* Enable ECC syndrome write */
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  if (eccBank->base == ECC_RAM0_MEM_BASE) {
+    ECC_CTRL0_REG |= eccBank->initSyndromeEnable;
+    ECC_IFC0_REG = ECC_IFC_MASK;
+  } else if (eccBank->base == ECC_RAM1_MEM_BASE) {
+    ECC_CTRL1_REG |= eccBank->initSyndromeEnable;
+    ECC_IFC1_REG = ECC_IFC_MASK;
+  }
+#else
+  ECC_CTRL_REG |= eccBank->initSyndromeEnable;
   ECC_IFC_REG = ECC_IFC_MASK;
+#endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
+
 #endif
 
 #ifndef __GNUC__
@@ -1790,7 +1842,15 @@ static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
 
   /* Clear any ECC errors that may have been reported before or during
      initialization. */
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  if (eccBank->base == ECC_RAM0_MEM_BASE) {
+    ECC_IFC0_REG = ECC_IFC_MASK;
+  } else if (eccBank->base == ECC_RAM1_MEM_BASE) {
+    ECC_IFC1_REG = ECC_IFC_MASK;
+  }
+#else
   ECC_IFC_REG = ECC_IFC_MASK;
+#endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
 
 #if !defined(_MPAHBRAM_CTRL_MASK)
   /* Enable ECC decoder to detect and report ECC errors. */
@@ -1815,7 +1875,15 @@ static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
 static void mscEccBankDisable(const MSC_EccBank_Typedef *eccBank)
 {
   /* Disable ECC write (encoder) and checking (decoder). */
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  if (eccBank->base == ECC_RAM0_MEM_BASE) {
+    ECC_CTRL0_REG &= ~(eccBank->initSyndromeEnable | eccBank->correctionEnable);
+  } else if (eccBank->base == ECC_RAM1_MEM_BASE) {
+    ECC_CTRL1_REG &= ~(eccBank->initSyndromeEnable | eccBank->correctionEnable);
+  }
+#else
   ECC_CTRL_REG &= ~(eccBank->initSyndromeEnable | eccBank->correctionEnable);
+#endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
 }
 
 /***************************************************************************//**
@@ -1902,13 +1970,22 @@ void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig)
  ******************************************************************************/
 void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
 {
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
   uint32_t bitfieldMask = DMEM_NUM_PORTS - 1;
+#elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  uint32_t bitfieldMask = DMEM0_NUM_PORTS - 1;
+#endif
 
   /* make sure master is within the mask of port map that can be changed
    * make sure port is a sensible value
    */
   EFM_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
+
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
   EFM_ASSERT(port < DMEM_NUM_PORTS);
+#elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  EFM_ASSERT(port < DMEM0_NUM_PORTS);
+#endif
 
 #if defined(CMU_CLKEN0_SYSCFG)
   bool disableSyscfgClk = false;
@@ -1950,11 +2027,22 @@ void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
  ******************************************************************************/
 void MSC_PortSetPriority(MSC_PortPriority_TypeDef portPriority)
 {
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
   EFM_ASSERT(portPriority < ((DMEM_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
 
   BUS_RegMaskedWrite(&DMEM->CTRL,
                      _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
                      (uint32_t)portPriority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
+#elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  EFM_ASSERT(portPriority < ((DMEM0_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
+
+  BUS_RegMaskedWrite(&DMEM0->CTRL,
+                     _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
+                     (uint32_t)portPriority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
+  BUS_RegMaskedWrite(&DMEM1->CTRL,
+                     _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
+                     (uint32_t)portPriority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
+#endif
 }
 
 /***************************************************************************//**
@@ -1971,8 +2059,13 @@ MSC_PortPriority_TypeDef MSC_PortGetCurrentPriority(void)
 {
   uint32_t port = 0;
 
+#if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
   port = BUS_RegMaskedRead(&DMEM->CTRL,
                            _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK);
+#elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
+  port = BUS_RegMaskedRead(&DMEM0->CTRL,
+                           _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK);
+#endif
 
   return (MSC_PortPriority_TypeDef)(port >> _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
 }

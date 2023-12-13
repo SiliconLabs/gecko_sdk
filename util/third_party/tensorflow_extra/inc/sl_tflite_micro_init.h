@@ -35,6 +35,7 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/tflite_bridge/micro_error_reporter.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
+#include "sl_status.h"
 
 /***************************************************************************//**
  * @addtogroup tflite_micro_init TensorFlow Lite Micro Init
@@ -52,9 +53,10 @@
  * @param[out] estimated_size The estimated size of the arena, as output.
  *
  * @return
- *   True if the estimation was successful, false otherwise.
+ *   SL_STATUS_OK if the estimation was successful.
  ******************************************************************************/
-bool sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflite::MicroOpResolver &opcode_resolver, size_t* estimated_size);
+sl_status_t sl_tflite_micro_estimate_arena_size(const tflite::Model* model, const tflite::MicroOpResolver &opcode_resolver, size_t* estimated_size);
+
 /***************************************************************************//**
  * @brief Dynamically allocate a buffer that can be used for the tensor arena.
  * @param[in] arena_size The size of the arena to allocate.

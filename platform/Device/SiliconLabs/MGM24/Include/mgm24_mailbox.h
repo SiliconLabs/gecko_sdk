@@ -137,4 +137,4 @@ typedef struct {
 /** @} End of group MGM24_MAILBOX */
 /** @} End of group Parts */
 
-#endif /* MGM24_MAILBOX_H */
+#endif // MGM24_MAILBOX_H

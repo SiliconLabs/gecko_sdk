@@ -16,7 +16,7 @@ requires:
     condition: [device_series_0]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_CBC_PKCS7
+    value: PSA_WANT_ALG_CBC_PKCS7 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_CBC_PKCS7 1"
     condition: [mbedtls_cipher_cbc, mbedtls_cipher_padding_pkcs7]

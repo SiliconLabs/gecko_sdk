@@ -414,6 +414,8 @@ class Calc_Global_Sol(CALC_Global_ocelot):
 
         self._addModelRegister(model, 'FRC.SPARE.SPARE', int, ModelVariableFormat.HEX)
 
+        self._addModelRegister(model, 'SMCTRL.TXDONE.TXDONE', int, ModelVariableFormat.HEX)
+
 
         # ECO implementation of DEC1 bug fix
         self._addModelRegister(model, 'MODEM.SPARE.SPARE', int, ModelVariableFormat.HEX)

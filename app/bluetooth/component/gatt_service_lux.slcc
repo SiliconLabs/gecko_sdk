@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_lux
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_gatt_service_lux_config.h
   - path: gatt_service_lux.xml
@@ -34,3 +33,6 @@ template_contribution:
       function: sl_gatt_service_lux_on_event
   - name: component_catalog
     value: gatt_service_lux
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-lux

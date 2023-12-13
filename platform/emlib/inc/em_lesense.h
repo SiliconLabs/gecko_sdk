@@ -495,6 +495,41 @@ typedef enum {
 } LESENSE_ChCompMode_TypeDef;
 #endif
 
+/** Mode of Storing of Sensor Sample in Result Buffer. */
+#if defined(_SILICON_LABS_32B_SERIES_0)
+typedef enum {
+  /** Nothing will be stored in the result buffer. */
+  lesenseStoreSampleDisable = _LESENSE_CH_EVAL_STRSAMPLE_DEFAULT,
+
+  /** The sensor sample data will be stored in the result buffer. */
+  lesenseStoreSampleData = _LESENSE_CH_EVAL_STRSAMPLE_MASK >> _LESENSE_CH_EVAL_STRSAMPLE_SHIFT
+} LESENSE_StoreSample_TypeDef;
+#elif defined (_SILICON_LABS_32B_SERIES_1)
+typedef enum {
+  /** Nothing will be stored in the result buffer. */
+  lesenseStoreSampleDisable = _LESENSE_CH_EVAL_STRSAMPLE_DISABLE,
+
+  /** The sensor sample data will be stored in the result buffer. */
+  lesenseStoreSampleData = _LESENSE_CH_EVAL_STRSAMPLE_DATA,
+
+  /** The data source (i.e. the channel) will be stored alongside the sensor
+   *  sample data. */
+  lesenseStoreSampleDataSrc = _LESENSE_CH_EVAL_STRSAMPLE_DATASRC
+} LESENSE_StoreSample_TypeDef;
+#else
+typedef enum {
+  /** Nothing will be stored in the result buffer. */
+  lesenseStoreSampleDisable = _LESENSE_CH_EVALCFG_STRSAMPLE_DISABLE,
+
+  /** The sensor sample data will be stored in the result buffer. */
+  lesenseStoreSampleData = _LESENSE_CH_EVALCFG_STRSAMPLE_DATA,
+
+  /** The data source (i.e. the channel) will be stored alongside the sensor
+   *  sample data. */
+  lesenseStoreSampleDataSrc = _LESENSE_CH_EVALCFG_STRSAMPLE_DATASRC
+} LESENSE_StoreSample_TypeDef;
+#endif
+
 /** Sensor evaluation modes. */
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 #if defined(_LESENSE_CH_EVAL_MODE_MASK)
@@ -1004,7 +1039,7 @@ typedef struct {
 
   /** Set to store counter value in the RAM (accessible via RESDATA) and make
    *  the comparison result available in the SCANRES register. */
-  bool                          storeCntRes;
+  LESENSE_StoreSample_TypeDef   storeCntRes;
 
   /** Select clock used for the excitation timing. */
   LESENSE_ChClk_TypeDef         exClk;
@@ -1082,7 +1117,7 @@ typedef struct {
     false,                    /* Do not use alternate excitation pins for excitation. */                 \
     false,                    /* Disabled to shift results from this channel to decoder register.     */ \
     false,                    /* Disabled to invert scan result bit. */                                  \
-    false,                    /* Disabled to store counter value in result buffer. */                    \
+    lesenseStoreSampleDisable,/* Disabled to store counter value in result buffer. */                    \
     lesenseClkLF,             /* Use LF clock for excitation timing. */                                  \
     lesenseClkLF,             /* Use LF clock for sample timing. */                                      \
     0x00U,                    /* Excitation time is set to 0(+1) excitation clock cycles. */             \
@@ -1107,7 +1142,7 @@ typedef struct {
     false,                    /* Do not use alternate excitation pins for excitation. */                 \
     false,                    /* Disabled to shift results from this channel to decoder register.     */ \
     false,                    /* Disabled to invert scan result bit. */                                  \
-    false,                    /* Disabled to store counter value in result buffer. */                    \
+    lesenseStoreSampleDisable,/* Disabled to store counter value in result buffer. */                    \
     lesenseClkLF,             /* Use LF clock for excitation timing. */                                  \
     lesenseClkLF,             /* Use LF clock for sample timing. */                                      \
     0x00U,                    /* Excitation time is set to 0(+1) excitation clock cycles. */             \
@@ -1121,27 +1156,27 @@ typedef struct {
     lesenseEvalModeThreshold  /* Evaluation mode has been set to trigger interrupt on threshold. */      \
   }
 #else /* _SILICON_LABS_32B_SERIES_0 */
-#define LESENSE_CH_CONF_DEFAULT                                                                         \
-  {                                                                                                     \
-    false,                   /* Disable scan channel. */                                                \
-    false,                   /* Disable assigned pin on scan channel. */                                \
-    false,                   /* Disable interrupts on channel. */                                       \
-    lesenseChPinExDis,       /* Channel pin is disabled during excitation period. */                    \
-    lesenseChPinIdleDis,     /* Channel pin is disabled during idle period. */                          \
-    false,                   /* Do not use alternate excitation pins for excitation. */                 \
-    false,                   /* Disabled to shift results from this channel to decoder register.     */ \
-    false,                   /* Disabled to invert scan result bit. */                                  \
-    false,                   /* Disabled to store counter value in result buffer. */                    \
-    lesenseClkLF,            /* Use LF clock for excitation timing. */                                  \
-    lesenseClkLF,            /* Use LF clock for sample timing. */                                      \
-    0x00U,                   /* Excitation time is set to 0(+1) excitation clock cycles. */             \
-    0x00U,                   /* Sample delay is set to 0(+1) sample clock cycles. */                    \
-    0x00U,                   /* Measure delay is set to 0 excitation clock cycles.*/                    \
-    0x00U,                   /* ACMP threshold has been set to 0. */                                    \
-    lesenseSampleModeACMP,   /* ACMP output will be used in comparison. */                              \
-    lesenseSetIntNone,       /* No interrupt is generated by the channel. */                            \
-    0x00U,                   /* Counter threshold has bee set to 0x00. */                               \
-    lesenseCompModeLess      /* Compare mode has been set to trigger interrupt on "less". */            \
+#define LESENSE_CH_CONF_DEFAULT                                                                          \
+  {                                                                                                      \
+    false,                    /* Disable scan channel. */                                                \
+    false,                    /* Disable assigned pin on scan channel. */                                \
+    false,                    /* Disable interrupts on channel. */                                       \
+    lesenseChPinExDis,        /* Channel pin is disabled during excitation period. */                    \
+    lesenseChPinIdleDis,      /* Channel pin is disabled during idle period. */                          \
+    false,                    /* Do not use alternate excitation pins for excitation. */                 \
+    false,                    /* Disabled to shift results from this channel to decoder register.     */ \
+    false,                    /* Disabled to invert scan result bit. */                                  \
+    lesenseStoreSampleDisable,/* Disabled to store counter value in result buffer. */                    \
+    lesenseClkLF,             /* Use LF clock for excitation timing. */                                  \
+    lesenseClkLF,             /* Use LF clock for sample timing. */                                      \
+    0x00U,                    /* Excitation time is set to 0(+1) excitation clock cycles. */             \
+    0x00U,                    /* Sample delay is set to 0(+1) sample clock cycles. */                    \
+    0x00U,                    /* Measure delay is set to 0 excitation clock cycles.*/                    \
+    0x00U,                    /* ACMP threshold has been set to 0. */                                    \
+    lesenseSampleModeACMP,    /* ACMP output will be used in comparison. */                              \
+    lesenseSetIntNone,        /* No interrupt is generated by the channel. */                            \
+    0x00U,                    /* Counter threshold has bee set to 0x00. */                               \
+    lesenseCompModeLess       /* Compare mode has been set to trigger interrupt on "less". */            \
   }
 #endif
 

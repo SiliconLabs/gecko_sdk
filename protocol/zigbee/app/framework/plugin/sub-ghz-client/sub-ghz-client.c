@@ -21,6 +21,9 @@
 #include "app/util/zigbee-framework/zigbee-device-common.h"      // emberNextZigDevRequestSequence()
 
 #include "sub-ghz-client.h"
+#ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_KEEPALIVE_PRESENT
+#include "trust-center-keepalive.h"
+#endif // SL_CATALOG_ZIGBEE_TRUST_CENTER_KEEPALIVE_PRESENT
 
 #include "zap-cluster-command-parser.h"
 
@@ -168,6 +171,9 @@ void emberAfSubGhzClusterClientTickCallback(uint8_t endpoint)
 {
   // Cancel the suspend status. That's it.
   suspendStatus &= ~SUSPEND_STATUS_SUSPENDED;
+#ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_KEEPALIVE_PRESENT
+  emberAfPluginTrustCenterKeepaliveEnable();
+#endif
 
   emberAfDebugPrintln("%p resumed",
                       "Sub-GHz client: sending of ZCL messages");
@@ -198,6 +204,9 @@ bool emberAfSubGhzClusterSuspendZclMessagesCallback(EmberAfClusterCommand *cmd)
   if (!emberAfPluginSubGhzSuspendZclMessagesCallback(cmd_data.period)) {
     // Suspend ZCL messages for 'period' minutes.
     suspendStatus |= SUSPEND_STATUS_SUSPENDED;
+#ifdef SL_CATALOG_ZIGBEE_TRUST_CENTER_KEEPALIVE_PRESENT
+    emberAfPluginTrustCenterKeepaliveDisable();
+#endif
 
     emberAfDebugPrintln("%p suspended for %d minutes",
                         "Sub-GHz client: sending of ZCL messages",

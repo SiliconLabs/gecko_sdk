@@ -40,9 +40,16 @@
 #define EMDRV_DMADRV_DMA_PRESENT
 #include "em_dma.h"
 #elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
-#define EMDRV_DMADRV_LDMA
+
+#if (_SILICON_LABS_32B_SERIES > 2)
+#define EMDRV_DMADRV_LDMA_S3
+#include "sl_peripheral_ldma.h"
+#else
 #define EMDRV_DMADRV_DMA_PRESENT
+#define EMDRV_DMADRV_LDMA
 #include "em_ldma.h"
+#endif
+
 #else
 #error "No valid DMA engine defined."
 #endif
@@ -78,14 +85,13 @@ extern "C" {
  *  DMADRV transfer completion callback function.
  *
  * @details
- *  The callback function is called when a transfer is complete or failed.
+ *  The callback function is called when a transfer is complete.
  *
  * @param[in] channel
  *  The DMA channel number.
  *
  * @param[in] sequenceNo
- *  0: transfer failed
- *  Others: the number of times the callback was called. Useful on long chains of
+ *  The number of times the callback was called. Useful on long chains of
  *  linked transfers or on endless ping-pong type transfers.
  *
  * @param[in] userParam
@@ -328,6 +334,7 @@ SL_ENUM(DMADRV_DataSize_t) {
 
 #if defined(LDMAXBAR_COUNT) && (LDMAXBAR_COUNT > 0)
 /// Peripherals that can trigger LDMA transfers.
+// TODO CM see if need to add stuff for Rainier XBAR
 SL_ENUM_GENERIC(DMADRV_PeripheralSignal_t, uint32_t) {
   dmadrvPeripheralSignal_NONE = LDMAXBAR_CH_REQSEL_SOURCESEL_NONE,                                                          ///< No peripheral selected for DMA triggering.
   #if defined LDMAXBAR_CH_REQSEL_SIGSEL_TIMER0CC0
@@ -953,74 +960,83 @@ SL_ENUM_GENERIC(DMADRV_PeripheralSignal_t, uint32_t) {
 
 /// Data size of one LDMA transfer item.
 SL_ENUM(DMADRV_DataSize_t) {
+#if defined(EMDRV_DMADRV_LDMA_S3)
+  dmadrvDataSize1 = SL_HAL_LDMA_CTRL_SIZE_BYTE, ///< Byte
+  dmadrvDataSize2 = SL_HAL_LDMA_CTRL_SIZE_HALF, ///< Halfword
+  dmadrvDataSize4 = SL_HAL_LDMA_CTRL_SIZE_WORD  ///< Word
+#else
   dmadrvDataSize1 = ldmaCtrlSizeByte, ///< Byte
   dmadrvDataSize2 = ldmaCtrlSizeHalf, ///< Halfword
   dmadrvDataSize4 = ldmaCtrlSizeWord  ///< Word
+#endif
 };
 
 #endif /* defined( LDMA_PRESENT ) && ( LDMA_COUNT == 1 ) */
 
-Ecode_t DMADRV_AllocateChannel(unsigned int *channelId, void *capabilities);
+Ecode_t DMADRV_AllocateChannel(unsigned int *channelId,
+                               void         *capabilities);
 Ecode_t DMADRV_DeInit(void);
 Ecode_t DMADRV_FreeChannel(unsigned int channelId);
 Ecode_t DMADRV_Init(void);
 
-Ecode_t DMADRV_MemoryPeripheral(unsigned int          channelId,
+Ecode_t DMADRV_MemoryPeripheral(unsigned int              channelId,
                                 DMADRV_PeripheralSignal_t peripheralSignal,
-                                void                  *dst,
-                                void                  *src,
-                                bool                  srcInc,
-                                int                   len,
-                                DMADRV_DataSize_t     size,
-                                DMADRV_Callback_t     callback,
-                                void                  *cbUserParam);
-Ecode_t DMADRV_PeripheralMemory(unsigned int          channelId,
+                                void                      *dst,
+                                void                      *src,
+                                bool                      srcInc,
+                                int                       len,
+                                DMADRV_DataSize_t         size,
+                                DMADRV_Callback_t         callback,
+                                void                      *cbUserParam);
+Ecode_t DMADRV_PeripheralMemory(unsigned int              channelId,
                                 DMADRV_PeripheralSignal_t peripheralSignal,
-                                void                  *dst,
-                                void                  *src,
-                                bool                  dstInc,
-                                int                   len,
-                                DMADRV_DataSize_t     size,
-                                DMADRV_Callback_t     callback,
-                                void                  *cbUserParam);
-Ecode_t DMADRV_MemoryPeripheralPingPong(unsigned int          channelId,
+                                void                      *dst,
+                                void                      *src,
+                                bool                      dstInc,
+                                int                       len,
+                                DMADRV_DataSize_t         size,
+                                DMADRV_Callback_t         callback,
+                                void                      *cbUserParam);
+Ecode_t DMADRV_MemoryPeripheralPingPong(unsigned int              channelId,
                                         DMADRV_PeripheralSignal_t peripheralSignal,
-                                        void                  *dst,
-                                        void                  *src0,
-                                        void                  *src1,
-                                        bool                  srcInc,
-                                        int                   len,
-                                        DMADRV_DataSize_t     size,
-                                        DMADRV_Callback_t     callback,
-                                        void                  *cbUserParam);
-Ecode_t DMADRV_PeripheralMemoryPingPong(unsigned int          channelId,
+                                        void                      *dst,
+                                        void                      *src0,
+                                        void                      *src1,
+                                        bool                      srcInc,
+                                        int                       len,
+                                        DMADRV_DataSize_t         size,
+                                        DMADRV_Callback_t         callback,
+                                        void                      *cbUserParam);
+Ecode_t DMADRV_PeripheralMemoryPingPong(unsigned int              channelId,
                                         DMADRV_PeripheralSignal_t peripheralSignal,
-                                        void                  *dst0,
-                                        void                  *dst1,
-                                        void                  *src,
-                                        bool                  dstInc,
-                                        int                   len,
-                                        DMADRV_DataSize_t     size,
-                                        DMADRV_Callback_t     callback,
-                                        void                  *cbUserParam);
+                                        void                      *dst0,
+                                        void                      *dst1,
+                                        void                      *src,
+                                        bool                      dstInc,
+                                        int                       len,
+                                        DMADRV_DataSize_t         size,
+                                        DMADRV_Callback_t         callback,
+                                        void                      *cbUserParam);
 
 #if defined(EMDRV_DMADRV_LDMA)
-Ecode_t DMADRV_LdmaStartTransfer(
-  int                channelId,
-  LDMA_TransferCfg_t *transfer,
-  LDMA_Descriptor_t  *descriptor,
-  DMADRV_Callback_t  callback,
-  void               *cbUserParam);
+Ecode_t DMADRV_LdmaStartTransfer(int                channelId,
+                                 LDMA_TransferCfg_t *transfer,
+                                 LDMA_Descriptor_t  *descriptor,
+                                 DMADRV_Callback_t  callback,
+                                 void               *cbUserParam);
 #endif
 
 Ecode_t DMADRV_PauseTransfer(unsigned int channelId);
 Ecode_t DMADRV_ResumeTransfer(unsigned int channelId);
 Ecode_t DMADRV_StopTransfer(unsigned int channelId);
-Ecode_t DMADRV_TransferActive(unsigned int channelId, bool *active);
-Ecode_t DMADRV_TransferCompletePending(unsigned int channelId, bool *pending);
-Ecode_t DMADRV_TransferDone(unsigned int channelId, bool *done);
+Ecode_t DMADRV_TransferActive(unsigned int channelId,
+                              bool         *active);
+Ecode_t DMADRV_TransferCompletePending(unsigned int channelId,
+                                       bool         *pending);
+Ecode_t DMADRV_TransferDone(unsigned int channelId,
+                            bool         *done);
 Ecode_t DMADRV_TransferRemainingCount(unsigned int channelId,
-                                      int *remaining);
+                                      int          *remaining);
 
 /** @} (end addtogroup dmadrv) */
 

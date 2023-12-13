@@ -1,0 +1,16 @@
+upgrade:
+  - sdk:
+      id: gecko_sdk
+      version: "4.4.0"
+    component:
+      - trigger: ot_thirdparty
+        description: >
+          The ot_thirdparty component has been deprecated. Replacing with ot_mbedtls directly.
+        remove:
+          - ot_thirdparty
+        add:
+          - ot_mbedtls
+      - script: protocol/openthread/component/script/upgrade_log_config.lua
+        description: >
+          The implementation for platform defined logging has been split into the ot_rtt_log component.
+          If a project configures for platform defined logging, this component must be included.

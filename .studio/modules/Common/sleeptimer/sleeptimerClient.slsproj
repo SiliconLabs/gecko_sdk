@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="com.silabs.sdk.exx32.common.sleeptimer" label="Sleeptimer SW" contentRoot="$(sdkInstallationPath:default())/platform/service/sleeptimer">
+  <property key="category" value="efm32|Common"/>
+  <folder name="sleeptimer" uri="src" includeAllFiles="true" />
+  <includePath uri="inc" />
+</project>

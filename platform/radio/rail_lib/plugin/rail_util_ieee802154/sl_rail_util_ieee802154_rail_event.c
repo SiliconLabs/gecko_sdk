@@ -61,10 +61,6 @@ void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ABORTED,
                                             (uint32_t) RAIL_IsAutoAckWaitingForAck(railHandle));
   }
-  if (events & RAIL_EVENT_RX_PACKET_RECEIVED) {
-    (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
-                                            (uint32_t) isReceivingFrame(railHandle));
-  }
   if (events & RAIL_EVENT_RX_ACK_TIMEOUT) {
     (void) sl_rail_util_ieee802154_on_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_TIMEDOUT, 0);
   }

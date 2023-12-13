@@ -1,24 +1,20 @@
 package: Zigbee
-description: Silicon Labs implementation of Partner Link Key Exchange. Partner Link Key
-  Exchange is a feature in Smart Energy where a device may obtain an APS link key
-  with another, non-trust center device. This code handles the necessary process
-  to request a link key with a partner device, then contact the trust center and ask
-  it to generate a new link key and send it securely to both devices.
+description: Silicon Labs implementation of Partner Link Key Exchange. Partner Link Key Exchange is a feature in Smart Energy where a device may obtain an APS link key with another, non-trust center device. This code handles the necessary process to request a link key with a partner device, then contact the trust center and ask it to generate a new link key and send it securely to both devices.
 label: Partner Link Key Exchange
 quality: production
 id: zigbee_partner_link_key_exchange
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_partner_link_key_exchange"
+  - name: zigbee_partner_link_key_exchange
 requires:
-   - name: "zigbee_address_table"
+  - name: zigbee_address_table
 config_file:
   - path: protocol/zigbee/app/framework/plugin/partner-link-key-exchange/config/partner-link-key-exchange-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/partner-link-key-exchange/partner-link-key-exchange.c
   - path: protocol/zigbee/app/framework/plugin/partner-link-key-exchange/partner-link-key-exchange-cli.c
     condition:
-      - "cli"
+      - cli
 include:
   - path: protocol/zigbee/app/framework/plugin/partner-link-key-exchange
     file_list:
@@ -33,7 +29,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: zigbee_key_establishment
-      function_name: emberAfPluginPartnerLinkKeyExchangeZigbeeKeyEstablishmentCallback    
+      function_name: emberAfPluginPartnerLinkKeyExchangeZigbeeKeyEstablishmentCallback
   - name: cli_group
     value:
       group: plugin
@@ -46,10 +42,10 @@ template_contribution:
       handler: cbkePartnerCommand
       help: Initiates partner link key exchange.
       argument:
-      - type: uint16
-        help: The 2-byte short address of the node
-      - type: uint8
-        help: The endpoint of the device with whom to start CBKE.
+        - type: uint16
+          help: The 2-byte short address of the node
+        - type: uint8
+          help: The endpoint of the device with whom to start CBKE.
   - name: cli_command
     value:
       group: partner-link-key-exchange
@@ -57,8 +53,8 @@ template_contribution:
       handler: cbkeAllowPartner
       help: Sets the allow partner flag within the device for Certificate Based Key Exchange.
       argument:
-      - type: uint8
-        help: Boolean value to allow or disallow partner based key exchange
+        - type: uint8
+          help: Boolean value to allow or disallow partner based key exchange
 
 
 documentation:

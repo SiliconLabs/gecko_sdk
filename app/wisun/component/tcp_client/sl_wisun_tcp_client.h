@@ -30,6 +30,11 @@
 
 #ifndef __SL_WISUN_TCP_CLIENT_H__
 #define __SL_WISUN_TCP_CLIENT_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -77,5 +82,9 @@ void sl_wisun_tcp_client_write(const int32_t sockid, const char *str);
  * @param size size of data to read
  *****************************************************************************/
 void sl_wisun_tcp_client_read(const int32_t sockid, const uint16_t size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

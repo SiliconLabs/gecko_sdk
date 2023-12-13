@@ -1,9 +1,9 @@
 project_name: psa_crypto_aead
 package: platform
 quality: production
-label: Platform - PSA Crypto AEAD
+label: Platform Security - SoC PSA Crypto AEAD
 description: >
-  This example project demonstrates the Authenticated Encryption with Associated Data (AEAD) API.
+  This example uses the PSA Crypto API to perform Authenticated Encryption with Associated Data (AEAD) operations on the supported device.
 category: Example|Platform
 filter:
   - name: "Device Type"

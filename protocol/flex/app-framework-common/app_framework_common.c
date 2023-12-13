@@ -27,9 +27,12 @@
  *
  ******************************************************************************/
 
+#include <assert.h>
 #include "callback_dispatcher.h"
 #include "app_framework_callback.h"
-#include "hal.h"
+#include "stack/core/sl-connect-watchdog.h"
+#include "em_rmu.h"
+#include "em_emu.h"
 
 #include "sl_component_catalog.h"
 
@@ -49,6 +52,8 @@ extern void(*emAppEventsHandlerPtrTable[])(void);
 extern const uint8_t emAfEventTableOffset;
 extern uint8_t emAfEventTableHandleIndex;
 
+static uint32_t savedResetCause;
+
 void connect_standard_phy_2_4g(void)
 {
   assert(emberPhyConfigInit(EMBER_STANDARD_PHY_2_4GHZ) == EMBER_SUCCESS);
@@ -58,12 +63,24 @@ void connect_stack_init(void)
 {
   EmberStatus status;
 
+  #ifndef EMBER_TEST
+  savedResetCause = RMU_ResetCauseGet();
+  RMU_ResetCauseClear(); // So resetCause is rational and not an accumulated mess
+  // Release GPIOs that were held by EM4h to ensure proper startup
+  EMU_UnlatchPinRetention();
+  #endif
+
   emberTaskEnableIdling(true);
 
   // Initialize the radio and the stack.  If this fails, we have to assert
   // because something is wrong.
   status = stack_init();
   assert(status == EMBER_SUCCESS);
+}
+
+uint32_t emberAfGetResetCause(void)
+{
+  return savedResetCause;
 }
 
 void connect_app_framework_init(void)
@@ -93,7 +110,7 @@ EmberStatus emberAfAllocateEvent(EmberEventControl **control, void (*handler)(vo
 void connect_stack_tick(void)
 {
   // Pet the watchdog.
-  halResetWatchdog();
+  WDOGn_Feed(DEFAULT_WDOG);
   // Call the stack tick API.
   stack_tick();
 }
@@ -101,7 +118,7 @@ void connect_stack_tick(void)
 void connect_app_framework_tick(void)
 {
   // Pet the watchdog.
-  halResetWatchdog();
+  WDOGn_Feed(DEFAULT_WDOG);
   // Call the application tick callback.
   emberAfTickCallback();
   // Call the tick callback of plugins that subscribed to it.

@@ -1219,4 +1219,4 @@ typedef struct {
 /** @} End of group EFR32FG28_LESENSE */
 /** @} End of group Parts */
 
-#endif /* EFR32FG28_LESENSE_H */
+#endif // EFR32FG28_LESENSE_H

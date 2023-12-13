@@ -975,4 +975,4 @@
 #define PRS_EUSART2L_RXFL                                  (PRS_ASYNC_EUSART2L_RXFL)
 #define PRS_EUSART2L_TXFL                                  (PRS_ASYNC_EUSART2L_TXFL)
 
-#endif /* EFR32FG28_PRS_SIGNALS_H */
+#endif // EFR32FG28_PRS_SIGNALS_H

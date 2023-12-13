@@ -1,7 +1,7 @@
 project_name: se_manager_ecdh
 package: platform
 quality: production
-label: Platform - SE Manager Key Agreement (ECDH)
+label: Platform Security - SoC SE Manager Key Agreement (ECDH)
 description: >
   This example project demonstrates the key agreement (ECDH) API of SE Manager.
 category: Example|Platform

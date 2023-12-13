@@ -54,9 +54,7 @@
 #include "common/new.hpp"
 #include "lib/spinel/spinel.h"
 
-#if OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
-
-using ot::Spinel::SpinelInterface;
+#if OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE
 
 namespace ot {
 namespace Posix {
@@ -66,20 +64,16 @@ namespace Posix {
  *
  */
 
-class CpcInterfaceImpl
+class CpcInterfaceImpl : public ot::Spinel::SpinelInterface
 {
 public:
     /**
      * This constructor initializes the object.
      *
-     * @param[in] aCallback         A reference to a `Callback` object.
-     * @param[in] aCallbackContext  The context pointer passed to the callback.
-     * @param[in] aFrameBuffer      A reference to a `RxFrameBuffer` object.
+     * @param[in] aRadioUrl RadioUrl parsed from radio url.
      *
      */
-    explicit CpcInterfaceImpl(SpinelInterface::ReceiveFrameCallback aCallback,
-                              void                                  *aCallbackContext,
-                              SpinelInterface::RxFrameBuffer        &aFrameBuffer);
+    CpcInterfaceImpl(const Url::Url &aRadioUrl);
 
     /**
      * This destructor deinitializes the object.
@@ -92,14 +86,18 @@ public:
      *
      * @note This method should be called before reading and sending spinel frames to the interface.
      *
-     * @param[in] aRadioUrl  Arguments parsed from radio url.
+     * @param[in] aCallback         Callback on frame received
+     * @param[in] aCallbackContext  Callback context
+     * @param[in] aFrameBuffer      A reference to a `RxFrameBuffer` object.
      *
-     * @retval OT_ERROR_NONE          The interface is initialized successfully.
-     * @retval OT_ERROR_ALREADY       The interface is already initialized.
-     * @retval OT_ERROR_INVALID_ARGS  The UART device or executable cannot be found or failed to open/run.
+     * @retval OT_ERROR_NONE       The interface is initialized successfully
+     * @retval OT_ERROR_ALREADY    The interface is already initialized.
+     * @retval OT_ERROR_FAILED     Failed to initialize the interface.
      *
      */
-    otError Init(const Url::Url &aRadioUrl);
+    otError Init(ReceiveFrameCallback aCallback,
+                 void *aCallbackContext,
+                 RxFrameBuffer &aFrameBuffer);
 
     /**
      * This method deinitializes the interface to the RCP.
@@ -174,6 +172,20 @@ public:
     const otRcpInterfaceMetrics *GetRcpInterfaceMetrics(void) const { return &mInterfaceMetrics; }
 
     /**
+     * Indicates whether or not the given interface matches this interface name.
+     *
+     * @param[in] aInterfaceName A pointer to the interface name.
+     *
+     * @retval TRUE   The given interface name matches this interface name.
+     * @retval FALSE  The given interface name doesn't match this interface name.
+     */
+    static bool IsInterfaceNameMatch(const char *aInterfaceName)
+    {
+        static const char *kInterfaceName = OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME;
+        return (strncmp(aInterfaceName, kInterfaceName, strlen(kInterfaceName)) == 0);
+    }
+
+    /**
      * This method is called reinitialise the CPC interface if sCpcResetReq indicates that a restart
      * is required.
      */
@@ -232,9 +244,10 @@ private:
         kCpcBusSpeed        = 115200,
     };
 
-    SpinelInterface::ReceiveFrameCallback mReceiveFrameCallback;
-    void                                 *mReceiveFrameContext;
-    SpinelInterface::RxFrameBuffer       &mReceiveFrameBuffer;
+    ReceiveFrameCallback mReceiveFrameCallback;
+    void                *mReceiveFrameContext;
+    RxFrameBuffer       *mReceiveFrameBuffer;
+    const Url::Url      &mRadioUrl;
 
     int            mSockFd;
     cpc_handle_t   mHandle;
@@ -291,4 +304,4 @@ protected:
 
 } // namespace Posix
 } // namespace ot
-#endif // OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR
+#endif // OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE

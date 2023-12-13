@@ -218,42 +218,6 @@ sl_status_t sl_btmesh_node_get_ivrecovery_mode(uint8_t *mode) {
 
 }
 
-sl_status_t sl_btmesh_node_get_statistics(size_t max_statistics_size,
-                                          size_t *statistics_len,
-                                          uint8_t *statistics) {
-    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
-
-    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
-
-
-    cmd->header=sl_btmesh_cmd_node_get_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
-
-
-    sl_btmesh_host_handle_command();
-    if (statistics_len) {
-        *statistics_len = rsp->data.rsp_node_get_statistics.statistics.len;
-    }
-    if (statistics && (rsp->data.rsp_node_get_statistics.statistics.len <= max_statistics_size)) {
-        memcpy(statistics,rsp->data.rsp_node_get_statistics.statistics.data,rsp->data.rsp_node_get_statistics.statistics.len);
-    }
-    return rsp->data.rsp_node_get_statistics.result;
-
-}
-
-sl_status_t sl_btmesh_node_clear_statistics() {
-    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
-
-    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
-
-
-    cmd->header=sl_btmesh_cmd_node_clear_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
-
-
-    sl_btmesh_host_handle_command();
-    return rsp->data.rsp_node_clear_statistics.result;
-
-}
-
 sl_status_t sl_btmesh_node_set_net_relay_delay(uint8_t min_ms, uint8_t max_ms) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
@@ -528,7 +492,7 @@ sl_status_t sl_btmesh_node_get_key(uint8_t type,
 
 }
 
-sl_status_t sl_btmesh_node_get_networks(size_t max_networks_size,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_get_networks(size_t max_networks_size,
                                         size_t *networks_len,
                                         uint8_t *networks) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
@@ -3077,7 +3041,7 @@ sl_status_t sl_btmesh_test_get_ivupdate_test_mode(uint8_t *mode) {
 
 }
 
-sl_status_t sl_btmesh_test_set_segment_send_delay(uint8_t delay) {
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_segment_send_delay(uint8_t delay) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
@@ -3504,57 +3468,6 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
 
 }
 
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
-                                            uint16_t netkey_index,
-                                            size_t value_len,
-                                            const uint8_t* value) {
-    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
-
-    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
-
-    cmd->data.cmd_test_set_local_config.id=id;
-    cmd->data.cmd_test_set_local_config.netkey_index=netkey_index;
-    if ((5+value_len) > SL_BGAPI_MAX_PAYLOAD_SIZE )
-    {
-        return SL_STATUS_COMMAND_TOO_LONG;
-    }
-    cmd->data.cmd_test_set_local_config.value.len=value_len;
-    memcpy(cmd->data.cmd_test_set_local_config.value.data,value,value_len);
-
-    cmd->header=sl_btmesh_cmd_test_set_local_config_id+(((5+value_len)&0xff)<<8)+(((5+value_len)&0x700)>>8);
-
-
-    sl_btmesh_host_handle_command();
-    return rsp->data.rsp_test_set_local_config.result;
-
-}
-
-SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
-                                            uint16_t netkey_index,
-                                            size_t max_data_size,
-                                            size_t *data_len,
-                                            uint8_t *data) {
-    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
-
-    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
-
-    cmd->data.cmd_test_get_local_config.id=id;
-    cmd->data.cmd_test_get_local_config.netkey_index=netkey_index;
-
-    cmd->header=sl_btmesh_cmd_test_get_local_config_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
-
-
-    sl_btmesh_host_handle_command();
-    if (data_len) {
-        *data_len = rsp->data.rsp_test_get_local_config.data.len;
-    }
-    if (data && (rsp->data.rsp_test_get_local_config.data.len <= max_data_size)) {
-        memcpy(data,rsp->data.rsp_test_get_local_config.data.data,rsp->data.rsp_test_get_local_config.data.len);
-    }
-    return rsp->data.rsp_test_get_local_config.result;
-
-}
-
 sl_status_t sl_btmesh_test_add_local_key(uint8_t key_type,
                                          aes_key_128 key,
                                          uint16_t key_index,
@@ -3612,7 +3525,7 @@ sl_status_t sl_btmesh_test_update_local_key(uint8_t key_type,
 
 }
 
-sl_status_t sl_btmesh_test_set_sar_config(uint32_t incomplete_timer_ms,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_sar_config(uint32_t incomplete_timer_ms,
                                           uint32_t pending_ack_base_ms,
                                           uint32_t pending_ack_mul_ms,
                                           uint32_t wait_for_ack_base_ms,
@@ -10604,5 +10517,114 @@ sl_status_t sl_btmesh_silabs_config_server_get_network_pdu(uint16_t *max_size) {
         *max_size = rsp->data.rsp_silabs_config_server_get_network_pdu.max_size;
     }
     return rsp->data.rsp_silabs_config_server_get_network_pdu.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_init() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_init_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_diagnostic_init.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_deinit() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_deinit_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_diagnostic_deinit.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_enable_relay() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_enable_relay_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_diagnostic_enable_relay.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_disable_relay() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_disable_relay_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_diagnostic_disable_relay.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_get_relay(uint32_t *relay_counter) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_get_relay_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    if (relay_counter) {
+        *relay_counter = rsp->data.rsp_diagnostic_get_relay.relay_counter;
+    }
+    return rsp->data.rsp_diagnostic_get_relay.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_get_statistics(size_t max_statistics_size,
+                                                size_t *statistics_len,
+                                                uint8_t *statistics) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_get_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    if (statistics_len) {
+        *statistics_len = rsp->data.rsp_diagnostic_get_statistics.statistics.len;
+    }
+    if (statistics && (rsp->data.rsp_diagnostic_get_statistics.statistics.len <= max_statistics_size)) {
+        memcpy(statistics,rsp->data.rsp_diagnostic_get_statistics.statistics.data,rsp->data.rsp_diagnostic_get_statistics.statistics.len);
+    }
+    return rsp->data.rsp_diagnostic_get_statistics.result;
+
+}
+
+sl_status_t sl_btmesh_diagnostic_clear_statistics() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_diagnostic_clear_statistics_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_diagnostic_clear_statistics.result;
 
 }

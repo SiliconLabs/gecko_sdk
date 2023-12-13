@@ -40,11 +40,11 @@
 #ifdef BOOTLOADER_ENABLE
 #include "api/btl_interface.h"
 
-#endif /* BOOTLOADER_ENABLE */
+#endif // BOOTLOADER_ENABLE
 #ifdef SL_APP_PROPERTIES
 #include "api/application_properties.h"
 
-#endif /* SL_APP_PROPERTIES */
+#endif // SL_APP_PROPERTIES
 
 #define TOTAL_INTERRUPTS    (16 + EXT_IRQ_COUNT)
 
@@ -74,9 +74,9 @@ extern uint32_t __INITIAL_SP;
 #if defined (SL_TRUSTZONE_SECURE)
 extern uint32_t __STACK_LIMIT;
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-extern uint32_t __STACK_SEAL;
-#endif /* __ARM_FEATURE_CMSE */
-#endif /* SL_TRUSTZONE_SECURE */
+extern uint64_t __STACK_SEAL;
+#endif // __ARM_FEATURE_CMSE
+#endif // SL_TRUSTZONE_SECURE
 
 extern __NO_RETURN void __PROGRAM_START(void);
 
@@ -84,7 +84,13 @@ extern __NO_RETURN void __PROGRAM_START(void);
 extern int  __START(void) __attribute__((noreturn));    /* main entry point */
 void Copy_Table();
 void Zero_Table();
-#endif /* __START */
+#endif // __START
+#if !defined(SL_LEGACY_LINKER)
+#if defined (__GNUC__)
+// Function to copy RAM functions from Flash to RAM at startup time
+void CopyRamFuncs();
+#endif
+#endif
 
 /*---------------------------------------------------------------------------
  * Internal References
@@ -95,12 +101,12 @@ void Default_Handler(void);
 #if defined (__GNUC__)
 #ifndef __STACK_SIZE
 #define __STACK_SIZE    0x00000400
-#endif /* __STACK_SIZE */
+#endif // __STACK_SIZE
 
 #ifndef __HEAP_SIZE
 #define __HEAP_SIZE    0x00000C00
-#endif /* __HEAP_SIZE */
-#endif /* __GNUC__ */
+#endif // __HEAP_SIZE
+#endif // __GNUC__
 
 /*----------------------------------------------------------------------------
  * Exception / Interrupt Handler
@@ -187,7 +193,7 @@ void M33CTI1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 #if defined (__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-#endif /* __GNUC__ */
+#endif // __GNUC__
 
 #if defined (__ICCARM__)
 #pragma data_alignment=512
@@ -292,7 +298,7 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 
 #if defined (__GNUC__)
 #pragma GCC diagnostic pop
-#endif /* __GNUC__ */
+#endif // __GNUC__
 
 #if defined (__START) && defined (__GNUC__)
 void Copy_Table()
@@ -320,7 +326,21 @@ void Zero_Table()
     *pDest++ = 0UL;
   }
 }
-#endif /* __START */
+#endif // __START
+
+#if !defined(SL_LEGACY_LINKER)
+#if defined (__GNUC__)
+void CopyRamFuncs()
+{
+  extern uint32_t __lma_ramfuncs_start__;
+  extern uint32_t __lma_ramfuncs_end__;
+  extern uint32_t __ramfuncs_start__;
+  uint32_t        size = &__lma_ramfuncs_end__ - &__lma_ramfuncs_start__;
+
+  FlashToRamCopy(&__lma_ramfuncs_start__, &__ramfuncs_start__, size);
+}
+#endif
+#endif
 
 /*---------------------------------------------------------------------------
  * Reset Handler called on controller reset
@@ -332,8 +352,8 @@ __NO_RETURN void Reset_Handler(void)
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   __TZ_set_STACKSEAL_S((uint32_t *) (&__STACK_SEAL));
-#endif /* __ARM_FEATURE_CMSE */
-#endif /* SL_TRUSTZONE_SECURE */
+#endif // __ARM_FEATURE_CMSE
+#endif // SL_TRUSTZONE_SECURE
 
   #ifndef __NO_SYSTEM_INIT
   SystemInit();                    /* CMSIS System Initialization */
@@ -341,21 +361,25 @@ __NO_RETURN void Reset_Handler(void)
 
 #ifdef BOOTLOADER_ENABLE
   SystemInit2();
-#endif /* BOOTLOADER_ENABLE */
-
+#endif // BOOTLOADER_ENABLE
+#if !defined(SL_LEGACY_LINKER)
+#if defined (__GNUC__)
+  CopyRamFuncs();
+#endif
+#endif
 #if defined (__GNUC__) && defined (__START)
   Copy_Table();
   Zero_Table();
   __START();
 #else
   __PROGRAM_START();               /* Enter PreMain (C library entry point) */
-#endif /* __GNUC__ */
+#endif // __GNUC__
 }
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wmissing-noreturn"
-#endif /* __ARMCC_VERSION */
+#endif // __ARMCC_VERSION
 
 /*----------------------------------------------------------------------------
  * Default Handler for Exceptions / Interrupts
@@ -368,4 +392,4 @@ void Default_Handler(void)
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
   #pragma clang diagnostic pop
-#endif /* __ARMCC_VERSION */
+#endif // __ARMCC_VERSION

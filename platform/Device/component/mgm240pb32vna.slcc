@@ -80,6 +80,7 @@
   - name: cortexm33
   - name: armv8m.main
   - name: device_is_module
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: device_security_vault
   - name: device_dcdc_buck
@@ -158,7 +159,7 @@
   - name: device_has_radio
   - name: device_has_radio_2g4hz
   - name: device_supports_rail
-  - name: device_no_rail_api
+  - name: device_supports_rail_stack
   - name: device_supports_zigbee
   - name: device_supports_thread
   - name: device_supports_bluetooth
@@ -170,6 +171,7 @@
   - name: device_compute_basic
 - recommends:
   - id: trustzone_unaware
+  - id: silabs_core_sl_malloc
 - requires:
   - name: cmsis_core
   - name: MGM240PB32VNA_config

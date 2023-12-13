@@ -1,17 +1,16 @@
 package: Zigbee
-description: This component implements the server-side functionality of the Smart Energy
-  1.2 Device Management cluster.
+description: This component implements the server-side functionality of the Smart Energy 1.2 Device Management cluster.
 id: zigbee_device_management_server
 label: Device Management Server
 category: Zigbee|Cluster Library|Smart Energy
 quality: production
 provides:
-   - name: "zigbee_device_management_server"
+  - name: zigbee_device_management_server
 source:
   - path: protocol/zigbee/app/framework/plugin/device-management-server/device-management-server.c
   - path: protocol/zigbee/app/framework/plugin/device-management-server/device-management-server-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/device-management-server/device-management-server-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/device-management-server
@@ -27,10 +26,10 @@ template_contribution:
       function_name: emberAfPluginDeviceManagementServerInitCallback
   - name: cluster_service
     value:
-       cluster_id: "0x0708"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "emberAfDeviceManagementClusterServerCommandParse" 
+      cluster_id: '0x0708'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfDeviceManagementClusterServerCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -49,7 +48,7 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_provider_id
       help: Sets the provider ID.
       argument:
-      - type: uint32
+        - type: uint32
   - name: cli_command
     value:
       group: device-management-server
@@ -57,7 +56,7 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_issuer_event_id
       help: Sets the issuer event ID.
       argument:
-      - type: uint32
+        - type: uint32
   - name: cli_command
     value:
       group: device-management-server
@@ -65,7 +64,7 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_tariff_type
       help: Sets the tariff type.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: device-management-server
@@ -73,8 +72,8 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_tenancy
       help: Sets the tenancy information.
       argument:
-      - type: uint32
-      - type: uint32
+        - type: uint32
+        - type: uint32
   - name: cli_command
     value:
       group: device-management-server
@@ -82,12 +81,12 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_supplier
       help: Sets the supplier information.
       argument:
-      - type: uint8
-      - type: uint32
-      - type: uint32
-      - type: int32
-      - type: string
-      - type: string
+        - type: uint8
+        - type: uint32
+        - type: uint32
+        - type: int32
+        - type: string
+        - type: string
   - name: cli_command
     value:
       group: device-management-server
@@ -95,8 +94,8 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_site_id
       help: Sets the site ID information.
       argument:
-      - type: string
-      - type: uint32
+        - type: string
+        - type: uint32
   - name: cli_command
     value:
       group: device-management-server
@@ -104,8 +103,8 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_cin
       help: Sets the customer ID number information.
       argument:
-      - type: string
-      - type: uint32
+        - type: string
+        - type: uint32
   - name: cli_command
     value:
       group: device-management-server
@@ -113,10 +112,10 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_password
       help: Sets the specified password.
       argument:
-      - type: string
-      - type: uint32
-      - type: uint16
-      - type: uint8
+        - type: string
+        - type: uint32
+        - type: uint16
+        - type: uint8
   - name: cli_command
     value:
       group: device-management-server
@@ -124,12 +123,12 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_publish_change_of_tenancy
       help: Sends the PublishChangeOfTenancy command
       argument:
-      - type: uint16
-        help: The network address of the server to which the request will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
-        help: The remote endpoint to which the request will be sent
+        - type: uint16
+          help: The network address of the server to which the request will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
+          help: The remote endpoint to which the request will be sent
   - name: cli_command
     value:
       group: device-management-server
@@ -137,12 +136,12 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_publish_change_of_supplier
       help: Sends the PublishChangeOfSupplier command.
       argument:
-      - type: uint16
-        help: The network address of the server to which the request will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
-        help: The remote endpoint to which the request will be sent
+        - type: uint16
+          help: The network address of the server to which the request will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
+          help: The remote endpoint to which the request will be sent
   - name: cli_command
     value:
       group: device-management-server
@@ -150,12 +149,12 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_update_site_id
       help: Sends the UpdateSiteId command.
       argument:
-      - type: uint16
-        help: The network address of the server to which the request will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
-        help: The remote endpoint to which the request will be sent
+        - type: uint16
+          help: The network address of the server to which the request will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
+          help: The remote endpoint to which the request will be sent
   - name: cli_command
     value:
       group: device-management-server
@@ -163,12 +162,12 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_update_cin
       help: Sends the UpdateCIN command.
       argument:
-      - type: uint16
-        help: The network address of the server to which the request will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
-        help: The remote endpoint to which the request will be sent
+        - type: uint16
+          help: The network address of the server to which the request will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
+          help: The remote endpoint to which the request will be sent
   - name: cli_command
     value:
       group: device-management-server
@@ -176,8 +175,8 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_pending_updates
       help: Sets the appropriate flag for pending updates. Details for each pending flag can be found via the definition of EmberAfDeviceManagementChangePendingFlags.
       argument:
-      - type: uint8
-        help: A bitmask determining if there is a valid pending update for different actions
+        - type: uint8
+          help: A bitmask determining if there is a valid pending update for different actions
   - name: cli_command
     value:
       group: device-management-server
@@ -185,13 +184,13 @@ template_contribution:
       handler: sli_zigbee_af_device_management_server_cli_send_request_new_password_response
       help: Sends unsolicited request new password response.
       argument:
-      - type: uint8
-        help: Service Producer or Consumer
-      - type: uint16
-        help: The network address of the server to which the response will be sent
-      - type: uint8
-        help: The local endpoint from which the request will be sent
-      - type: uint8
+        - type: uint8
+          help: Service Producer or Consumer
+        - type: uint16
+          help: The network address of the server to which the response will be sent
+        - type: uint8
+          help: The local endpoint from which the request will be sent
+        - type: uint8
 
 
 documentation:

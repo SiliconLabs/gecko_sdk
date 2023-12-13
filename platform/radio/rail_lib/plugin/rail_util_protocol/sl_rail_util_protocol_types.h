@@ -62,6 +62,9 @@ typedef enum sl_rail_util_protocol_type{
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1,
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2,
   SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE,
+  SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR1,
+  SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR2,
+  SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR_END_DEVICE,
   SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS,
 } sl_rail_util_protocol_type_t;
 
@@ -81,21 +84,24 @@ typedef enum sl_rail_util_protocol_type{
   ((x == SL_RAIL_UTIL_PROTOCOL_IEEE802154_GB868_915MHZ) \
    || (x == SL_RAIL_UTIL_PROTOCOL_IEEE802154_GB868_863MHZ))
 
-#define SL_RAIL_UTIL_PROTOCOL_IS_ZWAVE(x)       \
-  ((x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_ANZ)       \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_CN)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_HK)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_IN)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_IL)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_JP)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_KR)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_MY)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_RU)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US)     \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1) \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2) \
-   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE))
+#define SL_RAIL_UTIL_PROTOCOL_IS_ZWAVE(x)                 \
+  ((x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_ANZ)                 \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_CN)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_HK)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_IN)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_IL)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_JP)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_KR)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_MY)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_RU)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US)               \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1)           \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2)           \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE) \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR1)           \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR2)           \
+   || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_EU_LR_END_DEVICE))
 
 #define SL_RAIL_UTIL_PROTOCOL_IS_SIDEWALK(x) \
   ((x == SL_RAIL_UTIL_PROTOCOL_SIDEWALK_2GFSK_50KBPS))

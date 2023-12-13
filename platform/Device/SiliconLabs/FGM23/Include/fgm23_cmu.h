@@ -1125,4 +1125,4 @@ typedef struct {
 /** @} End of group FGM23_CMU */
 /** @} End of group Parts */
 
-#endif /* FGM23_CMU_H */
+#endif // FGM23_CMU_H

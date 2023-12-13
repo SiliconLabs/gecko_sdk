@@ -656,7 +656,7 @@ int8_t TEMPDRV_GetTemp(void)
   }
 
   // adding extra 0.5 before truncating to simulate rounding behavior
-  result = (((int8_t) (tempCelsius + 0.5 - INT8_MIN)) + INT8_MIN);
+  result = (((int8_t) (tempCelsius + 0.5f - INT8_MIN)) + INT8_MIN);
 
   return result;
 }

@@ -34,11 +34,9 @@ static void ApplicationTask(SApplicationHandles* pAppHandles);
 /**
  * @brief See description for function prototype in ZW_basis_api.h.
  */
-ZW_APPLICATION_STATUS ApplicationInit(EResetReason_t eResetReason)
+ZW_APPLICATION_STATUS ApplicationInit(__attribute__((unused)) EResetReason_t eResetReason)
 {
   SRadioConfig_t* RadioConfig;
-
-  UNUSED(eResetReason);
 
   zpal_enable_watchdog(true);
 

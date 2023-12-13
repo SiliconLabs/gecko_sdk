@@ -278,4 +278,4 @@ typedef struct {
 /** @} End of group BGM21_LFXO */
 /** @} End of group Parts */
 
-#endif /* BGM21_LFXO_H */
+#endif // BGM21_LFXO_H

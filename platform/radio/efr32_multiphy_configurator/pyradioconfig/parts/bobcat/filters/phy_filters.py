@@ -9,6 +9,7 @@ class PhyFilters_Bobcat(IPhyFilter):
                            'Phys_Internal_Base_ValOnly',
                            'Phys_Internal_Connect',
                            'Phys_Internal_MBus',
+                           'Phys_Internal_WiSUN',
                            'Phys_RAIL_Base_Standard_BLE',
                            'Phys_RAIL_Base_Standard_IEEE802154',
                            'Phys_RAIL_Base_Standard_ZWave'

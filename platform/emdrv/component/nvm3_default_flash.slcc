@@ -1,0 +1,14 @@
+id: nvm3_default_flash_backend
+label: NVM3 back-end for default instance in flash
+package: platform
+description: >
+  This component initialize/deinitialize the default NVM3 instance in flash.
+  The instance can be accessed with the NVM3 API by using the
+  nvm3_defaultHandle provided in nvm3_default.h as the nvm3_Handle_t pointer.
+category: Services|NVM3
+quality: production
+source:
+  - path: platform/emdrv/nvm3/src/nvm3_default_common_linker.c
+    unless: [trustzone_nonsecure, trustzone_secure]
+provides:
+  - name: nvm3_default_backend

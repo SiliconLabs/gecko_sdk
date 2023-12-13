@@ -47,12 +47,14 @@
  * @param[out] reg_domain Regulatory domain of the Wi-SUN network
  * @param[out] op_class Operational class of the Wi-SUN network
  * @param[out] op_mode Operational mode of the Wi-SUN network
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *
  * @return One of the following:
  *  - SL_STATUS_OK if successful
  *  - SL_STATUS_INVALID_CONFIGURATION if a configuration that cannot be managed
  *    by the plugin is used
  *  - SL_STATUS_FAIL if an other error occured
-  *
+ *
  * @warning Do not call this function while the Wi-SUN stack is started.
  * @deprecated This function will be removed in the future versions of the
  * Wi-SUN stack. See sl_wisun_util_get_phy_config() for a replacement.
@@ -64,7 +66,9 @@ sl_status_t sl_wisun_util_get_rf_settings(uint8_t *reg_domain, uint8_t *op_class
  * RAIL's channelConfigs array.
  *
  * @param[out] phy_config Pointer to PHY configuration
-* @return One of the following:
+ * @return SL_STATUS_OK if successful, an error code otherwise
+
+ * @return One of the following:
  *  - SL_STATUS_OK if successful
  *  - SL_STATUS_INVALID_CONFIGURATION if a configuration that cannot be managed
  *    by the plugin is used
@@ -78,6 +82,7 @@ sl_status_t sl_wisun_util_get_phy_config(sl_wisun_phy_config_t *phy_config);
  * Connect to a Wi-SUN network.
  *
  * @param[in] network_name Name of the Wi-SUN network as a zero-terminated string
+ * @return SL_STATUS_OK if successful, an error code otherwise
  * @return One of the following:
  *  - SL_STATUS_OK if successful
  *  - SL_STATUS_INVALID_CONFIGURATION if a configuration that cannot be managed
@@ -89,7 +94,7 @@ sl_status_t sl_wisun_util_get_phy_config(sl_wisun_phy_config_t *phy_config);
  * function is not recommended if more than one RAIL configuration is
  * described.
  *****************************************************************************/
-sl_status_t sl_wisun_util_connect(const uint8_t * network_name);
+sl_status_t sl_wisun_util_connect(const uint8_t *network_name);
 
 /** @} (end addtogroup SL_WISUN_UTIL) */
 

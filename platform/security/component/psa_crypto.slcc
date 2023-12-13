@@ -47,11 +47,7 @@ provides:
 
 requires:
   - name: device
-    condition: [device_series_0]
-  - name: device
-    condition: [device_series_1]
-  - name: device
-    condition: [device_series_2]
+    condition: [device_efx]
   - name: mbedtls_core
   - name: psa_crypto_config
   - name: psa_crypto_source
@@ -62,17 +58,14 @@ requires:
     condition: [device_series_1]
   - name: psa_driver
     condition: [device_series_2]
-
-  # PSA Crypto API headers (from TF-M) are provided by the TZ NS interface
-  # component.
   - name: psa_crypto_common
-    condition: [trustzone_unaware]
-  - name: psa_crypto_common
-    condition: [trustzone_secure]
+  - name: sl_si91x_psa_crypto
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 
   # Inclusion of source and config components depends on which TZ state we are
   # targeting. For apps that do not make active use of TZ, a dummy state
-  # (trustzone_unaware) should be used. 
+  # (trustzone_unaware) should be used.
   - name: trustzone_security_state
 
   # For devices with non-errata TRNG, specifically include the PSA
@@ -87,6 +80,8 @@ requires:
     condition: [device_sdid_103]
   - name: psa_crypto_trng
     condition: [device_sdid_106]
+  - name: psa_crypto_trng
+    condition: [device_si91x]
   # For all devices which don't have a fully-qualified TRNG, the PSA
   # Core needs to rely on mbed TLS's DRBG implementation
   - name: mbedtls_random
@@ -113,7 +108,7 @@ recommends:
   - id: trustzone_unaware
 
 template_contribution:
-  
+
   # Init of the PSA Crypto core should come after that of Mbed TLS.
   # Init of PSA Crypto is handled inside of the SKL secure main.
   # We are not able to provide automated initialization of PSA Crypto if RAIL is
@@ -127,7 +122,7 @@ template_contribution:
       handler: psa_crypto_init
     priority: 1
     condition: [trustzone_unaware, psa_crypto_trng]
-    unless: [device_sdid_89, zigbee_classic_key_storage, native]
+    unless: [device_sdid_89, zigbee_classic_key_storage, native, device_si91x]
   - name: event_handler
     value:
       event: service_init

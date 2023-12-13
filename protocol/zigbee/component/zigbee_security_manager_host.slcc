@@ -1,10 +1,7 @@
 id: zigbee_security_manager_host
 package: Zigbee
 label: Zigbee Security Manager (Host)
-description: |-
-  This component provides an implementation of the Zigbee Security Manager APIs for host application code.
-  Calls to cryptographic APIs and usage of one-off keys will run on the host platform, while calls to access
-  the non-generic key types (data and metadata) go to the NCP via EZSP.
+description: This component provides an implementation of the Zigbee Security Manager APIs for host application code. Calls to cryptographic APIs and usage of one-off keys will run on the host platform, while calls to access the non-generic key types (data and metadata) go to the NCP via EZSP.
 category: Zigbee|Utility
 quality: production
 
@@ -24,7 +21,7 @@ include:
     file_list:
       - path: zigbee-security-manager.h
       - path: zigbee-security-manager-types.h
-     
+
 
 source:
   - path: protocol/zigbee/stack/security/zigbee-security-manager-host.c

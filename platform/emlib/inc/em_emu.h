@@ -51,6 +51,7 @@ extern "C" {
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
+
 #if (defined(_EMU_STATUS_VSCALE_MASK) || defined(_EMU_CTRL_EM23VSCALE_MASK)) \
   && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 /** Voltage scaling present */
@@ -66,16 +67,16 @@ extern "C" {
 #define EMU_SERIES1_DCDC_BUCK_PRESENT
 #endif
 
-#if defined(_SILICON_LABS_DCDC_FEATURE) \
-  && ((_SILICON_LABS_DCDC_FEATURE == 1) \
-  || (_SILICON_LABS_DCDC_FEATURE == 3))
+#if defined(_SILICON_LABS_DCDC_FEATURE)                                    \
+  && ((_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BUCK) \
+  || (_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOB))
 /** DC-DC buck converter present */
 #define EMU_SERIES2_DCDC_BUCK_PRESENT
 #endif
 
-#if defined(_SILICON_LABS_DCDC_FEATURE) \
-  && ((_SILICON_LABS_DCDC_FEATURE == 2) \
-  || (_SILICON_LABS_DCDC_FEATURE == 3))
+#if defined(_SILICON_LABS_DCDC_FEATURE)                                     \
+  && ((_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOOST) \
+  || (_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOB))
 /** DC-DC boost converter present */
 #define EMU_SERIES2_DCDC_BOOST_PRESENT
 #endif
@@ -929,6 +930,7 @@ typedef struct {
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)
 #define EMU_DCDCINIT_DEFAULT                                                 \
@@ -1272,7 +1274,7 @@ __STATIC_INLINE void EMU_DCDCUnlock(void)
  ******************************************************************************/
 __STATIC_INLINE void EMU_DCDCSync(uint32_t mask)
 {
-  while (DCDC->SYNCBUSY & mask) {
+  while (0UL != (DCDC->SYNCBUSY & mask)) {
     /* Wait for previous synchronization to finish */
   }
 }
@@ -1299,6 +1301,12 @@ __STATIC_INLINE bool EMU_LDOStatusGet(void)
 /***************************************************************************//**
  * @brief
  *   Enter energy mode 1 (EM1).
+ *
+ * @note
+ *   This function is incompatible with the Power Manager module. When the
+ *   Power Manager module is present, it must be the one deciding at which
+ *   EM level the device sleeps to ensure the application properly works. Using
+ *   both at the same time could lead to undefined behavior in the application.
  ******************************************************************************/
 __STATIC_INLINE void EMU_EnterEM1(void)
 {
@@ -1696,7 +1704,7 @@ __STATIC_INLINE void EMU_UnlatchPinRetention(void)
 __STATIC_INLINE bool EMU_TemperatureReady(void)
 {
 #if defined(EMU_STATUS_FIRSTTEMPDONE)
-  return EMU->STATUS & EMU_STATUS_FIRSTTEMPDONE;
+  return (0UL != (EMU->STATUS & EMU_STATUS_FIRSTTEMPDONE));
 #else
   return !((EMU->TEMP & _EMU_TEMP_TEMP_MASK) == 0u);
 #endif
@@ -1717,9 +1725,9 @@ __STATIC_INLINE bool EMU_TemperatureReady(void)
  ******************************************************************************/
 __STATIC_INLINE float EMU_TemperatureAvgGet(void)
 {
-  return ((float) ((EMU->TEMP & _EMU_TEMP_TEMPAVG_MASK)
-                   >> _EMU_TEMP_TEMPAVG_SHIFT)
-          ) / 4.0f - EMU_TEMP_ZERO_C_IN_KELVIN;
+  uint32_t tmp = ((EMU->TEMP & _EMU_TEMP_TEMPAVG_MASK)
+                  >> _EMU_TEMP_TEMPAVG_SHIFT);
+  return (float)tmp / 4.0f - EMU_TEMP_ZERO_C_IN_KELVIN;
 }
 
 /***************************************************************************//**
@@ -1735,7 +1743,7 @@ __STATIC_INLINE float EMU_TemperatureAvgGet(void)
  ******************************************************************************/
 __STATIC_INLINE void EMU_TemperatureAvgRequest(EMU_TempAvgNum_TypeDef numSamples)
 {
-  BUS_RegBitWrite(&EMU->CTRL, _EMU_CTRL_TEMPAVGNUM_SHIFT, numSamples);
+  BUS_RegBitWrite(&EMU->CTRL, _EMU_CTRL_TEMPAVGNUM_SHIFT, (unsigned int)numSamples);
   EMU->CMD = 1u << _EMU_CMD_TEMPAVGREQ_SHIFT;
 }
 

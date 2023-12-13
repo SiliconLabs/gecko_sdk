@@ -1,0 +1,23 @@
+!!omap
+- id: bg22_rb4402b
+- label: BG22-RB4402B
+- package: platform
+- description: Kit BSP support for the EFR32BG22 Bluetooth LE 6 dBm QFN40 Rev E Radio
+    Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_bg22-rb4402b
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"BG22-RB4402B"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:BG22-RB4402B
+  - kit:pn:RB4402
+  - kit:variant:B
+  - kit:revision:A00

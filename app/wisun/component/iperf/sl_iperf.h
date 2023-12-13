@@ -146,10 +146,11 @@ bool sl_iperf_test_add(sl_iperf_test_t * const test);
  * @brief Get the iPerf test from the result queue.
  * @details Get the test from the output messagequeue.
  * @param[out] test Destination test descriptor
+ * @param[in] timeout_ms Timeout for getting test from messagequeue
  * @return true On Success
  * @return false On Failure
  *****************************************************************************/
-bool sl_iperf_test_get(sl_iperf_test_t * const test);
+bool sl_iperf_test_get(sl_iperf_test_t * const test, const uint32_t timeout_ms);
 #endif
 
 /** @}*/

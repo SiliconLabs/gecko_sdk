@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_rgb
 tag:
   - No-Code
-
 config_file:
   - path: gatt_service_rgb.xml
     directory: btconf
@@ -35,3 +34,6 @@ template_contribution:
       function: sl_gatt_service_rgb_on_event
   - name: component_catalog
     value: gatt_service_rgb
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-rgb

@@ -68,6 +68,11 @@ extern "C" {
  *       an1358-migrating-from-sleep-driver-to-power-manager.pdf">AN1358:
  *       Migrating from Sleep Driver to Power Manager</a> for information on how
  *       to migrate from Sleep Driver to Power Manager.
+ * @note Emlib EMU functions EMU_EnterEM1()/EMU_EnterEM2()/EMU_EnterEM3() must not
+ *       be used when the Power Manager is present. The Power Manager module must be
+ *       the one deciding at which EM level the device sleeps to ensure the application
+ *       properly works. Using both at the same time could lead to undefined behavior
+ *       in the application.
  *
  * @details
  * ## Initialization
@@ -216,19 +221,18 @@ extern "C" {
 
 // Current module name for debugging features
 #ifndef CURRENT_MODULE_NAME
-#define CURRENT_MODULE_NAME "Anonymous"
+#define CURRENT_MODULE_NAME "Anonymous"            ///< current module name
 #endif
 
 // Power transition events
-#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0     (1 << 0)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0      (1 << 1)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM1     (1 << 2)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM1      (1 << 3)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2     (1 << 4)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2      (1 << 5)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3     (1 << 6)
-#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3      (1 << 7)
-/// @endcond
+#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0     (1 << 0)                                  ///< sl power manager event transition entering em0
+#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0      (1 << 1)                                  ///< sl power manager event transition leaving em0
+#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM1     (1 << 2)                                  ///< sl power manager event transition entering em1
+#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM1      (1 << 3)                                  ///< sl power manager event transition leaving em1
+#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2     (1 << 4)                                  ///< sl power manager event transition entering em2
+#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2      (1 << 5)                                  ///< sl power manager event transition leaving em2
+#define SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3     (1 << 6)                                  ///< sl power manager event transition entering em3
+#define SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3      (1 << 7)                                  ///< sl power manager event transition leaving em3
 
 // -----------------------------------------------------------------------------
 // Data Types
@@ -497,6 +501,8 @@ void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_
 
 /***************************************************************************//**
  * Enable or disable fast wake-up in EM2 and EM3
+ *
+ * @param enable True False variable act as a switch for this api
  *
  * @note Will also update the wake up time from EM2 to EM0.
  *

@@ -43,8 +43,6 @@
 #include "app/ezsp-host/ezsp-host-queues.h"
 #include "app/ezsp-host/ezsp-host-ui.h"
 
-#include "app/util/gateway/backchannel.h"
-
 //------------------------------------------------------------------------------
 // Preprocessor definitions
 

@@ -56,7 +56,7 @@
                             | MVP_IF_ARRAYFAULT)
 
 static uint32_t mvp_numerical_exception_flags;
-bool sli_mvp_fault_flag;
+static volatile bool mvp_fault_flag;
 static uint32_t mvp_program_count = 0;
 static volatile uint32_t perfcnt[NUM_PERF_CNT] = { 0 };
 // Software retained MVP registers.
@@ -91,7 +91,7 @@ static bool isr_callback(void)
   pending &= MVP->IEN;
 
   if (pending & SLI_MVP_FAULT_MASK) {
-    sli_mvp_fault_flag = true;
+    mvp_fault_flag = true;
     done = true;
   }
   if (pending & MVP_IF_PROGDONE) {
@@ -118,9 +118,6 @@ static bool isr_callback(void)
 void sli_mvp_clear_error_flags(uint32_t flags)
 {
   mvp_numerical_exception_flags &= ~(flags & SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK);
-  if (flags & SLI_MVP_FAULT_FLAG) {
-    sli_mvp_fault_flag = false;
-  }
 }
 
 sl_status_t sli_mvp_get_error(sl_status_t *error_code,
@@ -134,11 +131,7 @@ sl_status_t sli_mvp_get_error(sl_status_t *error_code,
   uint32_t flag = 0;
   uint32_t flags = mvp_numerical_exception_flags & SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK;
 
-  if (sli_mvp_fault_flag) {
-    sli_mvp_fault_flag = false;
-    *error_code = SL_STATUS_COMPUTE_DRIVER_FAULT;
-
-  } else if (flags & MVP_IF_ALUNAN) {
+  if (flags & MVP_IF_ALUNAN) {
     *error_code = SL_STATUS_COMPUTE_DRIVER_ALU_NAN;
     flag = MVP_IF_ALUNAN;
   } else if (flags & MVP_IF_ALUOF) {
@@ -182,16 +175,12 @@ sl_status_t sli_mvp_get_error(sl_status_t *error_code,
 
 uint32_t sli_mvp_get_error_flags(void)
 {
-  uint32_t flags = mvp_numerical_exception_flags & SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK;
-  if (sli_mvp_fault_flag) {
-    flags |= SLI_MVP_FAULT_FLAG;
-  }
-  return flags;
+  return mvp_numerical_exception_flags & SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK;
 }
 
 sl_status_t sli_mvp_init(void)
 {
-  sli_mvp_fault_flag = false;
+  mvp_fault_flag = false;
   mvp_numerical_exception_flags = 0U;
   return sli_mvp_hal_init(enable_callback, disable_callback, isr_callback);
 }
@@ -207,26 +196,31 @@ void sli_mvp_cmd_enable(void)
   sli_mvp_hal_cmd_enable();
 }
 
-void sli_mvp_cmd_wait_for_completion(void)
+sl_status_t sli_mvp_cmd_wait_for_completion(void)
 {
   sli_mvp_hal_cmd_wait_for_completion();
   mvp_numerical_exception_flags |= MVP->IF;
   MVP->IF_CLR = SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK;
+  sl_status_t status = mvp_fault_flag ? SL_STATUS_COMPUTE_DRIVER_FAULT : SL_STATUS_OK;
+  mvp_fault_flag = false;
+  return status;
 }
 
 sl_status_t sli_mvp_prog_execute(sli_mvp_program_t *program, bool wait)
 {
+  sl_status_t status;
+
   program->CMD = MVP_CMD_INIT | MVP_CMD_START;
   mvp_program_count++;
-  sli_mvp_hal_cmd_wait_for_completion();
+  if ((status = sli_mvp_cmd_wait_for_completion()) != SL_STATUS_OK) {
+    return status;
+  }
   sli_mvp_hal_cmd_enable();
   sli_mvp_hal_load_program(program, &MVP->ALU[0], sizeof(sli_mvp_program_t));
   if (wait) {
-    sli_mvp_hal_cmd_wait_for_completion();
-    mvp_numerical_exception_flags |= MVP->IF;
-    MVP->IF_CLR = SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK;
+    status = sli_mvp_cmd_wait_for_completion();
   }
-  return SL_STATUS_OK;
+  return status;
 }
 
 void sli_mvp_prog_set_reg_s8(sli_mvp_program_t *prog, uint8_t reg, int8_t value)
@@ -603,8 +597,10 @@ void sli_mvp_pb_end_loop(sli_mvp_program_context_t *p)
   p->loop_level--;
 }
 
-void sli_mvp_pb_execute_program(sli_mvp_program_context_t *p)
+sl_status_t sli_mvp_pb_execute_program(sli_mvp_program_context_t *p)
 {
+  sl_status_t status;
+
   // Patch instruction loop begin & end bits.
   for (int i = 0; i <= p->last_instr; i++) {
     p->p->INSTR[i].CFG2 = (p->p->INSTR[i].CFG2 & 0xFFFF0000U) | p->loop_begin_end[i];
@@ -612,9 +608,10 @@ void sli_mvp_pb_execute_program(sli_mvp_program_context_t *p)
   // Mark end of program.
   p->p->INSTR[p->last_instr].cfg2.endprog = 1;
 
-  sli_mvp_prog_execute(p->p, false);
+  status = sli_mvp_prog_execute(p->p, false);
   p->prog_index ^= 1;
   p->p = &p->program[p->prog_index];
+  return status;
 }
 
 void sli_mvp_pb_init_program(sli_mvp_program_context_t *p)

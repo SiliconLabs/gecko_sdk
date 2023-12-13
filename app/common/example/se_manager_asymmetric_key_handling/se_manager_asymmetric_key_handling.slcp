@@ -1,7 +1,7 @@
 project_name: se_manager_asymmetric_key_handling
 package: platform
 quality: production
-label: Platform - SE Manager Asymmetric Key Handling
+label: Platform Security - SoC SE Manager Asymmetric Key Handling
 description: >
   This example project demonstrates the asymmetric key handling API of SE Manager.
 category: Example|Platform

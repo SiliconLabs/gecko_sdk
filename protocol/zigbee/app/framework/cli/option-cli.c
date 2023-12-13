@@ -31,24 +31,24 @@ void sli_zigbee_af_cli_service_discovery_callback(const EmberAfServiceDiscoveryR
     // Do nothing
   } else if (result->zdoRequestClusterId == MATCH_DESCRIPTORS_REQUEST) {
     const EmberAfEndpointList* epList = (const EmberAfEndpointList*)result->responseData;
-    emberAfAppPrintln("Match %py from 0x%2X, ep %d",
-                      "discover",
-                      result->matchAddress,
-                      epList->list[0]);
+    sl_zigbee_app_debug_println("Match %py from 0x%04X, ep %d",
+                                "discover",
+                                result->matchAddress,
+                                epList->list[0]);
   } else if (result->zdoRequestClusterId == NETWORK_ADDRESS_REQUEST) {
-    emberAfAppPrintln("NWK Address response: 0x%2X", result->matchAddress);
+    sl_zigbee_app_debug_println("NWK Address response: 0x%04X", result->matchAddress);
   } else if (result->zdoRequestClusterId == IEEE_ADDRESS_REQUEST) {
     const uint8_t* eui64ptr = (uint8_t*)(result->responseData);
     emberAfAppPrint("IEEE Address response: ");
     emberAfPrintBigEndianEui64(eui64ptr);
-    emberAfAppPrintln("");
+    sl_zigbee_app_debug_println("");
   } else {
     // MISRA requires ..else if.. to have a terminating else.
   }
 
   if (result->status != EMBER_AF_BROADCAST_SERVICE_DISCOVERY_RESPONSE_RECEIVED) {
-    emberAfAppPrintln("Service %py done.",
-                      "discover");
+    sl_zigbee_app_debug_println("Service %sy done.",
+                                "discover");
   }
 #endif //((defined(EMBER_AF_PRINT_ENABLE) && defined(EMBER_AF_PRINT_APP)) || (defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)))
 }
@@ -154,13 +154,6 @@ void optionDiscoverCommand(sl_cli_command_arg_t *arguments)
                                         sli_zigbee_af_cli_service_discovery_callback);
 }
 
-// option edb <endpoint>
-void optionEndDeviceBindCommand(sl_cli_command_arg_t *arguments)
-{
-  uint8_t endpoint = sl_cli_get_argument_uint8(arguments, 0);
-  emberAfSendEndDeviceBind(endpoint);
-}
-
 // option apsretry on/off/...
 void optionApsRetryCommand(sl_cli_command_arg_t *arguments)
 {
@@ -207,7 +200,7 @@ void optionLinkCommand(sl_cli_command_arg_t *arguments)
   EmberStatus status_ember = ((status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_KEY_TABLE_INVALID_ADDRESS);
   UNUSED_VAR(status_ember);
   emberAfAppDebugExec(sli_zigbee_af_print_status("add link key", status_ember));
-  emberAfAppPrintln("");
+  sl_zigbee_app_debug_println("");
   emberAfCoreFlush();
 }
 
@@ -231,12 +224,12 @@ void optionInstallCodeCommand(sl_cli_command_arg_t *arguments)
 
   if (EMBER_SUCCESS != status) {
     if (EMBER_SECURITY_DATA_INVALID == status) {
-      emberAfAppPrintln("ERR: Calculated CRC does not match");
+      sl_zigbee_app_debug_println("ERR: Calculated CRC does not match");
     } else if (EMBER_BAD_ARGUMENT == status) {
-      emberAfAppPrintln("ERR: Install Code must be 8, 10, 14, or 18 bytes in "
-                        "length");
+      sl_zigbee_app_debug_println("ERR: Install Code must be 8, 10, 14, or 18 bytes in "
+                                  "length");
     } else {
-      emberAfAppPrintln("ERR: AES-MMO hash failed: 0x%x", status);
+      sl_zigbee_app_debug_println("ERR: AES-MMO hash failed: 0x%x", status);
     }
     return;
   }
@@ -253,7 +246,7 @@ void optionInstallCodeCommand(sl_cli_command_arg_t *arguments)
   status = ((import_status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_KEY_TABLE_INVALID_ADDRESS);
   emberAfAppDebugExec(sli_zigbee_af_print_status("add link key", status));
 
-  emberAfAppPrintln("");
+  sl_zigbee_app_debug_println("");
   emberAfAppFlush();
   #else
   // Add the key to the transient key table.
@@ -262,13 +255,13 @@ void optionInstallCodeCommand(sl_cli_command_arg_t *arguments)
     sl_status_t key_status = sl_zb_sec_man_import_transient_key(eui64, (sl_zb_sec_man_key_t*)&key);
     status = ((key_status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_NO_BUFFERS);
     emberAfAppDebugExec(sli_zigbee_af_print_status("Set joining link key", status));
-    emberAfAppPrintln("");
+    sl_zigbee_app_debug_println("");
     emberAfAppFlush();
   }
   #endif
 
 #else
-  emberAfAppPrintln("This command only supports the Z3 or SE application profile.");
+  sl_zigbee_app_debug_println("This command only supports the Z3 or SE application profile.");
 #endif
 }
 
@@ -289,5 +282,5 @@ void optionBindingTableSetCommand(sl_cli_command_arg_t *arguments)
     status = emberSetBinding(index, &entry);
     (void) emberAfPopNetworkIndex();
   }
-  emberAfAppPrintln("set bind %d: 0x%x", index, status);
+  sl_zigbee_app_debug_println("set bind %d: 0x%02x", index, status);
 }

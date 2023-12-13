@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include PLATFORM_HEADER
+#include <assert.h>
 #include "sl_component_catalog.h"
 
 #include "cmsis-rtos-ipc-config.h"

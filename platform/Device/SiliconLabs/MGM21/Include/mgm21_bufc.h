@@ -434,4 +434,4 @@ typedef struct {
 /** @} End of group MGM21_BUFC */
 /** @} End of group Parts */
 
-#endif /* MGM21_BUFC_H */
+#endif // MGM21_BUFC_H

@@ -61,9 +61,9 @@ void app_register_meter(sl_cli_command_arg_t *arguments)
 {
   const char *meter_ip = NULL;
 
-  wisun_addr_t meter_addr = {
-    .sin6_family = AF_WISUN,
-    .sin6_addr.s6_addr = {
+  sockaddr_in6_t meter_addr = {
+    .sin6_family = AF_INET6,
+    .sin6_addr = {
       .address = { 0U },
     },
     .sin6_port = SL_WISUN_METER_PORT
@@ -76,8 +76,9 @@ void app_register_meter(sl_cli_command_arg_t *arguments)
   if (meter_ip == NULL) {
     app_wisun_release_cli_mutex_and_return();
   }
-  if (inet_pton(AF_WISUN, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
+  if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\r\n");
+    app_wisun_release_cli_mutex_and_return();
   }
 
   stat = sl_wisun_collector_register_meter(&meter_addr);
@@ -86,7 +87,7 @@ void app_register_meter(sl_cli_command_arg_t *arguments)
   } else if (stat == SL_STATUS_FAIL) {
     printf("[Failed: meter cannot be registered]\n");
   } else {
-    printf("[%s meter registered]\n", meter_ip);
+    printf("[Registration request sent to %s]\n", meter_ip);
   }
 
   app_wisun_cli_mutex_unlock();
@@ -96,9 +97,9 @@ void app_remove_meter(sl_cli_command_arg_t *arguments)
 {
   const char *meter_ip = NULL;
 
-  wisun_addr_t meter_addr = {
-    .sin6_family = AF_WISUN,
-    .sin6_addr.s6_addr = {
+  sockaddr_in6_t meter_addr = {
+    .sin6_family = AF_INET6,
+    .sin6_addr = {
       .address = { 0U },
     },
     .sin6_port = SL_WISUN_METER_PORT
@@ -111,7 +112,7 @@ void app_remove_meter(sl_cli_command_arg_t *arguments)
   if (meter_ip == NULL) {
     app_wisun_release_cli_mutex_and_return();
   }
-  if (inet_pton(AF_WISUN, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
+  if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\r\n");
   }
 
@@ -122,6 +123,47 @@ void app_remove_meter(sl_cli_command_arg_t *arguments)
     printf("[Failed: meter is not registered]\r\n");
   }
 
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_async_request(sl_cli_command_arg_t *arguments)
+{
+  const char *meter_ip = NULL;
+
+  static sockaddr_in6_t meter_addr = {
+    .sin6_family = AF_INET6,
+    .sin6_addr = {
+      .address = { 0U },
+    },
+    .sin6_port = SL_WISUN_METER_PORT
+  };
+  sl_status_t stat = SL_STATUS_FAIL;
+
+  app_wisun_cli_mutex_lock();
+
+  meter_ip = sl_cli_get_argument_string(arguments, 0);
+  if (meter_ip == NULL) {
+    app_wisun_release_cli_mutex_and_return();
+  }
+  if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
+    printf("[Failed: invalid remote address parameter]\r\n");
+  }
+
+  stat = sl_wisun_send_async_request(&meter_addr);
+  if (stat == SL_STATUS_FAIL) {
+    printf("[Failed: async request failed]\n");
+  } else {
+    printf("[Async request sent to %s]\n", meter_ip);
+  }
+
+  app_wisun_cli_mutex_unlock();
+}
+
+void app_list_meters(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  app_wisun_cli_mutex_lock();
+  sl_wisun_collector_print_meters();
   app_wisun_cli_mutex_unlock();
 }
 

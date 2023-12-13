@@ -9,10 +9,10 @@ class RM_Register_AGC_S_IPVERSION(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_IPVERSION, self).__init__(rmio, label,
-            0xa800c000, 0x000,
+            0xa020c000, 0x000,
             'IPVERSION', 'AGC_S.IPVERSION', 'read-only',
             u"",
-            0x00000004, 0xFFFFFFFF,
+            0x00000006, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -25,7 +25,7 @@ class RM_Register_AGC_S_EN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_EN, self).__init__(rmio, label,
-            0xa800c000, 0x004,
+            0xa020c000, 0x004,
             'EN', 'AGC_S.EN', 'read-write',
             u"",
             0x00000000, 0x00000001,
@@ -41,7 +41,7 @@ class RM_Register_AGC_S_STATUS0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_STATUS0, self).__init__(rmio, label,
-            0xa800c000, 0x008,
+            0xa020c000, 0x008,
             'STATUS0', 'AGC_S.STATUS0', 'read-only',
             u"",
             0x00000000, 0x07FFFFFF,
@@ -77,7 +77,7 @@ class RM_Register_AGC_S_STATUS1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_STATUS1, self).__init__(rmio, label,
-            0xa800c000, 0x00C,
+            0xa020c000, 0x00C,
             'STATUS1', 'AGC_S.STATUS1', 'read-only',
             u"",
             0x00000000, 0x3FFFFEFF,
@@ -101,7 +101,7 @@ class RM_Register_AGC_S_STATUS2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_STATUS2, self).__init__(rmio, label,
-            0xa800c000, 0x010,
+            0xa020c000, 0x010,
             'STATUS2', 'AGC_S.STATUS2', 'read-only',
             u"",
             0x00000000, 0xFFFF4FFF,
@@ -121,7 +121,7 @@ class RM_Register_AGC_S_RSSI(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_RSSI, self).__init__(rmio, label,
-            0xa800c000, 0x018,
+            0xa020c000, 0x018,
             'RSSI', 'AGC_S.RSSI', 'read-only',
             u"",
             0x00008000, 0x0000FFC0,
@@ -139,7 +139,7 @@ class RM_Register_AGC_S_FRAMERSSI(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_FRAMERSSI, self).__init__(rmio, label,
-            0xa800c000, 0x01C,
+            0xa020c000, 0x01C,
             'FRAMERSSI', 'AGC_S.FRAMERSSI', 'read-only',
             u"",
             0x00008000, 0x0000FFC0,
@@ -157,10 +157,10 @@ class RM_Register_AGC_S_CTRL0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL0, self).__init__(rmio, label,
-            0xa800c000, 0x020,
+            0xa020c000, 0x020,
             'CTRL0', 'AGC_S.CTRL0', 'read-write',
             u"",
-            0x2032727F, 0xFEFFFFFF,
+            0x2132727F, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -180,6 +180,8 @@ class RM_Register_AGC_S_CTRL0(Base_RM_Register):
         self.zz_fdict['DISRESETCHPWR'] = self.DISRESETCHPWR
         self.ADCATTENMODE = RM_Field_AGC_S_CTRL0_ADCATTENMODE(self)
         self.zz_fdict['ADCATTENMODE'] = self.ADCATTENMODE
+        self.INRXRSTEN = RM_Field_AGC_S_CTRL0_INRXRSTEN(self)
+        self.zz_fdict['INRXRSTEN'] = self.INRXRSTEN
         self.ADCATTENCODE = RM_Field_AGC_S_CTRL0_ADCATTENCODE(self)
         self.zz_fdict['ADCATTENCODE'] = self.ADCATTENCODE
         self.ENRSSIRESET = RM_Field_AGC_S_CTRL0_ENRSSIRESET(self)
@@ -199,10 +201,10 @@ class RM_Register_AGC_S_CTRL1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL1, self).__init__(rmio, label,
-            0xa800c000, 0x024,
+            0xa020c000, 0x024,
             'CTRL1', 'AGC_S.CTRL1', 'read-write',
             u"",
-            0x00001300, 0x001FFFFF,
+            0x04001300, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -222,6 +224,18 @@ class RM_Register_AGC_S_CTRL1(Base_RM_Register):
         self.zz_fdict['DISRSTONPREDET'] = self.DISRSTONPREDET
         self.CFLOOPINCREQMODE = RM_Field_AGC_S_CTRL1_CFLOOPINCREQMODE(self)
         self.zz_fdict['CFLOOPINCREQMODE'] = self.CFLOOPINCREQMODE
+        self.ENRSSIINITGAINCHG = RM_Field_AGC_S_CTRL1_ENRSSIINITGAINCHG(self)
+        self.zz_fdict['ENRSSIINITGAINCHG'] = self.ENRSSIINITGAINCHG
+        self.DISPWRERRCOMP = RM_Field_AGC_S_CTRL1_DISPWRERRCOMP(self)
+        self.zz_fdict['DISPWRERRCOMP'] = self.DISPWRERRCOMP
+        self.ENAGCRSTALL = RM_Field_AGC_S_CTRL1_ENAGCRSTALL(self)
+        self.zz_fdict['ENAGCRSTALL'] = self.ENAGCRSTALL
+        self.RSSIVALIDMODE = RM_Field_AGC_S_CTRL1_RSSIVALIDMODE(self)
+        self.zz_fdict['RSSIVALIDMODE'] = self.RSSIVALIDMODE
+        self.RSSIINITGAINSTEPTHR = RM_Field_AGC_S_CTRL1_RSSIINITGAINSTEPTHR(self)
+        self.zz_fdict['RSSIINITGAINSTEPTHR'] = self.RSSIINITGAINSTEPTHR
+        self.INRXRSSIGATING = RM_Field_AGC_S_CTRL1_INRXRSSIGATING(self)
+        self.zz_fdict['INRXRSSIGATING'] = self.INRXRSSIGATING
         self.__dict__['zz_frozen'] = True
 
 
@@ -229,7 +243,7 @@ class RM_Register_AGC_S_CTRL2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL2, self).__init__(rmio, label,
-            0xa800c000, 0x028,
+            0xa020c000, 0x028,
             'CTRL2', 'AGC_S.CTRL2', 'read-write',
             u"",
             0x0000610A, 0xFFFFFFFF,
@@ -265,7 +279,7 @@ class RM_Register_AGC_S_CTRL3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL3, self).__init__(rmio, label,
-            0xa800c000, 0x02C,
+            0xa020c000, 0x02C,
             'CTRL3', 'AGC_S.CTRL3', 'read-write',
             u"",
             0x5140A800, 0xFFFFFFFF,
@@ -295,7 +309,7 @@ class RM_Register_AGC_S_CTRL4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL4, self).__init__(rmio, label,
-            0xa800c000, 0x030,
+            0xa020c000, 0x030,
             'CTRL4', 'AGC_S.CTRL4', 'read-write',
             u"",
             0x0000000E, 0xBF80FFFF,
@@ -323,7 +337,7 @@ class RM_Register_AGC_S_CTRL5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL5, self).__init__(rmio, label,
-            0xa800c000, 0x034,
+            0xa020c000, 0x034,
             'CTRL5', 'AGC_S.CTRL5', 'read-write',
             u"",
             0x00000000, 0xC0FFFFFF,
@@ -345,7 +359,7 @@ class RM_Register_AGC_S_CTRL6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL6, self).__init__(rmio, label,
-            0xa800c000, 0x038,
+            0xa020c000, 0x038,
             'CTRL6', 'AGC_S.CTRL6', 'read-write',
             u"",
             0x0003AAA8, 0x7FFFFFFF,
@@ -365,7 +379,7 @@ class RM_Register_AGC_S_CTRL7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CTRL7, self).__init__(rmio, label,
-            0xa800c000, 0x03C,
+            0xa020c000, 0x03C,
             'CTRL7', 'AGC_S.CTRL7', 'read-write',
             u"",
             0x00000000, 0x01FFFFFF,
@@ -387,7 +401,7 @@ class RM_Register_AGC_S_RSSISTEPTHR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_RSSISTEPTHR, self).__init__(rmio, label,
-            0xa800c000, 0x040,
+            0xa020c000, 0x040,
             'RSSISTEPTHR', 'AGC_S.RSSISTEPTHR', 'read-write',
             u"",
             0x00000000, 0x3FFFFFFF,
@@ -413,7 +427,7 @@ class RM_Register_AGC_S_MANGAIN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_MANGAIN, self).__init__(rmio, label,
-            0xa800c000, 0x044,
+            0xa020c000, 0x044,
             'MANGAIN', 'AGC_S.MANGAIN', 'read-write',
             u"",
             0x00000000, 0x0001FFFF,
@@ -441,7 +455,7 @@ class RM_Register_AGC_S_IF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_IF, self).__init__(rmio, label,
-            0xa800c000, 0x048,
+            0xa020c000, 0x048,
             'IF', 'AGC_S.IF', 'read-write',
             u"",
             0x00000000, 0x0003FF7D,
@@ -487,7 +501,7 @@ class RM_Register_AGC_S_IEN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_IEN, self).__init__(rmio, label,
-            0xa800c000, 0x04C,
+            0xa020c000, 0x04C,
             'IEN', 'AGC_S.IEN', 'read-write',
             u"",
             0x00000000, 0x0003FF7D,
@@ -533,7 +547,7 @@ class RM_Register_AGC_S_CMD(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CMD, self).__init__(rmio, label,
-            0xa800c000, 0x050,
+            0xa020c000, 0x050,
             'CMD', 'AGC_S.CMD', 'write-only',
             u"",
             0x00000000, 0x00000001,
@@ -549,7 +563,7 @@ class RM_Register_AGC_S_GAINRANGE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_GAINRANGE, self).__init__(rmio, label,
-            0xa800c000, 0x054,
+            0xa020c000, 0x054,
             'GAINRANGE', 'AGC_S.GAINRANGE', 'read-write',
             u"",
             0x00813187, 0x7FFFFFFF,
@@ -577,15 +591,17 @@ class RM_Register_AGC_S_AGCPERIOD0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_AGCPERIOD0, self).__init__(rmio, label,
-            0xa800c000, 0x058,
+            0xa020c000, 0x058,
             'AGCPERIOD0', 'AGC_S.AGCPERIOD0', 'read-write',
             u"",
-            0xD607000E, 0xFFFF01FF,
+            0xD607020E, 0xFFFF03FF,
             0x00001000, 0x00002000,
             0x00003000)
 
         self.PERIODHI = RM_Field_AGC_S_AGCPERIOD0_PERIODHI(self)
         self.zz_fdict['PERIODHI'] = self.PERIODHI
+        self.PERIODHISTL = RM_Field_AGC_S_AGCPERIOD0_PERIODHISTL(self)
+        self.zz_fdict['PERIODHISTL'] = self.PERIODHISTL
         self.MAXHICNTTHD = RM_Field_AGC_S_AGCPERIOD0_MAXHICNTTHD(self)
         self.zz_fdict['MAXHICNTTHD'] = self.MAXHICNTTHD
         self.SETTLETIMEIF = RM_Field_AGC_S_AGCPERIOD0_SETTLETIMEIF(self)
@@ -599,7 +615,7 @@ class RM_Register_AGC_S_AGCPERIOD1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_AGCPERIOD1, self).__init__(rmio, label,
-            0xa800c000, 0x05C,
+            0xa020c000, 0x05C,
             'AGCPERIOD1', 'AGC_S.AGCPERIOD1', 'read-write',
             u"",
             0x00000037, 0xFFFFFFFF,
@@ -615,7 +631,7 @@ class RM_Register_AGC_S_HICNTREGION0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_HICNTREGION0, self).__init__(rmio, label,
-            0xa800c000, 0x060,
+            0xa020c000, 0x060,
             'HICNTREGION0', 'AGC_S.HICNTREGION0', 'read-write',
             u"",
             0x06050403, 0xFFFFFFFF,
@@ -637,7 +653,7 @@ class RM_Register_AGC_S_HICNTREGION1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_HICNTREGION1, self).__init__(rmio, label,
-            0xa800c000, 0x064,
+            0xa020c000, 0x064,
             'HICNTREGION1', 'AGC_S.HICNTREGION1', 'read-write',
             u"",
             0x00000008, 0x000000FF,
@@ -653,7 +669,7 @@ class RM_Register_AGC_S_STEPDWN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_STEPDWN, self).__init__(rmio, label,
-            0xa800c000, 0x068,
+            0xa020c000, 0x068,
             'STEPDWN', 'AGC_S.STEPDWN', 'read-write',
             u"",
             0x00036D10, 0x0003FFFF,
@@ -679,7 +695,7 @@ class RM_Register_AGC_S_GAINSTEPLIM0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_GAINSTEPLIM0, self).__init__(rmio, label,
-            0xa800c000, 0x06C,
+            0xa020c000, 0x06C,
             'GAINSTEPLIM0', 'AGC_S.GAINSTEPLIM0', 'read-write',
             u"",
             0x00003144, 0x01FFFFFF,
@@ -703,7 +719,7 @@ class RM_Register_AGC_S_GAINSTEPLIM1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_GAINSTEPLIM1, self).__init__(rmio, label,
-            0xa800c000, 0x070,
+            0xa020c000, 0x070,
             'GAINSTEPLIM1', 'AGC_S.GAINSTEPLIM1', 'read-write',
             u"",
             0x0000F1BA, 0x0003FFFF,
@@ -725,7 +741,7 @@ class RM_Register_AGC_S_PNRFATT0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT0, self).__init__(rmio, label,
-            0xa800c000, 0x074,
+            0xa020c000, 0x074,
             'PNRFATT0', 'AGC_S.PNRFATT0', 'read-write',
             u"",
             0x00200400, 0x3FFFFFFF,
@@ -745,7 +761,7 @@ class RM_Register_AGC_S_PNRFATT1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT1, self).__init__(rmio, label,
-            0xa800c000, 0x078,
+            0xa020c000, 0x078,
             'PNRFATT1', 'AGC_S.PNRFATT1', 'read-write',
             u"",
             0x00801804, 0x3FFFFFFF,
@@ -765,7 +781,7 @@ class RM_Register_AGC_S_PNRFATT2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT2, self).__init__(rmio, label,
-            0xa800c000, 0x07C,
+            0xa020c000, 0x07C,
             'PNRFATT2', 'AGC_S.PNRFATT2', 'read-write',
             u"",
             0x01203C0B, 0x3FFFFFFF,
@@ -785,7 +801,7 @@ class RM_Register_AGC_S_PNRFATT3(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT3, self).__init__(rmio, label,
-            0xa800c000, 0x080,
+            0xa020c000, 0x080,
             'PNRFATT3', 'AGC_S.PNRFATT3', 'read-write',
             u"",
             0x02107C18, 0x3FFFFFFF,
@@ -805,7 +821,7 @@ class RM_Register_AGC_S_PNRFATT4(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT4, self).__init__(rmio, label,
-            0xa800c000, 0x084,
+            0xa020c000, 0x084,
             'PNRFATT4', 'AGC_S.PNRFATT4', 'read-write',
             u"",
             0x06E0FC2F, 0x3FFFFFFF,
@@ -825,7 +841,7 @@ class RM_Register_AGC_S_PNRFATT5(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT5, self).__init__(rmio, label,
-            0xa800c000, 0x088,
+            0xa020c000, 0x088,
             'PNRFATT5', 'AGC_S.PNRFATT5', 'read-write',
             u"",
             0x0180480F, 0x3FFFFFFF,
@@ -845,7 +861,7 @@ class RM_Register_AGC_S_PNRFATT6(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT6, self).__init__(rmio, label,
-            0xa800c000, 0x08C,
+            0xa020c000, 0x08C,
             'PNRFATT6', 'AGC_S.PNRFATT6', 'read-write',
             u"",
             0x02F0841F, 0x3FFFFFFF,
@@ -865,7 +881,7 @@ class RM_Register_AGC_S_PNRFATT7(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATT7, self).__init__(rmio, label,
-            0xa800c000, 0x090,
+            0xa020c000, 0x090,
             'PNRFATT7', 'AGC_S.PNRFATT7', 'read-write',
             u"",
             0x07F1B83F, 0x3FFFFFFF,
@@ -885,7 +901,7 @@ class RM_Register_AGC_S_PNRFATTALT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PNRFATTALT, self).__init__(rmio, label,
-            0xa800c000, 0x0A4,
+            0xa020c000, 0x0A4,
             'PNRFATTALT', 'AGC_S.PNRFATTALT', 'read-write',
             u"",
             0x0000007F, 0x000003FF,
@@ -901,7 +917,7 @@ class RM_Register_AGC_S_LNAMIXCODE0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_LNAMIXCODE0, self).__init__(rmio, label,
-            0xa800c000, 0x0A8,
+            0xa020c000, 0x0A8,
             'LNAMIXCODE0', 'AGC_S.LNAMIXCODE0', 'read-write',
             u"",
             0x15724BBD, 0x3FFFFFFF,
@@ -925,7 +941,7 @@ class RM_Register_AGC_S_LNAMIXCODE1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_LNAMIXCODE1, self).__init__(rmio, label,
-            0xa800c000, 0x0AC,
+            0xa020c000, 0x0AC,
             'LNAMIXCODE1', 'AGC_S.LNAMIXCODE1', 'read-write',
             u"",
             0x0518A311, 0x3FFFFFFF,
@@ -949,7 +965,7 @@ class RM_Register_AGC_S_PGACODE0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PGACODE0, self).__init__(rmio, label,
-            0xa800c000, 0x0B0,
+            0xa020c000, 0x0B0,
             'PGACODE0', 'AGC_S.PGACODE0', 'read-write',
             u"",
             0x76543210, 0xFFFFFFFF,
@@ -979,7 +995,7 @@ class RM_Register_AGC_S_PGACODE1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_PGACODE1, self).__init__(rmio, label,
-            0xa800c000, 0x0B4,
+            0xa020c000, 0x0B4,
             'PGACODE1', 'AGC_S.PGACODE1', 'read-write',
             u"",
             0x00000A98, 0x00000FFF,
@@ -999,7 +1015,7 @@ class RM_Register_AGC_S_LBT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_LBT, self).__init__(rmio, label,
-            0xa800c000, 0x0B8,
+            0xa020c000, 0x0B8,
             'LBT', 'AGC_S.LBT', 'read-write',
             u"",
             0x00000000, 0x0000007F,
@@ -1021,7 +1037,7 @@ class RM_Register_AGC_S_MIRRORIF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_MIRRORIF, self).__init__(rmio, label,
-            0xa800c000, 0x0BC,
+            0xa020c000, 0x0BC,
             'MIRRORIF', 'AGC_S.MIRRORIF', 'read-write',
             u"",
             0x00000000, 0x0000000F,
@@ -1043,7 +1059,7 @@ class RM_Register_AGC_S_SEQIF(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_SEQIF, self).__init__(rmio, label,
-            0xa800c000, 0x0C0,
+            0xa020c000, 0x0C0,
             'SEQIF', 'AGC_S.SEQIF', 'read-write',
             u"",
             0x00000000, 0x0003FF7D,
@@ -1089,7 +1105,7 @@ class RM_Register_AGC_S_SEQIEN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_SEQIEN, self).__init__(rmio, label,
-            0xa800c000, 0x0C4,
+            0xa020c000, 0x0C4,
             'SEQIEN', 'AGC_S.SEQIEN', 'read-write',
             u"",
             0x00000000, 0x0003FF7D,
@@ -1135,7 +1151,7 @@ class RM_Register_AGC_S_RSSIABSTHR(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_RSSIABSTHR, self).__init__(rmio, label,
-            0xa800c000, 0x0C8,
+            0xa020c000, 0x0C8,
             'RSSIABSTHR', 'AGC_S.RSSIABSTHR', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -1153,36 +1169,14 @@ class RM_Register_AGC_S_RSSIABSTHR(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_AGC_S_LNABOOST(Base_RM_Register):
-    def __init__(self, rmio, label):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Register_AGC_S_LNABOOST, self).__init__(rmio, label,
-            0xa800c000, 0x0CC,
-            'LNABOOST', 'AGC_S.LNABOOST', 'read-write',
-            u"",
-            0x000001FE, 0x000007FF,
-            0x00001000, 0x00002000,
-            0x00003000)
-
-        self.BOOSTLNA = RM_Field_AGC_S_LNABOOST_BOOSTLNA(self)
-        self.zz_fdict['BOOSTLNA'] = self.BOOSTLNA
-        self.LNABWADJ = RM_Field_AGC_S_LNABOOST_LNABWADJ(self)
-        self.zz_fdict['LNABWADJ'] = self.LNABWADJ
-        self.LNABWADJBOOST = RM_Field_AGC_S_LNABOOST_LNABWADJBOOST(self)
-        self.zz_fdict['LNABWADJBOOST'] = self.LNABWADJBOOST
-        self.LNABOOSTGAIN = RM_Field_AGC_S_LNABOOST_LNABOOSTGAIN(self)
-        self.zz_fdict['LNABOOSTGAIN'] = self.LNABOOSTGAIN
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Register_AGC_S_ANTDIV(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_ANTDIV, self).__init__(rmio, label,
-            0xa800c000, 0x0D0,
+            0xa020c000, 0x0D0,
             'ANTDIV', 'AGC_S.ANTDIV', 'read-write',
             u"",
-            0x00000000, 0x000007FF,
+            0x00000000, 0x000001FF,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -1190,8 +1184,6 @@ class RM_Register_AGC_S_ANTDIV(Base_RM_Register):
         self.zz_fdict['GAINMODE'] = self.GAINMODE
         self.DEBOUNCECNTTHD = RM_Field_AGC_S_ANTDIV_DEBOUNCECNTTHD(self)
         self.zz_fdict['DEBOUNCECNTTHD'] = self.DEBOUNCECNTTHD
-        self.DISRSSIANTDIVFIX = RM_Field_AGC_S_ANTDIV_DISRSSIANTDIVFIX(self)
-        self.zz_fdict['DISRSSIANTDIVFIX'] = self.DISRSSIANTDIVFIX
         self.__dict__['zz_frozen'] = True
 
 
@@ -1199,7 +1191,7 @@ class RM_Register_AGC_S_DUALRFPKDTHD0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_DUALRFPKDTHD0, self).__init__(rmio, label,
-            0xa800c000, 0x0D4,
+            0xa020c000, 0x0D4,
             'DUALRFPKDTHD0', 'AGC_S.DUALRFPKDTHD0', 'read-write',
             u"",
             0x000A0001, 0x0FFF0FFF,
@@ -1217,7 +1209,7 @@ class RM_Register_AGC_S_DUALRFPKDTHD1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_DUALRFPKDTHD1, self).__init__(rmio, label,
-            0xa800c000, 0x0D8,
+            0xa020c000, 0x0D8,
             'DUALRFPKDTHD1', 'AGC_S.DUALRFPKDTHD1', 'read-write',
             u"",
             0x00280001, 0x0FFF0FFF,
@@ -1235,7 +1227,7 @@ class RM_Register_AGC_S_SPARE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_SPARE, self).__init__(rmio, label,
-            0xa800c000, 0x0DC,
+            0xa020c000, 0x0DC,
             'SPARE', 'AGC_S.SPARE', 'read-write',
             u"",
             0x00000000, 0x000000FF,
@@ -1251,7 +1243,7 @@ class RM_Register_AGC_S_FLARE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_FLARE, self).__init__(rmio, label,
-            0xa800c000, 0x0E0,
+            0xa020c000, 0x0E0,
             'FLARE', 'AGC_S.FLARE', 'read-write',
             u"",
             0x00000004, 0x0000001F,
@@ -1267,7 +1259,7 @@ class RM_Register_AGC_S_STEPDWNSAFE(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_STEPDWNSAFE, self).__init__(rmio, label,
-            0xa800c000, 0x0E4,
+            0xa020c000, 0x0E4,
             'STEPDWNSAFE', 'AGC_S.STEPDWNSAFE', 'read-write',
             u"",
             0x00036D11, 0x0007FFFF,
@@ -1295,7 +1287,7 @@ class RM_Register_AGC_S_CCADEBUG(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_CCADEBUG, self).__init__(rmio, label,
-            0xa800c000, 0x0E8,
+            0xa020c000, 0x0E8,
             'CCADEBUG', 'AGC_S.CCADEBUG', 'read-only',
             u"",
             0x00000000, 0x000003FF,
@@ -1315,7 +1307,7 @@ class RM_Register_AGC_S_TIACODE0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_TIACODE0, self).__init__(rmio, label,
-            0xa800c000, 0x0EC,
+            0xa020c000, 0x0EC,
             'TIACODE0', 'AGC_S.TIACODE0', 'read-write',
             u"",
             0x00000000, 0x00777777,
@@ -1341,7 +1333,7 @@ class RM_Register_AGC_S_TIACODE1(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_TIACODE1, self).__init__(rmio, label,
-            0xa800c000, 0x0F0,
+            0xa020c000, 0x0F0,
             'TIACODE1', 'AGC_S.TIACODE1', 'read-write',
             u"",
             0x00000000, 0x00077777,
@@ -1365,7 +1357,7 @@ class RM_Register_AGC_S_LNAMIXCODE2(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_LNAMIXCODE2, self).__init__(rmio, label,
-            0xa800c000, 0x0F4,
+            0xa020c000, 0x0F4,
             'LNAMIXCODE2', 'AGC_S.LNAMIXCODE2', 'read-write',
             u"",
             0x00000011, 0x0001FFFF,
@@ -1379,11 +1371,155 @@ class RM_Register_AGC_S_LNAMIXCODE2(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Register_AGC_S_FSWIF(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_FSWIF, self).__init__(rmio, label,
+            0xa020c000, 0x0F8,
+            'FSWIF', 'AGC_S.FSWIF', 'read-write',
+            u"",
+            0x00000000, 0x0003FF7D,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.RSSIVALID = RM_Field_AGC_S_FSWIF_RSSIVALID(self)
+        self.zz_fdict['RSSIVALID'] = self.RSSIVALID
+        self.CCA = RM_Field_AGC_S_FSWIF_CCA(self)
+        self.zz_fdict['CCA'] = self.CCA
+        self.RSSIPOSSTEP = RM_Field_AGC_S_FSWIF_RSSIPOSSTEP(self)
+        self.zz_fdict['RSSIPOSSTEP'] = self.RSSIPOSSTEP
+        self.RSSINEGSTEP = RM_Field_AGC_S_FSWIF_RSSINEGSTEP(self)
+        self.zz_fdict['RSSINEGSTEP'] = self.RSSINEGSTEP
+        self.RSSIDONE = RM_Field_AGC_S_FSWIF_RSSIDONE(self)
+        self.zz_fdict['RSSIDONE'] = self.RSSIDONE
+        self.SHORTRSSIPOSSTEP = RM_Field_AGC_S_FSWIF_SHORTRSSIPOSSTEP(self)
+        self.zz_fdict['SHORTRSSIPOSSTEP'] = self.SHORTRSSIPOSSTEP
+        self.RFPKDPRDDONE = RM_Field_AGC_S_FSWIF_RFPKDPRDDONE(self)
+        self.zz_fdict['RFPKDPRDDONE'] = self.RFPKDPRDDONE
+        self.RFPKDCNTDONE = RM_Field_AGC_S_FSWIF_RFPKDCNTDONE(self)
+        self.zz_fdict['RFPKDCNTDONE'] = self.RFPKDCNTDONE
+        self.RSSIHIGH = RM_Field_AGC_S_FSWIF_RSSIHIGH(self)
+        self.zz_fdict['RSSIHIGH'] = self.RSSIHIGH
+        self.RSSILOW = RM_Field_AGC_S_FSWIF_RSSILOW(self)
+        self.zz_fdict['RSSILOW'] = self.RSSILOW
+        self.CCANODET = RM_Field_AGC_S_FSWIF_CCANODET(self)
+        self.zz_fdict['CCANODET'] = self.CCANODET
+        self.GAINBELOWGAINTHD = RM_Field_AGC_S_FSWIF_GAINBELOWGAINTHD(self)
+        self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
+        self.GAINUPDATEFRZ = RM_Field_AGC_S_FSWIF_GAINUPDATEFRZ(self)
+        self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_FSWIF_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_FSWIF_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_FSWIF_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_FSWIEN(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_FSWIEN, self).__init__(rmio, label,
+            0xa020c000, 0x0FC,
+            'FSWIEN', 'AGC_S.FSWIEN', 'read-write',
+            u"",
+            0x00000000, 0x0003FF7D,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.RSSIVALID = RM_Field_AGC_S_FSWIEN_RSSIVALID(self)
+        self.zz_fdict['RSSIVALID'] = self.RSSIVALID
+        self.CCA = RM_Field_AGC_S_FSWIEN_CCA(self)
+        self.zz_fdict['CCA'] = self.CCA
+        self.RSSIPOSSTEP = RM_Field_AGC_S_FSWIEN_RSSIPOSSTEP(self)
+        self.zz_fdict['RSSIPOSSTEP'] = self.RSSIPOSSTEP
+        self.RSSINEGSTEP = RM_Field_AGC_S_FSWIEN_RSSINEGSTEP(self)
+        self.zz_fdict['RSSINEGSTEP'] = self.RSSINEGSTEP
+        self.RSSIDONE = RM_Field_AGC_S_FSWIEN_RSSIDONE(self)
+        self.zz_fdict['RSSIDONE'] = self.RSSIDONE
+        self.SHORTRSSIPOSSTEP = RM_Field_AGC_S_FSWIEN_SHORTRSSIPOSSTEP(self)
+        self.zz_fdict['SHORTRSSIPOSSTEP'] = self.SHORTRSSIPOSSTEP
+        self.RFPKDPRDDONE = RM_Field_AGC_S_FSWIEN_RFPKDPRDDONE(self)
+        self.zz_fdict['RFPKDPRDDONE'] = self.RFPKDPRDDONE
+        self.RFPKDCNTDONE = RM_Field_AGC_S_FSWIEN_RFPKDCNTDONE(self)
+        self.zz_fdict['RFPKDCNTDONE'] = self.RFPKDCNTDONE
+        self.RSSIHIGH = RM_Field_AGC_S_FSWIEN_RSSIHIGH(self)
+        self.zz_fdict['RSSIHIGH'] = self.RSSIHIGH
+        self.RSSILOW = RM_Field_AGC_S_FSWIEN_RSSILOW(self)
+        self.zz_fdict['RSSILOW'] = self.RSSILOW
+        self.CCANODET = RM_Field_AGC_S_FSWIEN_CCANODET(self)
+        self.zz_fdict['CCANODET'] = self.CCANODET
+        self.GAINBELOWGAINTHD = RM_Field_AGC_S_FSWIEN_GAINBELOWGAINTHD(self)
+        self.zz_fdict['GAINBELOWGAINTHD'] = self.GAINBELOWGAINTHD
+        self.GAINUPDATEFRZ = RM_Field_AGC_S_FSWIEN_GAINUPDATEFRZ(self)
+        self.zz_fdict['GAINUPDATEFRZ'] = self.GAINUPDATEFRZ
+        self.PNATTEN = RM_Field_AGC_S_FSWIEN_PNATTEN(self)
+        self.zz_fdict['PNATTEN'] = self.PNATTEN
+        self.COLLDETRSSIMAPRE = RM_Field_AGC_S_FSWIEN_COLLDETRSSIMAPRE(self)
+        self.zz_fdict['COLLDETRSSIMAPRE'] = self.COLLDETRSSIMAPRE
+        self.COLLDETRSSIMASYNC = RM_Field_AGC_S_FSWIEN_COLLDETRSSIMASYNC(self)
+        self.zz_fdict['COLLDETRSSIMASYNC'] = self.COLLDETRSSIMASYNC
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_CCASUB(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_CCASUB, self).__init__(rmio, label,
+            0xa020c000, 0x100,
+            'CCASUB', 'AGC_S.CCASUB', 'read-write',
+            u"",
+            0x00004400, 0x0003FFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.CCASUBPER = RM_Field_AGC_S_CCASUB_CCASUBPER(self)
+        self.zz_fdict['CCASUBPER'] = self.CCASUBPER
+        self.CCASUBNUM = RM_Field_AGC_S_CCASUB_CCASUBNUM(self)
+        self.zz_fdict['CCASUBNUM'] = self.CCASUBNUM
+        self.CCASUBDEN = RM_Field_AGC_S_CCASUB_CCASUBDEN(self)
+        self.zz_fdict['CCASUBDEN'] = self.CCASUBDEN
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_CTRL8(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_CTRL8, self).__init__(rmio, label,
+            0xa020c000, 0x104,
+            'CTRL8', 'AGC_S.CTRL8', 'read-write',
+            u"",
+            0x00000000, 0x0000000F,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.EARLYRSSIPERIOD = RM_Field_AGC_S_CTRL8_EARLYRSSIPERIOD(self)
+        self.zz_fdict['EARLYRSSIPERIOD'] = self.EARLYRSSIPERIOD
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_AGC_S_STATUS3(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_AGC_S_STATUS3, self).__init__(rmio, label,
+            0xa020c000, 0x108,
+            'STATUS3', 'AGC_S.STATUS3', 'read-only',
+            u"",
+            0x00000000, 0x000000FF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.IFPKDHICNT = RM_Field_AGC_S_STATUS3_IFPKDHICNT(self)
+        self.zz_fdict['IFPKDHICNT'] = self.IFPKDHICNT
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Register_AGC_S_COLLDETCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_COLLDETCTRL, self).__init__(rmio, label,
-            0xa800c000, 0x100,
+            0xa020c000, 0x110,
             'COLLDETCTRL', 'AGC_S.COLLDETCTRL', 'read-write',
             u"",
             0x00002800, 0x03007F8F,
@@ -1417,7 +1553,7 @@ class RM_Register_AGC_S_COLLDETTHD(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_COLLDETTHD, self).__init__(rmio, label,
-            0xa800c000, 0x104,
+            0xa020c000, 0x114,
             'COLLDETTHD', 'AGC_S.COLLDETTHD', 'read-write',
             u"",
             0x00281606, 0x07FDFF0F,
@@ -1437,7 +1573,7 @@ class RM_Register_AGC_S_COLLDETSTATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_COLLDETSTATUS, self).__init__(rmio, label,
-            0xa800c000, 0x108,
+            0xa020c000, 0x118,
             'COLLDETSTATUS', 'AGC_S.COLLDETSTATUS', 'read-only',
             u"",
             0x00000000, 0x000001FF,
@@ -1453,7 +1589,7 @@ class RM_Register_AGC_S_SETTLINGINDCTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_SETTLINGINDCTRL, self).__init__(rmio, label,
-            0xa800c000, 0x110,
+            0xa020c000, 0x120,
             'SETTLINGINDCTRL', 'AGC_S.SETTLINGINDCTRL', 'read-write',
             u"",
             0x00010100, 0x003F3F01,
@@ -1473,7 +1609,7 @@ class RM_Register_AGC_S_SETTLINGINDPER(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_AGC_S_SETTLINGINDPER, self).__init__(rmio, label,
-            0xa800c000, 0x114,
+            0xa020c000, 0x124,
             'SETTLINGINDPER', 'AGC_S.SETTLINGINDPER', 'read-write',
             u"",
             0x02000100, 0xFFFFFFFF,

@@ -34,8 +34,8 @@
 #include <string.h>
 #include PLATFORM_HEADER
 #include "em_chip.h"
+#include "em_cmu.h"
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "sl_cli.h"
 #include "app_log.h"
 #include "sl_app_common.h"
@@ -408,7 +408,7 @@ void cli_set_tx_option(sl_cli_command_arg_t *arguments)
 void cli_reset(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
-  halReboot();
+  NVIC_SystemReset();
 }
 
 bool set_security_key(uint8_t* key, size_t key_length)

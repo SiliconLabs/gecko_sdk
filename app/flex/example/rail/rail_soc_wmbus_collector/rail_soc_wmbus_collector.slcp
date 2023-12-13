@@ -19,12 +19,10 @@ component:
   - id: app_log
   - id: app_assert
   - id: power_manager
-  - id: simple_led
-    instance:
-      - led0
   - id: printf
   - id: iostream_recommended_stream
   - id: iostream_retarget_stdio
+  - id: simple_rail_assistance
 #------------------- WMBUS ---------------------------
   - id: sl_wmbus_support
 #------------Memory Protection Unit-------------------
@@ -46,6 +44,7 @@ requires:
   - name: radio_config_wmbus_collector_device_family_fgm23
     condition:
       - "device_family_fgm23"
+  - name: simple_led
 
 #----------------- Project files ---------------------
 include:

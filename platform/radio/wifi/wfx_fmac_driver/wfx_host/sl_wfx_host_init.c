@@ -18,7 +18,7 @@
 #include "os.h"
 #include "io.h"
 #include "bsp_os.h"
-#include "common.h"
+#include <common/include/common.h>
 #include "em_common.h"
 #include "em_gpio.h"
 #include "sl_wfx_task.h"

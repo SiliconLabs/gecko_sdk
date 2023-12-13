@@ -1071,4 +1071,4 @@ typedef struct {
 /** @} End of group EFM32PG28_IADC */
 /** @} End of group Parts */
 
-#endif /* EFM32PG28_IADC_H */
+#endif // EFM32PG28_IADC_H

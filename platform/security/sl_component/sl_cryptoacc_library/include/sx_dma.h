@@ -32,8 +32,8 @@
 * @brief Structure that represent a descriptor for the DMA module (in scatter-gather mode).
 */
 struct dma_sg_descr_s {
-   volatile void * addr; /**< Address of the first byte of data to be fetched/pushed */
-   volatile struct dma_sg_descr_s * next_descr; /**< Pointer to the next valid
+   volatile void * volatile addr; /**< Address of the first byte of data to be fetched/pushed */
+   volatile struct dma_sg_descr_s * volatile next_descr; /**< Pointer to the next valid
                                                      descriptor or indicates
                                                      that the current descriptor
                                                      is the last.

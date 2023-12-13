@@ -43,19 +43,33 @@
  * @{
  ******************************************************************************/
 
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
+
+extern __INLINE void sl_hal_sysrtc_wait_sync(void);
+extern __INLINE void sl_hal_sysrtc_wait_ready(void);
+extern __INLINE void sl_hal_sysrtc_start(void);
+extern __INLINE void sl_hal_sysrtc_stop(void);
+extern __INLINE uint32_t sl_hal_sysrtc_get_status(void);
+extern __INLINE void sl_hal_sysrtc_lock(void);
+extern __INLINE void sl_hal_sysrtc_unlock(void);
+extern __INLINE uint32_t sl_hal_sysrtc_get_counter(void);
+extern __INLINE void sl_hal_sysrtc_set_counter(uint32_t value);
+
 /***************************************************************************//**
  * Initializes SYSRTC module.
  ******************************************************************************/
-void sl_sysrtc_init(const sl_sysrtc_config_t *p_config)
+void sl_hal_sysrtc_init(const sl_hal_sysrtc_config_t *p_config)
 {
   // Wait to be ready
-  sl_sysrtc_wait_ready();
+  sl_hal_sysrtc_wait_ready();
 
   if (SYSRTC0->EN == SYSRTC_EN_EN) {
     // Disable the module
-    sl_sysrtc_disable();
+    sl_hal_sysrtc_disable();
     // Wait to be ready
-    sl_sysrtc_wait_ready();
+    sl_hal_sysrtc_wait_ready();
   }
 
   // Set configuration
@@ -65,10 +79,10 @@ void sl_sysrtc_init(const sl_sysrtc_config_t *p_config)
 /***************************************************************************//**
  * Enables SYSRTC counting.
  ******************************************************************************/
-void sl_sysrtc_enable(void)
+void sl_hal_sysrtc_enable(void)
 {
   // Wait if disabling
-  sl_sysrtc_wait_ready();
+  sl_hal_sysrtc_wait_ready();
 
   // Enable SYSRTC module
   SYSRTC0->EN_SET = SYSRTC_EN_EN;
@@ -80,14 +94,14 @@ void sl_sysrtc_enable(void)
 /***************************************************************************//**
  * Disables SYSRTC counting.
  ******************************************************************************/
-void sl_sysrtc_disable(void)
+void sl_hal_sysrtc_disable(void)
 {
   if (SYSRTC0->EN != SYSRTC_EN_EN) {
     return;
   }
 
   // Stop counter
-  sl_sysrtc_stop();
+  sl_hal_sysrtc_stop();
 
   // Disable module
   SYSRTC0->EN_CLR = SYSRTC_EN_EN;
@@ -96,7 +110,7 @@ void sl_sysrtc_disable(void)
 /***************************************************************************//**
  * Restores SYSRTC to its reset state.
  ******************************************************************************/
-void sl_sysrtc_reset(void)
+void sl_hal_sysrtc_reset(void)
 {
   // Reset timer
   SYSRTC0->SWRST = SYSRTC_SWRST_SWRST;
@@ -105,8 +119,8 @@ void sl_sysrtc_reset(void)
 /***************************************************************************//**
  * Initializes the selected SYSRTC group.
  ******************************************************************************/
-void sl_sysrtc_init_group(uint8_t group_number,
-                          sl_sysrtc_group_config_t const *p_group_config)
+void sl_hal_sysrtc_init_group(uint8_t group_number,
+                              sl_hal_sysrtc_group_config_t const *p_group_config)
 {
   uint32_t temp = 0;
 
@@ -254,8 +268,8 @@ void sl_sysrtc_init_group(uint8_t group_number,
 /***************************************************************************//**
  * Enables one or more SYSRTC interrupts for the given group.
  ******************************************************************************/
-void sl_sysrtc_enable_group_interrupts(uint8_t group_number,
-                                       uint32_t flags)
+void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
+                                           uint32_t flags)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -314,8 +328,8 @@ void sl_sysrtc_enable_group_interrupts(uint8_t group_number,
 /***************************************************************************//**
  * Disables one or more SYSRTC interrupts for the given group.
  ******************************************************************************/
-void sl_sysrtc_disable_group_interrupts(uint8_t group_number,
-                                        uint32_t flags)
+void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
+                                            uint32_t flags)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -374,8 +388,8 @@ void sl_sysrtc_disable_group_interrupts(uint8_t group_number,
 /***************************************************************************//**
  * Clears one or more pending SYSRTC interrupts for the given group.
  ******************************************************************************/
-void sl_sysrtc_clear_group_interrupts(uint8_t group_number,
-                                      uint32_t flags)
+void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
+                                          uint32_t flags)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -434,7 +448,7 @@ void sl_sysrtc_clear_group_interrupts(uint8_t group_number,
 /***************************************************************************//**
  * Gets pending SYSRTC interrupt flags for the given group.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_interrupts(uint8_t group_number)
+uint32_t sl_hal_sysrtc_get_group_interrupts(uint8_t group_number)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -486,7 +500,7 @@ uint32_t sl_sysrtc_get_group_interrupts(uint8_t group_number)
 /***************************************************************************//**
  * Gets enabled and pending SYSRTC interrupt flags.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
+uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
 {
   uint32_t ien = 0;
 
@@ -548,8 +562,8 @@ uint32_t sl_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
 /***************************************************************************//**
  * Sets one or more pending SYSRTC interrupts for the given group from Software.
  ******************************************************************************/
-void sl_sysrtc_set_group_interrupts(uint8_t group_number,
-                                    uint32_t flags)
+void sl_hal_sysrtc_set_group_interrupts(uint8_t group_number,
+                                        uint32_t flags)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -608,8 +622,8 @@ void sl_sysrtc_set_group_interrupts(uint8_t group_number,
 /***************************************************************************//**
  * Gets SYSRTC compare register value for selected channel of given group.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_compare_channel_value(uint8_t group_number,
-                                                   uint8_t channel)
+uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
+                                                       uint8_t channel)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -765,9 +779,9 @@ uint32_t sl_sysrtc_get_group_compare_channel_value(uint8_t group_number,
 /***************************************************************************//**
  * Sets SYSRTC compare register value for selected channel of given group.
  ******************************************************************************/
-void sl_sysrtc_set_group_compare_channel_value(uint8_t group_number,
-                                               uint8_t channel,
-                                               uint32_t value)
+void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
+                                                   uint8_t channel,
+                                                   uint32_t value)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
@@ -930,7 +944,7 @@ void sl_sysrtc_set_group_compare_channel_value(uint8_t group_number,
 /***************************************************************************//**
  * Gets SYSRTC input capture register value for selected channel of given group.
  ******************************************************************************/
-uint32_t sl_sysrtc_get_group_capture_channel_value(uint8_t group_number)
+uint32_t sl_hal_sysrtc_get_group_capture_channel_value(uint8_t group_number)
 {
   EFM_ASSERT(SYSRTC_GROUP_VALID(group_number));
 

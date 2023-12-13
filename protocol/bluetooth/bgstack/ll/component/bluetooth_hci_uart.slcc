@@ -8,11 +8,10 @@ quality: production
 root_path: protocol/bluetooth/bgstack/ll/utils/hci_packet
 source:
   - path: uart/src/sl_hci_packet.c
-  - path: uart/src/sl_hci_fifo.c
   - path: uart/src/sl_hci_uart.c
   - path: uart/src/sl_hci_uart_rtos.c
     condition:
-      - "kernel"      
+      - "kernel"
 include:
   - path: inc
     file_list:
@@ -25,7 +24,6 @@ include:
           - "kernel"
   - path: uart/src
     file_list:
-      - path: sl_hci_fifo.h
       - path: sl_hci_uart.h
 provides:
   - name: bluetooth_hci_uart
@@ -53,4 +51,4 @@ template_contribution:
       handler: "sl_btctrl_hci_uart_rtos_init"
     priority: -1000
     condition:
-      - "kernel"      
+      - "kernel"

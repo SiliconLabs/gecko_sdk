@@ -20,6 +20,7 @@ filter:
 component:
   - id: app_assert
   - id: bootloader_interface
+  - id: bt_post_build
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_node
   - id: btmesh_stack_relay
@@ -49,8 +50,6 @@ readme:
   - path: ../../documentation/example/btmesh_soc_empty/readme.md
 
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
   - path: ../../documentation/example/btmesh_soc_empty/readme_img0.png
   - path: ../../documentation/example/btmesh_soc_empty/readme_img1.png
   - path: ../../documentation/example/btmesh_soc_empty/readme_img2.png

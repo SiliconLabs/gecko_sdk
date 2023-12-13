@@ -40,6 +40,14 @@ template_contribution:
         - type: uint16
           help: "Measurement packet length"
 
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "print_nodeinfo"
+      handler: "app_print_node_info"
+      help: "Print info about Border Router and Neighbors"
+      shortcuts: "pni"
+
 #---------------- Component Catalog ------------------
   - name: component_catalog
     value: wisun_network_measurement_cli

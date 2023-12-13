@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_light
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_gatt_service_light_config.h
   - path: gatt_service_light.xml
@@ -35,3 +34,6 @@ template_contribution:
       function: sl_gatt_service_light_on_event
   - name: component_catalog
     value: gatt_service_light
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-light

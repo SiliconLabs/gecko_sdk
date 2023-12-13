@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include "em_common.h"
 #include "sl_status.h"
+#include "sl_sleeptimer.h"
 
 #include "sl_btmesh.h"
 #include "sl_bluetooth.h"
@@ -70,8 +71,8 @@
 #define HIGH_PRIORITY                  0
 /// No Timer Options
 #define NO_FLAGS                       0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA               (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA               NULL
 /// timeout for registering new devices after startup
 #define DEVICE_REGISTER_SHORT_TIMEOUT  100
 /// timeout for registering new devices after startup
@@ -467,6 +468,15 @@ void sl_btmesh_on_node_provisioning_started(uint16_t result)
   app_assert_status_f(sc, "Failed to start periodic timer");
 
   app_show_btmesh_node_provisioning_started(result);
+}
+
+// Called when the Provisioning fails
+void sl_btmesh_on_node_provisioning_failed(uint16_t result)
+{
+  app_show_btmesh_node_provisioning_failed(result);
+  // Small delay before reboot
+  sl_sleeptimer_delay_millisecond(2000);
+  sl_bt_system_reset(0);
 }
 
 // Called when the Provisioning finishes successfully

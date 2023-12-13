@@ -60,6 +60,8 @@
 #define I2C_REF_VALID(ref)    (((ref) == I2C0) || ((ref) == I2C1))
 #elif (I2C_COUNT == 3)
 #define I2C_REF_VALID(ref)    (((ref) == I2C0) || ((ref) == I2C1) || ((ref) == I2C2))
+#elif (I2C_COUNT == 4)
+#define I2C_REF_VALID(ref)    (((ref) == I2C0) || ((ref) == I2C1) || ((ref) == I2C2) || ((ref) == I2C3))
 #endif
 
 /** Error flags indicating that the I2C transfer has failed. */
@@ -72,7 +74,11 @@
 
 /* Maximum I2C transmission rate constant.  */
 #if defined(_SILICON_LABS_32B_SERIES_0)
+#if defined(_EFM32_HAPPY_FAMILY) || defined(_EFM32_ZERO_FAMILY)
+#define I2C_CR_MAX       8
+#else
 #define I2C_CR_MAX       4
+#endif
 #elif defined(_SILICON_LABS_32B_SERIES_1)
 #define I2C_CR_MAX       8
 #elif defined(_SILICON_LABS_32B_SERIES_2)
@@ -520,6 +526,11 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
     transfer = i2cTransfer + 2;
   }
 #endif
+#if (I2C_COUNT > 3)
+  else if (i2c == I2C3) {
+    transfer = i2cTransfer + 3;
+  }
+#endif
   else {
     return i2cTransferUsageFault;
   }
@@ -874,6 +885,11 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
 #if (I2C_COUNT > 2)
   else if (i2c == I2C2) {
     transfer = i2cTransfer + 2;
+  }
+#endif
+#if (I2C_COUNT > 3)
+  else if (i2c == I2C3) {
+    transfer = i2cTransfer + 3;
   }
 #endif
   else {

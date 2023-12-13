@@ -13,14 +13,14 @@ include:
     file_list:
       - path: sl_bt_cbap_lib.h
 library:
-  - path: "lib/cbap_CM33_gcc.a"
+  - path: lib/cbap_CM33_gcc.a
     condition:
-      - "toolchain_gcc"
-      - "cortexm33"
-  - path: "lib/cbap_CM33_iar.a"
+      - toolchain_gcc
+      - cortexm33
+  - path: lib/cbap_CM33_iar.a
     condition:
-      - "toolchain_iar"
-      - "cortexm33"
+      - toolchain_iar
+      - cortexm33
 requires:
   - name: nvm3_lib
   - name: nvm3_default

@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_longrange import calc_longrange_viper
+from pyradioconfig.parts.bobcat.calculators.calc_longrange import Calc_Longrange_Bobcat
 
 
-class CalcLongrangeRainier(calc_longrange_viper):
+class CalcLongrangeRainier(Calc_Longrange_Bobcat):
     pass

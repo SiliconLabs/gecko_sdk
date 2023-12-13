@@ -8,10 +8,9 @@
 #ifndef ZPAL_RETENTION_REGISTER_H_
 #define ZPAL_RETENTION_REGISTER_H_
 
+#include <stddef.h>
 #include <stdint.h>
 #include "zpal_status.h"
-
-#define ZPAL_RETENTION_REGISTER_SIZE 32
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +47,8 @@ extern "C" {
 #define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_4       4
 #define ZPAL_RETENTION_REGISTER_TXPOWER_RSSI_LR       5
 
+#define ZPAL_RETENTION_REGISTER_PROTOCOL_RESERVED_COUNT 16
+
 /**
  * @brief Reads a 32-bit value from the specified retention register.
  *
@@ -71,6 +72,12 @@ zpal_status_t zpal_retention_register_read(uint32_t index, uint32_t *data);
  * @note Retention Register should support at least 32 objects.
  */
 zpal_status_t zpal_retention_register_write(uint32_t index, uint32_t value);
+
+/**
+ * @brief Get number of available retention registers.
+ * @return number of retention registers.
+ */
+size_t zpal_retention_register_count(void);
 
 /**
  * @} //zpal-retention-register

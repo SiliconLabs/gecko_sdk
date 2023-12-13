@@ -96,7 +96,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       break;
 
@@ -107,7 +107,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       // Continue advertising if the stack allows further connections.
       if (connection_count < SL_BT_CONFIG_MAX_CONNECTIONS) {
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                           sl_bt_advertiser_connectable_scannable);
+                                           sl_bt_legacy_advertiser_connectable);
         app_assert_status(sc);
       }
       break;
@@ -118,7 +118,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       if (connection_count >= SL_BT_CONFIG_MAX_CONNECTIONS) {
         // Restart advertising after client has disconnected.
         sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                           sl_bt_advertiser_connectable_scannable);
+                                           sl_bt_legacy_advertiser_connectable);
         app_assert_status(sc);
       }
       connection_count--;

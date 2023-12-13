@@ -44,8 +44,6 @@ uint8_t funcID_ComplHandler_ZW_NodeManagement;
 uint8_t nodeManagement_Func_ID;
 #endif
 
-typedef  void (cast_help)(void*);
-
 
 #ifdef ZW_CONTROLLER
 static void SetupNodeManagement(const comm_interface_frame_ptr frame, uint8_t funcID_offet)
@@ -77,8 +75,6 @@ static void Initiate_shutdown_cb(void)
 */
 ZW_ADD_CMD(FUNC_ID_ZW_INITIATE_SHUTDOWN)
 {
-  UNUSED(frame);
-
   AppTimerStopAll();
   if (InitiateShutdown(&Initiate_shutdown_cb))
   {
@@ -97,8 +93,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_INITIATE_SHUTDOWN)
 #if SUPPORT_FUNC_ID_CLEAR_TX_TIMERS
 static void ClearTxTimers(void)
 {
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_CLEAR_TX_TIMERS;
+  SZwaveCommandPackage CommandPackage = { .eCommandType = EZWAVECOMMANDTYPE_CLEAR_TX_TIMERS };
 
   // Put the package on queue (and DO wait for it, since there is no feedback to serial master)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&CommandPackage, 500);
@@ -111,7 +106,6 @@ static void ClearTxTimers(void)
 
 ZW_ADD_CMD(FUNC_ID_CLEAR_TX_TIMERS)
 {
-  UNUSED(frame);
   /* HOST->ZW: */
   ClearTxTimers();
   set_state(stateIdle);
@@ -122,7 +116,6 @@ ZW_ADD_CMD(FUNC_ID_CLEAR_TX_TIMERS)
 #if SUPPORT_FUNC_ID_GET_TX_TIMERS
 ZW_ADD_CMD(FUNC_ID_GET_TX_TIMERS)
 {
-  UNUSED(frame);
   /* HOST->ZW: */
   /* ZW->HOST: channel0TxTimer_MSB | channel0TxTimer_Next_MSB | channel0TxTimer_Next_LSB | channel0TxTimerLSB | */
   /*           channel1TxTimer_MSB | channel1TxTimer_Next_MSB | channel1TxTimer_Next_LSB | channel1TxTimerLSB | */
@@ -133,7 +126,7 @@ ZW_ADD_CMD(FUNC_ID_GET_TX_TIMERS)
   // Copy current Network Statistic counters
   const zpal_radio_network_stats_t *sRFStats = ZAF_getNetworkStatistics();
 
-  int i = 0;
+  uint8_t i = 0;
   // Copy with endian swap
   compl_workbuf[i++] = (uint8_t)((sRFStats->tx_time_channel_0 >> 24) & 0xff);
   compl_workbuf[i++] = (uint8_t)((sRFStats->tx_time_channel_0 >> 16) & 0xff);
@@ -156,7 +149,7 @@ ZW_ADD_CMD(FUNC_ID_GET_TX_TIMERS)
   compl_workbuf[i++] = (uint8_t)((sRFStats->tx_time_channel_4 >> 8)  & 0xff);
   compl_workbuf[i++] = (uint8_t)((sRFStats->tx_time_channel_4 >> 0)  & 0xff);
 
-  DoRespond_workbuf((uint8_t)i);
+  DoRespond_workbuf(i);
 }
 #endif /* SUPPORT_FUNC_ID_GET_TX_TIMERS */
 
@@ -167,7 +160,7 @@ static void GetBackgroundRSSI(RSSI_LEVELS *noise_levels)
   SZwaveCommandPackage cmdPackage = {.eCommandType = EZWAVECOMMANDTYPE_GET_BACKGROUND_RSSI};
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_GET_BACKGROUND_RSSI))
   {
     memcpy((uint8_t *)noise_levels, cmdStatus.Content.GetBackgroundRssiStatus.rssi, sizeof(RSSI_LEVELS));
@@ -178,8 +171,6 @@ static void GetBackgroundRSSI(RSSI_LEVELS *noise_levels)
 
 ZW_ADD_CMD(FUNC_ID_ZW_GET_BACKGROUND_RSSI)
 {
-  UNUSED(frame);
-
   /* HOST->ZW: (no arguments) */
   /* ZW->HOST: RES | RSSI Ch0 | RSSI Ch1 | RSSI Ch2  */
   GetBackgroundRSSI((RSSI_LEVELS*)&compl_workbuf[0]);
@@ -191,8 +182,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_BACKGROUND_RSSI)
 #if SUPPORT_ZW_CLEAR_NETWORK_STATS
 static void ClearNetworkStats(void)
 {
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_CLEAR_NETWORK_STATISTICS;
+  SZwaveCommandPackage CommandPackage = {.eCommandType = EZWAVECOMMANDTYPE_CLEAR_NETWORK_STATISTICS};
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&CommandPackage, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
@@ -200,8 +190,6 @@ static void ClearNetworkStats(void)
 
 ZW_ADD_CMD(FUNC_ID_ZW_CLEAR_NETWORK_STATS)
 {
-  UNUSED(frame);
-
   /* HOST->ZW: */
   /* ZW->HOST: 0x01 */
   ClearNetworkStats();
@@ -213,7 +201,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_CLEAR_NETWORK_STATS)
 #if SUPPORT_ZW_GET_NETWORK_STATS
 ZW_ADD_CMD(FUNC_ID_ZW_GET_NETWORK_STATS)
 {
-  UNUSED(frame);
   /* HOST->ZW: */
   /* ZW->HOST: wRFTxFrames_MSB | wRFTxFrames_LSB | */
   /*           wRFTxLBTBackOffs_MSB | wRFTxLBTBackOffs_LSB | */
@@ -255,7 +242,7 @@ uint8_t SetRFReceiveMode(uint8_t mode)
   // Put the Command on queue (and dont wait for it, queue must be empty)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&pCmdPackage, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_SET_RF_RECEIVE_MODE))
   {
     return cmdStatus.Content.SetRFReceiveModeStatus.result;
@@ -279,13 +266,12 @@ uint8_t funcID_ComplHandler_ZW_SendNodeInformation;
 
 static uint8_t SendNodeInformation(uint16_t destID, uint8_t txOptions, ZW_TX_Callback_t pCallBack)
 {
-  SZwaveTransmitPackage FramePackage;
-  SNodeInfo *pNodeInfo = &FramePackage.uTransmitParams.NodeInfo;
-  pNodeInfo->DestNodeId = destID;
-  pNodeInfo->TransmitOptions = txOptions;
-  pNodeInfo->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_NODEINFORMATION;
-
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.NodeInfo.DestNodeId = destID,
+    .uTransmitParams.NodeInfo.TransmitOptions = txOptions,
+    .uTransmitParams.NodeInfo.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_NODEINFORMATION
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus;
   QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
@@ -299,9 +285,8 @@ static uint8_t SendNodeInformation(uint16_t destID, uint8_t txOptions, ZW_TX_Cal
 static void /* RET  Nothing                     */
 ZCB_ComplHandler_ZW_SendNodeInformation(
     uint8_t txStatus, /* IN   Transmit completion status  */
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendNodeInformation;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_NODE_INFORMATION, compl_workbuf, 2);
@@ -392,7 +377,8 @@ ZCB_ComplHandler_ZW_SendData(
 
 static uint8_t SendData(uint16_t nodeID, const uint8_t *pData, uint8_t dataLength, uint8_t txOptions, ZW_TX_Callback_t pCallBack)
 {
-  SZwaveTransmitPackage FramePackage;
+  SZwaveTransmitPackage FramePackage = { 0 };
+
 #ifndef ZW_SECURITY_PROTOCOL
   SSendData *pSendData = &FramePackage.uTransmitParams.SendData;
   memset(&pSendData->FrameConfig.aFrame, 0, sizeof(pSendData->FrameConfig.aFrame));
@@ -406,12 +392,7 @@ static uint8_t SendData(uint16_t nodeID, const uint8_t *pData, uint8_t dataLengt
 #else
   {
     SSendDataEx *pSendDataEx = &FramePackage.uTransmitParams.SendDataEx;
-    memset(&pSendDataEx->FrameConfig.aFrame, 0, sizeof(pSendDataEx->FrameConfig.aFrame));
     pSendDataEx->DestNodeId = nodeID;
-    pSendDataEx->SourceNodeId = 0;
-    pSendDataEx->TransmitSecurityOptions = 0;
-    pSendDataEx->TransmitOptions2 = 0;
-    pSendDataEx->eKeyType = SECURITY_KEY_NONE;
     pSendDataEx->FrameConfig.TransmitOptions = txOptions;
     memcpy(&pSendDataEx->FrameConfig.aFrame, pData, dataLength);
     pSendDataEx->FrameConfig.Handle = pCallBack;
@@ -440,7 +421,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA)
   uint8_t  offset = 0;
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   uint8_t dataLength = frame->payload[offset + 1];
-
+  ASSERT(dataLength <= BUF_SIZE_RX);
   if (dataLength > BUF_SIZE_RX)
   {
     dataLength = BUF_SIZE_RX;
@@ -477,20 +458,17 @@ static uint8_t SendDataEx(uint16_t nodeID, uint8_t *pData, uint8_t dataLength,
                           ZW_TX_Callback_t pCallBack)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSendDataEx *pSendDataEx = &FramePackage.uTransmitParams.SendDataEx;
-
-  memset(&pSendDataEx->FrameConfig.aFrame, 0, sizeof(pSendDataEx->FrameConfig.aFrame));
-  pSendDataEx->DestNodeId = nodeID;
-  pSendDataEx->SourceNodeId = 0;
-  pSendDataEx->TransmitSecurityOptions = txSecOptions;
-  pSendDataEx->TransmitOptions2 = txOptions2;
-  pSendDataEx->eKeyType = secKeyType;
-  pSendDataEx->FrameConfig.TransmitOptions = txOptions;
-  memcpy(&pSendDataEx->FrameConfig.aFrame, pData, dataLength);
-  pSendDataEx->FrameConfig.Handle = pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EX;
-  FramePackage.uTransmitParams.SendDataEx.FrameConfig.iFrameLength = dataLength;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendDataEx.DestNodeId = nodeID,
+    .uTransmitParams.SendDataEx.TransmitSecurityOptions = txSecOptions,
+    .uTransmitParams.SendDataEx.TransmitOptions2 = txOptions2,
+    .uTransmitParams.SendDataEx.eKeyType = secKeyType,
+    .uTransmitParams.SendDataEx.FrameConfig.TransmitOptions = txOptions,
+    .uTransmitParams.SendDataEx.FrameConfig.Handle = pCallBack,
+    .uTransmitParams.SendDataEx.FrameConfig.iFrameLength = dataLength,
+    .eTransmitType = EZWAVETRANSMITTYPE_EX
+  };
+  memcpy(&FramePackage.uTransmitParams.SendDataEx.FrameConfig.aFrame, pData, dataLength);
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -511,6 +489,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_EX)
   uint8_t dataLength;
 
   dataLength = frame->payload[offset + 1];
+  ASSERT(dataLength <= BUF_SIZE_RX);
   if (dataLength > BUF_SIZE_RX)
   {
     dataLength = BUF_SIZE_RX;
@@ -538,9 +517,8 @@ uint8_t funcID_ComplHandler_ZW_SendDataMulti;
 static void /* RET  Nothing                     */
 ZCB_ComplHandler_ZW_SendDataMulti(
     uint8_t txStatus,
-    TX_STATUS_TYPE *txStatusType) /* IN   Transmit completion status  */
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusType) /* IN   Transmit completion status  */
 {
-  UNUSED(txStatusType);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendDataMulti;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_DATA_MULTI, compl_workbuf, 2);
@@ -559,11 +537,12 @@ static uint8_t SendDataMulti(uint8_t numberOfNodes, const uint8_t *pNodeList, co
   {
     ZW_NodeMaskSetBit(pSendDataMulti->NodeMask, pNodeList[i]);
   }
+  pSendDataMulti->FrameConfig.TransmitOptions = txOptions;
+  ASSERT(dataLength <= BUF_SIZE_RX);
   if (dataLength > BUF_SIZE_RX)
   {
     dataLength = BUF_SIZE_RX;
   }
-  pSendDataMulti->FrameConfig.TransmitOptions = txOptions;
   memcpy(&pSendDataMulti->FrameConfig.aFrame, pData, dataLength);
   pSendDataMulti->FrameConfig.Handle = pCallBack;
   FramePackage.eTransmitType = EZWAVETRANSMITTYPE_MULTI;
@@ -601,9 +580,8 @@ uint8_t funcID_ComplHandler_ZW_SendDataMultiEx;
 static void
 ZCB_ComplHandler_ZW_SendDataMultiEx(
     uint8_t txStatus, /* IN   Transmit completion status  */
-    TX_STATUS_TYPE* extendedTxStatus)
+    __attribute__((unused)) TX_STATUS_TYPE* extendedTxStatus)
 {
-  UNUSED(extendedTxStatus);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendDataMultiEx;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_DATA_MULTI_EX, compl_workbuf, 2);
@@ -611,23 +589,21 @@ ZCB_ComplHandler_ZW_SendDataMultiEx(
 
 static uint8_t SendDataMultiEx(uint8_t dataLength, uint8_t *pData, uint8_t txOptions, uint8_t secKeyType, uint8_t groupID, ZW_TX_Callback_t pCallBack)
 {
-  // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSendDataMultiEx *pSendDataMultiEx = &FramePackage.uTransmitParams.SendDataMultiEx;
-  memset(&pSendDataMultiEx->FrameConfig.aFrame, 0, sizeof(pSendDataMultiEx->FrameConfig.aFrame));
+  ASSERT(dataLength <= BUF_SIZE_RX);
   if (dataLength > BUF_SIZE_RX)
   {
     dataLength = BUF_SIZE_RX;
   }
-  pSendDataMultiEx->FrameConfig.Handle = pCallBack;
-  pSendDataMultiEx->FrameConfig.TransmitOptions = txOptions;
-  pSendDataMultiEx->FrameConfig.iFrameLength = dataLength;
-
+  // Create transmit frame package
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendDataMultiEx.FrameConfig.Handle = pCallBack,
+    .uTransmitParams.SendDataMultiEx.FrameConfig.TransmitOptions = txOptions,
+    .uTransmitParams.SendDataMultiEx.FrameConfig.iFrameLength = dataLength,
+    .uTransmitParams.SendDataMultiEx.GroupId = groupID,
+    .uTransmitParams.SendDataMultiEx.eKeyType = secKeyType,
+    .eTransmitType = EZWAVETRANSMITTYPE_MULTI_EX
+  };
   memcpy(&FramePackage.uTransmitParams.SendDataMultiEx.FrameConfig.aFrame, pData, dataLength);
-  pSendDataMultiEx->SourceNodeId = 0;
-  pSendDataMultiEx->GroupId = groupID;
-  pSendDataMultiEx->eKeyType = secKeyType;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_MULTI_EX;
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -656,8 +632,7 @@ static void SendDataAbort(void)
   // What makes sense? aborting based on frame context?
   // We cant peek into FreeRtos queue...
   // We could also reset the queue on abort. and stop any ongoing frame.
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SEND_DATA_ABORT;
+  SZwaveCommandPackage CommandPackage = { .eCommandType = EZWAVECOMMANDTYPE_SEND_DATA_ABORT };
   // Put the package on queue (and DO wait for it, since there is no feedback to serial master)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&CommandPackage, 500);
 
@@ -669,8 +644,6 @@ static void SendDataAbort(void)
 
 ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_ABORT)
 {
-  UNUSED(frame);
-
   /* If we are in middle of transmitting an application frame then STOP the transmission as soon as possible. */
   SendDataAbort();
   set_state_and_notify(stateIdle);
@@ -693,24 +666,21 @@ ZCB_ComplHandler_ZW_SendData_Bridge(
 
 static uint8_t SendDataBridge(uint16_t srcNode, uint16_t destNode, uint8_t dataLength, const uint8_t *pData, uint8_t txOptions, ZW_TX_Callback_t pCallBack)
 {
-  // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSendDataBridge* pSendDataBridge = &FramePackage.uTransmitParams.SendDataBridge;
-  memset(&pSendDataBridge->FrameConfig.aFrame, 0, sizeof(pSendDataBridge->FrameConfig.aFrame));
-
+  ASSERT(dataLength <= BUF_SIZE_RX);
   if (dataLength > BUF_SIZE_RX)
   {
     dataLength = BUF_SIZE_RX;
   }
-
-  pSendDataBridge->FrameConfig.Handle = pCallBack;
-  pSendDataBridge->FrameConfig.TransmitOptions = txOptions;
-  pSendDataBridge->FrameConfig.iFrameLength = dataLength;
-  pSendDataBridge->DestNodeId = destNode;
-  pSendDataBridge->SourceNodeId = srcNode;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_BRIDGE;
-  memcpy(&pSendDataBridge->FrameConfig.aFrame, pData, dataLength);
-
+  // Create transmit frame package
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendDataBridge.FrameConfig.Handle = pCallBack,
+    .uTransmitParams.SendDataBridge.FrameConfig.TransmitOptions = txOptions,
+    .uTransmitParams.SendDataBridge.FrameConfig.iFrameLength = dataLength,
+    .uTransmitParams.SendDataBridge.DestNodeId = destNode,
+    .uTransmitParams.SendDataBridge.SourceNodeId = srcNode,
+    .eTransmitType = EZWAVETRANSMITTYPE_BRIDGE
+  };
+  memcpy(&FramePackage.uTransmitParams.SendDataBridge.FrameConfig.aFrame, pData, dataLength);
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -744,9 +714,8 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_BRIDGE)
 static void /* RET  Nothing                     */
 ZCB_ComplHandler_ZW_SendDataMulti_Bridge(
     uint8_t txStatus, /* IN   Transmit completion status  */
-    TX_STATUS_TYPE* extendedTxStatus)
+    __attribute__((unused)) TX_STATUS_TYPE* extendedTxStatus)
 {
-  UNUSED(extendedTxStatus);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendDataMulti;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_DATA_MULTI_BRIDGE, compl_workbuf, 2);
@@ -758,12 +727,17 @@ static uint8_t SendDataMultiBridge(node_id_t srcNode, uint8_t numOfNodes, uint8_
   // when nodeIdBaseType is 2 then we handle the FramePackage.uTransmitParams.SendDataMultiBridge.NodeMask as node list
   // when nodeIdBaseType is 1 then we handle the FramePackage.uTransmitParams.SendDataMultiBridge.NodeMask as node mask
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSendDataMultiBridge* pSendDataMultiBridge = &FramePackage.uTransmitParams.SendDataMultiBridge;
-  /* clear the destination node mask (classic nodes)/ node list (LR nodes)*/
-  memset((uint8_t *)&pSendDataMultiBridge->NodeMask, 0, sizeof(pSendDataMultiBridge->NodeMask));
-  /*clear frame data buffer*/
-  memset(pSendDataMultiBridge->FrameConfig.aFrame, 0, sizeof(pSendDataMultiBridge->FrameConfig.aFrame));
+  ASSERT(dataLength <= BUF_SIZE_RX);
+
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendDataMultiBridge.FrameConfig.Handle = pCallBack,
+    .uTransmitParams.SendDataMultiBridge.FrameConfig.TransmitOptions = txOptions,
+    .uTransmitParams.SendDataMultiBridge.FrameConfig.iFrameLength = dataLength,
+    .uTransmitParams.SendDataMultiBridge.SourceNodeId = srcNode,
+    .eTransmitType = EZWAVETRANSMITTYPE_MULTI_BRIDGE
+   };
+
+  memcpy(&FramePackage.uTransmitParams.SendDataMultiBridge.FrameConfig.aFrame, pData, dataLength);
 
   bool lr_list = false;
   bool classic_list = false;
@@ -791,7 +765,7 @@ static uint8_t SendDataMultiBridge(node_id_t srcNode, uint8_t numOfNodes, uint8_
     }
     if (lr_list)  {
       /*lr nodes are 16-bit and the list is in bytes then we copy 2 * numOfNodes*/
-      memcpy(pSendDataMultiBridge->NodeMask, pNodeIDList , numOfNodes * 2);
+      memcpy(FramePackage.uTransmitParams.SendDataMultiBridge.NodeMask, pNodeIDList , numOfNodes * 2);
     }
   } else {
     classic_list = true;
@@ -800,7 +774,7 @@ static uint8_t SendDataMultiBridge(node_id_t srcNode, uint8_t numOfNodes, uint8_
     }
   }
 
-  pSendDataMultiBridge->lr_nodeid_list = lr_list;
+  FramePackage.uTransmitParams.SendDataMultiBridge.lr_nodeid_list = lr_list;
   if (classic_list) {
     uint8_t tmpNode;
     for (uint8_t i = 0; i < numOfNodes; i++)
@@ -812,22 +786,9 @@ static uint8_t SendDataMultiBridge(node_id_t srcNode, uint8_t numOfNodes, uint8_
         /* Set the destination node mask bits */
         tmpNode = pNodeIDList[i];
       }
-      ZW_NodeMaskSetBit(pSendDataMultiBridge->NodeMask, tmpNode);
+      ZW_NodeMaskSetBit(FramePackage.uTransmitParams.SendDataMultiBridge.NodeMask, tmpNode);
     }
   }
-
-  if (dataLength > BUF_SIZE_RX)
-  {
-    dataLength = BUF_SIZE_RX;
-  }
-
-  pSendDataMultiBridge->FrameConfig.Handle = pCallBack;
-  pSendDataMultiBridge->FrameConfig.TransmitOptions = txOptions;
-  pSendDataMultiBridge->FrameConfig.iFrameLength = dataLength;
-  pSendDataMultiBridge->SourceNodeId = srcNode;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_MULTI_BRIDGE;
-  memcpy(pSendDataMultiBridge->FrameConfig.aFrame, pData, dataLength);
-
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -869,8 +830,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_SEND_DATA_MULTI_BRIDGE)
 #if SUPPORT_MEMORY_GET_ID
 ZW_ADD_CMD(FUNC_ID_MEMORY_GET_ID)
 {
-  UNUSED(frame);
-
   uint8_t i = 0;
   node_id_t node_id;
   uint32_t home_id;
@@ -1013,8 +972,6 @@ ZW_ADD_CMD(FUNC_ID_NVM_BACKUP_RESTORE)
 #if SUPPORT_NVM_GET_ID
 ZW_ADD_CMD(FUNC_ID_NVM_GET_ID)
 {
-  UNUSED(frame);
-
 }
 #endif
 
@@ -1128,8 +1085,6 @@ ZW_ADD_CMD(FUNC_ID_NVR_GET_VALUE)
 #if SUPPORT_SERIAL_API_GET_APPL_HOST_MEMORY_OFFSET
 ZW_ADD_CMD(FUNC_ID_SERIAL_API_GET_APPL_HOST_MEMORY_OFFSET)
 {
-  UNUSED(frame);
-
   DoRespond(0);
 }
 #endif
@@ -1165,9 +1120,10 @@ ZCB_ComplHandler_ZW_netWork_Management(
 static uint8_t RequestNetworkUpdate(ZW_TX_Callback_t pCallBack)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_NETWORKUPDATEREQUEST;
-  FramePackage.uTransmitParams.NetworkUpdateRequest.Handle = (ZW_Void_Callback_t)pCallBack;
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_NETWORKUPDATEREQUEST,
+    .uTransmitParams.NetworkUpdateRequest.Handle = (ZW_Void_Callback_t)pCallBack
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -1194,9 +1150,8 @@ uint8_t funcID_ComplHandler_ZW_RequestNodeNeighborUpdate;
 static void /* RET  Nothing                    */
 ZCB_ComplHandler_ZW_RequestNodeNeighborUpdate(
     uint8_t txStatus, /* IN   Transmit completion status */
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_RequestNodeNeighborUpdate;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_REQUEST_NODE_NEIGHBOR_UPDATE, compl_workbuf, 2);
@@ -1214,7 +1169,7 @@ static uint8_t RequestNodeNeighborUpdate(uint16_t nodeID, ZW_TX_Callback_t pCall
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Request, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage status;
+    SZwaveCommandStatusPackage status = { 0 };
     if (GetCommandResponse(&status, EZWAVECOMMANDSTATUS_ZW_REQUESTNODENEIGHBORUPDATE))
     {
       return  status.Content.RequestNodeNeigborUpdateStatus.result;
@@ -1248,9 +1203,8 @@ uint8_t funcID_ComplHandler_ZW_RequestNodeTypeNeighborUpdate;
 static void /* RET  Nothing                    */
 ZCB_ComplHandler_ZW_RequestNodeTypeNeighborUpdate(
     uint8_t txStatus, /* IN   Transmit completion status */
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_RequestNodeTypeNeighborUpdate;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_REQUEST_NODETYPE_NEIGHBOR_UPDATE, compl_workbuf, 2);
@@ -1269,7 +1223,7 @@ static uint8_t RequestNodeTypeNeighborUpdate(uint16_t nodeID, uint8_t nodeType, 
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Request, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage status;
+    SZwaveCommandStatusPackage status = { 0 };
     if (GetCommandResponse(&status, EZWAVECOMMANDSTATUS_ZW_REQUESTNODETYPE_NEIGHBORUPDATE))
     {
       return  status.Content.RequestNodeTypeNeigborUpdateStatus.result;
@@ -1303,7 +1257,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_REQUEST_NODETYPE_NEIGHBOR_UPDATE)
 ZW_ADD_CMD(FUNC_ID_ZW_GET_NODE_PROTOCOL_INFO)
 {
   /* bNodeID */
-  uint8_t offset = 0;
+  volatile uint8_t offset = 0;
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   GetNodeInfo(nodeId, (t_ExtNodeInfo *)compl_workbuf);
   STATIC_ASSERT(sizeof(t_ExtNodeInfo) == 7, STATIC_ASSERT_FAILED_size_mismatch);
@@ -1334,8 +1288,7 @@ static void SetDefault(ZW_Void_Callback_t pCallBack)
   {
     SyncEventBind(&SetDefaultCB, pCallBack);
   }
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT;
+  SZwaveCommandPackage CommandPackage = { .eCommandType = EZWAVECOMMANDTYPE_SET_DEFAULT };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&CommandPackage, 500);
   if (EQUEUENOTIFYING_STATUS_SUCCESS != QueueStatus)
   {
@@ -1396,7 +1349,7 @@ ZCB_ComplHandler_ZW_NodeManagement(
   Request(nodeManagement_Func_ID, compl_workbuf, (uint8_t)(offset + (*statusInfo).bLen + 4));
 }
 
-bool ZW_NodeManagementRunning()
+bool ZW_NodeManagementRunning(void)
 {
   return (addState == ADD_NODE_STATUS_NODE_FOUND ||
           addState == ADD_NODE_STATUS_ADDING_SLAVE ||
@@ -1459,10 +1412,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_ADD_NODE_TO_NETWORK)
 #if defined (SUPPORT_ZW_REMOVE_NODE_ID_FROM_NETWORK) && (SUPPORT_ZW_REMOVE_NODE_ID_FROM_NETWORK == 1)
 static void RemoveNodeFromNetwork(uint8_t mode, node_id_t node_id, void (*pCallBack)(LEARN_INFO_T *statusInfo))
 {
-   SZwaveCommandPackage pCmdPackage;
-   pCmdPackage.eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODE_FROM_NETWORK;
-   pCmdPackage.uCommandParams.NetworkManagement.mode = mode;
-   pCmdPackage.uCommandParams.NetworkManagement.pHandle = (ZW_Void_Callback_t)pCallBack;
+   SZwaveCommandPackage pCmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODE_FROM_NETWORK,
+    .uCommandParams.NetworkManagement.mode = mode,
+    .uCommandParams.NetworkManagement.pHandle = (ZW_Void_Callback_t)pCallBack
+   };
 
   if (0 != node_id) {
     pCmdPackage.eCommandType = EZWAVECOMMANDTYPE_REMOVE_NODEID_FROM_NETWORK;
@@ -1595,7 +1549,7 @@ static uint8_t NetworkLearnModeStart(  E_NETWORK_LEARN_MODE_ACTION  eLearnMode)
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&learnModeStart, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage result;
+    SZwaveCommandStatusPackage result = { 0 };
     if (GetCommandResponse(&result, EZWAVECOMMANDSTATUS_NETWORK_LEARN_MODE_START))
     {
       return result.Content.NetworkManagementStatus.statusInfo[0];
@@ -1621,10 +1575,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LEARN_MODE)
   {
     SyncEventArg1bind(&LearnModeStatusCb, ZCB_ZW_NodeManagementLearnStatusRelay);
   }
-  SZwaveCommandPackage Command;
-  Command.eCommandType = EZWAVECOMMANDTYPE_SET_LEARN_MODE;
-  Command.uCommandParams.SetLearnMode.eLearnMode = frame->payload[0];
-  Command.uCommandParams.SetLearnMode.useCB = frame->payload[1] != 0;
+  SZwaveCommandPackage Command = {
+    .eCommandType = EZWAVECOMMANDTYPE_SET_LEARN_MODE,
+    .uCommandParams.SetLearnMode.eLearnMode = frame->payload[0],
+    .uCommandParams.SetLearnMode.useCB = frame->payload[1] != 0
+  };
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
 
 #else
@@ -1646,10 +1601,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LEARN_MODE)
     /* ZW_SET_LEARN_MODE_CLASSIC          0x01 */
     /* ZW_SET_LEARN_MODE_NWI              0x02 */
     /* ZW_SET_LEARN_MODE_NWE              0x03 */
-    SZwaveCommandPackage Command;
-    Command.eCommandType = EZWAVECOMMANDTYPE_SET_LEARN_MODE;
-    Command.uCommandParams.SetLearnMode.eLearnMode = frame->payload[0];
-    Command.uCommandParams.SetLearnMode.useCB = frame->payload[1] != 0;
+    SZwaveCommandPackage Command = {
+      .eCommandType = EZWAVECOMMANDTYPE_SET_LEARN_MODE,
+      .uCommandParams.SetLearnMode.eLearnMode = frame->payload[0],
+      .uCommandParams.SetLearnMode.useCB = frame->payload[1] != 0
+    };
     QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
   }
   else
@@ -1673,8 +1629,9 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_LEARN_MODE)
 static uint8_t ExploreRequestInclusion(void)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EXPLOREINCLUSIONREQUEST;
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_EXPLOREINCLUSIONREQUEST
+  };
 
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
@@ -1683,8 +1640,6 @@ static uint8_t ExploreRequestInclusion(void)
 
 ZW_ADD_CMD(FUNC_ID_ZW_EXPLORE_REQUEST_INCLUSION)
 {
-  UNUSED(frame);
-
   const uint8_t retVal = ExploreRequestInclusion();
   DoRespond(retVal);
 }
@@ -1695,8 +1650,9 @@ ZW_ADD_CMD(FUNC_ID_ZW_EXPLORE_REQUEST_INCLUSION)
 static uint8_t ExploreRequestExclusion(void)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_EXPLOREEXCLUSIONREQUEST;
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_EXPLOREEXCLUSIONREQUEST
+  };
 
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
@@ -1705,8 +1661,6 @@ static uint8_t ExploreRequestExclusion(void)
 
 ZW_ADD_CMD(FUNC_ID_ZW_EXPLORE_REQUEST_EXCLUSION)
 {
-  UNUSED(frame);
-
   const uint8_t retVal = ExploreRequestExclusion();
   DoRespond(retVal);
 }
@@ -1718,16 +1672,15 @@ static void ReplicationComplete(void)
 {
   /*  */
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_SENDREPLICATIONRECEIVECOMPLETE;
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_SENDREPLICATIONRECEIVECOMPLETE
+  };
   // Put the package on queue (and dont wait for it)
   QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
 }
 
 ZW_ADD_CMD(FUNC_ID_ZW_REPLICATION_COMMAND_COMPLETE)
 {
-  UNUSED(frame);
-
   ReplicationComplete();
   set_state_and_notify(stateIdle);
 }
@@ -1743,9 +1696,8 @@ uint8_t funcID_ComplHandler_ZW_ReplicationSendData;
 **--------------------------------------------------------------------------*/
 static void /* RET  Nothing */
 ZCB_ComplHandler_ZW_ReplicationSendData(
-    uint8_t txStatus, TX_STATUS_TYPE* extendedTxStatus) /* IN   Transmit completion status */
+    uint8_t txStatus, __attribute__((unused)) TX_STATUS_TYPE* extendedTxStatus) /* IN   Transmit completion status */
 {
-  UNUSED(extendedTxStatus);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_ReplicationSendData;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_REPLICATION_SEND_DATA, compl_workbuf, 2);
@@ -1753,19 +1705,15 @@ ZCB_ComplHandler_ZW_ReplicationSendData(
 
 static uint8_t ReplicationSendData(uint16_t nodeID, uint8_t dataLength, const uint8_t* pData, uint8_t txOptions, ZW_TX_Callback_t pCallBack)
 {
-  SZwaveTransmitPackage FramePackage;
-  SSendReplication *pSendReplication = &FramePackage.uTransmitParams.SendReplication;
-  memset(&pSendReplication->FrameConfig.aFrame, 0, sizeof(pSendReplication->FrameConfig.aFrame));
-  if (dataLength > BUF_SIZE_RX)
-  {
-    dataLength = BUF_SIZE_RX;
-  }
-  memcpy(&pSendReplication->FrameConfig.aFrame, pData, dataLength);
-  pSendReplication->DestNodeId = nodeID;
-  pSendReplication->FrameConfig.TransmitOptions = txOptions;
-  pSendReplication->FrameConfig.Handle = pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_SENDREPLICATION;
-  FramePackage.uTransmitParams.SendReplication.FrameConfig.iFrameLength = dataLength;
+  ASSERT(dataLength <= BUF_SIZE_RX);
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendReplication.DestNodeId = nodeID,
+    .uTransmitParams.SendReplication.FrameConfig.TransmitOptions = txOptions,
+    .uTransmitParams.SendReplication.FrameConfig.Handle = pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_SENDREPLICATION,
+    .uTransmitParams.SendReplication.FrameConfig.iFrameLength = dataLength
+  };
+  memcpy(&FramePackage.uTransmitParams.SendReplication.FrameConfig.aFrame, pData, dataLength);
 
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
@@ -1817,15 +1765,12 @@ ZCB_ComplHandler_ZW_AssignReturnRoute(
 static uint8_t AssignReturnRoute(uint16_t srcNode, uint16_t destNode,  ZW_TX_Callback_t pCallBack)
 {
  // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SAssignReturnRoute *pAssignReturnRoute = &FramePackage.uTransmitParams.AssignReturnRoute;
-  pAssignReturnRoute->ReturnRouteReceiverNodeId = srcNode;
-  pAssignReturnRoute->RouteDestinationNodeId = destNode;
-  memset(pAssignReturnRoute->aPriorityRouteRepeaters, 0, sizeof(pAssignReturnRoute->aPriorityRouteRepeaters));
-  pAssignReturnRoute->PriorityRouteSpeed = 0;
-  pAssignReturnRoute->isSucRoute = false;
-  pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.AssignReturnRoute.ReturnRouteReceiverNodeId = srcNode,
+    .uTransmitParams.AssignReturnRoute.RouteDestinationNodeId = destNode,
+    .uTransmitParams.AssignReturnRoute.Handle  = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -1875,18 +1820,15 @@ static uint8_t AssignPriorityReturnRoute(uint16_t srcNode, uint16_t destNode, co
 {
   /* srcNodeID | destNodeID | route[5] | funcID */
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SAssignReturnRoute *pAssignReturnRoute = &FramePackage.uTransmitParams.AssignReturnRoute;
-
-  pAssignReturnRoute->ReturnRouteReceiverNodeId = srcNode;
-  pAssignReturnRoute->RouteDestinationNodeId = destNode;
-
-  memcpy(pAssignReturnRoute->aPriorityRouteRepeaters, pRoute, 4);
-  pAssignReturnRoute->PriorityRouteSpeed = routeSpeed;
-  pAssignReturnRoute->isSucRoute = false;
-  pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
-
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.AssignReturnRoute.ReturnRouteReceiverNodeId = srcNode,
+    .uTransmitParams.AssignReturnRoute.RouteDestinationNodeId = destNode,
+    .uTransmitParams.AssignReturnRoute.PriorityRouteSpeed = routeSpeed,
+    .uTransmitParams.AssignReturnRoute.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE
+  };
+  memcpy(FramePackage.uTransmitParams.AssignReturnRoute.aPriorityRouteRepeaters, pRoute,
+          sizeof(FramePackage.uTransmitParams.AssignReturnRoute.aPriorityRouteRepeaters));
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -1937,12 +1879,11 @@ ZCB_ComplHandler_ZW_DeleteReturnRoute(
 static uint8_t DeleteReturnNode(uint16_t nodeID, ZW_TX_Callback_t pCallBack)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SDeleteReturnRoute *pDeleteReturnRoute = &FramePackage.uTransmitParams.DeleteReturnRoute;
-  pDeleteReturnRoute->DestNodeId = nodeID;
-  pDeleteReturnRoute->bDeleteSuc = false;
-  pDeleteReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_DELETERETURNROUTE;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.DeleteReturnRoute.DestNodeId = nodeID,
+    .uTransmitParams.DeleteReturnRoute.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_DELETERETURNROUTE
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -1965,17 +1906,13 @@ static uint8_t AssignSucReturnRoute(uint16_t srcNodeID, uint8_t sucNode, ZW_TX_C
 {
   /* srcNodeID | funcID */
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SAssignReturnRoute *pAssignReturnRoute = &FramePackage.uTransmitParams.AssignReturnRoute;
-
-  pAssignReturnRoute->ReturnRouteReceiverNodeId = srcNodeID;
-  pAssignReturnRoute->RouteDestinationNodeId = sucNode;
-  memset(pAssignReturnRoute->aPriorityRouteRepeaters, 0, sizeof(pAssignReturnRoute->aPriorityRouteRepeaters));
-  pAssignReturnRoute->PriorityRouteSpeed = 0;
-  pAssignReturnRoute->isSucRoute = true;
-  pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
-
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.AssignReturnRoute.ReturnRouteReceiverNodeId = srcNodeID,
+    .uTransmitParams.AssignReturnRoute.RouteDestinationNodeId = sucNode,
+    .uTransmitParams.AssignReturnRoute.isSucRoute = true,
+    .uTransmitParams.AssignReturnRoute.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2005,16 +1942,15 @@ uint8_t funcID_ComplHandler_ZW_AssignPrioritySUCReturnRoute;
 static uint8_t AssignPrioritySucReturnRoute(uint16_t srcNode, uint8_t sucNode,  const uint8_t* pRoute, uint8_t routeSpeed, ZW_TX_Callback_t pCallBack)
 {
  // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SAssignReturnRoute *pAssignReturnRoute = &FramePackage.uTransmitParams.AssignReturnRoute;
-  pAssignReturnRoute->ReturnRouteReceiverNodeId = srcNode;
-  pAssignReturnRoute->RouteDestinationNodeId = sucNode;
-  memcpy(pAssignReturnRoute->aPriorityRouteRepeaters, pRoute, 4);
-  pAssignReturnRoute->PriorityRouteSpeed = routeSpeed;
-  pAssignReturnRoute->isSucRoute = true;
-  pAssignReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE;
-
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.AssignReturnRoute.ReturnRouteReceiverNodeId = srcNode,
+    .uTransmitParams.AssignReturnRoute.RouteDestinationNodeId = sucNode,
+    .uTransmitParams.AssignReturnRoute.PriorityRouteSpeed = routeSpeed,
+    .uTransmitParams.AssignReturnRoute.isSucRoute = true,
+    .uTransmitParams.AssignReturnRoute.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_ASSIGNRETURNROUTE
+  };
+  memcpy(FramePackage.uTransmitParams.AssignReturnRoute.aPriorityRouteRepeaters, pRoute, sizeof(FramePackage.uTransmitParams.AssignReturnRoute.aPriorityRouteRepeaters));
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2046,12 +1982,12 @@ static uint8_t DeleteSucReturnRoute(uint16_t srcNode, ZW_TX_Callback_t pCallBack
   /* srcNodeID | funcID */
 
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SDeleteReturnRoute *pDeleteReturnRoute = &FramePackage.uTransmitParams.DeleteReturnRoute;
-  pDeleteReturnRoute->DestNodeId = srcNode;
-  pDeleteReturnRoute->bDeleteSuc = true;
-  pDeleteReturnRoute->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_DELETERETURNROUTE;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.DeleteReturnRoute.DestNodeId = srcNode,
+    .uTransmitParams.DeleteReturnRoute.bDeleteSuc = true,
+    .uTransmitParams.DeleteReturnRoute.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_DELETERETURNROUTE
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2077,9 +2013,8 @@ uint8_t funcID_ComplHandler_ZW_SendSUC_ID;
 static void
 ZCB_ComplHandler_ZW_SendSUC_ID(
     uint8_t bStatus,
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendSUC_ID;
   BYTE_IN_AR(compl_workbuf, 1) = bStatus;
   Request(FUNC_ID_ZW_SEND_SUC_ID, compl_workbuf, 2);
@@ -2088,12 +2023,12 @@ ZCB_ComplHandler_ZW_SendSUC_ID(
 static uint8_t SendSucID(uint16_t destNode, uint8_t txOptions, ZW_TX_Callback_t pCallBack)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSendSucNodeId *pSendSucNodeId = &FramePackage.uTransmitParams.SendSucNodeId;
-  pSendSucNodeId->DestNodeId = destNode;
-  pSendSucNodeId->TransmitOptions = txOptions;
-  pSendSucNodeId->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_SENDSUCNODEID;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendSucNodeId.DestNodeId = destNode,
+    .uTransmitParams.SendSucNodeId.TransmitOptions = txOptions,
+    .uTransmitParams.SendSucNodeId.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_SENDSUCNODEID
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2125,9 +2060,8 @@ uint8_t funcID_ComplHandler_ZW_SetSUCNodeID;
 static void
 ZCB_ComplHandler_ZW_SetSUCNodeID(
     uint8_t txStatus, /*IN   Completion status*/
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SetSUCNodeID;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SET_SUC_NODE_ID, compl_workbuf, 2);
@@ -2136,15 +2070,14 @@ ZCB_ComplHandler_ZW_SetSUCNodeID(
 static uint8_t SetSucNodeID(uint16_t nodeID, uint8_t sucState, uint8_t txOptions, uint8_t capabilities, ZW_TX_Callback_t pCallBack)
 {
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  SSetSucNodeId *pSetSucNodeId = &FramePackage.uTransmitParams.SetSucNodeId;
-  pSetSucNodeId->SucNodeId = nodeID;
-  pSetSucNodeId->bSucEnable = sucState;
-  pSetSucNodeId->bTxLowPower = txOptions;
-  pSetSucNodeId->Capabilities = capabilities;
-  pSetSucNodeId->Handle = (ZW_Void_Callback_t)pCallBack;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_SETSUCNODEID;
-
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SetSucNodeId.SucNodeId = nodeID,
+    .uTransmitParams.SetSucNodeId.bSucEnable = sucState,
+    .uTransmitParams.SetSucNodeId.bTxLowPower = txOptions,
+    .uTransmitParams.SetSucNodeId.Capabilities = capabilities,
+    .uTransmitParams.SetSucNodeId.Handle = (ZW_Void_Callback_t)pCallBack,
+    .eTransmitType = EZWAVETRANSMITTYPE_SETSUCNODEID
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2166,8 +2099,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_SUC_NODE_ID)
 #if SUPPORT_ZW_GET_SUC_NODE_ID
 ZW_ADD_CMD(FUNC_ID_ZW_GET_SUC_NODE_ID)
 {
-  UNUSED(frame);
-
   uint8_t cmdLength = 0;
   node_id_t suc_node_id;
 
@@ -2213,14 +2144,14 @@ ZCB_ComplHandler_ZW_RemoveFailedNodeID(
 static uint8_t RemoveFailedNode(uint16_t nodeID)
 {
 
-  SZwaveCommandPackage cmdPackage;
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_REMOVE_FAILED_NODE_ID;
-  SCommandFailedNodeIDCmd *pApiParam = &cmdPackage.uCommandParams.FailedNodeIDCmd;
-  pApiParam->nodeID = nodeID;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_REMOVE_FAILED_NODE_ID,
+    .uCommandParams.FailedNodeIDCmd.nodeID = nodeID
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_REMOVE_FAILED_NODE_ID))
   {
     return cmdStatus.Content.FailedNodeIDStatus.result;
@@ -2253,7 +2184,7 @@ static uint8_t IsNodeIDFailed(uint16_t nodeID)
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_IS_FAILED_NODE_ID))
   {
     return cmdStatus.Content.IsFailedNodeIDStatus.result;
@@ -2265,7 +2196,7 @@ static uint8_t IsNodeIDFailed(uint16_t nodeID)
 ZW_ADD_CMD(FUNC_ID_ZW_IS_FAILED_NODE_ID)
 {
   /* nodeID */
-  uint8_t offset = 0;
+  volatile uint8_t offset = 0;
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   const uint8_t retVal = IsNodeIDFailed(nodeId);
   DoRespond(retVal);
@@ -2296,15 +2227,15 @@ ZCB_ComplHandler_ZW_ReplaceFailedNode(
 
 static uint8_t ReplaceFailedNode(uint16_t nodeID, uint8_t normalPower)
 {
-  SZwaveCommandPackage cmdPackage;
-  cmdPackage.eCommandType = EZWAVECOMMANDTYPE_REPLACE_FAILED_NODE_ID;
-  SCommandFailedNodeIDCmd *pApiParam = &cmdPackage.uCommandParams.FailedNodeIDCmd;
-  pApiParam->nodeID = nodeID;
-  pApiParam->normalPower = normalPower;
+  SZwaveCommandPackage cmdPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_REPLACE_FAILED_NODE_ID,
+    .uCommandParams.FailedNodeIDCmd.nodeID = nodeID,
+    .uCommandParams.FailedNodeIDCmd.normalPower = normalPower
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 0);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_REPLACE_FAILED_NODE_ID))
   {
     return cmdStatus.Content.FailedNodeIDStatus.result;
@@ -2338,7 +2269,7 @@ static void GetRoutingInfo(uint16_t nodeID, uint8_t options, uint8_t *pRoutingIn
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_GET_ROUTING_TABLE_LINE))
   {
     memcpy(pRoutingInfo, cmdStatus.Content.GetRoutingInfoStatus.RoutingInfo, MAX_NODEMASK_LENGTH);
@@ -2364,8 +2295,6 @@ ZW_ADD_CMD(FUNC_ID_GET_ROUTING_TABLE_LINE)
 #if SUPPORT_GET_TX_COUNTER
 ZW_ADD_CMD(FUNC_ID_GET_TX_COUNTER)
 {
-  UNUSED(frame);
-
   /* */
   /* Get the transmit counter */
   /* Not usedin 700 series - Obsoleted */
@@ -2377,8 +2306,6 @@ ZW_ADD_CMD(FUNC_ID_GET_TX_COUNTER)
 #if SUPPORT_RESET_TX_COUNTER
 ZW_ADD_CMD(FUNC_ID_RESET_TX_COUNTER)
 {
-  UNUSED(frame);
-
   /* */
   /* Reset the transmit counter */
   /* Not usedin 700 series - Obsoleted */
@@ -2446,7 +2373,7 @@ static uint8_t GetPriorityRoute(uint16_t nodeID, uint8_t *priRoute)
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_GET_PRIORITY_ROUTE))
   {
     memcpy(priRoute, cmdStatus.Content.GetPriorityRouteStatus.repeaters, MAX_REPEATERS);
@@ -2499,7 +2426,7 @@ static uint8_t SetPriorityRoute(uint16_t nodeID, const uint8_t *routeInfo)
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
 
   // Wait for protocol to handle command (it shouldnt take long)
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_SET_PRIORITY_ROUTE))
   {
     return cmdStatus.Content.SetPriorityRouteStatus.bRouteUpdated;
@@ -2541,8 +2468,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_SET_PRIORITY_ROUTE)
 #if SUPPORT_ZW_GET_VERSION
 ZW_ADD_CMD(FUNC_ID_ZW_GET_VERSION)
 {
-  UNUSED(frame);
-
   /* */
   const SProtocolInfo* protocol_info = ZAF_getProtocolInfo();
   uint8_t versionMinor = protocol_info->ProtocolVersion.Minor;
@@ -2552,7 +2477,7 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_VERSION)
     // Make ZW_GET_VERSION return a unique version string "Z-Wave 7.99" so that test tools can distinguish it from the normal builds.
     versionMinor = 99;
   }
-  volatile int32_t iCharacters = snprintf((char *)(&compl_workbuf[0]), 12, "Z-Wave %1d.%2d", protocol_info->ProtocolVersion.Major, versionMinor);
+  volatile int32_t iCharacters = snprintf((char *)(&compl_workbuf[0]), 12, "Z-Wave %1d.%02d", protocol_info->ProtocolVersion.Major, versionMinor);
   ASSERT(iCharacters == 11); // Serial API must deliver 13 bytes reply. 11 byte string (no zero termination) followed by zero and 1 byte lib type
                               // We use SNPRINTF zero termination to produce the zero.
   STATIC_ASSERT(sizeof(compl_workbuf) >= 13, STATIC_ASSERT_compl_workbuf_to_small);
@@ -2565,8 +2490,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_VERSION)
 #if SUPPORT_ZW_GET_PROTOCOL_VERSION
 ZW_ADD_CMD(FUNC_ID_ZW_GET_PROTOCOL_VERSION)
 {
-  UNUSED(frame);
-
   /*  */
   uint8_t len;
   func_id_zw_get_protocol_version(0, NULL, compl_workbuf, &len);
@@ -2580,9 +2503,10 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_PROTOCOL_VERSION)
 static void ZW_UpdateCtrlNodeInformation_API_IF(void)
 {
   // Create transmit frame package
-  SZwaveCommandPackage FramePackage;
-  FramePackage.eCommandType =  EZWAVECOMMANDTYPE_ZW_UPDATE_CTRL_NODE_INFORMATION;
-  FramePackage.uCommandParams.UpdateCtrlNodeInformation.value = true;
+  SZwaveCommandPackage FramePackage ={
+    .eCommandType =  EZWAVECOMMANDTYPE_ZW_UPDATE_CTRL_NODE_INFORMATION,
+    .uCommandParams.UpdateCtrlNodeInformation.value = true
+  };
   // Put the package on queue (and dont wait for it)
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&FramePackage, 0);
 }
@@ -2689,9 +2613,8 @@ uint8_t funcID_ComplHandler_ZW_SendSlaveNodeInformation;
 static void                             /* RET  Nothing                     */
 ZCB_ComplHandler_ZW_SendSlaveNodeInformation(
   uint8_t txStatus,                        /* IN   Transmit completion status  */
-  TX_STATUS_TYPE *txStatusReport)
+  __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-  UNUSED(txStatusReport);
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendSlaveNodeInformation;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_SLAVE_NODE_INFORMATION, compl_workbuf, 2);
@@ -2786,7 +2709,7 @@ static uint8_t SetSlaveLearnMode(uint16_t nodeID, uint8_t mode)
   };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_SET_SLAVE_LEARN_MODE_RESULT))
   {
     return cmdStatus.Content.SetSlaveLearnModeStatus.result;
@@ -2815,29 +2738,23 @@ uint8_t funcID_ComplHandler_ZW_SendTestFrame;
 **--------------------------------------------------------------------------*/
 static void
 ZCB_ComplHandler_ZW_SendTestFrame(
-    void *callback_param)
+  uint8_t txStatus,
+  __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
-
-  transmission_result_t *tmp = callback_param;
-
-  uint8_t txStatus = tmp->status;
-
   BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_ZW_SendTestFrame;
   BYTE_IN_AR(compl_workbuf, 1) = txStatus;
   Request(FUNC_ID_ZW_SEND_TEST_FRAME, compl_workbuf, 2);
 }
 
-static uint8_t SendTestFrame(uint16_t nodeID, uint8_t powerLevel, cast_help pCallBack)
+static uint8_t SendTestFrame(uint16_t nodeID, uint8_t powerLevel, ZW_TX_Callback_t pCallBack)
 {
-
-
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  STest *pTest = &FramePackage.uTransmitParams.Test;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_TESTFRAME;
-  pTest->DestNodeId = nodeID;
-  pTest->PowerLevel = powerLevel;
-  pTest->Handle = pCallBack;
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_TESTFRAME,
+    .uTransmitParams.Test.DestNodeId = nodeID,
+    .uTransmitParams.Test.PowerLevel = powerLevel,
+    .uTransmitParams.Test.Handle = pCallBack
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -2871,7 +2788,7 @@ static uint8_t IsNodeVirtual(uint16_t nodeID)
   };
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_IS_VIRTUAL_NODE))
   {
     return cmdStatus.Content.IsVirtualNodeStatus.result;
@@ -2898,7 +2815,7 @@ static void GetVirtualNodes(uint8_t *vNodesMask)
       .eCommandType = EZWAVECOMMANDTYPE_GET_VIRTUAL_NODES};
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_GET_VIRTUAL_NODES))
   {
     memcpy(vNodesMask, cmdStatus.Content.GetVirtualNodesStatus.vNodesMask, MAX_NODEMASK_LENGTH);
@@ -2910,8 +2827,6 @@ static void GetVirtualNodes(uint8_t *vNodesMask)
 
 ZW_ADD_CMD(FUNC_ID_ZW_GET_VIRTUAL_NODES)
 {
-  UNUSED(frame);
-
   /* */
   GetVirtualNodes(compl_workbuf);
   DoRespond_workbuf(ZW_MAX_NODES / 8);
@@ -2940,8 +2855,6 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_GET_LR_NODES)
 #if SUPPORT_SERIAL_GET_LR_CHANNEL
 ZW_ADD_CMD(FUNC_ID_GET_LR_CHANNEL)
 {
-  UNUSED(frame);
-
   GetLongRangeChannel(&compl_workbuf[0], &compl_workbuf[1]);
   DoRespond_workbuf(2);
 }
@@ -2974,8 +2887,6 @@ ZW_ADD_CMD(FUNC_ID_ENABLE_RADIO_PTI)
 
 ZW_ADD_CMD(FUNC_ID_GET_RADIO_PTI)
 {
-  UNUSED(frame);
-
   const uint8_t retVal = GetPTIConfig();
   DoRespond(retVal);
 }
@@ -2985,8 +2896,6 @@ ZW_ADD_CMD(FUNC_ID_GET_RADIO_PTI)
 #if SUPPORT_ZW_GET_CONTROLLER_CAPABILITIES
 ZW_ADD_CMD(FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES)
 {
-  UNUSED(frame);
-
   /* HOST->ZW: no params defined */
   const uint8_t retVal = GetControllerCapabilities();
   DoRespond(retVal);
@@ -3002,10 +2911,9 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_CONTROLLER_CAPABILITIES)
 static void /* RET  Nothing                     */
 ZCB_ComplHandler_ZW_RequestNodeInfo(
     uint8_t txStatus, /* IN   Transmit completion status  */
-    TX_STATUS_TYPE *txStatusReport)
+    __attribute__((unused)) TX_STATUS_TYPE *txStatusReport)
 {
   /* */
-  UNUSED(txStatusReport);
   if (txStatus != TRANSMIT_COMPLETE_OK)
   {
     ApplicationNodeUpdate(UPDATE_STATE_NODE_INFO_REQ_FAILED, 0, NULL, 0);
@@ -3015,11 +2923,11 @@ ZCB_ComplHandler_ZW_RequestNodeInfo(
 static uint8_t RequestNodeID(uint16_t nodeID)
 {
    // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_NODEINFORMATIONREQUEST;
-  FramePackage.uTransmitParams.NodeInfoRequest.DestNodeId = nodeID;
-  FramePackage.uTransmitParams.NodeInfoRequest.Handle = (ZW_Void_Callback_t)ZCB_ComplHandler_ZW_RequestNodeInfo;
-
+  SZwaveTransmitPackage FramePackage = {
+    .eTransmitType = EZWAVETRANSMITTYPE_NODEINFORMATIONREQUEST,
+    .uTransmitParams.NodeInfoRequest.DestNodeId = nodeID,
+    .uTransmitParams.NodeInfoRequest.Handle = (ZW_Void_Callback_t)ZCB_ComplHandler_ZW_RequestNodeInfo
+  };
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
   return (EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus) ? true : false;
@@ -3028,7 +2936,7 @@ static uint8_t RequestNodeID(uint16_t nodeID)
 ZW_ADD_CMD(FUNC_ID_ZW_REQUEST_NODE_INFO)
 {
   /* HOST->ZW: nodeID */
-  uint8_t offset = 0;
+  volatile uint8_t offset = 0;
   node_id_t nodeId = (node_id_t)GET_NODEID(&frame->payload[0], offset);
   const uint8_t retVal = RequestNodeID(nodeId);
   DoRespond(retVal);
@@ -3054,11 +2962,10 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_SET_TIMEOUTS)
 #if SUPPORT_SERIAL_API_SOFT_RESET
 ZW_ADD_CMD(FUNC_ID_SERIAL_API_SOFT_RESET)
 {
-  UNUSED(frame);
-
   //Enqueue soft reset command to protocol
-  SZwaveCommandPackage Command;
-  Command.eCommandType = EZWAVECOMMANDTYPE_SOFT_RESET;
+  SZwaveCommandPackage Command = {
+    .eCommandType = EZWAVECOMMANDTYPE_SOFT_RESET
+  };
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
 }
 #endif
@@ -3104,8 +3011,6 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_READY)
 #if SUPPORT_ZW_TYPE_LIBRARY
 ZW_ADD_CMD(FUNC_ID_ZW_TYPE_LIBRARY)
 {
-  UNUSED(frame);
-
   const SProtocolInfo* protocol_info = ZAF_getProtocolInfo();
   DoRespond(protocol_info->eLibraryType);
 }
@@ -3120,8 +3025,6 @@ uint8_t bWatchdogStarted;
 #if SUPPORT_ZW_WATCHDOG_START
 ZW_ADD_CMD(FUNC_ID_ZW_WATCHDOG_START)
 {
-  UNUSED(frame);
-
   bWatchdogStarted = true;
   zpal_enable_watchdog(true);
   set_state_and_notify(stateIdle);
@@ -3132,8 +3035,6 @@ ZW_ADD_CMD(FUNC_ID_ZW_WATCHDOG_START)
 #if SUPPORT_ZW_WATCHDOG_STOP
 ZW_ADD_CMD(FUNC_ID_ZW_WATCHDOG_STOP)
 {
-  UNUSED(frame);
-
   zpal_enable_watchdog(false);
   bWatchdogStarted = false;
   set_state_and_notify(stateIdle);
@@ -3144,9 +3045,10 @@ ZW_ADD_CMD(FUNC_ID_ZW_WATCHDOG_STOP)
 #if SUPPORT_ZW_SET_ROUTING_MAX
 static void zw_set_routing_max_handler(const comm_interface_frame_ptr frame)
 {
-  SZwaveCommandPackage Command;
-  Command.eCommandType = EZWAVECOMMANDTYPE_SET_ROUTING_MAX;
-  Command.uCommandParams.SetRoutingMax.value = frame->payload[0];
+  SZwaveCommandPackage Command = {
+    .eCommandType = EZWAVECOMMANDTYPE_SET_ROUTING_MAX,
+    .uCommandParams.SetRoutingMax.value = frame->payload[0]
+  };
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
   DoRespond(1);
 }
@@ -3225,9 +3127,8 @@ SendTestReport(
 
 void
 SendTestRoundReport(
-  uint8_t txStatus)
+  __attribute__((unused)) uint8_t txStatus)
 {
-  UNUSED(txStatus);
   if (funcID_ComplHandler_Serial_API_Test != 0)
   {
     BYTE_IN_AR(compl_workbuf, 0) = funcID_ComplHandler_Serial_API_Test;
@@ -3307,10 +3208,9 @@ TestFindNextNode(void)
 void
 ZCB_TestSendComplete(
   uint8_t bStatus,
-  TX_STATUS_TYPE *txStatusReport
+  __attribute__((unused)) TX_STATUS_TYPE *txStatusReport
 )
 {
-  UNUSED(txStatusReport);
   DPRINT("C");
   DPRINTF("%u", bStatus);
 
@@ -3433,17 +3333,15 @@ TestSend(void)
   }
   /* Send meta data frame */
   // Create transmit frame package
-  SZwaveTransmitPackage FramePackage;
-
-  memset(&FramePackage.uTransmitParams.SendData.FrameConfig.aFrame, 0, sizeof(FramePackage.uTransmitParams.SendData.FrameConfig.aFrame));
-  FramePackage.uTransmitParams.SendData.DestNodeId = testNodeID;
-  FramePackage.uTransmitParams.SendData.FrameConfig.TransmitOptions = testTxOptions;
   uint8_t iFrameLength = (testPayloadLen > payLoadLen) ? testPayloadLen : payLoadLen;
+  SZwaveTransmitPackage FramePackage = {
+    .uTransmitParams.SendData.DestNodeId = testNodeID,
+    .uTransmitParams.SendData.FrameConfig.TransmitOptions = testTxOptions,
+    .uTransmitParams.SendData.FrameConfig.Handle = &ZCB_TestSendComplete,
+    .eTransmitType = EZWAVETRANSMITTYPE_STD,
+    .uTransmitParams.SendData.FrameConfig.iFrameLength = iFrameLength
+  };
   memcpy(&FramePackage.uTransmitParams.SendData.FrameConfig.aFrame, &txBuffer, iFrameLength);
-  FramePackage.uTransmitParams.SendData.FrameConfig.Handle = &ZCB_TestSendComplete;
-  FramePackage.eTransmitType = EZWAVETRANSMITTYPE_STD;
-  FramePackage.uTransmitParams.SendData.FrameConfig.iFrameLength = iFrameLength;
-
   // Put the package on queue (and dont wait for it)
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwTxQueue(), (uint8_t *)&FramePackage, 0);
 
@@ -3514,7 +3412,7 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_TEST)
       testnodemasklen = MAX_NODEMASK_LENGTH;
     }
     ZW_NODE_MASK_CLEAR(testnodemask, MAX_NODEMASK_LENGTH);
-    for (i = 0; i < testnodemasklen; i++)
+    for (uint8_t i = 0; i < testnodemasklen; i++)
     {
       BYTE_IN_AR(testnodemask, i) = frame->payload[i + 8];
     }
@@ -3589,7 +3487,7 @@ static uint8_t GetRandom(uint8_t noOfRndBytes, uint8_t* rndBytes)
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&GetRandom, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage Random;
+    SZwaveCommandStatusPackage Random = { 0 };
     if (GetCommandResponse(&Random, EZWAVECOMMANDSTATUS_GENERATE_RANDOM))
     {
       memcpy(rndBytes, Random.Content.GenerateRandomStatus.aRandomNumber, Random.Content.GenerateRandomStatus.iLength);
@@ -3636,11 +3534,11 @@ ZW_ADD_CMD(FUNC_ID_ZW_GET_RANDOM)
 static void AesEcb(uint8_t *key, uint8_t *InputData, uint8_t *outData)
 {
   SZwaveCommandPackage cmdPackage = {.eCommandType = EZWAVECOMMANDTYPE_AES_ECB};
-  memcpy(cmdPackage.uCommandParams.AesEcb.key, key, 16);
-  memcpy(cmdPackage.uCommandParams.AesEcb.inputData, inputData, 16);
+  memcpy(cmdPackage.uCommandParams.AesEcb.key, key, sizeof(cmdPackage.uCommandParams.AesEcb.key));
+  memcpy(cmdPackage.uCommandParams.AesEcb.inputData, InputData, sizeof(cmdPackage.uCommandParams.AesEcb.inputData));
   EQueueNotifyingStatus QueueStatus = QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&cmdPackage, 500);
   ASSERT(EQUEUENOTIFYING_STATUS_SUCCESS == QueueStatus);
-  SZwaveCommandStatusPackage cmdStatus;
+  SZwaveCommandStatusPackage cmdStatus = { 0 };
   if (GetCommandResponse(&cmdStatus, EZWAVECOMMANDSTATUS_AES_ECB))
   {
     memcpy(outData, cmdStatus.Content.AesEcbStatus.outputData, 16);
@@ -3663,11 +3561,10 @@ ZW_ADD_CMD(FUNC_ID_ZW_AES_ECB)
 #if SUPPORT_ZW_AUTO_PROGRAMMING
 ZW_ADD_CMD(FUNC_ID_AUTO_PROGRAMMING)
 {
-  UNUSED(frame);
-
   //Reboot into bootloader.  Calls zpal_bootloader_reboot_and_install();
-  SZwaveCommandPackage Command;
-  Command.eCommandType = EZWAVECOMMANDTYPE_BOOTLOADER_REBOOT;
+  SZwaveCommandPackage Command = {
+    .eCommandType = EZWAVECOMMANDTYPE_BOOTLOADER_REBOOT
+  };
   QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&Command, 0);
 }
 #endif
@@ -3696,7 +3593,7 @@ static bool SetMaxInclReqIntervals( uint32_t maxInclReqIntervals)
   if (EQUEUENOTIFYING_STATUS_SUCCESS == QueueNotifyingSendToBack(ZAF_getZwCommandQueue(), (uint8_t *)&setMaxInclusionRequestIntervals, 0))
   {
     // Wait for protocol to handle command
-    SZwaveCommandStatusPackage result;
+    SZwaveCommandStatusPackage result = { 0 };
     if (GetCommandResponse(&result, EZWAVECOMMANDSTATUS_ZW_SET_MAX_INCL_REQ_INTERVALS))
     {
       if(result.Content.NetworkManagementStatus.statusInfo[0])
@@ -3720,23 +3617,19 @@ ZW_ADD_CMD(FUNC_ID_ZW_NETWORK_MANAGEMENT_SET_MAX_INCLUSION_REQUEST_INTERVALS)
 // Added to make sure that capabilities is correct.
 ZW_ADD_CMD(FUNC_ID_SERIAL_API_STARTED)
 {
-  UNUSED(frame);
 }
 
 // Added to make sure that capabilities is correct.
 ZW_ADD_CMD(FUNC_ID_ZW_APPLICATION_UPDATE)
 {
-  UNUSED(frame);
 }
 
 // Added to make sure that capabilities is correct.
 ZW_ADD_CMD(FUNC_ID_APPLICATION_COMMAND_HANDLER_BRIDGE)
 {
-  UNUSED(frame);
 }
 
 // Added to make sure that capabilities is correct.
 ZW_ADD_CMD(FUNC_ID_ZW_GET_PROTOCOL_STATUS)
 {
-  UNUSED(frame);
 }

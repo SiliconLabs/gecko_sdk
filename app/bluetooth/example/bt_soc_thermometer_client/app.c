@@ -49,11 +49,10 @@
 #define CONN_MIN_CE_LENGTH            0
 #define CONN_MAX_CE_LENGTH            0xffff
 
-#define TEMP_INVALID                  NAN
+#define TEMP_INVALID                  ((float)-1000)
 #define UNIT_INVALID                  ('?')
 #define UNIT_CELSIUS                  ('C')
 #define UNIT_FAHRENHEIT               ('F')
-#define RSSI_INVALID                  ((int8_t)0x7F)
 #define CONNECTION_HANDLE_INVALID     ((uint8_t)0xFFu)
 #define SERVICE_HANDLE_INVALID        ((uint32_t)0xFFFFFFFFu)
 #define CHARACTERISTIC_HANDLE_INVALID ((uint16_t)0xFFFFu)
@@ -163,6 +162,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
   uint8_t *char_value;
   uint16_t addr_value;
   uint8_t table_index;
+  int8_t rssi;
 
   // Handle stack events
   switch (SL_BT_MSG_ID(evt->header)) {
@@ -337,13 +337,14 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     // -------------------------------
     // This event is generated when a characteristic value was received e.g. an indication
     case sl_bt_evt_gatt_characteristic_value_id:
+      table_index = find_index_by_connection_handle(evt->data.evt_gatt_characteristic_value.connection);
+      if (table_index == TABLE_INDEX_INVALID) {
+        break;
+      }
       if (evt->data.evt_gatt_characteristic_value.value.len >= 5) {
         char_value = &(evt->data.evt_gatt_characteristic_value.value.data[0]);
-        table_index = find_index_by_connection_handle(evt->data.evt_gatt_characteristic_value.connection);
-        if (table_index != TABLE_INDEX_INVALID) {
-          conn_properties[table_index].temperature = translate_IEEE_11073_temperature_to_float((IEEE_11073_float *)(char_value + 1));
-          conn_properties[table_index].unit = translate_flags_to_temperature_unit(char_value[0]);
-        }
+        conn_properties[table_index].temperature = translate_IEEE_11073_temperature_to_float((IEEE_11073_float *)(char_value + 1));
+        conn_properties[table_index].unit = translate_flags_to_temperature_unit(char_value[0]);
       } else {
         app_log_warning("Characteristic value too short: %d" APP_LOG_NL,
                         evt->data.evt_gatt_characteristic_value.value.len);
@@ -352,18 +353,9 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sc = sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
       app_assert_status(sc);
       // Trigger RSSI measurement on the connection
-      sc = sl_bt_connection_get_rssi(evt->data.evt_gatt_characteristic_value.connection);
-      app_assert_status(sc);
-      break;
-
-    // -------------------------------
-    // This event is generated when RSSI value was measured
-    case sl_bt_evt_connection_rssi_id:
-      table_index = find_index_by_connection_handle(evt->data.evt_connection_rssi.connection);
-      if (table_index != TABLE_INDEX_INVALID) {
-        conn_properties[table_index].rssi = evt->data.evt_connection_rssi.rssi;
-      }
-
+      rssi = SL_BT_CONNECTION_RSSI_UNAVAILABLE;
+      sc = sl_bt_connection_get_median_rssi(evt->data.evt_gatt_characteristic_value.connection, &rssi);
+      conn_properties[table_index].rssi = rssi;
       print_values();
       break;
 
@@ -413,7 +405,7 @@ static void init_properties(void)
     conn_properties[i].thermometer_characteristic_handle = CHARACTERISTIC_HANDLE_INVALID;
     conn_properties[i].temperature = TEMP_INVALID;
     conn_properties[i].unit = UNIT_INVALID;
-    conn_properties[i].rssi = RSSI_INVALID;
+    conn_properties[i].rssi = SL_BT_CONNECTION_RSSI_UNAVAILABLE;
     conn_properties[i].power_control_active = TX_POWER_CONTROL_INACTIVE;
     conn_properties[i].tx_power = TX_POWER_INVALID;
     conn_properties[i].remote_tx_power = TX_POWER_INVALID;
@@ -482,7 +474,7 @@ static void remove_connection(uint8_t connection)
     conn_properties[i].thermometer_characteristic_handle = CHARACTERISTIC_HANDLE_INVALID;
     conn_properties[i].temperature = TEMP_INVALID;
     conn_properties[i].unit = UNIT_INVALID;
-    conn_properties[i].rssi = RSSI_INVALID;
+    conn_properties[i].rssi = SL_BT_CONNECTION_RSSI_UNAVAILABLE;
     conn_properties[i].power_control_active = TX_POWER_CONTROL_INACTIVE;
     conn_properties[i].tx_power = TX_POWER_INVALID;
     conn_properties[i].remote_tx_power = TX_POWER_INVALID;
@@ -605,11 +597,15 @@ void print_values(void)
   app_log_info("");
   // Print parameters
   for (i = 0u; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-    if ((TEMP_INVALID != conn_properties[i].temperature) && (RSSI_INVALID != conn_properties[i].rssi) ) {
+    if (TEMP_INVALID != conn_properties[i].temperature) {
       app_log_append("%04x ", conn_properties[i].server_address);
       app_log_append("%6.2f", conn_properties[i].temperature);
       app_log_append("%c ", conn_properties[i].unit);
-      app_log_append("% 3d", conn_properties[i].rssi);
+      if (conn_properties[i].rssi != SL_BT_CONNECTION_RSSI_UNAVAILABLE) {
+        app_log_append("% 3d", conn_properties[i].rssi);
+      } else {
+        app_log_append("---");
+      }
       app_log_append("dBm");
       if (true == print_tx_power) {
         app_log_append(" %4d", conn_properties[i].tx_power);

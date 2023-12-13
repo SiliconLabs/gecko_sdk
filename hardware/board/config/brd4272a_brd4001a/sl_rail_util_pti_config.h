@@ -46,8 +46,8 @@
 
 // <o SL_RAIL_UTIL_PTI_BAUD_RATE_HZ> PTI Baud Rate (Hertz)
 // <147800-20000000:1>
-// <i> Default: 1600000
-#define SL_RAIL_UTIL_PTI_BAUD_RATE_HZ   1600000
+// <i> Default: 3200000
+#define SL_RAIL_UTIL_PTI_BAUD_RATE_HZ   3200000
 
 // </h>
 // <<< end of configuration section >>>

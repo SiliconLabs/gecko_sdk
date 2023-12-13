@@ -37,8 +37,7 @@
 #include "sl_rail_util_init.h"
 #include "app_process.h"
 #include "app_init.h"
-#include "sl_simple_led_instances.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_rail_util_init_inst0_config.h"
 #include "sl_rail_util_protocol_types.h"
 #include "rail_config.h"
@@ -92,8 +91,8 @@ RAIL_Handle_t app_init(void)
 
   init_mode_switch(rail_handle);
   set_up_tx_fifo(rail_handle);
-  sl_led_turn_off(&sl_led_led0);
-  sl_led_turn_off(&sl_led_led1);
+  clear_receive_led();
+  clear_send_led();
   print_sample_app_name("Mode switch");
 
   return rail_handle;

@@ -31,6 +31,11 @@
 #ifndef SL_BT_L2CAP_TRANSFER_H
 #define SL_BT_L2CAP_TRANSFER_H
 
+/***********************************************************************************************//**
+ * @addtogroup l2cap_transfer
+ * @{
+ **************************************************************************************************/
+
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -258,4 +263,5 @@ sl_power_manager_on_isr_exit_t sli_bt_l2cap_transfer_sleep_on_isr_exit(void);
 };
 #endif
 
+/** @} (end addtogroup l2cap_transfer) */
 #endif // SL_BT_L2CAP_TRANSFER_H

@@ -10,14 +10,13 @@ quality: production
 root_path: app/bluetooth/common/ncp_sec
 tag:
   - No-Code
-
 source:
   - path: sl_ncp_sec.c
     condition:
-      - "device_series_2"
+      - device_series_2
   - path: sl_ncp_sec_legacy.c
     condition:
-      - "device_series_1"
+      - device_series_1
 include:
   - path: .
     file_list:
@@ -28,26 +27,26 @@ requires:
   - name: component_catalog
   - name: mbedtls_ccm
     condition:
-      - "device_series_1"
+      - device_series_1
   - name: mbedtls_ecc
     condition:
-      - "device_series_1"
+      - device_series_1
   - name: mbedtls_slcrypto
     condition:
-      - "device_series_1"
+      - device_series_1
   - name: mbedtls_sha
     condition:
-      - "device_series_1"
+      - device_series_1
   - name: ncp
   - name: psa_crypto
     condition:
-      - "device_series_2"
+      - device_series_2
   - name: psa_crypto_sha256
     condition:
-      - "device_series_2"
+      - device_series_2
   - name: psa_crypto_ccm
     condition:
-        - "device_series_2"
+        - device_series_2
 template_contribution:
   - name: component_catalog
     value: ncp_sec
@@ -57,3 +56,6 @@ template_contribution:
       count: 1
     condition:
       - psa_crypto
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp-sec

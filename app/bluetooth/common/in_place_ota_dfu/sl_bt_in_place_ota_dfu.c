@@ -3,7 +3,7 @@
  * @brief In-Place Over-the-Air Device Firmware Update
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include <math.h>
 #include <stddef.h>
 #include "em_common.h"
 #include "gatt_db.h"
@@ -35,9 +36,18 @@
 #include "sl_apploader_util.h"
 #include "sl_bt_in_place_ota_dfu.h"
 #include "sl_bt_in_place_ota_dfu_config.h"
+#include "app_timer.h"
+
+// Connection interval time resolution. Time = interval x 1.25 ms
+#define CONN_INTERVAL_TIME_RESOLUTION_MS  1.25f
 
 // Flag for indicating DFU reset must be performed.
 static bool boot_to_dfu = false;
+static app_timer_t connection_close_delay;
+static uint32_t delay_additional_ms = SL_BT_IN_PLACE_OTA_DFU_MIN_DELAY_TO_DISCONNECT;
+
+static void delay_timer_cb(app_timer_t *handle, void *data);
+static uint32_t calculate_delay_ms(uint16_t conn_interval, uint16_t latency);
 
 /**************************************************************************//**
  * Bluetooth stack event handler.
@@ -70,6 +80,7 @@ void sl_bt_in_place_ota_dfu_on_event(sl_bt_msg_t *evt)
           // Boot into DFU mode.
           boot_to_dfu = true;
         }
+
         // Send response to user write request.
         sc = sl_bt_gatt_server_send_user_write_response(
           evt->data.evt_gatt_server_user_write_request.connection,
@@ -77,13 +88,22 @@ void sl_bt_in_place_ota_dfu_on_event(sl_bt_msg_t *evt)
           (uint8_t)attr_status);
         app_assert_status(sc);
 
-        // Close connection before booting into DFU mode.
-        if (boot_to_dfu) {
-          sc = sl_bt_connection_close(
-            evt->data.evt_gatt_server_user_write_request.connection);
-          app_assert_status(sc);
-        }
+        // Start delay timer before closing connection.
+        // Forward connection ID to the timer callback.
+        sc = app_timer_start(&connection_close_delay,
+                             delay_additional_ms,
+                             delay_timer_cb,
+                             (void *)((uint32_t) evt->data.evt_gatt_server_user_write_request.connection),
+                             false);
+        app_assert_status(sc);
       }
+      break;
+
+    // -------------------------------
+    // This event indicates that a connection was opened.
+    case sl_bt_evt_connection_parameters_id:
+      delay_additional_ms = calculate_delay_ms(evt->data.evt_connection_parameters.interval,
+                                               evt->data.evt_connection_parameters.latency);
       break;
 
     // -------------------------------
@@ -98,6 +118,44 @@ void sl_bt_in_place_ota_dfu_on_event(sl_bt_msg_t *evt)
     default:
       break;
   }
+}
+
+/**************************************************************************//**
+ * Private delay timer callback function.
+ *****************************************************************************/
+static void delay_timer_cb(app_timer_t *handle, void *data)
+{
+  sl_status_t sc;
+  uint32_t conn_handle = (uint32_t)data;
+  if (handle == &connection_close_delay && boot_to_dfu) {
+    // Close connection before booting into DFU mode.
+    sc = sl_bt_connection_close((uint8_t)conn_handle);
+    app_assert_status(sc);
+  }
+}
+
+/**************************************************************************//**
+ * Calculate delay function.
+ * Takes the connection interval and the latency, and multiplies it
+ * with a configurable multiplier.
+ * The calculated value must be greater than the minimum delay value that is
+ * also configurable in component config.
+ *****************************************************************************/
+static uint32_t calculate_delay_ms(uint16_t conn_interval, uint16_t latency)
+{
+  float raw_delay = 0.0f;
+  uint32_t delay = 0;
+
+  raw_delay = (float)conn_interval * CONN_INTERVAL_TIME_RESOLUTION_MS * (float)(1 + latency);
+  raw_delay *= SL_BT_IN_PLACE_OTA_DFU_CALC_DELAY_MULTIPLIER;
+
+  delay = (uint32_t)ceilf(raw_delay);
+
+  if (delay < SL_BT_IN_PLACE_OTA_DFU_MIN_DELAY_TO_DISCONNECT) {
+    delay = SL_BT_IN_PLACE_OTA_DFU_MIN_DELAY_TO_DISCONNECT;
+  }
+
+  return delay;
 }
 
 /**************************************************************************//**

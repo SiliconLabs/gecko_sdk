@@ -59,7 +59,8 @@ extern "C" {
  * @param[in] max Maximum value, after operation no elements will be > max.
  *
  * @return
- *   @ref SL_STATUS_OK.
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate sl_status_t
+ *   errorcode is returned.
  */
 sl_status_t sl_math_mvp_clamp_i8(int8_t *data, size_t num_elements, int8_t min, int8_t max);
 

@@ -30,6 +30,9 @@ template_contribution:
       include: sl_device_init_usbpll.h
       handler: sl_device_init_usbpll
     priority: -9545
+    condition: [sl_system]
+  - name: component_catalog
+    value: device_init_usbpll
 documentation:
   docset: gecko-platform
   document: platform-service/device-init-usbpll

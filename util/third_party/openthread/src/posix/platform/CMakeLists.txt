@@ -77,10 +77,24 @@ if (OT_POSIX_SECURE_SETTINGS)
     )
 endif()
 
-set(OT_POSIX_CONFIG_RCP_BUS "" CACHE STRING "RCP bus type")
-if(OT_POSIX_CONFIG_RCP_BUS)
+option(OT_POSIX_RCP_HDLC_BUS "enable RCP HDLC bus" OFF)
+if(OT_POSIX_RCP_HDLC_BUS)
     target_compile_definitions(ot-posix-config
-        INTERFACE "OPENTHREAD_POSIX_CONFIG_RCP_BUS=OT_POSIX_RCP_BUS_${OT_POSIX_CONFIG_RCP_BUS}"
+        INTERFACE "OPENTHREAD_POSIX_CONFIG_SPINEL_HDLC_INTERFACE_ENABLE=1"
+    )
+endif()
+
+option(OT_POSIX_RCP_SPI_BUS "enable RCP SPI bus" OFF)
+if(OT_POSIX_RCP_SPI_BUS)
+    target_compile_definitions(ot-posix-config
+        INTERFACE "OPENTHREAD_POSIX_CONFIG_SPINEL_SPI_INTERFACE_ENABLE=1"
+    )
+endif()
+
+option(OT_POSIX_RCP_VENDOR_BUS "enable RCP vendor bus" OFF)
+if(OT_POSIX_RCP_VENDOR_BUS)
+    target_compile_definitions(ot-posix-config
+        INTERFACE "OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE=1"
     )
 endif()
 
@@ -91,8 +105,8 @@ if(OT_POSIX_NAT64_CIDR)
     )
 endif()
 
-if(NOT OT_CONFIG)
-    set(OT_CONFIG "openthread-core-posix-config.h" PARENT_SCOPE)
+if(NOT OT_PLATFORM_CONFIG)
+    set(OT_PLATFORM_CONFIG "openthread-core-posix-config.h" PARENT_SCOPE)
 endif()
 
 set(CMAKE_EXE_LINKER_FLAGS "-rdynamic ${CMAKE_EXE_LINKER_FLAGS}" PARENT_SCOPE)
@@ -105,6 +119,7 @@ add_library(openthread-posix
     alarm.cpp
     backbone.cpp
     backtrace.cpp
+    configuration.cpp
     config_file.cpp
     daemon.cpp
     entropy.cpp
@@ -118,7 +133,6 @@ add_library(openthread-posix
     multicast_routing.cpp
     netif.cpp
     power.cpp
-    power_updater.cpp
     radio.cpp
     radio_url.cpp
     resolver.cpp

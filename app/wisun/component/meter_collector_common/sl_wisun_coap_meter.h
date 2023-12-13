@@ -30,6 +30,10 @@
 #ifndef __SL_WISUN_COAP_METER_H__
 #define __SL_WISUN_COAP_METER_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -59,13 +63,14 @@
  *****************************************************************************/
 void sl_wisun_coap_meter_init(void);
 
+#if !SL_WISUN_COAP_MC_OPTIMIZED_MODE_ENABLE
 /**************************************************************************//**
  * @brief Prepare measurement response packet from all sensor values
  * @details Callback for CoAP Resource Handler Service. It should be registered.
  * @param[in] req_packet Request packet
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-sl_wisun_coap_packet_t * sl_wisun_coap_meter_measurement_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+sl_wisun_coap_packet_t *sl_wisun_coap_meter_measurement_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Temperature measurement response packet
@@ -73,7 +78,7 @@ sl_wisun_coap_packet_t * sl_wisun_coap_meter_measurement_response_cb(const sl_wi
  * @param[in] req_packet Request packet
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-sl_wisun_coap_packet_t * sl_wisun_coap_meter_temperature_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+sl_wisun_coap_packet_t *sl_wisun_coap_meter_temperature_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Humidity measurement response packet
@@ -81,7 +86,7 @@ sl_wisun_coap_packet_t * sl_wisun_coap_meter_temperature_response_cb(const sl_wi
  * @param[in] req_packet Request packet
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-sl_wisun_coap_packet_t * sl_wisun_coap_meter_humidity_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+sl_wisun_coap_packet_t *sl_wisun_coap_meter_humidity_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare Light measurement response packet
@@ -89,7 +94,7 @@ sl_wisun_coap_packet_t * sl_wisun_coap_meter_humidity_response_cb(const sl_wisun
  * @param[in] req_packet Request packet
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-sl_wisun_coap_packet_t * sl_wisun_coap_meter_light_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+sl_wisun_coap_packet_t *sl_wisun_coap_meter_light_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
 /**************************************************************************//**
  * @brief Prepare measurement response packet
@@ -97,14 +102,11 @@ sl_wisun_coap_packet_t * sl_wisun_coap_meter_light_response_cb(const sl_wisun_co
  * @param[in] req_packet Request packet
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
-sl_wisun_coap_packet_t * sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+sl_wisun_coap_packet_t *sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+#endif
 
-/**************************************************************************//**
- * @brief Convert LED ID.
- * @details Helper function to convert uint8_t LED ID to sl_wisun_led_id_t
- * @param[in] led_id LED ID raw value
- * @return sl_wisun_led_id_t converted LED ID
- *****************************************************************************/
-sl_wisun_led_id_t sl_wisun_coap_meter_convert_led_id(const uint8_t led_id);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -22,40 +22,139 @@
 #include "nvm3.h"
 #include "app_settings.h"
 #include "border_router/sl_wisun_br_api.h"
-#include "sl_default_phy.h"
+#include "sl_wisun_default_phy.h"
 #include "sl_wisun_cli_util.h"
 #include "sl_wisun_types.h"
 #include "sl_wisun_trace_api.h"
 #include "rail_features.h"
+#include "sl_malloc.h"
 
-#define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  "Wi-SUN Network"
-#define APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE  SL_WISUN_NETWORK_SIZE_SMALL
-#define APP_SETTINGS_WISUN_DEFAULT_TX_POWER  20
+#ifdef WISUN_FAN_CERTIFICATION
+
+  // Defaults for Wi-SUN FAN Certification.
+
+  #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  "WiSUN PAN"
+  #define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN11
+  #define APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN  1 // NA
+  #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS  1
+  #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE  0x1b
+  #define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  1
+  #define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  2
+  #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE  SL_WISUN_NETWORK_SIZE_CERTIFICATION
+  #define APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS  "0"
+  #define APP_SETTINGS_WISUN_DEFAULT_CERTIFICATE_CHAIN  APP_CERTIFICATE_CHAIN_CERTIF
+
+#elif defined SL_CATALOG_WISUN_CONFIG_PRESENT
+
+  // Defaults from Wi-SUN Configurator.
+
+  #include "sl_wisun_config.h"
+
+  #ifdef WISUN_CONFIG_NETWORK_NAME
+    #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  WISUN_CONFIG_NETWORK_NAME
+  #endif
+  #ifdef WISUN_CONFIG_DEFAULT_PHY_FAN10
+    #define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN10
+    #define APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN  WISUN_CONFIG_REGULATORY_DOMAIN
+    #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS  WISUN_CONFIG_OPERATING_CLASS
+    #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE  WISUN_CONFIG_OPERATING_MODE
+  #elif defined WISUN_CONFIG_DEFAULT_PHY_FAN11
+    #define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN11
+    #define APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN  WISUN_CONFIG_REGULATORY_DOMAIN
+    #define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  WISUN_CONFIG_CHANNEL_PLAN_ID
+    #define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  WISUN_CONFIG_PHY_MODE_ID
+  #endif
+  #ifdef WISUN_CONFIG_NETWORK_SIZE
+    #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE  WISUN_CONFIG_NETWORK_SIZE
+  #endif
+  #ifdef WISUN_CONFIG_ALLOWED_CHANNELS
+    #define APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS  WISUN_CONFIG_ALLOWED_CHANNELS
+  #endif
+  #ifdef WISUN_CONFIG_TX_POWER
+    #define APP_SETTINGS_WISUN_DEFAULT_TX_POWER  WISUN_CONFIG_TX_POWER
+  #endif
+  #ifdef WISUN_CONFIG_MODE_SWITCH_PHYS
+    #define APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS  WISUN_CONFIG_MODE_SWITCH_PHYS
+  #endif
+  #ifdef WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER
+    #define APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS_COUNT  WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER
+  #endif
+  #ifdef WISUN_CONFIG_DEVICE_PROFILE
+    #define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE  WISUN_CONFIG_DEVICE_PROFILE
+  #endif
+
+#endif
+
+// Defaults from wisun_default_phy component.
+
+#include "sl_wisun_default_phy.h"
+
+#ifndef APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME
+  #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_NAME  "Wi-SUN Network"
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE
+  #define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN11
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN
+  #define APP_SETTINGS_WISUN_DEFAULT_REGULATORY_DOMAIN  SL_WISUN_DEFAULT_REGULATORY_DOMAIN
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS
+  #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_CLASS  SL_WISUN_DEFAULT_OPERATING_CLASS
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE
+  #define APP_SETTINGS_WISUN_DEFAULT_OPERATING_MODE  SL_WISUN_DEFAULT_OPERATING_MODE
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID
+  #define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  SL_WISUN_DEFAULT_CHAN_PLAN_ID
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID
+  #define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  SL_WISUN_DEFAULT_PHY_MODE_ID
+#endif
+
+#ifndef APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE
+  #define APP_SETTINGS_WISUN_DEFAULT_NETWORK_SIZE  SL_WISUN_NETWORK_SIZE_SMALL
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS
+  #define APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS  "0-255"
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_CERTIFICATE_CHAIN
+  #define APP_SETTINGS_WISUN_DEFAULT_CERTIFICATE_CHAIN  APP_CERTIFICATE_CHAIN_SILABS
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_TX_POWER
+  #define APP_SETTINGS_WISUN_DEFAULT_TX_POWER  20
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS
+  #define APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS  { 0 }
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS_COUNT
+  #define APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS_COUNT  0
+#endif
+#ifndef APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE
+  #define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE SL_WISUN_LFN_PROFILE_TEST
+#endif
+
 #define APP_SETTINGS_WISUN_DEFAULT_UC_DWELL_INTERVAL  255
 #define APP_SETTINGS_WISUN_DEFAULT_BC_INTERVAL  1020
 #define APP_SETTINGS_WISUN_DEFAULT_BC_DWELL_INTERVAL  255
 #define APP_SETTINGS_WISUN_DEFAULT_CH0_FREQUENCY  863100
 #define APP_SETTINGS_WISUN_DEFAULT_NUMBER_OF_CHANNELS  69
-#define APP_SETTINGS_WISUN_DEFAULT_CHANNEL_SPACING  SL_WISUN_CHANNEL_SPACING_100HZ
-#define APP_SETTINGS_WISUN_CHANNEL_MASK_ALL  0xFFFFFFFF
-#define APP_SETTINGS_WISUN_CHANNEL_MASK_NONE  0
-#define APP_SETTINGS_WISUN_FIXED_CHANNEL_DISABLE  256
-#define APP_SETTINGS_WISUN_DEFAULT_ALLOWED_CHANNELS  "0-255"
+#define APP_SETTINGS_WISUN_DEFAULT_CHANNEL_SPACING  100
 #define APP_SETTINGS_WISUN_DEFAULT_REGULATION  SL_WISUN_REGULATION_NONE
-#define APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE  SL_WISUN_PHY_CONFIG_FAN10
-#define APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID  1
-#define APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID  2
-#define APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE SL_WISUN_LFN_PROFILE_TEST
+#define APP_SETTINGS_WISUN_DEFAULT_DEVICE_TYPE SL_WISUN_BORDER_ROUTER
+#define APP_SETTINGS_WISUN_DEFAULT_CRC_TYPE SL_WISUN_4_BYTES_CRC
+#define APP_SETTINGS_WISUN_DEFAULT_STF_LENGTH 4
+#define APP_SETTINGS_WISUN_DEFAULT_PREAMBLE_LENGTH 56
 
 #ifndef APP_SETTINGS_APP_DEFAULT_AUTOSTART
-# define APP_SETTINGS_APP_DEFAULT_AUTOSTART  false
+  #define APP_SETTINGS_APP_DEFAULT_AUTOSTART  false
 #endif
 
 typedef enum
 {
   app_settings_domain_wisun       = 0x00,
   app_settings_domain_statistics  = 0x01,
-  app_settings_domain_app         = 0x02
+  app_settings_domain_app         = 0x02,
+  app_settings_domain_info        = 0x03,
 } app_settings_domain_t;
 
 const char *app_settings_domain_str[] =
@@ -63,6 +162,7 @@ const char *app_settings_domain_str[] =
   "wisun",
   "statistics",
   "app",
+  "info",
   NULL,
 };
 
@@ -73,7 +173,8 @@ typedef enum
   app_statistics_domain_fhss       = 0x02,
   app_statistics_domain_wisun      = 0x03,
   app_statistics_domain_network    = 0x04,
-  app_statistics_domain_regulation = 0x05
+  app_statistics_domain_regulation = 0x05,
+  app_statistics_domain_heap       = 0x06
 } app_statistics_domain_t;
 
 const char *app_statistics_domain_str[] =
@@ -84,6 +185,20 @@ const char *app_statistics_domain_str[] =
   "wisun",
   "network",
   "regulation",
+  "heap",
+  NULL,
+};
+
+typedef enum
+{
+  app_info_domain_network = 0x00,
+  app_info_domain_rpl     = 0x01
+} app_info_domain_t;
+
+const char *app_info_domain_str[] =
+{
+  "network",
+  "rpl",
   NULL,
 };
 
@@ -106,13 +221,18 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .uc_dwell_interval_ms = APP_SETTINGS_WISUN_DEFAULT_UC_DWELL_INTERVAL,
   .bc_interval_ms = APP_SETTINGS_WISUN_DEFAULT_BC_INTERVAL,
   .bc_dwell_interval_ms = APP_SETTINGS_WISUN_DEFAULT_BC_DWELL_INTERVAL,
-  .gtk = {
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  .gtks = {
+    {0xBB, 0x06, 0x08, 0x57, 0x2C, 0xE1, 0x4D, 0x7B, 0xA2, 0xD1, 0x55, 0x49, 0x9C, 0xC8, 0x51, 0x9B},  // GTK[0] from Conformance Test Plan.
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   },
-  .gtk_set = 0,
+  .lgtks = {
+    {0xA6, 0xE9, 0xAE, 0x41, 0x56, 0xB2, 0x74, 0xC3, 0x6B, 0x49, 0x40, 0xC7, 0xDA, 0x2B, 0xA3, 0x09},  // LGTK[0] from Conformance Test Plan.
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+  },
+  .gtk_set = 0x11,
   .state = SL_WISUN_BR_STATE_INITIALIZED,
   .channel_spacing = APP_SETTINGS_WISUN_DEFAULT_CHANNEL_SPACING,
   .number_of_channels = APP_SETTINGS_WISUN_DEFAULT_NUMBER_OF_CHANNELS,
@@ -123,7 +243,12 @@ static const app_settings_wisun_t app_settings_wisun_default = {
   .chan_plan_id = APP_SETTINGS_WISUN_DEFAULT_CHAN_PLAN_ID,
   .phy_mode_id = APP_SETTINGS_WISUN_DEFAULT_PHY_MODE_ID,
   .phy_config_type = APP_SETTINGS_WISUN_DEFAULT_PHY_CONFIG_TYPE,
-  .lfn_profile = APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE
+  .rx_phy_mode_ids = APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS,
+  .rx_phy_mode_ids_count = APP_SETTINGS_WISUN_DEFAULT_RX_PHY_MODE_IDS_COUNT,
+  .lfn_profile = APP_SETTINGS_WISUN_DEFAULT_LFN_PROFILE,
+  .crc_type = APP_SETTINGS_WISUN_DEFAULT_CRC_TYPE,
+  .stf_length = APP_SETTINGS_WISUN_DEFAULT_STF_LENGTH,
+  .preamble_length = APP_SETTINGS_WISUN_DEFAULT_PREAMBLE_LENGTH
 };
 
 static const app_settings_app_t app_settings_app_default = {
@@ -165,6 +290,12 @@ const app_saving_item_t *saving_settings[] = {
 };
 
 static sl_wisun_statistics_t app_statistics;
+static sl_wisun_network_info_t app_network_info;
+static sl_wisun_rpl_info_t app_rpl_info;
+
+#if SLI_WISUN_DISABLE_SECURITY
+uint32_t app_security_state = 1;
+#endif
 
 static const app_enum_t app_settings_wisun_phy_config_type_enum[] =
 {
@@ -172,6 +303,9 @@ static const app_enum_t app_settings_wisun_phy_config_type_enum[] =
   { "FAN 1.1", SL_WISUN_PHY_CONFIG_FAN11 },
   { "explicit", SL_WISUN_PHY_CONFIG_EXPLICIT },
   { "IDs", SL_WISUN_PHY_CONFIG_IDS},
+  { "Custom FSK", SL_WISUN_PHY_CONFIG_CUSTOM_FSK},
+  { "Custom OFDM", SL_WISUN_PHY_CONFIG_CUSTOM_OFDM},
+  { "Custom OQPSK", SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK},
   { NULL, 0 }
 };
 
@@ -223,15 +357,26 @@ static const app_enum_t app_settings_wisun_state_enum[] =
   { NULL, 0 }
 };
 
-static const app_enum_t app_settings_phy_channel_spacing_enum[] =
+const app_enum_t app_settings_wisun_crc_type_enum[] =
 {
-  { "100kHz", SL_WISUN_CHANNEL_SPACING_100KHZ },
-  { "200kHz", SL_WISUN_CHANNEL_SPACING_200KHZ },
-  { "400kHz", SL_WISUN_CHANNEL_SPACING_400KHZ },
-  { "600kHz", SL_WISUN_CHANNEL_SPACING_600KHZ },
-  { "250kHz", SL_WISUN_CHANNEL_SPACING_250KHZ },
-  { "800kHz", SL_WISUN_CHANNEL_SPACING_800KHZ },
-  { "1200kHz", SL_WISUN_CHANNEL_SPACING_1200KHZ },
+  { "no-crc", SL_WISUN_NO_CRC },
+  { "2-bytes", SL_WISUN_2_BYTES_CRC },
+  { "4-bytes", SL_WISUN_4_BYTES_CRC },
+  { NULL, 0 }
+};
+
+const app_enum_t app_settings_wisun_neighbor_type_enum[] =
+{
+  { "Primary parent", SL_WISUN_NEIGHBOR_TYPE_PRIMARY_PARENT },
+  { "Secondary parent", SL_WISUN_NEIGHBOR_TYPE_SECONDARY_PARENT },
+  { "Child", SL_WISUN_NEIGHBOR_TYPE_CHILD },
+  { NULL, 0 }
+};
+
+const app_enum_t app_settings_wisun_is_lfn_enum[] =
+{
+  { "FFN", 0 },
+  { "LFN", 1 },
   { NULL, 0 }
 };
 
@@ -259,6 +404,15 @@ static sl_status_t app_settings_get_fan11_phy_config(char *value_str,
 static sl_status_t app_settings_get_explicit_phy_config(char *value_str,
                                                         const char *key_str,
                                                         const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_custom_phy_config(char *value_str,
+                                                      const char *key_str,
+                                                      const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_custom_fsk_oqpsk_phy_config(char *value_str,
+                                                                const char *key_str,
+                                                                const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_custom_ofdm_phy_config(char *value_str,
+                                                           const char *key_str,
+                                                           const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_ids_phy_config(char *value_str,
                                                    const char *key_str,
                                                    const app_settings_entry_t *entry);
@@ -274,18 +428,27 @@ static sl_status_t app_settings_set_gtk(const char *value_str,
 static sl_status_t app_settings_get_gtk(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry);
+static sl_status_t app_settings_set_lgtk(const char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_lgtk(char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_gak(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry);
-static sl_status_t app_settings_get_lfn_gak(char *value_str,
-                                            const char *key_str,
-                                            const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_lgak(char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_mac_address(char *value_str,
                                                 const char *key_str,
                                                 const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_ip_addresses(char *value_str,
                                                  const char *key_str,
                                                  const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_neighbors(char *value_str,
+                                              const char *key_str,
+                                              const app_settings_entry_t *entry);
 static sl_status_t app_settings_get_statistics(char *value_str,
                                                const char *key_str,
                                                const app_settings_entry_t *entry);
@@ -295,9 +458,15 @@ static sl_status_t app_settings_get_statistics_regulation(char *value_str,
 static sl_status_t app_settings_get_state(char *value_str,
                                           const char *key_str,
                                           const app_settings_entry_t *entry);
-static sl_status_t app_settings_get_channel_mask_str(char *value_str,
-                                                     const char *key_str,
-                                                     const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_async_channel_mask_str(char *value_str,
+                                                           const char *key_str,
+                                                           const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_unicast_channel_mask_str(char *value_str,
+                                                             const char *key_str,
+                                                             const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_broadcast_channel_mask_str(char *value_str,
+                                                               const char *key_str,
+                                                               const app_settings_entry_t *entry);
 static sl_status_t app_settings_set_allowed_channels(const char *value_str,
                                                      const char *key_str,
                                                      const app_settings_entry_t *entry);
@@ -321,6 +490,13 @@ static sl_status_t app_settings_get_rx_phy_mode_ids(char *value_str,
                                                     const char *key_str,
                                                     const app_settings_entry_t *entry);
 #endif
+
+static sl_status_t app_settings_get_network_info(char *value_str,
+                                                 const char *key_str,
+                                                 const app_settings_entry_t *entry);
+static sl_status_t app_settings_get_rpl_info(char *value_str,
+                                             const char *key_str,
+                                             const app_settings_entry_t *entry);
 
 const app_settings_entry_t app_settings_entries[] =
 {
@@ -470,15 +646,54 @@ const app_settings_entry_t app_settings_entries[] =
   {
     .key = "channel_spacing",
     .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
     .value = &app_settings_wisun.channel_spacing,
-    .input_enum_list = app_settings_phy_channel_spacing_enum,
-    .output_enum_list = app_settings_phy_channel_spacing_enum,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
     .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_explicit_phy_config,
-    .description = "Channel spacing [string] (100kHz|200kHz|400kHz|600kHz|250kHz|800kHz|1200kHz)"
+    .description = "Channel spacing in kHz [uint16]"
+  },
+  {
+    .key = "crc_type",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.crc_type,
+    .input_enum_list = app_settings_wisun_crc_type_enum,
+    .output_enum_list = app_settings_wisun_crc_type_enum,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_custom_phy_config,
+    .description = "Custom CRC type [uint8]"
+  },
+  {
+    .key = "preamble_length",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.preamble_length,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_custom_fsk_oqpsk_phy_config,
+    .description = "Custom preamble length [uint8]"
+  },
+  {
+    .key = "stf_length",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_wisun.stf_length,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_custom_ofdm_phy_config,
+    .description = "Custom STF length [uint8]"
   },
   {
     .key = "protocol_id",
@@ -572,176 +787,6 @@ const app_settings_entry_t app_settings_entries[] =
     .description = "Broadcast dwell interval in ms [uint8]"
   },
   {
-    .key = "channel_mask",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.allowed_channels,
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_channel_mask_str,
-    .description = "Excluded channel mask"
-  },
-  {
-    .key = "allowed_channels",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.allowed_channels,
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_allowed_channels,
-    .get_handler = app_settings_get_string,
-    .description = "Allowed channel ranges (e.g. 0-54,57-60,64,67-68)"
-  },
-
-  {
-    .key = "gtk1",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gtk[0],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_gtk,
-    .get_handler = app_settings_get_gtk,
-    .description = "GTK to install, 'none' to uninstall [string]"
-  },
-  {
-    .key = "gtk2",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gtk[1],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_gtk,
-    .get_handler = app_settings_get_gtk,
-    .description = "GTK to install, 'none' to uninstall [string]"
-  },
-  {
-    .key = "gtk3",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gtk[2],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_gtk,
-    .get_handler = app_settings_get_gtk,
-    .description = "GTK to install, 'none' to uninstall [string]"
-  },
-  {
-    .key = "gtk4",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gtk[3],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = app_settings_set_gtk,
-    .get_handler = app_settings_get_gtk,
-    .description = "GTK to install, 'none' to uninstall [string]"
-  },
-  {
-    .key = "gak1",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gak[0],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_gak,
-    .description = "GAK derived from GTK1 [string]"
-  },
-  {
-    .key = "gak2",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gak[1],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_gak,
-    .description = "GAK derived from GTK2 [string]"
-  },
-  {
-    .key = "gak3",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gak[2],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_gak,
-    .description = "GAK derived from GTK3 [string]"
-  },
-  {
-    .key = "gak4",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.gak[3],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_gak,
-    .description = "GAK derived from GTK4 [string]"
-  },
-  {
-    .key = "lfn_gak1",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.lfn_gak[0],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_lfn_gak,
-    .description = "GAK derived from LGTK1 [string]"
-  },
-  {
-    .key = "lfn_gak2",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.lfn_gak[1],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_lfn_gak,
-    .description = "GAK derived from LGTK2 [string]"
-  },
-  {
-    .key = "lfn_gak3",
-    .domain = app_settings_domain_wisun,
-    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
-    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
-    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = app_settings_wisun.lfn_gak[2],
-    .input_enum_list = NULL,
-    .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_lfn_gak,
-    .description = "GAK derived from LGTK3 [string]"
-  },
-  {
     .key = "mac_address",
     .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
@@ -768,134 +813,264 @@ const app_settings_entry_t app_settings_entries[] =
     .description = "IPv6 addresses"
   },
   {
-    .key = "phy",
-    .domain = app_settings_domain_statistics,
+    .key = "neighbors",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_PHY,
+    .value = NULL,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = NULL,
-    .get_handler = app_settings_get_statistics,
-    .description = "PHY statistics and errors"
+    .get_handler = app_settings_get_neighbors,
+    .description = "RPL neighbors (parents and children)"
   },
   {
-    .key = "mac",
-    .domain = app_settings_domain_statistics,
+    .key = "async_channel_mask",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_async_channel_mask_str,
+    .description = "Excluded channel mask applied to async frames"
+  },
+  {
+    .key = "unicast_channel_mask",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_unicast_channel_mask_str,
+    .description = "Excluded channel mask applied to unicast frequency hopping"
+  },
+  {
+    .key = "broadcast_channel_mask",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_broadcast_channel_mask_str,
+    .description = "Excluded channel mask applied to broadcast frequency hopping"
+  },
+  {
+    .key = "allowed_channels",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_UTIL_PRINTABLE_DATA_MAX_LENGTH+1,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.allowed_channels,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_allowed_channels,
+    .get_handler = app_settings_get_string,
+    .description = "Allowed channel ranges (e.g. 0-54,57-60,64,67-68)"
+  },
+  {
+    .key = "gtk1",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_MAC,
+    .value = app_settings_wisun.gtks[0],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_statistics,
-    .description = "MAC statistics and errors"
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
   },
   {
-    .key = "fhss",
-    .domain = app_settings_domain_statistics,
+    .key = "gtk2",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_FHSS,
+    .value = app_settings_wisun.gtks[1],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_statistics,
-    .description = "FHSS statistics and errors"
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
   },
   {
-    .key = "wisun",
-    .domain = app_settings_domain_statistics,
+    .key = "gtk3",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_WISUN,
+    .value = app_settings_wisun.gtks[2],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_statistics,
-    .description = "Wi-SUN statistics and errors"
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
   },
   {
-    .key = "network",
-    .domain = app_settings_domain_statistics,
+    .key = "gtk4",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_NETWORK,
+    .value = app_settings_wisun.gtks[3],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = NULL,
-    .get_handler = app_settings_get_statistics,
-    .description = "Network statistics and errors"
+    .set_handler = app_settings_set_gtk,
+    .get_handler = app_settings_get_gtk,
+    .description = "GTK to install, 'none' to uninstall [string]"
   },
   {
-    .key = "regulation",
-    .domain = app_settings_domain_statistics,
+    .key = "lgtk1",
+    .domain = app_settings_domain_wisun,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = (void *)SL_WISUN_STATISTICS_TYPE_REGULATION,
+    .value = app_settings_wisun.lgtks[0],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_lgtk,
+    .get_handler = app_settings_get_lgtk,
+    .description = "LGTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "lgtk2",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.lgtks[1],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_lgtk,
+    .get_handler = app_settings_get_lgtk,
+    .description = "LGTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "lgtk3",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.lgtks[2],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_lgtk,
+    .get_handler = app_settings_get_lgtk,
+    .description = "LGTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "lgtk4",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.lgtks[3],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_lgtk,
+    .get_handler = app_settings_get_lgtk,
+    .description = "LGTK to install, 'none' to uninstall [string]"
+  },
+  {
+    .key = "gak1",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.gaks[0],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
     .set_handler = NULL,
-    .get_handler = app_settings_get_statistics_regulation,
-    .description = "Regional regulation statistics and errors"
+    .get_handler = app_settings_get_gak,
+    .description = "GAK derived from GTK1 [string]"
   },
   {
-    .key = "printable_data_as_hex",
-    .domain = app_settings_domain_app,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .key = "gak2",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_settings_app.printable_data_as_hex,
+    .value = app_settings_wisun.gaks[1],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_integer,
-    .description = "Print socket data as hex [bool] (0|1)"
+    .set_handler = NULL,
+    .get_handler = app_settings_get_gak,
+    .description = "GAK derived from GTK2 [string]"
   },
   {
-    .key = "printable_data_length",
-    .domain = app_settings_domain_app,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .key = "gak3",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_settings_app.printable_data_length,
+    .value = app_settings_wisun.gaks[2],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_integer,
-    .description = "Socket data line length [uint8]"
+    .set_handler = NULL,
+    .get_handler = app_settings_get_gak,
+    .description = "GAK derived from GTK3 [string]"
   },
   {
-    .key = "autostart",
-    .domain = app_settings_domain_app,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .key = "gak4",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_settings_app.autostart,
+    .value = app_settings_wisun.gaks[3],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_integer,
-    .description = "Disable or enable autostart [bool] (0|1)"
+    .set_handler = NULL,
+    .get_handler = app_settings_get_gak,
+    .description = "GAK derived from GTK4 [string]"
   },
   {
-    .key = "pti_state",
-    .domain = app_settings_domain_app,
-    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .key = "lgak1",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
     .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
     .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
-    .value = &app_settings_app.pti_state,
+    .value = app_settings_wisun.lgaks[0],
     .input_enum_list = NULL,
     .output_enum_list = NULL,
-    .set_handler = app_settings_set_integer,
-    .get_handler = app_settings_get_integer,
-    .description = "Disable or enable PTI [bool] (0|1)"
+    .set_handler = NULL,
+    .get_handler = app_settings_get_lgak,
+    .description = "GAK derived from LGTK1 [string]"
+  },
+  {
+    .key = "lgak2",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.lgaks[1],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_lgak,
+    .description = "GAK derived from LGTK2 [string]"
+  },
+  {
+    .key = "lgak3",
+    .domain = app_settings_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = app_settings_wisun.lgaks[2],
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_lgak,
+    .description = "GAK derived from LGTK3 [string]"
   },
   {
     .key = "trace_filter",
@@ -976,6 +1151,190 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = app_settings_set_integer,
     .get_handler = app_settings_get_integer,
     .description = "Wi-SUN LFN profile [uint8]"
+  },
+  {
+    .key = "phy",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_PHY,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "PHY statistics and errors"
+  },
+  {
+    .key = "mac",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_MAC,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "MAC statistics and errors"
+  },
+  {
+    .key = "fhss",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_FHSS,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "FHSS statistics and errors"
+  },
+  {
+    .key = "wisun",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_WISUN,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "Wi-SUN statistics and errors"
+  },
+  {
+    .key = "network",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_NETWORK,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "Network statistics and errors"
+  },
+  {
+    .key = "heap",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_HEAP,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "Heap usage statistics"
+  },
+  {
+    .key = "regulation",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_REGULATION,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics_regulation,
+    .description = "Regional regulation statistics and errors"
+  },
+  {
+    .key = "printable_data_as_hex",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.printable_data_as_hex,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Print socket data as hex [bool] (0|1)"
+  },
+  {
+    .key = "printable_data_length",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.printable_data_length,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Socket data line length [uint8]"
+  },
+  {
+    .key = "autostart",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.autostart,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Disable or enable autostart [bool] (0|1)"
+  },
+  {
+    .key = "pti_state",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_settings_app.pti_state,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Disable or enable PTI [bool] (0|1)"
+  },
+#if SLI_WISUN_DISABLE_SECURITY
+  {
+    .key = "security_state",
+    .domain = app_settings_domain_app,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_security_state,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = app_settings_set_integer,
+    .get_handler = app_settings_get_integer,
+    .description = "Set the security state [uint32]"
+  },
+#endif
+  {
+    .key = "network",
+    .domain = app_settings_domain_info,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_network_info,
+    .description = "Wi-SUN network information"
+  },
+  {
+    .key = "rpl",
+    .domain = app_settings_domain_info,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_rpl_info,
+    .description = "Wi-SUN RPL information"
   },
   {
     .key = NULL,
@@ -1777,6 +2136,235 @@ static const app_settings_entry_t app_statistics_entries[] =
     .description = "Total transmission duration during last hour in milliseconds"
   },
   {
+    .key = "arena",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.arena,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Maximum heap usage"
+  },
+  {
+    .key = "uordblks",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.uordblks,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Current heap usage"
+  },
+  {
+    .key = NULL,
+    .domain = 0,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = NULL,
+    .description = NULL
+  }
+};
+
+static const app_settings_entry_t app_info_entries[] =
+{
+  {
+    .key = "pan_id",
+    .domain = app_info_domain_network,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_network_info.pan_id,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "PAN ID"
+  },
+  {
+    .key = NULL,
+    .domain = 0,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = NULL,
+    .description = NULL
+  }
+};
+
+static const app_settings_entry_t app_rpl_entries[] =
+{
+  {
+    .key = "instance_id",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.instance_id,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Instance ID"
+  },
+  {
+    .key = "dodag_version_number",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dodag_version_number,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DODAG Version Number"
+  },
+  {
+    .key = "dodag_rank",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dodag_rank,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DODAG Rank"
+  },
+  {
+    .key = "grounded",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.grounded,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Grounded"
+  },
+  {
+    .key = "mode_of_operation",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.mode_of_operation,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Mode of Operation (MOF)"
+  },
+  {
+    .key = "dodag_preference",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dodag_preference,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DODAG Preference"
+  },
+  {
+    .key = "dodag_dtsn",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dodag_dtsn,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Destination Advertisement Trigger Sequence Number (DTSN)"
+  },
+  {
+    .key = "dio_interval_min",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dio_interval_min,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DIO Minimum Interval"
+  },
+  {
+    .key = "dio_interval_doublings",
+    .domain = app_info_domain_network,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dio_interval_doublings,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DIO Interval Doublings"
+  },
+  {
+    .key = "dio_redundancy_constant",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.dio_redundancy_constant,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "DIO Redundancy Constant"
+  },
+  {
+    .key = "default_lifetime",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT8,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.default_lifetime,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Default Lifetime"
+  },
+  {
+    .key = "lifetime_unit",
+    .domain = app_info_domain_rpl,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_rpl_info.lifetime_unit,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Lifetime Unit"
+  },
+  {
     .key = NULL,
     .domain = 0,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
@@ -1826,7 +2414,37 @@ static sl_status_t app_settings_get_explicit_phy_config(char *value_str,
                                                         const char *key_str,
                                                         const app_settings_entry_t *entry)
 {
-  bool used = app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT;
+  bool used = (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_FSK
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OFDM
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK);
+  return app_settings_get_phy_config(value_str, key_str, entry, !used);
+}
+
+static sl_status_t app_settings_get_custom_phy_config(char *value_str,
+                                                      const char *key_str,
+                                                      const app_settings_entry_t *entry)
+{
+  bool used = (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_FSK
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OFDM
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK);
+  return app_settings_get_phy_config(value_str, key_str, entry, !used);
+}
+
+static sl_status_t app_settings_get_custom_fsk_oqpsk_phy_config(char *value_str,
+                                                                const char *key_str,
+                                                                const app_settings_entry_t *entry)
+{
+  bool used = (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_FSK
+               || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK);
+  return app_settings_get_phy_config(value_str, key_str, entry, !used);
+}
+
+static sl_status_t app_settings_get_custom_ofdm_phy_config(char *value_str,
+                                                           const char *key_str,
+                                                           const app_settings_entry_t *entry)
+{
+  bool used = (app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OFDM);
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
 
@@ -1853,6 +2471,9 @@ static sl_status_t app_settings_get_fan11_and_explicit_and_ids_phy_config(char *
 {
   bool used = app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_FAN11
            || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_EXPLICIT
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_FSK
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OFDM
+           || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK
            || app_settings_wisun.phy_config_type == SL_WISUN_PHY_CONFIG_IDS;
   return app_settings_get_phy_config(value_str, key_str, entry, !used);
 }
@@ -1928,6 +2549,65 @@ static sl_status_t app_settings_get_gtk(char *value_str,
   }
 }
 
+static sl_status_t app_settings_set_lgtk(const char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry)
+{
+  (void)key_str;
+
+  uint16_t key_index;
+  int ret;
+
+  ret = sscanf(entry->key, "lgtk%hu", &key_index);
+  if (ret != 1) {
+    return SL_STATUS_FAIL;
+  }
+
+  key_index += 4;
+
+  if (strcmp(value_str, "none") == 0){
+    app_settings_wisun.gtk_set &= ~(1 << (key_index - 1));
+    return SL_STATUS_OK;
+  } else {
+    ret = parse_byte_array(entry->value, 16, value_str);
+    if (ret == 0) {
+      app_settings_wisun.gtk_set |= 1 << (key_index - 1);
+      return SL_STATUS_OK;
+    } else {
+      return SL_STATUS_FAIL;
+    }
+  }
+}
+
+static sl_status_t app_settings_get_lgtk(char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry)
+{
+  (void)key_str;
+
+  const uint8_t *lgtk = (uint8_t *) entry->value;
+  uint16_t key_index;
+  int ret;
+
+  ret = sscanf(entry->key, "lgtk%hu", &key_index);
+  if (ret != 1) {
+    return SL_STATUS_FAIL;
+  }
+
+  key_index += 4;
+
+  if (app_settings_wisun.gtk_set & (1 << (key_index - 1))) {
+    sprintf(value_str, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+            *lgtk,        *(lgtk + 1),  *(lgtk + 2),  *(lgtk + 3),
+            *(lgtk + 4),  *(lgtk + 5),  *(lgtk + 6),  *(lgtk + 7),
+            *(lgtk + 8),  *(lgtk + 9),  *(lgtk + 10), *(lgtk + 11),
+            *(lgtk + 12), *(lgtk + 13), *(lgtk + 14), *(lgtk + 15));
+    return SL_STATUS_OK;
+  } else {
+    return SL_STATUS_FAIL;
+  }
+}
+
 static sl_status_t app_settings_get_gak(char *value_str,
                                         const char *key_str,
                                         const app_settings_entry_t *entry)
@@ -1944,8 +2624,11 @@ static sl_status_t app_settings_get_gak(char *value_str,
   }
 
   ret = sscanf(entry->key, "gak%hu", &key_index);
+  if (ret != 1) {
+    return SL_STATUS_FAIL;
+  }
 
-  sl_wisun_br_get_gak(key_index-1, gak);
+  sl_wisun_br_get_gak(key_index - 1, gak);
 
   sprintf(value_str, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
           *gak,        *(gak + 1),  *(gak + 2),  *(gak + 3),
@@ -1953,21 +2636,17 @@ static sl_status_t app_settings_get_gak(char *value_str,
           *(gak + 8),  *(gak + 9),  *(gak + 10), *(gak + 11),
           *(gak + 12), *(gak + 13), *(gak + 14), *(gak + 15));
 
-  if (ret == 1) {
-    return SL_STATUS_OK;
-  } else {
-    return SL_STATUS_FAIL;
-  }
+  return SL_STATUS_OK;
 }
 
-static sl_status_t app_settings_get_lfn_gak(char *value_str,
-                                            const char *key_str,
-                                            const app_settings_entry_t *entry)
+static sl_status_t app_settings_get_lgak(char *value_str,
+                                         const char *key_str,
+                                         const app_settings_entry_t *entry)
 {
   (void)key_str;
 
   sl_wisun_br_state_t state;
-  uint8_t *gak = (uint8_t *) entry->value;
+  uint8_t *lgak = (uint8_t *) entry->value;
   uint16_t key_index;
   int ret;
 
@@ -1975,21 +2654,22 @@ static sl_status_t app_settings_get_lfn_gak(char *value_str,
     return SL_STATUS_FAIL;
   }
 
-  ret = sscanf(entry->key, "lfn_gak%hu", &key_index);
-
-  sl_wisun_br_get_gak(key_index-1 + 4, gak);
-
-  sprintf(value_str, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
-          *gak,        *(gak + 1),  *(gak + 2),  *(gak + 3),
-          *(gak + 4),  *(gak + 5),  *(gak + 6),  *(gak + 7),
-          *(gak + 8),  *(gak + 9),  *(gak + 10), *(gak + 11),
-          *(gak + 12), *(gak + 13), *(gak + 14), *(gak + 15));
-
-  if (ret == 1) {
-    return SL_STATUS_OK;
-  } else {
+  ret = sscanf(entry->key, "lgak%hu", &key_index);
+  if (ret != 1) {
     return SL_STATUS_FAIL;
   }
+
+  key_index += 4;
+
+  sl_wisun_br_get_gak(key_index - 1, lgak);
+
+  sprintf(value_str, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
+          *lgak,        *(lgak + 1),  *(lgak + 2),  *(lgak + 3),
+          *(lgak + 4),  *(lgak + 5),  *(lgak + 6),  *(lgak + 7),
+          *(lgak + 8),  *(lgak + 9),  *(lgak + 10), *(lgak + 11),
+          *(lgak + 12), *(lgak + 13), *(lgak + 14), *(lgak + 15));
+
+  return SL_STATUS_OK;
 }
 
 static sl_status_t app_settings_get_mac_address(char *value_str,
@@ -2056,6 +2736,80 @@ static sl_status_t app_settings_get_state(char *value_str,
                             false,
                             false,
                             value_length);
+}
+
+static sl_status_t app_settings_get_neighbors(char *value_str,
+                                              const char *key_str,
+                                              const app_settings_entry_t *entry)
+{
+  sl_status_t ret;
+  uint8_t neighbor_count, idx, j;
+  sl_wisun_mac_address_t *neighbor_mac_addresses;
+  (void)key_str;
+  (void)entry;
+
+  ret = sl_wisun_get_neighbor_count(&neighbor_count);
+  if (ret == SL_STATUS_OK && neighbor_count) {
+    neighbor_mac_addresses = sl_malloc(neighbor_count * sizeof(sl_wisun_mac_address_t));
+    if (neighbor_mac_addresses) {
+      ret = sl_wisun_get_neighbors(&neighbor_count, neighbor_mac_addresses);
+      if (ret == SL_STATUS_OK) {
+        printf("%s.%s = [\r\n", app_settings_domain_str[entry->domain], entry->key);
+        for (idx = 0; idx < neighbor_count; idx++) {
+          sl_wisun_neighbor_info_t neighbor_info;
+          app_util_get_mac_address_string(value_str, neighbor_mac_addresses + idx);
+          printf("  %s\r\n", value_str);
+          ret = sl_wisun_get_neighbor_info(neighbor_mac_addresses + idx, &neighbor_info);
+          if (ret == SL_STATUS_OK)  {
+            app_util_get_string(value_str, neighbor_info.type, app_settings_wisun_neighbor_type_enum, false, false, 0);
+            printf("    type = %s\r\n", value_str);
+            sl_wisun_ip6tos(neighbor_info.link_local_address.address, value_str);
+            printf("    ll = %s\r\n", value_str);
+            sl_wisun_ip6tos(neighbor_info.global_address.address, value_str);
+            if (strcmp(value_str, "::")) {
+              printf("    gua = %s\r\n", value_str);
+            }
+            printf("    lifetime = %lu\r\n", neighbor_info.lifetime);
+            printf("    mac_tx_count = %lu\r\n", neighbor_info.mac_tx_count);
+            printf("    mac_tx_failed_count = %lu\r\n", neighbor_info.mac_tx_failed_count);
+            printf("    mac_tx_ms_count = %lu\r\n", neighbor_info.mac_tx_ms_count);
+            printf("    mac_tx_ms_failed_count = %lu\r\n", neighbor_info.mac_tx_ms_failed_count);
+            printf("    mac_rx_count = %lu\r\n", neighbor_info.mac_rx_count);
+            if (neighbor_info.rpl_rank != 0xFFFF) {
+              printf("    rpl_rank = %hu\r\n", neighbor_info.rpl_rank);
+            }
+            if (neighbor_info.etx != 0xFFFF) {
+              printf("    etx = %hu\r\n", neighbor_info.etx);
+            }
+            if (neighbor_info.rsl_out != 0xFF) {
+              printf("    rsl_out = %d dBm\r\n", (int16_t)neighbor_info.rsl_out - 174);
+            }
+            if (neighbor_info.rsl_in != 0xFF) {
+              printf("    rsl_in = %d dBm\r\n", (int16_t)neighbor_info.rsl_in - 174);
+            }
+            app_util_get_string(value_str, neighbor_info.is_lfn, app_settings_wisun_is_lfn_enum, false, false, 0);
+            printf("    device_type = %s\r\n", value_str);
+            printf("    phy_mode_ids = ");
+            if (neighbor_info.phy_mode_id_count != 0) {
+              for (j = 0; j < neighbor_info.phy_mode_id_count - 1; j++) {
+                printf("0x%02x,", neighbor_info.phy_mode_ids[j]);
+              }
+              // Last one without coma
+              printf("0x%02x\r\n", neighbor_info.phy_mode_ids[j]);
+            } else {
+              printf("none\r\n");
+            }
+            printf("    is_mdr_command_capable = %s\r\n", neighbor_info.is_mdr_command_capable ? "true" : "false");
+          }
+        }
+        printf("]\r\n");
+      }
+      sl_free(neighbor_mac_addresses);
+    }
+  }
+
+  // Prevent parent from printing anything
+  return SL_STATUS_FAIL;
 }
 
 static sl_status_t app_settings_get_statistics(char *value_str,
@@ -2134,6 +2888,61 @@ static sl_status_t app_settings_get_statistics_regulation(char *value_str,
   return SL_STATUS_FAIL;
 }
 
+static sl_status_t app_settings_get_channel_mask_str(sl_wisun_channel_mask_type_t type, char *value_str)
+
+
+{
+  sl_status_t status;
+  sl_wisun_channel_mask_t channel_mask;
+  uint8_t channel_count;
+  uint8_t index;
+
+  status = sl_wisun_get_excluded_channel_mask(type, &channel_mask, &channel_count);
+
+  strcpy(value_str, "--");
+
+  if (status == SL_STATUS_OK && channel_count > 0) {
+    sprintf(value_str, "%02x", channel_mask.mask[0]);
+    value_str += 2;
+    for (index = 1; index < (channel_count + 7) / 8; index++) {
+      sprintf(value_str, ":%02x", channel_mask.mask[index]);
+      value_str += 3;
+    }
+  }
+
+  return SL_STATUS_OK;
+}
+
+static sl_status_t app_settings_get_async_channel_mask_str(char *value_str,
+                                                           const char *key_str,
+                                                           const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+
+  return app_settings_get_channel_mask_str(SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_ASYNC, value_str);
+}
+
+static sl_status_t app_settings_get_unicast_channel_mask_str(char *value_str,
+                                                             const char *key_str,
+                                                             const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+
+  return app_settings_get_channel_mask_str(SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_UNICAST, value_str);
+}
+
+static sl_status_t app_settings_get_broadcast_channel_mask_str(char *value_str,
+                                                               const char *key_str,
+                                                               const app_settings_entry_t *entry)
+{
+  (void)key_str;
+  (void)entry;
+
+  return app_settings_get_channel_mask_str(SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_BROADCAST, value_str);
+}
+
 static sl_status_t app_ranges_to_mask(const char *str, uint8_t *mask, uint32_t size)
 {
   char *endptr;
@@ -2173,38 +2982,6 @@ static sl_status_t app_ranges_to_mask(const char *str, uint8_t *mask, uint32_t s
 sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask)
 {
   return app_ranges_to_mask(str, channel_mask->mask, SL_WISUN_CHANNEL_MASK_SIZE);
-}
-
-static sl_status_t app_settings_get_channel_mask_str(char *value_str,
-                                                     const char *key_str,
-                                                     const app_settings_entry_t *entry)
-{
-  sl_status_t ret;
-  sl_wisun_channel_mask_t channel_mask;
-  int index, end;
-  (void)key_str;
-
-  ret = app_settings_get_channel_mask(entry->value, &channel_mask);
-  if (ret == SL_STATUS_OK) {
-    // Flip bits to get excluded channel mask.
-    for (index = 0; index < SL_WISUN_CHANNEL_MASK_SIZE; index++) {
-      channel_mask.mask[index] = channel_mask.mask[index] ^ 0xFF;
-    }
-    // Look for first byte different of 0xFF starting from the end.
-    for (end = SL_WISUN_CHANNEL_MASK_SIZE - 1; end >= 0; end--) {
-      if (channel_mask.mask[end] != 0xFF) {
-        break;
-      }
-    }
-    sprintf(value_str, "%02x", channel_mask.mask[0]);
-    value_str += 2;
-    for (index = 1; index <= end; index++) {
-      sprintf(value_str, ":%02x", channel_mask.mask[index]);
-      value_str += 3;
-    }
-  }
-
-  return ret;
 }
 
 static sl_status_t app_settings_set_allowed_channels(const char *value_str,
@@ -2427,3 +3204,67 @@ static sl_status_t app_settings_get_rx_phy_mode_ids(char *value_str,
   return SL_STATUS_OK;
 }
 #endif
+
+static sl_status_t app_settings_get_network_info(char *value_str,
+                                                 const char *key_str,
+                                                 const app_settings_entry_t *entry)
+{
+  sl_status_t ret;
+  const app_settings_entry_t *iter;
+
+  ret = sl_wisun_get_network_info(&app_network_info);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed to retrieve Wi-SUN network information: %lu]\r\n", ret);
+    return SL_STATUS_FAIL;
+  }
+
+  iter = app_info_entries;
+  while (iter->key) {
+    if (!strcmp(entry->key, app_info_domain_str[iter->domain])) {
+      if (!key_str || !strcmp(iter->key, key_str)) {
+        if (iter->get_handler) {
+          ret = iter->get_handler(value_str, NULL, iter);
+          if (ret == SL_STATUS_OK) {
+            printf("%s.%s.%s = %s\r\n", app_settings_domain_str[entry->domain], app_info_domain_str[iter->domain], iter->key, value_str);
+          }
+        }
+      }
+    }
+    iter++;
+  }
+
+  // Prevent parent from printing anything
+  return SL_STATUS_FAIL;
+}
+
+static sl_status_t app_settings_get_rpl_info(char *value_str,
+                                             const char *key_str,
+                                             const app_settings_entry_t *entry)
+{
+  sl_status_t ret;
+  const app_settings_entry_t *iter;
+
+  ret = sl_wisun_get_rpl_info(&app_rpl_info);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed to retrieve Wi-SUN RPL information: %lu]\r\n", ret);
+    return SL_STATUS_FAIL;
+  }
+
+  iter = app_rpl_entries;
+  while (iter->key) {
+    if (!strcmp(entry->key, app_info_domain_str[iter->domain])) {
+      if (!key_str || !strcmp(iter->key, key_str)) {
+        if (iter->get_handler) {
+          ret = iter->get_handler(value_str, NULL, iter);
+          if (ret == SL_STATUS_OK) {
+            printf("%s.%s.%s = %s\r\n", app_settings_domain_str[entry->domain], app_info_domain_str[iter->domain], iter->key, value_str);
+          }
+        }
+      }
+    }
+    iter++;
+  }
+
+  // Prevent parent from printing anything
+  return SL_STATUS_FAIL;
+}

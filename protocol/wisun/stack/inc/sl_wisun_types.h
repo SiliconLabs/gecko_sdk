@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include "sl_common.h"
+#include "socket/socket.h"
 
 /**************************************************************************//**
  * @defgroup SL_WISUN_TYPES Wi-SUN API type definitions
@@ -44,8 +45,6 @@
 #define SL_WISUN_NETWORK_NAME_SIZE 32
 /// Size of a MAC address
 #define SL_WISUN_MAC_ADDRESS_SIZE 8
-/// Size of an IPv6 address
-#define SL_WISUN_IP_ADDRESS_SIZE 16
 /// Size of a channel mask
 #define SL_WISUN_CHANNEL_MASK_SIZE 32
 /// Size of the filter bitfield
@@ -95,16 +94,6 @@ typedef enum {
   SL_WISUN_IP_ADDRESS_TYPE_SECONDARY_PARENT = 4
 } sl_wisun_ip_address_type_t;
 
-/// Enumerations for socket protocol
-typedef enum {
-  /// User Datagram Protocol (UDP)
-  SL_WISUN_SOCKET_PROTOCOL_UDP  = 0,
-  /// Transmission Control Protocol (TCP)
-  SL_WISUN_SOCKET_PROTOCOL_TCP  = 1,
-  /// Internet Control Message Protocol (ICMP)
-  SL_WISUN_SOCKET_PROTOCOL_ICMP = 2
-} sl_wisun_socket_protocol_t;
-
 /// Enumerations for certificate options
 typedef enum {
   /// Empty option
@@ -125,30 +114,6 @@ typedef enum {
   SL_WISUN_PRIVATE_KEY_OPTION_IS_REF  = 1
 } sl_wisun_private_key_option_t;
 
-/// Enumerations for socket event mode
-typedef enum {
-  /// Received data is sent in an indication
-  SL_WISUN_SOCKET_EVENT_MODE_INDICATION = 0,
-  /// The amount of received data is sent in an indication
-  SL_WISUN_SOCKET_EVENT_MODE_POLLING    = 1
-} sl_wisun_socket_event_mode_t;
-
-/// Enumerations for socket option
-typedef enum {
-  /// Option for socket event mode
-  SL_WISUN_SOCKET_OPTION_EVENT_MODE = 0,
-  /// Option for multicast group
-  SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP = 1,
-  /// Option for send buffer limit
-  SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT = 2,
-  /// Option to enable/disable Extended Directed Frame Exchange mode
-  SL_WISUN_SOCKET_OPTION_EDFE_MODE = 3,
-  /// Option to set socket unicast hop limit
-  SL_WISUN_SOCKET_OPTION_UNICAST_HOP_LIMIT = 4,
-  /// Option to set socket multicast hop limit
-  SL_WISUN_SOCKET_OPTION_MULTICAST_HOP_LIMIT = 5
-} sl_wisun_socket_option_t;
-
 /// Enumerations for statistics type
 typedef enum {
   /// PHY/RF statistics
@@ -162,7 +127,9 @@ typedef enum {
   /// 6LoWPAN/IP stack statistics
   SL_WISUN_STATISTICS_TYPE_NETWORK    = 4,
   /// Regional regulation
-  SL_WISUN_STATISTICS_TYPE_REGULATION = 5
+  SL_WISUN_STATISTICS_TYPE_REGULATION = 5,
+  /// Heap usage
+  SL_WISUN_STATISTICS_TYPE_HEAP       = 6
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -313,16 +280,22 @@ typedef enum {
   SL_WISUN_NETWORK_UPDATE_FLAGS_SECONDARY_PARENT = 2
 } sl_wisun_network_update_flags_t;
 
-/// Enumerations for channel plan
+/// Enumerations for PHY config type
 typedef enum {
   /// FAN1.0 configuration
-  SL_WISUN_PHY_CONFIG_FAN10    = 0,
+  SL_WISUN_PHY_CONFIG_FAN10        = 0,
   /// FAN1.1 configuration
-  SL_WISUN_PHY_CONFIG_FAN11    = 1,
+  SL_WISUN_PHY_CONFIG_FAN11        = 1,
   /// Explicit configuration
-  SL_WISUN_PHY_CONFIG_EXPLICIT = 2,
+  SL_WISUN_PHY_CONFIG_EXPLICIT     = 2,
   /// Specific RAIL channel configuration
-  SL_WISUN_PHY_CONFIG_IDS      = 3
+  SL_WISUN_PHY_CONFIG_IDS          = 3,
+  /// FSK customization
+  SL_WISUN_PHY_CONFIG_CUSTOM_FSK   = 4,
+  /// OFDM customization
+  SL_WISUN_PHY_CONFIG_CUSTOM_OFDM  = 5,
+  /// OQPSK customization
+  SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK = 6,
 } sl_wisun_phy_config_type_t;
 
 /// Enumeration for LFN configuration profile
@@ -334,6 +307,16 @@ typedef enum {
   /// Profile optimized for low power consumption
   SL_WISUN_LFN_PROFILE_ECO      = 2
 } sl_wisun_lfn_profile_t;
+
+/// Enumeration for CRC type
+typedef enum {
+  /// No CRC (OFDM and OQPSK only)
+  SL_WISUN_NO_CRC      = 0,
+  /// 2 bytes CRC
+  SL_WISUN_2_BYTES_CRC = 1,
+  /// 4 bytes CRC
+  SL_WISUN_4_BYTES_CRC = 2
+} sl_wisun_crc_type_t;
 
 /// Wi-SUN Message API common header
 SL_PACK_START(1)
@@ -490,6 +473,14 @@ typedef union {
   sl_wisun_statistics_arib_regulation_t arib;  /**< ARIB statistics. */
 } sl_wisun_statistics_regulation_t;
 
+/// Heap usage statistics
+typedef struct {
+  /// Heap arena
+  uint32_t arena;
+  /// Current heap usage
+  uint32_t uordblks;
+} sl_wisun_statistics_heap_t;
+
 /// Statistics
 typedef union {
   /// PHY/RF statistics
@@ -504,9 +495,111 @@ typedef union {
   sl_wisun_statistics_network_t network;
   /// Regional regulation statistics
   sl_wisun_statistics_regulation_t regulation;
+  /// Heap usage statistics
+  sl_wisun_statistics_heap_t heap;
 } sl_wisun_statistics_t;
 
-/// Channel plan configuration
+/// FAN1.0 PHY configuration
+typedef struct {
+  /// Regulatory domain (#sl_wisun_regulatory_domain_t)
+  uint8_t reg_domain;
+  /// Operating class (#sl_wisun_operating_class_t)
+  uint8_t op_class;
+  /// Operating mode (#sl_wisun_operating_mode_t)
+  uint8_t op_mode;
+  /// 1 if FEC is enabled, 0 if not
+  uint8_t fec;
+} sl_wisun_phy_config_fan10_t;
+
+/// FAN1.1 PHY configuration
+typedef struct {
+  /// Regulatory domain (#sl_wisun_regulatory_domain_t)
+  uint8_t reg_domain;
+  /// Channel plan ID
+  uint8_t chan_plan_id;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+} sl_wisun_phy_config_fan11_t;
+
+/// Explicit PHY configuration
+typedef struct {
+  /// Ch0 center frequency in kHz
+  uint32_t ch0_frequency_khz;
+  /// Number of channels
+  uint16_t number_of_channels;
+  /// Channel spacing (#sl_wisun_channel_spacing_t)
+  uint8_t channel_spacing;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+} sl_wisun_phy_config_explicit_t;
+
+/// Explicit RAIL configuration
+typedef struct {
+  /// Protocol ID
+  uint16_t protocol_id;
+  /// Channel ID
+  uint16_t channel_id;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+  /// Reserved, set to zero
+  uint8_t reserved[3];
+} sl_wisun_phy_config_ids_t;
+
+/// Custom FSK PHY configuration
+typedef struct {
+  /// Ch0 center frequency in kHz
+  uint32_t ch0_frequency_khz;
+  /// Channel spacing in kHz
+  uint16_t channel_spacing_khz;
+  /// Number of channels
+  uint16_t number_of_channels;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+  /// FSK CRC type (#sl_wisun_crc_type_t)
+  uint8_t crc_type;
+  /// FSK preamble length in bits
+  uint8_t preamble_length;
+  /// Reserved, set to zero
+  uint8_t reserved[1];
+} sl_wisun_phy_config_custom_fsk_t;
+
+/// Custom OFDM PHY configuration
+typedef struct {
+  /// Ch0 center frequency in kHz
+  uint32_t ch0_frequency_khz;
+  /// Channel spacing in kHz
+  uint16_t channel_spacing_khz;
+  /// Number of channels
+  uint16_t number_of_channels;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+  /// OFDM CRC type (#sl_wisun_crc_type_t)
+  uint8_t crc_type;
+  /// STF length in number of symbols
+  uint8_t stf_length;
+  /// Reserved, set to zero
+  uint8_t reserved[1];
+} sl_wisun_phy_config_custom_ofdm_t;
+
+/// Custom QPSK PHY configuration
+typedef struct {
+  /// Ch0 center frequency in kHz
+  uint32_t ch0_frequency_khz;
+  /// Channel spacing in kHz
+  uint16_t channel_spacing_khz;
+  /// Number of channels
+  uint16_t number_of_channels;
+  /// PHY mode ID
+  uint8_t phy_mode_id;
+  /// OFDM CRC type (#sl_wisun_crc_type_t)
+  uint8_t crc_type;
+  /// OQPSK preamble length in bits
+  uint8_t preamble_length;
+  /// Reserved, set to zero
+  uint8_t reserved[1];
+} sl_wisun_phy_config_custom_oqpsk_t;
+
+/// PHY configuration
 SL_PACK_START(1)
 typedef struct {
   /// Configuration type (#sl_wisun_phy_config_type_t)
@@ -514,47 +607,19 @@ typedef struct {
   /// Configuration
   union {
     /// Configuration for #SL_WISUN_PHY_CONFIG_FAN10 type
-    struct {
-      /// Regulatory domain (#sl_wisun_regulatory_domain_t)
-      uint8_t reg_domain;
-      /// Operating class (#sl_wisun_operating_class_t)
-      uint8_t op_class;
-      /// Operating mode (#sl_wisun_operating_mode_t)
-      uint8_t op_mode;
-      /// 1 if FEC is enabled, 0 if not
-      uint8_t fec;
-    } fan10;
+    sl_wisun_phy_config_fan10_t fan10;
     /// Configuration for #SL_WISUN_PHY_CONFIG_FAN11 type
-    struct {
-      /// Regulatory domain (#sl_wisun_regulatory_domain_t)
-      uint8_t reg_domain;
-      /// Channel plan ID
-      uint8_t chan_plan_id;
-      /// PHY mode ID
-      uint8_t phy_mode_id;
-    } fan11;
+    sl_wisun_phy_config_fan11_t fan11;
     /// Configuration for #SL_WISUN_PHY_CONFIG_EXPLICIT type
-    struct {
-      /// Ch0 center frequency in kHz
-      uint32_t ch0_frequency_khz;
-      /// Number of channels
-      uint16_t number_of_channels;
-      /// Channel spacing (#sl_wisun_channel_spacing_t)
-      uint8_t channel_spacing;
-      /// PHY mode ID
-      uint8_t phy_mode_id;
-    } explicit;
+    sl_wisun_phy_config_explicit_t explicit_plan;
     /// Configuration for #SL_WISUN_PHY_CONFIG_IDS type
-    struct {
-      /// Protocol ID
-      uint16_t protocol_id;
-      /// Channel ID
-      uint16_t channel_id;
-      /// PHY mode ID
-      uint8_t phy_mode_id;
-      /// Reserved, set to zero
-      uint8_t reserved[3];
-    } ids;
+    sl_wisun_phy_config_ids_t ids;
+    /// Configuration for #SL_WISUN_PHY_CONFIG_CUSTOM_FSK type
+    sl_wisun_phy_config_custom_fsk_t custom_fsk;
+    /// Configuration for #SL_WISUN_PHY_CONFIG_CUSTOM_OFDM type
+    sl_wisun_phy_config_custom_ofdm_t custom_ofdm;
+    /// Configuration for #SL_WISUN_PHY_CONFIG_CUSTOM_OQPSK type
+    sl_wisun_phy_config_custom_oqpsk_t custom_oqpsk;
   } config;
 } sl_wisun_phy_config_t;
 SL_PACK_END()
@@ -570,16 +635,6 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_mac_address_t;
 SL_PACK_END()
 
-/// IP address
-SL_PACK_START(1)
-typedef struct {
-  /// @brief IP address
-  /// @details This field contains an IPv6 address where the first byte of the
-  ///          array is the most-significant byte of the IP address.
-  uint8_t address[SL_WISUN_IP_ADDRESS_SIZE];
-} SL_ATTRIBUTE_PACKED sl_wisun_ip_address_t;
-SL_PACK_END()
-
 /// Channel mask
 SL_PACK_START(1)
 typedef struct {
@@ -592,13 +647,45 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_channel_mask_t;
 SL_PACK_END()
 
+/// Enumerations for socket protocol
+/// Deprecated
+typedef enum {
+  /// User Datagram Protocol (UDP)
+  SL_WISUN_SOCKET_PROTOCOL_UDP  = 0,
+  /// Transmission Control Protocol (TCP)
+  SL_WISUN_SOCKET_PROTOCOL_TCP  = 1,
+  /// Internet Control Message Protocol (ICMP)
+  SL_WISUN_SOCKET_PROTOCOL_ICMP = 2
+} sl_wisun_socket_protocol_t;
+
+/// Enumerations for socket option
+/// Deprecated
+typedef enum {
+  /// Option for socket event mode
+  SL_WISUN_SOCKET_OPTION_EVENT_MODE = 0,
+  /// Option for multicast group
+  SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP = 1,
+  /// Option for send buffer limit
+  SL_WISUN_SOCKET_OPTION_SEND_BUFFER_LIMIT = 2,
+  /// Option to enable/disable Extended Directed Frame Exchange mode
+  SL_WISUN_SOCKET_OPTION_EDFE_MODE = 3,
+  /// Option to set socket unicast hop limit
+  SL_WISUN_SOCKET_OPTION_UNICAST_HOP_LIMIT = 4,
+  /// Option to set socket multicast hop limit
+  SL_WISUN_SOCKET_OPTION_MULTICAST_HOP_LIMIT = 5
+} sl_wisun_socket_option_t;
+
 /// Socket option for event mode
+/// Deprecated
 typedef struct {
   /// Socket event mode
   uint32_t mode;
 } sl_wisun_socket_option_event_mode_t;
 
+typedef in6_addr_t sl_wisun_ip_address_t;
+
 /// Socket option for multicast group
+/// Deprecated
 typedef struct {
   /// Multicast group action
   uint32_t action;
@@ -607,18 +694,21 @@ typedef struct {
 } sl_wisun_socket_option_multicast_group_t;
 
 /// Socket option for send buffer limit
+/// Deprecated
 typedef struct {
   /// Send buffer limit
   uint32_t limit;
 } sl_wisun_socket_option_send_buffer_limit_t;
 
 /// Socket option for EDFE mode
+/// Deprecated
 typedef struct {
   /// Socket EDFE mode (1 to enable, 0 to disable)
   uint32_t mode;
 } sl_wisun_socket_option_edfe_mode_t;
 
 /// Socket option for socket unicast hop limit
+/// Deprecated
 typedef struct {
   /// Socket unicast hop limit (0 to 255 hops, -1 to use default)
   int16_t hop_limit;
@@ -627,6 +717,7 @@ typedef struct {
 } sl_wisun_socket_option_unicast_hop_limit;
 
 /// Socket option for socket multicast hop limit
+/// Deprecated
 typedef struct {
   /// Socket multicast hop limit (0 to 255 hops, -1 to use default)
   int16_t hop_limit;
@@ -634,29 +725,33 @@ typedef struct {
   uint16_t reserved;
 } sl_wisun_socket_option_multicast_hop_limit;
 
-/// Socket option data
+/// socket options
 SL_PACK_START(1)
 typedef union {
   /// Socket event mode
+  /// Deprecated
   sl_wisun_socket_option_event_mode_t event_mode;
   /// Socket multicast group
+  /// Deprecated
   sl_wisun_socket_option_multicast_group_t multicast_group;
   /// Socket send buffer limit
+  /// Deprecated
   sl_wisun_socket_option_send_buffer_limit_t send_buffer_limit;
   /// Socket EDFE mode
+  /// Deprecated
   sl_wisun_socket_option_edfe_mode_t edfe_mode;
   /// Socket unicast hop limit
+  /// Deprecated
   sl_wisun_socket_option_unicast_hop_limit unicast_hop_limit;
   /// Socket multicast hop limit
+  /// Deprecated
   sl_wisun_socket_option_multicast_hop_limit multicast_hop_limit;
+  /// Option-specific value
+  int32_t value;
+  /// IPv6 address
+  in6_addr_t ipv6_address;
 } SL_ATTRIBUTE_PACKED sl_wisun_socket_option_data_t;
 SL_PACK_END()
-
-/// ID used identify a socket
-typedef uint32_t sl_wisun_socket_id_t;
-
-/// Socket ID value for an invalid socket
-#define SL_WISUN_INVALID_SOCKET_ID 255
 
 /// Enumeration for RPL neighbor types
 typedef enum {
@@ -672,9 +767,9 @@ typedef enum {
 SL_PACK_START(1)
 typedef struct {
   /// Link-local address
-  sl_wisun_ip_address_t link_local_address;
+  in6_addr_t link_local_address;
   /// ULA/GUA address (unspecified address :: if unknown)
-  sl_wisun_ip_address_t global_address;
+  in6_addr_t global_address;
   /// Neighbor type (#sl_wisun_neighbor_type_t)
   uint32_t type;
   /// Remaining lifetime (Link lifetime for parents, EARO lifetime for children) in seconds
@@ -687,6 +782,8 @@ typedef struct {
   uint32_t mac_tx_ms_count;
   /// MAC TX failed count using mode switch
   uint32_t mac_tx_ms_failed_count;
+  /// MAC RX packet count
+  uint32_t mac_rx_count;
   /// RPL Rank value for parents (0xffff if unknown or child)
   uint16_t rpl_rank;
   /// Measured ETX value if known (0xffff if unknown)
@@ -705,6 +802,12 @@ typedef struct {
   int8_t rssi;
   /// Indicate if the device is an LFN. 1 = LFN, 0 = FFN
   uint8_t is_lfn;
+  /// Number of PhyModeId supported
+  uint8_t phy_mode_id_count;
+  /// List of phy_mode_id_count PhyModeId
+  uint8_t phy_mode_ids[SL_WISUN_MAX_PHY_MODE_ID_COUNT];
+  /// Indicate if the neighbor supports MAC mode switch
+  uint8_t is_mdr_command_capable;
 } SL_ATTRIBUTE_PACKED sl_wisun_neighbor_info_t;
 SL_PACK_END()
 
@@ -746,10 +849,20 @@ typedef enum {
   Sl_WISUN_TRACE_GROUP_WSIE    = 35,    ///< Wi-SUN IE
   SL_WISUN_TRACE_GROUP_CONFIG  = 36,    ///< Configuration
   SL_WISUN_TRACE_GROUP_TIM_SRV = 37,    ///< Timer service
+  SL_WISUN_TRACE_GROUP_LFN_TIM = 38,    ///< LFN timing measurement
   // 36 to 63 reserved for future used
   SL_WISUN_TRACE_GROUP_INT     = 63,    ///< Internal usage
   SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum
 } sl_wisun_trace_group_t;
+
+/// Thread identifier "Wi-SUN Task"
+#define SL_WISUN_TRACE_THREAD_WISUN         "WS"
+/// Thread identifier "Wi-SUN Event Task"
+#define SL_WISUN_TRACE_THREAD_EVENT_TASK    "EVT"
+/// Thread identifier "Wi-SUN Event Loop Task"
+#define SL_WISUN_TRACE_THREAD_EVENT_LOOP    "EVL"
+/// Thread identifier "Wi-SUN RF Task"
+#define SL_WISUN_TRACE_THREAD_MAC           "MAC"
 
 /// Enumerations for trace level
 typedef enum {
@@ -781,12 +894,6 @@ typedef enum {
   /// ARIB, can only be used with JP regulatory domain
   SL_WISUN_REGULATION_ARIB = 1
 } sl_wisun_regulation_t;
-
-/// Async transmission fragmentation parameters
-typedef struct {
-  /// Max duration of a fragment in ms
-  uint32_t fragment_duration_ms;
-} sl_wisun_async_fragmentation_t;
 
 /// Enumeration for Mode Switch mode
 typedef enum {
@@ -828,6 +935,89 @@ typedef enum {
   /// Channels are excluded by mask
   SL_WISUN_CHANNEL_EXCLUSION_MODE_BY_MASK = 2
 } sl_wisun_channel_exclusion_mode_t;
+
+/// Enumeration for types of frame that can be triggered.
+typedef enum {
+  SL_WISUN_FRAME_TYPE_PAS = 0,
+  SL_WISUN_FRAME_TYPE_PA = 1,
+  SL_WISUN_FRAME_TYPE_PCS = 2,
+  SL_WISUN_FRAME_TYPE_PC = 3,
+  SL_WISUN_FRAME_TYPE_DIS = 4,
+  SL_WISUN_FRAME_TYPE_DIO = 5,
+} sl_wisun_frame_type_t;
+
+/// Wi-SUN network information
+SL_PACK_START(1)
+typedef struct {
+  /// PAN ID
+  uint16_t pan_id;
+  } SL_ATTRIBUTE_PACKED sl_wisun_network_info_t;
+SL_PACK_END()
+
+/// RPL information
+SL_PACK_START(1)
+typedef struct {
+  /// DODAG rank or the node
+  uint16_t dodag_rank;
+  /// DAG max rank increase, the allowable increase in Rank
+  /// in support of local repair (0 to disable the mechanism)
+  uint16_t dag_max_rank_increase;
+  /// Min hop rank increase, minimum increase in Rank
+  /// between a node and any of its DODAG parents
+  uint16_t min_hop_rank_increase;
+  /// Lifetime unit, unit in seconds that is used to express
+  /// route lifetimes in RPL
+  uint16_t lifetime_unit;
+  /// Instance ID, set by the DODAG root, it indicates of which RPL Instance
+  /// the DODAG is a part
+  uint8_t instance_id;
+  /// DODAG version number, set by the DODAG root
+  uint8_t dodag_version_number;
+  /// Grounded, indicates whether the DODAG advertised can satisfy
+  /// the application-defined goal.  If set, the DODAG is grounded.
+  /// If cleared, the DODAG is floating.
+  uint8_t grounded;
+  /// Mode of Operation (MOP), must be 1 for Non-Storing Mode of Operation
+  uint8_t mode_of_operation;
+  /// DODAG Preference, defines how preferable the root of this DODAG
+  /// is compared to other DODAG roots within the instance.
+  /// DAGPreference ranges from 0x00 (least preferred) to 0x07
+  /// (most preferred).
+  uint8_t dodag_preference;
+  /// Destination Advertisement Trigger Sequence Number (DTSN)
+  uint8_t dodag_dtsn;
+  /// DIO minimum interval, used to configure Imin of the
+  /// DIO Trickle timer
+  uint8_t dio_interval_min;
+  /// DIO interval doublings, used to configure Imax of the
+  /// DIO Trickle timer
+  uint8_t dio_interval_doublings;
+  /// DIO redundancy constant, used to configure k of the
+  /// DIO Trickle timer
+  uint8_t dio_redundancy_constant;
+  /// Default lifetime, lifetime that is used as default for
+  /// all RPL routes. Expressed in units of Lifetime Units.
+  uint8_t default_lifetime;
+  /// Reserved, set to zero
+  uint8_t reserved[2];
+  } SL_ATTRIBUTE_PACKED sl_wisun_rpl_info_t;
+SL_PACK_END()
+
+/// Enumeration for channel mask types
+typedef enum {
+  /// Regional excluded channel mask (not advertised)
+  SL_WISUN_CHANNEL_MASK_TYPE_REGIONAL,
+  /// Excluded channel mask advertised in us-ie
+  SL_WISUN_CHANNEL_MASK_TYPE_ADVERTISED_UNICAST,
+  /// Excluded channel mask advertised in bs-ie
+  SL_WISUN_CHANNEL_MASK_TYPE_ADVERTISED_BROADCAST,
+  /// Excluded channel mask applied to async frames
+  SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_ASYNC,
+  /// Excluded channel mask applied to unicast frequency hopping
+  SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_UNICAST,
+  /// Excluded channel mask applied to broadcast frequency hopping
+  SL_WISUN_CHANNEL_MASK_TYPE_EFFECTIVE_BROADCAST
+} sl_wisun_channel_mask_type_t;
 
 /** @} (end SL_WISUN_TYPES) */
 

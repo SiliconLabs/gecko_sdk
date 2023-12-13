@@ -687,12 +687,12 @@ void range_test_init(void)
   RAIL_Handle_t rail_handle = get_current_rail_handler();
   range_test_reset_values();
   if (!is_current_phy_standard()) {
-#if !(defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE) && \
-      (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS) || \
-      defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS) || \
-      defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS)) || \
-      defined(RAIL0_CHANNEL_GROUP_1_PROFILE_SIDEWALK) || \
-      defined(RAIL0_CHANNELS_FOR_915_PROFILE_SIDEWALK))
+#if !(defined(RAIL0_CHANNEL_GROUP_1_PROFILE_BASE)                 \
+    && (defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_50KBPS)  \
+    || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_150KBPS)  \
+    || defined(RAIL0_CHANNEL_GROUP_1_PHY_SIDEWALK_2GFSK_250KBPS)) \
+    || defined(RAIL0_CHANNEL_GROUP_1_PROFILE_SIDEWALK)            \
+    || defined(RAIL0_CHANNELS_FOR_915_PROFILE_SIDEWALK))
     RAIL_SetFixedLength(rail_handle, (range_test_settings.payload_length));
 #endif
   }
@@ -1361,6 +1361,9 @@ static inline void print_tx_logs(void)
  ******************************************************************************/
 static inline void print_rx_logs(void)
 {
+#if defined(__IAR_SYSTEMS_ICC__)
+  #pragma diag_suppress=Pa205
+#endif
   if (RANGETEST_PACKET_COUNT_INVALID != range_test_measurement.packets_received_correctly ) {
     range_test_measurement_t range_test_measurement_buf = range_test_measurement;
     range_test_settings_t range_test_settings_buf = range_test_settings;
@@ -1388,4 +1391,7 @@ static inline void print_rx_logs(void)
       range_test_settings_buf.source_id,
       range_test_settings_buf.destination_id);
   }
+#if defined(__IAR_SYSTEMS_ICC__)
+  #pragma diag_default=Pa205
+#endif
 }

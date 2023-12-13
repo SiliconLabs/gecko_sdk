@@ -38,11 +38,11 @@
  ******************************************************************************/
 void sl_imu_normalize_angle(float *a)
 {
-  while ( *a >= IMU_PI ) {
+  while ( *a >= (float)IMU_PI ) {
     *a -= 2 * IMU_PI;
   }
 
-  while ( *a < -IMU_PI ) {
+  while ( *a < -(float)IMU_PI ) {
     *a += 2 * IMU_PI;
   }
 }

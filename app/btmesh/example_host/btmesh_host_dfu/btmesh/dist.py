@@ -28,7 +28,7 @@ import os
 import struct
 from typing import Callable, ClassVar, Iterable, List, Optional, Tuple
 
-from bgapix.bglibx import BGLibExtRetryParams
+from bgapix.bglibx import BGLibExtRetryParams, EventParamValues
 from bgapix.slstatus import SlStatus
 
 from . import util
@@ -861,20 +861,23 @@ class FwDistributionClient(BtmeshComponent):
                 receiver_chunks.append((idx, chunk_size))
             else:
                 receiver_chunks.append((idx, end_idx - idx))
-        event_selector = {
-            "btmesh_evt_fw_dist_client_receivers_list": {
-                "#final": False,
-                "elem_index": elem_index,
-                "server_address": dist_addr,
-            },
-            "btmesh_evt_fw_dist_client_receivers_list_end": {
-                "#final": True,
-                "elem_index": elem_index,
-                "server_address": dist_addr,
-            },
-        }
         receiver_info_list = []
         for start_idx, max_entries in receiver_chunks:
+            indexes = EventParamValues(range(start_idx, start_idx + max_entries))
+            event_selector = {
+                "btmesh_evt_fw_dist_client_receivers_list": {
+                    "#final": False,
+                    "elem_index": elem_index,
+                    "server_address": dist_addr,
+                    "index": indexes,
+                },
+                "btmesh_evt_fw_dist_client_receivers_list_end": {
+                    "#final": True,
+                    "elem_index": elem_index,
+                    "server_address": dist_addr,
+                    "start_index": start_idx,
+                },
+            }
             receiver_list_evts = self.lib.retry_until(
                 self.lib.btmesh.fw_dist_client.get_receivers,
                 elem_index,

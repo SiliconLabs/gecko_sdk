@@ -38,8 +38,7 @@
 #include "rail_config.h"
 #include "sl_rail_util_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "sl_flex_rail_channel_selector.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -85,8 +84,8 @@ RAIL_Handle_t app_init(void)
   set_up_tx_fifo(rail_handle);
 
   // Turn OFF LEDs
-  sl_led_turn_off(&sl_led_led0);
-  sl_led_turn_off(&sl_led_led1);
+  clear_receive_led();
+  clear_send_led();
   init_display();
 
   // CLI info message

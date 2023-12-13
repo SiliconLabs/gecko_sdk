@@ -37,7 +37,7 @@
 #include "app/framework/plugin/fragmentation/fragmentation.h"
 #endif // SL_CATALOG_ZIGBEE_FRAGMENTATION_PRESENT
 
-#define MAX_CLUSTER (SECURE_EZSP_MAX_FRAME_LENGTH - 12) / 2 //currently == 94
+#define MAX_CLUSTER (EZSP_MAX_FRAME_LENGTH) / 2 //currently == 94
 #define UNKNOWN_NETWORK_STATE 0xFF
 
 // This is used to store the local EUI of the NCP when using
@@ -299,58 +299,6 @@ EmberNetworkStatus emberAfNetworkState(void)
   return networkCache[networkIndex].networkState;
 }
 
-EmberStatus emberAfSendEndDeviceBind(uint8_t endpoint)
-{
-  EmberStatus status;
-  EmberEUI64 eui;
-  uint8_t inClusterCount, outClusterCount;
-  EmberAfClusterId clusterList[MAX_CLUSTER];
-  EmberAfClusterId *inClusterList;
-  EmberAfClusterId *outClusterList;
-  EmberAfProfileId profileId;
-  EmberApsOption options = ((EMBER_AF_DEFAULT_APS_OPTIONS
-                             | EMBER_APS_OPTION_SOURCE_EUI64)
-                            & ~EMBER_APS_OPTION_RETRY);
-  uint8_t index = emberAfIndexFromEndpoint(endpoint);
-  if (index == 0xFF) {
-    return EMBER_INVALID_ENDPOINT;
-  }
-  status = emberAfPushEndpointNetworkIndex(endpoint);
-  if (status != EMBER_SUCCESS) {
-    return status;
-  }
-
-  emberAfGetEui64(eui);
-
-  emberAfZdoPrintln("send %x %2x ", endpoint, options);
-  inClusterList = clusterList;
-  inClusterCount = emberAfGetClustersFromEndpoint(endpoint,
-                                                  inClusterList,
-                                                  MAX_CLUSTER,
-                                                  true); // server?
-  outClusterList = clusterList + inClusterCount;
-  outClusterCount = emberAfGetClustersFromEndpoint(endpoint,
-                                                   outClusterList,
-                                                   (MAX_CLUSTER
-                                                    - inClusterCount),
-                                                   false); // server?
-  profileId = emberAfProfileIdFromIndex(index);
-
-  status = ezspEndDeviceBindRequest(emberAfGetNodeId(),
-                                    eui,
-                                    endpoint,
-                                    profileId,
-                                    inClusterCount,  // cluster in count
-                                    outClusterCount, // cluster out count
-                                    inClusterList,   // list of input clusters
-                                    outClusterList,  // list of output clusters
-                                    options);
-  emberAfZdoPrintln("done: %x.", status);
-
-  (void) emberAfPopNetworkIndex();
-  return status;
-}
-
 EmberNodeId emberGetSender(void)
 {
   return currentSender;
@@ -519,8 +467,6 @@ void sli_zigbee_af_reset_and_init_ncp(void)
   // send the version command before any other commands
   sli_zigbee_af_cli_version_command();
 
-  sli_zigbee_secure_ezsp_init();
-
   // The random number generator on the host needs to be seeded with some
   // random data, which we can get from the NCP.
   ezspGetRandomNumber(&seed0);
@@ -593,6 +539,13 @@ void sli_zigbee_af_reset_and_init_ncp(void)
                         2,     // value length
                         value,
                         "maximum outgoing transfer size");
+
+    value[0] = LOW_BYTE(SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS);
+    value[1] = HIGH_BYTE(SL_ZIGBEE_TRANSIENT_DEVICE_DEFAULT_TIMEOUT_MS);
+    emberAfSetEzspValue(EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT,
+                        2,
+                        value,
+                        "default timeout for transient device table");
   }
 
   // Set the manufacturing code. This is defined by ZigBee document 053874r10

@@ -34,12 +34,10 @@
 #include <stdint.h>
 #include "printf.h"
 #include "sl_component_catalog.h"
-#include "app_assert.h"
-#include "app_log.h"
+#include "sl_simple_led_instances.h"
 #include "rail.h"
 #include "app_process.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
 #include "demo-ui.h"
 #include "em_system.h"
 #include "em_core.h"
@@ -629,7 +627,7 @@ static void get_light_state_from_rx_fifo(void)
              *(uint16_t*)light_module.addr,
              "] ",
              ((light_module.communication_state == LIGHT_MODE_ADVERTISE) ? "Mode: ADVERTISE\n" : "Mode: READY\n"));
-    light_module.communication_state = start_of_packet[DEVICE_STATUS_PAYLOAD_BYTE] & 0x03;
+    light_module.communication_state = (light_mode_t)(start_of_packet[DEVICE_STATUS_PAYLOAD_BYTE] & 0x03);
   }
 }
 
@@ -700,7 +698,7 @@ static void copy_light_address_to_payload(void)
  *****************************************************************************/
 static demo_control_command_type_t get_light_response_type(void)
 {
-  return ((rx_fifo[DEMO_CONTROL_PAYLOAD_BYTE]) & DEMO_CONTROL_PAYLOAD_CMD_MASK) >> DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT;
+  return (demo_control_command_type_t)(((rx_fifo[DEMO_CONTROL_PAYLOAD_BYTE]) & DEMO_CONTROL_PAYLOAD_CMD_MASK) >> DEMO_CONTROL_PAYLOAD_CMD_MASK_SHIFT);
 }
 
 /******************************************************************************

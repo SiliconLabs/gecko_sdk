@@ -271,7 +271,7 @@ void app_show_btmesh_node_provisioned(uint16_t address,
  * Called when the Provisioning fails
  *
  ******************************************************************************/
-void sl_btmesh_on_node_provisioning_failed(uint16_t result)
+void app_show_btmesh_node_provisioning_failed(uint16_t result)
 {
   app_log("BT mesh node provisioning failed (result: 0x%04x)" APP_LOG_NL, result);
   sl_status_t lcd_status = sl_btmesh_LCD_write("prov failed...",

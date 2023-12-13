@@ -1,0 +1,39 @@
+!!omap
+- id: brd8029a
+- label: BRD8029A
+- package: platform
+- description: Board support for BRD8029A.
+- category: Platform|Board|Expansion Board
+- quality: production
+- requires:
+  - name: brd8029a_config
+  - name: hardware_board
+  - name: hardware_board_mainboard
+- provides:
+  - name: brd8029a
+  - name: hardware_exp_board
+- recommends:
+  - id: simple_led
+    instance:
+    - exp_led0
+    - exp_led1
+    - exp_led2
+    - exp_led3
+  - id: simple_button
+    instance:
+    - exp_btn0
+    - exp_btn1
+    - exp_btn2
+    - exp_btn3
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD8029A"'
+  - name: SL_BOARD_REV
+    value: '"B00"'
+- tag:
+  - board:pn:BRD8029
+  - board:variant:A
+  - board:revision:B00
+  - hardware:has:led:4
+  - hardware:has:button:4

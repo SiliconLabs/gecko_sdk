@@ -29,9 +29,10 @@
 // Define module name for Power Manager debuging feature.
 #define CURRENT_MODULE_NAME    "FLEX"
 
+#include <assert.h>
 #include "callback_dispatcher.h"
 #include "app_framework_callback.h"
-#include "hal.h"
+#include "stack/core/sli-connect-interrupt-manipulation.h"
 
 #include "sl_component_catalog.h"
 #include "sl_sleeptimer.h"
@@ -105,7 +106,7 @@ bool connect_is_ok_to_sleep(void)
 {
   uint32_t duration_ms = 0;
 
-  INTERRUPTS_OFF();
+  CORE_ATOMIC_IRQ_DISABLE();
 
   // If the stack says we can nap, it means that we may sleep (EM2) for some
   // amount of time.  Otherwise, we can't sleep at all, although we can try to
@@ -155,7 +156,7 @@ bool connect_is_ok_to_sleep(void)
     duration_ms = emberMsToNextEvent(emAppEvents, duration_ms);
   }
 
-  INTERRUPTS_ON();
+  CORE_ATOMIC_IRQ_ENABLE();
 
   // We need to stay awake.
   if (duration_ms == 0) {

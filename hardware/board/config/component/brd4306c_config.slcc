@@ -72,6 +72,13 @@
   - condition:
     - brd4001a
     override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: exp
+    path: brd4306c_brd4001a/sl_cpc_drv_uart_usart_exp_config.h
+  - condition:
+    - brd4001a
+    override:
       component: cpc_secondary_driver_spi_usart
       file_id: cpc_drv_secondary_spi_usart_config
       instance: exp
@@ -80,16 +87,28 @@
     - brd4001a
     override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: vcom
-    path: brd4306c_brd4001a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
+    path: brd4306c_brd4001a/sl_cpc_drv_uart_usart_vcom_config.h
   - condition:
     - brd4001a
     override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: exp
-    path: brd4306c_brd4001a/sl_cpc_drv_secondary_uart_usart_exp_config.h
+    path: brd4306c_brd4001a/sl_cpc_drv_uart_usart_exp_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4306c_brd4001a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4306c_brd4001a/sl_device_init_lfxo_config.h
   - condition:
     - brd4001a
     override:
@@ -384,6 +403,13 @@
   - condition:
     - brd4002a
     override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: exp
+    path: brd4306c_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
       component: cpc_secondary_driver_spi_usart
       file_id: cpc_drv_secondary_spi_usart_config
       instance: exp
@@ -392,16 +418,28 @@
     - brd4002a
     override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: vcom
-    path: brd4306c_brd4002a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
+    path: brd4306c_brd4002a/sl_cpc_drv_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: exp
-    path: brd4306c_brd4002a/sl_cpc_drv_secondary_uart_usart_exp_config.h
+    path: brd4306c_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4306c_brd4002a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4306c_brd4002a/sl_device_init_lfxo_config.h
   - condition:
     - brd4002a
     override:

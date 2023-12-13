@@ -476,4 +476,4 @@ typedef struct {
 /** @} End of group MGM22_MSC */
 /** @} End of group Parts */
 
-#endif /* MGM22_MSC_H */
+#endif // MGM22_MSC_H

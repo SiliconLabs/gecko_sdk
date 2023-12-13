@@ -89,6 +89,9 @@ static const ZWAVE_Region_t zwaveRegionTable[] = {
   { "USLR1-United States, Long Range 1", &RAIL_ZWAVE_REGION_US_LR1 },
   { "USLR2-United States, Long Range 2", &RAIL_ZWAVE_REGION_US_LR2 },
   { "USLRED-United States, Long Range End Device", &RAIL_ZWAVE_REGION_US_LR_END_DEVICE },
+  { "EULR1-European Union, Long Range 1", &RAIL_ZWAVE_REGION_EU_LR1 },
+  { "EULR2-European Union, Long Range 2", &RAIL_ZWAVE_REGION_EU_LR2 },
+  { "EULRED-European Union, Long Range End Device", &RAIL_ZWAVE_REGION_EU_LR_END_DEVICE },
 };
 
 #define ZWAVE_REGION_UNDEFINED (COMMON_UTILS_COUNTOF(zwaveRegionTable))
@@ -271,7 +274,7 @@ void zwavePerformIrcal(sl_cli_command_arg_t *args)
 
   RAIL_ZWAVE_IrcalVal_t *zwaveIrCalValLocal;
   if ((configuredRegion == RAIL_ZWAVE_REGIONID_KR)
-#ifdef RAIL_ZWAVE_SUPPORTS_CONC_PHY
+#if RAIL_ZWAVE_SUPPORTS_CONC_PHY
       || (configuredRegion == RAIL_ZWAVE_REGIONID_JP)
 #endif
       ) {

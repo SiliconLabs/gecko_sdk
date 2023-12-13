@@ -11,7 +11,6 @@ requires:
   - name: component_catalog
   - name: legacy_common_ash
   - name: device
-  - name: silabs_core_buffer_manager
   - name: token_manager
   - name: zigbee_debug_basic
 source:

@@ -756,4 +756,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_VDAC */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_VDAC_H */
+#endif // EFR32ZG23_VDAC_H

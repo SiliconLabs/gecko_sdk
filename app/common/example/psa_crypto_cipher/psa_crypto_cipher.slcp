@@ -1,7 +1,7 @@
 project_name: psa_crypto_cipher
 package: platform
 quality: production
-label: Platform - PSA Crypto Cipher
+label: Platform Security - SoC PSA Crypto Cipher
 description: >
   This example project demonstrates the unauthenticated cipher API for generic and built-in AES-128 keys.
 category: Example|Platform

@@ -35,11 +35,11 @@
 // <h> LPN configuration
 
 // <o SL_BTMESH_LPN_MIN_QUEUE_LENGTH_CFG_VAL> Minimum queue length the friend must support <2-128>
-// <i> Default: 4
+// <i> Default: 16
 // <i> Minimum queue length the friend must support. Choose an appropriate value based on the expected message
 // frequency and LPN sleep period, because new messages push out the least recent messages from the friend queue.
 // Note that the given value is rounded up to the nearest power of 2
-#define SL_BTMESH_LPN_MIN_QUEUE_LENGTH_CFG_VAL   (4)
+#define SL_BTMESH_LPN_MIN_QUEUE_LENGTH_CFG_VAL   (16)
 
 // <o SL_BTMESH_LPN_POLL_TIMEOUT_CFG_VAL> Poll timeout in milliseconds <1000-345599900:100>
 // <i> Default: 5000

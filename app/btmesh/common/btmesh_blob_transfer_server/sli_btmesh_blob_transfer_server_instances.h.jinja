@@ -39,6 +39,7 @@
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
+#include "sl_btmesh_blob_transfer_server_config.h"
 {% for inst in btmesh_blob_transfer_server_instance | sort -%}
 #include "sl_btmesh_blob_transfer_server_{{ inst | lower }}_config.h"
 {% endfor %}
@@ -126,6 +127,12 @@ typedef struct {
   /// LPN high throughput timer is not used
   void *high_throughput_timer;
   #endif
+  /// Pointer to statically allocated block buffer (link time)
+  /// It is set to NULL if the block shall be allocated from heap.
+  uint8_t *block_buffer;
+  /// Size of block buffer
+  /// It is set to 0 if the block shall be allocated from heap.
+  uint32_t block_buffer_size;
   /// Element index of model instance (in DCD)
   uint16_t elem_index;
   /// The maximum number of chunks into which a block can be broken down
@@ -172,7 +179,7 @@ typedef struct {
   /// Block size calculated based on the log value received at transfer start
   uint32_t blob_block_size;
   /// Buffer for blocks
-  uint8_t * block_buffer;
+  uint8_t *block_buffer;
   /// State of the current transfer
   union {
     struct {

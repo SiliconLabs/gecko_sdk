@@ -54,4 +54,8 @@
 #error "Yield support is not available on EFR32xG22 devices"
 #endif
 
+#if (SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED != 1)
+#error "Using multiple blocks for key stream computation is not supported"
+#endif
+
 #endif // SL_SE_MANAGER_CHECK_CONFIG_H

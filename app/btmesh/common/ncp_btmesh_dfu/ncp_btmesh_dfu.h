@@ -70,5 +70,19 @@ sl_status_t sl_btmesh_ncp_dfu_set_uri(uint8_t idx,
                                       uint8_t type,
                                       uint8_t len,
                                       uint8_t *data);
-
+/**************************************************************************//**
+ * User command (message_to_target) handler callback.
+ * Handles user defined commands received from NCP host.
+ *
+ * @param[in] cmd  Pointer to the command.
+ * @param[inout] cmd_handled  Status of tehe command:
+ *                            true - cmd handled, no further interpretation is required
+ *                            false - cmd unhandled, interpretation is required
+ * @note If the value of the parameter 'cmd_handled' is false, the incoming
+ *       command needs to be interpreted. If the command is recognized and
+ *       handled, the 'cmd_handled' flag should be set to true. If the value of
+ *       the 'cmd_handled' parameter is already true, the function will return
+ *       without executing any further operations.
+ *****************************************************************************/
+void sl_btmesh_ncp_dfu_handle_cmd(void *data, bool *cmd_handled);
 #endif // DFU_H

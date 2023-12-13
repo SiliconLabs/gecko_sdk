@@ -38,12 +38,6 @@ EmberStatus emberAfEzspUnicastNwkKeyUpdateCommandCallback(EmberNodeId destShort,
                                                           EmberEUI64 destLong,
                                                           EmberKeyData* key);
 
-EmberStatus emberAfEzspAddTransientLinkKeyCommandCallback(EmberEUI64 partnerEui64,
-                                                          EmberKeyData* key);
-
-EmberStatus emberAfEzspGetTransientLinkKeyCommandCallback(const EmberEUI64 eui,
-                                                          EmberTransientKeyData *transientKeyData);
-
 EmberStatus emberAfEzspUpdateLinkKeyCommandCallback(void);
 
 void emberAfPluginEzspSecurityGetValueCommandCallback(EmberAfPluginEzspValueCommandContext* context);

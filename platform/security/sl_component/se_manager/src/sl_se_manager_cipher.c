@@ -29,15 +29,12 @@
  ******************************************************************************/
 
 #include "sl_se_manager.h"
-
 #if defined(SLI_MAILBOX_COMMAND_SUPPORTED)
 
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
 #include "sl_assert.h"
 #include <string.h>
-
-#define BUFSIZE 16
 
 /// @addtogroup sl_se_manager
 /// @{
@@ -299,6 +296,51 @@ sl_status_t sl_se_aes_crypt_cfb8(sl_se_command_context_t *cmd_ctx,
 }
 
 /***************************************************************************//**
+ * Increment the input nonce counter by one
+ ******************************************************************************/
+static void increment_nonce_counter(uint8_t block_end, unsigned char nonce_counter[])
+{
+  for (size_t i = 0u; i < SL_SE_AES_BLOCK_SIZE; i++) {
+    nonce_counter[block_end - i] = nonce_counter[block_end - i] + 1u;
+    if (nonce_counter[block_end - i] != 0u) {
+      // did not overflow so no need to increment the value at next index
+      break;
+    }
+  }
+}
+
+#if (SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED > 1)
+/***************************************************************************//**
+ * Prepare the SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE byte
+ * wide stream block buffer that will be used as nonce counter for
+ * encryption/decryption.
+ ******************************************************************************/
+static void prepare_nonce_counter(unsigned char nonce_counter[],
+                                  unsigned char stream_block[])
+{
+  uint8_t no_of_blocks = ((SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE) / SL_SE_AES_BLOCK_SIZE);
+  // place the most recent counter in the first stream block
+  memcpy(stream_block,
+         nonce_counter,
+         SL_SE_AES_BLOCK_SIZE);
+
+  for (size_t i = 0; i < no_of_blocks - 1u; i++) {
+    // Use the first block's reference counter to update the other
+    // blocks since it holds the most recent counter information.
+    memcpy(&stream_block[i * SL_SE_AES_BLOCK_SIZE + SL_SE_AES_BLOCK_SIZE],
+           &stream_block[i * SL_SE_AES_BLOCK_SIZE],
+           SL_SE_AES_BLOCK_SIZE);
+    increment_nonce_counter(((i + 2u) * SL_SE_AES_BLOCK_SIZE) - 1u, stream_block);
+  }
+
+  // Store the largest counter back in the nonce counter buffer
+  memcpy(nonce_counter,
+         &stream_block[(no_of_blocks - 1u) * SL_SE_AES_BLOCK_SIZE],
+         SL_SE_AES_BLOCK_SIZE);
+}
+#endif // SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED > 1
+
+/***************************************************************************//**
  * AES-CTR buffer encryption/decryption.
  ******************************************************************************/
 sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
@@ -306,7 +348,7 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
                                 size_t length,
                                 uint32_t *nc_off,
                                 unsigned char nonce_counter[16],
-                                unsigned char stream_block[16],
+                                unsigned char stream_block[SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE],
                                 const unsigned char *input,
                                 unsigned char *output)
 {
@@ -325,11 +367,11 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
     if (n > 0) {
       // start by filling up the IV
       output[processed] = (unsigned char)(input[processed] ^ stream_block[n]);
-      n = (n + 1) & 0x0F;
+      n = (n + 1) & ((SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE) - 1u);
       processed++;
     } else {
       // process one or more blocks of data
-      uint32_t iterations = (length - processed) / 16;
+      uint32_t iterations = (length - processed) / SL_SE_AES_BLOCK_SIZE;
 
       if (iterations > 0) {
         sli_se_command_init(cmd_ctx,
@@ -340,25 +382,25 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
         // Add key parameters to command
         sli_add_key_parameters(cmd_ctx, key, command_status);
         // Message size (number of bytes)
-        SE_addParameter(se_cmd, iterations * 16);
+        SE_addParameter(se_cmd, iterations * SL_SE_AES_BLOCK_SIZE);
 
         // Add key metadata block to command
         sli_add_key_metadata(cmd_ctx, key, command_status);
         // Add key input block to command
         sli_add_key_input(cmd_ctx, key, command_status);
 
-        SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(nonce_counter, 16);
-        SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(&input[processed], iterations * 16);
+        SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
+        SE_DataTransfer_t in = SE_DATATRANSFER_DEFAULT(&input[processed], iterations * SL_SE_AES_BLOCK_SIZE);
         SE_addDataInput(se_cmd, &iv_in);
         SE_addDataInput(se_cmd, &in);
 
-        SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(&output[processed], iterations * 16);
-        SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(nonce_counter, 16);
+        SE_DataTransfer_t out = SE_DATATRANSFER_DEFAULT(&output[processed], iterations * SL_SE_AES_BLOCK_SIZE);
+        SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(nonce_counter, SL_SE_AES_BLOCK_SIZE);
         SE_addDataOutput(se_cmd, &out);
         SE_addDataOutput(se_cmd, &iv_out);
 
         command_status = sli_se_execute_and_wait(cmd_ctx);
-        processed += iterations * 16;
+        processed += iterations * SL_SE_AES_BLOCK_SIZE;
         if (command_status != SL_STATUS_OK) {
           return command_status;
         }
@@ -367,26 +409,32 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
       while ((length - processed) > 0) {
         if (n == 0) {
           // Get a new stream block
+          unsigned char *counter_ptr = NULL;
+          #if (SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED > 1)
+          // Use the nonce counter buffer as the reference to create nonce counter blocks
+          // needed to compute the key stream blocks. Also, update the nonce counter buffer
+          // to store the latest block.
+          prepare_nonce_counter(nonce_counter, stream_block);
+          // The key stream buffer now holds the nonce counter
+          counter_ptr = stream_block;
+          #else
+          counter_ptr = nonce_counter;
+          #endif // SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED > 1
+
           command_status = sl_se_aes_crypt_ecb(cmd_ctx,
                                                key,
                                                SL_SE_ENCRYPT,
-                                               16U,
-                                               nonce_counter,
+                                               SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE,
+                                               counter_ptr,
                                                stream_block);
           if (command_status != SL_STATUS_OK) {
             return command_status;
           }
-          // increment nonce counter
-          for (uint32_t i = 0; i < 16; i++) {
-            nonce_counter[15 - i] = nonce_counter[15 - i] + 1;
-            if (nonce_counter[15 - i] != 0) {
-              break;
-            }
-          }
+          increment_nonce_counter(SL_SE_AES_BLOCK_SIZE - 1u, nonce_counter);
         }
         // Save remainder to IV
         output[processed] = (unsigned char)(input[processed] ^ stream_block[n]);
-        n = (n + 1) & 0x0F;
+        n = (n + 1) & ((SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE) - 1u);
         processed++;
       }
     }
@@ -576,10 +624,10 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
 {
   sl_status_t status = SL_STATUS_OK;
   uint8_t q;
-  uint8_t b[BUFSIZE] = { 0 };
-  uint8_t tag_out[BUFSIZE] = { 0 };
-  uint8_t cbc_mac_state[BUFSIZE] = { 0 };
-  uint8_t nonce_counter[BUFSIZE] = { 0 };
+  uint8_t b[SL_SE_AES_BLOCK_SIZE] = { 0 };
+  uint8_t tag_out[SL_SE_AES_BLOCK_SIZE] = { 0 };
+  uint8_t cbc_mac_state[SL_SE_AES_BLOCK_SIZE] = { 0 };
+  uint8_t nonce_counter[SL_SE_AES_BLOCK_SIZE] = { 0 };
   uint32_t len_left;
 
   //Check input parameters
@@ -644,7 +692,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
   status = sl_se_aes_crypt_cbc(cmd_ctx,
                                key,
                                SL_SE_ENCRYPT,
-                               BUFSIZE,
+                               SL_SE_AES_BLOCK_SIZE,
                                cbc_mac_state,
                                b,
                                tag_out);
@@ -662,7 +710,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
     // First block.
     b[0] = (unsigned char)((aad_len >> 8) & 0xFF);
     b[1] = (unsigned char)((aad_len) & 0xFF);
-    use_len = len_left < BUFSIZE - 2 ? len_left : 16 - 2;
+    use_len = len_left < SL_SE_AES_BLOCK_SIZE - 2 ? len_left : 16 - 2;
     memcpy(b + 2, aad, use_len);
     len_left -= use_len;
     aad += use_len;
@@ -670,7 +718,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
     status = sl_se_aes_crypt_cbc(cmd_ctx,
                                  key,
                                  SL_SE_ENCRYPT,
-                                 BUFSIZE,
+                                 SL_SE_AES_BLOCK_SIZE,
                                  cbc_mac_state,
                                  b,
                                  tag_out);
@@ -686,7 +734,7 @@ sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
       status = sl_se_aes_crypt_cbc(cmd_ctx,
                                    key,
                                    SL_SE_ENCRYPT,
-                                   BUFSIZE,
+                                   SL_SE_AES_BLOCK_SIZE,
                                    cbc_mac_state,
                                    b,
                                    tag_out);
@@ -723,9 +771,9 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
   sl_status_t status = SL_STATUS_OK;
   *output_length = 0;
 
-  uint8_t out_buf[BUFSIZE] = { 0 };
-  uint8_t empty[BUFSIZE] = { 0 };
-  uint8_t b[BUFSIZE] = { 0 };
+  uint8_t out_buf[SL_SE_AES_BLOCK_SIZE] = { 0 };
+  uint8_t empty[SL_SE_AES_BLOCK_SIZE * SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED] = { 0 };
+  uint8_t b[SL_SE_AES_BLOCK_SIZE] = { 0 };
 
   size_t len_left;
 
@@ -761,8 +809,8 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     input = output;
   }
 
-  if (length + ccm_ctx->final_data_length < BUFSIZE && length < BUFSIZE && ccm_ctx->processed_message_length + length != ccm_ctx->total_message_length ) {
-    if (ccm_ctx->final_data_length > BUFSIZE) {
+  if (length + ccm_ctx->final_data_length < SL_SE_AES_BLOCK_SIZE && length < SL_SE_AES_BLOCK_SIZE && ccm_ctx->processed_message_length + length != ccm_ctx->total_message_length ) {
+    if (ccm_ctx->final_data_length > SL_SE_AES_BLOCK_SIZE) {
       // Context is not valid.
       return SL_STATUS_INVALID_PARAMETER;
     }
@@ -779,19 +827,19 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
   // The only difference between encryption and decryption is
   // the respective order of authentication and {en,de}cryption.
   while (len_left > 0 ) {
-    uint8_t use_len = len_left > BUFSIZE ? BUFSIZE : len_left;
+    uint8_t use_len = len_left > SL_SE_AES_BLOCK_SIZE ? SL_SE_AES_BLOCK_SIZE : len_left;
 
     memset(b, 0, sizeof(b));
 
     // Process data stored in context first.
     if (ccm_ctx->final_data_length > 0) {
-      if (ccm_ctx->final_data_length > BUFSIZE) {
+      if (ccm_ctx->final_data_length > SL_SE_AES_BLOCK_SIZE) {
         // Context is not valid.
         return SL_STATUS_INVALID_PARAMETER;
       }
       memcpy(b, ccm_ctx->final_data, ccm_ctx->final_data_length);
-      memcpy(b + ccm_ctx->final_data_length, input, BUFSIZE - ccm_ctx->final_data_length);
-      input += BUFSIZE - ccm_ctx->final_data_length;
+      memcpy(b + ccm_ctx->final_data_length, input, SL_SE_AES_BLOCK_SIZE - ccm_ctx->final_data_length);
+      input += SL_SE_AES_BLOCK_SIZE - ccm_ctx->final_data_length;
       ccm_ctx->final_data_length = 0;
     } else {
       memcpy(b, input, use_len);
@@ -802,7 +850,7 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
       status = sl_se_aes_crypt_cbc(cmd_ctx,
                                    key,
                                    SL_SE_ENCRYPT,
-                                   BUFSIZE,
+                                   SL_SE_AES_BLOCK_SIZE,
                                    ccm_ctx->cbc_mac_state,
                                    b,
                                    out_buf);
@@ -828,7 +876,7 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
       status = sl_se_aes_crypt_cbc(cmd_ctx,
                                    key,
                                    SL_SE_ENCRYPT,
-                                   BUFSIZE,
+                                   SL_SE_AES_BLOCK_SIZE,
                                    ccm_ctx->cbc_mac_state,
                                    b,
                                    out_buf);
@@ -842,7 +890,7 @@ sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
     len_left -= use_len;
     output += use_len;
 
-    if (len_left < BUFSIZE && ((ccm_ctx->processed_message_length + len_left) != ccm_ctx->total_message_length)) {
+    if (len_left < SL_SE_AES_BLOCK_SIZE && ((ccm_ctx->processed_message_length + len_left) != ccm_ctx->total_message_length)) {
       memcpy(ccm_ctx->final_data, input, len_left);
       ccm_ctx->final_data_length = len_left;
       break;
@@ -867,8 +915,8 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
 {
   (void)output;
   uint8_t q;
-  uint8_t ctr[BUFSIZE] = { 0 };
-  uint8_t out_tag[BUFSIZE] = { 0 };
+  uint8_t ctr[SL_SE_AES_BLOCK_SIZE] = { 0 };
+  uint8_t out_tag[SL_SE_AES_BLOCK_SIZE] = { 0 };
   //Check input parameters
   if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || tag == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -887,7 +935,7 @@ sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
   memcpy(ctr + 1, ccm_ctx->iv, ccm_ctx->iv_len);
 
   // Encrypt the tag with CTR.
-  uint8_t empty[BUFSIZE] = { 0 };
+  uint8_t empty[SL_SE_AES_BLOCK_SIZE * SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED] = { 0 };
   status =  sl_se_aes_crypt_ctr(cmd_ctx,
                                 key,
                                 ccm_ctx->tag_len,

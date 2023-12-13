@@ -31,6 +31,7 @@
 #include "sl_mvp_ml_transpose_conv2d.h"
 #include "sl_mvp.h"
 #include "sl_mvp_util.h"
+#include "sl_nn_util.h"
 #include "sl_mvp_program_area.h"
 #include "sl_common.h"
 
@@ -115,7 +116,9 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
 
   if (execute) {
     // Zero entire temporary buffer using MVP.
-    status = sli_mvp_util_memclr_f16(p, tmp_buf, batches, output_depth, output_height, output_width);
+    if ((status = sli_mvp_util_memclr_f16(p, tmp_buf, batches, output_depth, output_height, output_width)) != SL_STATUS_OK) {
+      return status;
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -143,19 +146,19 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
         const int filter_x_start = SL_MAX(0, -out_x_origin);
         const int filter_x_end   = SL_MIN(filter_width, output_width - out_x_origin);
 
-        const int input_base = sli_mvp_util_offset_nhwc(input_height, input_width, input_depth,
-                                                        batch, in_y, in_x,
-                                                        0 /* input channel */);
-        int tmpbuf_base = sli_mvp_util_offset_nhwc(output_height, output_width, output_depth,
-                                                   batch,
-                                                   out_y_origin + filter_y_start,
-                                                   out_x_origin + filter_x_start,
-                                                   0 /* output channel */);
-        int filter_base = sli_mvp_util_offset_nhwc(filter_height, filter_width, input_depth,
-                                                   batch,
-                                                   filter_y_start,
-                                                   filter_x_start,
-                                                   0 /* output channel */);
+        const int input_base = sli_nn_calc_offset_nhwc(input_height, input_width, input_depth,
+                                                       batch, in_y, in_x,
+                                                       0 /* input channel */);
+        int tmpbuf_base = sli_nn_calc_offset_nhwc(output_height, output_width, output_depth,
+                                                  batch,
+                                                  out_y_origin + filter_y_start,
+                                                  out_x_origin + filter_x_start,
+                                                  0 /* output channel */);
+        int filter_base = sli_nn_calc_offset_nhwc(filter_height, filter_width, input_depth,
+                                                  batch,
+                                                  filter_y_start,
+                                                  filter_x_start,
+                                                  0 /* output channel */);
         const int filter_x_count = filter_x_end - filter_x_start;
         const int filter_y_count = filter_y_end - filter_y_start;
 
@@ -268,7 +271,9 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
           }
 
           if (execute) {
-            sli_mvp_pb_execute_program(p);
+            if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+              return status;
+            }
           }
 
           // Next filter "pack".
@@ -315,8 +320,8 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
 
     sli_mvp_pb_begin_program(p);
 
-    const int output_base = sli_mvp_util_offset_nhwc(output_height, output_width, output_depth,
-                                                     batch, 0, 0, 0);
+    const int output_base = sli_nn_calc_offset_nhwc(output_height, output_width, output_depth,
+                                                    batch, 0, 0, 0);
     sli_mvp_pb_config_array_nhwc(p->p,
                                  tmp_buf_array,
                                  (void*)&tmp_buf[output_base],
@@ -450,11 +455,15 @@ static sl_status_t transpose_conv(const sli_mvp_ml_transpose_conv2d_s8_params_t 
     }
 
     if (execute) {
-      sli_mvp_pb_execute_program(p);
+      if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+        return status;
+      }
     }
   } // Batches.
-  sli_mvp_cmd_wait_for_completion();
+  if (execute) {
+    status = sli_mvp_cmd_wait_for_completion();
+  }
 
-  return SL_STATUS_OK;
+  return status;
 }
 /// @endcond

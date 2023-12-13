@@ -21,3 +21,6 @@ template_contribution:
 define:
   - name: RADIOAES_BLE_RPA_MAX_KEYS
     value: 8
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-resolving-list

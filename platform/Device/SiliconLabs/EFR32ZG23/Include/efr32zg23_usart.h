@@ -1428,4 +1428,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_USART */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_USART_H */
+#endif // EFR32ZG23_USART_H

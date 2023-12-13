@@ -38,13 +38,15 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "sl_string.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_network_measurement.h"
 #include "sl_wisun_network_measurement_remote_ctrl.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
-#include "socket.h"
+#include "sl_iperf_log.h"
+#include "socket/socket.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_sleeptimer.h"
@@ -243,6 +245,16 @@ static void _parse_nbr_stat_to_json(char **payload_pos,
                                     const sl_wisun_nwm_node_stat_t * const stat,
                                     int16_t * const payload_len);
 
+/**************************************************************************//**
+ * @brief Log printer only to buffer
+ * @details Helper function to print to the internal buffer
+ * @param[in,out] log Log instance
+ * @param[in] format Format string
+ * @param[in] ... args
+ * @return int32_t Result by functions like snprintf and printf
+ *****************************************************************************/
+static int32_t _log_print_only_buff(sl_iperf_log_t * const log, const char * format, ...);
+
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
@@ -325,7 +337,7 @@ static sl_wisun_coap_packet_t * _get_nbr(const sl_wisun_coap_packet_t * const re
   payload_pos = _payload_buff;
 
   // get count of neighbors
-  (void) sl_wisun_nwm_get_nodes(_nodes, SL_WISUN_MAX_NODE_COUNT);
+  (void) sl_wisun_nwm_get_nodes(_nodes, SL_WISUN_MAX_NODE_COUNT, true);
 
   sl_wisun_nwm_get_border_router_stat(&_br_stat);
   sl_wisun_nwm_get_primary_parent_stat(&_pp_stat);
@@ -351,7 +363,7 @@ static sl_wisun_coap_packet_t * _get_nbr(const sl_wisun_coap_packet_t * const re
 static sl_wisun_coap_packet_t * _parse_ping(const sl_wisun_coap_packet_t * const req_packet)
 {
   ctrl_cmd_type_t ping_cmd          = { 0U };
-  wisun_addr_t remote_addr          = { 0U };
+  sockaddr_in6_t remote_addr          = { 0U };
   uint16_t packet_count             = 0U;
   uint16_t packet_size              = 0U;
   char* req_payload                 = NULL;
@@ -393,7 +405,7 @@ static sl_wisun_coap_packet_t * _parse_ping(const sl_wisun_coap_packet_t * const
     sl_wisun_nwm_quick_measure(SL_WISUN_NWM_TARGET_TYPE_BORDER_ROUTER, packet_count, packet_size);
     print_target = BUFFER_TYPE_BORDER_ROUTER;
   } else {
-    if (ping_cmd.arg3 != NULL && inet_pton(AF_WISUN, ping_cmd.arg3, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
+    if (ping_cmd.arg3 != NULL && inet_pton(AF_INET6, ping_cmd.arg3, &remote_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
       sl_wisun_coap_destroy_payload_str(req_payload);
       return _build_response_packet("[IP address is not set or not valid]", req_packet);
     }
@@ -415,7 +427,7 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
   ctrl_cmd_type_t iperf_cmd = { 0U };
   char* req_payload         = NULL;
   sl_wisun_coap_packet_t * resp_packet = NULL;
-  
+
   // Parsing incoming cli command string.
   req_payload = sl_wisun_coap_get_payload_str(req_packet);
   if (req_payload == NULL) {
@@ -431,7 +443,7 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
 
   // Handle help request.
   if (!strncmp(iperf_cmd.arg1, "help", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-    sl_wisun_coap_destroy_payload_str(req_payload); 
+    sl_wisun_coap_destroy_payload_str(req_payload);
     return _build_response_packet(SL_WISUN_NWM_REMOTE_CTRL_IPERF_HELP_STRING, req_packet);
   }
 
@@ -455,7 +467,7 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
   // Handle get requests.
   if (!strncmp(iperf_cmd.arg1, "get", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
     if (!strncmp(iperf_cmd.arg2, "result", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
-      sl_iperf_test_get(&_last_test);
+      (void) sl_iperf_test_get(&_last_test, 1);
       resp_packet = _build_send_output(req_packet, BUFFER_TYPE_IPERF);
       if (resp_packet == NULL) {
         resp_packet = _build_response_packet("[Buffer error]", req_packet);
@@ -478,21 +490,21 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
   if (!strncmp(iperf_cmd.arg1, "set", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
     if (!strncmp(iperf_cmd.arg2, "options.bandwidth", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.bandwidth = atoi(iperf_cmd.arg3);
-      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
+      resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CHANGED);
     } else if (!strncmp(iperf_cmd.arg2, "options.remote_addr", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       memcpy(_options.remote_addr, iperf_cmd.arg3, sl_strnlen(iperf_cmd.arg3, SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_QUERY_LENGTH));
-      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
+      resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CHANGED);
     } else if (!strncmp(iperf_cmd.arg2, "options.duration", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.duration_ms = atoi(iperf_cmd.arg3);
-      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
+      resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CHANGED);
     } else if (!strncmp(iperf_cmd.arg2, "options.interval", SL_WISUN_COAP_NWM_REMOTE_CLI_MAX_ARG_STRING_LENGTH)) {
       _options.interval_ms = atoi(iperf_cmd.arg3);
-      resp_packet = _build_response_packet(iperf_cmd.arg3, req_packet);
+      resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_CHANGED);
     } else {
-      resp_packet = _build_response_packet("Not found argument.", req_packet);
+      resp_packet = sl_wisun_coap_build_response(req_packet, COAP_MSG_CODE_RESPONSE_NOT_ACCEPTABLE);
     }
   } else {
-   resp_packet = _build_response_packet("Unknown cli command", req_packet);
+    resp_packet = _build_response_packet("Unknown cli command", req_packet);
   }
 
   // Clean memory
@@ -502,7 +514,7 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
 
 static  sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_iperf_test_t test = { 0U };
+  static sl_iperf_test_t test = { 0U };
 
   // Set iPerf server options and init test descriptor.
   _options.mode = SL_IPERF_MODE_SERVER;
@@ -522,9 +534,8 @@ static  sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_
 
 static sl_wisun_coap_packet_t * _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet)
 {
-  sl_iperf_test_t test = { 0U };
-  sl_wisun_coap_packet_t * resp_packet = NULL;
-  
+  static sl_iperf_test_t test = { 0U };
+
   /// 1. Set iPerf client options and init test descriptor.
   _options.mode = SL_IPERF_MODE_CLIENT;
   _options.protocol = SL_IPERF_IPROTOV6_UDP;
@@ -537,19 +548,11 @@ static sl_wisun_coap_packet_t * _start_iperf_client(const sl_wisun_coap_packet_t
     return NULL;
   }
 
-  if (!sl_iperf_test_get(&_last_test)) {
-    printf("[Getting test to queue failed]\n");
-    return NULL;
-  }
-
   // Build response packet.
-  resp_packet = _build_send_output(req_packet, BUFFER_TYPE_IPERF);
-  if (resp_packet == NULL) {
-   resp_packet =  _build_response_packet("[Buffer error]", req_packet);
-  }
+  return _build_response_packet("[iPerf client started]", req_packet);
 
-  return resp_packet;
 }
+
 
 static void _parse_remote_cmd(char* req_cmd, ctrl_cmd_type_t* cmd)
 {
@@ -572,8 +575,17 @@ static sl_status_t _build_payload(buffer_target_type_t target)
   sl_wisun_nwm_get_children_stat(_children_stats, 30U, &children_count);
 
   if (target == BUFFER_TYPE_IPERF) {
+    // Set buffer
     sl_iperf_log_set_buff(_last_test.log, _payload_buff, payload_len);
+    
+    // Set printer
+    sl_iperf_log_set_printer(_last_test.log, _log_print_only_buff);
+    
+    // Print json formatted log
     sl_iperf_print_test_log_json(&_last_test);
+
+    // Reinit log
+    sl_iperf_log_init(_last_test.log);
     return SL_STATUS_OK;
   }
 
@@ -701,4 +713,34 @@ static void _sl_wisun_nwm_remote_ctrl_stat_handler(sl_wisun_ping_stat_t *stat)
 {
   assert(stat->packet_count != 0);
   memcpy(&_stat.ping_stat, stat, sizeof(sl_wisun_ping_stat_t));
+}
+
+
+static int32_t _log_print_only_buff(sl_iperf_log_t * const log, const char * format, ...)
+{
+  va_list args;
+  int32_t res = -1L;
+  size_t free_bytes = 0;
+
+  if (log == NULL) {
+    return res;
+  }
+
+  va_start(args, format);
+
+  if (log->buffered
+      && log->buff.buff != NULL
+      && log->buff.size) {
+    free_bytes = log->buff.size - (log->buff.pos - log->buff.buff);
+
+    if (free_bytes) {
+      res = vsnprintf(log->buff.pos, free_bytes, format, args);
+      if (res > 0L) {
+        log->buff.pos += res;
+      }
+    }
+  }
+
+  va_end(args);
+  return res;
 }

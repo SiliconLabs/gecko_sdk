@@ -1,6 +1,5 @@
 # TrustZone PSA Attestation (Non-secure application)
 
-
 This example uses the PSA attestation API to fetch the PSA attestation token on the supported Series 2 device.
 
 The example also demonstrates how the PSA attestation token can be parsed and printed in a human-readable format. Parsing and printing the PSA attestation token on the chip might not be a typical use case. But it can showcase the structure and capabilities of the PSA attestation token.
@@ -13,31 +12,42 @@ The example has been instrumented with code to count the number of clock cycles 
 
 ## PSA attestation API
 
-
 The following PSA attestation APIs are used in this example:
-
 
 * `psa_initial_attest_get_token_size`
 * `psa_initial_attest_get_token`
 * `sl_tz_attestation_get_public_key` (Silicon Labs custom API)
 
-
-
 ## Getting Started
-
 
 The Non-secure application needs to work with the Secure application on a workspace (see readme in `tz_psa_attestation_ws`).
 
-
 ## Additional Information
-
 
 1. The Silicon Labs custom API `sl_tz_attestation_get_public_key()` is used to get the Public Attestation Key.
 2. The Series 2 device will generate the PSA attestation token by request unless the SE OTP is uninitialized or the `SECURE_BOOT_ENABLE` option in SE OTP is disabled.
 3. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
 
+## Troubleshooting
+
+### Serial Port Settings
+
+Be sure to select the following settings to see the serial output of this example:
+
+* 115200 Baud Rate 
+* 8-N-1 configuration
+* Line terminator should be set to "None" if using Device Console in Simplicity Studio
+
+### Programming the Radio Board
+
+Before programming the radio board mounted on the mainboard, make sure the power supply switch is in the AEM position (right side) as shown below.
+
+![Radio board power supply switch](image/readme_img0.png)
 
 ## Resources
 
-
 [AN1374: Series 2 TrustZone](https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf)
+
+## Report Bugs & Get Support
+
+You are always encouraged and welcome to report any issues you found to us via [Silicon Labs Community](https://community.silabs.com/).

@@ -7,7 +7,6 @@ quality: production
 root_path: app/bluetooth/script
 tag:
   - No-Code
-
 other_file:
   - path: create_bl_files.bat
     condition:
@@ -19,5 +18,13 @@ other_file:
       - bootloader_app_properties
     project:
       transfer_ownership: true
+  - path: create_bl_files.py
+    condition:
+      - bootloader_app_properties
+    project:
+      transfer_ownership: true
 provides:
   - name: bt_post_build
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/bt-post-build

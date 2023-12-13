@@ -682,4 +682,4 @@ typedef struct {
 /** @} End of group BGM21_LDMA */
 /** @} End of group Parts */
 
-#endif /* BGM21_LDMA_H */
+#endif // BGM21_LDMA_H

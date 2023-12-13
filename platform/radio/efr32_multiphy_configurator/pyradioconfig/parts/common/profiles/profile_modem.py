@@ -72,7 +72,7 @@ def buildModemInfoOutputs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.baudrate,         '', ModelOutputType.INFO, readable_name='Desired baudrate'))
     profile.outputs.append(ModelOutput(model.vars.sample_freq_actual, '', ModelOutputType.INFO, readable_name='Actual sample frequency'))
     profile.outputs.append(ModelOutput(model.vars.frc_conv_decoder_buffer_size, '', ModelOutputType.SW_VAR, readable_name='Convolutional Decoder Buffer Size'))
-    profile.outputs.append(ModelOutput(model.vars.fec_enabled, '', ModelOutputType.INFO, readable_name='FEC enabled flag'))
+    profile.outputs.append(ModelOutput(model.vars.fec_enabled, '', ModelOutputType.SW_VAR, readable_name='FEC enabled flag'))
 
 
 def buildRailOutputs(model, profile):

@@ -12,6 +12,27 @@ class Profile_Long_Range_Ocelot(Profile_Long_Range_Nixi):
         self._family = 'ocelot'
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
+    def buildProfileModel(self, model):
+
+        # Build profile object and append it to the model
+        profile = self._makeProfile(model)
+
+        # Build inputs
+        self.build_required_profile_inputs(model, profile)
+        self.build_optional_profile_inputs(model, profile)
+        self.build_advanced_profile_inputs(model, profile)
+        self.build_hidden_profile_inputs(model, profile)
+        self.build_deprecated_profile_inputs(model, profile)
+
+        # Build outputs
+        self.build_register_profile_outputs(model, profile)
+        self.build_variable_profile_outputs(model, profile)
+        self.build_info_profile_outputs(model, profile)
+
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
+        return profile
+
     def build_required_profile_inputs(self, model, profile):
         super().build_required_profile_inputs(model, profile)
         self.make_required_input(profile, model.vars.xtal_frequency_hz, "crystal",

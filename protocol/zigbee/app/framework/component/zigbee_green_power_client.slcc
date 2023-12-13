@@ -1,16 +1,15 @@
 package: Zigbee
-description: A component implementing the client-side functionality of the Green Power
-  cluster.
+description: A component implementing the client-side functionality of the Green Power cluster.
 label: Green Power Client
 quality: production
 id: zigbee_green_power_client
 category: Zigbee|Green Power
 provides:
-   - name: "zigbee_green_power_client"
+  - name: zigbee_green_power_client
 requires:
-   - name: "zigbee_gp"
-   - name: "zigbee_gp_util"
-   - name: "zigbee_green_power_common"
+  - name: zigbee_gp
+  - name: zigbee_gp_util
+  - name: zigbee_green_power_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-client/config/green-power-client-config.h
 source:
@@ -27,10 +26,10 @@ template_contribution:
     value: zigbee_green_power_client
   - name: cluster_service
     value:
-       cluster_id: "0x0021"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"
-       service_function: "emberAfGreenPowerClusterClientCommandParse"    
+      cluster_id: '0x0021'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfGreenPowerClusterClientCommandParse
   - name: zigbee_af_callback
     value:
       callback_type: event_init
@@ -46,7 +45,7 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: retrieve_attribute_and_craft_response
-      function_name: sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response    
+      function_name: sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status

@@ -116,6 +116,13 @@ uint32_t sli_tz_iovecs_live_in_ns(sli_tz_invec in_vec[],
                                   iovec_copy->in_vec[i].len))) {
         return SLI_TZ_IOVEC_ERROR;
       }
+    } else {
+      if (iovec_copy->in_vec[i].base != NULL) {
+        if (!object_lives_in_ns(iovec_copy->in_vec[i].base,
+                                1u)) {
+          return SLI_TZ_IOVEC_ERROR;
+        }
+      }
     }
   }
   for (size_t i = 0; i < out_len; ++i) {
@@ -125,9 +132,15 @@ uint32_t sli_tz_iovecs_live_in_ns(sli_tz_invec in_vec[],
                                   iovec_copy->out_vec[i].len))) {
         return SLI_TZ_IOVEC_ERROR;
       }
+    } else {
+      if (iovec_copy->out_vec[i].base != NULL) {
+        if (!object_lives_in_ns(iovec_copy->out_vec[i].base,
+                                1u)) {
+          return SLI_TZ_IOVEC_ERROR;
+        }
+      }
     }
   }
-
   return SLI_TZ_IOVEC_OK;
 }
 

@@ -1,7 +1,7 @@
-from pyradioconfig.parts.viper.calculators.calc_aox import calc_aox_viper
+from pyradioconfig.parts.bobcat.calculators.calc_aox import Calc_AoX_Bobcat
 
 
-class CalcAoxRainier(calc_aox_viper):
+class CalcAoxRainier(Calc_AoX_Bobcat):
     pass
 
 

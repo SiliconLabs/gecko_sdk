@@ -44,6 +44,16 @@ class calc_softmodem_sol(ICalculator):
                 ['_2000_KCPS', 3, '2000 kcps']
             ])
 
+        self._addModelVariable(model, 'sun_oqpsk_spreading_mode', Enum, ModelVariableFormat.DECIMAL, desc='Spreading mode selection for SUN OQPSK PHYs')
+        model.vars.sun_oqpsk_spreading_mode.var_enum = CreateModelVariableEnum(
+            enum_name='SunOqpskSpreadingModeEnum',
+            enum_desc='SUN OQPSK Spreading Mode',
+            member_data=[
+                ['DSSS', 0, 'DSSS'],
+                ['MDSSS', 1, 'MDSSS']
+            ]
+        )
+
         self._addModelVariable(model, 'sun_fsk_fecsel', Enum, ModelVariableFormat.DECIMAL,
                                desc='FEC selection for SUN FSK PHYs')
         model.vars.sun_fsk_fecsel.var_enum = CreateModelVariableEnum(
@@ -108,8 +118,9 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_defaults(self, model):
         #This function assigns defaults to the softmodem vars so that other Profiles will correctly populate the vars
-        model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1
+        model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
         model.vars.sun_oqpsk_chiprate.value = model.vars.sun_oqpsk_chiprate.var_enum._100_KCPS
+        model.vars.sun_oqpsk_spreading_mode.value = model.vars.sun_oqpsk_spreading_mode.var_enum.DSSS
 
     def calc_softmodem_modulation_type(self, model):
         #For now, calculate the softmodem modulation type as None by default (must be manually set per softmodem PHY)
@@ -377,11 +388,11 @@ class calc_softmodem_sol(ICalculator):
             target_kHz = (target_ppm/1000000.0 * base_frequency_hz)/1000
             ICS_kHz = ofdm_subcarrier_spacing_hz/1000
 
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                 STF_spacing = 8
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                 STF_spacing = 4
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                 STF_spacing = 4
             else:
                 STF_spacing = 2
@@ -507,7 +518,7 @@ class calc_softmodem_sol(ICalculator):
                 pdetcwthrgain_field = 6
                 pdetcwthratt_field = 6
 
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
 
                 if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
                     pdetthrgain_field = 2
@@ -518,7 +529,7 @@ class calc_softmodem_sol(ICalculator):
                     pdet_thr_att_field = 5
                     pdetcf_field = 8
 
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
 
                 if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
                     pdetthrgain_field = 2
@@ -529,7 +540,7 @@ class calc_softmodem_sol(ICalculator):
                     pdet_thr_att_field = 5
                     pdetcf_field = 8
 
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
 
                 if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
                     pdetthrgain_field = 2
@@ -582,11 +593,11 @@ class calc_softmodem_sol(ICalculator):
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             ofdm_option = model.vars.ofdm_option.value
 
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                 filter_coeffs = [7177, 2600, -1229, -1133, 537, 687, -262, -448, 120, 293, -44, -186, 9, 143, 82, 3]
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                 filter_coeffs = [7415, 2369, -1461, -920, 754, 503, -459, -299, 294, 173, -187, -87, 107, 35, -51, -21]
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                 filter_coeffs = [7386, 2416, -1455, -974, 763, 563, -474, -369, 319, 252, -231, -156, 164, 78, -116, -67]
             else:
                 filter_coeffs = [8990, 70, -1803, 1203, 67, -772, 568, 61, -442, 320, 50, -273, 205, 32, -380, -118]
@@ -657,11 +668,11 @@ class calc_softmodem_sol(ICalculator):
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             ofdm_option = model.vars.ofdm_option.value
 
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                 filter_coeffs = [3428, 1436, -431, -648, 125, 418, 9, -289, -59, 196, 102, -116, -91, 57, 115, -69]
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                 filter_coeffs = [3727, 1160, -736, -417, 395, 220, -234, -120, 142, 65, -81, -31, 43, 14, -21, -1]
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                 filter_coeffs = [3770, 1115, -776, -370, 431, 180, -264, -86, 165, 39, -98, -13, 53, 2, -27, 6]
             else:
                 filter_coeffs = [3807, 1076, -809, -332, 459, 146, -285, -57, 179, 16, -107, 4, 58, -9, -30, 13]
@@ -1056,19 +1067,19 @@ class calc_softmodem_sol(ICalculator):
             """Values obtained from designers - to annotate"""
             if ofdm_stf_length < 12:
 
-                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                     agcreldly = 20
                     agcconvdly = 155
                     settlingtime = 45
                     anticpswitch = 0
 
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                     agcreldly = 20
                     agcconvdly = 155
                     settlingtime = 24
                     anticpswitch = 11
 
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                     agcreldly = 20
                     agcconvdly = 155
                     settlingtime = 14
@@ -1082,19 +1093,19 @@ class calc_softmodem_sol(ICalculator):
 
             else:
 
-                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                     agcreldly = 20
                     agcconvdly = 190
                     settlingtime = 24
                     anticpswitch = 12
 
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                     agcreldly = 20
                     agcconvdly = 190
                     settlingtime = 24
                     anticpswitch = 12
 
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                     agcreldly = 20
                     agcconvdly = 180
                     settlingtime = 24

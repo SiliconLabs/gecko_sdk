@@ -54,7 +54,7 @@
  ******************************************************************************/
 void sli_keyscan_driver_hal_init(void)
 {
-  sl_keyscan_config_t hw_config;
+  sl_hal_keyscan_config_t hw_config;
   uint32_t clock_freq;
   uint32_t clock_div;
 
@@ -75,11 +75,11 @@ void sli_keyscan_driver_hal_init(void)
   hw_config.clock_divider = clock_div;
 
   // Hardware initialization
-  sl_keyscan_init(&hw_config);
+  sl_hal_keyscan_init(&hw_config);
 
   // Clear interrupt flags
-  sl_keyscan_disable_interrupts(_KEYSCAN_IEN_MASK);
-  sl_keyscan_clear_interrupts(_KEYSCAN_IEN_MASK);
+  sl_hal_keyscan_disable_interrupts(_KEYSCAN_IEN_MASK);
+  sl_hal_keyscan_clear_interrupts(_KEYSCAN_IEN_MASK);
 
   // Enable interrupts
   NVIC_ClearPendingIRQ(KEYSCAN_IRQn);
@@ -214,7 +214,7 @@ void sli_keyscan_driver_hal_enable_interrupts(uint8_t local_flags)
     keyscan_ien |= KEYSCAN_IF_SCANNED;
   }
 
-  sl_keyscan_enable_interrupts(keyscan_ien);
+  sl_hal_keyscan_enable_interrupts(keyscan_ien);
 }
 
 /***************************************************************************//**
@@ -226,7 +226,7 @@ void sli_keyscan_driver_hal_get_column_row(uint8_t *p_column,
   uint32_t status;
   uint32_t mask = 0UL;
 
-  status = sl_keyscan_get_status();
+  status = sl_hal_keyscan_get_status();
 
   /* KEYSCAN_E301: The unused row bits in the KEYSCAN_STATUS field should be masked
      so that unused row bits are set to 1, indicating a key is not pressed. */
@@ -247,7 +247,7 @@ bool sli_keyscan_driver_hal_is_scan_running(void)
 {
   uint32_t status;
 
-  status = sl_keyscan_get_status();
+  status = sl_hal_keyscan_get_status();
 
   return ((status & _KEYSCAN_STATUS_RUNNING_MASK) >> _KEYSCAN_STATUS_RUNNING_SHIFT ? true : false);
 }
@@ -258,12 +258,12 @@ bool sli_keyscan_driver_hal_is_scan_running(void)
 void sli_keyscan_driver_hal_start_scan(bool enable)
 {
   if (enable) {
-    sl_keyscan_enable();
+    sl_hal_keyscan_enable();
   }
 
-  sl_keyscan_start_scan();
+  sl_hal_keyscan_start_scan();
 
-  sl_keyscan_wait_sync();
+  sl_hal_keyscan_wait_sync();
 }
 
 /***************************************************************************//**
@@ -271,11 +271,11 @@ void sli_keyscan_driver_hal_start_scan(bool enable)
  ******************************************************************************/
 void sli_keyscan_driver_hal_stop_scan(void)
 {
-  sl_keyscan_stop_scan();
+  sl_hal_keyscan_stop_scan();
 
-  sl_keyscan_wait_sync();
+  sl_hal_keyscan_wait_sync();
 
-  sl_keyscan_disable();
+  sl_hal_keyscan_disable();
 }
 
 /***************************************************************************//**
@@ -287,7 +287,7 @@ void KEYSCAN_IRQHandler(void)
   uint32_t local_flags = 0;
 
   // Retrieve Keyscan interrupt flags
-  irq_flags = sl_keyscan_get_interrupts();
+  irq_flags = sl_hal_keyscan_get_interrupts();
 
   // Interrupt "wake-up from sleep" handling.
   if (irq_flags & KEYSCAN_IF_WAKEUP) {
@@ -310,7 +310,7 @@ void KEYSCAN_IRQHandler(void)
   }
 
   // Clear all interrupt flags
-  sl_keyscan_clear_interrupts(irq_flags);
+  sl_hal_keyscan_clear_interrupts(irq_flags);
 
   // Process interrupts
   sli_keyscan_process_irq(local_flags);

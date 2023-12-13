@@ -457,6 +457,17 @@ config_file:
   - hardware_board_default_rf_band_2400
   - device_sdid_215
   unless:
+  - hardware_board_has_hfxo_freq_40mhz
+  - device_is_module
+  - device_sdid_200
+- path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_215/rf_band_2400/rf40mhz/radio_settings.radioconf
+  file_id: radio_configuration_settings
+  directory: rail
+  condition:
+  - hardware_board_default_rf_band_2400
+  - device_sdid_215
+  - hardware_board_has_hfxo_freq_40mhz
+  unless:
   - device_is_module
   - device_sdid_200
 - path: platform/radio/radio_configuration/Base/simple_rail_singlephy/device_sdid_220/rf_band_470/radio_settings.radioconf

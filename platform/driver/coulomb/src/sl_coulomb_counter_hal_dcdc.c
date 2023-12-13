@@ -70,7 +70,7 @@ sl_status_t sli_coulomb_counter_hal_int_enable(uint8_t flag)
   if (flag == SL_COULOMB_COUNTER_INT_CALIBRATION_DONE) {
     CMU_IntEnable(CMU_IEN_CALRDY);
   } else if (flag == SL_COULOMB_COUNTER_INT_COUNTER_FULL) {
-    sl_dcdc_coulomb_counter_enable_interrupts(DCDC_CCIEN_EM0OF | DCDC_CCIEN_EM2OF);
+    sl_hal_dcdc_coulomb_counter_enable_interrupts(DCDC_CCIEN_EM0OF | DCDC_CCIEN_EM2OF);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -87,7 +87,7 @@ sl_status_t sli_coulomb_counter_hal_int_disable(uint8_t flag)
   if (flag == SL_COULOMB_COUNTER_INT_CALIBRATION_DONE) {
     CMU_IntDisable(CMU_IEN_CALRDY);
   } else if (flag == SL_COULOMB_COUNTER_INT_COUNTER_FULL) {
-    sl_dcdc_coulomb_counter_disable_interrupts(DCDC_CCIEN_EM0OF | DCDC_CCIEN_EM2OF);
+    sl_hal_dcdc_coulomb_counter_disable_interrupts(DCDC_CCIEN_EM0OF | DCDC_CCIEN_EM2OF);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -106,7 +106,7 @@ sl_status_t sli_coulomb_counter_hal_int_is_set(uint8_t flag, bool *is_set)
   if (flag == SL_COULOMB_COUNTER_INT_CALIBRATION_DONE) {
     reg = CMU_IntGet() & CMU_IF_CALRDY;
   } else if (flag == SL_COULOMB_COUNTER_INT_COUNTER_FULL) {
-    reg = sl_dcdc_coulomb_counter_get_interrupts() & (DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
+    reg = sl_hal_dcdc_coulomb_counter_get_interrupts() & (DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -129,7 +129,7 @@ sl_status_t sli_coulomb_counter_hal_int_clear(uint8_t flag)
   if (flag == SL_COULOMB_COUNTER_INT_CALIBRATION_DONE) {
     CMU_IntClear(CMU_IF_CALRDY);
   } else if (flag == SL_COULOMB_COUNTER_INT_COUNTER_FULL) {
-    sl_dcdc_coulomb_counter_clear_interrupts(DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
+    sl_hal_dcdc_coulomb_counter_clear_interrupts(DCDC_CCIF_EM0OF | DCDC_CCIF_EM2OF);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -144,23 +144,23 @@ sl_status_t sli_coulomb_counter_hal_int_clear(uint8_t flag)
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_init(sli_coulomb_counter_handle_t *handle)
 {
-  sl_dcdc_coulomb_counter_config_t config = DCDC_COULOMB_COUNTER_CONFIG_DEFAULT;
+  sl_hal_dcdc_coulomb_counter_config_t config = DCDC_COULOMB_COUNTER_CONFIG_DEFAULT;
   const uint16_t COUNTER_THRESHOLD_50 = ((UINT16_MAX + 1) / 2);
   const uint16_t COUNTER_THRESHOLD_DELTA = (COUNTER_THRESHOLD_50 / 4);  /* 12.5% */
   uint16_t threshold = 0U;
 
   (void)handle;
 
-  sl_dcdc_coulomb_counter_disable();
+  sl_hal_dcdc_coulomb_counter_disable();
 
   /* configuring the counter thresholds EM0CNT and EM2CNT. */
   threshold = COUNTER_THRESHOLD_50 + (handle->threshold * COUNTER_THRESHOLD_DELTA);
   config.counter_threshold_em0 = threshold;
   config.counter_threshold_em2 = threshold;
 
-  sl_dcdc_coulomb_counter_init(&config);
+  sl_hal_dcdc_coulomb_counter_init(&config);
 
-  sl_dcdc_coulomb_counter_enable();
+  sl_hal_dcdc_coulomb_counter_enable();
 
   return SL_STATUS_OK;
 }
@@ -171,8 +171,8 @@ sl_status_t sli_coulomb_counter_hal_init(sli_coulomb_counter_handle_t *handle)
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_start(void)
 {
-  sl_dcdc_coulomb_counter_start();
-  sl_dcdc_coulomb_counter_wait_start();
+  sl_hal_dcdc_coulomb_counter_start();
+  sl_hal_dcdc_coulomb_counter_wait_start();
 
   return SL_STATUS_OK;
 }
@@ -183,8 +183,8 @@ sl_status_t sli_coulomb_counter_hal_start(void)
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_stop(void)
 {
-  sl_dcdc_coulomb_counter_stop();
-  sl_dcdc_coulomb_counter_wait_stop();
+  sl_hal_dcdc_coulomb_counter_stop();
+  sl_hal_dcdc_coulomb_counter_wait_stop();
 
   return SL_STATUS_OK;
 }
@@ -195,8 +195,8 @@ sl_status_t sli_coulomb_counter_hal_stop(void)
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_clear_counters(void)
 {
-  sl_dcdc_coulomb_counter_clear_counters();
-  sl_dcdc_coulomb_counter_wait_clear_counters();
+  sl_hal_dcdc_coulomb_counter_clear_counters();
+  sl_hal_dcdc_coulomb_counter_wait_clear_counters();
 
   return SL_STATUS_OK;
 }
@@ -215,9 +215,9 @@ sl_status_t sli_coulomb_counter_hal_read_output(sli_coulomb_counter_output_t *ou
   }
 
   if (output == &output_dcdc_em0) {
-    read_val = sl_dcdc_coulomb_counter_get_count(SL_DCDC_COULOMB_COUNTER_EM0);
+    read_val = sl_hal_dcdc_coulomb_counter_get_count(SL_HAL_DCDC_COULOMB_COUNTER_EM0);
   } else if (output == &output_dcdc_em2) {
-    read_val = sl_dcdc_coulomb_counter_get_count(SL_DCDC_COULOMB_COUNTER_EM2);
+    read_val = sl_hal_dcdc_coulomb_counter_get_count(SL_HAL_DCDC_COULOMB_COUNTER_EM2);
   } else {
     return SL_STATUS_FAIL;
   }
@@ -242,35 +242,35 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
 
   switch (ccl_level) {
     case 0:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD0);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD0);
       break;
 
     case 1:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD1);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD1);
       break;
 
     case 2:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD2);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD2);
       break;
 
     case 3:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD3);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD3);
       break;
 
     case 4:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD4);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD4);
       break;
 
     case 5:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD5);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD5);
       break;
 
     case 6:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD6);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD6);
       break;
 
     case 7:
-      ccload = sl_dcdc_coulomb_counter_get_cal_load_current(SL_DCDC_COULOMB_COUNTER_CAL_LOAD7);
+      ccload = sl_hal_dcdc_coulomb_counter_get_cal_load_current(SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD7);
       break;
 
     default:
@@ -286,7 +286,7 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
  ******************************************************************************/
 float sli_coulomb_counter_hal_get_osc_frequency(void)
 {
-  return (float)sl_dcdc_coulomb_counter_get_cal_reference_freq();
+  return (float)sl_hal_dcdc_coulomb_counter_get_cal_reference_freq();
 }
 
 /***************************************************************************//**
@@ -310,41 +310,41 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
                                               int8_t nreq,
                                               int8_t ccl_level)
 {
-  sl_dcdc_coulomb_counter_emode_t emode = SL_DCDC_COULOMB_COUNTER_EM0;
-  sl_dcdc_coulomb_counter_calibration_load_level_t ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD0;
-  sl_dcdc_coulomb_counter_calibration_config_t config = DCDC_COULOMB_COUNTER_CALIBRATION_CONFIG_DEFAULT;
+  sl_hal_dcdc_coulomb_counter_emode_t emode = SL_HAL_DCDC_COULOMB_COUNTER_EM0;
+  sl_hal_dcdc_coulomb_counter_calibration_load_level_t ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD0;
+  sl_hal_dcdc_coulomb_counter_calibration_config_t config = DCDC_COULOMB_COUNTER_CALIBRATION_CONFIG_DEFAULT;
 
   switch (ccl_level) {
     case 0:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD0;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD0;
       break;
 
     case 1:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD1;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD1;
       break;
 
     case 2:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD2;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD2;
       break;
 
     case 3:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD3;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD3;
       break;
 
     case 4:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD4;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD4;
       break;
 
     case 5:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD5;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD5;
       break;
 
     case 6:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD6;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD6;
       break;
 
     case 7:
-      ccl = SL_DCDC_COULOMB_COUNTER_CAL_LOAD7;
+      ccl = SL_HAL_DCDC_COULOMB_COUNTER_CAL_LOAD7;
       break;
 
     default:
@@ -352,15 +352,15 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
   }
 
   if (output == &output_dcdc_em2) {
-    emode = SL_DCDC_COULOMB_COUNTER_EM2;
+    emode = SL_HAL_DCDC_COULOMB_COUNTER_EM2;
   }
 
   config.cal_emode = emode;
   config.cal_count = nreq;
   config.cal_load_level = ccl;
 
-  sl_dcdc_coulomb_counter_cal_init(config);
-  sl_dcdc_coulomb_counter_cal_start();
+  sl_hal_dcdc_coulomb_counter_cal_init(config);
+  sl_hal_dcdc_coulomb_counter_cal_start();
   return SL_STATUS_OK;
 }
 
@@ -370,7 +370,7 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
  ******************************************************************************/
 sl_status_t sli_coulomb_counter_hal_cal_stop(void)
 {
-  sl_dcdc_coulomb_counter_cal_stop();
+  sl_hal_dcdc_coulomb_counter_cal_stop();
   return SL_STATUS_OK;
 }
 
@@ -388,7 +388,7 @@ sl_status_t sli_coulomb_counter_hal_cal_read_result(uint16_t *result)
 
   // Read the CCCALHALT bit when calibration is complete.
   // to determine if the measurement has been compromised in this way.
-  if (sl_dcdc_coulomb_counter_calhalt_is_set() == true) {
+  if (sl_hal_dcdc_coulomb_counter_calhalt_is_set() == true) {
     // The calibration was halted, and should be re-tried.
     return SL_COULOMB_COUNTER_CALIBRATION_ERROR;
   }

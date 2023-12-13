@@ -27,7 +27,7 @@
  * @param number_of_sensors Number of Sensor Descriptor states
  * @param descriptors Array of sensor_descriptor_t structs
  *
- * @return bg_err_success on success; an error code otherwise
+ * @return SL_STATUS_OK on success; an error code otherwise
  */
 sl_status_t mesh_lib_sensor_server_init(uint16_t elem_idx, uint8_t number_of_sensors, const sensor_descriptor_t *descriptors);
 
@@ -56,7 +56,7 @@ mesh_device_property_t mesh_sensor_data_from_buf (uint16_t property_id, const ui
  * @param buf Byte array containing the serialized descriptors
  * @param input_len Length of the byte array
  *
- * @return bg_err_success on success; an error code otherwise
+ * @return SL_STATUS_OK on success; an error code otherwise
  */
 sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor, uint8_t *buf, int16_t input_len);
 

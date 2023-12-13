@@ -37,10 +37,10 @@
 #include <stdio.h>
 
 #include "common/as_core_type.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/notifier.hpp"
+#include "instance/instance.hpp"
 #include "meshcop/meshcop.hpp"
 #include "meshcop/meshcop_tlvs.hpp"
 #include "radio/radio.hpp"
@@ -315,23 +315,12 @@ void DatasetManager::HandleMgmtSetResponse(Coap::Message *aMessage, const Ip6::M
     uint8_t state;
 
     SuccessOrExit(error = aError);
-    VerifyOrExit(Tlv::Find<StateTlv>(*aMessage, state) == kErrorNone, error = kErrorParse);
-
-    switch (state)
-    {
-    case StateTlv::kReject:
-        error = kErrorRejected;
-        break;
-    case StateTlv::kAccept:
-        error = kErrorNone;
-        break;
-    default:
-        error = kErrorParse;
-        break;
-    }
+    VerifyOrExit(Tlv::Find<StateTlv>(*aMessage, state) == kErrorNone && state != StateTlv::kPending,
+                 error = kErrorParse);
 
 exit:
-    LogInfo("MGMT_SET finished: %s", ErrorToString(error));
+    LogInfo("MGMT_SET finished: %s",
+            error == kErrorNone ? StateTlv::StateToString(static_cast<StateTlv::State>(state)) : ErrorToString(error));
 
     mMgmtPending = false;
 

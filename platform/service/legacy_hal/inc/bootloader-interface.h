@@ -39,10 +39,10 @@
 /** @brief Numerical definition for a bootloader type.
  */
 #define BL_TYPE_NULL        (0)
-#define BL_TYPE_STANDALONE  (1)
-#define BL_TYPE_APPLICATION (2)
-#define BL_TYPE_BOOTLOADER  (3)        // Generic bootloader type
-#define BL_TYPE_SMALL_BOOTLOADER  (4)  // Generic, but small bootloader type
+#define BL_TYPE_STANDALONE  (1)                    ///< bl type standalone
+#define BL_TYPE_APPLICATION (2)                    ///< bl type application
+#define BL_TYPE_BOOTLOADER  (3)        ///< Generic bootloader type
+#define BL_TYPE_SMALL_BOOTLOADER  (4)  ///< Generic, but small bootloader type
 
 /**@} */
 
@@ -58,6 +58,8 @@ typedef uint8_t BlBaseType;
 /** @brief Define the bootloader extended type.
  */
 typedef uint16_t BlExtendedType;
+
+/**@} */
 
 /** @brief Returns the bootloader base type the application was
  *  built for.
@@ -96,8 +98,8 @@ BlBaseType halBootloaderGetType(void);
 /** @brief Macro defining the extended standalone OTA and UART bootloader type.
  */
 #define BL_EXT_TYPE_SERIAL_UART_OTA     ((BL_TYPE_STANDALONE << 8U) | 0x03U)
-#define BL_EXT_TYPE_EZSP_SPI            ((BL_TYPE_STANDALONE << 8U) | 0x04U)
-#define BL_EXT_TYPE_EZSP_SPI_OTA        ((BL_TYPE_STANDALONE << 8U) | 0x06U)
+#define BL_EXT_TYPE_EZSP_SPI            ((BL_TYPE_STANDALONE << 8U) | 0x04U)                         ///< bl ext type ezsp spi
+#define BL_EXT_TYPE_EZSP_SPI_OTA        ((BL_TYPE_STANDALONE << 8U) | 0x06U)                         ///< bl ext type ezsp spi ota
 
 /** @brief Macro defining the extended standalone USB bootloader type.
  */
@@ -123,8 +125,12 @@ BlBaseType halBootloaderGetType(void);
  */
 #define BL_EXT_TYPE_APP_LOCAL_STORAGE   ((BL_TYPE_APPLICATION << 8U) | 0x03U)
 
-/** @brief Returns the extended bootloader type of the bootloader that
- *         is present on the chip.
+/**
+ * @brief Returns the extended bootloader type of the bootloader that
+ * is present on the chip.
+ *
+ * @return the extended bootloader type of the bootloader that
+ * is present on the chip.
  */
 BlExtendedType halBootloaderGetInstalledType(void);
 

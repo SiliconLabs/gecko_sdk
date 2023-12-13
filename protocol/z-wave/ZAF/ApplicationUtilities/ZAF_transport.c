@@ -16,8 +16,9 @@
 bool
 ZAF_transportSendDataAbort(void)
 {
-  SZwaveCommandPackage CommandPackage;
-  CommandPackage.eCommandType = EZWAVECOMMANDTYPE_SEND_DATA_ABORT;
+  SZwaveCommandPackage CommandPackage = {
+    .eCommandType = EZWAVECOMMANDTYPE_SEND_DATA_ABORT
+  };
 
   DPRINT("\nSendDataAbort\n");
 

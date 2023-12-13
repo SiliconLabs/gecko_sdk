@@ -1,0 +1,20 @@
+id: "btmesh_nlc_occupancy_sensor"
+label: "Occupancy Sensor Profile"
+package: "Btmesh"
+description: >
+  Occupancy Sensor role in an NLC network. This component
+  includes other components needed for an SoC application to
+  act as an Occupancy Sensor node in an NLC network, as
+  well as components providing the relevant metadata for the role.
+category: "Bluetooth Mesh|NLC"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_nlc_occupancy_sensor"
+tag:
+  - No-Code
+
+provides:
+  - name: "btmesh_nlc_occupancy_sensor"
+requires:
+  - name: "btmesh_nlc_occupancy_sensor_profile_metadata"
+  - name: "btmesh_sensor_server"
+  - name: "btmesh_sensor_people_count"

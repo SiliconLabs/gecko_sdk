@@ -1,5 +1,6 @@
 {
-  "featureLevel": 71,
+  "fileFormat": 2,
+  "featureLevel": 99,
   "creator": "zap",
   "keyValuePairs": [
     {
@@ -19,19 +20,43 @@
     {
       "pathRelativity": "relativeToZap",
       "path": "../../../../../../../../../app/zcl/zcl-zap.json",
-      "version": "Zigbee Silabs ZCL data",
-      "type": "zcl-properties"
+      "type": "zcl-properties",
+      "category": "zigbee",
+      "version": 1,
+      "description": "Zigbee Silabs ZCL data"
     },
     {
       "pathRelativity": "relativeToZap",
       "path": "../../../../../gen-template/gen-templates.json",
-      "version": "zigbee-v0",
-      "type": "gen-templates-json"
+      "type": "gen-templates-json",
+      "category": "zigbee",
+      "version": "zigbee-v0"
     }
   ],
   "endpointTypes": [
     {
+      "id": 1,
       "name": "Primary",
+      "deviceTypeRef": {
+        "code": 0,
+        "profileId": 260,
+        "label": "HA-onoff",
+        "name": "HA-onoff"
+      },
+      "deviceTypes": [
+        {
+          "code": 0,
+          "profileId": 260,
+          "label": "HA-onoff",
+          "name": "HA-onoff"
+        }
+      ],
+      "deviceVersions": [
+        0
+      ],
+      "deviceIdentifiers": [
+        0
+      ],
       "deviceTypeName": "HA-onoff",
       "deviceTypeCode": 0,
       "deviceTypeProfileId": 260,
@@ -41,50 +66,25 @@
           "code": 0,
           "mfgCode": null,
           "define": "BASIC_CLUSTER",
-          "side": "client",
-          "enabled": 0,
+          "side": "server",
+          "enabled": 1,
           "commands": [
             {
               "name": "ResetToFactoryDefaults",
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 0
+              "isIncoming": 1,
+              "isEnabled": 1
             }
           ],
-          "attributes": [
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 1,
-              "bounded": 0,
-              "defaultValue": "3",
-              "reportable": 0,
-              "minInterval": 1,
-              "maxInterval": 65534,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "Basic",
-          "code": 0,
-          "mfgCode": null,
-          "define": "BASIC_CLUSTER",
-          "side": "server",
-          "enabled": 1,
-          "commands": [],
           "attributes": [
             {
               "name": "ZCL version",
               "code": 0,
               "mfgCode": null,
               "side": "server",
+              "type": "int8u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 1,
@@ -100,6 +100,7 @@
               "code": 7,
               "mfgCode": null,
               "side": "server",
+              "type": "enum8",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 1,
@@ -115,6 +116,7 @@
               "code": 65533,
               "mfgCode": null,
               "side": "server",
+              "type": "int16u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 1,
@@ -140,40 +142,24 @@
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 1
+              "isIncoming": 0,
+              "isEnabled": 1
+            },
+            {
+              "name": "IdentifyQueryResponse",
+              "code": 0,
+              "mfgCode": null,
+              "source": "server",
+              "isIncoming": 1,
+              "isEnabled": 1
             },
             {
               "name": "IdentifyQuery",
               "code": 1,
               "mfgCode": null,
               "source": "client",
-              "incoming": 1,
-              "outgoing": 1
-            },
-            {
-              "name": "EZModeInvoke",
-              "code": 2,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "UpdateCommissionState",
-              "code": 3,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 1,
-              "outgoing": 0
-            },
-            {
-              "name": "TriggerEffect",
-              "code": 64,
-              "mfgCode": null,
-              "source": "client",
-              "incoming": 0,
-              "outgoing": 0
+              "isIncoming": 0,
+              "isEnabled": 1
             }
           ],
           "attributes": [
@@ -182,6 +168,7 @@
               "code": 65533,
               "mfgCode": null,
               "side": "client",
+              "type": "int16u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
@@ -203,12 +190,44 @@
           "enabled": 1,
           "commands": [
             {
+              "name": "Identify",
+              "code": 0,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
+            },
+            {
               "name": "IdentifyQueryResponse",
               "code": 0,
               "mfgCode": null,
               "source": "server",
-              "incoming": 1,
-              "outgoing": 1
+              "isIncoming": 0,
+              "isEnabled": 1
+            },
+            {
+              "name": "IdentifyQuery",
+              "code": 1,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
+            },
+            {
+              "name": "EZModeInvoke",
+              "code": 2,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
+            },
+            {
+              "name": "UpdateCommissionState",
+              "code": 3,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 1,
+              "isEnabled": 1
             }
           ],
           "attributes": [
@@ -217,6 +236,7 @@
               "code": 0,
               "mfgCode": null,
               "side": "server",
+              "type": "int16u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
@@ -232,6 +252,7 @@
               "code": 65533,
               "mfgCode": null,
               "side": "server",
+              "type": "int16u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
@@ -257,24 +278,24 @@
               "code": 0,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
-              "outgoing": 1
+              "isIncoming": 0,
+              "isEnabled": 1
             },
             {
               "name": "On",
               "code": 1,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
-              "outgoing": 1
+              "isIncoming": 0,
+              "isEnabled": 1
             },
             {
               "name": "Toggle",
               "code": 2,
               "mfgCode": null,
               "source": "client",
-              "incoming": 0,
-              "outgoing": 1
+              "isIncoming": 0,
+              "isEnabled": 1
             }
           ],
           "attributes": [
@@ -283,47 +304,7 @@
               "code": 65533,
               "mfgCode": null,
               "side": "client",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "2",
-              "reportable": 0,
-              "minInterval": 1,
-              "maxInterval": 65534,
-              "reportableChange": 0
-            }
-          ]
-        },
-        {
-          "name": "On/off",
-          "code": 6,
-          "mfgCode": null,
-          "define": "ON_OFF_CLUSTER",
-          "side": "server",
-          "enabled": 0,
-          "commands": [],
-          "attributes": [
-            {
-              "name": "on/off",
-              "code": 0,
-              "mfgCode": null,
-              "side": "server",
-              "included": 1,
-              "storageOption": "RAM",
-              "singleton": 0,
-              "bounded": 0,
-              "defaultValue": "0x00",
-              "reportable": 1,
-              "minInterval": 1,
-              "maxInterval": 65534,
-              "reportableChange": 0
-            },
-            {
-              "name": "cluster revision",
-              "code": 65533,
-              "mfgCode": null,
-              "side": "server",
+              "type": "int16u",
               "included": 1,
               "storageOption": "RAM",
               "singleton": 0,
@@ -345,10 +326,7 @@
       "endpointTypeIndex": 0,
       "profileId": 260,
       "endpointId": 1,
-      "networkId": 0,
-      "endpointVersion": 0,
-      "deviceIdentifier": 0
+      "networkId": 0
     }
-  ],
-  "log": []
+  ]
 }

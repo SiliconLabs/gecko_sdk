@@ -31,13 +31,17 @@
 #ifndef __SL_WISUN_NETWORK_MEASUREMENT_STAT_H__
 #define __SL_WISUN_NETWORK_MEASUREMENT_STAT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
 
 #include "sl_wisun_ping.h"
 #include "sl_wisun_types.h"
-#include "socket.h"
+#include "socket/socket.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -93,7 +97,7 @@ typedef struct sl_wisun_nwm_node_stat {
   /// Name
   const char *name;
   /// Address (global)
-  wisun_addr_t addr;
+  sockaddr_in6_t addr;
   /// Neighbor statistics
   sl_wisun_neighbor_stat_t stat;
   /// Ping statistics
@@ -107,7 +111,7 @@ typedef struct sl_wisun_nwm_measurable_node {
   /// Name
   const char *name;
   /// Address (global)
-  wisun_addr_t addr;
+  sockaddr_in6_t addr;
   /// Measurement requested indication
   bool is_requested;
 } sl_wisun_nwm_measurable_node_t;
@@ -138,10 +142,12 @@ void sl_wisun_nwm_stat_handler(sl_wisun_ping_stat_t *stat);
  * @details Fill the internal storage with Border Router and Neighbors
  * @param[out] storage Measurable router storage, for starting iteration/measurement
  * @param[in] max_storage_size Storage size check for assertion
+ * @param[in] print Print node info or not
  * @return uint8_t Count of Routers (Border Router + Neighbors)
  *****************************************************************************/
 uint8_t sl_wisun_nwm_get_nodes(sl_wisun_nwm_measurable_node_t * const storage,
-                               const uint8_t max_storage_size);
+                               const uint8_t max_storage_size,
+                               const bool print);
 
 /**************************************************************************//**
  * @brief Get Border Router statistics
@@ -178,5 +184,9 @@ bool sl_wisun_nwm_get_secondary_parent_stat(sl_wisun_nwm_node_stat_t * const des
 void sl_wisun_nwm_get_children_stat(sl_wisun_nwm_node_stat_t * const dest,
                                     const uint8_t dest_size,
                                     uint8_t * const children_count);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

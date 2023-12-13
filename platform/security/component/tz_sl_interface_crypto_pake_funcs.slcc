@@ -1,0 +1,43 @@
+id: tz_sl_interface_crypto_pake_funcs
+package: platform
+description: >-
+  This component provides a TrustZone secure library interface crypto pake functions
+category: Platform|Security|TrustZone
+quality: production
+ui_hints:
+  visibility: never
+provides:
+  - name: tz_sl_interface_crypto_pake_funcs
+requires:
+  - name: trustzone_nonsecure
+template_contribution:
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_setup
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_set_password_key
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_set_user
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_set_peer
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_set_role
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_output
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_input
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_get_implicit_key
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_derive_secret
+
+  - name: tfm_interface_func
+    value: tfm_crypto_pake_abort

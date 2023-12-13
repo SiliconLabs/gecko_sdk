@@ -27,6 +27,121 @@
 #include "app/xncp/xncp-sample-custom-ezsp-protocol.h"
 #include "zigbee_app_framework_common.h"
 
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+#include "green-power-server.h"
+#include "green-power-common.h"
+#include "app/framework/include/af.h"
+// Finds and returns the Gp Controlable application endpoint in the APS group
+static uint16_t findAppEndpointGroupId(uint8_t endpoint)
+{
+  for (uint8_t i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
+    EmberBindingTableEntry binding;
+    if (emberGetBinding(i, &binding) == EMBER_SUCCESS
+        && binding.type == EMBER_MULTICAST_BINDING
+        && binding.local == endpoint) {
+      uint16_t groupId = (binding.identifier[1] << 8) | binding.identifier[0];
+      return groupId;
+    }
+  }
+  return 0;
+}
+
+// This implementation is targeting the test spec (4.3.4.1)
+// where it uses the same group for Gp endpoint and application endpoints.
+// to read the groupId of the operational endpoint and use that groupId
+// to add the GP endpoint for groupcast notifications.
+void emberAfPluginGreenPowerServerPreSinkPairingCallback(GpCommDataSaved *commissioningGpd)
+{
+  sl_zigbee_app_debug_println("PreSinkPairingCallback is called from %s",
+                              (commissioningGpd->preSinkCbSource == GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION)
+                              ? "pairing configuration" : "native commissioning");
+
+  if (commissioningGpd->preSinkCbSource == GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION) {
+    return;
+  }
+  // Set up the grouplist incase it did not have one, supply default values.
+  uint8_t *count = commissioningGpd->groupList;
+  uint8_t *grouplist = commissioningGpd->groupList + 1;
+  *count = 0;
+  uint8_t totalEndpointCount = emberGetEndpointCount();
+  for (uint8_t i = 0; i < totalEndpointCount && grouplist < (commissioningGpd->groupList + GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING); i++) {
+    uint8_t endpoint = emberGetEndpoint(i);
+    if (endpoint != 0xff // A valid application endpoint value.
+        && isCommissioningAppEndpoint(endpoint)) {
+      uint16_t groupId = findAppEndpointGroupId(endpoint);
+      if (0 != groupId) {
+        (*count)++;
+        MEMCOPY(grouplist, &groupId, sizeof(groupId));
+        grouplist += sizeof(groupId);
+        uint16_t alias = sli_zigbee_af_gpd_alias(&(commissioningGpd->addr));
+        MEMCOPY(grouplist, &alias, sizeof(alias));
+        grouplist += sizeof(alias);
+      }
+    }
+  }
+}
+
+void emberAfGreenPowerServerPairingStatusCallback(EmberSinkPairingStatus status,
+                                                  EmberCommissioningGpd *commissioningGpd)
+{
+  sl_zigbee_app_debug_println("ServerPairingStatusCallback");
+  sl_zigbee_app_debug_println("Status: %X", status);
+  sl_zigbee_app_debug_println("App ID: %X, App EP: %X", commissioningGpd->addr.applicationId, commissioningGpd->addr.endpoint);
+  if (commissioningGpd->addr.applicationId == EMBER_GP_APPLICATION_IEEE_ADDRESS) {
+    sl_zigbee_app_debug_println("IEEE address: %.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",
+                                commissioningGpd->addr.id.gpdIeeeAddress[0],
+                                commissioningGpd->addr.id.gpdIeeeAddress[1],
+                                commissioningGpd->addr.id.gpdIeeeAddress[2],
+                                commissioningGpd->addr.id.gpdIeeeAddress[3],
+                                commissioningGpd->addr.id.gpdIeeeAddress[4],
+                                commissioningGpd->addr.id.gpdIeeeAddress[5],
+                                commissioningGpd->addr.id.gpdIeeeAddress[6],
+                                commissioningGpd->addr.id.gpdIeeeAddress[7]);
+  } else {
+    sl_zigbee_app_debug_println("Source ID: %08X", commissioningGpd->addr.id.sourceId);
+  }
+  sl_zigbee_app_debug_println("Option: %X, Extended Option: %X", commissioningGpd->gpdfOptions, commissioningGpd->gpdfExtendedOptions);
+  sl_zigbee_app_debug_println("Communication mode: %X", commissioningGpd->communicationMode);
+  sl_zigbee_app_debug_println("Security level: %X", commissioningGpd->securityLevel);
+
+  // Key
+  sl_zigbee_app_debug_print("Key: ");
+  for (uint8_t i = 0; i < EMBER_ENCRYPTION_KEY_SIZE; i++) {
+    sl_zigbee_app_debug_print("%.2X ", commissioningGpd->key.contents[i]);
+  }
+
+  // Alias
+  sl_zigbee_app_debug_println("\nUse given alias: %d", commissioningGpd->useGivenAssignedAlias);
+  if (commissioningGpd->useGivenAssignedAlias) {
+    sl_zigbee_app_debug_print("%04X ", commissioningGpd->givenAlias);
+  }
+
+  // Group
+  sl_zigbee_app_debug_println("Group count: %d", commissioningGpd->groupList[0]);
+  for (uint8_t i = 0; i < commissioningGpd->groupList[0]; i++) {
+    uint8_t pos = i * sizeof(EmberGpSinkGroup) + 1;
+    EmberGpSinkGroup sinkGroup = { 0 };
+    MEMCOPY(&sinkGroup, &commissioningGpd->groupList[pos], sizeof(EmberGpSinkGroup));
+    sl_zigbee_app_debug_println("Idx: %d, Group ID: %04X, Alias: %04X", i, sinkGroup.groupID, sinkGroup.alias);
+  }
+}
+
+void emberAfGreenPowerClusterCommissioningMessageStatusNotificationCallback(EmberAfGreenPowerServerCommissioningState *commissioningState,
+                                                                            EmberApsFrame *apsFrame,
+                                                                            EmberOutgoingMessageType messageType,
+                                                                            uint16_t destination,
+                                                                            EmberStatus status)
+{
+  UNUSED_VAR(apsFrame);
+  UNUSED_VAR(messageType);
+  UNUSED_VAR(destination);
+  UNUSED_VAR(status);
+  sl_zigbee_app_debug_println("CommissioningMessageStatusNotificationCallback. Endpoint: %d, Proxies Involved: %d",
+                              commissioningState->endpoint, commissioningState->proxiesInvolved);
+}
+
+#endif //SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+
 #if defined(SL_CATALOG_ZIGBEE_MULTIRAIL_DEMO_PRESENT)
 #include "multirail-demo.h"
 

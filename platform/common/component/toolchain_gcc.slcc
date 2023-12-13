@@ -20,6 +20,8 @@ requires:
     condition: [device_host]
   - name: sl_memory
     condition: [device_cortexm]
+  - name: sl_syscalls
+    condition: [device_cortexm]
 template_file:
   - path: toolchain/gcc/linkerfile.ld.jinja
     condition: [device_cortexm]

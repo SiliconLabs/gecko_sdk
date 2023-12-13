@@ -418,4 +418,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_SYSRTC */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_SYSRTC_H */
+#endif // EFR32ZG28_SYSRTC_H

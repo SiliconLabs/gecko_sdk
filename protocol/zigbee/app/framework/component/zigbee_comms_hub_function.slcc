@@ -5,22 +5,22 @@ quality: production
 id: zigbee_comms_hub_function
 category: Zigbee|Great Britain Companion Specification
 provides:
-   - name: "zigbee_comms_hub_function"
+  - name: zigbee_comms_hub_function
 requires:
-   - name: "zigbee_sleepy_message_queue"
-   - name: "zigbee_meter_mirror"
-   - name: "zigbee_tunneling_client"
-   - name: "zigbee_tunneling_server"
-   - name: "zigbee_gbcs_compatibility"
-   - name: "zigbee_gbcs_device_log"
-   - name: "zigbee_gas_proxy_function"
+  - name: zigbee_sleepy_message_queue
+  - name: zigbee_meter_mirror
+  - name: zigbee_tunneling_client
+  - name: zigbee_tunneling_server
+  - name: zigbee_gbcs_compatibility
+  - name: zigbee_gbcs_device_log
+  - name: zigbee_gas_proxy_function
 config_file:
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/config/comms-hub-function-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/comms-hub-function.c
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/comms-hub-function-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/comms-hub-tunnel-endpoints.c
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/tunnel-manager.c
   - path: protocol/zigbee/app/framework/plugin/comms-hub-function/comms-hub-function-cb.c
@@ -74,8 +74,8 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_simulate_gbz_msg
       help: Simulates transmission of a GBZ message to the Comms Hub Function.
       argument:
-      - type: hex
-      - type: uint16
+        - type: hex
+        - type: uint16
   - name: cli_command
     value:
       group: comms-hub-function
@@ -89,8 +89,8 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_send
       help: Sends a message with hex payload.
       argument:
-      - type: hex
-      - type: hex
+        - type: hex
+        - type: hex
   - name: cli_command
     value:
       group: comms-hub-function
@@ -98,8 +98,8 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_send
       help: Sends a message with string payload.
       argument:
-      - type: hex
-      - type: string
+        - type: hex
+        - type: string
   - name: cli_command
     value:
       group: comms-hub-function
@@ -107,7 +107,7 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_timeout
       help: Sets the default sleepy message timeout.
       argument:
-      - type: uint32
+        - type: uint32
   - name: cli_command
     value:
       group: comms-hub-function
@@ -115,7 +115,7 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_get_tunnel_endpoint
       help: Retrievesthe tunneling endpoint for a given nodeId.
       argument:
-      - type: uint16
+        - type: uint16
   - name: cli_command
     value:
       group: comms-hub-function
@@ -123,7 +123,7 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_close_tunnel
       help: Removes the tunnel for a given device.
       argument:
-      - type: hex
+        - type: hex
   - name: cli_command
     value:
       group: comms-hub-function
@@ -131,8 +131,8 @@ template_contribution:
       handler: sli_zigbee_af_comms_hub_function_cli_create_tunnel
       help: Creates a tunnel for the given device and endpoint.
       argument:
-      - type: hex
-      - type: uint8
+        - type: hex
+        - type: uint8
   - name: cli_command
     value:
       group: comms-hub-function
@@ -142,7 +142,7 @@ template_contribution:
   - name: zigbee_stack_callback
     value:
       callback_type: trust_center_join
-      function_name: sli_zigbee_af_comms_hub_function_trust_center_join_callback      
+      function_name: sli_zigbee_af_comms_hub_function_trust_center_join_callback
 
 documentation:
   docset: zigbee

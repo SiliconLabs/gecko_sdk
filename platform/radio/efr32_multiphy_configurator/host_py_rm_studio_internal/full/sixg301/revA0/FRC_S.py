@@ -10,7 +10,7 @@ class RM_Peripheral_FRC_S(Base_RM_Peripheral):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Peripheral_FRC_S, self).__init__(rmio, label,
-            0xA8004000, 'FRC_S',
+            0xA0204000, 'FRC_S',
             u"",
             [])
         self.IPVERSION = RM_Register_FRC_S_IPVERSION(self.zz_rmio, self.zz_label)
@@ -137,6 +137,10 @@ class RM_Peripheral_FRC_S(Base_RM_Peripheral):
         self.zz_rdict['PKTBUF10'] = self.PKTBUF10
         self.PKTBUF11 = RM_Register_FRC_S_PKTBUF11(self.zz_rmio, self.zz_label)
         self.zz_rdict['PKTBUF11'] = self.PKTBUF11
+        self.FSWIF = RM_Register_FRC_S_FSWIF(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FSWIF'] = self.FSWIF
+        self.FSWIEN = RM_Register_FRC_S_FSWIEN(self.zz_rmio, self.zz_label)
+        self.zz_rdict['FSWIEN'] = self.FSWIEN
         self.FCD0 = RM_Register_FRC_S_FCD0(self.zz_rmio, self.zz_label)
         self.zz_rdict['FCD0'] = self.FCD0
         self.FCD1 = RM_Register_FRC_S_FCD1(self.zz_rmio, self.zz_label)

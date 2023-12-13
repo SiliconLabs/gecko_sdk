@@ -22,6 +22,7 @@
 #include "app/framework/util/af-main.h"
 #include "stack/include/security.h"
 #include "stack/include/aes-mmo.h"
+#include "stack/include/zigbee-security-manager.h"
 #include "sl_component_catalog.h"
 #include "sl_bluetooth.h"
 #include "gatt_db.h"
@@ -66,7 +67,6 @@
 #define ZIGBEE_DIRECT_NONCE_LENGTH 13
 #define ZIGBEE_DIRECT_AUTH_DATA_LENGTH 34
 #define ZIGBEE_DIRECT_MIC_LENGTH 4
-#define ENCRYPTION_BLOCK_SIZE 16
 #define ENCRYPTION_KEYBITS ENCRYPTION_BLOCK_SIZE * 8
 #define UUID_SIZE 16
 
@@ -98,18 +98,21 @@ void sli_zigbee_direct_anonymous_join_event_handler(sl_zigbee_event_t *event)
 
 sl_status_t sl_zigbee_direct_calculate_basic_key(EmberEUI64 zvd_IEEE, uint8_t* basic_key)
 {
-  EmberKeyData hash;
-  EmberKeyStruct nwkKey;
+  sl_zb_sec_man_key_t hash;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t network_key;
   uint8_t input[24];
   uint8_t data = 0x03;
   uint8_t i;
 
-  if ( SL_STATUS_OK != emberGetKey(EMBER_CURRENT_NETWORK_KEY, &nwkKey)) {
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+  if ( SL_STATUS_OK != sl_zb_sec_man_export_key(&context, &network_key)) {
     return SL_STATUS_FAIL;
   }
 
   MEMCOPY(input, zvd_IEEE, EUI64_SIZE);
-  MEMCOPY(input + EUI64_SIZE, &nwkKey.key, EMBER_ENCRYPTION_KEY_SIZE);
+  MEMCOPY(input + EUI64_SIZE, &network_key, EMBER_ENCRYPTION_KEY_SIZE);
 
   sl_zigbee_app_debug_print("Calculating Basic Key for Device [");
   for (i = 0; i < EUI64_SIZE; i++) {
@@ -121,33 +124,42 @@ sl_status_t sl_zigbee_direct_calculate_basic_key(EmberEUI64 zvd_IEEE, uint8_t* b
   }
   sl_zigbee_app_debug_println("]");
 
-  if (SL_STATUS_OK != emberAesHashSimple(24, input, (uint8_t*)&hash.contents)) {
+  if (SL_STATUS_OK != emberAesHashSimple(24, input, (uint8_t*)&hash.key)) {
     return SL_STATUS_FAIL;
   }
-
-  emberHmacAesHash((uint8_t*)&hash.contents, &data, 1, (uint8_t*) basic_key);
+  //this hash is also a derived type
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
+  sl_zb_sec_man_import_key(&context, &hash);
+  sl_zb_sec_man_load_key_context(&context);
+  sl_zb_sec_man_hmac_aes_mmo(&data, 1, (uint8_t*) basic_key);
 
   return SL_STATUS_OK;
 }
 
 sl_status_t sl_zigbee_direct_calculate_admin_key(EmberEUI64 zvd_IEEE, uint8_t* admin_key)
 {
-  EmberKeyData hash;
-  EmberKeyStruct linkKey;
+  sl_zb_sec_man_key_t hash;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t network_key;
   uint8_t input[24];
   uint8_t data = 0x04;
 
-  if ( SL_STATUS_OK != emberGetKey(EMBER_CURRENT_NETWORK_KEY, &linkKey)) {
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_NETWORK;
+  if ( SL_STATUS_OK != sl_zb_sec_man_export_key(&context, &network_key)) {
     return SL_STATUS_FAIL;
   }
 
   MEMCOPY(input, zvd_IEEE, EUI64_SIZE);
-  MEMCOPY(input + EUI64_SIZE, &linkKey.key, EMBER_ENCRYPTION_KEY_SIZE);
+  MEMCOPY(input + EUI64_SIZE, &network_key, EMBER_ENCRYPTION_KEY_SIZE);
 
   if (SL_STATUS_OK != emberAesHashSimple(24, input, (uint8_t*) &hash)) {
     return SL_STATUS_FAIL;
   }
-  emberHmacAesHash((uint8_t*)&hash, &data, 1, (uint8_t*)admin_key);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_INTERNAL;
+  sl_zb_sec_man_import_key(&context, &hash);
+  sl_zb_sec_man_load_key_context(&context);
+  sl_zb_sec_man_hmac_aes_mmo(&data, 1, (uint8_t*)admin_key);
 
   return SL_STATUS_OK;
 }
@@ -321,16 +333,21 @@ bool sl_zigbee_direct_security_decrypt_packet(EmberEUI64 sourceEui, uint8_t *dec
 static int sli_zigbee_direct_calculate_mac_tag_value(bool useKC_2_U, uint8_t *output, uint8_t method)
 {
   int ret;
-  EmberTransientKeyData myTransientKeyData;
+  sl_zb_sec_man_context_t context;
+  sl_zb_sec_man_key_t plaintext_key;
+  sl_zb_sec_man_aps_key_metadata_t metadata;
 
   if (method != DLK_ECC_P256_SHA_256) {
     uint8_t input[86];
-    ret = emberGetTransientLinkKey(sl_zvd_eui, &myTransientKeyData);
+    ret = sl_zb_sec_man_export_transient_key_by_eui(sl_zvd_eui,
+                                                    &context,
+                                                    &plaintext_key,
+                                                    &metadata);
     if (ret == 0) {
       sl_zigbee_core_debug_print("Session key: ");
-      emberAfPrintZigbeeKey(emberKeyContents(&myTransientKeyData.keyData));
+      emberAfPrintZigbeeKey((const uint8_t*)&(plaintext_key.key));
       sl_zigbee_core_debug_println("");
-      MEMCOPY(zigbee_direct_session_key, myTransientKeyData.keyData.contents, 16);
+      MEMCOPY(zigbee_direct_session_key, &plaintext_key, 16);
 
       if (useKC_2_U) {
         input[0] = 'K';
@@ -353,7 +370,8 @@ static int sli_zigbee_direct_calculate_mac_tag_value(bool useKC_2_U, uint8_t *ou
       MEMCOPY(&input[46], sl_zvd_eui, 8);
       MEMCOPY(&input[54], sl_zvd_public_point_x, DLK_ECC_COORDINATE_SIZE);
 
-      emberHmacAesHash(zigbee_direct_session_key, input, 86, output);
+      sl_zb_sec_man_load_key_context(&context);
+      sl_zb_sec_man_hmac_aes_mmo(input, 86, output);
       return EMBER_SUCCESS;
     }
   } else {
@@ -365,14 +383,17 @@ static int sli_zigbee_direct_calculate_mac_tag_value(bool useKC_2_U, uint8_t *ou
     ret = mbedtls_md_setup(&ctx, md_info, 1);
 
     if (ret == 0) {
-      ret = emberGetTransientLinkKey(sl_zvd_eui, &myTransientKeyData);
+      ret = sl_zb_sec_man_export_transient_key_by_eui(sl_zvd_eui,
+                                                      &context,
+                                                      &plaintext_key,
+                                                      &metadata);
     }
     if (ret == 0) {
       sl_zigbee_core_debug_print("Session key: ");
-      emberAfPrintZigbeeKey(emberKeyContents(&myTransientKeyData.keyData));
+      emberAfPrintZigbeeKey((const uint8_t*)&(plaintext_key.key));
       sl_zigbee_core_debug_println("");
-      MEMCOPY(zigbee_direct_session_key, myTransientKeyData.keyData.contents, 16);
-      ret = mbedtls_md_hmac_starts(&ctx, myTransientKeyData.keyData.contents, 16);
+      MEMCOPY(zigbee_direct_session_key, &plaintext_key, 16);
+      ret = mbedtls_md_hmac_starts(&ctx, (const unsigned char *)&plaintext_key, 16);
     }
     if (ret == 0) {
       if (useKC_2_U) {

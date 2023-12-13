@@ -14,19 +14,18 @@ quality: evaluation
 root_path:  app/bluetooth/common/ots
 tag:
   - Low-Code
-
 source:
   - path: src/sl_bt_ots_server.c
   - path: src/sl_bt_ots_common.c
   - path: src/sl_bt_ots_server_bm.c
     unless:
-      - "kernel"
+      - kernel
   - path: src/sl_bt_ots_server_freertos.c
     condition:
-      - "freertos"
+      - freertos
   - path: src/sl_bt_ots_server_micriumos.c
     condition:
-      - "micriumos_kernel"
+      - micriumos_kernel
 include:
   - path: inc
     file_list:
@@ -38,10 +37,10 @@ config_file:
   - path: config/sl_bt_ots_server_config.h
   - path: config/sl_bt_ots_server_freertos_config.h
     condition:
-      - "freertos"
+      - freertos
   - path: config/sl_bt_ots_server_micriumos_config.h
     condition:
-      - "micriumos_kernel"
+      - micriumos_kernel
 provides:
   - name: ots_server_core
 requires:
@@ -82,14 +81,13 @@ template_contribution:
       include: sl_bt_ots_server.h
       handler: sli_bt_ots_server_is_ok_to_sleep
     unless:
-      - "kernel"
+      - kernel
   - name: power_manager_handler
     value:
       event: sleep_on_isr_exit
       include: sl_bt_ots_server.h
       handler: sli_bt_ots_server_sleep_on_isr_exit
     unless:
-      - "kernel"
-
+      - kernel
 ui_hints:
   visibility: never

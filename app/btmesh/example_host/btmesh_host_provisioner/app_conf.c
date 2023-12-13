@@ -63,84 +63,135 @@
 #define NL APP_LOG_NEW_LINE
 
 /// Company identifier of Silicon Labs
-#define SILABS_COMPANY_ID                           0x02ff
+#define SILABS_COMPANY_ID                                  0x02ff
+
+// -----------------------------------------------------------------------------
+// Pre-NLC PIDs
 
 /// Product identifier of Silicon Labs NCP Empty example
-#define SILABS_PRODUCT_ID_NCP_EMPTY_EXAMPLE         0x0000
+#define SILABS_PRODUCT_ID_NCP_EMPTY_EXAMPLE                0x0000
 
 /// Product identifier of Silicon Labs SoC Empty example
-#define SILABS_PRODUCT_ID_SOC_EMPTY_EXAMPLE         0x0001
+#define SILABS_PRODUCT_ID_SOC_EMPTY_EXAMPLE                0x0001
 
 /// Product identifier of Silicon Labs SoC HSL Light example
-#define SILABS_PRODUCT_ID_HSL_EXAMPLE               0x0002
+#define SILABS_PRODUCT_ID_HSL_EXAMPLE                      0x0002
 
 /// Product identifier of Silicon Labs SoC Light example
-#define SILABS_PRODUCT_ID_LIGHT_EXAMPLE             0x0003
+#define SILABS_PRODUCT_ID_LIGHT_EXAMPLE                    0x0003
 
 /// Product identifier of Silicon Labs SoC Sensor Client example
-#define SILABS_PRODUCT_ID_SENSOR_CLIENT_EXAMPLE     0x0004
+#define SILABS_PRODUCT_ID_SENSOR_CLIENT_EXAMPLE            0x0004
 
 /// Product identifier of Silicon Labs SoC Sensor Server example
-#define SILABS_PRODUCT_ID_SENSOR_SERVER_EXAMPLE     0x0005
+#define SILABS_PRODUCT_ID_SENSOR_SERVER_EXAMPLE            0x0005
 
 /// Product identifier of Silicon Labs SoC Switch example
-#define SILABS_PRODUCT_ID_SWITCH_EXAMPLE            0x0006
+#define SILABS_PRODUCT_ID_SWITCH_EXAMPLE                   0x0006
 
 /// Product identifier of Silicon Labs SoC Low Power Switch example
-#define SILABS_PRODUCT_ID_LOW_POWER_SWITCH_EXAMPLE  0x0007
+#define SILABS_PRODUCT_ID_LOW_POWER_SWITCH_EXAMPLE         0x0007
+
+// -----------------------------------------------------------------------------
+// Post-NLC PIDs
+
+/// Product identifier of Silicon Labs SoC DFU Distributor example
+#define SILABS_PRODUCT_ID_DFU_DISTRIBUTOR_EXAMPLE          0x000c
+
+/// Product identifier of Silicon Labs SoC Empty CBP example
+#define SILABS_PRODUCT_ID_SOC_EMPTY_CBP_EXAMPLE            0x000d
+
+/// Product identifier of Silicon Labs NLC Basic Lightness Controller example
+#define SILABS_PRODUCT_ID_NLC_BLC_EXAMPLE                  0x000e
+
+/// Product identifier of Silicon Labs NLC Dimming Control example
+#define SILABS_PRODUCT_ID_NLC_DC_EXAMPLE                   0x000f
+
+/// Product identifier of Silicon Labs NLC Dimming Control Low Power example
+#define SILABS_PRODUCT_ID_NLC_DC_LOW_POWER_EXAMPLE         0x0010
+
+/// Product identifier of Silicon Labs NLC Ambient Light Sensor example
+#define SILABS_PRODUCT_ID_NLC_AMB_LIGHT_EXAMPLE            0x0011
+
+/// Product identifier of Silicon Labs NLC Occupancy Sensor example
+#define SILABS_PRODUCT_ID_NLC_OCCUPANCY_EXAMPLE            0x0012
+
+/// Product identifier of Silicon Labs NLC Basic Scene Selector example
+#define SILABS_PRODUCT_ID_NLC_BSS_EXAMPLE                  0x0013
+
+/// Product identifier of Silicon Labs NLC Basic Scene Selector Low Power example
+#define SILABS_PRODUCT_ID_NLC_BSS_LOW_POWER_EXAMPLE        0x0014
+
+/// Product identifier of Silicon Labs SoC Switch CTL example
+#define SILABS_PRODUCT_ID_SOC_SWITCH_CTL_EXAMPLE           0x0015
+
+/// Product identifier of Silicon Labs SoC Switch CTL Low Power example
+#define SILABS_PRODUCT_ID_SOC_SWITCH_CTL_LOW_POWER_EXAMPLE 0x0016
+
+/// Product identifier of Silicon Labs SoC Light CTL example
+#define SILABS_PRODUCT_ID_SOC_LIGHT_CTL_EXAMPLE            0x0017
+
+/// Product identifier of Silicon Labs SoC Light HSL example
+#define SILABS_PRODUCT_ID_SOC_LIGHT_HSL_EXAMPLE            0x0018
+
+/// Product identifier of Silicon Labs SoC Sensor Thermometer example
+#define SILABS_PRODUCT_ID_SOC_THERMOMETER_EXAMPLE          0x0019
+
+/// Product identifier of Silicon Labs SoC Provisioner Light Lightness example
+#define SILABS_PRODUCT_ID_SOC_PROV_LIGHT_LIGHTNESS_EXAMPLE 0x001a
 
 /// BT Mesh DCD page to query
-#define APP_CONF_DCD_PAGE                           0
+#define APP_CONF_DCD_PAGE                                  0
 
 /// Default value of model publication group address
-#define APP_CONF_PUB_ADDR                           0xC000
+#define APP_CONF_PUB_ADDR                                  0xC000
 /// Default value of model publication application key index
-#define APP_CONF_PUB_APPKEY_IDX                     0
+#define APP_CONF_PUB_APPKEY_IDX                            0
 /// Default model publication friendship credentials
 ///   - 0: normal credentials
 ///   - 1: frienship credentials
-#define APP_CONF_PUB_CREDENTIALS                    0
+#define APP_CONF_PUB_CREDENTIALS                           0
 /// Default value of model publication TTL (Time to Live)
-#define APP_CONF_PUB_TTL                            5
+#define APP_CONF_PUB_TTL                                   5
 /// Default value of model publication period
-#define APP_CONF_PUB_PERIOD_MS                      0
+#define APP_CONF_PUB_PERIOD_MS                             0
 /// Default value of model publication retransmission count (0-7 range)
-#define APP_CONF_PUB_RETRANSMIT_COUNT               0
+#define APP_CONF_PUB_RETRANSMIT_COUNT                      0
 /// Default value of model publication retransmission interval in milliseconds
 /// Range: 0 to 1600 ms with 50 ms resolution
-#define APP_CONF_PUB_RETRANSMIT_INTERVAL_MS         0
+#define APP_CONF_PUB_RETRANSMIT_INTERVAL_MS                0
 /// Default value of model subscription group address
 /// Note: Only one group address is added to model subscription list in this
 ///   example however a model is able to subscribe to multiple group addresses.
 /// The maximum length of the model subscription list is configured by the
 /// SL_BTMESH_CONFIG_MAX_SUBSCRIPTIONS (sl_btmesh_config.h) define on each node.
-#define APP_CONF_SUB_ADDR                           0xC000
+#define APP_CONF_SUB_ADDR                                  0xC000
 
 /// Default value of beacon state
-#define APP_CONF_BEACON_ACTIVE                      1
+#define APP_CONF_BEACON_ACTIVE                             1
 
 /// Default value of node default TTL
-#define APP_CONF_DEFAULT_TTL                        5
+#define APP_CONF_DEFAULT_TTL                               5
 
 /// Default value of node proxy feature state
-#define APP_CONF_PROXY_ACTIVE                       1
+#define APP_CONF_PROXY_ACTIVE                              1
 
 /// Default value of node relay feature state
-#define APP_CONF_RELAY_ACTIVE                       1
+#define APP_CONF_RELAY_ACTIVE                              1
 /// Default value of node relay retransmission count (0-7 range)
-#define APP_CONF_RELAY_RETRANSMIT_COUNT             0
+#define APP_CONF_RELAY_RETRANSMIT_COUNT                    0
 /// Default value of node relay retransmission interval in milliseconds
 /// Range: 0 to 320 ms with 10 ms resolution
-#define APP_CONF_RELAY_RETRANSMIT_INT_MS            0
+#define APP_CONF_RELAY_RETRANSMIT_INT_MS                   0
 
 /// Default value of node network transmission count (1-8 range)
-#define APP_CONF_NW_TRANSMIT_COUNT                  1
+#define APP_CONF_NW_TRANSMIT_COUNT                         1
 /// Default value of node network transmission interval in milliseconds
 /// Range: 0 to 320 ms with 10 ms resolution
-#define APP_CONF_NW_TRANSMIT_INT_MS                 0
+#define APP_CONF_NW_TRANSMIT_INT_MS                        0
 
 /// Default value of node friend feature state
-#define APP_CONF_FRIEND_ACTIVE                      1
+#define APP_CONF_FRIEND_ACTIVE                             1
 
 // -----------------------------------------------------------------------------
 // Enums
@@ -740,6 +791,36 @@ static const char *btmesh_example_product_id_to_string(uint16_t product_id)
       return "btmesh_soc_switch";
     case SILABS_PRODUCT_ID_LOW_POWER_SWITCH_EXAMPLE:
       return "btmesh_soc_switch_low_power";
+    case SILABS_PRODUCT_ID_DFU_DISTRIBUTOR_EXAMPLE:
+      return "btmesh_soc_dfu_distributor";
+    case SILABS_PRODUCT_ID_SOC_EMPTY_CBP_EXAMPLE:
+      return "btmesh_soc_empty_cbp";
+    case SILABS_PRODUCT_ID_NLC_BLC_EXAMPLE:
+      return "btmesh_soc_nlc_basic_lightness_controller";
+    case SILABS_PRODUCT_ID_NLC_DC_EXAMPLE:
+      return "btmesh_soc_nlc_dimming_control";
+    case SILABS_PRODUCT_ID_NLC_DC_LOW_POWER_EXAMPLE:
+      return "btmesh_soc_nlc_dimming_control_low_power";
+    case SILABS_PRODUCT_ID_NLC_AMB_LIGHT_EXAMPLE:
+      return "btmesh_soc_nlc_sensor_ambient_light";
+    case SILABS_PRODUCT_ID_NLC_OCCUPANCY_EXAMPLE:
+      return "btmesh_soc_nlc_sensor_occupancy";
+    case SILABS_PRODUCT_ID_NLC_BSS_EXAMPLE:
+      return "btmesh_soc_nlc_basic_scene_selector";
+    case SILABS_PRODUCT_ID_NLC_BSS_LOW_POWER_EXAMPLE:
+      return "btmesh_soc_nlc_basic_scene_selector_low_power";
+    case SILABS_PRODUCT_ID_SOC_SWITCH_CTL_EXAMPLE:
+      return "btmesh_soc_switch_ctl";
+    case SILABS_PRODUCT_ID_SOC_SWITCH_CTL_LOW_POWER_EXAMPLE:
+      return "btmesh_soc_switch_ctl_low_power";
+    case SILABS_PRODUCT_ID_SOC_LIGHT_CTL_EXAMPLE:
+      return "btmesh_soc_light_ctl_server";
+    case SILABS_PRODUCT_ID_SOC_LIGHT_HSL_EXAMPLE:
+      return "btmesh_soc_light_hsl_server";
+    case SILABS_PRODUCT_ID_SOC_THERMOMETER_EXAMPLE:
+      return "btmesh_soc_sensor_thermometer";
+    case SILABS_PRODUCT_ID_SOC_PROV_LIGHT_LIGHTNESS_EXAMPLE:
+      return "btmesh_soc_provisioner_light_lightness";
     default:
       return "Unknown";
   }

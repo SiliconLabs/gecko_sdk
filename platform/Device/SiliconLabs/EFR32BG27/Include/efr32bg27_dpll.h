@@ -224,4 +224,4 @@ typedef struct {
 /** @} End of group EFR32BG27_DPLL */
 /** @} End of group Parts */
 
-#endif /* EFR32BG27_DPLL_H */
+#endif // EFR32BG27_DPLL_H

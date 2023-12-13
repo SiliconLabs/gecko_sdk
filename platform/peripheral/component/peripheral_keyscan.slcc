@@ -12,6 +12,7 @@ include:
   - path: "inc"
     file_list:
     - path: "peripheral_keyscan.h"
+    - path: "peripheral_keyscan_compat.h"
 provides:
   - name: peripheral_keyscan
 requires:
@@ -19,6 +20,7 @@ requires:
   - name: device_has_keyscan
   - name: emlib_common
   - name: cmsis_core
+  - name: enum
 documentation:
   docset: gecko-platform
   document:

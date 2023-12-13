@@ -493,4 +493,4 @@ typedef struct {
 /** @} End of group BGM21_LETIMER */
 /** @} End of group Parts */
 
-#endif /* BGM21_LETIMER_H */
+#endif // BGM21_LETIMER_H

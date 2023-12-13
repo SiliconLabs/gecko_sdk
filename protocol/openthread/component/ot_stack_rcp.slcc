@@ -12,12 +12,14 @@ requires:
   - name: ot_radio
   - name: ot_headers
   - name: ot_platform_abstraction
-  - name: ot_thirdparty
+  - name: ot_mbedtls
 recommends:
   - id: ot_platform_abstraction
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
   - path: protocol/openthread/config/sl_openthread_generic_config.h
+validation_helper:
+  - path: protocol/openthread/component/script/ot_log_validation.lua
 define:
   - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
     value: "\"sl_openthread_features_config.h\""

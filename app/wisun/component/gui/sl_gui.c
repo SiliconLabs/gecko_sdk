@@ -361,7 +361,7 @@ void sl_gui_init(void)
 void _gui_event_task(void *args)
 {
   osStatus_t stat;
-  sl_widget_event_hnd_t evt_hnd;
+  static sl_widget_event_hnd_t evt_hnd;
   uint8_t msg_prio = 0;
   (void) args;
   // Set font

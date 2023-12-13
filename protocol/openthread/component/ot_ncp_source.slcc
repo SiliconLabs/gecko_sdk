@@ -24,7 +24,6 @@ include:
     file_list:
       - path: multi_frame_buffer.hpp
       - path: radio_spinel.hpp
-      - path: radio_spinel_impl.hpp
       - path: radio_spinel_metrics.h
       - path: spi_frame.hpp
       - path: spinel.h
@@ -50,6 +49,7 @@ source:
       - path: ncp/ncp_base_radio.cpp
       - path: ncp/ncp_hdlc.cpp
       - path: ncp/ncp_spi.cpp
+      - path: lib/spinel/radio_spinel.cpp
       - path: lib/spinel/spinel.c
       - path: lib/spinel/spinel_buffer.cpp
       - path: lib/spinel/spinel_decoder.cpp

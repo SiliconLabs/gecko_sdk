@@ -40,6 +40,8 @@
     value: '"BRD2001A"'
   - name: SL_BOARD_REV
     value: '"B01"'
+  - name: HFXO_FREQ
+    value: 32000000
 - tag:
   - board:pn:BRD2001
   - board:variant:A

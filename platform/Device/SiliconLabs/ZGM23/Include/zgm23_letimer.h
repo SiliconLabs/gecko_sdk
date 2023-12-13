@@ -531,4 +531,4 @@ typedef struct {
 /** @} End of group ZGM23_LETIMER */
 /** @} End of group Parts */
 
-#endif /* ZGM23_LETIMER_H */
+#endif // ZGM23_LETIMER_H

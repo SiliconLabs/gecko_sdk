@@ -1,10 +1,10 @@
 project_name: usb_device_hid_micriumos
 package: platform
 quality: production
-label: Platform - USB Device HID with MicriumOS kernel
-description: > 
-  This example uses the USB stack HID Class with the MicriumOS kernel to emulate a mouse. 
-  Once the usb device is connected to a computer, it will trigger continuous mouse mouvements.
+label: Platform - USB Device HID with Micrium OS kernel
+description: >
+  This example uses the USB stack HID Class with the Micrium OS kernel to emulate a mouse.
+  Once the usb device is connected to a computer, it will trigger continuous mouse movements.
 category: Example|Platform
 filter:
   - name: "Device Type"

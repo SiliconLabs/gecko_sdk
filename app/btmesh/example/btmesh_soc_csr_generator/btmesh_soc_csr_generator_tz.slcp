@@ -23,6 +23,7 @@ component:
   - id: app_log
   - id: apploader
   - id: bootloader_interface
+  - id: bt_post_build
   - id: component_catalog
   - id: device_init
   - id: emlib_cmu
@@ -71,9 +72,15 @@ include:
 config_file:
   - path: config/csr_generator_config.h
 
+readme:
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme.md
+
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme_img0.png
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme_img1.png
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme_img2.png
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme_img3.png
+  - path: ../../documentation/example/btmesh_soc_csr_generator/readme_img4.png
 
 import:
   # Import the config files from the TZ Secure application

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -53,14 +53,14 @@
 #define RADIO_TIMING_CSMA_OVERHEAD_US 500
 #define RADIO_TIMING_DEFAULT_BYTETIME_US 32   // only used if RAIL_GetBitRate returns 0
 #define RADIO_TIMING_DEFAULT_SYMBOLTIME_US 16 // only used if RAIL_GetSymbolRate returns 0
-
 typedef struct efr32CommonConfig
 {
     RAIL_Config_t mRailConfig;
 #if RADIO_CONFIG_DMP_SUPPORT
     RAILSched_Config_t mRailSchedState;
 #endif
-    union {
+    union
+    {
         // Used to align this buffer as needed
         RAIL_FIFO_ALIGNMENT_TYPE align[RAIL_TX_FIFO_SIZE / RAIL_FIFO_ALIGNMENT];
         uint8_t fifo[RAIL_TX_FIFO_SIZE]; // must be 2 power between 64 and 4096, and bigger than OT_RADIO_FRAME_MAX_SIZE

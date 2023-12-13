@@ -59,14 +59,8 @@
 
 // RAIL handle and scheduler settings for BLE
 static RAIL_Handle_t sl_rail_handle = RAIL_EFR32_HANDLE;
-#if SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE
-static RAILSched_Config_t sl_rail_sched_config;
-#endif // SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE
 static RAIL_Config_t sl_rail_config = {
   .eventsCallback = &sli_rail_util_on_event,
-#if SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE
-  .scheduler = &sl_rail_sched_config,
-#endif // SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_BLE_ENABLE
 };
 
 // -----------------------------------------------------------------------------

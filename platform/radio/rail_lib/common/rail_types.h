@@ -102,6 +102,16 @@ typedef struct RAIL_Version {
 typedef void *RAIL_Handle_t;
 
 /**
+ * A placeholder for a chip-specific RAIL handle. Using NULL as a RAIL handle
+ * is not recommended. As a result, another value that can't be de-referenced
+ * is used.
+ *
+ * This generic handle can and should be used for RAIL APIs that are called
+ * prior to RAIL initialization.
+ */
+#define RAIL_EFR32_HANDLE ((RAIL_Handle_t)0xFFFFFFFFUL)
+
+/**
  * @enum RAIL_Status_t
  * @brief A status returned by many RAIL API calls indicating their success or
  *   failure.
@@ -141,6 +151,20 @@ typedef void (*RAIL_InitCompleteCallbackPtr_t)(RAIL_Handle_t railHandle);
 
 /** A value to signal that RAIL should not use DMA. */
 #define RAIL_DMA_INVALID (0xFFU)
+
+/**
+ * @struct RAILSched_Config_t
+ * @brief Provided for backwards compatibility.
+ */
+typedef struct RAILSched_Config {
+  uint8_t buffer[1]; /**< Dummy buffer no longer used. */
+} RAILSched_Config_t;
+
+/**
+ * @typedef RAIL_StateBuffer_t
+ * @brief Provided for backwards compatibility.
+ */
+typedef uint8_t RAIL_StateBuffer_t[1];
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -385,6 +409,9 @@ typedef struct RAIL_PacketTimeStamp {
 
 /** @} */ // end of group System_Timing
 
+/******************************************************************************
+ * Sleep Structures
+ *****************************************************************************/
 /**
  * @addtogroup Sleep
  * @{
@@ -936,6 +963,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * times while searching for a packet and is generally used for diagnostic
  * purposes. It can only occur after a
  * \ref RAIL_EVENT_RX_PREAMBLE_DETECT event has already occurred.
+ *
+ * @note See warning for \ref RAIL_EVENT_RX_PREAMBLE_DETECT.
  */
 #define RAIL_EVENT_RX_PREAMBLE_LOST (1ULL << RAIL_EVENT_RX_PREAMBLE_LOST_SHIFT)
 
@@ -946,6 +975,13 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * times while searching for a packet and is generally used for diagnostic
  * purposes. It can only occur after a \ref RAIL_EVENT_RX_TIMING_DETECT
  * event has already occurred.
+ *
+ * @warning This event, along with \ref RAIL_EVENT_RX_PREAMBLE_LOST,
+ *   may not work on some demodulators. Some demodulators usurped the signals
+ *   on which these events are based for another purpose. These demodulators
+ *   in particular are available on the EFR32xG23, EFR32xG25, and the EFR32xG28
+ *   platforms. Enabling these events on these platforms may cause the
+ *   events to fire infinitely and possibly freeze the application.
  */
 #define RAIL_EVENT_RX_PREAMBLE_DETECT (1ULL << RAIL_EVENT_RX_PREAMBLE_DETECT_SHIFT)
 
@@ -1036,7 +1072,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_RX_TIMEOUT (1ULL << RAIL_EVENT_RX_TIMEOUT_SHIFT)
 
 /**
- * Occurs when a scheduled RX begins turning on the transmitter.
+ * Occurs when a scheduled RX begins turning on the receiver.
  * This event has the same numerical value as RAIL_EVENT_SCHEDULED_TX_STARTED
  * because one cannot schedule both RX and TX simultaneously.
  */
@@ -1111,6 +1147,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * while searching for a packet and is generally used for diagnostic purposes.
  * It can only occur after a \ref RAIL_EVENT_RX_TIMING_DETECT event has
  * already occurred.
+ *
+ * @note See warning for \ref RAIL_EVENT_RX_TIMING_DETECT.
  */
 #define RAIL_EVENT_RX_TIMING_LOST (1ULL << RAIL_EVENT_RX_TIMING_LOST_SHIFT)
 
@@ -1119,6 +1157,13 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  *
  * This event can occur multiple times
  * while searching for a packet and is generally used for diagnostic purposes.
+ *
+ * @warning This event, along with \ref RAIL_EVENT_RX_TIMING_LOST,
+ *   may not work on some demodulators. Some demodulators usurped the signals
+ *   on which these events are based for another purpose. These demodulators
+ *   in particular are available on the EFR32xG23, EFR32xG25, and the EFR32xG28
+ *   platforms. Enabling these events on these platforms may cause the
+ *   events to fire infinitely and possibly freeze the application.
  */
 #define RAIL_EVENT_RX_TIMING_DETECT (1ULL << RAIL_EVENT_RX_TIMING_DETECT_SHIFT)
 
@@ -1133,6 +1178,11 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * through the channels again. If this event is left on indefinitely and not
  * handled it will likely be a fairly noisy event, as it continues to fire
  * each time the hopping algorithm cycles through the channel sequence.
+ *
+ * @warning This event currently does not occur when using \ref
+ *   RAIL_RxChannelHoppingMode_t::RAIL_RX_CHANNEL_HOPPING_MODE_MANUAL.
+ *   As a workaround, an application can monitor the current hop channel
+ *   with \ref RAIL_GetChannelAlt().
  */
 #define RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE (1ULL << RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE_SHIFT)
 
@@ -1359,7 +1409,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  *
  * This event generally precedes the actual start of a CCA check by roughly
  * the \ref RAIL_StateTiming_t::idleToRx time (subject to
- * \ref RAIL_MINIMUM_TRANSITION_US).  It can
+ * \ref RAIL_MINIMUM_TRANSITION_US). It can
  * occur multiple times based on the configuration of the ongoing CSMA or LBT
  * transmission. It can only happen after calling RAIL_StartCcaCsmaTx()
  * or RAIL_StartCcaLbtTx().
@@ -1582,6 +1632,47 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 
 /** @} */ // end of group Events
 
+/******************************************************************************
+ * General Structures (part 2)
+ *****************************************************************************/
+/**
+ * @addtogroup General
+ * @{
+ */
+
+/**
+ * @struct RAIL_Config_t
+ * @brief RAIL configuration structure.
+ */
+typedef struct RAIL_Config {
+  /**
+   * A pointer to a function, which is called whenever a RAIL event occurs.
+   *
+   * @param[in] railHandle A handle for a RAIL instance.
+   * @param[in] events A bit mask of RAIL events.
+   *
+   * See the \ref RAIL_Events_t documentation for the list of RAIL events.
+   */
+  void (*eventsCallback)(RAIL_Handle_t railHandle, RAIL_Events_t events);
+  /**
+   * Provided for backwards compatibility. Ignored.
+   */
+  void *protocol;
+  /**
+   * Provided for backwards compatibility. Ignored.
+   */
+  RAILSched_Config_t *scheduler;
+  /**
+   * Provided for backwards compatibility. Ignored.
+   */
+  RAIL_StateBuffer_t buffer;
+} RAIL_Config_t;
+
+/** @} */ // end of group General
+
+/******************************************************************************
+ * PA Power Amplifier Structures
+ *****************************************************************************/
 /**
  * @addtogroup PA Power Amplifier (PA)
  * @ingroup Transmit
@@ -1614,6 +1705,247 @@ typedef int16_t RAIL_TxPower_t;
 /// All dBm inputs to TX power functions take dBm power times this factor.
 #define RAIL_TX_POWER_DBM_SCALING_FACTOR 10
 
+/**
+ * Raw power levels used directly by the RAIL_Get/SetTxPower API where a higher
+ * numerical value corresponds to a higher output power. These are referred to
+ * as 'raw (values/units)'. On EFR32, they can range from one of \ref
+ * RAIL_TX_POWER_LEVEL_2P4_LP_MIN, \ref RAIL_TX_POWER_LEVEL_2P4_HP_MIN, or
+ * \ref RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN to one of \ref
+ * RAIL_TX_POWER_LEVEL_2P4_LP_MAX, \ref RAIL_TX_POWER_LEVEL_2P4_HP_MAX, and \ref
+ * RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX, respectively, depending on the selected \ref
+ * RAIL_TxPowerMode_t.
+ */
+typedef uint8_t RAIL_TxPowerLevel_t;
+
+/**
+ * Invalid RAIL_TxPowerLevel_t value returned when an error occurs
+ * with RAIL_GetTxPower.
+ */
+#define RAIL_TX_POWER_LEVEL_INVALID (255U)
+
+/**
+ * Sentinel value that can be passed to RAIL_SetTxPower to set
+ * the highest power level available on the current PA, regardless
+ * of which one is selected.
+ */
+#define RAIL_TX_POWER_LEVEL_MAX (254U)
+
+/**
+ * PA power setting used directly by the \ref RAIL_GetPaPowerSetting() and
+ * \ref RAIL_SetPaPowerSetting() APIs which is decoded to the actual
+ * hardware register value(s).
+ */
+typedef uint32_t RAIL_PaPowerSetting_t;
+
+/**
+ * Returned by \ref RAIL_GetPaPowerSetting when the device does
+ * not support the dBm to power setting mapping table.
+ */
+#define RAIL_TX_PA_POWER_SETTING_UNSUPPORTED     (0U)
+
+/**
+ * @enum RAIL_TxPowerMode_t
+ * @brief An enumeration of the EFR32 power modes.
+ *
+ * The power modes on the EFR32 correspond to the different on-chip PAs that
+ * are available. For more information about the power and performance
+ * characteristics of a given amplifier, see the data sheet.
+ */
+RAIL_ENUM(RAIL_TxPowerMode_t) {
+  /**
+   *  High-power 2.4 GHz amplifier
+   *  EFR32xG1X: up to 20 dBm, raw values: 0-252
+   *  EFR32xG21: up to 20 dBm, raw values: 1-180
+   *  EFR32xG22: up to  6 dBm, raw values: 1-128
+   *  EFR32xG24: up to 20 dBm, raw values: 0-180, or
+   *             up to 10 dBm, raw values: 0-90
+   *  EFR32xG26: same as EFR32xG24
+   *  EFR32xG27: up to  6 dBm, raw values: 1-128
+   *  EFR32xG28: up to 10 dBm, raw values: 0-240
+   *  Not supported on other platforms.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_HP = 0U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_HP instead. */
+  RAIL_TX_POWER_MODE_2P4_HP = RAIL_TX_POWER_MODE_2P4GIG_HP,
+  /**
+   *  Mid-power 2.4 GHz amplifier
+   *  EFR32xG21: up to 10 dBm, raw values: 1-90
+   *  Not supported on other platforms.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_MP = 1U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_MP instead. */
+  RAIL_TX_POWER_MODE_2P4_MP = RAIL_TX_POWER_MODE_2P4GIG_MP,
+  /**
+   *  Low-power 2.4 GHz amplifier
+   *  EFR32xG1x: up to 0 dBm, raw values: 1-7
+   *  EFR32xG21: up to 0 dBm, raw values: 1-64
+   *  EFR32xG22: up to 0 dBm, raw values: 1-16
+   *  EFR32xG24: up to 0 dBm, raw values: 1-16
+   *  EFR32xG26: same as EFR32xG24
+   *  EFR32xG27: up to 0 dBm, raw values: 1-16
+   *  Not supported on other platforms.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_LP = 2U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_LP instead. */
+  RAIL_TX_POWER_MODE_2P4_LP = RAIL_TX_POWER_MODE_2P4GIG_LP,
+  /**
+   *  Low-Low-power 2.4 GHz amplifier
+   *  Not currently supported on any EFR32 platform.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_LLP = 3U,
+  /**
+   *  Select the highest 2.4 GHz power PA available on the current chip.
+   *  Only supported on EFR32 Series-2 platforms and not Series-1.
+   */
+  RAIL_TX_POWER_MODE_2P4GIG_HIGHEST = 4U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_2P4GIG_HIGHEST instead. */
+  RAIL_TX_POWER_MODE_2P4_HIGHEST = RAIL_TX_POWER_MODE_2P4GIG_HIGHEST,
+  /**
+   *  PA for all Sub-GHz dBm values in range, using \ref
+   *  RAIL_PaPowerSetting_t table.
+   *  Only supported on platforms with \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE (e.g. EFR32xG25).
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE = 5U,
+  /**
+   *  High-power Sub-GHz amplifier (Class D mode)
+   *  EFR32xG1x: up to 20 dBm, raw values: 0-248
+   *  Also supported on FR32xG23 and EFR32xG28.
+   *  Not supported other Sub-GHz-incapable platforms or those with \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_HP = 6U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_SUBGIG_HP instead. */
+  RAIL_TX_POWER_MODE_SUBGIG = RAIL_TX_POWER_MODE_SUBGIG_HP,
+  /**
+   *  Mid-power Sub-GHz amplifier
+   *  Supported only on EFR32xG23 and EFR32xG28.
+   *  Not supported other Sub-GHz-incapable platforms or those with \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_MP = 7U,
+  /**
+   *  Low-power Sub-GHz amplifier
+   *  Supported only on EFR32xG23 and EFR32xG28.
+   *  Not supported other Sub-GHz-incapable platforms or those with \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_LP = 8U,
+  /**
+   *  Low-Low-power Sub-GHz amplifier
+   *  Supported only on EFR32xG23 and EFR32xG28.
+   *  Not supported other Sub-GHz-incapable platforms or those with \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_LLP = 9U,
+  /**
+   *  Select the highest Sub-GHz power PA available on the current chip.
+   *  Only supported on EFR32 Series-2 platforms and not Series-1.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_HIGHEST = 10U,
+  /**
+   *  PA for all OFDM Sub-GHz dBm values in range, using \ref
+   *  RAIL_PaPowerSetting_t table.
+   *  Supported only on platforms with both \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE and \ref
+   *  RAIL_SUPPORTS_OFDM_PA (e.g. EFR32xG25).
+   */
+  RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE = 11U,
+  /** @deprecated Please use \ref RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE instead. */
+  RAIL_TX_POWER_MODE_OFDM_PA = RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE,
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /**
+   *  PA for all Sub-GHz dBm values in range for Front-End-Module, using \ref
+   *  RAIL_PaPowerSetting_t table.
+   *  Supported only on platforms with both
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE and \ref
+   *  RAIL_SUPPORTS_EFF.
+   */
+  RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE = 12U,
+  /**
+   *  PA for all OFDM Sub-GHz dBm values in range for Front-End-Module, using \ref
+   *  RAIL_PaPowerSetting_t table.
+   *  Supported only on platforms with all of \ref
+   *  RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE, \ref
+   *  RAIL_SUPPORTS_OFDM_PA, and \ref
+   *  RAIL_SUPPORTS_EFF.
+   */
+  RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE = 13U,
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+  /** Invalid amplifier Selection */
+  RAIL_TX_POWER_MODE_NONE // Must be last
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+// Refer to rail_chip_specific.h for per-platform defines of supported ones.
+#define RAIL_TX_POWER_MODE_NONE ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_NONE)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @def RAIL_TX_POWER_MODE_NAMES
+ * @brief The names of the TX power modes
+ *
+ * A list of the names for the TX power modes on EFR32 parts. This
+ * macro is useful for test applications and debugging output.
+ */
+#define RAIL_TX_POWER_MODE_NAMES {                       \
+    "RAIL_TX_POWER_MODE_2P4GIG_HP",                      \
+    "RAIL_TX_POWER_MODE_2P4GIG_MP",                      \
+    "RAIL_TX_POWER_MODE_2P4GIG_LP",                      \
+    "RAIL_TX_POWER_MODE_2P4GIG_LLP",                     \
+    "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST",                 \
+    "RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE",      \
+    "RAIL_TX_POWER_MODE_SUBGIG_HP",                      \
+    "RAIL_TX_POWER_MODE_SUBGIG_MP",                      \
+    "RAIL_TX_POWER_MODE_SUBGIG_LP",                      \
+    "RAIL_TX_POWER_MODE_SUBGIG_LLP",                     \
+    "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST",                 \
+    "RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE",     \
+    "RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE",  \
+    "RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE", \
+    "RAIL_TX_POWER_MODE_NONE"                            \
+}
+
+/**
+ * @struct RAIL_TxPowerConfig_t
+ *
+ * @brief A structure containing values used to initialize the power amplifiers.
+ */
+typedef struct RAIL_TxPowerConfig {
+  /** TX power mode */
+  RAIL_TxPowerMode_t mode;
+  /** Power amplifier supply voltage in mV, generally:
+   *  DCDC supply ~ 1800 mV (1.8 V)
+   *  Battery supply ~ 3300 mV (3.3 V)
+   */
+  uint16_t voltage;
+  /** The amount of time to spend ramping for TX in uS. */
+  uint16_t rampTime;
+} RAIL_TxPowerConfig_t;
+
+/** Convenience macro for any EFF power mode. */
+#define RAIL_POWER_MODE_IS_ANY_EFF(x)                         \
+  (((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE) \
+   || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE))
+/** Convenience macro for any OFDM mapping table mode. */
+#define RAIL_POWER_MODE_IS_DBM_POWERSETTING_MAPPING_TABLE_OFDM(x) \
+  (((x) == RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE)         \
+   || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE))
+/** Convenience macro for any Sub-GHz mapping table mode. */
+#define RAIL_POWER_MODE_IS_DBM_POWERSETTING_MAPPING_TABLE_SUBGIG(x) \
+  (((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE)        \
+   || ((x) == RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE))
+/** Convenience macro for any mapping table mode. */
+#define RAIL_POWER_MODE_IS_ANY_DBM_POWERSETTING_MAPPING_TABLE(x) \
+  (((x) == RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE)        \
+   || ((x) == RAIL_TX_POWER_MODE_OFDM_PA_EFF_POWERSETTING_TABLE) \
+   || ((x) == RAIL_TX_POWER_MODE_SUBGIG_POWERSETTING_TABLE)      \
+   || ((x) == RAIL_TX_POWER_MODE_SUBGIG_EFF_POWERSETTING_TABLE))
+/** Convenience macro for any OFDM mode. */
+#define RAIL_POWER_MODE_IS_ANY_OFDM(x) \
+  RAIL_POWER_MODE_IS_DBM_POWERSETTING_MAPPING_TABLE_OFDM(x)
+
 /** @} */ // PA Power Amplifier (PA)
 
 /******************************************************************************
@@ -1623,6 +1955,15 @@ typedef int16_t RAIL_TxPower_t;
  * @addtogroup Radio_Configuration
  * @{
  */
+
+/**
+ * @brief Pointer to a radio configuration array.
+ *
+ * The radio configuration properly configures the
+ * radio for operation on a protocol. These configurations are very
+ * chip-specific should not be created or edited by hand.
+ */
+typedef const uint32_t *RAIL_RadioConfig_t;
 
 /**
  * @struct RAIL_FrameType_t
@@ -1735,8 +2076,8 @@ typedef struct RAIL_AlternatePhy {
  *   + channelSpacing * (channel - physicalChannelOffset);
  */
 typedef struct RAIL_ChannelConfigEntry {
-  const uint32_t *phyConfigDeltaAdd; /**< The minimum radio configuration to apply to the base
-                                          configuration for this channel set. */
+  RAIL_RadioConfig_t phyConfigDeltaAdd; /**< The minimum radio configuration to apply to the base
+                                           configuration for this channel set. */
   uint32_t baseFrequency; /**< A base frequency in Hz of this channel set. */
   uint32_t channelSpacing; /**< A channel spacing in Hz of this channel set. */
   uint16_t physicalChannelOffset; /**< The offset to subtract from the logical
@@ -1970,11 +2311,11 @@ typedef struct RAIL_ChannelConfigEntry {
 /// @endcode
 
 typedef struct RAIL_ChannelConfig {
-  const uint32_t *phyConfigBase; /**< Base radio configuration for the corresponding
-                                      channel configuration entries. */
-  const uint32_t *phyConfigDeltaSubtract; /**< Minimum radio configuration to restore
-                                               channel entries back to base
-                                               configuration. */
+  RAIL_RadioConfig_t phyConfigBase; /**< Base radio configuration for the corresponding
+                                       channel configuration entries. */
+  RAIL_RadioConfig_t phyConfigDeltaSubtract; /**< Minimum radio configuration to restore
+                                                channel entries back to base
+                                                configuration. */
   const RAIL_ChannelConfigEntry_t *configs; /**< Pointer to an array of
                                                  RAIL_ChannelConfigEntry_t
                                                  entries. */
@@ -2020,7 +2361,63 @@ typedef void (*RAIL_RadioConfigChangedCallback_t)(RAIL_Handle_t railHandle,
 /**
  * @addtogroup PTI
  * @{
+ *
+ * These enumerations and structures are used with RAIL PTI API. EFR32 supports
+ * SPI and UART PTI and is configurable in terms of baud rates and PTI
+ * pin locations.
  */
+
+/** A channel type enumeration. */
+RAIL_ENUM(RAIL_PtiMode_t) {
+  /** Turn PTI off entirely. */
+  RAIL_PTI_MODE_DISABLED,
+  /** 8-bit SPI mode. */
+  RAIL_PTI_MODE_SPI,
+  /** 8-bit UART mode. */
+  RAIL_PTI_MODE_UART,
+  /** 9-bit UART mode. */
+  RAIL_PTI_MODE_UART_ONEWIRE,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_PTI_MODE_DISABLED     ((RAIL_PtiMode_t) RAIL_PTI_MODE_DISABLED)
+#define RAIL_PTI_MODE_SPI          ((RAIL_PtiMode_t) RAIL_PTI_MODE_SPI)
+#define RAIL_PTI_MODE_UART         ((RAIL_PtiMode_t) RAIL_PTI_MODE_UART)
+#define RAIL_PTI_MODE_UART_ONEWIRE ((RAIL_PtiMode_t) RAIL_PTI_MODE_UART_ONEWIRE)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @struct RAIL_PtiConfig_t
+ * @brief A configuration for PTI.
+ */
+typedef struct RAIL_PtiConfig {
+  /** Packet Trace mode (UART or SPI). */
+  RAIL_PtiMode_t mode;
+  /** Output baudrate for PTI in Hz. */
+  uint32_t baud;
+  /** Data output (DOUT) location for doutPort/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t doutLoc;
+  /** Data output (DOUT) GPIO port. */
+  uint8_t doutPort;
+  /** Data output (DOUT) GPIO pin. */
+  uint8_t doutPin;
+  /** Data clock (DCLK) location for dclkPort/Pin. Only used in SPI mode.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t dclkLoc;
+  /** Data clock (DCLK) GPIO port. Only used in SPI mode. */
+  uint8_t dclkPort;
+  /** Data clock (DCLK) GPIO pin. Only used in SPI mode. */
+  uint8_t dclkPin;
+  /** Data frame (DFRAME) location for dframePort/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t dframeLoc;
+  /** Data frame (DFRAME) GPIO port. */
+  uint8_t dframePort;
+  /** Data frame (DFRAME) GPIO pin. */
+  uint8_t dframePin;
+} RAIL_PtiConfig_t;
 
 /**
  * @enum RAIL_PtiProtocol_t
@@ -2059,6 +2456,12 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
  * @addtogroup Data_Management
  * @{
  */
+
+/// Fixed-width type indicating the needed alignment for RX and TX FIFOs.
+#define RAIL_FIFO_ALIGNMENT_TYPE uint32_t
+
+/// Alignment that is needed for the RX and TX FIFOs.
+#define RAIL_FIFO_ALIGNMENT (sizeof(RAIL_FIFO_ALIGNMENT_TYPE))
 
 /**
  * @enum RAIL_TxDataSource_t
@@ -2192,6 +2595,57 @@ typedef struct {
  */
 
 /**
+ * @typedef RAIL_TransitionTime_t
+ * @brief Suitable type for the supported transition time range.
+ *
+ * Refer to platform-specific \ref RAIL_MINIMUM_TRANSITION_US and
+ * \ref RAIL_MAXIMUM_TRANSITION_US for the valid range of this type.
+ */
+typedef uint32_t RAIL_TransitionTime_t;
+
+/**
+ * @def RAIL_TRANSITION_TIME_KEEP
+ * @brief A value to use in \ref RAIL_StateTiming_t fields when
+ *   calling \ref RAIL_SetStateTiming() to keep that timing
+ *   parameter at it current setting.
+ */
+#define RAIL_TRANSITION_TIME_KEEP ((RAIL_TransitionTime_t) -1)
+
+/**
+ * @struct RAIL_StateTiming_t
+ * @brief A timing configuration structure for the RAIL State Machine.
+ *
+ * Configure the timings of the radio state transitions for common situations.
+ * All of the listed timings are in microseconds. Transitions from an active
+ * radio state to idle are not configurable, and will always happen as fast
+ * as possible.
+ * No timing value can exceed platform-specific \ref RAIL_MAXIMUM_TRANSITION_US.
+ * Use \ref RAIL_TRANSITION_TIME_KEEP to keep an existing setting.
+ *
+ * For idleToRx, idleToTx, rxToTx, txToRx, and txToTx a value of 0 for the
+ * transition time means that the specified transition should happen as fast
+ * as possible, even if the timing cannot be as consistent. Otherwise, the
+ * timing value cannot be below the platform-specific \ref RAIL_MINIMUM_TRANSITION_US.
+ *
+ * For idleToTx, rxToTx, and txToTx setting a longer \ref
+ * RAIL_TxPowerConfig_t::rampTime may result in a larger minimum value.
+ *
+ * For rxSearchTimeout and txToRxSearchTimeout, there is no minimum value. A
+ * value of 0 disables the feature, functioning as an infinite timeout.
+ */
+typedef struct RAIL_StateTiming {
+  RAIL_TransitionTime_t idleToRx; /**< Transition time from IDLE to RX. */
+  RAIL_TransitionTime_t txToRx; /**< Transition time from TX to RX. */
+  RAIL_TransitionTime_t idleToTx; /**< Transition time from IDLE to TX. */
+  RAIL_TransitionTime_t rxToTx; /**< Transition time from RX packet to TX. */
+  RAIL_TransitionTime_t rxSearchTimeout; /**< Length of time the radio will search for a
+                                            packet when coming from idle or RX. */
+  RAIL_TransitionTime_t txToRxSearchTimeout; /**< Length of time the radio will search for a
+                                                packet when coming from TX. */
+  RAIL_TransitionTime_t txToTx; /**< Transition time from TX packet to TX. */
+} RAIL_StateTiming_t;
+
+/**
  * @enum RAIL_RadioState_t
  * @brief The state of the radio.
  */
@@ -2218,6 +2672,58 @@ RAIL_ENUM(RAIL_RadioState_t) {
 #define RAIL_RF_STATE_IDLE      ((RAIL_RadioState_t) RAIL_RF_STATE_IDLE)
 #define RAIL_RF_STATE_RX_ACTIVE ((RAIL_RadioState_t) RAIL_RF_STATE_RX_ACTIVE)
 #define RAIL_RF_STATE_TX_ACTIVE ((RAIL_RadioState_t) RAIL_RF_STATE_TX_ACTIVE)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * @enum RAIL_RadioStateEfr32_t
+ * @brief Detailed EFR32 Radio state machine statuses.
+ */
+RAIL_ENUM(RAIL_RadioStateEfr32_t) {
+  RAIL_RAC_STATE_OFF,         /**< Radio is off. */
+  RAIL_RAC_STATE_RXWARM,      /**< Radio is enabling the receiver. */
+  RAIL_RAC_STATE_RXSEARCH,    /**< Radio is listening for incoming frames. */
+  RAIL_RAC_STATE_RXFRAME,     /**< Radio is receiving a frame. */
+  RAIL_RAC_STATE_RXPD,        /**< Radio is powering down receiver and going to
+                                   OFF state. */
+  RAIL_RAC_STATE_RX2RX,       /**< Radio is going back to receive mode after
+                                   receiving a frame. */
+  RAIL_RAC_STATE_RXOVERFLOW,  /**< Received data was lost due to full receive
+                                   buffer. */
+  RAIL_RAC_STATE_RX2TX,       /**< Radio is disabling receiver and enabling
+                                   transmitter. */
+  RAIL_RAC_STATE_TXWARM,      /**< Radio is enabling transmitter. */
+  RAIL_RAC_STATE_TX,          /**< Radio is transmitting data. */
+  RAIL_RAC_STATE_TXPD,        /**< Radio is powering down transmitter and going
+                                   to OFF state. */
+  RAIL_RAC_STATE_TX2RX,       /**< Radio is disabling transmitter and enabling
+                                   reception. */
+  RAIL_RAC_STATE_TX2TX,       /**< Radio is preparing a transmission after the
+                                   previous transmission was ended. */
+  RAIL_RAC_STATE_SHUTDOWN,    /**< Radio is powering down receiver and going to
+                                   OFF state. */
+  RAIL_RAC_STATE_POR,         /**< Radio power-on-reset state (EFR32xG22 and later) */
+  RAIL_RAC_STATE_NONE         /**< Invalid Radio state, must be the last entry. */
+};
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_RAC_STATE_OFF          ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_OFF)
+#define RAIL_RAC_STATE_RXWARM       ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXWARM)
+#define RAIL_RAC_STATE_RXSEARCH     ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXSEARCH)
+#define RAIL_RAC_STATE_RXFRAME      ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXFRAME)
+#define RAIL_RAC_STATE_RXPD         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXPD)
+#define RAIL_RAC_STATE_RX2RX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RX2RX)
+#define RAIL_RAC_STATE_RXOVERFLOW   ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RXOVERFLOW)
+#define RAIL_RAC_STATE_RX2TX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_RX2TX)
+#define RAIL_RAC_STATE_TXWARM       ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TXWARM)
+#define RAIL_RAC_STATE_TX           ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX)
+#define RAIL_RAC_STATE_TXPD         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TXPD)
+#define RAIL_RAC_STATE_TX2RX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX2RX)
+#define RAIL_RAC_STATE_TX2TX        ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_TX2TX)
+#define RAIL_RAC_STATE_SHUTDOWN     ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_SHUTDOWN)
+#define RAIL_RAC_STATE_NONE         ((RAIL_RadioStateEfr32_t) RAIL_RAC_STATE_NONE)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -2388,22 +2894,23 @@ typedef struct RAIL_TxChannelHoppingConfig {
    * data anywhere in this buffer.
    *
    * @note the size of this buffer must be at least as large as
-   * 3 + 30 * numberOfChannels, plus the sum of the sizes of the
+   * 3 + \ref RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL * numberOfChannels,
+   * plus the sum of the sizes of the
    * radioConfigDeltaAdd's of the required channels, plus the size of the
    * radioConfigDeltaSubtract. In the case that one channel
    * appears two or more times in your channel sequence
    * (e.g., 1, 2, 3, 2), you must account for the radio configuration
    * size that number of times (i.e., need to count channel 2's
-   * radio configuration size twice for the given example). The overall
-   * 3 words and 30 words per channel needed in this buffer are
+   * radio configuration size twice for the given example). The buffer is
    * for internal use to the library.
    */
   uint32_t *buffer;
   /**
-   * This parameter must be set to the length of the buffer array. This way,
-   * during configuration, the software can confirm it's writing within the
-   * range of the buffer. The configuration API will return an error
-   * if bufferLength is insufficient.
+   * This parameter must be set to the length of the buffer array, in 32 bit
+   * words. This way, during configuration, the software can confirm it's
+   * writing within the bounds of the buffer. The configuration API will return
+   * an error or trigger \ref RAIL_ASSERT_CHANNEL_HOPPING_BUFFER_TOO_SHORT if
+   * bufferLength is insufficient.
    */
   uint16_t bufferLength;
   /**
@@ -2423,6 +2930,11 @@ typedef struct RAIL_TxChannelHoppingConfig {
    */
   RAIL_TxChannelHoppingConfigEntry_t *entries;
 } RAIL_TxChannelHoppingConfig_t;
+
+/// The worst-case platform-agnostic static amount of memory needed per
+/// channel for channel hopping, measured in 32 bit words, regardless of
+/// the size of radio configuration structures.
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL_WORST_CASE (65U)
 
 /** @} */ // end of group Tx_Channel_Hopping
 
@@ -2992,8 +3504,84 @@ typedef struct RAIL_SyncWordConfig {
   uint32_t syncWord2;
 } RAIL_SyncWordConfig_t;
 
+/**
+ * @enum RAIL_TxRepeatOptions_t
+ * @brief Transmit repeat options, in reality a bitmask.
+ */
+RAIL_ENUM_GENERIC(RAIL_TxRepeatOptions_t, uint16_t) {
+  /** Shift position of \ref RAIL_TX_REPEAT_OPTION_HOP bit */
+  RAIL_TX_REPEAT_OPTION_HOP_SHIFT = 0,
+  /** Shift position of the \ref RAIL_TX_REPEAT_OPTION_START_TO_START bit */
+  RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT = 1,
+};
+
+/** A value representing no repeat options enabled. */
+#define RAIL_TX_REPEAT_OPTIONS_NONE 0U
+/** All repeat options disabled by default. */
+#define RAIL_TX_REPEAT_OPTIONS_DEFAULT RAIL_TX_REPEAT_OPTIONS_NONE
+/**
+ * An option to configure whether or not to channel-hop before each
+ * repeated transmit.
+ */
+#define RAIL_TX_REPEAT_OPTION_HOP (1U << RAIL_TX_REPEAT_OPTION_HOP_SHIFT)
+
+/**
+ * An option to configure the delay between transmissions to be from start to start
+ * instead of end to start. Delay must be long enough to cover the prior transmit's time.
+ */
+#define RAIL_TX_REPEAT_OPTION_START_TO_START (1 << RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT)
+
+/// @struct RAIL_TxRepeatConfig_t
+/// @brief A configuration structure for repeated transmits
+///
+/// @note The PA will always be ramped down and up in between transmits so
+/// there will always be some minimum delay between transmits depending on the
+/// ramp time configuration.
+typedef struct RAIL_TxRepeatConfig {
+  /**
+   * The number of repeated transmits to run. A total of (iterations + 1)
+   * transmits will go on-air in the absence of errors.
+   */
+  uint16_t iterations;
+  /**
+   * Repeat option(s) to apply.
+   */
+  RAIL_TxRepeatOptions_t repeatOptions;
+  /**
+   * Per-repeat delay or hopping configuration, depending on repeatOptions.
+   */
+  union {
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is not set, specifies
+     * the delay time between each repeated transmit. Specify \ref
+     * RAIL_TRANSITION_TIME_KEEP to use the current \ref
+     * RAIL_StateTiming_t::txToTx transition time setting.
+     * When using \ref RAIL_TX_REPEAT_OPTION_START_TO_START the delay
+     * must be long enough to cover the prior transmit's time.
+     */
+    RAIL_TransitionTime_t delay;
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is set, this specifies
+     * the channel hopping configuration to use when hopping between
+     * repeated transmits. Per-hop delays are configured within each
+     * \ref RAIL_TxChannelHoppingConfigEntry_t::delay rather than
+     * this union's delay field.
+     * When using \ref RAIL_TX_REPEAT_OPTION_START_TO_START the hop delay
+     * must be long enough to cover the prior transmit's time.
+     */
+    RAIL_TxChannelHoppingConfig_t channelHopping;
+  } delayOrHop;
+} RAIL_TxRepeatConfig_t;
+
+/// RAIL_TxRepeatConfig_t::iterations initializer configuring infinite
+/// repeated transmissions.
+#define RAIL_TX_REPEAT_INFINITE_ITERATIONS (0xFFFFU)
+
 /** @} */ // end of group Transmit
 
+/******************************************************************************
+ * Receive Structures
+ *****************************************************************************/
 /**
  * @addtogroup Receive
  * @{
@@ -3125,6 +3713,8 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
   RAIL_RX_OPTION_CHANNEL_SWITCHING_SHIFT,
   /** Shift position of \ref RAIL_RX_OPTION_FAST_RX2RX bit. */
   RAIL_RX_OPTION_FAST_RX2RX_SHIFT,
+  /** Shift position of \ref RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION bit. */
+  RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION_SHIFT,
 };
 
 /** A value representing no options enabled. */
@@ -3251,8 +3841,7 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
 
 /**
  * An option to enable IEEE 802.15.4 RX channel switching.
- * \ref RAIL_IEEE802154_ConfigRxChannelSwitching() must be called to configure the
- * feature before enabling it via this option.
+ * See \ref RAIL_IEEE802154_ConfigRxChannelSwitching() for more information.
  * Defaults to false.
  *
  * @note This option is only supported on specific chips where
@@ -3275,6 +3864,18 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  * \ref RAIL_SUPPORTS_FAST_RX2RX is true.
  */
 #define RAIL_RX_OPTION_FAST_RX2RX (1U << RAIL_RX_OPTION_FAST_RX2RX_SHIFT)
+
+/**
+ * An option to enable collision detection.
+ *
+ * Once enabled, when a collision with a strong enough packet is detected, the demod
+ * will stop the current packet decoding and try to detect the preamble of the incoming
+ * packet.
+ *
+ * @note This option is only supported on specific chips where
+ * \ref RAIL_SUPPORTS_COLLISION_DETECTION is true.
+ */
+#define RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION (1U << RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION_SHIFT)
 
 /** A value representing all possible options. */
 #define RAIL_RX_OPTIONS_ALL 0xFFFFFFFFUL
@@ -3656,8 +4257,29 @@ typedef struct RAIL_RxPacketDetails {
   uint16_t channel;
 } RAIL_RxPacketDetails_t;
 
+/**
+ * @typedef RAIL_ConvertLqiCallback_t
+ * @brief A pointer to a function called before LQI is copied into the
+ *   \ref RAIL_RxPacketDetails_t structure.
+ *
+ * @param[in] lqi The LQI value obtained by hardware and being readied for
+ *   application consumption. This LQI value is in integral units ranging from
+ *   0 to 255.
+ * @param[in] rssi The RSSI value corresponding to the packet from which the
+ *   hardware LQI value was obtained. This RSSI value is in integral dBm units.
+ * @return uint8_t The converted LQI value that will be loaded into the
+ *   \ref RAIL_RxPacketDetails_t structure in preparation for application
+ *   consumption. This value should likewise be in integral units ranging from
+ *   0 to 255.
+ */
+typedef uint8_t (*RAIL_ConvertLqiCallback_t)(uint8_t lqi,
+                                             int8_t rssi);
+
 /** @} */ // end of group Receive
 
+/******************************************************************************
+ * Auto-ACK Structures
+ *****************************************************************************/
 /**
  * @addtogroup Auto_Ack
  * @{
@@ -3715,6 +4337,80 @@ typedef struct RAIL_AutoAckConfig {
 #define RAIL_AUTOACK_MAX_LENGTH (64U)
 
 /** @} */ // end of group Auto_Ack
+
+/******************************************************************************
+ * Antenna Control
+ *****************************************************************************/
+/**
+ * @addtogroup Antenna_Control
+ * @{
+ *
+ * These enumerations and structures are used with RAIL Antenna Control API.
+ * EFR32 supports up to two antennas with configurable pin locations.
+ */
+
+/** Antenna path Selection enumeration. */
+RAIL_ENUM(RAIL_AntennaSel_t) {
+  /** Enum for antenna path 0. */
+  RAIL_ANTENNA_0 = 0,
+  /** Enum for antenna path 1. */
+  RAIL_ANTENNA_1 = 1,
+  /** Enum for antenna path auto. */
+  RAIL_ANTENNA_AUTO = 255,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_ANTENNA_0    ((RAIL_AntennaSel_t) RAIL_ANTENNA_0)
+#define RAIL_ANTENNA_1    ((RAIL_AntennaSel_t) RAIL_ANTENNA_1)
+#define RAIL_ANTENNA_AUTO ((RAIL_AntennaSel_t) RAIL_ANTENNA_AUTO)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @struct RAIL_AntennaConfig_t
+ * @brief A configuration for antenna selection.
+ */
+typedef struct RAIL_AntennaConfig {
+  /** Antenna 0 Pin Enable */
+  bool ant0PinEn;
+  /** Antenna 1 Pin Enable */
+  bool ant1PinEn;
+  /**
+   *  Antenna 0 location for ant0Port/Pin on EFR32 Series 1
+   *  and on EFR32 Series 2 this field is called \ref defaultPath
+   *  (see define and usage below).
+   */
+  uint8_t ant0Loc;
+  /** Antenna 0 output GPIO port */
+  uint8_t ant0Port;
+  /** Antenna 0 output GPIO pin */
+  uint8_t ant0Pin;
+  /** Antenna 1 location for ant1Port/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t ant1Loc;
+  /** Antenna 1 output GPIO port */
+  uint8_t ant1Port;
+  /** Antenna 1 output GPIO pin */
+  uint8_t ant1Pin;
+} RAIL_AntennaConfig_t;
+
+/**
+ * Maps EFR32 Series 2 defaultPath onto Series 1 ant0Loc field.
+ * For EFR32 Series 2, defaultPath should be a \ref RAIL_AntennaSel_t
+ * value specifying the internal default RF path. It is ignored
+ * on EFR32 Series 2 parts that have only one RF path bonded
+ * out and on EFR32xG28 dual-band OPNs where the appropriate
+ * RF path is automatically set by RAIL to 0 for 2.4GHZ band
+ * and 1 for SubGHz band PHYs. On EFR32xG23 and EFR32xG28
+ * single-band OPNs where both RF paths are bonded out this can
+ * be set to \ref RAIL_ANTENNA_AUTO to effect internal RF path
+ * diversity on PHYs supporting diversity. This avoids the need
+ * for an external RF switch and the associated GPIO(s) needed
+ * to control its antenna selection.
+ */
+#define defaultPath ant0Loc
+
+/** @} */ // end of group Antenna_Control
 
 /******************************************************************************
  * External_Thermistor Structures
@@ -3778,6 +4474,22 @@ typedef struct RAIL_HFXOCompensationConfig {
 /**
  * @addtogroup Calibration
  * @{
+ *
+ * The EFR32 supports the Image Rejection (IR)
+ * calibration and a temperature-dependent calibration. The IR calibration
+ * can be computed once and stored off or computed each time at
+ * startup. Because it is PHY-specific and provides sensitivity improvements,
+ * it is highly recommended. The IR calibration should only be run when the
+ * radio is IDLE.
+ *
+ * The temperature-dependent calibrations are used to recalibrate the synth if
+ * the temperature crosses 0C or the temperature delta since the last
+ * calibration exceeds 70C while in receive. RAIL will run the VCO calibration
+ * automatically upon entering receive or transmit states, so the application
+ * can omit this calibration if the stack re-enters receive or transmit with
+ * enough frequency to avoid reaching the temperature delta. If the application
+ * does not calibrate for temperature, it's possible to miss receive packets due
+ * to a drift in the carrier frequency.
  */
 
 /**
@@ -3789,35 +4501,152 @@ typedef struct RAIL_HFXOCompensationConfig {
  */
 typedef uint32_t RAIL_CalMask_t;
 
-/** @} */ // end of group Calibration
+/** EFR32-specific temperature calibration bit. */
+#define RAIL_CAL_TEMP_VCO         (0x00000001U)
+/** EFR32-specific HFXO temperature check bit.
+ *  (Ignored if platform lacks \ref RAIL_SUPPORTS_HFXO_COMPENSATION.) */
+#define RAIL_CAL_TEMP_HFXO        (0x00000002U)
+/** EFR32-specific HFXO compensation bit.
+ *  (Ignored if platform lacks \ref RAIL_SUPPORTS_HFXO_COMPENSATION.) */
+#define RAIL_CAL_COMPENSATE_HFXO  (0x00000004U)
+/** EFR32-specific IR calibration bit */
+#define RAIL_CAL_RX_IRCAL         (0x00010000U)
+/** EFR32-specific Tx IR calibration bit.
+ *  (Ignored if platform lacks \ref RAIL_SUPPORTS_OFDM_PA.) */
+#define RAIL_CAL_OFDM_TX_IRCAL    (0x00100000U)
 
-/******************************************************************************
- * LQI Structures
- *****************************************************************************/
+/** A mask to run EFR32-specific IR calibrations. */
+#define RAIL_CAL_ONETIME_IRCAL    (RAIL_CAL_RX_IRCAL | RAIL_CAL_OFDM_TX_IRCAL)
+/** A mask to run temperature-dependent calibrations. */
+#define RAIL_CAL_TEMP             (RAIL_CAL_TEMP_VCO | RAIL_CAL_TEMP_HFXO | RAIL_CAL_COMPENSATE_HFXO)
+/** A mask to run one-time calibrations. */
+#define RAIL_CAL_ONETIME          (RAIL_CAL_ONETIME_IRCAL)
+/** A mask to run optional performance calibrations. */
+#define RAIL_CAL_PERF             (0)
+/** A mask for calibrations that require the radio to be off. */
+#define RAIL_CAL_OFFLINE          (RAIL_CAL_ONETIME_IRCAL)
+/** A mask to run all possible calibrations for this chip. */
+#define RAIL_CAL_ALL              (RAIL_CAL_TEMP | RAIL_CAL_ONETIME)
+/** A mask to run all pending calibrations. */
+#define RAIL_CAL_ALL_PENDING      (0x00000000U)
+/** An invalid calibration value. */
+#define RAIL_CAL_INVALID_VALUE    (0xFFFFFFFFU)
+
 /**
- * @addtogroup Receive
- * @{
+ * @def RAIL_MAX_RF_PATHS
+ * @brief Indicates the maximum number of RF Paths supported across all
+ *   platforms.
  */
+#define RAIL_MAX_RF_PATHS 2
 
 /**
- * @typedef RAIL_ConvertLqiCallback_t
- * @brief A pointer to a function called before LQI is copied into the
- *   \ref RAIL_RxPacketDetails_t structure.
+ * RAIL_RxIrCalValues_t
+ * @brief RX IR calibration values.
  *
- * @param[in] lqi The LQI value obtained by hardware and being readied for
- *   application consumption. This LQI value is in integral units ranging from
- *   0 to 255.
- * @param[in] rssi The RSSI value corresponding to the packet from which the
- *   hardware LQI value was obtained. This RSSI value is in integral dBm units.
- * @return uint8_t The converted LQI value that will be loaded into the
- *   \ref RAIL_RxPacketDetails_t structure in preparation for application
- *   consumption. This value should likewise be in integral units ranging from
- *   0 to 255.
+ * Platforms with fewer \ref RAIL_RF_PATHS than \ref RAIL_MAX_RF_PATHS
+ * will only respect and update \ref RAIL_RF_PATHS indices and ignore
+ * the rest.
  */
-typedef uint8_t (*RAIL_ConvertLqiCallback_t)(uint8_t lqi,
-                                             int8_t rssi);
+typedef uint32_t RAIL_RxIrCalValues_t[RAIL_MAX_RF_PATHS];
 
-/** @} */ // end of group Receive
+/**
+ * A define to set all RAIL_RxIrCalValues_t values to uninitialized.
+ *
+ * This define can be used when you have no data to pass to the calibration
+ * routines but wish to compute and save all possible calibrations.
+ */
+#define RAIL_IRCALVALUES_RX_UNINIT {                        \
+    [0 ... RAIL_MAX_RF_PATHS - 1] = RAIL_CAL_INVALID_VALUE, \
+}
+
+/**
+ * @struct RAIL_TxIrCalValues_t
+ * @brief A Tx IR calibration value structure.
+ *
+ * This definition contains the set of persistent calibration values for
+ * OFDM on EFR32. You can set these beforehand and apply them at startup
+ * to save the time required to compute them. Any of these values may be
+ * set to RAIL_IRCAL_INVALID_VALUE to force the code to compute that
+ * calibration value.
+ *
+ * Only supported on platforms with \ref RAIL_SUPPORTS_OFDM_PA enabled.
+ */
+typedef struct RAIL_TxIrCalValues {
+  uint32_t dcOffsetIQ;    /**< TXIRCAL result */
+  uint32_t phiEpsilon;    /**< TXIRCAL result */
+} RAIL_TxIrCalValues_t;
+
+/**
+ * A define to set all RAIL_TxIrCalValues_t values to uninitialized.
+ *
+ * This define can be used when you have no data to pass to the calibration
+ * routines but wish to compute and save all possible calibrations.
+ */
+#define RAIL_IRCALVALUES_TX_UNINIT  { \
+    RAIL_CAL_INVALID_VALUE,           \
+    RAIL_CAL_INVALID_VALUE,           \
+}
+
+/**
+ * @struct RAIL_IrCalValues_t
+ * @brief An IR calibration value structure.
+ *
+ * This definition contains the set of persistent calibration values for
+ * EFR32. You can set these beforehand and apply them at startup to save the
+ * time required to compute them. Any of these values may be set to
+ * RAIL_IRCAL_INVALID_VALUE to force the code to compute that calibration value.
+ */
+typedef struct RAIL_IrCalValues {
+  RAIL_RxIrCalValues_t rxIrCalValues; /**< RX Image Rejection (IR) calibration value */
+  RAIL_TxIrCalValues_t txIrCalValues; /**< TX Image Rejection (IR) calibration value for OFDM */
+} RAIL_IrCalValues_t;
+
+/**
+ * A define to set all RAIL_IrCalValues_t values to uninitialized.
+ *
+ * This define can be used when you have no data to pass to the calibration
+ * routines but wish to compute and save all possible calibrations.
+ */
+#define RAIL_IRCALVALUES_UNINIT { \
+    RAIL_IRCALVALUES_RX_UNINIT,   \
+    RAIL_IRCALVALUES_TX_UNINIT,   \
+}
+
+/**
+ * A define allowing Rx calibration value access compatibility
+ * between non-OFDM and OFDM platforms.
+ */
+#define RAIL_IRCALVAL(irCalStruct, rfPath) \
+  (((RAIL_IrCalValues_t *)(&(irCalStruct)))->rxIrCalValues[(rfPath)])
+
+/**
+ * @typedef RAIL_CalValues_t
+ * @brief A calibration value structure.
+ *
+ * This structure contains the set of persistent calibration values for
+ * EFR32. You can set these beforehand and apply them at startup to save the
+ * time required to compute them. Any of these values may be set to
+ * RAIL_CAL_INVALID_VALUE to force the code to compute that calibration value.
+ */
+typedef RAIL_IrCalValues_t RAIL_CalValues_t;
+
+/**
+ * A define to set all RAIL_CalValues_t values to uninitialized.
+ *
+ * This define can be used when you have no data to pass to the calibration
+ * routines but wish to compute and save all possible calibrations.
+ */
+#define RAIL_CALVALUES_UNINIT RAIL_IRCALVALUES_UNINIT
+
+/// Use this value with either TX or RX values in RAIL_SetPaCTune
+/// to use whatever value is already set and do no update. This
+/// value is provided to provide consistency across EFR32 chips,
+/// but technically speaking, all PA capacitance tuning values are
+/// invalid on EFR32XG21 parts, as RAIL_SetPaCTune is not supported
+/// on those parts.
+#define RAIL_PACTUNE_IGNORE (255U)
+
+/** @} */ // end of group Calibration
 
 /******************************************************************************
  * RF Sense Structures
@@ -3916,7 +4745,16 @@ typedef struct RAIL_RfSenseSelectiveOokConfig {
  */
 RAIL_ENUM(RAIL_RxChannelHoppingMode_t) {
   /**
-   * Switch to the next channel each time the radio enters RX.
+   * Switch to the next channel each time the radio re-enters RX after
+   * packet reception or a transmit based on the corresponding \ref
+   * State_Transitions. A hop can also be manually triggered by calling
+   * \ref RAIL_CalibrateTemp() while the radio is listening.
+   *
+   * @warning This mode currently does not issue \ref
+   *   RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE when hopping out of
+   *   the last channel in the hop sequence.
+   *   As a workaround, an application can monitor the current hop channel
+   *   with \ref RAIL_GetChannelAlt().
    */
   RAIL_RX_CHANNEL_HOPPING_MODE_MANUAL,
   /**
@@ -4251,7 +5089,7 @@ typedef struct RAIL_RxChannelHoppingConfigMultiMode {
    * lost after this time, in microseconds, measured from entry
    * to Rx -- unless preamble had been sensed in which case any
    * switching is deferred to timingReSense and, if timing is
-   * regained, to syncDetect.  This must be greater than timingSense
+   * regained, to syncDetect. This must be greater than timingSense
    * and less than \ref RAIL_RX_CHANNEL_HOPPING_MAX_SENSE_TIME_US.
    */
   uint32_t preambleSense;
@@ -4336,22 +5174,23 @@ typedef struct RAIL_RxChannelHoppingConfig {
    * data anywhere in this buffer.
    *
    * @note the size of this buffer must be at least as large as
-   * 3 + 30 * numberOfChannels, plus the sum of the sizes of the
+   * 3 + \ref RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL * numberOfChannels,
+   * plus the sum of the sizes of the
    * radioConfigDeltaAdd's of the required channels, plus the size of the
    * radioConfigDeltaSubtract. In the case that one channel
    * appears two or more times in your channel sequence
-   * (e.g., 1, 2, 1, 3), you must account for the radio configuration
-   * size that number of times (i.e., need to count channel 1's
-   * radio configuration size twice for the given example). The overall
-   * 3 words and 30 words per channel needed in this buffer are
+   * (e.g., 1, 2, 3, 2), you must account for the radio configuration
+   * size that number of times (i.e., need to count channel 2's
+   * radio configuration size twice for the given example). The buffer is
    * for internal use to the library.
    */
   uint32_t *buffer;
   /**
    * This parameter must be set to the length of the buffer array, in 32 bit
    * words. This way, during configuration, the software can confirm it's
-   * writing within the range of the buffer. The configuration API will return
-   * an error if bufferLength is insufficient.
+   * writing within the bounds of the buffer. The configuration API will return
+   * an error or trigger \ref RAIL_ASSERT_CHANNEL_HOPPING_BUFFER_TOO_SHORT if
+   * bufferLength is insufficient.
    */
   uint16_t bufferLength;
   /**
@@ -4422,6 +5261,72 @@ typedef struct RAIL_RxDutyCycleConfig {
  */
 
 /**
+ * @typedef RAIL_FrequencyOffset_t
+ * @brief Type that represents the number of Frequency Offset
+ *   units. It is used with \ref RAIL_GetRxFreqOffset() and
+ *   \ref RAIL_SetFreqOffset().
+ *
+ * The units are chip-specific. For EFR32 they are radio synthesizer
+ * resolution steps (synthTicks) and is limited to 15 bits.
+ * A value of \ref RAIL_FREQUENCY_OFFSET_INVALID
+ * means that this value is invalid.
+ */
+typedef int16_t RAIL_FrequencyOffset_t;
+
+/**
+ * The maximum frequency offset value supported.
+ */
+#define RAIL_FREQUENCY_OFFSET_MAX ((RAIL_FrequencyOffset_t) 0x3FFF)
+
+/**
+ * The minimum frequency offset value supported.
+ */
+#define RAIL_FREQUENCY_OFFSET_MIN ((RAIL_FrequencyOffset_t) -RAIL_FREQUENCY_OFFSET_MAX)
+
+/**
+ * Specify an invalid frequency offset value. This will be returned if you
+ * call \ref RAIL_GetRxFreqOffset() at an invalid time.
+ */
+#define RAIL_FREQUENCY_OFFSET_INVALID ((RAIL_FrequencyOffset_t) 0x8000)
+
+/**
+ * @struct RAIL_DirectModeConfig_t
+ * @brief Allows the user to specify direct mode
+ *   parameters using \ref RAIL_ConfigDirectMode().
+ */
+typedef struct RAIL_DirectModeConfig {
+  /** Enable synchronous RX DOUT using DCLK vs. asynchronous RX DOUT. */
+  bool syncRx;
+  /** Enable synchronous TX DIN using DCLK vs. asynchronous TX DIN. */
+  bool syncTx;
+
+  /** RX Data output (DOUT) GPIO port */
+  uint8_t doutPort;
+  /** RX Data output (DOUT) GPIO pin */
+  uint8_t doutPin;
+
+  /** Data clock (DCLK) GPIO port. Only used in synchronous mode */
+  uint8_t dclkPort;
+  /** Data clock (DCLK) GPIO pin. Only used in synchronous mode */
+  uint8_t dclkPin;
+
+  /** TX Data input (DIN) GPIO port */
+  uint8_t dinPort;
+  /** TX Data input (DIN) GPIO pin */
+  uint8_t dinPin;
+
+  /** RX Data output (DOUT) location for doutPort/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t doutLoc;
+  /** Data clock (DCLK) location for dclkPort/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t dclkLoc;
+  /** TX Data input (DIN) location for tdinPort/Pin.
+   *  Only needed on EFR32 Series 1; ignored on other platforms. */
+  uint8_t dinLoc;
+} RAIL_DirectModeConfig_t;
+
+/**
  * @enum RAIL_StreamMode_t
  * @brief Possible stream output modes.
  */
@@ -4429,7 +5334,7 @@ RAIL_ENUM(RAIL_StreamMode_t) {
   RAIL_STREAM_CARRIER_WAVE = 0, /**< An unmodulated carrier wave. */
   RAIL_STREAM_PN9_STREAM = 1,   /**< PN9 byte sequence. */
   RAIL_STREAM_10_STREAM = 2, /**< 101010 sequence. */
-  RAIL_STREAM_CARRIER_WAVE_PHASENOISE = 3, /**< An unmodulated carrier wave with no change to PLL BW. For series-2, same as RAIL_STREAM_CARRIER_WAVE */
+  RAIL_STREAM_CARRIER_WAVE_PHASENOISE = 3, /**< An unmodulated carrier wave with no change to PLL BW. For EFR32 Series 2, same as RAIL_STREAM_CARRIER_WAVE */
   RAIL_STREAM_RAMP_STREAM = 4, /**< ramp sequence starting at a different offset for consecutive packets. Only available for some modulations. Fall back to RAIL_STREAM_PN9_STREAM if not available. */
   RAIL_STREAM_CARRIER_WAVE_SHIFTED = 5, /**< An unmodulated carrier wave not centered on DC but shifted roughly by channel_bandwidth/6 allowing an easy check of the residual DC. Only available for OFDM PA. Fall back to RAIL_STREAM_CARRIER_WAVE_PHASENOISE if not available. */
   RAIL_STREAM_MODES_COUNT   /**< A count of the choices in this enumeration. Must be last. */
@@ -4494,7 +5399,7 @@ typedef struct RAIL_VerifyConfig {
   /** Internal verification tracking information. */
   uint32_t nextIndexToVerify;
   /** Internal verification tracking information. */
-  const uint32_t *override;
+  RAIL_RadioConfig_t override;
   /** Internal verification tracking information. */
   RAIL_VerifyCallbackPtr_t cb;
 } RAIL_VerifyConfig_t;
@@ -4798,6 +5703,105 @@ typedef struct RAIL_ChipTempMetrics {
 
 /** @} */ // end of group Thermal_Protection
 
+// -----------------------------------------------------------------------------
+// Retiming
+// -----------------------------------------------------------------------------
+/**
+ * @addtogroup Retiming Retiming
+ * @{
+ * @brief EFR32-specific retiming capability.
+ * @ingroup RAIL_API
+ *
+ * The EFR product families have many digital and analog modules that can run
+ * in parallel with a radio. These combinations can cause interference and
+ * degradation on the radio RX sensitivity. Retiming can
+ * modify the clocking of the digital modules to reduce the interference.
+ */
+
+/**
+ * @enum RAIL_RetimeOptions_t
+ * @brief Retiming options bit shifts.
+ */
+RAIL_ENUM(RAIL_RetimeOptions_t) {
+  /** Shift position of \ref RAIL_RETIME_OPTION_HFXO bit. */
+  RAIL_RETIME_OPTION_HFXO_SHIFT = 0,
+  /** Shift position of \ref RAIL_RETIME_OPTION_HFRCO bit. */
+  RAIL_RETIME_OPTION_HFRCO_SHIFT,
+  /** Shift position of \ref RAIL_RETIME_OPTION_DCDC bit. */
+  RAIL_RETIME_OPTION_DCDC_SHIFT,
+  /** Shift position of \ref RAIL_RETIME_OPTION_LCD bit. */
+  RAIL_RETIME_OPTION_LCD_SHIFT,
+};
+
+// RAIL_RetimeOptions_t bitmasks
+/**
+ * An option to configure HFXO retiming.
+ */
+#define RAIL_RETIME_OPTION_HFXO \
+  (1U << RAIL_RETIME_OPTION_HFXO_SHIFT)
+
+/**
+ * An option to configure HFRCO retiming.
+ */
+#define RAIL_RETIME_OPTION_HFRCO \
+  (1U << RAIL_RETIME_OPTION_HFRCO_SHIFT)
+
+/**
+ * An option to configure DCDC retiming.
+ * Ignored on platforms that lack DCDC.
+ */
+#define RAIL_RETIME_OPTION_DCDC \
+  (1U << RAIL_RETIME_OPTION_DCDC_SHIFT)
+
+/**
+ * An option to configure LCD retiming.
+ * Ignored on platforms that lack LCD.
+ */
+#define RAIL_RETIME_OPTION_LCD \
+  (1U << RAIL_RETIME_OPTION_LCD_SHIFT)
+
+/** A value representing no retiming options. */
+#define RAIL_RETIME_OPTIONS_NONE 0x0U
+
+/** A value representing all retiming options. */
+#define RAIL_RETIME_OPTIONS_ALL 0xFFU
+
+/**
+ * Configure retiming options.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] mask A bitmask containing which options should be modified.
+ * @param[in] options A bitmask containing desired configuration settings.
+ *   Bit positions for each option are found in the \ref RAIL_RetimeOptions_t.
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_ConfigRetimeOptions(RAIL_Handle_t railHandle,
+                                       RAIL_RetimeOptions_t mask,
+                                       RAIL_RetimeOptions_t options);
+
+/**
+ * Get the currently configured retiming option.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[out] pOptions A pointer to configured retiming options
+                        bitmask indicating which are enabled.
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
+                                    RAIL_RetimeOptions_t *pOptions);
+
+/**
+ * Indicate that the DCDC peripheral bus clock enable has changed allowing
+ * RAIL to react accordingly.
+ *
+ * @note This should be called after DCDC has been enabled or disabled.
+ *
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_ChangedDcdc(void);
+
+/** @} */ // end of group Retiming_EFR32
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 /******************************************************************************
@@ -4832,150 +5836,31 @@ typedef struct RAIL_ChipTempMetrics {
 }
 #endif
 
-// Include appropriate chip-specific types and APIs *after* common types, and
-// *before* types that require chip-specific abstractions.
-#include "rail_chip_specific.h"
+// Define SLI_LIBRARY_BUILD to build a library that does not include
+// chip-dependent defines. This may limit functionality but allows building
+// generic libraries that are not tied to any given chip.
+#ifdef  SLI_LIBRARY_BUILD
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// Platform-agnostic worst-case settings and types
 
-/**
- * @addtogroup RAIL_API
- * @{
- */
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL \
+  RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL_WORST_CASE
 
-/**
- * @addtogroup State_Transitions
- * @{
- */
-
-/**
- * @def RAIL_TRANSITION_TIME_KEEP
- * @brief A value to use in \ref RAIL_StateTiming_t fields when
- *   calling \ref RAIL_SetStateTiming() to keep that timing
- *   parameter at it current setting.
- */
-#define RAIL_TRANSITION_TIME_KEEP ((RAIL_TransitionTime_t) -1)
-
-/**
- * @struct RAIL_StateTiming_t
- * @brief A timing configuration structure for the RAIL State Machine.
- *
- * Configure the timings of the radio state transitions for common situations.
- * All of the listed timings are in microseconds. Transitions from an active
- * radio state to idle are not configurable, and will always happen as fast
- * as possible.
- * No timing value can exceed \ref RAIL_MAXIMUM_TRANSITION_US.
- * Use \ref RAIL_TRANSITION_TIME_KEEP to keep an existing setting.
- *
- * For idleToRx, idleToTx, rxToTx, txToRx, and txToTx a value of 0 for the
- * transition time means that the specified transition should happen as fast
- * as possible, even if the timing cannot be as consistent. Otherwise, the
- * timing value cannot be below \ref RAIL_MINIMUM_TRANSITION_US.
- *
- * For idleToTx, rxToTx, and txToTx setting a longer \ref
- * RAIL_TxPowerConfig_t::rampTime may result in a larger minimum value.
- *
- * For rxSearchTimeout and txToRxSearchTimeout, there is no minimum value. A
- * value of 0 disables the feature, functioning as an infinite timeout.
- */
-typedef struct RAIL_StateTiming {
-  RAIL_TransitionTime_t idleToRx; /**< Transition time from IDLE to RX. */
-  RAIL_TransitionTime_t txToRx; /**< Transition time from TX to RX. */
-  RAIL_TransitionTime_t idleToTx; /**< Transition time from IDLE to TX. */
-  RAIL_TransitionTime_t rxToTx; /**< Transition time from RX packet to TX. */
-  RAIL_TransitionTime_t rxSearchTimeout; /**< Length of time the radio will search for a
-                                            packet when coming from idle or RX. */
-  RAIL_TransitionTime_t txToRxSearchTimeout; /**< Length of time the radio will search for a
-                                                packet when coming from TX. */
-  RAIL_TransitionTime_t txToTx; /**< Transition time from TX packet to TX. */
-} RAIL_StateTiming_t;
-
-/** @} */ // end of group State_Transitions
-
-/**
- * @addtogroup Transmit
- * @{
- */
-
-/**
- * @enum RAIL_TxRepeatOptions_t
- * @brief Transmit repeat options, in reality a bitmask.
- */
-RAIL_ENUM_GENERIC(RAIL_TxRepeatOptions_t, uint16_t) {
-  /** Shift position of \ref RAIL_TX_REPEAT_OPTION_HOP bit */
-  RAIL_TX_REPEAT_OPTION_HOP_SHIFT = 0,
-  /** Shift position of the \ref RAIL_TX_REPEAT_OPTION_START_TO_START bit */
-  RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT = 1,
+struct RAIL_ChannelConfigEntryAttr {
+  RAIL_RxIrCalValues_t calValues;
+  RAIL_TxIrCalValues_t txCalValues; // placeholder for size
 };
 
-/** A value representing no repeat options enabled. */
-#define RAIL_TX_REPEAT_OPTIONS_NONE 0U
-/** All repeat options disabled by default. */
-#define RAIL_TX_REPEAT_OPTIONS_DEFAULT RAIL_TX_REPEAT_OPTIONS_NONE
-/**
- * An option to configure whether or not to channel-hop before each
- * repeated transmit.
- */
-#define RAIL_TX_REPEAT_OPTION_HOP (1U << RAIL_TX_REPEAT_OPTION_HOP_SHIFT)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+#else//!SLI_LIBRARY_BUILD
 
-/**
- * An option to configure the delay between transmissions to be from start to start
- * instead of end to start. Delay must be long enough to cover the prior transmit's time.
- */
-#define RAIL_TX_REPEAT_OPTION_START_TO_START (1 << RAIL_TX_REPEAT_OPTION_START_TO_START_SHIFT)
+// Include appropriate chip-specific types and APIs *after* common types, and
+// *before* types that depend on chip-specific types.
+#include "rail_chip_specific.h"
 
-/// @struct RAIL_TxRepeatConfig_t
-/// @brief A configuration structure for repeated transmits
-///
-/// @note The PA will always be ramped down and up in between transmits so
-/// there will always be some minimum delay between transmits depending on the
-/// ramp time configuration.
-typedef struct RAIL_TxRepeatConfig {
-  /**
-   * The number of repeated transmits to run. A total of (iterations + 1)
-   * transmits will go on-air in the absence of errors.
-   */
-  uint16_t iterations;
-  /**
-   * Repeat option(s) to apply.
-   */
-  RAIL_TxRepeatOptions_t repeatOptions;
-  /**
-   * Per-repeat delay or hopping configuration, depending on repeatOptions.
-   */
-  union {
-    /**
-     * When \ref RAIL_TX_REPEAT_OPTION_HOP is not set, specifies
-     * the delay time between each repeated transmit. Specify \ref
-     * RAIL_TRANSITION_TIME_KEEP to use the current \ref
-     * RAIL_StateTiming_t::txToTx transition time setting. Delay must
-     * be long enough to cover the prior transmit's time.
-     */
-    RAIL_TransitionTime_t delay;
-    /**
-     * When \ref RAIL_TX_REPEAT_OPTION_HOP is set, this specifies
-     * the channel hopping configuration to use when hopping between
-     * repeated transmits. Per-hop delays are configured within each
-     * \ref RAIL_TxChannelHoppingConfigEntry_t::delay rather than
-     * this union's delay field. Delay must be long enough to cover
-     * the prior transmit's time.
-     */
-    RAIL_TxChannelHoppingConfig_t channelHopping;
-  } delayOrHop;
-} RAIL_TxRepeatConfig_t;
+// (Currently no types depend on chip-specific types.)
 
-/// RAIL_TxRepeatConfig_t::iterations initializer configuring infinite
-/// repeated transmissions.
-#define RAIL_TX_REPEAT_INFINITE_ITERATIONS (0xFFFFU)
-
-/** @} */ // end of group Transmit
-
-/** @} */ // end of RAIL_API
-
-#ifdef __cplusplus
-}
-#endif
+#endif //SLI_LIBRARY_BUILD
 
 #endif  // __RAIL_TYPES_H__

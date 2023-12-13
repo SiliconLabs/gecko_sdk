@@ -205,13 +205,12 @@ class BtmeshDfuAppExec(cmd.Cmd):
             # The Network Transmit state is stored in NVM so local configuration
             # shall be performed once when the network is created.
             self.local_conf_nettx()
+            # The SAR Transmitter and Receiver states are stored in NVM so local
+            # configuration shall be performed once when the network is created.
+            self.local_conf_sar()
         # Configure local BT Mesh models
         self.local_conf_dfu()
         self.local_conf_ae()
-        # The SAR Transmitter and Receiver state isn't saved into the NVM.
-        # If it is fixed in the stack then this local SAR configuration shall
-        # run once at network creation only.
-        self.local_conf_sar()
 
     def dfu_init(self):
         dfu_clt_retry_params = BtmeshMulticastRetryParams(
@@ -350,7 +349,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
             # functions don't require initialization call and it is not mandatory
             # to have SAR Configuration Server in the Device Composition Data.
             # These are necessary only to handle SAR Config messages.
-            if app_cfg.conf.auto_conf_sar:
+            if app_cfg.conf.auto_conf_sar or app_cfg.conf.auto_conf_sar_local:
                 sar_tx_status = app_btmesh.conf.set_sar_transmitter(
                     prov_node,
                     app_cfg.conf.sar_tx_segment_interval_step_default,
@@ -391,7 +390,7 @@ class BtmeshDfuAppExec(cmd.Cmd):
                 f"Local SAR TX Multicast Retransmissions Interval Step is "
                 f"{sar_tx_status.multicast_retrans_interval_step} ms."
             )
-            if app_cfg.conf.auto_conf_sar:
+            if app_cfg.conf.auto_conf_sar or app_cfg.conf.auto_conf_sar_local:
                 sar_rx_status = app_btmesh.conf.set_sar_receiver(
                     prov_node,
                     app_cfg.conf.sar_rx_segments_threshold_default,

@@ -42,12 +42,6 @@
 /// Maximum size for the node info frame contained in the SReceiveNodeUpdate struct.
 #define MAX_NODE_INFO_LENGTH 159
 
-#ifdef HOST_SECURITY_INCLUDED
-/* Portable controller related definitions */
-#define ZWAVE_DSK_LENGTH                                          16
-#define ZWAVE_CONTROLLER_MAXIMUM_COMMAND_CLASS_LIST_LENGTH        64
-#endif
-
 #define APPLICATION_INTERFACE_TRANSMIT_ENUM_OFFSET  (0x00)
 #define APPLICATION_INTERFACE_COMMAND_ENUM_OFFSET   (0x40)
 #define APPLICATION_INTERFACE_RECEIVE_ENUM_OFFSET   (0x80)
@@ -1678,8 +1672,12 @@ SIncludedNodeInfo;
 
 typedef struct STest
 {
+  #ifdef ZW_SLAVE
   void (*Handle)(void *);      // Will be returned with transmit status
                                // Allows application to recognize frames
+  #else
+  void (*Handle)(uint8_t, TX_STATUS_TYPE*);
+  #endif
   node_id_t DestNodeId;
   uint8_t PowerLevel;
 } STest;
@@ -1833,7 +1831,7 @@ typedef struct SCommandRequestNodeTypeNeighborUpdate
                                    // Will be returned with transmit status
                                    // Allows application to recognize frames
 
-  E_SYSTEM_TYPE NodeType;	  
+  E_SYSTEM_TYPE NodeType;
   node_id_t NodeId;                // Node to have its neighbors discovered..
 } SCommandRequestNodeTypeNeighborUpdate;
 
@@ -2000,195 +1998,6 @@ typedef struct SReceiveSecurityEvent
   uint8_t aEventData[48];               // Security Event payload
 } SReceiveSecurityEvent;
 
-#ifdef HOST_SECURITY_INCLUDED
-
-/* Portable controller related definitions */
-typedef uint8_t zwave_dsk_t[ZWAVE_DSK_LENGTH];
-typedef uint8_t zwave_keyset_t;
-
-/**
- * @brief Structure holding a Z-Wave node info frame.
- *
- */
-typedef struct {
-  /// This represents the first byte of the NIF, also known as "capability"
-  /// It is composed of several subfields that can be read using the
-  /// ZWAVE_NODE_INFO_LISTENING_PROTOCOL_* masks. For a complete field
-  /// description, refer to @ref application_cc_spec, section Node Information Frame.
-  uint8_t listening_protocol;
-
-  /// This represents the first byte of the NIF, also known as "security"
-  /// It is composed of several subfields that can be read using the
-  /// ZWAVE_NODE_INFO_OPTIONAL_PROTOCOL_* masks. For a complete field
-  /// description, refer to @ref application_cc_spec, section Node Information Frame.
-  uint8_t optional_protocol;
-
-  /// This field indicates the Basic Device Class of the actual node.
-  /// The Basic Device Classes are listed in @ref device_class_spec.
-  /// This byte is omitted by End Nodes and will be set to 0x00 in this case.
-  uint8_t basic_device_class;
-
-  /// This field indicates the Generic Device Class of the actual node.
-  /// The Generic Device Classes are listed in @ref device_class_spec for
-  /// Z-Wave and @ref device_type_spec_v2, @ref device_type_spec for Z-Wave Plus
-  uint8_t generic_device_class;
-
-  /// This field indicates the Specific Device Class of the actual node.
-  /// The Specific Device Classes are listed in @ref device_class_spec for
-  /// Z-Wave and @ref device_type_spec, @ref device_type_spec_v2 for Z-Wave Plus
-  uint8_t specific_device_class;
-
-  /// Length of the command class list
-  uint8_t command_class_list_length;
-
-  /// List of command classes supported by the device.
-  /// This can be removed based on review comment. TODO
-  uint16_t
-    command_class_list[ZWAVE_CONTROLLER_MAXIMUM_COMMAND_CLASS_LIST_LENGTH];
-} zw_node_info_t;
-
-typedef struct SSecureNodeAddedNotification
-{
-  uint32_t status;
-  zw_node_info_t          nif;
-  node_id_t               node_id;
-  zwave_dsk_t             dsk;
-  zwave_keyset_t          granted_keys;
-  int32_t                 kex_fail_type;
-  int32_t                 inclusion_protocol;
-} SSecureNodeAddedNotification;
-
-
-typedef struct SSecureNodeDeletedNotification
-{
-  node_id_t   node_id;
-} SSecureNodeDeletedNotification;
-
-typedef struct SSecureNodeEnteredNetwork
-{
-  uint32_t        home_id;
-  node_id_t       node_id;
-  zwave_keyset_t  granted_keys;
-  int32_t         kex_fail_type;
-} SSecureNodeEnteredNetwork;
-
-typedef struct SSecureNetworkManagement
-{
-  uint32_t  state;
-} SSecureNetworkManagement;
-
-typedef struct SSecureNewSucId
-{
-  node_id_t   node_id;
-} SSecureNewSucId;
-
-typedef struct SSecureNodeFrameTransmission
-{
-  bool transmission_successful;
-  TX_STATUS_TYPE tx_report;
-  node_id_t node_id;
-} SSecureNodeFrameTransmission;
-
-typedef struct SSecureFrameReceivedIndicator
-{
-  node_id_t   node_id;
-} SSecureFrameReceivedIndicator;
-
-/**
- * Used by SECURE to notify application.
- */
-typedef union {
-  SSecureNodeAddedNotification     nodeAddedNotification;
-  SSecureNodeDeletedNotification   nodeDeletedNotification;
-  SSecureNodeEnteredNetwork        nodeEnteredNetwork;
-  SSecureNetworkManagement         nodeNetworkManagement;
-  SSecureNewSucId                  nodeNewSucId;
-  SSecureNodeFrameTransmission     nodeFrameTransmission;
-  SSecureFrameReceivedIndicator    nodeFrameReceivedIndicator;
-}USecureAppNotification;
-
-/*********************************************************
- * EZWAVETRANSMITTYPE_SECURE command parameter.
- ********************************************************/
-
-typedef struct {
-  union {
-    /// Node Id
-    node_id_t node_id;
-
-    /// Multicast node-list to use when sending multicast messages.
-    NODE_MASK_TYPE_ALL nodeList;
-  } address;
-
-  /// Endpoint Id. Set to 0 if a message is sent or received  without
-  /// Multi Channel encapsulation
-  /// Note that bit 7 is a multi-endpoint mask addressing. If bit 7 is set to 1
-  /// the endpoint_id field MUST be interpreted as a bitmask, with bit 0
-  /// representing endpoint 1, bit 1, representing endpoint 2, ...,
-  /// bit 6 representing endpoint 7.
-  uint8_t endpoint_id;
-
-  /// This flag is set to true if it should be sent as a multicast frame.
-  bool is_multicast;
-
-} ZW_controller_endpoint_t;
-
-/**
- * @brief Structure holding information about the source and destination
- * when transmitting and receiving Z-Wave frames.
- */
-typedef struct {
-  /// Local end of this connection, ie this device.
-  /// Only the endpoint needs to be set!
-  ZW_controller_endpoint_t local;
-
-  /// remote end of this connection, ie not this device.
-  ZW_controller_endpoint_t remote;
-
-} ZW_controller_connection_info_t;
-
-typedef struct {
-  /// The underlying services will wait for the expected responses to a frame before
-  /// transmitting the next frame. It will time out and resume TX operations after a
-  /// recommended backoff time for the expected number of responses.
-  /// If S2 uses the supervision mechanism, the number of expected responses should be
-  /// equal or greater than 1.
-  /// It is possible to specify that multiple responses are expected.
-  /// In case of Supervision with status update flag, the number_of_responses should
-  /// be set to 1, as only one frame will be returned immediately for sure, the other(s) one will
-  /// come later after an arbitrary time.
-  ///
-  /// Generally, for GET commands, set to 1, for SET commands set to 0.
-  uint8_t number_of_responses;
-
-  /// Maximum time in ms this transmission is allowed to spend in queue waiting
-  /// to be processed before it is dropped. Discard timeout of 0 means to never
-  /// drop the frame. (It won't be dropped while in queue, but can be dropped due to
-  /// other mechanisms.)
-  uint32_t discard_timeout_ms;
-
-  /// This flag indicates if the frame is to be sent as a test frame
-  /// Test frame was intended to be used to test link reliability, the
-  /// Z-Wave API will send a test frame without any routing and with 9600 kbit/s
-  /// transmission speed. The payload will also be ignored.
-  bool is_test_frame;
-
-  /// This value indicates if the a test frame must be sent
-  /// with a particular Tx Power. This value will be ignored if the
-  /// is_test_frame flag is set to false.
-  zpal_radio_tx_power_t rf_power;
-} ZW_tx_options_t;
-
-typedef struct {
-  ZW_controller_connection_info_t  connection;
-  ZW_tx_options_t                  tx_options;
-  zwave_keyset_t                   tx_keys;
-  uint16_t                         data_length;
-  uint8_t                          data[TX_BUFFER_SIZE];
-  void                             (*ptxCompleteCallback)(uint8_t, const TX_STATUS_TYPE*);
-}SSecureSendData;
-#endif  // HOST_SECURITY_INCLUDED
-
 /**
  * Transmit Parameters Union used by @ref SZwaveTransmitPackage
  */
@@ -2219,13 +2028,6 @@ typedef union UTransmitParameters
   SSendSlaveNodeInformation       SendSlaveNodeInformation;
   // Slave API
   SRequestNewRouteDestinations    RequestNewRouteDestinations;
-#ifdef HOST_SECURITY_INCLUDED
-  /***************************************
-   * Needed structures for APP data and
-   * delivery to UNIFY.
-   ***************************************/
-  SSecureSendData                  SendDataParams;
-#endif  // HOST_SECURITY_INCLUDED
 } UTransmitParameters;
 
 /**
@@ -2271,14 +2073,6 @@ typedef union UCommandStatus
   SZWaveGeneric8bStatus         GetPTIconfig;
   SZWaveGenericBoolStatus       SetTxAttenuation;
   SZWaveTxPowerMaxSupported     GetTxPowerMaximumSupported;
-
-#ifdef HOST_SECURITY_INCLUDED
-  /***************************************
-   * Needed structures for SECURE data and
-   * notification delivery to application.
-   ***************************************/
-  USecureAppNotification        USecureAppNotification;          // 163 bytes
-#endif  // HOST_SECURITY_INCLUDED
 } UCommandStatus;
 
 typedef union UReceiveCmdPayload

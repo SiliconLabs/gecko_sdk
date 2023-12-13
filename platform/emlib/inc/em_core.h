@@ -50,10 +50,6 @@
 #define SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING   0
 #endif
 
-#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
-#include "sl_cycle_counter.h"
-#endif
-
 /***************************************************************************//**
  * @addtogroup core
  * @{
@@ -180,23 +176,6 @@ extern "C" {
  * @param[in] enable
  *   Mask specifying which NVIC interrupts to briefly enable. */
 #define CORE_YIELD_NVIC(enable)   CORE_YieldNvicMask(enable)
-
-//
-//  Miscellaneous macros.
-//
-
-// Support for cycle counter
-#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
-/** Start counter. */
-#define START_COUNTER(handle) sl_cycle_counter_start(handle)
-/** Stop counter. */
-#define STOP_COUNTER(handle) sl_cycle_counter_stop(handle)
-#else
-/** Start counter. */
-#define START_COUNTER(handle)
-/** Stop counter. */
-#define STOP_COUNTER(handle)
-#endif
 
 /*******************************************************************************
  *************************   TYPEDEFS   ****************************************

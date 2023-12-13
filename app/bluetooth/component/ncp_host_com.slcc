@@ -11,7 +11,6 @@ quality: production
 root_path: app/bluetooth/common/ncp_host_com
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_ncp_host_com_config.h
 source:
@@ -39,3 +38,6 @@ template_contribution:
       event: is_ok_to_sleep
       include: sl_ncp_host_com.h
       handler: sl_ncp_host_is_ok_to_sleep
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/ncp-host-com

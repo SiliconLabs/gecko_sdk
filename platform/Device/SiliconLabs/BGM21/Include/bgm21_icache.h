@@ -245,4 +245,4 @@ typedef struct {
 /** @} End of group BGM21_ICACHE */
 /** @} End of group Parts */
 
-#endif /* BGM21_ICACHE_H */
+#endif // BGM21_ICACHE_H

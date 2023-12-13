@@ -53,6 +53,7 @@ sl_status_t sl_math_mvp_vector_dot_product_f16(const float16_t *input_a,
   uint32_t rows, cols;
   bool use_complex;
   float16_t *temporary_output;
+  sl_status_t status = SL_STATUS_OK;
 
   if (!input_a || !input_b || !output || !num_elements) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -91,7 +92,6 @@ sl_status_t sl_math_mvp_vector_dot_product_f16(const float16_t *input_a,
   ofs_remainder = num_elements - len_remainder;
 
 #if USE_MVP_PROGRAMBUILDER
-  sl_status_t status = SL_STATUS_OK;
   const int vector_x = SLI_MVP_ARRAY(0);
   const int vector_y = SLI_MVP_ARRAY(1);
   const int vector_z = SLI_MVP_ARRAY(2);
@@ -158,8 +158,9 @@ sl_status_t sl_math_mvp_vector_dot_product_f16(const float16_t *input_a,
   if (status != SL_STATUS_OK) {
     return status;
   }
-  sli_mvp_pb_execute_program(p);
-
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
 #else
 
   sli_mvp_cmd_enable();
@@ -251,14 +252,13 @@ sl_status_t sl_math_mvp_vector_dot_product_f16(const float16_t *input_a,
 
   // Start program.
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
-
 #endif // USE_MVP_PROGRAMBUILDER
 
-  sli_mvp_cmd_wait_for_completion();
+  status = sli_mvp_cmd_wait_for_completion();
 
   if (use_complex) {
     output[0] = temporary_output[0];
   }
 
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return status;
 }

@@ -70,6 +70,12 @@ static const osEventFlagsAttr_t bluetooth_event_flags_attr = {
   .cb_size = osEventFlagsCbSize
 };
 
+uint8_t sl_btctrl_rtos_get_stack_space(uint32_t *stack_space)
+{
+  *stack_space = osThreadGetStackSpace(tid_thread_link_layer);
+  return 0;
+}
+
 static void sl_btctrl_rtos_deinit()
 {
   (void) osEventFlagsDelete(bluetooth_event_flags);

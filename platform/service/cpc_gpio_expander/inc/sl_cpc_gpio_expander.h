@@ -40,10 +40,10 @@
  ******************************************************************************/
 /// @brief Struct representing a cpc gpio expander handle.
 typedef struct {
-  const GPIO_Port_TypeDef port;
-  const uint32_t pin;
-  const char *name;
-  uint32_t config;
+  const GPIO_Port_TypeDef port;                    ///< port
+  const uint32_t pin;                              ///< pin
+  const char *name;                                ///< name
+  uint32_t config;                                 ///< config
 } sl_cpc_gpio_expander_handle_t;
 
 #ifdef __cplusplus

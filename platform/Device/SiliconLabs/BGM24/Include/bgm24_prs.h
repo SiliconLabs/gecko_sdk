@@ -1618,4 +1618,4 @@ typedef struct {
 /** @} End of group BGM24_PRS */
 /** @} End of group Parts */
 
-#endif /* BGM24_PRS_H */
+#endif // BGM24_PRS_H

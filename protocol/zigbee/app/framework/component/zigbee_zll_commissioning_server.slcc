@@ -1,16 +1,15 @@
 package: Zigbee
-description: Server-side implementation of the Zigbee 3.0 Touchlink commissioning
-  mechanism.
+description: Server-side implementation of the Zigbee 3.0 Touchlink commissioning mechanism.
 label: ZLL Commissioning Server
 quality: production
 id: zigbee_zll_commissioning_server
 category: Zigbee|Zigbee Light Link
 provides:
-   - name: "zigbee_zll_commissioning_server"
+  - name: zigbee_zll_commissioning_server
 requires:
-   - name: "zigbee_zll"
-   - name: "zigbee_interpan"
-   - name: "zigbee_zll_commissioning_common"
+  - name: zigbee_zll
+  - name: zigbee_interpan
+  - name: zigbee_zll_commissioning_common
 config_file:
   - path: protocol/zigbee/app/framework/plugin/zll-commissioning-server/config/zll-commissioning-server-config.h
 source:

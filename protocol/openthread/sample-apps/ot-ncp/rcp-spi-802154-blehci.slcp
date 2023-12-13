@@ -18,6 +18,7 @@ category: OpenThread Examples
 quality: production
 
 component:
+  - id: ot_crash_handler
   - id: ot_stack_rcp
   - id: ot_ncp_cpc
   - id: cpc_secondary_driver_spi_usart
@@ -32,7 +33,8 @@ component:
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_advertiser
   - id: bluetooth_feature_connection_phy_update
-  - id: bluetooth_feature_scanner
+  - id: bluetooth_feature_legacy_scanner
+  - id: bluetooth_feature_extended_scanner
   - id: bluetooth_feature_extended_advertiser
   - id: rail_lib_multiprotocol
 
@@ -81,7 +83,7 @@ configuration:
   - name: OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
     value: 1
   - name: OPENTHREAD_CONFIG_DIAG_ENABLE
-    value: 1  
+    value: 1
   - name: OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE

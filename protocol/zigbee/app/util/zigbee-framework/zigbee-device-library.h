@@ -117,27 +117,6 @@ EmberStatus emberMatchDescriptorsRequest(EmberNodeId target,
                                          EmberApsOption options);
 /** @} END name group */
 
-/** @name Binding Manager Functions
- * @{
- */
-
-/** An end device bind request to the coordinator. The simple
- * descriptor of the specified endpoint is used to construct the request. If the
- * coordinator receives a second end device bind request then a binding is
- * created for every matching cluster.
- *
- * @param endpoint  The endpoint on the local device whose simple descriptor
- * will be used to create the request.
- * @param options  The options to use when sending the request. See
- * emberSendUnicast() for a description.
- *
- * @return An EmberStatus value. ::EMBER_SUCCESS, ::EMBER_NO_BUFFERS,
- * ::EMBER_NETWORK_DOWN or ::EMBER_NETWORK_BUSY.
- */
-EmberStatus emberEndDeviceBindRequest(uint8_t endpoint,
-                                      EmberApsOption options);
-/** @} END name group */
-
 /** @name Decode Address Response Messages
  * @{
  */

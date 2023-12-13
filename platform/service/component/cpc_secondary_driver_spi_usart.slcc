@@ -21,8 +21,6 @@ provides:
   - name: cpc_secondary_driver_spi_usart_interface
   - name: cpc_secondary_driver
     allow_multiple: false
-  - name: cpc_secondary_driver_spi      # Keep it for backward compatibility
-    allow_multiple: false
   - name: cpc_secondary_driver_spi_usart
     allow_multiple: false
 requires:
@@ -46,3 +44,5 @@ template_contribution:
     value: spi
   - name: cpc_periph_type
     value: usart
+  - name: component_catalog
+    value: cpc_driver_spi

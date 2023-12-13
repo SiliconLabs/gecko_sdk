@@ -38,8 +38,8 @@
 static unsigned int tx_channel, rx_channel;
 
 // Transfer and reception buffers
-static char tx_buffer[TX_BUFFER_SIZE];
-static char rx_buffer[RX_BUFFER_SIZE];
+static char tx_buffer[TX_BUFFER_SIZE + 1]; // An extra character for the NULL character
+static char rx_buffer[RX_BUFFER_SIZE + 1]; // An extra character for the NULL character
 
 // Flag indicating that the DMA data transfer is completed on reception channel
 static volatile bool rx_transfer_complete;

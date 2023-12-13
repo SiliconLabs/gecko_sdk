@@ -31,12 +31,17 @@
 #ifndef __SL_WISUN_MC_COMMON_H__
 #define __SL_WISUN_MC_COMMON_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
 
 #include <inttypes.h>
-#include "socket.h"
+#include "sl_mempool.h"
+#include "socket/socket.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -52,30 +57,38 @@
 #define SL_WISUN_METER_LED1_TOGGLE_PAYLOAD_STR            "LED1"
 
 /// Meter-Collector mutex acquire macro function
+#ifndef sl_wisun_mc_mutex_acquire
 #define sl_wisun_mc_mutex_acquire(__hnd) \
   do {                                   \
     __hnd.resource_hnd.lock();           \
   } while (0)
+#endif
 
 /// Meter-Collector mutex release macro function
+#ifndef sl_wisun_mc_mutex_release
 #define sl_wisun_mc_mutex_release(__hnd) \
   do {                                   \
     __hnd.resource_hnd.unlock();         \
   } while (0)
+#endif
 
 /// Release meter collector mutex and return with value helper macro function
+#ifndef sl_wisun_mc_release_mtx_and_return_val
 #define sl_wisun_mc_release_mtx_and_return_val(__hnd, __retval) \
   do {                                                          \
     __hnd.resource_hnd.unlock();                                \
     return (__retval);                                          \
   } while (0)
+#endif
 
 /// Release meter collector mutex and return helper macro function
+#ifndef sl_wisun_mc_release_mtx_and_return
 #define sl_wisun_mc_release_mtx_and_return(__hnd) \
   do {                                            \
     __hnd.resource_hnd.unlock();                  \
     return;                                       \
   } while (0)
+#endif
 
 /// LED0 ID
 #define SL_WISUN_METER_LED0               (0U)
@@ -86,19 +99,47 @@
 /// LED unknown
 #define SL_WISUN_METER_LED_UNKNOWN        (255U)
 
+/// Length of the request type section
+#define SL_WISUN_METER_REQUEST_TYPE_LENGTH          4
+
+/// Delimiter for the request message
+#define SL_WISUN_METER_REQUEST_DELIMITER            "\0"
+
+/// Register request type string
+#define SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER    "reqr"
+
+/// Async request type string
+#define SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC       "reqa"
+
+/// Remove request type string
+#define SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE      "reqd"
+
+/// Request type definition
+typedef enum sl_wisun_request_type {
+  SL_WISUN_MC_REQ_ASYNC,
+  SL_WISUN_MC_REQ_REGISTER,
+  SL_WISUN_MC_REQ_REMOVE,
+  SL_WISUN_MC_REQ_RD,
+  SL_WISUN_MC_REQ_UNKNOWN
+} sl_wisun_request_type_t;
+
 /// Meter entry type definition
 typedef struct sl_wisun_meter_entry {
-  /// Schedule in millisecond
-  uint32_t schedule;
-  /// Schedule tick counter
-  uint32_t schedule_tick_counter;
   /// Address structure for meter
-  wisun_addr_t addr;
+  sockaddr_in6_t addr;
   /// Request sent timestamp
   uint32_t req_sent_timestamp;
   /// Response received timestamp
   uint32_t resp_recv_timestamp;
+  /// Type of the meter
+  uint8_t type;
 } sl_wisun_meter_entry_t;
+
+/// Collector entry type definition
+typedef struct sl_wisun_collector_entry {
+  /// Address structure for collector
+  sockaddr_in6_t addr;
+} sl_wisun_collector_entry_t;
 
 /// Mutex lock callback type definition
 typedef void (*sl_wisun_mc_lock_t)(void);
@@ -121,44 +162,10 @@ typedef struct sl_wisun_meter_request {
   uint8_t *buff;
 } sl_wisun_meter_request_t;
 
-/// Collector receive handler type definition
-typedef sl_wisun_meter_entry_t * (*sl_wisun_collector_recv_hnd_t)(int32_t);
-
-/// Collector send handler type definition
-typedef sl_status_t (*sl_wisun_collector_send_hnd_t)(int32_t, sl_wisun_meter_entry_t *, sl_wisun_meter_request_t *);
-
-/// Collector measurement timeout handler type definition
-typedef void (*sl_wisun_collector_timeout_hnd_t)(sl_wisun_meter_entry_t *);
-
-/// Get meter entry by address handler type definition
-typedef sl_wisun_meter_entry_t * (*sl_wisun_collector_get_meter_entry_t)(const wisun_addr_t * const);
-
-/// Collector handler type definition
-typedef struct sl_wisun_collector_hnd {
-  /// Resource handler
-  sl_wisun_mc_resource_hnd_t resource_hnd;
-  /// Receive handler
-  sl_wisun_collector_recv_hnd_t recv;
-  /// Send handler
-  sl_wisun_collector_send_hnd_t send;
-  /// Timeout handler
-  sl_wisun_collector_timeout_hnd_t timeout;
-  /// Get meter entry by address
-  sl_wisun_collector_get_meter_entry_t get_meter;
-} sl_wisun_collector_hnd_t;
-
-/// Collector handler type definition
-typedef struct sl_wisun_meter_hnd {
-  /// Resource handler
-  sl_wisun_mc_resource_hnd_t resource_hnd;
-} sl_wisun_meter_hnd_t;
-
 /// Measurement packet structure
 typedef struct sl_wisun_meter_packet {
   /// ID
   uint16_t id;
-  /// Schedule    [millisecond]
-  uint32_t schedule;
   /// Temperature [milliCelsius]
   int32_t temperature;
   /// Humidity    [Rel% * 1000]
@@ -172,8 +179,6 @@ SL_PACK_START(1)
 typedef struct sl_wisun_meter_packet_packed {
   /// ID
   uint16_t id;
-  /// Schedule    [millisecond]
-  uint32_t schedule;
   /// Temperature [milliCelsius]
   int32_t temperature;
   /// Humidity    [Rel% * 1000]
@@ -182,6 +187,62 @@ typedef struct sl_wisun_meter_packet_packed {
   uint16_t light;
 } sl_wisun_meter_packet_packed_t;
 SL_PACK_END()
+
+/// Collector received packet parser type definition
+typedef sl_wisun_meter_entry_t * (*sl_wisun_collector_parse_t)(void *, int32_t, const sockaddr_in6_t * const);
+
+/// Collector measurement timeout handler type definition
+typedef void (*sl_wisun_collector_timeout_hnd_t)(sl_wisun_meter_entry_t *);
+
+/// Collector handler type definition
+typedef struct sl_wisun_collector_hnd {
+  /// Resource handler
+  sl_wisun_mc_resource_hnd_t resource_hnd;
+  /// Receive handler
+  sl_wisun_collector_parse_t parse;
+  /// Timeout handler
+  sl_wisun_collector_timeout_hnd_t timeout;
+} sl_wisun_collector_hnd_t;
+
+/// Type definition for measurement packet storage
+typedef struct {
+  sl_wisun_meter_packet_t * const buffer;
+  const uint8_t buf_size;
+  uint8_t stored;
+} sl_wisun_meter_packet_storage_t;
+
+/// Meter received packet parser type definition
+typedef sl_status_t (*sl_wisun_meter_parse_t)(const void * const,
+                                              int32_t,
+                                              sl_wisun_request_type_t * const);
+
+/// Meter build measurement data handler type definition
+typedef sl_status_t (*sl_wisun_meter_build_hnd_t)(const sl_wisun_request_type_t,
+                                                  const sl_wisun_meter_packet_t * const,
+                                                  const uint8_t, uint8_t * const,
+                                                  uint32_t * const);
+
+/// Meter type definition for the function for deciding if measurement is necessary
+typedef bool (*sl_wisun_meter_meas_branching_t)(sl_mempool_t *, const uint32_t);
+
+/// Meter type definition for the function for deciding if sending is necessary
+typedef bool (*sl_wisun_meter_send_branching_t)(sl_wisun_meter_packet_storage_t *,
+                                                sl_wisun_collector_entry_t *,
+                                                uint8_t *);
+
+/// Meter handler type definition
+typedef struct sl_wisun_meter_hnd {
+  /// Resource handler
+  sl_wisun_mc_resource_hnd_t resource_hnd;
+  /// Received packet parser function
+  sl_wisun_meter_parse_t parse;
+  /// Build function
+  sl_wisun_meter_build_hnd_t build;
+  /// Measurement branching function
+  sl_wisun_meter_meas_branching_t is_measurement_necessary;
+  /// Sending branching function
+  sl_wisun_meter_send_branching_t is_sending_necessary;
+} sl_wisun_meter_hnd_t;
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -211,16 +272,27 @@ void sl_wisun_collector_set_initializer(sl_wisun_collector_hnd_t *hnd,
  * @brief Set callback functions for handler.
  * @details If the callback is NULL, the default handler will be set
  * @param[in,out] hnd Handler
- * @param[in] receiver Receiver callback
- * @param[in] sender Sender Callback
+ * @param[in] parser Parser callback
  * @param[in] timeout_hnd Timeout handler
- * @param[in] get_meter_hnd Get meter callback
  *****************************************************************************/
 void sl_wisun_collector_set_handler(sl_wisun_collector_hnd_t *hnd,
-                                    sl_wisun_collector_recv_hnd_t receiver,
-                                    sl_wisun_collector_send_hnd_t sender,
-                                    sl_wisun_collector_timeout_hnd_t timeout_hnd,
-                                    sl_wisun_collector_get_meter_entry_t get_meter);
+                                    sl_wisun_collector_parse_t parser,
+                                    sl_wisun_collector_timeout_hnd_t timeout_hnd);
+
+/**************************************************************************//**
+ * @brief Set callback functions for handler.
+ * @details If the callback is NULL, the default handler will be set
+ * @param[in,out] hnd Handler
+ * @param[in] parser Parser callback
+ * @param[in] build Build callback
+ * @param[in] is_measurement_necessary Measurement branching callback
+ * @param[in] is_sending_necessary Sending branching callback
+ *****************************************************************************/
+void sl_wisun_meter_set_handler(sl_wisun_meter_hnd_t *hnd,
+                                sl_wisun_meter_parse_t parser,
+                                sl_wisun_meter_build_hnd_t build,
+                                sl_wisun_meter_meas_branching_t is_measurement_necessary,
+                                sl_wisun_meter_send_branching_t is_sending_necessary);
 
 /**************************************************************************//**
  * @brief Init Meter handler.
@@ -237,14 +309,6 @@ void sl_wisun_meter_init_hnd(sl_wisun_meter_hnd_t *hnd);
  *****************************************************************************/
 void sl_wisun_meter_set_initializer(sl_wisun_meter_hnd_t *hnd,
                                     sl_wisun_mc_init_t initializer);
-
-/**************************************************************************//**
-* @brief Set measurement request.
-* @details This request is sent periodically to get
-*          measurement data from the meter
-* @param[in] req  Measurement request
-******************************************************************************/
-void sl_wisun_collector_set_measurement_request(const sl_wisun_meter_request_t * const req);
 
 /**************************************************************************//**
  * @brief Init internal token.
@@ -300,7 +364,7 @@ void sl_wisun_mc_print_mesurement(const char *ip_address,
  * @return true On success
  * @return false On error
  *****************************************************************************/
-bool sl_wisun_mc_compare_token(const uint8_t *token, const uint16_t token_size);
+bool sl_wisun_mc_compare_token(const char *token, const uint16_t token_size);
 
 /**************************************************************************//**
  * @brief Get LED ID from payload string.
@@ -317,4 +381,19 @@ uint8_t sl_wisun_mc_get_led_id_from_payload(const char *payload_str);
  * @return const char* Payload string
  *****************************************************************************/
 const char *sl_wisun_mc_get_led_payload_by_id(const uint8_t led_id);
+
+/**************************************************************************//**
+ * @brief Compare byte address.
+ * @details byte comparison for addresses
+ * @param[in] addr1 address 1
+ * @param[in] addr2 address 2
+ * @return true if addresses has been matched
+ * @return false if addresses has not been matched
+ *****************************************************************************/
+bool sl_wisun_mc_compare_address(const sockaddr_in6_t *addr1, const sockaddr_in6_t *addr2);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

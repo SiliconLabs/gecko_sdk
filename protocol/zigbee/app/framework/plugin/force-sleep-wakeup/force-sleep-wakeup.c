@@ -35,6 +35,21 @@ extern void sli_802154mac_purge_transmit_queue(void);
 extern void sli_802154mac_purge_incoming_queue(void);
 
 bool force_sleep = false;
+static sl_zigbee_event_t force_sleep_wakeup_event;
+
+static void force_sleep_wakeup_event_handler(sl_zigbee_event_t *event)
+{
+  force_sleep = false;
+  sli_mac_lower_mac_force_sleep(false);
+  sl_zigbee_core_debug_print("Wakeup\n");
+}
+
+void sli_zigbee_af_force_sleep_wakeup_init_callback(uint8_t init_level)
+{
+  (void)init_level;
+
+  sl_zigbee_event_init(&force_sleep_wakeup_event, force_sleep_wakeup_event_handler);
+}
 
 void sl_zigbee_app_framework_force_stop(void)
 {
@@ -53,9 +68,7 @@ void sl_zigbee_app_framework_force_stop(void)
 
 void sl_zigbee_app_framework_force_wakeup(void)
 {
-  force_sleep = false;
-  sli_mac_lower_mac_force_sleep(false);
-  sl_zigbee_core_debug_print("Wakeup\n");
+  sl_zigbee_event_set_active(&force_sleep_wakeup_event);
 }
 // When force_sleep is set, this function will bypass power manager logic and immediately
 // setup zigbee so it is ready to sleep

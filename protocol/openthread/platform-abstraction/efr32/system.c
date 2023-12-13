@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include <string.h>
 
 #include <openthread-core-config.h>
-#include "openthread-system.h"
+#include <openthread-system.h>
 #include "utils/uart.h"
 
 #include "common/logging.hpp"
@@ -47,6 +47,15 @@
 #include "rail.h"
 #include "sl_mpu.h"
 #include "sl_sleeptimer.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
+#include "sl_rcp_gp_interface.h"
+#endif // SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
+
 #if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
 #include "sl_malloc.h"
 #include "openthread/heap.h"
@@ -55,13 +64,6 @@
 #include "platform-efr32.h"
 #include "sl_openthread.h"
 
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif // SL_COMPONENT_CATALOG_PRESENT
-#ifdef SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
-#include "sl_rcp_gp_interface.h"
-#endif // SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT
-
 #define USE_EFR32_LOG (OPENTHREAD_CONFIG_LOG_OUTPUT == OPENTHREAD_CONFIG_LOG_OUTPUT_PLATFORM_DEFINED)
 
 otInstance *sInstance;
@@ -69,7 +71,7 @@ otInstance *sInstance;
 #ifndef SL_COMPONENT_CATALOG_PRESENT
 __WEAK void sl_openthread_init(void)
 {
-    // Place holder for enabling Silabs specific features available only through Simplicity Studio
+    // Placeholder for enabling Silabs specific features available only through Simplicity Studio
 }
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
@@ -111,7 +113,7 @@ void otSysProcessDrivers(otInstance *aInstance)
     sInstance = aInstance;
 
     // should sleep and wait for interrupts here
-#if (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
+#if defined(SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
     efr32GpProcess();
 #endif
 

@@ -48,7 +48,7 @@ void ZAF_Reset(void);
  * Returns the task handle set by ZAF_Init().
  * @return Task handle.
  */
-TaskHandle_t ZAF_getAppTaskHandle();
+TaskHandle_t ZAF_getAppTaskHandle(void);
 
 /**
  * Makes the node stay awake for either 2 or 10 seconds.

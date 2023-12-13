@@ -413,8 +413,8 @@ class Proxy(BtmeshComponent):
     ) -> Tuple[str, GapAddrType]:
         bd_addr = 0
         bd_addr_type = GapAddrType.UNKNOWN_VALUE
-        # The gen_scan_reports method can yield deprecated, legacy and extended
-        # advertisement report scanner events.
+        # The gen_scan_reports method can yield legacy and extended advertisement
+        # report scanner events.
         # All these events contain the advertisement data in the data attribute.
         for scan_report in self.gen_scan_reports(max_time=scan_time):
             sc, match = self.lib.btmesh.prov.test_identity(
@@ -450,7 +450,6 @@ class Proxy(BtmeshComponent):
         try:
             for scan_report in self.lib.gen_events(
                 event_selector=[
-                    "bt_evt_scanner_scan_report",
                     "bt_evt_scanner_legacy_advertisement_report",
                     "bt_evt_scanner_extended_advertisement_report",
                 ],

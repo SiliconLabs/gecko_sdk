@@ -3,7 +3,6 @@ label: CBKE core
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
 description: Certificate-Based Key Exchange Library. It provides support for managing the Elliptic Curve Cryptography (ECC) operations.  It provides key agreement and ephemeral key generation interfaces with the ability to save the generated link key key.  It is used by the Smart Energy 1.x Profile to authenticate and authorize devices.
 
 provides:
@@ -13,7 +12,7 @@ requires:
   - name: zigbee_cbke_core_implementation
   - name: zigbee_cbke_core_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_security_link_keys
   # The CBKE Core library requires the selection of either the CBKE 163k1 library,
   # the CBKE 283k1 library, or both libraries. The current recommended library is
@@ -21,7 +20,7 @@ requires:
   - name: zigbee_ecc_curve_support
 
 recommends:
-  - id: zigbee_cbke_core_source
+  - id: zigbee_cbke_core_library_internal
   - id: zigbee_cbke_283k1
 
 include:
@@ -46,38 +45,38 @@ template_contribution:
     value:
       callback_type: dsa_sign
       function_name: sli_zigbee_af_dsa_sign_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: dsa_verify
       function_name: sli_zigbee_af_dsa_verify_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys
       function_name: sli_zigbee_af_generate_cbke_keys_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs
       function_name: sli_zigbee_af_calculate_smacs_callback
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: generate_cbke_keys_handler283k1
       function_name: sli_zigbee_af_generate_cbke_keys_callback_283k1
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_stack_callback
     value:
       callback_type: calculate_smacs_handler283k1
       function_name: sli_zigbee_af_calculate_smacs_callback_283k1
-    condition:  
-       - zigbee_ncp
+    condition:
+      - zigbee_ncp
   - name: zigbee_ncp_callback
     value:
       callback_type: set_configuration_value

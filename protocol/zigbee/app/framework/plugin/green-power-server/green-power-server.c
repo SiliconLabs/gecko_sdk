@@ -41,6 +41,7 @@
 #endif //SL_CATALOG_ZIGBEE_GREEN_POWER_TRANSLATION_TABLE_PRESENT
 
 #include "stack/include/gp-types.h"
+#include "stack/gp/gp-proxy-table.h"
 #include "stack/gp/gp-sink-table.h"
 #include "green-power-server.h"
 
@@ -76,6 +77,7 @@ typedef struct {
   uint8_t numberOfEndpoints;
 } SupportedGpdCommandClusterEndpointMap;
 
+EmberAfStatus defaultResponseFailureStatus;
 sl_zigbee_event_t emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEvent;
 void emberAfPluginGreenPowerServerGenericSwitchCommissioningTimeoutEventHandler(sl_zigbee_event_t * event);
 sl_zigbee_event_t emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEvent;
@@ -86,10 +88,6 @@ void emberAfPluginGreenPowerServerCommissioningWindowTimeoutEventHandler(sl_zigb
 #define multiSensorCommissioningTimeout (&emberAfPluginGreenPowerServerMultiSensorCommissioningTimeoutEvent)
 #define commissioningWindowTimeout (&emberAfPluginGreenPowerServerCommissioningWindowTimeoutEvent)
 
-extern void emberHmacAesHash(const uint8_t *key,
-                             const uint8_t *data,
-                             uint8_t dataLength,
-                             uint8_t *result);
 static void import_load_zb_sec_man_internal_key(sl_zb_sec_man_key_t* key);
 
 static GpCommDataSaved gpdCommDataSaved[EMBER_AF_PLUGIN_GREEN_POWER_SERVER_COMMISSIONING_GPD_INSTANCES] = { 0 };
@@ -118,23 +116,9 @@ static bool gpdAddrZero(EmberGpAddress *gpdAddr)
   return emberAfGreenPowerCommonGpAddrCompare(&gpdAddrZero, gpdAddr);
 }
 
-static uint8_t gpNumberOfSinkEntriesInSinkTable(void)
-{
-  uint8_t validEntriesCount = 0;
-  EmberGpSinkTableEntry entry;
-  for (int entryIndex = 0; entryIndex < EMBER_GP_SINK_TABLE_SIZE; entryIndex++) {
-    if (emberGpSinkTableGetEntry(entryIndex, &entry) == EMBER_SUCCESS) {
-      if (entry.status == EMBER_GP_SINK_TABLE_ENTRY_STATUS_ACTIVE) {
-        validEntriesCount++;
-      }
-    }
-  }
-  return validEntriesCount;
-}
-
 static uint8_t gpNumberOfFreeSinkEntries(void)
 {
-  return (EMBER_GP_SINK_TABLE_SIZE - gpNumberOfSinkEntriesInSinkTable());
+  return (EMBER_GP_SINK_TABLE_SIZE - emberGpSinkTableGetNumberOfActiveEntries());
 }
 
 static uint8_t gpNumberOfTempAllocatedCommisioningInstances(void)
@@ -213,14 +197,13 @@ static void writeInvolveTCBit(void)
     // If centralised - checkif default TC link key is used
     const EmberKeyData linkKey = { GP_DEFAULT_LINK_KEY };
     sl_zb_sec_man_context_t context;
-    sl_zb_sec_man_key_t plaintext_key;
 
     sl_zb_sec_man_init_context(&context);
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
 
-    sl_status_t keyReadStatus = sl_zb_sec_man_export_key(&context, &plaintext_key);
+    sl_status_t keyReadStatus = sl_zb_sec_man_check_key_context(&context);
     if (keyReadStatus == SL_STATUS_OK
-        && MEMCOMPARE(plaintext_key.key, linkKey.contents, EMBER_ENCRYPTION_KEY_SIZE)) {
+        && !sl_zb_sec_man_compare_key_to_value(&context, (sl_zb_sec_man_key_t*)&linkKey.contents)) {
       emberAfGreenPowerClusterPrint("Centralised Network : Non Default TC Key used - Set InvoveTc bit");
       // Set the InvolveTC bit
       gpsSecurityLevelAttribute |= GREEN_POWER_SERVER_GPS_SECURITY_LEVEL_ATTRIBUTE_FIELD_INVOLVE_TC;
@@ -313,21 +296,6 @@ static EmberAfStatus removeFromApsGroup(uint8_t endpoint, uint16_t groupId)
   return ((status == EMBER_SUCCESS) ? EMBER_ZCL_STATUS_SUCCESS : EMBER_ZCL_STATUS_FAILURE);
 }
 
-// Finds and returns the Gp Controlable application endpoint in the APS group
-static uint16_t findAppEndpointGroupId(uint8_t endpoint)
-{
-  for (uint8_t i = 0; i < EMBER_BINDING_TABLE_SIZE; i++) {
-    EmberBindingTableEntry binding;
-    if (emberGetBinding(i, &binding) == EMBER_SUCCESS
-        && binding.type == EMBER_MULTICAST_BINDING
-        && binding.local == endpoint) {
-      uint16_t groupId = (binding.identifier[1] << 8) | binding.identifier[0];
-      return groupId;
-    }
-  }
-  return 0;
-}
-
 static bool isValidAppEndpoint(uint8_t endpoint)
 {
   if (endpoint == GREEN_POWER_SERVER_ALL_SINK_ENDPOINTS
@@ -349,7 +317,7 @@ static bool isValidAppEndpoint(uint8_t endpoint)
   return false;
 }
 
-static bool isCommissioningAppEndpoint(uint8_t endpoint)
+bool isCommissioningAppEndpoint(uint8_t endpoint)
 {
   // Gp Controlable end points are all valid enabled endpoints
   if (endpoint >= GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT
@@ -361,6 +329,7 @@ static bool isCommissioningAppEndpoint(uint8_t endpoint)
           || commissioningState.endpoint == GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS)) { // No endpoint specified
     return true;
   }
+
   emberAfGreenPowerClusterPrintln("Endpoint %d Not in Commissioning Endpoint", endpoint);
   return false;
 }
@@ -466,18 +435,21 @@ static EmberStatus sendGpPairingMessage(EmberOutgoingMessageType type,
   EmberEUI64 ourEUI;
   emberAfGetEui64(ourEUI);
   if (sendGpPairing) {
-    emberAfFillCommandGreenPowerClusterGpPairingSmart(options,
-                                                      gpdAddr->id.sourceId,
-                                                      gpdAddr->id.gpdIeeeAddress,
-                                                      gpdAddr->endpoint,
-                                                      ourEUI,
-                                                      emberGetNodeId(),
-                                                      sinkGroupId,
-                                                      deviceId,
-                                                      gpdSecurityFrameCounter,
-                                                      gpdKey,
-                                                      assignedAlias,
-                                                      groupcastRadius);
+    if (emberAfFillCommandGreenPowerClusterGpPairingSmart(options,
+                                                          gpdAddr->id.sourceId,
+                                                          gpdAddr->id.gpdIeeeAddress,
+                                                          gpdAddr->endpoint,
+                                                          ourEUI,
+                                                          emberGetNodeId(),
+                                                          sinkGroupId,
+                                                          deviceId,
+                                                          gpdSecurityFrameCounter,
+                                                          gpdKey,
+                                                          assignedAlias,
+                                                          groupcastRadius) == 0) {
+      return status;
+    }
+
     EmberApsFrame *apsFrame;
     apsFrame = emberAfGetCommandApsFrame();
     apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -582,35 +554,38 @@ static void decommissionGpd(uint8_t secLvl,
     if (gpsCommunicationMode == EMBER_GP_SINK_TYPE_GROUPCAST
         && (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_SINK_TABLE_BASED_GROUPCAST_FORWARDING)
             || sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_PRE_COMMISSIONED_GROUPCAST_COMMUNICATION))) {
-      emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_GPD,
-                                                                     gpdAddr->applicationId,
-                                                                     gpdAddr->id.sourceId,
-                                                                     gpdAddr->id.gpdIeeeAddress,
-                                                                     gpdAddr->endpoint,
-                                                                     entry.deviceId,
-                                                                     0,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     NULL,
-                                                                     0xFE,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     NULL,
-                                                                     0,
-                                                                     NULL,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     NULL);
+      if (emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_GPD,
+                                                                         gpdAddr->applicationId,
+                                                                         gpdAddr->id.sourceId,
+                                                                         gpdAddr->id.gpdIeeeAddress,
+                                                                         gpdAddr->endpoint,
+                                                                         entry.deviceId,
+                                                                         0,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         NULL,
+                                                                         0xFE,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         NULL,
+                                                                         0,
+                                                                         NULL,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         NULL) == 0) {
+        return;
+      }
+
       EmberApsFrame *apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;
@@ -670,37 +645,40 @@ static void sendGpPairingConfigBasedOnSinkCommunicationMode(GpCommDataSaved *com
     uint8_t securityOptions = commissioningGpd->securityLevel
                               | (commissioningGpd->securityKeyType << EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_KEY_TYPE_OFFSET);
 
-    emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_EXTEND_SINK_TABLE_ENTRY,
-                                                                   pairigConfigOptions,
-                                                                   commissioningGpd->addr.id.sourceId,
-                                                                   commissioningGpd->addr.id.gpdIeeeAddress,
-                                                                   commissioningGpd->addr.endpoint,
-                                                                   commissioningGpd->applicationInfo.deviceId,
-                                                                   commissioningGpd->groupList[0],
-                                                                   &(commissioningGpd->groupList[1]),
-                                                                   0,
-                                                                   0,
-                                                                   securityOptions,
-                                                                   commissioningGpd->outgoingFrameCounter,
-                                                                   commissioningGpd->key.contents,
-                                                                   0xFE,
-                                                                   NULL,
-                                                                   commissioningGpd->applicationInfo.applInfoBitmap,
-                                                                   0,
-                                                                   0,
-                                                                   0,
-                                                                   NULL,
-                                                                   0,
-                                                                   NULL,
-                                                                   NULL,
-                                                                   commissioningGpd->switchInformationStruct.switchInfoLength,
-                                                                   (commissioningGpd->switchInformationStruct.nbOfContacts  \
-                                                                    + (commissioningGpd->switchInformationStruct.switchType \
-                                                                       << EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE_OFFSET)),
-                                                                   commissioningGpd->switchInformationStruct.currentContact,
-                                                                   0,
-                                                                   0,
-                                                                   NULL);
+    if (emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_EXTEND_SINK_TABLE_ENTRY,
+                                                                       pairigConfigOptions,
+                                                                       commissioningGpd->addr.id.sourceId,
+                                                                       commissioningGpd->addr.id.gpdIeeeAddress,
+                                                                       commissioningGpd->addr.endpoint,
+                                                                       commissioningGpd->applicationInfo.deviceId,
+                                                                       commissioningGpd->groupList[0],
+                                                                       &(commissioningGpd->groupList[1]),
+                                                                       0,
+                                                                       0,
+                                                                       securityOptions,
+                                                                       commissioningGpd->outgoingFrameCounter,
+                                                                       commissioningGpd->key.contents,
+                                                                       0xFE,
+                                                                       NULL,
+                                                                       commissioningGpd->applicationInfo.applInfoBitmap,
+                                                                       0,
+                                                                       0,
+                                                                       0,
+                                                                       NULL,
+                                                                       0,
+                                                                       NULL,
+                                                                       NULL,
+                                                                       commissioningGpd->switchInformationStruct.switchInfoLength,
+                                                                       (commissioningGpd->switchInformationStruct.nbOfContacts  \
+                                                                        + (commissioningGpd->switchInformationStruct.switchType \
+                                                                           << EMBER_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE_OFFSET)),
+                                                                       commissioningGpd->switchInformationStruct.currentContact,
+                                                                       0,
+                                                                       0,
+                                                                       NULL) == 0) {
+      return;
+    }
+
     EmberApsFrame *apsFrame;
     apsFrame = emberAfGetCommandApsFrame();
     apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -710,35 +688,38 @@ static void sendGpPairingConfigBasedOnSinkCommunicationMode(GpCommDataSaved *com
     emberAfGreenPowerClusterPrintln("Gp Pairing Config Extend Sink send returned %d", retval);
     if (commissioningGpd->applicationInfo.applInfoBitmap
         & EMBER_AF_GP_APPLICATION_INFORMATION_APPLICATION_DESCRIPTION_PRESENT) {
-      emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_APPLICATION_DESCRIPTION,
-                                                                     0,
-                                                                     commissioningGpd->addr.id.sourceId,
-                                                                     commissioningGpd->addr.id.gpdIeeeAddress,
-                                                                     commissioningGpd->addr.endpoint,
-                                                                     commissioningGpd->applicationInfo.deviceId,
-                                                                     0,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     NULL,
-                                                                     0xFE,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     NULL,
-                                                                     0,
-                                                                     NULL,
-                                                                     NULL,
-                                                                     0,
-                                                                     0,
-                                                                     0,
-                                                                     commissioningGpd->totalNbOfReport,
-                                                                     commissioningGpd->numberOfReports,
-                                                                     commissioningGpd->reportsStorage);
+      if (emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_APPLICATION_DESCRIPTION,
+                                                                         0,
+                                                                         commissioningGpd->addr.id.sourceId,
+                                                                         commissioningGpd->addr.id.gpdIeeeAddress,
+                                                                         commissioningGpd->addr.endpoint,
+                                                                         commissioningGpd->applicationInfo.deviceId,
+                                                                         0,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         NULL,
+                                                                         0xFE,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         NULL,
+                                                                         0,
+                                                                         NULL,
+                                                                         NULL,
+                                                                         0,
+                                                                         0,
+                                                                         0,
+                                                                         commissioningGpd->totalNbOfReport,
+                                                                         commissioningGpd->numberOfReports,
+                                                                         commissioningGpd->reportsStorage) == 0) {
+        return;
+      }
+
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;
@@ -1425,15 +1406,18 @@ static void sendCommissioningReply(GpCommDataSaved *commissioningGpd)
     }
   }
   emberAfGreenPowerClusterPrintln("GpResponse : Sending Commissioning Reply");
-  emberAfFillCommandGreenPowerClusterGpResponseSmart(commissioningGpd->addr.applicationId,
-                                                     commissioningGpd->gppShortAddress,
-                                                     (emberAfGetRadioChannel() - 11),
-                                                     commissioningGpd->addr.id.sourceId,
-                                                     commissioningGpd->addr.id.gpdIeeeAddress,
-                                                     commissioningGpd->addr.endpoint,
-                                                     EMBER_ZCL_GP_GPDF_COMMISSIONING_REPLY,
-                                                     index,
-                                                     commReplyPayload);
+  if (emberAfFillCommandGreenPowerClusterGpResponseSmart(commissioningGpd->addr.applicationId,
+                                                         commissioningGpd->gppShortAddress,
+                                                         (emberAfGetRadioChannel() - 11),
+                                                         commissioningGpd->addr.id.sourceId,
+                                                         commissioningGpd->addr.id.gpdIeeeAddress,
+                                                         commissioningGpd->addr.endpoint,
+                                                         EMBER_ZCL_GP_GPDF_COMMISSIONING_REPLY,
+                                                         index,
+                                                         commReplyPayload) == 0) {
+    return;
+  }
+
   EmberApsFrame *apsFrame;
   apsFrame = emberAfGetCommandApsFrame();
   apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -1492,7 +1476,7 @@ static EmberSinkPairingStatus handleSinkEntryAndPairing(GpCommDataSaved *commiss
     return SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED;
   }
   emberAfPluginGreenPowerServerPreSinkPairingCallback(commissioningGpd);
-
+  commissioningGpd->preSinkCbSource = GP_PRE_SINK_PAIRING_CALLBACK_SOURCE_UNKNOWN;
   bool gpdFixed = ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_FIXED_LOCATION) \
                   ? true : false;
   bool gpdMacCapabilities = ((commissioningGpd->gpdfOptions) & EMBER_AF_GP_GPD_COMMISSIONING_OPTIONS_MAC_SEQ_NUM_CAP) \
@@ -1522,9 +1506,10 @@ static EmberSinkPairingStatus handleSinkEntryAndPairing(GpCommDataSaved *commiss
   }
   // Add the Group
   uint16_t groupId = 0xFFFF;
+  EmberAfStatus status = EMBER_ZCL_STATUS_SUCCESS;
   if (commissioningGpd->communicationMode == EMBER_GP_SINK_TYPE_D_GROUPCAST) {
     groupId = sli_zigbee_af_gpd_alias(gpdAddr);
-    EmberAfStatus status = sli_zigbee_af_gp_add_to_aps_group(EMBER_GP_ENDPOINT, groupId);
+    status = sli_zigbee_af_gp_add_to_aps_group(EMBER_GP_ENDPOINT, groupId);
     emberAfCorePrintln("Added to Group %d Status = %d", groupId, status);
   } else if (commissioningGpd->communicationMode == EMBER_GP_SINK_TYPE_GROUPCAST) {
     for (uint8_t index = 0, pos = 1;
@@ -1534,9 +1519,14 @@ static EmberSinkPairingStatus handleSinkEntryAndPairing(GpCommDataSaved *commiss
       MEMCOPY(&(sinkEntry.sinkList[index].target.groupcast), &(commissioningGpd->groupList[pos]), sizeof(EmberGpSinkGroup));
       pos += sizeof(EmberGpSinkGroup);
       groupId = sinkEntry.sinkList[index].target.groupcast.groupID;
-      EmberAfStatus UNUSED status = sli_zigbee_af_gp_add_to_aps_group(EMBER_GP_ENDPOINT, groupId);
+      status = sli_zigbee_af_gp_add_to_aps_group(EMBER_GP_ENDPOINT, groupId);
     }
   }
+
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    return SINK_PAIRING_STATUS_FAILURE;
+  }
+
   sinkEntry.securityOptions = newSinkTableSecurityOptions;
   // carefull, take the gpd outgoing FC (not the framecounter of the commissioning frame "gpdSecurityFrameCounter")
   sinkEntry.gpdSecurityFrameCounter = commissioningGpd->outgoingFrameCounter;
@@ -1562,7 +1552,7 @@ static EmberSinkPairingStatus handleSinkEntryAndPairing(GpCommDataSaved *commiss
   return SINK_PAIRING_STATUS_SUCCESS;
 }
 
-static void handleClosingCommissioningSessionOnFirstPairing(GpCommDataSaved *commissioningGpd)
+static void handleClosingCommissioningSessionOnFirstPairing(void)
 {
   uint8_t gpsCommissioningExitMode;
   EmberAfStatus statusExitMode;
@@ -1579,18 +1569,18 @@ static void handleClosingCommissioningSessionOnFirstPairing(GpCommDataSaved *com
     // if commissioning mode is ON and received frame set it to OFF, exit comissioning mode
     commissioningState.inCommissioningMode = false;
 
-    // commissioning session ended here,clean up stored information
-    resetOfMultisensorDataSaved(true, commissioningGpd);
-
     if (commissioningState.proxiesInvolved) {
       uint8_t UNUSED retval;
       uint8_t proxyOptions = 0;
       if (commissioningState.unicastCommunication) { //  based on the commission mode as decided by sink
         proxyOptions |= 0x20;
       }
-      emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
-                                                                       0,
-                                                                       0);
+      if (emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
+                                                                           0,
+                                                                           0) == 0) {
+        return;
+      }
+
       EmberApsFrame *apsFrame;
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -1624,7 +1614,7 @@ static void finalisePairing(GpCommDataSaved *commissioningGpd)
       if (handleAddingTranstionTableEntry(commissioningGpd)) {
         status = handleSinkEntryAndPairing(commissioningGpd);
         if (status == SINK_PAIRING_STATUS_SUCCESS) {
-          handleClosingCommissioningSessionOnFirstPairing(commissioningGpd);
+          handleClosingCommissioningSessionOnFirstPairing();
         }
         commissioningGpd->commissionState = GP_SINK_COMM_STATE_PAIRING_DONE;
         // Call the user to inform the pairing is finalised.
@@ -1633,6 +1623,8 @@ static void finalisePairing(GpCommDataSaved *commissioningGpd)
         emberAfGreenPowerServerPairingStatusCallback(status,
                                                      commissioningGpd);
         emberAfGreenPowerServerDeleteCommissioningGpdInstance(&(commissioningGpd->addr));
+        // commissioning session ended here,clean up stored information
+        resetOfMultisensorDataSaved(true, commissioningGpd);
         return;
       } else {
         status = SINK_PAIRING_STATUS_FAIL_ADDING_TRANSLATION;
@@ -1890,6 +1882,7 @@ static bool gpCommissioningNotificationCommissioningGpdf(uint16_t commNotificati
   } else {
     // No reports to collect AND no commReply to be sent, then finalise pairing
     commissioningGpd->commissionState = GP_SINK_COMM_STATE_FINALISE_PAIRING;
+    commissioningGpd->preSinkCbSource = GP_PRE_SINK_PAIRING_CALLBACK_COMMISSONING_FINALIZE;
   }
   // Based on the states the following function either sends a commReply or finalises pairing
   finalisePairing(commissioningGpd);
@@ -2034,15 +2027,18 @@ static void handleChannelRequest(uint16_t options,
   uint8_t channelConfigPayload;
   channelConfigPayload = (emberAfGetRadioChannel() - 11) & EMBER_AF_GP_GPD_CHANNEL_CONFIGURATION_CHANNEL_OPERATIONAL_CHANNEL;
   channelConfigPayload |= (1 << EMBER_AF_GP_GPD_CHANNEL_CONFIGURATION_CHANNEL_BASIC_OFFSET); // BASIC
-  emberAfFillCommandGreenPowerClusterGpResponseSmart(responseOption,
-                                                     gppShortAddress,
-                                                     nextChannel,
-                                                     0,
-                                                     NULL,
-                                                     0,
-                                                     EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION,
-                                                     sizeof(uint8_t),
-                                                     &channelConfigPayload);
+  if (emberAfFillCommandGreenPowerClusterGpResponseSmart(responseOption,
+                                                         gppShortAddress,
+                                                         nextChannel,
+                                                         0,
+                                                         NULL,
+                                                         0,
+                                                         EMBER_ZCL_GP_GPDF_CHANNEL_CONFIGURATION,
+                                                         sizeof(uint8_t),
+                                                         &channelConfigPayload) == 0) {
+    return;
+  }
+
   EmberApsFrame *apsFrame;
   apsFrame = emberAfGetCommandApsFrame();
   apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -2441,6 +2437,8 @@ bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler
   // Test 4..4.6 - not a sink ep or bcast ep - drop
   if (!isValidAppEndpoint(sinkEndpoint)) {
     emberAfGreenPowerClusterPrintln("DROP - Comm Mode Callback: Sink EP not supported");
+    // 3.3.4.8.2
+    defaultResponseFailureStatus = EMBER_ZCL_STATUS_NOT_FOUND;
     return false;
   }
   if ((options & EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_GPM_IN_SECURITY)
@@ -2463,23 +2461,25 @@ bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler
   }
   uint16_t commissioningWindow = 0;
   uint8_t proxyOptions = 0;
+
   if (options & EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_ACTION) {
     commissioningState.inCommissioningMode = true;
-    commissioningState.endpoint = sinkEndpoint; // The commissioning endpoint can be 0xFF as well
     //enter commissioning mode
-    if (options
-        & (EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_GPM_IN_SECURITY
-           | EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_GPM_IN_PAIRING)) {
+    // 3.3.4.8.2
+    // If the GPM address for security or pairing is different from 0xffff
+    // or if any involve GPM in pairing bit is set
+    // the default response status should be set to INVALID_VALUE
+    if ( gpmAddrForSecurity != 0xffff
+         || gpmAddrForPairing  != 0xffff
+         || (options
+             & (EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_GPM_IN_SECURITY
+                | EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_GPM_IN_PAIRING))) {
       //these SHALL be 0 for now
       //TODO also check involve-TC
+      defaultResponseFailureStatus = EMBER_ZCL_STATUS_INVALID_VALUE;
+      commissioningState.inCommissioningMode = false;
       return false;
     }
-    if (options & EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_PROXIES) {
-      commissioningState.proxiesInvolved = true;
-    } else {
-      commissioningState.proxiesInvolved = false;
-    }
-
     // default 180s of GP specification
     commissioningWindow = EMBER_AF_ZCL_CLUSTER_GP_GPS_COMMISSIONING_WINDOWS_DEFAULT_TIME_S;
 
@@ -2539,6 +2539,14 @@ bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler
       proxyOptions = 0;
     }
   }
+
+  if (options & EMBER_AF_GP_SINK_COMMISSIONING_MODE_OPTIONS_INVOLVE_PROXIES) {
+    commissioningState.proxiesInvolved = true;
+  } else {
+    commissioningState.proxiesInvolved = false;
+  }
+  commissioningState.endpoint = sinkEndpoint; // The commissioning endpoint can be 0xFF as well
+
   // On commissioning entry or exist, reset the number of report config received
   for (int i = 0; i < EMBER_AF_PLUGIN_GREEN_POWER_SERVER_COMMISSIONING_GPD_INSTANCES; i++) {
     resetOfMultisensorDataSaved(true, &gpdCommDataSaved[i]);
@@ -2546,9 +2554,13 @@ bool sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_command_handler
   if (commissioningState.unicastCommunication) { //  based on the commission mode as decided by sink
     proxyOptions |= 0x20; // Flag unicast communication
   }
-  emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
-                                                                   commissioningWindow,
-                                                                   0);
+  if (emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
+                                                                       commissioningWindow,
+                                                                       0) == 0) {
+    defaultResponseFailureStatus = EMBER_ZCL_STATUS_INSUFFICIENT_SPACE;
+    return false;
+  }
+
   EmberApsFrame *apsFrame;
   apsFrame = emberAfGetCommandApsFrame();
   apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -2613,17 +2625,7 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
     // Address 0 only for channel request command.
     return true;
   }
-  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_COMMISSIONING) {
-    return true; // Drop Commissioning Command - Test 4.4.2.8 Step 5
-  }
-  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_DECOMMISSIONING) {
-    decommissionGpd(((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET),
-                    ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET),
-                    &gpdAddr,
-                    true,
-                    true);
-    return true;
-  }
+
   if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_CHANNEL_REQUEST) {
     handleChannelRequest(cmd_data.options,
                          cmd_data.gppShortAddress,
@@ -2666,6 +2668,20 @@ bool emberAfGreenPowerClusterGpNotificationCallback(EmberAfClusterCommand *cmd)
     }
     emberGpSinkTableSetSecurityFrameCounter(sinkIndex, cmd_data.gpdSecurityFrameCounter);
   }
+
+  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_COMMISSIONING) {
+    return true; // Drop Commissioning Command - Test 4.4.2.8 Step 5
+  }
+
+  if (cmd_data.gpdCommandId == EMBER_ZCL_GP_GPDF_DECOMMISSIONING) {
+    decommissionGpd(((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_LEVEL_OFFSET),
+                    ((cmd_data.options & EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE) >> EMBER_AF_GP_NOTIFICATION_OPTION_SECURITY_KEY_TYPE_OFFSET),
+                    &gpdAddr,
+                    true,
+                    true);
+    return true;
+  }
+
   // Call user first to give a chance to handle the notification.
   if (emberAfGreenPowerClusterGpNotificationForwardCallback(cmd_data.options,
                                                             &gpdAddr,
@@ -2897,6 +2913,9 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
   // Action = 0b011 (Remove Pairing)
   // Input(s) - Gpd Address, Communication Mode, GroupList, Number Of Paired Eps , Paired Ep List
   //            Application Information, Switch Information, Additional Block Information
+  uint8_t gpPairingConfigCommunicationMode = (cmd_data.options
+                                              & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE)
+                                             >> EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE_OFFSET;
   if (gpConfigAtion == EMBER_ZCL_GP_PAIRING_CONFIGURATION_ACTION_REMOVE_A_PAIRING) {
     if (((gpdAddr.applicationId == EMBER_GP_APPLICATION_SOURCE_ID)
          && gpdAddr.id.sourceId == GP_ADDR_SRC_ID_WILDCARD)
@@ -2905,7 +2924,40 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
       // TODO: apply action to all GPD with this particular applicationID (SrcId or IEEE)
       return true;
     }
-    if (emberGpSinkTableLookup(&gpdAddr) != 0xFF) {
+
+    uint8_t sinkEntryIndex = emberGpSinkTableLookup(&gpdAddr);
+    if (sinkEntryIndex != 0xFF) {
+      EmberGpSinkTableEntry entry = { 0 };
+      if (emberGpSinkTableGetEntry(sinkEntryIndex, &entry) != EMBER_SUCCESS) {
+        // return if entry not found
+        return true;
+      } else {
+        uint8_t gpsCommunicationMode = (entry.options
+                                        & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE)
+                                       >> EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE_OFFSET;
+        // return if communication mode mismatch
+        if (gpPairingConfigCommunicationMode != gpsCommunicationMode) {
+          return true;
+        }
+
+        // return if communication mode is matched as group cast
+        // but the group ID mismatch
+        if (gpPairingConfigCommunicationMode == EMBER_GP_SINK_TYPE_GROUPCAST) {
+          if (cmd_data.groupListCount == 0 || cmd_data.groupList == NULL) {
+            return true;
+          }
+          for (uint8_t index = 0, pos = 1;
+               index < GP_SINK_LIST_ENTRIES && pos < ((cmd_data.groupList[0] * sizeof(EmberGpSinkGroup)) + 1);
+               index++) {
+            EmberGpSinkGroup gpPairingConfigGroupID = { 0 };
+            MEMCOPY(&gpPairingConfigGroupID, &(cmd_data.groupList[pos]), sizeof(EmberGpSinkGroup));
+            pos += sizeof(EmberGpSinkGroup);
+            if (entry.sinkList[index].target.groupcast.groupID != gpPairingConfigGroupID.groupID) {
+              return true;
+            }
+          }
+        }
+      }
       decommissionGpd(0, 0, &gpdAddr, false, cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING);
     }
     return true;
@@ -2917,9 +2969,6 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
   }
   MEMCOPY(&(commissioningGpd->addr), &gpdAddr, sizeof(EmberGpAddress));
 
-  uint8_t gpPairingConfigCommunicationMode = (cmd_data.options
-                                              & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE)
-                                             >> EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE_OFFSET;
   // Save the grouplist for group cast communication mode, that eventually gets saved into the sink table upon succesfull pairing.
   if (gpPairingConfigCommunicationMode == EMBER_GP_SINK_TYPE_GROUPCAST
       && cmd_data.groupListCount
@@ -2927,6 +2976,24 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
     commissioningGpd->groupList[0] = cmd_data.groupListCount > GP_SINK_LIST_ENTRIES ? GP_SINK_LIST_ENTRIES : cmd_data.groupListCount;
     MEMCOPY(&commissioningGpd->groupList[1], cmd_data.groupList, commissioningGpd->groupList[0] * sizeof(EmberGpSinkGroup));
   }
+
+  // Save the grouplist from the existing entry, in case there is availability
+  uint8_t sinkEntryIndex = emberGpSinkTableLookup(&gpdAddr);
+  if (sinkEntryIndex != 0xFF) {
+    EmberGpSinkTableEntry entry = { 0 };
+    if (emberGpSinkTableGetEntry(sinkEntryIndex, &entry) == EMBER_SUCCESS) {
+      if (cmd_data.groupListCount < GP_SINK_LIST_ENTRIES) {
+        for (uint8_t index = 0; commissioningGpd->groupList[0] < GP_SINK_LIST_ENTRIES; index++) {
+          uint8_t pos = commissioningGpd->groupList[0] * sizeof(EmberGpSinkGroup) + 1;
+          if (entry.sinkList[index].type == EMBER_GP_SINK_TYPE_GROUPCAST) {
+            MEMCOPY(&commissioningGpd->groupList[pos], &entry.sinkList[index].target.groupcast, sizeof(EmberGpSinkGroup));
+            commissioningGpd->groupList[0]++;
+          }
+        }
+      }
+    }
+  }
+
   bool appInformationPresent = (cmd_data.options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_INFORMATION_PRESENT)
                                ? true : false;
   if (appInformationPresent) { // application info present
@@ -2992,12 +3059,10 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
                                         >> EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_KEY_TYPE_OFFSET;
     gpdfExtendedOptions = commissioningGpd->securityLevel
                           | (commissioningGpd->securityKeyType << EMBER_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_KEY_TYPE_OFFSET);
-    if ((uint8_t *) (cmd_data.gpdSecurityKey) != NULL) {
-      gpdfExtendedOptions |= EMBER_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_PRESENT;
-      gpdfExtendedOptions |= ((commissioningGpd->securityLevel == 3)
-                              ? EMBER_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_ENCRYPTION : 0);
-      MEMCOPY(commissioningGpd->key.contents, cmd_data.gpdSecurityKey, EMBER_ENCRYPTION_KEY_SIZE);
-    }
+    gpdfExtendedOptions |= EMBER_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_PRESENT;
+    gpdfExtendedOptions |= ((commissioningGpd->securityLevel == 3)
+                            ? EMBER_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_ENCRYPTION : 0);
+    MEMCOPY(commissioningGpd->key.contents, cmd_data.gpdSecurityKey, EMBER_ENCRYPTION_KEY_SIZE);
     commissioningGpd->gpdfExtendedOptions |= gpdfExtendedOptions;
   }
 
@@ -3081,6 +3146,7 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
       #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT
       }
       commissioningGpd->commissionState = GP_SINK_COMM_STATE_FINALISE_PAIRING;
+      commissioningGpd->preSinkCbSource = GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION;
       finalisePairing(commissioningGpd);
       return true;
     }
@@ -3116,6 +3182,7 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
       }
       // Report collection is over - finalise the pairing
       commissioningGpd->commissionState = GP_SINK_COMM_STATE_FINALISE_PAIRING;
+      commissioningGpd->preSinkCbSource = GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION;
       finalisePairing(commissioningGpd);
       return true;
     }
@@ -3159,7 +3226,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
     return false;
   }
 
-  uint8_t validEntriesCount = gpNumberOfSinkEntriesInSinkTable();
+  uint8_t validEntriesCount = emberGpSinkTableGetNumberOfActiveEntries();
 
   // If its Sink Table is empty, and the triggering GP Sink Table Request was received in unicast,
   // then the GP Sink Table Response SHALL be sent with Status NOT_FOUND,
@@ -3407,9 +3474,12 @@ void emberAfGreenPowerClusterGpSinkCommissioningWindowExtend(uint16_t commission
   if (commissioningState.unicastCommunication) { //  based on the commission mode as decided by sink
     proxyOptions |= EMBER_AF_GP_PROXY_COMMISSIONING_MODE_OPTION_UNICAST_COMMUNICATION;
   }
-  emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
-                                                                   commissioningWindow,
-                                                                   0);
+  if (emberAfFillCommandGreenPowerClusterGpProxyCommissioningModeSmart(proxyOptions,
+                                                                       commissioningWindow,
+                                                                       0) == 0) {
+    return;
+  }
+
   EmberApsFrame *apsFrame;
   apsFrame = emberAfGetCommandApsFrame();
   apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;
@@ -3454,7 +3524,7 @@ uint32_t emberAfGreenPowerClusterServerCommandParse(sl_service_opcode_t opcode,
                                                     sl_service_function_context_t *context)
 {
   (void)opcode;
-
+  defaultResponseFailureStatus = EMBER_ZCL_STATUS_UNSUP_COMMAND;
   EmberAfClusterCommand *cmd = (EmberAfClusterCommand *)context->data;
   bool wasHandled = false;
 
@@ -3504,31 +3574,13 @@ uint32_t emberAfGreenPowerClusterServerCommandParse(sl_service_opcode_t opcode,
 
   return ((wasHandled)
           ? EMBER_ZCL_STATUS_SUCCESS
-          : EMBER_ZCL_STATUS_UNSUP_COMMAND);
+          : defaultResponseFailureStatus);
 }
 
+// This callback is application-specific
+// to get the group id for the groupcast communication mode.
 WEAK(void emberAfPluginGreenPowerServerPreSinkPairingCallback(GpCommDataSaved *commissioningGpd))
 {
-  // Set up the grouplist incase it did not have one, supply default values.
-  uint8_t *count = commissioningGpd->groupList;
-  uint8_t *grouplist = commissioningGpd->groupList + 1;
-  *count = 0;
-  uint8_t totalEndpointCount = emberGetEndpointCount();
-  for (uint8_t i = 0; i < totalEndpointCount && grouplist < (commissioningGpd->groupList + GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING); i++) {
-    uint8_t endpoint = emberGetEndpoint(i);
-    if (endpoint != 0xff // A valid application endpoint value.
-        && isCommissioningAppEndpoint(endpoint)) {
-      uint16_t groupId = findAppEndpointGroupId(endpoint);
-      if (0 != groupId) {
-        (*count)++;
-        MEMCOPY(grouplist, &groupId, sizeof(groupId));
-        grouplist += sizeof(groupId);
-        uint16_t alias = sli_zigbee_af_gpd_alias(&(commissioningGpd->addr));
-        MEMCOPY(grouplist, &alias, sizeof(alias));
-        grouplist += sizeof(alias);
-      }
-    }
-  }
 }
 
 void emberAfGreenPowerClientGpdfSinkTableBasedForwardCallback(EmberGpAddress *addr,

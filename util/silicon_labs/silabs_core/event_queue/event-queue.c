@@ -140,7 +140,7 @@ uint32_t emberEventGetRemainingMs(EmberEvent *event)
   }
 }
 
-static void adjustListLocation(EmberEventQueue *queue, EmberEvent *event, bool keep)
+static void adjustListLocation(EmberEventQueue *queue, EmberEvent *event, bool keep, uint32_t now)
 {
   EmberEvent *previous = (EmberEvent *) queue;
   EmberEvent *finger = queue->events;
@@ -151,7 +151,8 @@ static void adjustListLocation(EmberEventQueue *queue, EmberEvent *event, bool k
   while (finger != event) {
     if (keep
         && newLocation == NULL
-        && !timeGTorEqualInt32u(event->timeToExecute, finger->timeToExecute)) {
+        && !timeGTorEqualInt32u(event->timeToExecute, finger->timeToExecute)
+        && !timeGTorEqualInt32u(now, finger->timeToExecute)) {
       newLocation = previous;
     }
     previous = finger;
@@ -305,7 +306,7 @@ void emberEventSetDelayMs(EmberEvent *event, uint32_t delay)
       queue->events = event;
     }
     event->timeToExecute = timeToExecute;
-    adjustListLocation(queue, event, true);
+    adjustListLocation(queue, event, true, now);
   }
 }
 
@@ -334,7 +335,7 @@ void emberEventSetInactive(EmberEvent *event)
       );
   } else if (emberEventIsScheduled(event)) {
     EmberEventQueue *queue = event->actions.queue;
-    adjustListLocation(queue, event, false);
+    adjustListLocation(queue, event, false,0);
     event->next = NULL;
   }
 }

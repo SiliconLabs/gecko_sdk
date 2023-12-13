@@ -1,0 +1,24 @@
+id: ZW_MIGRATION_FROM_7_20
+label: Migration from V7.20 (to V7.21)
+category: Z-Wave|Migration
+description: >
+  This component enables the migration code introduced in the 7.21 gsdk release by providing a define
+  ZW_MIGRATION_FROM_7_20. This define can be used to trigger a migration code block. Migration code is a block of code
+  that is introduced when there is an incompatible change in certain file structures between two minor GSDK versions.
+  Then this migration code block is enabled to transform the file structures from the older GSDK version to the newer
+  GSDK version.
+
+
+  It is applicable only when the developer is on an older GSDK version and would like to port the application to the newer GSDK version. This component can be uninstalled if the user is already on
+  a later version of the GSDK.
+
+  Application concerned by this migration:
+  - NCP serial API
+
+package: Z-Wave
+quality: production
+provides:
+  - name: ZW_MIGRATION_FROM_7_20
+define:
+  - name: ZW_MIGRATION_FROM_7_20
+    value: "1"

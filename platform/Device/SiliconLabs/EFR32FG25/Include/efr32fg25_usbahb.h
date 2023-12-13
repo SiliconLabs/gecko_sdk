@@ -2238,4 +2238,4 @@ typedef struct {
 /** @} End of group EFR32FG25_USBAHB_AHBS */
 /** @} End of group Parts */
 
-#endif /* EFR32FG25_USBAHB_H */
+#endif // EFR32FG25_USBAHB_H

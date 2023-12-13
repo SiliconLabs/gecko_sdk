@@ -57,6 +57,8 @@
     value: '"BRD4167A"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS

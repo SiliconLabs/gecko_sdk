@@ -13,6 +13,7 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+#include <stdlib.h>
 #include "stack/include/ember.h"
 #include "csp-format.h"
 #include "csp-command-utils.h"
@@ -20,7 +21,7 @@
 
 uint8_t *sendBlockingCommand(uint8_t *apiCommandBuffer)
 {
-  (void *)apiCommandBuffer;
+  (void)apiCommandBuffer;
   return NULL;
 }
 
@@ -43,7 +44,7 @@ uint8_t *getApiCommandPointer()
 
 uint8_t *allocateCallbackCommandPointer()
 {
-  return (uint8_t *)malloc(MAX_STACK_API_COMMAND_SIZE);
+  return (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
 }
 
 void acquireCommandMutex(void)
@@ -57,4 +58,16 @@ void releaseCommandMutex(void)
 bool isCurrentTaskStackTask(void)
 {
   return true;
+}
+
+void unknownCommandIdHandler(uint16_t commandId)
+{
+  (void)commandId;
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 commandId,
+                                                 "u",
+                                                 EMBER_NCP_UNKNOWN_COMMAND_ID);
+  sendResponse(apiCommandBuffer, commandLength);
 }

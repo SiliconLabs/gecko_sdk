@@ -31,6 +31,11 @@
 #ifndef SL_BT_L2CAP_TRANSFER_CONFIG_H
 #define SL_BT_L2CAP_TRANSFER_CONFIG_H
 
+/***********************************************************************************************//**
+ * @addtogroup l2cap_transfer
+ * @{
+ **************************************************************************************************/
+
 #include "sl_bluetooth_connection_config.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -43,4 +48,5 @@
 
 #define SL_BT_L2CAP_TRANSFER_CONFIG_PRIOR_CHANNEL_COUNT           SL_BT_CONFIG_MAX_CONNECTIONS
 
+/** @} (end addtogroup l2cap_transfer) */
 #endif // SL_BT_L2CAP_TRANSFER_CONFIG_H

@@ -1,0 +1,24 @@
+parameters: []
+constants:
+  - name: workspace_name
+    value: ot-trustzone-workspace
+steps:
+  # Combine trustzone secure and nonsecure applications
+  - task: convert
+    input:
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+    output: artifact/{{workspace_name}}-app-only.s37
+
+  # Combine applications with bootloader image
+  - task: convert
+    input:
+      - "{{trustzone_secure_binary}}"
+      - "{{trustzone_nonsecure_binary}}"
+      - "{{bootloader_main_stage}}"
+    output: artifact/{{workspace_name}}-full.s37
+
+  # Generate GBL file from bootloader interface
+  - task: create_gbl
+    app: "artifact/{{workspace_name}}-app-only.s37"
+    output: artifact/{{workspace_name}}-app-only.gbl

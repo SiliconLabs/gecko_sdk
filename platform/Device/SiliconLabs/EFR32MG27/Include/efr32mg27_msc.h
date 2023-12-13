@@ -503,4 +503,4 @@ typedef struct {
 /** @} End of group EFR32MG27_MSC */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_MSC_H */
+#endif // EFR32MG27_MSC_H

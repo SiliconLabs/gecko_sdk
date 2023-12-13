@@ -16,14 +16,6 @@ include:
   - path: platform/service/legacy_printf/inc
     file_list:
     - path: sl_legacy_printf.h
-define:
-  - name: "PLATFORM_HEADER"
-    value: "\"platform-header.h\""
-    unless: 
-      - zigbee_host_simulation
-  - name: CORTEXM3_EFM32_MICRO
-  - name: CORTEXM3
-  - name: CORTEXM3_EFR32
 template_contribution:
   - name: component_catalog
     value: legacy_printf

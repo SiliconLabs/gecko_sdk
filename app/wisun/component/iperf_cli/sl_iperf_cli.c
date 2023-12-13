@@ -43,7 +43,7 @@
 #include "sl_iperf_config.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
-
+#include "cmsis_os2.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -1047,7 +1047,7 @@ static void _exec_test(const sl_iperf_mode_t mode,
     return;
   }
 
-  if (!sl_iperf_test_get(&_last_test)) {
+  if (!sl_iperf_test_get(&_last_test, osWaitForever)) {
     printf("[Getting test to queue failed]\n");
     return;
   }

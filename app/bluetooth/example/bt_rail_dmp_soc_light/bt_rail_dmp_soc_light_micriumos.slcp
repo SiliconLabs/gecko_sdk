@@ -46,7 +46,9 @@ component:
   - id: demo_ui
   - id: component_catalog
   - id: ibeacon
-  - id: iostream_recommended_stream
+  - id: iostream_usart
+    instance:
+      - vcom
   - id: dmd_memlcd
   - id: mpu
   - id: simple_led
@@ -114,18 +116,8 @@ configuration:
     value: "14600"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
-  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
-    value: "eusartHwFlowControlNone"
     condition:
-      - iostream_eusart
-  - name: SL_IOSTREAM_LEUART_VCOM_FLOW_CONTROL_TYPE
-    value: "uartFlowControlNone"
-    condition:
-      - iostream_leuart
-  - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
-    value: "uartFlowControlNone"
-    condition:
-      - iostream_uart
+      - iostream_usart
   - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
     value: "usartHwFlowControlNone"
     condition:
@@ -168,11 +160,7 @@ configuration:
   # ------------- RAIL init, Project -------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
-    value: "1"
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
   # -------------- RAIL init, Protocol -----------------
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE

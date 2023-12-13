@@ -171,14 +171,7 @@ class PHYS_connect_Ocelot(IPhy):
         phy.profile_inputs.shaping_filter_param.value = 0.5
 
         """ Preamble Parameters """
-        phy.profile_inputs.preamble_pattern_len.value = 4
         phy.profile_inputs.preamble_length.value = 40
-        phy.profile_inputs.preamble_pattern.value = 0
-
-        """ Syncword Parameters """
-        phy.profile_inputs.syncword_0.value = 0xA7
-        phy.profile_inputs.syncword_1.value = 0x0
-        phy.profile_inputs.syncword_length.value = 8
 
         return phy
 
@@ -192,7 +185,7 @@ class PHYS_connect_Ocelot(IPhy):
         self.Connect_base(phy, model)
 
         """ Channel and Bandwidth Settings """
-        phy.profile_inputs.base_frequency_hz.value = 915000000
+        phy.profile_inputs.base_frequency_hz.value = 902000000
         phy.profile_inputs.deviation.value = 200000
         phy.profile_inputs.channel_spacing_hz.value = 2000000
         phy.profile_inputs.bitrate.value = 100000
@@ -239,7 +232,7 @@ class PHYS_connect_Ocelot(IPhy):
         self.Connect_base(phy, model)
 
         """ Channel and Bandwidth Settings """
-        phy.profile_inputs.base_frequency_hz.value = long(915000000)
+        phy.profile_inputs.base_frequency_hz.value = long(902000000)
         phy.profile_inputs.deviation.value = 500000
         phy.profile_inputs.channel_spacing_hz.value = 2000000
         phy.profile_inputs.bitrate.value = 250000

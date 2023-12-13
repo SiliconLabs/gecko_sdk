@@ -3,7 +3,6 @@ label: Zigbee Direct Command Line Interface
 package: Zigbee
 category: Zigbee|Zigbee Direct ZDD
 quality: production
-
 description: Zigbee Direct Command Line Interface
 
 provides:
@@ -12,9 +11,9 @@ provides:
 requires:
   - name: zigbee_direct_zdd
 
-source:  
+source:
   - path: protocol/zigbee/app/framework/plugin-soc/zigbee_direct_cli/zigbee_direct_cli.c
-    condition: 
+    condition:
       - cli
 
 template_contribution:
@@ -46,5 +45,5 @@ template_contribution:
       handler: sl_zigbee_direct_set_anonymous_join_timeout
       help: Set the anonymous join timeout.
       argument:
-      - type: uint32
-        help: The value of the anonymous join timeout.
+        - type: uint32
+          help: The value of the anonymous join timeout.

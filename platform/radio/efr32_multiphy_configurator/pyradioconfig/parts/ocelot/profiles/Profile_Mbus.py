@@ -104,6 +104,9 @@ class Profile_Mbus_Ocelot(IProfile):
         IProfile.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
                                    readable_name="Frequency Offset Compensation (AFC) Limit", value_limit_min=0,
                                    value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
+        self.make_hidden_input(profile, model.vars.modulation_index_for_ksi, "Advanced",
+                               readable_name="Modulation index used by ksi calculation",
+                               value_limit_min=0.0, value_limit_max=5.0, fractional_digits=2)
 
         #Deprecated inputs
         # These inputs were exposed on or after Ocelot Alpha 1 release, so they may be present in radioconf XML
@@ -125,6 +128,8 @@ class Profile_Mbus_Ocelot(IProfile):
         buildWhiteOutputs(model, profile)
         buildFecOutputs(model, profile)
         self._add_reg_profile_outputs(model, profile)
+
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
 
         return profile
 

@@ -798,4 +798,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_HFXO */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_HFXO_H */
+#endif // EFR32ZG28_HFXO_H

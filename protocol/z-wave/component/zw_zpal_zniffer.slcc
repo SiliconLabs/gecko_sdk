@@ -1,0 +1,12 @@
+id: zw_zpal_zniffer
+label: Z-Wave ZPAL Zniffer
+category: Z-Wave
+description: >
+  This component contains ZPAL libraries used for the Z-wave Zniffer build. The contents are
+  different depending on the type of the build (i.e. production or development).
+package: Z-Wave
+quality: production
+requires:
+  - name: zw_zpal_zniffer_quality_mode
+recommends:
+  - id: zw_zpal_zniffer_production

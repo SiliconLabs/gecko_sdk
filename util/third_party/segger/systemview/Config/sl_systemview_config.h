@@ -66,6 +66,10 @@
 // <i> Default: 1
 #define SEGGER_SYSVIEW_CAN_RESTART            1
 
+// <q SEGGER_SYSVIEW_ID_SHIFT> Number of bits to shift the Id to save bandwidth. (i.e. 2 when Ids are 4 byte aligned)
+// <i> Default: 0
+#define SEGGER_SYSVIEW_ID_SHIFT            0
+
 #endif  // SL_SYSTEMVIEW_CONFIG_H
 
 // <<< end of configuration section >>>

@@ -134,26 +134,6 @@ class CALC_Misc_nixi(CALC_Misc_jumbo):
             self._reg_write(model.vars.SEQ_SYNTH_CTRL_DITHER_SETTINGS_DITHERDSMINPUTTX, 1)
             self._reg_write(model.vars.SYNTH_CTRL_DEMMODE, 1)
 
-        #These writes should happen for Nixi and Panther (not in later families)
-        if model.part_family.lower() in ['nixi','panther']:
-            self._reg_write(model.vars.MODEM_SHAPING4_COEFF20, 0)
-            self._reg_write(model.vars.MODEM_SHAPING4_COEFF21, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF24, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF25, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF26, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF27, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF28, 0)
-            self._reg_write(model.vars.MODEM_SHAPING5_COEFF29, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF30, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF31, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF32, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF33, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF34, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF35, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF36, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF37, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF38, 0)
-            self._reg_write(model.vars.MODEM_SHAPING6_COEFF39, 0)
 
         #These writes should happen for all families except Lynx / Leopard
         if model.part_family.lower() not in ['lynx', 'leopard']:

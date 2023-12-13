@@ -37,6 +37,10 @@
 #include "sl_bt_api.h"
 #include "abr_cs_parser_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**************************************************************************//**
  * ABR file logger initialization
  * This function sets the target filename
@@ -46,6 +50,15 @@
  * @return status code
  *****************************************************************************/
 sl_status_t abr_file_log_init(uint8_t abr_mode);
+
+/**************************************************************************//**
+ * ABR file logger set directory path
+ *
+ * @param[in] value raw path string
+ *
+ * @return status code
+ *****************************************************************************/
+sl_status_t abr_file_log_set_dir(char *value);
 
 /**************************************************************************//**
  * ABR file logger deinitialization
@@ -62,9 +75,11 @@ sl_status_t abr_file_log_deinit(void);
  * @param[in] minor application minor version
  * @param[in] patch application patch version
  * @param[in] build application build version
+ *
+ * @return status code
  *****************************************************************************/
-void abr_file_log_app_version(uint16_t major, uint16_t minor,
-                              uint16_t patch, uint16_t build);
+sl_status_t abr_file_log_app_version(uint16_t major, uint16_t minor,
+                                     uint16_t patch, uint16_t build);
 
 /**************************************************************************//**
  * ABR file log append header section
@@ -86,6 +101,22 @@ void abr_file_log_app_version(uint16_t major, uint16_t minor,
 sl_status_t abr_file_log_append_header_section(const uint8_t *ch_data,
                                                const uint32_t ch_data_len,
                                                const uint8_t mode0_steps_count);
+
+/**************************************************************************//**
+ * Append channel sounding configuration complete event to the jsonl object
+ * @param[in] l2_config channel sounding config event data
+ *
+ * @return status code
+ *****************************************************************************/
+sl_status_t abr_file_log_config_complete_event(sl_bt_evt_cs_config_complete_t *l2_config);
+
+/**************************************************************************//**
+ * Append procedure configuration complete event to the jsonl object
+ * @param[in] procedure_config channel sounding procedure config event data
+ *
+ * @return status code
+ *****************************************************************************/
+sl_status_t abr_file_log_procedure_config_complete_event(sl_bt_evt_cs_procedure_enable_complete_t *procedure_config);
 
 /**************************************************************************//**
  * Append new event header to the jsonl object
@@ -138,10 +169,15 @@ sl_status_t abr_file_log_store_step(abr_role_t role, cs_step_t *step_data);
  *
  * @param[in] estimated_distance estimated distance taken from the cs parser
  *                               module
+ * @param[in] distance_likeliness estimated distance likeliness from the cs parser
+ *                                module
+ * @param[in] rssi_distance distance calculated with RSSI values
  *
  * @return status code
  *****************************************************************************/
-sl_status_t abr_file_log_finalize_measurement_section(float *estimated_distance);
+sl_status_t abr_file_log_finalize_measurement_section(float *estimated_distance,
+                                                      float *distance_likeliness,
+                                                      float *rssi_distance);
 
 #else // defined(HOST_TOOLCHAIN) && (ABR_FILE_LOG_ENABLED == 1)
 
@@ -150,10 +186,15 @@ sl_status_t abr_file_log_finalize_measurement_section(float *estimated_distance)
 #define abr_file_log_app_version(...) SL_STATUS_OK
 #define abr_file_log_get_measurement_mode(...) SL_STATUS_OK
 #define abr_file_log_append_header_section(...) SL_STATUS_OK
+#define abr_file_log_config_complete_event(...) SL_STATUS_OK
+#define abr_file_log_procedure_config_complete_event(...) SL_STATUS_OK
 #define abr_file_log_append_event_header(...) SL_STATUS_OK
 #define abr_file_log_assign_steps_to_event(...) SL_STATUS_OK
 #define abr_file_log_store_step(...) SL_STATUS_OK
 #define abr_file_log_finalize_measurement_section(...) SL_STATUS_OK
 
 #endif // defined(HOST_TOOLCHAIN) && (ABR_FILE_LOG_ENABLED == 1)
+#ifdef __cplusplus
+};
+#endif
 #endif // ABR_FILE_LOG_H

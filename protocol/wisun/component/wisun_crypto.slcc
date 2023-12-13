@@ -55,3 +55,6 @@ template_contribution:
     value:
       name: psa_its_files_wisun_stack
       count: "9"
+
+  - name: component_catalog
+    value: wisun_crypto

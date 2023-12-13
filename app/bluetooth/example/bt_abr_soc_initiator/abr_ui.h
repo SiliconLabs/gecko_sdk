@@ -45,7 +45,7 @@
 
 /**************************************************************************//**
  * @brief
- *   Initializes the the display and the UI
+ *   Initialize the the display and the UI
  *****************************************************************************/
 void abr_ui_init(void);
 
@@ -57,7 +57,7 @@ void abr_ui_update(void);
 
 /**************************************************************************//**
  * @brief
- *   Sets the UI text aligment
+ *   Set the UI text aligment
  *
  * @param[in] alignment text aligment to use
  *****************************************************************************/
@@ -65,7 +65,7 @@ void abr_ui_set_alignment(GLIB_Align_t alignment);
 
 /**************************************************************************//**
  * @brief
- *   Writes text on the UI
+ *   Write text on the UI
  *
  * @param[in] str pointer to the text to print
  * @param[in] row row to print the text on
@@ -74,16 +74,17 @@ void abr_ui_write_text(char *str, uint8_t row);
 
 /**************************************************************************//**
  * @brief
- *   Prints the calculated distance on the UI
+ *   Print the calculated value on the UI
  *
- * @param[in] distance the calculated distance
+ * @param[in] value the calculated value
  * @param[in] row number of the row to print on
+ * @param[in] unit unit string, in case of NULL no unit displayed
  *****************************************************************************/
-void abr_ui_print_distance(float distance, uint8_t row);
+void abr_ui_print_value(float value, uint8_t row, char *unit);
 
 /**************************************************************************//**
  * @brief
- *   Sets the state on UI.
+ *   Set the state on UI.
  *
  * @param[in] state current state
  *****************************************************************************/

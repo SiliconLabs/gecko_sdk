@@ -161,7 +161,7 @@
  *   // Cause the periodic event to occur once a second.
  *   emberEventControlSetDelayQS(periodicEvent, 4);
  *
- *   while (TRUE) {
+ *   while (true) {
  *     emberRunEvents(events);
  *   }
  * }
@@ -177,6 +177,81 @@
 //
 #ifndef __EVENT_H__
 #define __EVENT_H__
+
+/**
+ * @name  Time Manipulation Macros
+ */
+//@{
+
+/**
+ * @brief Returns the elapsed time between two 8 bit values.
+ *        Result may not be valid if the time samples differ by more than 127
+ */
+#define elapsedTimeInt8u(oldTime, newTime) \
+  ((uint8_t) ((uint8_t)(newTime) - (uint8_t)(oldTime)))
+
+/**
+ * @brief Returns the elapsed time between two 16 bit values.
+ *        Result may not be valid if the time samples differ by more than 32767
+ */
+#define elapsedTimeInt16u(oldTime, newTime) \
+  ((uint16_t) ((uint16_t)(newTime) - (uint16_t)(oldTime)))
+
+/**
+ * @brief Returns the elapsed time between two 32 bit values.
+ *   Result may not be valid if the time samples differ by more than 2147483647
+ */
+#define elapsedTimeInt32u(oldTime, newTime) \
+  ((uint32_t) ((uint32_t)(newTime) - (uint32_t)(oldTime)))
+
+/**
+ * @brief Returns true if t1 is greater than t2.  Can only account for 1 wrap
+ * around of the variable before it is wrong.
+ */
+#define MAX_INT8U_VALUE       (0xFF)
+#define HALF_MAX_INT8U_VALUE  (0x80)
+#define timeGTorEqualInt8u(t1, t2) \
+  (elapsedTimeInt8u(t2, t1) <= (HALF_MAX_INT8U_VALUE))
+
+/**
+ * @brief Returns true if t1 is greater than t2.  Can only account for 1 wrap
+ * around of the variable before it is wrong.
+ */
+#define MAX_INT16U_VALUE      (0xFFFF)
+#define HALF_MAX_INT16U_VALUE (0x8000)
+#define timeGTorEqualInt16u(t1, t2) \
+  (elapsedTimeInt16u(t2, t1) <= (HALF_MAX_INT16U_VALUE))
+
+/**
+ * @brief Returns true if t1 is greater than t2.  Can only account for 1 wrap
+ * around of the variable before it is wrong.
+ */
+#define MAX_INT32U_VALUE      (0xFFFFFFFFUL)
+#define HALF_MAX_INT32U_VALUE (0x80000000UL)
+#define timeGTorEqualInt32u(t1, t2) \
+  (elapsedTimeInt32u(t2, t1) <= (HALF_MAX_INT32U_VALUE))
+
+#define MILLISECOND_TICKS_PER_SECOND 1000UL
+
+#ifndef MILLISECOND_TICKS_PER_DECISECOND
+  #define MILLISECOND_TICKS_PER_DECISECOND (MILLISECOND_TICKS_PER_SECOND / 10)
+#endif
+
+#ifndef MILLISECOND_TICKS_PER_QUARTERSECOND
+  #define MILLISECOND_TICKS_PER_QUARTERSECOND (MILLISECOND_TICKS_PER_SECOND >> 2)
+#endif
+
+#ifndef MILLISECOND_TICKS_PER_MINUTE
+  #define MILLISECOND_TICKS_PER_MINUTE (60UL * MILLISECOND_TICKS_PER_SECOND)
+#endif
+
+#ifndef MILLISECOND_TICKS_PER_HOUR
+  #define MILLISECOND_TICKS_PER_HOUR (60UL * MILLISECOND_TICKS_PER_MINUTE)
+#endif
+
+#ifndef MILLISECOND_TICKS_PER_DAY
+  #define MILLISECOND_TICKS_PER_DAY (24UL * MILLISECOND_TICKS_PER_HOUR)
+#endif
 
 /**
  * @brief The number of event tasks that can be used to schedule and run

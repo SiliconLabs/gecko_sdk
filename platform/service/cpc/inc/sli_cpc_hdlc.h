@@ -85,7 +85,7 @@ extern "C"
  *
  * @return HDLC header flag value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_flag(const uint8_t *header_buf)
+static inline uint8_t sli_cpc_hdlc_get_flag(const uint8_t *header_buf)
 {
   return header_buf[SLI_CPC_HDLC_FLAG_POS];
 }
@@ -97,7 +97,7 @@ inline uint8_t sli_cpc_hdlc_get_flag(const uint8_t *header_buf)
  *
  * @return HDLC header address value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_address(const uint8_t *header_buf)
+static inline uint8_t sli_cpc_hdlc_get_address(const uint8_t *header_buf)
 {
   return header_buf[SLI_CPC_HDLC_ADDRESS_POS];
 }
@@ -109,7 +109,7 @@ inline uint8_t sli_cpc_hdlc_get_address(const uint8_t *header_buf)
  *
  * @return HDLC header payload length value.
  ******************************************************************************/
-inline uint16_t sli_cpc_hdlc_get_length(const uint8_t *header_buf)
+static inline uint16_t sli_cpc_hdlc_get_length(const uint8_t *header_buf)
 {
   uint16_t length = 0;
 
@@ -126,7 +126,7 @@ inline uint16_t sli_cpc_hdlc_get_length(const uint8_t *header_buf)
  *
  * @return HDLC header control value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_control(const uint8_t *header_buf)
+static inline uint8_t sli_cpc_hdlc_get_control(const uint8_t *header_buf)
 {
   return header_buf[SLI_CPC_HDLC_CONTROL_POS];
 }
@@ -138,7 +138,7 @@ inline uint8_t sli_cpc_hdlc_get_control(const uint8_t *header_buf)
  *
  * @return HDLC header HCS value.
  ******************************************************************************/
-inline uint16_t sli_cpc_hdlc_get_hcs(const uint8_t *header_buf)
+static inline uint16_t sli_cpc_hdlc_get_hcs(const uint8_t *header_buf)
 {
   uint16_t hcs = 0;
 
@@ -155,7 +155,7 @@ inline uint16_t sli_cpc_hdlc_get_hcs(const uint8_t *header_buf)
  *
  * @return HDLC payload FCS value.
  ******************************************************************************/
-inline uint16_t sli_cpc_hdlc_get_fcs(const uint8_t *payload_buf, uint16_t payload_length)
+static inline uint16_t sli_cpc_hdlc_get_fcs(const uint8_t *payload_buf, uint16_t payload_length)
 {
   uint16_t fcs = 0;
 
@@ -172,7 +172,7 @@ inline uint16_t sli_cpc_hdlc_get_fcs(const uint8_t *payload_buf, uint16_t payloa
  *
  * @return HDLC frame type value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_frame_type(uint8_t control)
+static inline uint8_t sli_cpc_hdlc_get_frame_type(uint8_t control)
 {
   uint8_t type = control >> SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
@@ -190,7 +190,7 @@ inline uint8_t sli_cpc_hdlc_get_frame_type(uint8_t control)
  *
  * @return HDLC frame SEQ value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_seq(uint8_t control)
+static inline uint8_t sli_cpc_hdlc_get_seq(uint8_t control)
 {
   return (control >> SLI_CPC_HDLC_CONTROL_SEQ_SHIFT) & 0x07;
 }
@@ -202,7 +202,7 @@ inline uint8_t sli_cpc_hdlc_get_seq(uint8_t control)
  *
  * @return HDLC frame ACK value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_ack(uint8_t control)
+static inline uint8_t sli_cpc_hdlc_get_ack(uint8_t control)
 {
   return control & 0x07;
 }
@@ -214,7 +214,7 @@ inline uint8_t sli_cpc_hdlc_get_ack(uint8_t control)
  *
  * @return HDLC frame supervisory function value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_supervisory_function(uint8_t control)
+static inline uint8_t sli_cpc_hdlc_get_supervisory_function(uint8_t control)
 {
   return (control >> SLI_CPC_HDLC_CONTROL_SUPERVISORY_FNCT_ID_SHIFT) & 0x03;
 }
@@ -226,7 +226,7 @@ inline uint8_t sli_cpc_hdlc_get_supervisory_function(uint8_t control)
  *
  * @return HDLC u-frame type.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_get_unumbered_type(uint8_t control)
+static inline uint8_t sli_cpc_hdlc_get_unumbered_type(uint8_t control)
 {
   return (control >> SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_SHIFT) & SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_MASK;
 }
@@ -256,7 +256,7 @@ void sli_cpc_hdlc_create_header(uint8_t *header_buf,
  *
  * @return HDLC header control value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_create_control_data(uint8_t seq, uint8_t ack, bool poll_final)
+static inline uint8_t sli_cpc_hdlc_create_control_data(uint8_t seq, uint8_t ack, bool poll_final)
 {
   uint8_t control = SLI_CPC_HDLC_FRAME_TYPE_INFORMATION << SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
@@ -275,7 +275,7 @@ inline uint8_t sli_cpc_hdlc_create_control_data(uint8_t seq, uint8_t ack, bool p
  *
  * @return HDLC header control value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_create_control_supervisory(uint8_t ack, uint8_t supervisory_function)
+static inline uint8_t sli_cpc_hdlc_create_control_supervisory(uint8_t ack, uint8_t supervisory_function)
 {
   uint8_t control = SLI_CPC_HDLC_FRAME_TYPE_SUPERVISORY << SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
@@ -290,7 +290,7 @@ inline uint8_t sli_cpc_hdlc_create_control_supervisory(uint8_t ack, uint8_t supe
  *
  * @return HDLC header control value.
  ******************************************************************************/
-inline uint8_t sli_cpc_hdlc_create_control_unumbered(uint8_t type)
+static inline uint8_t sli_cpc_hdlc_create_control_unumbered(uint8_t type)
 {
   uint8_t control = SLI_CPC_HDLC_FRAME_TYPE_UNNUMBERED << SLI_CPC_HDLC_CONTROL_FRAME_TYPE_SHIFT;
 
@@ -306,7 +306,7 @@ inline uint8_t sli_cpc_hdlc_create_control_unumbered(uint8_t type)
  *
  * @return true if HDLC frame poll/frame bit is set.
  ******************************************************************************/
-inline bool sli_cpc_hdlc_is_poll_final(uint8_t control)
+static inline bool sli_cpc_hdlc_is_poll_final(uint8_t control)
 {
   if (control & (1 << SLI_CPC_HDLC_CONTROL_P_F_SHIFT)) {
     return true;
@@ -317,10 +317,10 @@ inline bool sli_cpc_hdlc_is_poll_final(uint8_t control)
 /***************************************************************************//**
  * Update the ACK number in a frame's header.
  ******************************************************************************/
-inline void sli_cpc_hdlc_set_control_ack(uint8_t *control,
-                                         uint8_t ack)
+static inline void sli_cpc_hdlc_set_control_ack(uint8_t *control,
+                                                uint8_t ack)
 {
-  *control &= ~0x07;
+  *control &= (uint8_t) ~0x07;
   *control |= ack;
 }
 

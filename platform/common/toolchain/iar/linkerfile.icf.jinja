@@ -2,6 +2,7 @@
   Device specific sizes and addresses. These variables describes the physical
   memory of the device.
 #}
+{%- set series = device_series | first %}
 {%- set sram_addr = device_ram_addr | first | default(536870912, true) %}
 {%- set sram_size = device_ram_size | first %}
 {%- set flash_addr = device_flash_addr | first | default(0, true) %}
@@ -114,13 +115,6 @@ define block CSTACK with alignment = 8
   section .stack
 };
 
-define block RAMFUNCS with alignment = 8
-{
-{%- for entry in common_code_classes %}
-  section text_{{entry['component']}}_*{{entry['class']}}*,
-{%- endfor %}
-};
-
 {%-   if trustzone_secure %}
 define block STACKSEAL with size = STACK_SEAL_SIZE
 {
@@ -183,6 +177,64 @@ define block application with fixed order
   readonly section .intvec,
   readonly
 };
+
+{%- if series >= 3 %}
+{%- for component in code_classification_components %}
+
+define block text_{{component}}_ram with alignment = 8
+{
+{%- for selection in code_classification_selections %}
+{%- if selection['component'] == component  %}
+  readwrite code section text_{{selection['component']}}_*{{selection['class']}}*,
+{%- endif %}
+{%- endfor %}
+{%- if "timecritical" in code_classification_standard_selections %}
+  readwrite code section text_{{component}}_*timecritical*,
+{%- endif %}
+};
+
+define block text_{{component}}_ram_init with alignment = 8
+{
+{%- for selection in code_classification_selections %}
+{%- if selection['component'] == component  %}
+  readonly code section text_{{selection['component']}}_*{{selection['class']}}*_init,
+{%- endif %}
+{%- endfor %}
+{%- if "timecritical" in code_classification_standard_selections %}
+  readonly code section text_{{component}}_*timecritical*_init,
+{%- endif %}
+};
+
+initialize by copy
+{
+{%- for selection in code_classification_selections %}
+{%- if selection['component'] == component  %}
+  readonly section text_{{selection['component']}}_*{{selection['class']}}*,
+{%- endif %}
+{%- endfor %}
+{%- if "timecritical" in code_classification_standard_selections %}
+  readonly section text_{{component}}_*timecritical*,
+{%- endif %}
+};
+
+{%- endfor %}
+{%- endif %}
+
+define block text_application_ram with alignment = 8
+{
+  readwrite code section text_application_ram,
+};
+
+define block text_application_ram_init with alignment = 8
+{
+  readonly code section text_application_ram_init,
+};
+
+initialize by copy
+{
+  readonly section text_application_ram,
+};
+
 {%- endif %}
 
 define block application_ram with fixed order
@@ -216,16 +268,37 @@ do not initialize
 keep { section .intvec };
 
 {%- if bootloader_enable %}
-place in ROM_region   { block ROM_CONTENT };
+place in ROM_region
+{
+  block ROM_CONTENT
+};
 {%- else %}
 {%- if apploader_enable %}
 ".text_apploader":
 place at start of ROM_region  { block apploader };
 "application":
-place in ROM_region { block application };
+place in ROM_region
+{
+  block application,
+{%- if series >= 3 %}
+{%- for component in code_classification_components %}
+  block text_{{component}}_ram_init,
+{%- endfor %}
+{%- endif %}
+  block text_application_ram_init,
+};
 {%- else %}
 "application":
-place at start of ROM_region { block application };
+place at start of ROM_region
+{
+  block application,
+{%- if series >= 3 %}
+{%- for component in code_classification_components %}
+  block text_{{component}}_ram_init,
+{%- endfor %}
+{%- endif %}
+  block text_application_ram_init,
+};
 {%- endif %}
 {%- endif %}
 
@@ -243,10 +316,18 @@ place at end of MAIN_FLASH_region {
 {%- endif %}
 };
 
-"ramfuncs":
-place at start of RAM_region { 
-  block RAMFUNCS,
+{%- if not bootloader_enable %}
+"ram_code":
+place at start of RAM_region {
+{%- if series >= 3 %}
+{%- for component in code_classification_components %}
+  block text_{{component}}_ram,
+{%- endfor %}
+{%- endif %}
+  block text_application_ram,
 };
+{%- endif %}
+
 
 "application_ram":
 place in RAM_region {

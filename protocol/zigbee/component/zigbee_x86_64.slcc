@@ -1,15 +1,16 @@
-id: "zigbee_x86_64"
-label: "Zigbee x86_64"
-package: "Zigbee"
-category: "Zigbee"
-quality: "production"
-description: "This plugin contains defines to build Zigbee apps against x86_64."
+id: zigbee_x86_64
+label: Zigbee x86_64
+package: Zigbee
+category: Zigbee
+quality: production
+description: This plugin contains defines to build Zigbee apps against x86_64.
 
 provides:
-  - name: "zigbee_x86_64"
+  - name: x86-64
+  - name: zigbee_x86_64
 
 requires:
-  - name: "linux_arch_64"
+  - name: linux_arch_64
 
 documentation:
   docset: zigbee

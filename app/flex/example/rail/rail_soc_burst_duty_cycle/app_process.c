@@ -33,20 +33,14 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
-#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
-#include "app_assert.h"
-#endif
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-#include "app_log.h"
-#endif
 #include "rail.h"
 #include "app_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
 #include "sl_flex_rail_package_assistant.h"
 #include "sl_duty_cycle_config.h"
 #include "sl_flex_rail_config.h"
 #include "sl_flex_rail_channel_selector.h"
+#include "simple_rail_assistance.h"
 
 #if DUTY_CYCLE_USE_LCD_BUTTON
 #include "app_graphics.h"
@@ -254,9 +248,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
       break;
     default:
       // Unexpected state
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Unexpected state occurred:%d\n", state);
-#endif
 #if DUTY_CYCLE_USE_LCD_BUTTON == 1
       display_error_on_lcd(INVALID_APP_STATE);
       refresh_display = false;
@@ -401,41 +393,31 @@ static void handle_receive_state(RAIL_Handle_t rail_handle)
   if (rail_packet_received) {
     rail_packet_received = false;
     // Get the RX packet data
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     if (rx_packet_handle == RAIL_RX_PACKET_HANDLE_INVALID) {
       app_log_error("RAIL_HoldRxPacket() error: RAIL_RX_PACKET_HANDLE_INVALID\n"
                     "No such RAIL rx packet yet exists or rail_handle is not active");
     }
-#endif
     rx_packet_handle = RAIL_GetRxPacketInfo(rail_handle,
                                             RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE,
                                             &packet_info);
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     if (rx_packet_handle == RAIL_RX_PACKET_HANDLE_INVALID) {
       app_log_error("RAIL_GetRxPacketInfo() error: RAIL_RX_PACKET_HANDLE_INVALID\n");
     }
-#endif
     uint8_t *start_of_packet = 0;
     uint16_t packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
     rail_status = RAIL_ReleaseRxPacket(rail_handle, rx_packet_handle);
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     if (rail_status != RAIL_STATUS_NO_ERROR) {
       app_log_warning("RAIL_ReleaseRxPacket() result:%d", rail_status);
     }
-#else
-    (void) rail_status;
-#endif
     // Check if this is a new burst
     if (slave_rx_burst_id != start_of_packet[0]) {
       slave_rx_burst_id = start_of_packet[0];
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
       // Print packet if requested
       if (rx_requested) {
         printf_rx_packet(start_of_packet, packet_size);
       }
-#endif
       // RX bookkeeping & update LCD
-      sl_led_toggle(&sl_led_led0);
+      toggle_receive_led();
       packet_received++;
       refresh_display = true;
       // Rx of one packet done, going back to listen
@@ -457,10 +439,9 @@ static void handle_send_state(RAIL_Handle_t rail_handle)
   if (RAIL_GetTime() >= timeout) {
     // Burst completed, clear any Tx flags and upadte UI
     rail_packet_sent = false;
-    sl_led_toggle(&sl_led_led1);
+    toggle_send_led();
     packet_transmitted++;
     refresh_display = true;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_info("Burst of %lu packets sent.\n", master_burst_packets_count);
     // Run-time check if the listener had no chance to receive the burst
     if ((BURST_TIME / master_burst_packets_count) > DUTY_CYCLE_ON_TIME) {
@@ -468,7 +449,6 @@ static void handle_send_state(RAIL_Handle_t rail_handle)
                    (BURST_TIME / master_burst_packets_count),
                    (uint32_t)DUTY_CYCLE_ON_TIME);
     }
-#endif
     master_burst_packets_count = 0UL;
     // Go back to Slave Idle state in Duty Cycle
     RAIL_Idle(rail_handle, RAIL_IDLE, true);
@@ -495,7 +475,6 @@ static void handle_send_state(RAIL_Handle_t rail_handle)
 static void handle_error_state(RAIL_Handle_t rail_handle)
 {
   (void)rail_handle;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
   // Handle Rx error
   if (rail_last_state & RAIL_EVENTS_RX_COMPLETION) {
     app_log_error("Radio RX Error occurred\nEvents: %lld\n", rail_last_state);
@@ -508,7 +487,6 @@ static void handle_error_state(RAIL_Handle_t rail_handle)
                   rail_last_state,
                   calibration_status);
   }
-#endif
   // Restart duty cylce
   duty_cycle_end = true;
 
@@ -532,11 +510,9 @@ static RAIL_Status_t send_tx_packet(RAIL_Handle_t rail_handle)
 
   rail_status = RAIL_StartTx(rail_handle, get_selected_channel(), RAIL_TX_OPTIONS_DEFAULT, NULL);
 
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
   if (rail_status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("RAIL_StartTx() result:%d ", rail_status);
   }
-#endif
 
   return rail_status;
 }

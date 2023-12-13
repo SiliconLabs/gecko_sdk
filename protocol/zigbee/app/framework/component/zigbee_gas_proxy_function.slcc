@@ -1,27 +1,25 @@
 package: Zigbee
-description: Silicon Labs implementation of the Gas Proxy Function (GPF). This component receives and processes 
-  GBZ Top Off Messages. NOTE This component uses malloc
-  and should only be used in a non-SoC setup.
+description: Silicon Labs implementation of the Gas Proxy Function (GPF). This component receives and processes GBZ Top Off Messages. NOTE This component uses malloc and should only be used in a non-SoC setup.
 label: Gas Proxy Function (GPF)
 quality: production
 id: zigbee_gas_proxy_function
 category: Zigbee|Great Britain Companion Specification
 provides:
-   - name: "zigbee_gas_proxy_function"
+  - name: zigbee_gas_proxy_function
 requires:
-   - name: "zigbee_key_establishment"
-   - name: "zigbee_gbz_message_controller"
-   - name: "zigbee_meter_mirror"
-   - name: "zigbee_events_server"
-   - name: "zigbee_gbcs_compatibility"
-   - name: "zigbee_price_server"
+  - name: zigbee_key_establishment
+  - name: zigbee_gbz_message_controller
+  - name: zigbee_meter_mirror
+  - name: zigbee_events_server
+  - name: zigbee_gbcs_compatibility
+  - name: zigbee_price_server
 config_file:
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/config/gas-proxy-function-config.h
 source:
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/gas-proxy-function.c
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/gas-proxy-function-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/gpf-structured-data.c
   - path: protocol/zigbee/app/framework/plugin/gas-proxy-function/gas-proxy-function-cb.c
 include:
@@ -50,52 +48,52 @@ template_contribution:
       function_name: sli_zigbee_af_gas_proxy_function_pre_command_received_callback
   - name: cluster_service
     value:
-      cluster_id: "0x0708"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_device_management_cluster_client_command_parse"
+      cluster_id: '0x0708'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_device_management_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0707"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_calendar_cluster_client_command_parse"
+      cluster_id: '0x0707'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_calendar_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0700"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_price_cluster_client_command_parse"
+      cluster_id: '0x0700'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_price_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0703"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_messaging_cluster_client_command_parse"
+      cluster_id: '0x0703'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_messaging_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0702"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_simple_metering_cluster_client_command_parse"
+      cluster_id: '0x0702'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_simple_metering_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0702"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "SERVER"
-      service_function: "sli_zigbee_af_gas_proxy_function_simple_metering_cluster_server_command_parse"
+      cluster_id: '0x0702'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: sli_zigbee_af_gas_proxy_function_simple_metering_cluster_server_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0705"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "CLIENT"
-      service_function: "sli_zigbee_af_gas_proxy_function_prepayment_cluster_client_command_parse"
+      cluster_id: '0x0705'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: sli_zigbee_af_gas_proxy_function_prepayment_cluster_client_command_parse
   - name: cluster_service
     value:
-      cluster_id: "0x0705"
-      mfg_id: "NOT_MFG_SPECIFIC"
-      side: "SERVER"
-      service_function: "sli_zigbee_af_gas_proxy_function_prepayment_cluster_server_command_parse"
+      cluster_id: '0x0705'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: sli_zigbee_af_gas_proxy_function_prepayment_cluster_server_command_parse
   - name: cli_group
     value:
       group: plugin
@@ -108,7 +106,7 @@ template_contribution:
       handler: sli_zigbee_af_gas_proxy_function_cli_simulate_gbz_msg
       help: Simulates transmission of a GBZ message to the Gas Proxy Function.
       argument:
-      - type: uint16
+        - type: uint16
   - name: cli_command
     value:
       group: gas-proxy-function
@@ -135,29 +133,29 @@ template_contribution:
       help: Simulates transmission of a GBZ message to the Gas Proxy Function.
   - name: cluster_functions
     value:
-       cluster_name: SimpleMetering
-       cluster_id: 0x702
-       cluster_type: client
-       default_response_function: emberAfSimpleMeteringClusterClientDefaultResponseCallback
+      cluster_name: SimpleMetering
+      cluster_id: 0x702
+      cluster_type: client
+      default_response_function: emberAfSimpleMeteringClusterClientDefaultResponseCallback
   - name: cluster_functions
     value:
       cluster_name: SimpleMetering
       cluster_id: 0x702
-      cluster_type: server     
-      attribute_changed_function: emberAfSimpleMeteringClusterServerAttributeChangedCallback     
+      cluster_type: server
+      attribute_changed_function: emberAfSimpleMeteringClusterServerAttributeChangedCallback
   - name: cluster_functions
     value:
-       cluster_name: Prepayment
-       cluster_id: 0x705
-       cluster_type: client
-       default_response_function: emberAfPrepaymentClusterClientDefaultResponseCallback
+      cluster_name: Prepayment
+      cluster_id: 0x705
+      cluster_type: client
+      default_response_function: emberAfPrepaymentClusterClientDefaultResponseCallback
   - name: cluster_functions
     value:
       cluster_name: Prepayment
       cluster_id: 0x705
       cluster_type: server
       attribute_changed_function: emberAfPrepaymentClusterServerAttributeChangedCallback
-      
+
 documentation:
   docset: zigbee
   document: zigbee-af-api/gas-proxy-function

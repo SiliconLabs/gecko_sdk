@@ -1,7 +1,7 @@
 project_name: tz_psa_attestation_s
 package: platform
 quality: production
-label: Platform - TrustZone PSA Attestation (Secure application)
+label: Platform Security - SoC TrustZone PSA Attestation (Secure application)
 description: >
   The Secure part of the application provides the PSA Crypto and Attestation functionalities in the Secure world. The Secure application needs to build with the Non-secure application on a workspace (tz_psa_attestation_ws).
 category: Example|Platform

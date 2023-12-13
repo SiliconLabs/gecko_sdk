@@ -110,12 +110,11 @@ static uint32_t BoardSawFilterSetup(uint8_t rfRegion)
 /*                      PUBLIC FUNCTIONS                                    */
 /****************************************************************************/
 
-uint32_t BRD420xBoardInit(uint8_t rfRegion)
+uint32_t BRD420xBoardInit(__attribute__((unused)) uint8_t rfRegion)
 {
 #ifdef ENABLE_SAW_FILTER
   return BoardSawFilterSetup(rfRegion);
 #else
-  UNUSED(rfRegion);
   return true;
 #endif
 }

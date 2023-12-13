@@ -65,4 +65,7 @@ requires:
   - name: tz_sl_interface_crypto_key_derivation_funcs
     condition: [psa_crypto_ecdh]
 
+  - name: tz_sl_interface_crypto_pake_funcs
+    condition: [psa_crypto_jpake]
+
   - name: tz_sl_interface_crypto_rng_funcs

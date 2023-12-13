@@ -580,6 +580,7 @@ typedef enum {
   prsSignalEUSART1_TXFL       = PRS_EUSART1L_TXFL,       /**< EUSART1 txfl Signal. */
 #endif
 #if defined(EUSART2)
+#if defined(PRS_EUSART2L_CS)
   prsSignalEUSART2_CS         = PRS_EUSART2L_CS,         /**< EUSART2 chip select Signal. */
   prsSignalEUSART2_IRTX       = PRS_EUSART2L_IRDATX,     /**< EUSART2 IR TX Signal. */
   prsSignalEUSART2_RTS        = PRS_EUSART2L_RTS,        /**< EUSART2 RTS Signal. */
@@ -588,8 +589,19 @@ typedef enum {
   prsSignalEUSART2_TXC        = PRS_EUSART2L_TXC,        /**< EUSART2 TX complete Signal. */
   prsSignalEUSART2_RXFL       = PRS_EUSART2L_RXFL,       /**< EUSART2 rxfl Signal. */
   prsSignalEUSART2_TXFL       = PRS_EUSART2L_TXFL,       /**< EUSART2 txfl Signal. */
+#else
+  prsSignalEUSART2_CS         = PRS_EUSART2_CS,         /**< EUSART2 chip select Signal. */
+  prsSignalEUSART2_IRTX       = PRS_EUSART2_IRDATX,     /**< EUSART2 IR TX Signal. */
+  prsSignalEUSART2_RTS        = PRS_EUSART2_RTS,        /**< EUSART2 RTS Signal. */
+  prsSignalEUSART2_RXDATA     = PRS_EUSART2_RXDATAV,    /**< EUSART2 RX data available Signal. */
+  prsSignalEUSART2_TX         = PRS_EUSART2_TX,         /**< EUSART2 TX Signal. */
+  prsSignalEUSART2_TXC        = PRS_EUSART2_TXC,        /**< EUSART2 TX complete Signal. */
+  prsSignalEUSART2_RXFL       = PRS_EUSART2_RXFL,       /**< EUSART2 rxfl Signal. */
+  prsSignalEUSART2_TXFL       = PRS_EUSART2_TXFL,       /**< EUSART2 txfl Signal. */
+#endif
 #endif
 #if defined(EUSART3)
+#if defined(PRS_EUSART3L_CS)
   prsSignalEUSART3_CS         = PRS_EUSART3L_CS,         /**< EUSART3 chip select Signal. */
   prsSignalEUSART3_IRTX       = PRS_EUSART3L_IRDATX,     /**< EUSART3 IR TX Signal. */
   prsSignalEUSART3_RTS        = PRS_EUSART3L_RTS,        /**< EUSART3 RTS Signal. */
@@ -598,6 +610,16 @@ typedef enum {
   prsSignalEUSART3_TXC        = PRS_EUSART3L_TXC,        /**< EUSART3 TX complete Signal. */
   prsSignalEUSART3_RXFL       = PRS_EUSART3L_RXFL,       /**< EUSART3 rxfl Signal. */
   prsSignalEUSART3_TXFL       = PRS_EUSART3L_TXFL,       /**< EUSART3 txfl Signal. */
+#else
+  prsSignalEUSART3_CS         = PRS_EUSART3_CS,         /**< EUSART3 chip select Signal. */
+  prsSignalEUSART3_IRTX       = PRS_EUSART3_IRDATX,     /**< EUSART3 IR TX Signal. */
+  prsSignalEUSART3_RTS        = PRS_EUSART3_RTS,        /**< EUSART3 RTS Signal. */
+  prsSignalEUSART3_RXDATA     = PRS_EUSART3_RXDATAV,    /**< EUSART3 RX data available Signal. */
+  prsSignalEUSART3_TX         = PRS_EUSART3_TX,         /**< EUSART3 TX Signal. */
+  prsSignalEUSART3_TXC        = PRS_EUSART3_TXC,        /**< EUSART3 TX complete Signal. */
+  prsSignalEUSART3_RXFL       = PRS_EUSART3_RXFL,       /**< EUSART3 rxfl Signal. */
+  prsSignalEUSART3_TXFL       = PRS_EUSART3_TXFL,       /**< EUSART3 txfl Signal. */
+#endif
 #endif
 #if defined(EUSART4)
   prsSignalEUSART4_CS         = PRS_EUSART4L_CS,         /**< EUSART4 chip select Signal. */
@@ -1052,7 +1074,7 @@ __STATIC_INLINE uint32_t PRS_Values(PRS_ChType_t type)
  ******************************************************************************/
 __STATIC_INLINE bool PRS_ChannelValue(unsigned int ch, PRS_ChType_t type)
 {
-  return (PRS_Values(type) >> ch) & 0x1U;
+  return (0UL != ((PRS_Values(type) >> ch) & 0x1U));
 }
 #endif
 

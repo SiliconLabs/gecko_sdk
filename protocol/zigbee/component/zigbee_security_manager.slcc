@@ -1,8 +1,7 @@
 id: zigbee_security_manager
 package: Zigbee
 label: Zigbee Security Manager
-description: |-
-  The Zigbee Security Manager utility handles Zigbee-specific security functions, which include key management and certain security operations.
+description: The Zigbee Security Manager utility handles Zigbee-specific security functions, which include key management and certain security operations.
 category: Zigbee|Utility
 quality: production
 

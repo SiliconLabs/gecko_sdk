@@ -1862,4 +1862,4 @@ typedef struct {
 /** @} End of group EFR32FG25_PRS */
 /** @} End of group Parts */
 
-#endif /* EFR32FG25_PRS_H */
+#endif // EFR32FG25_PRS_H

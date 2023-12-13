@@ -128,8 +128,9 @@ sl_status_t sl_math_mvp_vector_scale_f16(const float16_t *input, float16_t scale
   if (status != SL_STATUS_OK) {
     return status;
   }
-  sli_mvp_pb_execute_program(p);
-
+  if ((status = sli_mvp_pb_execute_program(p)) != SL_STATUS_OK) {
+    return status;
+  }
   #else
 
   sli_mvp_cmd_enable();
@@ -200,10 +201,7 @@ sl_status_t sl_math_mvp_vector_scale_f16(const float16_t *input, float16_t scale
 
   // Start program.
   MVP->CMD = MVP_CMD_INIT | MVP_CMD_START;
-
   #endif
 
-  sli_mvp_cmd_wait_for_completion();
-
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return sli_mvp_cmd_wait_for_completion();
 }

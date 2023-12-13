@@ -28,8 +28,7 @@
  ******************************************************************************/
 
 #define  CMSIS_SOURCE
-#include PLATFORM_HEADER
-#include "hal.h"
+#include "stack/core/sl-connect-watchdog.h"
 #include "cmsis-rtos-ipc-config.h"
 #include "stack/include/ember.h"
 #include "cmsis-stack-ipc/cmsis-rtos-support.h"
@@ -139,7 +138,7 @@ void  App_OS_ClrAllHooks(void)
 void  OSIdleEnterHook(void)
 {
 #ifndef DISABLE_WATCHDOG
-  halResetWatchdog();
+  WDOGn_Feed(DEFAULT_WDOG);
 #endif
 }
 
@@ -159,7 +158,7 @@ void  App_OS_RedzoneHitHook(OS_TCB *p_tcb)
 {
   while (DEF_ON) {
 #ifndef DISABLE_WATCHDOG
-    halResetWatchdog();
+    WDOGn_Feed(DEFAULT_WDOG);
 #endif
 
 #if defined(SL_CATALOG_CONNECT_DEBUG_PRINT_PRESENT)

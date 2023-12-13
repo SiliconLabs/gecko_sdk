@@ -445,4 +445,4 @@ typedef struct {
 /** @} End of group MGM21_HFXO */
 /** @} End of group Parts */
 
-#endif /* MGM21_HFXO_H */
+#endif // MGM21_HFXO_H

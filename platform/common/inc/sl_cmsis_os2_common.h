@@ -55,12 +55,13 @@
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 
-#define   osEventFlagsCbSize   sizeof(StaticEventGroup_t)
-#define   osThreadCbSize       sizeof(StaticTask_t)
-#define   osTimerCbSize        sizeof(StaticTimer_t)
-#define   osMutexCbSize        sizeof(StaticSemaphore_t)
-#define   osSemaphoreCbSize    sizeof(StaticSemaphore_t)
-#define   osMessageQueueCbSize sizeof(StaticQueue_t)
+#define   osEventFlagsCbSize          sizeof(StaticEventGroup_t)
+#define   osThreadCbSize              sizeof(StaticTask_t)
+#define   osTimerCbSize               sizeof(StaticTimer_t)
+#define   osMutexCbSize               sizeof(StaticSemaphore_t)
+#define   osSemaphoreCbSize           sizeof(StaticSemaphore_t)
+#define   osMessageQueueCbSize        sizeof(StaticQueue_t)
+#define   osAlignment                 (portBYTE_ALIGNMENT)
 
 typedef StaticEventGroup_t osEventFlags_t;
 typedef StaticTask_t       osThread_t;
@@ -148,30 +149,32 @@ typedef struct {
 #endif
 
 #if (OS_CFG_FLAG_EN == DEF_ENABLED)
-#define   osEventFlagsCbSize     sizeof(osEventFlags_t)
+#define   osEventFlagsCbSize            sizeof(osEventFlags_t)
 #endif
 
-#define   osThreadCbSize         sizeof(osThread_t)
+#define   osThreadCbSize                sizeof(osThread_t)
 
 #if (OS_CFG_TMR_EN == DEF_ENABLED)
-#define   osTimerCbSize          sizeof(osTimer_t)
+#define   osTimerCbSize                 sizeof(osTimer_t)
 #endif
 
 #if (OS_CFG_MUTEX_EN == DEF_ENABLED)
-#define   osMutexCbSize          sizeof(osMutex_t)
+#define   osMutexCbSize                 sizeof(osMutex_t)
 #endif
 
 #if (OS_CFG_SEM_EN == DEF_ENABLED)
-#define   osSemaphoreCbSize      sizeof(osSemaphore_t)
+#define   osSemaphoreCbSize             sizeof(osSemaphore_t)
 #endif
 
 #if (OS_CFG_SEM_EN == DEF_ENABLED)
-#define   osMessageQueueCbSize   sizeof(osMessageQueue_t)
+#define   osMessageQueueCbSize          sizeof(osMessageQueue_t)
 #endif
 
 #if (OS_CFG_SEM_EN == DEF_ENABLED)
-#define   osMemoryPoolCbSize     sizeof(osMemoryPool_t)
+#define   osMemoryPoolCbSize            sizeof(osMemoryPool_t)
 #endif
+
+#define   osAlignment                   sizeof(CPU_ALIGN)
 
 #endif // SL_CATALOG_MICRIUMOS_KERNEL_PRESENT
 

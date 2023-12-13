@@ -78,7 +78,7 @@ uint8_t halButtonPinState(uint8_t button);
 /** @brief A callback called in interrupt context whenever a button
  * changes its state.
  *
- * @appusage Must be implemented by the application.  This function should
+ * Must be implemented by the application.  This function should
  * contain the functionality to be executed in response to changes of state
  * in each of the buttons, or callbacks to the appropriate functionality.
  *

@@ -51,13 +51,6 @@ include:
     file_list:
       - path: events.h
 configuration:
-  # Version numbers are equal to ZAF_VERSION_MAJOR, ZAF_VERSION_MINOR, ZAF_VERSION_PATCH
-  - name: APP_VERSION
-    value: 10
-  - name: APP_REVISION
-    value: 20
-  - name: APP_PATCH
-    value: 2
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
@@ -93,7 +86,7 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2    
+    value: 0    # UART RX shouldn't prevent EM2
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY
@@ -111,9 +104,9 @@ configuration:
     value: 112
     condition: [device_series_2]
   - name: configTIMER_QUEUE_LENGTH
-    value: 8    
+    value: 8
   - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1 
+    value: 1
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -163,7 +156,7 @@ config_file:
 
 other_file:
   - path: ../../DevTools/postbuild.sh
-  
+
 post_build:
   profile: zwave_soc_led_bulb
 

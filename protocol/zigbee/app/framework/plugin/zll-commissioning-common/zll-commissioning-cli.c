@@ -342,6 +342,7 @@ void setIdentifyDuration(sl_cli_command_arg_t *arguments)
 {
 #ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_CLIENT
   sli_zigbee_af_zll_identify_duration_sec = sl_cli_get_argument_uint16(arguments, 0);
+  emberAfAppPrintln("%p %d", "Identify duration set to", sli_zigbee_af_zll_identify_duration_sec);
 #endif //EMBER_AF_PLUGIN_ZLL_COMMISSIONING_LINK_INITIATOR
 }
 
@@ -391,6 +392,7 @@ void noTouchlinkForNFN(sl_cli_command_arg_t *arguments)
 {
 #ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER
   emberAfZllNoTouchlinkForNFN();
+  emberAfAppPrintln("Touchlink stealing disabled");
 #else
   emberAfAppPrintln("zll commissioning server plugin not found");
 #endif
@@ -400,6 +402,7 @@ void noResetForNFN(sl_cli_command_arg_t *arguments)
 {
 #ifdef EMBER_AF_PLUGIN_ZLL_COMMISSIONING_SERVER
   emberAfZllNoResetForNFN();
+  emberAfAppPrintln("Touchlink remote reset disabled");
 #else
   emberAfAppPrintln("zll commissioning server plugin not found");
 #endif
@@ -408,9 +411,11 @@ void noResetForNFN(sl_cli_command_arg_t *arguments)
 void enable(sl_cli_command_arg_t *arguments)
 {
   emberAfZllEnable();
+  emberAfAppPrintln("Touchlinking enabled");
 }
 
 void disable(sl_cli_command_arg_t *arguments)
 {
   emberAfZllDisable();
+  emberAfAppPrintln("Touchlinking disabled");
 }

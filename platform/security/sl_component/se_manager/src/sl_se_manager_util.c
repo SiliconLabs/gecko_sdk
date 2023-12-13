@@ -929,6 +929,14 @@ sl_status_t sl_se_get_status(sl_se_command_context_t *cmd_ctx,
     // Decode secure boot mode
     status->secure_boot_enabled =
       ((output[8] & 0x1U) && ((output[8] & ~0x1U) == 0));
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+    uint32_t active_mode_shift = 16;
+#else
+    uint32_t active_mode_shift = 8;
+#endif
+    status->active_mode_enabled =
+      (status->boot_status >> active_mode_shift) & 0x1;
   }
 
   return ret;
@@ -1284,6 +1292,34 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
 
   SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(cert, num_bytes);
   SE_addDataOutput(se_cmd, &out_data);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+
+/***************************************************************************//**
+ * Enter active mode.
+ ******************************************************************************/
+sl_status_t sl_se_enter_active_mode(sl_se_command_context_t *cmd_ctx)
+{
+  if (cmd_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_ENTER_ACTIVE_MODE);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+
+/***************************************************************************//**
+ * Exit active mode.
+ ******************************************************************************/
+sl_status_t sl_se_exit_active_mode(sl_se_command_context_t *cmd_ctx)
+{
+  if (cmd_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_EXIT_ACTIVE_MODE);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }

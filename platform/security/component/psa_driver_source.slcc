@@ -16,6 +16,11 @@ requires:
   - name: psa_crypto_common
   - name: emlib_crypto
     condition: [device_has_crypto]
+  # psa_driver_source depends on 'mbedtls/build_info.h' via 'sli_psa_driver_features.h'
+  # 'mbedtls/build_info.h' includes MBEDTLS_CONFIG_FILE and is provided by mbedtls_source.slcc.
+  # We include mbedtls_core here which requires both mbedtls_source and mbedtls_config.
+  # mbedtls_config provides the actual MBEDTLS_CONFIG_FILE of the application.
+  - name: mbedtls_core
   - name: cryptoacc_library
     condition: [device_has_cryptoacc]
   - name: enum

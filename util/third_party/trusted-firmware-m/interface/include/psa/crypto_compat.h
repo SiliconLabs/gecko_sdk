@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,13 +33,15 @@ extern "C" {
 
 /*
  * To support both openless APIs and psa_open_key() temporarily, define
- * psa_key_handle_t to be equal to psa_key_id_t. Do not mark the
+ * psa_key_handle_t to be equal to mbedtls_svc_key_id_t. Do not mark the
  * type and its utility macros and functions deprecated yet. This will be done
  * in a subsequent phase.
  */
-typedef psa_key_id_t psa_key_handle_t;
+typedef mbedtls_svc_key_id_t psa_key_handle_t;
 
-/** Check whether an handle is null.
+#define PSA_KEY_HANDLE_INIT MBEDTLS_SVC_KEY_ID_INIT
+
+/** Check whether a handle is null.
  *
  * \param handle  Handle
  *
@@ -47,7 +49,7 @@ typedef psa_key_id_t psa_key_handle_t;
  */
 static inline int psa_key_handle_is_null(psa_key_handle_t handle)
 {
-    return(handle == 0);
+    return mbedtls_svc_key_id_is_null(handle);
 }
 
 /** Open a handle to an existing persistent key.
@@ -80,8 +82,8 @@ static inline int psa_key_handle_is_null(psa_key_handle_t handle)
  * opened. See also :ref:\`key-handles\`.
  *
  *
- * \param id           The persistent identifier of the key.
- * \param[out] key     On success, a handle to the key.
+ * \param key           The persistent identifier of the key.
+ * \param[out] handle   On success, a handle to the key.
  *
  * \retval #PSA_SUCCESS
  *         Success. The application can now use the value of `*handle`
@@ -92,26 +94,26 @@ static inline int psa_key_handle_is_null(psa_key_handle_t handle)
  *         number of open keys, the number of open key handles, or available
  *         memory.
  * \retval #PSA_ERROR_DOES_NOT_EXIST
- *         There is no persistent key with key identifier \p id.
+ *         There is no persistent key with key identifier \p key.
  * \retval #PSA_ERROR_INVALID_ARGUMENT
- *         \p id is not a valid persistent key identifier.
+ *         \p key is not a valid persistent key identifier.
  * \retval #PSA_ERROR_NOT_PERMITTED
  *         The specified key exists, but the application does not have the
  *         permission to access it. Note that this specification does not
  *         define any way to create such a key, but it may be possible
  *         through implementation-specific means.
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
- * \retval #PSA_ERROR_STORAGE_FAILURE
- * \retval #PSA_ERROR_DATA_INVALID
- * \retval #PSA_ERROR_DATA_CORRUPT
+ * \retval #PSA_ERROR_COMMUNICATION_FAILURE \emptydescription
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED \emptydescription
+ * \retval #PSA_ERROR_STORAGE_FAILURE \emptydescription
+ * \retval #PSA_ERROR_DATA_INVALID \emptydescription
+ * \retval #PSA_ERROR_DATA_CORRUPT \emptydescription
  * \retval #PSA_ERROR_BAD_STATE
  *         The library has not been previously initialized by psa_crypto_init().
  *         It is implementation-dependent whether a failure to initialize
  *         results in this error code.
  */
-psa_status_t psa_open_key(psa_key_id_t id,
-                          psa_key_id_t *key);
+psa_status_t psa_open_key(mbedtls_svc_key_id_t key,
+                          psa_key_handle_t *handle);
 
 /** Close a key handle.
  *
@@ -137,21 +139,21 @@ psa_status_t psa_open_key(psa_key_id_t id,
  * key handle can cause the multipart operation to fail. Applications should
  * maintain the key handle until after the multipart operation has finished.
  *
- * \param key           The key to close.
+ * \param handle        The key handle to close.
  *                      If this is \c 0, do nothing and return \c PSA_SUCCESS.
  *
  * \retval #PSA_SUCCESS
  *         \p handle was a valid handle or \c 0. It is now closed.
  * \retval #PSA_ERROR_INVALID_HANDLE
  *         \p handle is not a valid handle nor \c 0.
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE
- * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_COMMUNICATION_FAILURE \emptydescription
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED \emptydescription
  * \retval #PSA_ERROR_BAD_STATE
  *         The library has not been previously initialized by psa_crypto_init().
  *         It is implementation-dependent whether a failure to initialize
  *         results in this error code.
  */
-psa_status_t psa_close_key(psa_key_id_t key);
+psa_status_t psa_close_key(psa_key_handle_t handle);
 
 #ifdef __cplusplus
 }

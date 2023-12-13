@@ -17,3 +17,4 @@ source:
   - path: util/silicon_labs/silabs_core/memory_manager/sl_malloc.c
 provides:
   - name: silabs_core_sl_malloc
+  - name: sl_malloc

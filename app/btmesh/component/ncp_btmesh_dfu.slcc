@@ -20,6 +20,12 @@ requires:
   - name: btmesh_core
   - name: btmesh_stack_fw_update_server
   - name: btmesh_stack
-
+  - name: "ncp_btmesh_user_cmd"
+template_contribution: 
+  - name: ncp_cmd_to_target
+    value:
+      include: ncp_btmesh_dfu.h
+      function: sl_btmesh_ncp_dfu_handle_cmd
+    priority: -9
 validation_helper:
   - path: "../../script/validation/ncp_soc_compatibility.lua"

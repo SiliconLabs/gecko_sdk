@@ -7,6 +7,7 @@ PROTECTED_REGS = ['SYNTH.FREQ', 'SYNTH.CHCTRL',
 # These are fields of registers that should not be touched by radio configs, as they are handled by the RAIL API
 PROTECTED_FIELDS_BASE = {
     'AGC.CTRL0': ['RSSISHIFT'],
+    'AGC.CTRL1': ['CCATHRSH'],
     'FRC.RXCTRL': [
         'BUFRESTORERXABORTED',
         'BUFRESTOREFRAMEERROR',
@@ -163,6 +164,11 @@ PROTECTED_FIELDS_SOL = {
     ],
     'RAC.IFADCPLLDCO': [
         'IFADCPLLDCOTEMPADJ'
+    ],
+    'RAC.TX': [
+        'TXENPADDCFORCE',
+        'TXMODEPMOSOFF',
+        'TXENXDRVVMID',
     ],
     'RFFPLL0.RFFPLLCAL1': [
         'DIVR'

@@ -256,7 +256,7 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
                                 size_t length,
                                 uint32_t *nc_off,
                                 unsigned char nonce_counter[16],
-                                unsigned char stream_block[16],
+                                unsigned char stream_block[SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED * SL_SE_AES_BLOCK_SIZE],
                                 const unsigned char *input,
                                 unsigned char *output);
 

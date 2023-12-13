@@ -21,6 +21,7 @@ requires:
   - name: "sl_wisun_trace_util"
   - name: "sl_wisun_ns_list"
   - name: "sleeptimer"
+  - name: "wisun_legacy_socket_wrapper"
 
 recommends:
   - id: "wisun_stack_library"
@@ -35,6 +36,9 @@ template_contribution:
       include: "sl_wisun_stack.h"
       handler: "sl_wisun_stack_init"
 
+  - name: component_catalog
+    value: wisun_stack
+
 include:
   - path: "inc/"
     file_list:
@@ -48,6 +52,13 @@ include:
       - path: "sli_wisun_timer_service.h"
       - path: "sl_wisun_connection_params_api.h"
       - path: "sl_wisun_lfn_params_api.h"
+  - path: "inc/socket/"
+    file_list:
+      - path: "socket.h"
+
+toolchain_settings:
+  - option: iar_linker_option
+    value: --advanced_heap
 
 documentation:
   docset: wisun

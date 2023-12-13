@@ -754,4 +754,4 @@ typedef struct {
 /** @} End of group MGM24_VDAC */
 /** @} End of group Parts */
 
-#endif /* MGM24_VDAC_H */
+#endif // MGM24_VDAC_H

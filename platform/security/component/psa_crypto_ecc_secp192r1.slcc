@@ -18,7 +18,7 @@ requires:
     condition: [device_series_1]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ECC_SECP_R1_192
+    value: PSA_WANT_ECC_SECP_R1_192 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_R1_192 1"
     condition: [mbedtls_ecc_secp192r1]

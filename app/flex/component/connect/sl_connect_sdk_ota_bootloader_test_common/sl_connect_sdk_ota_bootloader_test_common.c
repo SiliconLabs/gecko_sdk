@@ -32,7 +32,6 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "app_log.h"
 #include "sl_connect_sdk_ota_bootloader_test_common.h"
 #include "sl_connect_sdk_btl-interface.h"
@@ -105,7 +104,7 @@ void cli_bootloader_validate_image(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
 
-  if (!emberAfPluginBootloaderInterfaceValidateImage()) {
+  if (emberAfPluginBootloaderInterfaceValidateImage() != 0L) {
     app_log_error("Image is invalid!\n");
   } else {
     app_log_info("Image is valid!\n");

@@ -25,7 +25,7 @@
 #define SL_BTMESH_DCD_H
 
 {%- macro u16tohex(val) %}
-{{ "0x%04x"|format(val) }}
+{{ "0x%04X"|format(val) }}
 {%- endmacro %}
 
 // Defines the maximum number of elements the application needs based on the
@@ -37,19 +37,17 @@
 #define SL_BTMESH_CONFIG_MAX_MODELS {{dcd.total_models}}
 
 {% for elem in dcd.elements %}
-    {% set index = loop.index0 %}
     {% for macro in elem.macros %}
-#define {{macro}} {{index}}
+#define {{macro}} {{elem.elem_index}}
     {% endfor %}
 {% endfor %}
 
 {% for elem in dcd.elements %}
-    {% set index = loop.index0 %}
     {% for macro in elem.group_macros %}
-#define {{macro}} {{index}}
+#define {{macro}} {{elem.elem_index}}
     {% endfor %}
 {% endfor %}
-
+// Vendor model company and model identifiers
 {% for model in dcd.unique_vendor_models %}
 #define {{model.macro_name}}_CID {{ u16tohex(model.cid) }}
 #define {{model.macro_name}}_MID {{ u16tohex(model.mid) }}

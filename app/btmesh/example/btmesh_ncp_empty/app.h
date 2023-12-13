@@ -41,35 +41,16 @@ typedef uint8_t cmd_1_t[16];
 #define USER_CMD_2_ID    0x02
 typedef uint8_t cmd_2_t[8];
 
-// User command to set FWID
-#define USER_CMD_FWID_ID 'F'
-typedef struct {
-  uint8_t idx;
-  uint8_t len;
-  uint8_t data[];
-} cmd_fwid_t;
-
-// User command to set FW URI
-#define USER_CMD_URI_ID 'U'
-typedef struct {
-  uint8_t type;
-  uint8_t idx;
-  uint8_t len;
-  uint8_t data[];
-} cmd_uri_t;
-
-PACKSTRUCT(struct user_cmd {
+PACKSTRUCT(struct ncp_user_cmd {
   uint8_t hdr;
   // Example: union of user commands.
   union {
     cmd_1_t cmd_1;
     cmd_2_t cmd_2;
-    cmd_fwid_t cmd_fwid;
-    cmd_uri_t cmd_uri;
   } data;
 });
 
-typedef struct user_cmd user_cmd_t;
+typedef struct ncp_user_cmd ncp_user_cmd_t;
 
 /**************************************************************************//**
  * Application Init.

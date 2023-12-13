@@ -298,7 +298,15 @@ typedef struct {
 #define _SYSCFG_CHIPREV_FAMILY_SHIFT                       6                                     /**< Shift value for SYSCFG_FAMILY               */
 #define _SYSCFG_CHIPREV_FAMILY_MASK                        0xFC0UL                               /**< Bit mask for SYSCFG_FAMILY                  */
 #define _SYSCFG_CHIPREV_FAMILY_DEFAULT                     0x00000000UL                          /**< Mode DEFAULT for SYSCFG_CHIPREV             */
+#define _SYSCFG_CHIPREV_FAMILY_PG22                        0x00000018UL                          /**< Mode PG22 for SYSCFG_CHIPREV                */
+#define _SYSCFG_CHIPREV_FAMILY_MG22                        0x00000034UL                          /**< Mode MG22 for SYSCFG_CHIPREV                */
+#define _SYSCFG_CHIPREV_FAMILY_BG22                        0x00000035UL                          /**< Mode BG22 for SYSCFG_CHIPREV                */
+#define _SYSCFG_CHIPREV_FAMILY_FG22                        0x00000037UL                          /**< Mode FG22 for SYSCFG_CHIPREV                */
 #define SYSCFG_CHIPREV_FAMILY_DEFAULT                      (_SYSCFG_CHIPREV_FAMILY_DEFAULT << 6) /**< Shifted mode DEFAULT for SYSCFG_CHIPREV     */
+#define SYSCFG_CHIPREV_FAMILY_PG22                         (_SYSCFG_CHIPREV_FAMILY_PG22 << 6)    /**< Shifted mode PG22 for SYSCFG_CHIPREV        */
+#define SYSCFG_CHIPREV_FAMILY_MG22                         (_SYSCFG_CHIPREV_FAMILY_MG22 << 6)    /**< Shifted mode MG22 for SYSCFG_CHIPREV        */
+#define SYSCFG_CHIPREV_FAMILY_BG22                         (_SYSCFG_CHIPREV_FAMILY_BG22 << 6)    /**< Shifted mode BG22 for SYSCFG_CHIPREV        */
+#define SYSCFG_CHIPREV_FAMILY_FG22                         (_SYSCFG_CHIPREV_FAMILY_FG22 << 6)    /**< Shifted mode FG22 for SYSCFG_CHIPREV        */
 #define _SYSCFG_CHIPREV_MINOR_SHIFT                        12                                    /**< Shift value for SYSCFG_MINOR                */
 #define _SYSCFG_CHIPREV_MINOR_MASK                         0xFF000UL                             /**< Bit mask for SYSCFG_MINOR                   */
 #define _SYSCFG_CHIPREV_MINOR_DEFAULT                      0x00000000UL                          /**< Mode DEFAULT for SYSCFG_CHIPREV             */
@@ -588,4 +596,4 @@ typedef struct {
 /** @} End of group EFR32BG22_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_SYSCFG_H */
+#endif // EFR32BG22_SYSCFG_H

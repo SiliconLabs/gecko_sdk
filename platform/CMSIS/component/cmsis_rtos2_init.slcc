@@ -23,4 +23,4 @@ template_contribution:
       event: kernel_start
       include: cmsis_os2.h
       handler: osKernelStart
-    priority: 5    
+    priority: 6

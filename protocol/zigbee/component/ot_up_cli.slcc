@@ -1,21 +1,20 @@
-id: "ot_up_cli"
-label: "OpenThread CLI using Silabs unified platform and CMSIS RTOS2"
-package: "Zigbee"
-category: "Zigbee|Zigbee 3.0"
-quality: "production"
-
-description: "OpenThread CLI using Silabs unified platform and CMSIS RTOS2"
+id: ot_up_cli
+label: OpenThread CLI using Silabs unified platform and CMSIS RTOS2
+package: Zigbee
+category: Zigbee|Zigbee 3.0
+quality: production
+description: OpenThread CLI using Silabs unified platform and CMSIS RTOS2
 provides:
-  - name: "ot_up_cli"
+  - name: ot_up_cli
 requires:
-  - name: "zigbee_app_framework_common"
-  - name: "ot_stack_ftd"
-  - name: "cmsis_rtos2"
+  - name: zigbee_app_framework_common
+  - name: ot_stack_ftd
+  - name: cmsis_rtos2
 
-source:  
-  - path: "protocol/zigbee/app/framework/common/ot_up_cli.c"
-    condition: 
-      - "cli"
+source:
+  - path: protocol/zigbee/app/framework/common/ot_up_cli.c
+    condition:
+      - cli
 
 template_contribution:
   - name: component_catalog
@@ -50,8 +49,8 @@ template_contribution:
       name: dataset_networkkey
       handler: dataset_networkkey
       argument:
-      - type: hex
-        help: "Network key"
+        - type: hex
+          help: Network key
       help: thread dataset networkkey
 
   - name: cli_command
@@ -59,8 +58,8 @@ template_contribution:
       name: dataset_channel
       handler: dataset_channel
       argument:
-      - type: uint8
-        help: "Radio channel"
+        - type: uint8
+          help: Radio channel
       help: thread dataset channel
 
   - name: cli_command
@@ -68,8 +67,8 @@ template_contribution:
       name: dataset_pan_id
       handler: dataset_pan_id
       argument:
-      - type: uint16
-        help: "Pan ID"
+        - type: uint16
+          help: Pan ID
       help: thread dataset panID
 
   - name: cli_command
@@ -77,8 +76,8 @@ template_contribution:
       name: dataset_extended_pan_id
       handler: dataset_extended_pan_id
       argument:
-      - type: hex
-        help: "Extended PANID"
+        - type: hex
+          help: Extended PANID
       help: thread dataset ext PANID
 
   - name: cli_command
@@ -117,5 +116,5 @@ template_contribution:
       handler: thread_ping_ipaddr
       help: ping ip address
       argument:
-      - type: string
-        help: destination IPV6 address
+        - type: string
+          help: destination IPV6 address

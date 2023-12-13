@@ -33,9 +33,7 @@
 
 #include "rail_features.h"
 
-#if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY == 0
-#error "High speed IEEE.802.15.4 PHY unsupported on this platform!"
-#endif //RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+#define sl_rail_util_ieee802154_is_high_speed_phy_selected() SL_RAIL_UTIL_IEEE802154_2P4_2MBPS_PHY_ENABLED
 
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> IEEE802.15.4 High Speed PHY Configuration

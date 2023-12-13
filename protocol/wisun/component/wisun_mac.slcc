@@ -40,5 +40,9 @@ include:
   - path: "inc"
     file_list:
       - path: "sl_wisun_types.h"
-      - path: "sli_wisun_timer_service.h"
       - path: "sl_wisun_common.h"
+      - path: "sli_wisun_timer_service.h"
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_mac

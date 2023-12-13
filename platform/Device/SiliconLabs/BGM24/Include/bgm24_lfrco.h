@@ -301,4 +301,4 @@ typedef struct {
 /** @} End of group BGM24_LFRCO */
 /** @} End of group Parts */
 
-#endif /* BGM24_LFRCO_H */
+#endif // BGM24_LFRCO_H

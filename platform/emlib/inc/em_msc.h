@@ -273,6 +273,17 @@ typedef struct {
     { 0, 1 },                 \
   }
 
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
+
+/** xG26 chips incorporate 2 memory banks including ECC support. */
+#define MSC_ECC_BANKS  (2)
+/** Default MSC EccConfig initialization */
+#define MSC_ECCCONFIG_DEFAULT \
+  {                           \
+    { false, false },         \
+    { 0, 1 },                 \
+  }
+
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 
 /** Series 2 chips incorporate 1 memory bank including ECC support. */
@@ -326,7 +337,7 @@ __STATIC_INLINE bool MSC_LockGetLocked(void)
 #elif defined(_MSC_STATUS_REGLOCK_MASK)
   return (MSC->STATUS & _MSC_STATUS_REGLOCK_MASK) != MSC_STATUS_REGLOCK_UNLOCKED;
 #else
-  return (MSC->LOCK & _MSC_LOCK_MASK) != MSC_LOCK_LOCKKEY_UNLOCK;
+  return (MSC->LOCK & _MSC_LOCK_MASK) != MSC_LOCK_LOCKKEY_UNLOCKED;
 #endif
 }
 

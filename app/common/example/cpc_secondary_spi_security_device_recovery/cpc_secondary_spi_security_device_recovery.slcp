@@ -2,7 +2,7 @@ project_name: cpc_secondary_spi_security_device_recovery
 package: platform
 quality: production
 label: Platform - CPC Secondary Device Recovery - SPI
-description: > 
+description: >
   This simple example project implements the function sl_cpc_security_on_unbind_request(),
   allowing the secondary device to be unbound from the host.
 category: Example|Platform
@@ -29,7 +29,7 @@ component:
   - id: cpc_security_secondary
   - id: cpc_secondary_driver_spi_usart
     instance:
-    - exp    
+    - exp
 define:
   - name: DEBUG_EFM
 configuration:
@@ -43,3 +43,4 @@ ui_hints:
   highlight: readme.md
 tag:
   - hardware:device:ram:40
+  - hardware:component:exp_header:spi

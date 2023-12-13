@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2019, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 #include <string.h>
 
 #include <openthread/logging.h>
-
+#include "common/debug.hpp"
 #include "utils/code_utils.h"
 
 // Print entire source match tables when
@@ -52,7 +52,7 @@ extern uint8_t        otNcpPlatGetCurCommandIid(void);
 static inline uint8_t getPanIndex(uint8_t iid)
 {
     // Assert if iid=0 (broadcast iid)
-    assert(iid != 0);
+    OT_ASSERT(iid != 0);
     return iid - 1;
 }
 #else // !OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
@@ -108,8 +108,11 @@ static void printShortEntryTable(uint8_t iid)
     otLogDebgPlat("================================|============|===========");
     for (int16_t i = 0; i < RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM; i++)
     {
-        otLogDebgPlat("ShortEntry[panIndex=%d][entry=%d] | %d          | 0x%04x", panIndex, i,
-                      srcMatchShortEntry[panIndex][i].allocated, srcMatchShortEntry[panIndex][i].checksum);
+        otLogDebgPlat("ShortEntry[panIndex=%d][entry=%d] | %d          | 0x%04x",
+                      panIndex,
+                      i,
+                      srcMatchShortEntry[panIndex][i].allocated,
+                      srcMatchShortEntry[panIndex][i].checksum);
     }
     otLogDebgPlat("================================|============|===========");
 }
@@ -274,8 +277,11 @@ static void printExtEntryTable(uint8_t iid)
     otLogDebgPlat("==============================|============|===========");
     for (int16_t i = 0; i < RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM; i++)
     {
-        otLogDebgPlat("ExtEntry[panIndex=%d][entry=%d] | %d          | 0x%04x", panIndex, i,
-                      srcMatchExtEntry[panIndex][i].allocated, srcMatchExtEntry[panIndex][i].checksum);
+        otLogDebgPlat("ExtEntry[panIndex=%d][entry=%d] | %d          | 0x%04x",
+                      panIndex,
+                      i,
+                      srcMatchExtEntry[panIndex][i].allocated,
+                      srcMatchExtEntry[panIndex][i].checksum);
     }
     otLogDebgPlat("==============================|============|===========");
 }

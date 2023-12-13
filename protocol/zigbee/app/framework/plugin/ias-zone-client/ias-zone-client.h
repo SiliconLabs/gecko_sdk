@@ -50,6 +50,13 @@ extern IasZoneDevice emberAfIasZoneClientKnownServers[];
 
 #define UNKNOWN_ZONE_ID 0xFF
 
+/** @brief API to control the setting of CIE address
+ *
+ * @param allow
+ *
+ */
+void sl_zigbee_ias_client_allow_set_cie_address(bool allow);
+
 /**
  * @name Callbacks
  * @{

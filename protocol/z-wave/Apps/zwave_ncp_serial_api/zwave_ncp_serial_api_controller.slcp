@@ -19,6 +19,7 @@ component:
   - id: zw_api_serialapi
   - id: zw_api_controller
   - id: zw_dcdc_override
+  - id: ZW_MIGRATION_FROM_7_20
   # Platform
   - id: emlib_letimer
   - id: emlib_timer
@@ -26,7 +27,7 @@ component:
   - id: gpiointerrupt
   - id: sl_system
   - id: device_init
-  - id: mpu # disable execution from RAM  
+  - id: mpu # disable execution from RAM
 source:
   - path: app_node_info.c
   - path: cmd_handlers_invoker.c
@@ -73,13 +74,6 @@ config_file:
     file_id: zaf_config
     condition: [device_series_2]
 configuration:
-  # Version numbers are equal to SDK_VERSION_MAJOR, SDK_VERSION_MINOR, SDK_VERSION_PATCH
-  - name: APP_VERSION
-    value: 7
-  - name: APP_REVISION
-    value: 20
-  - name: APP_PATCH
-    value: 2
   - name: ZAF_CONFIG_GENERIC_TYPE
     value: GENERIC_TYPE_STATIC_CONTROLLER
   - name: ZAF_CONFIG_SPECIFIC_TYPE
@@ -125,7 +119,7 @@ configuration:
   - name: configTIMER_QUEUE_LENGTH
     value: 8
   - name: SL_DEVICE_INIT_DCDC_BYPASS
-    value: 1  
+    value: 1
   - name: SL_PSA_ITS_USER_MAX_FILES
     value: 32
     condition: ["device_series_2", "device_security_vault"]
@@ -142,7 +136,11 @@ configuration:
     value: 0
     condition: [device_sdid_95]
   - name: SL_STACK_SIZE
-    value: 1536
+    value: 1024
+    condition: [device_sdid_95]
+  - name: SL_STACK_SIZE
+    value: 1280
+    unless: [device_sdid_95]
   - name: SL_HEAP_SIZE
     value: 128
   - name: ZAF_CONFIG_INSTALLER_ICON_TYPE

@@ -23,7 +23,15 @@
 #include "sl_wisun_api.h"
 #include "sl_wisun_cli_util.h"
 
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+#include "sl_power_manager.h"
+#endif
+
 #define SL_WISUN_PING_PATTERN_SIZE 16
+
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+#define EM_MAX SL_POWER_MANAGER_EM3
+#endif
 
 typedef enum
 {
@@ -44,7 +52,7 @@ typedef struct {
   uint8_t uc_dwell_interval_ms;
   uint16_t number_of_channels;
   uint32_t ch0_frequency;
-  uint8_t channel_spacing;
+  uint16_t channel_spacing; // channel spacing in kHz
   uint8_t trace_filter[SL_WISUN_FILTER_BITFIELD_SIZE];
   uint8_t regulation;
   int8_t regulation_warning_threshold;
@@ -61,6 +69,9 @@ typedef struct {
   uint16_t protocol_id;
   uint16_t channel_id;
   uint8_t lfn_profile;
+  uint8_t crc_type;
+  uint8_t preamble_length;
+  uint8_t stf_length;
 } app_settings_wisun_t;
 
 typedef struct {
@@ -85,6 +96,14 @@ extern app_settings_app_t app_settings_app;
 
 extern const app_enum_t app_settings_wisun_join_state_enum_ffn[];
 extern const app_enum_t app_settings_wisun_join_state_enum_lfn[];
+
+#if SLI_WISUN_DISABLE_SECURITY
+extern uint32_t app_security_state;
+#endif
+
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+extern uint32_t lfn_em_time_ms[EM_MAX + 1];
+#endif
 
 sl_status_t app_settings_get_channel_mask(const char *str, sl_wisun_channel_mask_t *channel_mask);
 

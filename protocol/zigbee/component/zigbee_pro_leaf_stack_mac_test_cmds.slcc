@@ -1,0 +1,38 @@
+id: zigbee_pro_leaf_stack_mac_test_cmds
+label: Pro Leaf Stack
+package: Zigbee
+category: Zigbee|Stack|Pro Core
+quality: production
+description: The Zigbee PRO Stack support for end devices. It includes stubs for parent and routing code, since end devices do not need this functionality.
+
+provides:
+  - name: zigbee_pro_leaf_stack
+  - name: zigbee_pro_stack_support
+  - name: zigbee_pro_leaf_stack_mac_test_cmds
+  - name: zigbee_pro_stack_mac_test_cmds
+  - name: 802_15_4_stack_mac_test_cmds
+
+requires:
+  - name: zigbee_pro_leaf_stack_mac_test_cmds_implementation
+  - name: zigbee_pro_leaf_stack_mac_test_cmds_library
+    condition:
+      - zigbee_use_release_libraries
+  - name: zigbee_stack_common
+
+recommends:
+  - id: zigbee_pro_leaf_stack_mac_test_cmds_library_internal
+
+config_file:
+  - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_leaf_stack_config.h
+
+define:
+  - name: SL_ZIGBEE_LEAF_STACK
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_pro_leaf_stack_mac_test_cmds
+
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-leaf-stack

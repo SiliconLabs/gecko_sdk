@@ -198,7 +198,6 @@ void app_process_action(void)
 void app_deinit(void)
 {
   sl_status_t sc;
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
   app_log("Shutting down." APP_LOG_NL);
   ncp_host_deinit();
   sc = mqtt_deinit(&mqtt_handle);

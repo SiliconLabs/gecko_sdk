@@ -31,14 +31,16 @@
 #ifndef __SILICON_LABS_SPIDRV_H__
 #define __SILICON_LABS_SPIDRV_H__
 
+#ifndef SLI_LIBRARY_BUILD
 #include "em_device.h"
 #include "em_cmu.h"
+#include "dmadrv.h"
+#endif
 
 #include "ecode.h"
 #include "spidrv_config.h"
 #include "sl_sleeptimer.h"
 #include "sl_slist.h"
-#include "dmadrv.h"
 #include "sl_enum.h"
 
 #ifdef __cplusplus
@@ -177,6 +179,7 @@ typedef struct SPIDRV_Init {
   SPIDRV_SlaveStart_t slaveStartMode;   ///< A slave mode transfer start scheme.
 } SPIDRV_Init_t;
 
+#ifndef SLI_LIBRARY_BUILD
 /// An SPI driver instance handle data structure.
 /// The handle is allocated by the application using the SPIDRV.
 /// Several concurrent driver instances can exist in an application. The application is
@@ -216,6 +219,9 @@ typedef struct SPIDRV_HandleData {
 
 /// An SPI driver instance handle.
 typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
+#else
+typedef void * SPIDRV_Handle_t;
+#endif
 
 /***************************************************************************//**
  * @addtogroup spidrv_init_structs Init Configuration Data

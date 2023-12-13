@@ -288,9 +288,13 @@ void txCancel(sl_cli_command_arg_t *args)
 {
   int32_t delay = sl_cli_get_argument_uint32(args, 0);
   txCancelDelay = delay;
-  txCancelMode = RAIL_STOP_MODES_NONE; // Default to using RAIL_Idle()
+  txCancelMode = RAIL_STOP_MODES_NONE; // == RAIL_Idle(,RAIL_IDLE_ABORT,false)
   if (sl_cli_get_argument_count(args) >= 2) {
     txCancelMode = sl_cli_get_argument_uint8(args, 1);
+    if (txCancelMode > (4U + RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Invalid RAIL_StopMode_t/4+RAIL_IdleMode_t");
+      return;
+    }
   }
 
   enableAppMode(TX_CANCEL, delay >= 0, sl_cli_get_command_string(args, 0)); // Pends transmit to cancel
@@ -519,15 +523,20 @@ void configThermalProtection(sl_cli_command_arg_t *args)
     RAIL_Status_t status = RAIL_ConfigThermalProtection(railHandle, &chipTempConfig);
 
     if (status != RAIL_STATUS_NO_ERROR) {
-      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermal protection config failed");
 #ifdef SL_RAIL_UTIL_EFF_DEVICE
       if (SL_RAIL_UTIL_EFF_DEVICE != RAIL_EFF_DEVICE_NONE) {
         if (!chipTempConfig.enable) {
           responsePrintError(sl_cli_get_command_string(args, 0),
                              0xFF,
                              "Thermal protection cannot be disabled with EFF");
+        } else {
+          responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermal protection config failed");
         }
+      } else {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermal protection config failed");
       }
+#else
+      responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermal protection config failed");
 #endif
       return;
     }
@@ -1200,7 +1209,7 @@ void getRandom(sl_cli_command_arg_t *args)
 #define FIRST_PCD_CHANNEL 6
 #define LAST_PCD_CHANNEL 11
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
   #define LAST_PAB_CHANNEL 15
 #else
   #define LAST_PAB_CHANNEL 5
@@ -1283,7 +1292,7 @@ static void printDebugSignalHelp(char *cmdName,
   bool isFirstInstance = true;
 
   RAILTEST_PRINTF("%s [pin] [signal] [options]\n", cmdName);
-  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
   RAILTEST_PRINTF("\nPins: Any pin from PA, PB, PC, and PD available for debug, but only 6 total from PA and PB, and 6 total from PC and PD\n");
   #else
   RAILTEST_PRINTF("\nPins: Any pin from PA, PB, PC, and PD available for debug, but only 10 total from PA and PB, and 6 total from PC and PD\n");
@@ -1458,10 +1467,10 @@ static RAIL_Status_t getPinAndChannelFromInput(debugPin_t *pin, char *pinArg, bo
     // XG24 parts have 4 extra channels available for ports A and B, so do some extra logic to include them in the search
     if (pin->gpioPort < 2U) {   // gpioPortA or gpioPortB
       for (i = FIRST_PAB_CHANNEL; i <= LAST_PAB_CHANNEL; i++) {
-        #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
-        if (((i < FIRST_PCD_CHANNEL) || (i > LAST_PCD_CHANNEL)) && (pinForPRSChannel[i][0] == '\0'))
+        #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
+        if (((i < FIRST_PCD_CHANNEL) || (i > LAST_PCD_CHANNEL)) && (pinForPRSChannel[i][0] == '\0') && halIsPrsChannelFree(i))
         #else
-        if (pinForPRSChannel[i][0] == '\0')
+        if (pinForPRSChannel[i][0] == '\0' && halIsPrsChannelFree(i))
         #endif
         {
           pin->prsChannel = i;
@@ -1477,7 +1486,7 @@ static RAIL_Status_t getPinAndChannelFromInput(debugPin_t *pin, char *pinArg, bo
     // ports C and D
     else {
       for (i = FIRST_PCD_CHANNEL; i <= LAST_PCD_CHANNEL; i++) {
-        if (pinForPRSChannel[i][0] == '\0') {
+        if (pinForPRSChannel[i][0] == '\0' && halIsPrsChannelFree(i)) {
           pin->prsChannel = i;
           strcpy(pinForPRSChannel[i], pin->name);
           break;
@@ -1984,7 +1993,7 @@ void verifyRadio(sl_cli_command_arg_t * args)
   bool restart = !!sl_cli_get_argument_uint8(args, 1);
   bool useOverride = !!sl_cli_get_argument_uint8(args, 2);
   bool useCallback = !!sl_cli_get_argument_uint8(args, 3);
-  uint32_t *radioConfig;
+  RAIL_RadioConfig_t radioConfig;
   RAIL_VerifyCallbackPtr_t cb;
   uint32_t timeBefore;
   uint32_t timeAfter;
@@ -2003,7 +2012,7 @@ void verifyRadio(sl_cli_command_arg_t * args)
     if (useOverride) {
 #if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
       // Provide a custom radio config.
-      radioConfig = (uint32_t *)(channelConfigs[configIndex]->phyConfigBase);
+      radioConfig = (RAIL_RadioConfig_t)(channelConfigs[configIndex]->phyConfigBase);
 #else // !SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
       // Restore variable to default value so this error always occurs.
       verifyFirstTime = true;

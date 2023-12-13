@@ -1019,4 +1019,4 @@ typedef struct {
 /** @} End of group BGM22_CRYPTOACC_RNGCTRL */
 /** @} End of group Parts */
 
-#endif /* BGM22_CRYPTOACC_H */
+#endif // BGM22_CRYPTOACC_H

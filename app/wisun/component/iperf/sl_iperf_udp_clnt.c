@@ -51,6 +51,9 @@
 /// Client FinACK Receive Timeout
 #define SL_IPERF_FINACK_RECV_TIMEOUT_MS       10000UL
 
+/// Client sendto retry max count
+#define SL_IPERF_CLIENT_SENDTO_RETRY_MAX_CNT  100UL
+
 /// Client TX parameters
 typedef struct client_tx_params {
   /// Packet count
@@ -129,7 +132,7 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
 
   // create socket
   test->conn.socket_id = sl_iperf_socket_create(test->opt.protocol);
-  if (test->conn.socket_id  == SL_IPERF_NW_API_ERROR) {
+  if (test->conn.socket_id == SL_IPERF_NW_API_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_CLIENT_SOCK_OPEN, SL_IPERF_TEST_STATUS_ERR);
     sl_iperf_test_log(test, "UDP Client: sl_iperf_socket_create failed.\n");
     return;
@@ -150,6 +153,8 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
   sl_iperf_test_print_udp_conn_str(test);
   sl_iperf_test_print_udp_clnt_report_hdr(test);
 
+  test->conn.run = true;
+
   while (params.packet_count) {
     sl_iperf_test_update_status(test);
 
@@ -158,6 +163,10 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
 
     ++pkt_id;
 
+    if ((test->statistic.ts_curr_sent_ms - test->statistic.ts_start_ms)
+        > test->opt.duration_ms) {
+      params.packet_count = 1;
+    }
     // last packet
     if (params.packet_count == 1U) {
       pkt_id = -pkt_id;
@@ -166,20 +175,28 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
     _prepare_udp_clnt_header(test, pkt_id);
 
     sl_iperf_test_log_verbose(test, "UDP Client: sending packet_id = %d\n", pkt_id);
-    r = sl_iperf_socket_sendto(test->conn.socket_id,
-                               test->conn.buff,
-                               params.packet_size,
-                               &test->conn.srv_addr);
 
-    ++test->statistic.nbr_calls;
-    ++test->statistic.nbr_rcv_snt_packets;
+    for (uint32_t retry_cnt = 0UL;
+         retry_cnt < SL_IPERF_CLIENT_SENDTO_RETRY_MAX_CNT;
+         ++retry_cnt) {
+      r = sl_iperf_socket_sendto(test->conn.socket_id,
+                                 test->conn.buff,
+                                 params.packet_size,
+                                 &test->conn.srv_addr);
+      ++test->statistic.nbr_calls;
 
-    if (r == SL_IPERF_NW_API_ERROR) {
+      if (r != SL_IPERF_NW_API_ERROR) {
+        break;
+      }
       ++test->statistic.errs;
-      ++test->statistic.udp_lost_pkt;
-    } else {
+      sl_iperf_delay_ms(1UL);
+    }
+
+    ++test->statistic.nbr_rcv_snt_packets;
+    if (r > 0) {
       test->statistic.bytes += r;
     }
+
     params.packet_count--;
 
     if (params.packet_count) {
@@ -187,6 +204,7 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
     }
   }
 
+  test->conn.run = false;
   test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
 
   for (uint8_t i = 0; i < SL_IPERF_SERVER_UDP_TX_FINACK_COUNT; ++i) {

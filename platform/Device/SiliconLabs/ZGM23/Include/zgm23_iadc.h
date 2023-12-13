@@ -1033,4 +1033,4 @@ typedef struct {
 /** @} End of group ZGM23_IADC */
 /** @} End of group Parts */
 
-#endif /* ZGM23_IADC_H */
+#endif // ZGM23_IADC_H

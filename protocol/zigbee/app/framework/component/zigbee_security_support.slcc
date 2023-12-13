@@ -1,6 +1,5 @@
 package: Zigbee
-description: This component provides support for security, such as random number generation,
-  on the Host.
+description: This component provides support for security, such as random number generation, on the Host.
 id: zigbee_security_support
 label: Security Support
 category: Zigbee|Utility

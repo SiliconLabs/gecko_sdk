@@ -25,7 +25,7 @@ provides:
   - name: tensorflow_kernel_optimized_svdf
   - name: tensorflow_kernel_optimized_unidirectional_sequence_lstm
 requires:
-  - name: tensorflow_dependency_cmsis_nn
+  - name: cmsis_nn
   - name: tensorflow_lite_micro_reference_kernels
 root_path: util/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn
 source:

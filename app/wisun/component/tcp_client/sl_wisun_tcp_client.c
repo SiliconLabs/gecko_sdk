@@ -34,7 +34,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_wisun_tcp_client.h"
 
 // -----------------------------------------------------------------------------
@@ -60,8 +60,8 @@
 /* create tcp client */
 void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
 {
-  int32_t sockid = SOCKET_INVALID_ID; // client socket id
-  wisun_addr_t server_addr;
+  int32_t sockid = SOCKET_RETVAL_ERROR; // client socket id
+  sockaddr_in6_t server_addr;
 
   if (ip_address == NULL) {
     printf("[Failed: IP address is NULL ptr]\n");
@@ -69,9 +69,9 @@ void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
   }
 
   // create client socket
-  sockid = socket(AF_WISUN, SOCK_STREAM, IPPROTO_IP);
+  sockid = socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_IP);
 
-  if (sockid == SOCKET_INVALID_ID) {
+  if (sockid == SOCKET_RETVAL_ERROR) {
     printf("[Failed to create socket: %ld]\n", sockid);
     return;
   } else {
@@ -79,9 +79,10 @@ void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
   }
 
   // setting the server address
-  server_addr.sin6_family = AF_WISUN;
+  server_addr.sin6_family = AF_INET6;
   server_addr.sin6_port = port;
-  if (inet_pton(AF_WISUN, ip_address,
+
+  if (inet_pton(AF_INET6, ip_address,
                 &server_addr.sin6_addr) == SOCKET_RETVAL_ERROR) {
     printf("[Invalid IP address: %s]\n", ip_address);
     return;
@@ -105,6 +106,7 @@ void sl_wisun_tcp_client_close(const int32_t sockid)
 
 /* write to tcp client socket */
 void sl_wisun_tcp_client_write(const int32_t sockid, const char *str)
+
 {
   int32_t res;
   if (str == NULL) {

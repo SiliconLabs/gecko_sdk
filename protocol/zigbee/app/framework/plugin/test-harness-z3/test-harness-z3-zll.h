@@ -41,7 +41,7 @@
 void sli_zigbee_af_test_harness_z3_zll_stack_status_callback(EmberStatus status);
 
 void sli_zigbee_af_test_harness_z3_zll_network_found_callback(const EmberZllNetwork *networkInfo);
-void sli_zigbee_af_test_harness_z3_zll_scan_complete_callback(EmberStatus status);
+bool sli_zigbee_af_test_harness_z3_zll_scan_complete_callback(EmberStatus status);
 EmberPacketAction sli_zigbee_af_test_harness_z3_zll_command_callback(uint8_t *command,
                                                                      EmberEUI64 sourceEui64);
 EmberPacketAction sli_zigbee_af_test_harness_z3_zll_modify_interpan_command(uint8_t *commandData,

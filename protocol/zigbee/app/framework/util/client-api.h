@@ -166,6 +166,7 @@ extern EmberApsFrame *sli_zigbee_af_command_aps_frame;
 #include "zap-command.h"
 #endif
 
+uint8_t * emberAfPutBlockInResp(const uint8_t* data, uint16_t length);
 #define emberAfAppendToExternalBuffer(...) emberAfPutBlockInResp(__VA_ARGS__)
 
 /** @} END Client API functions */

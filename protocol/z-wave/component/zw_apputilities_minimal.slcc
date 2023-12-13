@@ -18,11 +18,13 @@ include:
       - path: "ZAF_ApplicationEvents.h"
       - path: "ZAF_nvm.h"
       - path: "ZAF_nvm_app.h"
+      - path: "ZAF_retention_register.h"
 source:
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/AppTimer.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/_commonIF/ZAF_Common_interface.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_nvm.c"
   - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_nvm_app.c"
+  - path: "protocol/z-wave/ZAF/ApplicationUtilities/ZAF_retention_register.c"
 requires:
   - name: zaf_appname
 provides:

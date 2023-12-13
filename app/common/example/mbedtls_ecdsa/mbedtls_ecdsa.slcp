@@ -1,10 +1,10 @@
 project_name: mbedtls_ecdsa
 package: platform
 quality: production
-label: Platform - mbedTLS ECDSA
+label: Platform Security - SoC mbedTLS ECDSA
 description: >
   This example uses hardware accelerators on the supported device to perform ECDSA
-  digital signaturewith mbedTLS.
+  digital signature with mbedTLS.
 category: Example|Platform
 filter:
   - name: "Device Type"
@@ -52,6 +52,6 @@ configuration:
      condition: [iostream_usart]
    - name: SL_IOSTREAM_UART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
      value: "true"
-     condition: [iostream_uart]     
+     condition: [iostream_uart]
 define:
    - name: DEBUG_EFM

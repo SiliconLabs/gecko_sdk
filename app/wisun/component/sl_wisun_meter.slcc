@@ -28,13 +28,14 @@ include:
       - "sl_wisun_coap"
 
 config_file:
+  - path: "config/sl_wisun_meter_config.h"
   - path: "config/sl_wisun_meter_collector_config.h"
   - path: "config/sl_wisun_coap_meter_collector_config.h"
     condition:
       - "sl_wisun_coap"
 
 requires:
-  - name: "sl_wisun_socket"
+  - name: "sl_mempool"
   - name: "sl_wisun_app_core"
   - name: "sl_wisun_rht_measurement"
     condition:

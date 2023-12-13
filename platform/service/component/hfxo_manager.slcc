@@ -35,6 +35,8 @@ template_contribution:
       include: sl_hfxo_manager.h
       handler: sl_hfxo_manager_init
     priority: -5
+  - name: component_catalog
+    value: hfxo_manager
 validation_helper:
   - path: platform/service/hfxo_manager/hfxo_manager_validation.lua    
 documentation:

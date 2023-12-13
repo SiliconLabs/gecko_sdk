@@ -50,3 +50,5 @@ include:
       - path: toolchains.h
 provides:
   - name: common_core
+requires:
+  - name: common_lib

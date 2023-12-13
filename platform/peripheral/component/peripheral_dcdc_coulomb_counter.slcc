@@ -12,6 +12,7 @@ include:
   - path: "inc"
     file_list:
     - path: "peripheral_dcdc_coulomb_counter.h"
+    - path: "peripheral_dcdc_coulomb_counter_compat.h"
 provides:
   - name: peripheral_dcdc_coulomb_counter
 requires:
@@ -23,6 +24,7 @@ requires:
   - name: emlib_emu
   - name: emlib_prs
   - name: cmsis_core
+  - name: enum
 documentation:
   docset: gecko-platform
   document:

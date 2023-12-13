@@ -77,7 +77,7 @@ class IProfile(object):
     @staticmethod
     def make_linked_io(profile, var, category=None, readable_name=None,
                  value_limit_min=None, value_limit_max=None, fractional_digits=None, deprecated=False,
-                 units_multiplier=None):
+                 units_multiplier=None, in_public_log=False):
 
         if category is None:
             raise Exception("Category not defined for profile input %s" % var._name)
@@ -100,7 +100,7 @@ class IProfile(object):
 
         # Make output
         output = ModelOutput(var, category, ModelOutputType.LINKED_IO, readable_name,
-                             value_limit_min, value_limit_max, override=None)
+                             value_limit_min, value_limit_max, override=None, in_public_log=in_public_log)
         profile.outputs.append(output)
 
 

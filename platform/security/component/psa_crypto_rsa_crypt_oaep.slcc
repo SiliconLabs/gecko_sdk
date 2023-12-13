@@ -18,4 +18,4 @@ requires:
 
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_RSA_OEAP
+    value: PSA_WANT_ALG_RSA_OEAP 1

@@ -34,9 +34,9 @@
 #include <openthread/config.h>
 
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/linked_list.hpp"
 #include "common/owning_list.hpp"
+#include "instance/instance.hpp"
 
 #include "test_util.h"
 
@@ -294,6 +294,16 @@ void TestLinkedList(void)
     list.RemoveAllMatching(kBetaType, removedList);
     VerifyLinkedListContent(&list, &a, &b, &e, nullptr);
     VerifyLinkedListContent(&removedList, &f, &d, &c, nullptr);
+
+    list.Clear();
+    list.PushAfterTail(a);
+    VerifyLinkedListContent(&list, &a, nullptr);
+    list.PushAfterTail(b);
+    VerifyLinkedListContent(&list, &a, &b, nullptr);
+    list.PushAfterTail(c);
+    VerifyLinkedListContent(&list, &a, &b, &c, nullptr);
+    list.PushAfterTail(d);
+    VerifyLinkedListContent(&list, &a, &b, &c, &d, nullptr);
 }
 
 void TestOwningList(void)

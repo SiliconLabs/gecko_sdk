@@ -34,6 +34,10 @@
 #include "sl_cpc_config.h"
 #include "string.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 #if (SL_CPC_DEBUG_SYSTEM_VIEW_LOG_CORE_EVENT == 1) \
   || (SL_CPC_DEBUG_SYSTEM_VIEW_LOG_ENDPOINT_EVENT == 1)
 #include "SEGGER_SYSVIEW.h"
@@ -74,7 +78,7 @@
 #define SLI_CPC_DEBUG_TRACE_CORE_TXD_REJECT_ERROR_FAULT()               { SLI_CPC_DEBUG_CORE_COUNTER_INC(txd_reject_error_fault); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(TXD_REJECT_ERROR_FAULT); }
 
-#define SLI_CPC_DEBUG_TRACE_CORE_DRIVER_READ_ERROR()                    { SLI_CPC_DEBUG_CORE_COUNTER_INC(driver_error); \
+#define SLI_CPC_DEBUG_TRACE_CORE_DRIVER_ERROR()                         { SLI_CPC_DEBUG_CORE_COUNTER_INC(driver_error); \
                                                                           SLI_CPC_SYSVIEW_MARK_EVENT_ON_CORE(DRIVER_READ_ERROR); }
 
 #define SLI_CPC_DEBUG_TRACE_CORE_DRIVER_PACKET_DROPPED()                { SLI_CPC_DEBUG_CORE_COUNTER_INC(driver_packet_dropped); \
@@ -203,6 +207,12 @@
 #define SLI_CPC_DEBUG_ENDPOINT_COUNTER_INC(endpoint, counter)
 #endif  // SL_CPC_DEBUG_ENDPOINT_EVENT_COUNTERS
 
+#if defined(SL_CATALOG_CPC_PRIMARY_PRESENT)
+#define DEBUG_SYSTEM_BUFFER sl_cpc_core_debug.memory_pool.system_command = &cpc_mempool_command_handle
+#else
+#define DEBUG_SYSTEM_BUFFER sl_cpc_core_debug.memory_pool.system_command = &cpc_mempool_system_command
+#endif
+
 #if (SL_CPC_DEBUG_MEMORY_ALLOCATOR_COUNTERS == 1)
 #define SLI_CPC_DEBUG_MEMORY_POOL_INIT()          sl_cpc_core_debug.memory_pool.buffer_handle = &cpc_mempool_buffer_handle; \
   sl_cpc_core_debug.memory_pool.hdlc_header = &cpc_mempool_hdlc_header;                                                     \
@@ -210,10 +220,8 @@
   sl_cpc_core_debug.memory_pool.rx_buffer = &cpc_mempool_rx_buffer;                                                         \
   sl_cpc_core_debug.memory_pool.endpoint = &cpc_mempool_endpoint;                                                           \
   sl_cpc_core_debug.memory_pool.rx_queue_item = &cpc_mempool_rx_queue_item;                                                 \
-  sl_cpc_core_debug.memory_pool.tx_queue_item = &cpc_mempool_tx_queue_item;                                                 \
-  sl_cpc_core_debug.memory_pool.system_command = &cpc_mempool_system_command;                                               \
-  sl_cpc_core_debug.memory_pool.endpoint_closed_arg_item = &cpc_mempool_endpoint_closed_arg_item;
-#else
+  DEBUG_SYSTEM_BUFFER;
+  #else
 #define SLI_CPC_DEBUG_MEMORY_POOL_INIT()
 #endif
 

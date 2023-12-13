@@ -22,6 +22,7 @@
 #include "app/framework/util/af-main.h"
 #include "app/framework/security/af-security.h"
 #include "delayed-join.h"
+
 // *****************************************************************************
 // Globals
 
@@ -45,19 +46,21 @@ void sli_zigbee_af_delayed_join_trust_center_join_callback(EmberNodeId newNodeId
 void emberAfPluginDelayedJoinStackStatusCallback(EmberStatus status)
 {
   #if defined(EZSP_HOST)
-  if (status == EMBER_NETWORK_UP) {
-    EzspStatus status = emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
-                                             (EZSP_DECISION_ALLOW_JOINS
-                                              | EZSP_DECISION_ALLOW_UNSECURED_REJOINS
-                                              | EZSP_DECISION_DEFER_JOINS),
-                                             "Trust Center Policy",
-                                             "Delay joins");
+  if (emberAfPluginDelayedJoinIsActivated()) {
+    if (status == EMBER_NETWORK_UP) {
+      EzspStatus status = emberAfSetEzspPolicy(EZSP_TRUST_CENTER_POLICY,
+                                               (EZSP_DECISION_ALLOW_JOINS
+                                                | EZSP_DECISION_ALLOW_UNSECURED_REJOINS
+                                                | EZSP_DECISION_DEFER_JOINS),
+                                               "Trust Center Policy",
+                                               "Delay joins");
 
-    if (EZSP_SUCCESS != status) {
-      emberAfCorePrintln("%s: %s: 0x%02X",
-                         EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
-                         "failed to configure delayed joining",
-                         status);
+      if (EZSP_SUCCESS != status) {
+        emberAfCorePrintln("%s: %s: 0x%02X",
+                           EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                           "failed to configure delayed joining",
+                           status);
+      }
     }
   }
   #endif // EZSP_HOST
@@ -71,13 +74,38 @@ void emberAfPluginDelayedJoinSetNetworkKeyTimeout(uint8_t timeout)
                        EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
                        "\nCould not set the network timeout value. Acceptable timeout range[3,255]\n");
   }
-
   #else
   if (EMBER_SUCCESS != emberSetupDelayedJoin(timeout)) {
     emberAfCorePrintln("%s: %s",
                        EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
                        "\nCould not set the network timeout value. Acceptable timeout range[3,255]\n");
   }
-
   #endif
+}
+
+void emberAfPluginDelayedJoinActivate(bool activated)
+{
+#if defined(EZSP_HOST)
+  if (EZSP_SUCCESS != ezspSetValue(EZSP_VALUE_DELAYED_JOIN_ACTIVATION, 1, (uint8_t*)&activated)) {
+    emberAfCorePrintln("%s: %s",
+                       EMBER_AF_PLUGIN_DELAYED_JOIN_PLUGIN_NAME,
+                       "failed to activate TC delayed joining\n");
+  }
+#else
+  emberDelayedJoinActivate(activated);
+#endif
+}
+
+bool emberAfPluginDelayedJoinIsActivated(void)
+{
+  bool isActivated = false;
+#if defined(EZSP_HOST)
+  uint8_t valueLength = 1;
+  (void) ezspGetValue(EZSP_VALUE_DELAYED_JOIN_ACTIVATION,
+                      &valueLength,
+                      (uint8_t*)&isActivated);
+#else
+  isActivated = emberDelayedJoinIsActivated();
+#endif
+  return isActivated;
 }

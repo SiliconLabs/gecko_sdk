@@ -36,7 +36,7 @@
 #include "sl_rail_util_init.h"
 #include "app_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
+#include "simple_rail_assistance.h"
 #include "sl_wmbus_support.h"
 #include "sl_flex_rail_channel_selector.h"
 
@@ -83,8 +83,8 @@ RAIL_Handle_t app_init(void)
   // Get the mode of WMBUS
   WMBUS_Mode_t mode = WMBUS_GetSelectedMode();
 
-  sl_led_turn_off(&sl_led_led0);
-  sl_led_turn_off(&sl_led_led1);
+  clear_receive_led();
+  clear_send_led();
 
   if ( get_wmbus_accessibility() == WMBUS_ACCESSIBILITY_UNLIMITED_ACCESS ) {
     RAIL_StateTransitions_t transitions = {

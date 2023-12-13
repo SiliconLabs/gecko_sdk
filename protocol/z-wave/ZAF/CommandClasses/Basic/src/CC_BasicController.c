@@ -14,7 +14,10 @@ zaf_job_status_t CC_Basic_Set_tx(
   const bool use_supervision,
   ZAF_TX_Callback_t callback)
 {
-  ccc_pair_t ccc_pair = {COMMAND_CLASS_BASIC, BASIC_SET};
+  ccc_pair_t ccc_pair = {
+    .cmdClass=COMMAND_CLASS_BASIC,
+    .cmd=BASIC_SET
+  };
 
   return cc_engine_multicast_request(
       p_profile,

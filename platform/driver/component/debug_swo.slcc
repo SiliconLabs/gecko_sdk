@@ -28,12 +28,7 @@ provides:
 requires:
   - name: status
   - name: emlib_cmu
-  - name: emlib_gpio
-    condition: [device_series_0]
-  - name: emlib_gpio
-    condition: [device_series_1]
-  - name: emlib_gpio
-    condition: [device_series_2]
+  - name: lld_gpio
   - name: cmsis_core
 config_file:
   - path: config/s0/tg/sl_debug_swo_config.h

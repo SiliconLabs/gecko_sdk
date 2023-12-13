@@ -41,8 +41,8 @@
 #include "openthread-core-config.h"
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
-#include "common/instance.hpp"
 #include "common/new.hpp"
+#include "instance/instance.hpp"
 #include "net/ip6.hpp"
 
 #if OPENTHREAD_CONFIG_NCP_HDLC_ENABLE
@@ -83,7 +83,6 @@ NcpHdlc::NcpHdlc(Instance *aInstance, otNcpHdlcSendCallback aSendCallback)
     : NcpBase(aInstance)
     , mSendCallback(aSendCallback)
     , mFrameEncoder(mHdlcBuffer)
-    , mFrameDecoder(mRxBuffer, &NcpHdlc::HandleFrame, this)
     , mState(kStartingFrame)
     , mByte(0)
     , mHdlcSendImmediate(false)
@@ -92,6 +91,7 @@ NcpHdlc::NcpHdlc(Instance *aInstance, otNcpHdlcSendCallback aSendCallback)
     , mTxFrameBufferEncrypterReader(mTxFrameBuffer)
 #endif // OPENTHREAD_ENABLE_NCP_SPINEL_ENCRYPTER
 {
+    mFrameDecoder.Init(mRxBuffer, &NcpHdlc::HandleFrame, this);
     mTxFrameBuffer.SetFrameAddedCallback(HandleFrameAddedToNcpBuffer, this);
 }
 

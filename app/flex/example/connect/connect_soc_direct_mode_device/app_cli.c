@@ -35,9 +35,9 @@
 
 #include PLATFORM_HEADER
 #include "em_chip.h"
+#include "em_cmu.h"
 #include "ember.h"
-#include "hal.h"
-
+#include "em_cmu.h"
 #include "app_init.h"
 #include "sl_cli.h"
 #include "app_log.h"
@@ -214,7 +214,7 @@ void cli_set_tx_option(sl_cli_command_arg_t *arguments)
 void cli_reset(sl_cli_command_arg_t *arguments)
 {
   (void) arguments;
-  halReboot();
+  NVIC_SystemReset();
 }
 
 /******************************************************************************

@@ -15,7 +15,7 @@
  *
  ******************************************************************************/
 
-#include "sl_bt_api_compatibility.h"
+#include "sl_bt_api.h"
 
 #ifndef SL_BT_HAL_CONFIG_H
 #define SL_BT_HAL_CONFIG_H
@@ -39,13 +39,13 @@
 #endif
 
 // <o SL_BT_HAL_DEFAULT_IO_CAPABILITIES> Default IO capabilities
-// <sm_io_capability_displayonly=> Display only
-// <sm_io_capability_displayyesno=> Display Yes/No
-// <sm_io_capability_keyboardonly=> Keyboard only
-// <sm_io_capability_noinputnooutput=> No input, no output
-// <sm_io_capability_keyboarddisplay=> Keyboard and display
-// <i> Default: sm_io_capability_noinputnooutput
-#define SL_BT_HAL_DEFAULT_IO_CAPABILITIES	sm_io_capability_noinputnooutput
+// <sl_bt_sm_io_capability_displayonly=> Display only
+// <sl_bt_sm_io_capability_displayyesno=> Display Yes/No
+// <sl_bt_sm_io_capability_keyboardonly=> Keyboard only
+// <sl_bt_sm_io_capability_noinputnooutput=> No input, no output
+// <sl_bt_sm_io_capability_keyboarddisplay=> Keyboard and display
+// <i> Default: sl_bt_sm_io_capability_noinputnooutput
+#define SL_BT_HAL_DEFAULT_IO_CAPABILITIES sl_bt_sm_io_capability_noinputnooutput
 
 // <h> Security Manager Default Configuration
 

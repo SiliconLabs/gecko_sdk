@@ -55,6 +55,7 @@ component:
   - id: restrictions_profile_wisun_fan_1_1
   - id: restrictions_profile_wisun_han
   - id: restrictions_profile_wisun_ofdm
+  - id: restrictions_profile_connect_ofdm
 
 #----------------- Require list ----------------------
 requires:
@@ -132,8 +133,6 @@ configuration:
 #------------- RAIL init, Project --------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
     value: "1"
 #------------ RAIL init, Protocol --------------------
@@ -147,9 +146,6 @@ configuration:
   - name: SL_RAIL_UTIL_INIT_CALIBRATION_TEMPERATURE_NOTIFY_INST0_ENABLE
     value: "1"
   - name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
-    value: "1"
-#------------- RAIL init, Multi-protocol Support -----
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
     value: "1"
 #------------- RAIL init, Auto Transitions -----------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE

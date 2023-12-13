@@ -19,10 +19,6 @@
 #include "rail.h"
 #include "em_gpio.h"
 
-#ifdef RAIL_INTERNAL_BUILD
-#include "sl_rail_util_ant_div_internal.h"
-#endif
-
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))

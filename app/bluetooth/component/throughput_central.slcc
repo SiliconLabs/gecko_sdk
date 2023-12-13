@@ -13,7 +13,6 @@ quality: production
 root_path: app/bluetooth/common/throughput_central
 tag:
   - No-Code
-
 include:
   - path: .
     file_list:
@@ -23,28 +22,28 @@ include:
     file_list:
       - path: throughput_central_system.h
 config_file:
-  - path: "config/throughput_central_config.h"
+  - path: config/throughput_central_config.h
 source:
   - path: throughput_central.c
   - path: platform/throughput_central_interface.c
 requires:
-  - name: "app_log"
-  - name: "app_assert"
-  - name: "silabs_core_sl_malloc"
-  - name: "bluetooth_stack"
-  - name: "bluetooth_feature_system"
-  - name: "bluetooth_feature_power_control"
-  - name: "bluetooth_feature_connection"
-  - name: "bluetooth_feature_legacy_scanner"
-  - name: "bluetooth_feature_extended_scanner"
-  - name: "bluetooth_feature_gatt"
-  - name: "power_manager"
-  - name: "throughput"
-  - name: "app_timer"
-  - name: "throughput_ui"
+  - name: app_log
+  - name: app_assert
+  - name: silabs_core_sl_malloc
+  - name: bluetooth_stack
+  - name: bluetooth_feature_system
+  - name: bluetooth_feature_power_control
+  - name: bluetooth_feature_connection
+  - name: bluetooth_feature_legacy_scanner
+  - name: bluetooth_feature_extended_scanner
+  - name: bluetooth_feature_gatt
+  - name: power_manager
+  - name: throughput
+  - name: app_timer
+  - name: throughput_ui
 recommends:
-  - id: "app_timer"
-  - id: "throughput_ui_log"
+  - id: app_timer
+  - id: throughput_ui_log
 provides:
   - name: throughput_central
 template_contribution:
@@ -70,11 +69,10 @@ template_contribution:
       event: sleep_on_isr_exit
       include: throughput_central.h
       handler: throughput_central_sleep_on_isr_exit
-
   - name: cli_group
     value:
       name: throughput_central
-      help: "Throughput Central"
+      help: Throughput Central
       shortcuts:
         - name: central
   - name: cli_command
@@ -84,9 +82,9 @@ template_contribution:
       handler: cli_throughput_central_stop
       shortcuts:
         - name: x
-      help: "Stops remote transmission"
+      help: Stops remote transmission
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: throughput_central
@@ -94,7 +92,7 @@ template_contribution:
       handler: cli_throughput_central_start
       shortcuts:
         - name: s
-      help: "Starts remote transmission"
+      help: Starts remote transmission
       argument:
         - type: uint8
           help: "Type: 1: notification, 2: indication"
@@ -105,17 +103,16 @@ template_contribution:
       handler: cli_throughput_central_status
       shortcuts:
         - name: t
-      help: "Prints current status"
-
+      help: Prints current status
   - name: cli_group
     value:
       group: throughput_central
       name: central_mode
-      help: "Mode"
+      help: Mode
       shortcuts:
         - name: m
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_mode
@@ -123,14 +120,14 @@ template_contribution:
       handler: cli_throughput_central_mode_set
       shortcuts:
         - name: s
-      help: "Set reception mode"
+      help: Set reception mode
       argument:
         - type: uint8
           help: "Mode: 0:Continous, 1:Fixed time, 2: Fixed size"
         - type: uint32
-          help: "Value to set (in case of fixed time/size)"
+          help: Value to set (in case of fixed time/size)
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_mode
@@ -140,16 +137,16 @@ template_contribution:
         - name: g
       help: "Get reception mode, 0:Continous, 1:Fixed time, 2: Fixed size"
     condition:
-      - "cli"
+      - cli
   - name: cli_group
     value:
       group: throughput_central
       name: central_tx_power
-      help: "Power settings"
+      help: Power settings
       shortcuts:
         - name: p
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_tx_power
@@ -157,16 +154,16 @@ template_contribution:
       handler: cli_throughput_central_tx_power_set
       shortcuts:
         - name: s
-      help: "Set power"
+      help: Set power
       argument:
         - type: int16
-          help: "Power in dBm"
+          help: Power in dBm
         - type: uint8
-          help: "Enable adaptive power control"
+          help: Enable adaptive power control
         - type: uint8
-          help: "Enable deep sleep"
+          help: Enable deep sleep
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_tx_power
@@ -174,18 +171,18 @@ template_contribution:
       handler: cli_throughput_central_tx_power_get
       shortcuts:
         - name: g
-      help: "Read power settings"
+      help: Read power settings
     condition:
-      - "cli"
+      - cli
   - name: cli_group
     value:
       group: throughput_central
       name: central_data
-      help: "Data settings"
+      help: Data settings
       shortcuts:
         - name: d
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_data
@@ -193,12 +190,12 @@ template_contribution:
       handler: cli_throughput_central_data_set
       shortcuts:
         - name: s
-      help: "Set data size"
+      help: Set data size
       argument:
         - type: uint8
-          help: "Maximum MTU size"
+          help: Maximum MTU size
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: central_data
@@ -206,19 +203,18 @@ template_contribution:
       handler: cli_throughput_central_data_get
       shortcuts:
         - name: g
-      help: "Read data settings"
+      help: Read data settings
     condition:
-      - "cli"
-
+      - cli
   - name: cli_group
     value:
       group: throughput_central
       name: phy
-      help: "PHY settings"
+      help: PHY settings
       shortcuts:
         - name: y
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: phy
@@ -226,12 +222,12 @@ template_contribution:
       handler: cli_throughput_central_phy_scan_set
       shortcuts:
         - name: s
-      help: "Set PHY used for scanning"
+      help: Set PHY used for scanning
       argument:
         - type: uint8
           help: "Scan PHY, 1:1M 4:Coded PHY, 5:1M and Coded"
       condition:
-        - "cli"
+        - cli
   - name: cli_command
     value:
       group: phy
@@ -242,9 +238,9 @@ template_contribution:
       help: "Set PHY used for the connection, 1:1M 2:2M 4:Coded 125k, 8:Coded 500k PHY"
       argument:
         - type: uint8
-          help: "Connection PHY"
+          help: Connection PHY
       condition:
-        - "cli"
+        - cli
   - name: cli_command
     value:
       group: phy
@@ -254,17 +250,16 @@ template_contribution:
         - name: g
       help: "Read PHY settings for scan and connection, 1:1M 2:2M 4:Coded 125k, 8:Coded 500k PHY"
     condition:
-      - "cli"
-
+      - cli
   - name: cli_group
     value:
       group: throughput_central
       name: connection
-      help: "Connection settings"
+      help: Connection settings
       shortcuts:
         - name: c
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: connection
@@ -272,18 +267,18 @@ template_contribution:
       handler: cli_throughput_central_connection_set
       shortcuts:
         - name: s
-      help: "Set connection settings"
+      help: Set connection settings
       argument:
         - type: uint32
-          help: "Minimum connection interval (in 1.25 ms steps)"
+          help: Minimum connection interval (in 1.25 ms steps)
         - type: uint32
-          help: "Maximum connection interval (in 1.25 ms steps)"
+          help: Maximum connection interval (in 1.25 ms steps)
         - type: uint32
-          help: "Responder latency (in connection intervals)"
+          help: Responder latency (in connection intervals)
         - type: uint32
-          help: "Supervision timeout (in 10 ms steps)"
+          help: Supervision timeout (in 10 ms steps)
       condition:
-        - "cli"
+        - cli
   - name: cli_command
     value:
       group: connection
@@ -291,19 +286,18 @@ template_contribution:
       handler: cli_throughput_central_connection_get
       shortcuts:
         - name: g
-      help: "Read connection settings"
+      help: Read connection settings
     condition:
-      - "cli"
-
+      - cli
   - name: cli_group
     value:
       group: throughput_central
       name: allowlist
-      help: "Allowlist management"
+      help: Allowlist management
       shortcuts:
         - name: w
     condition:
-      - "cli"
+      - cli
   - name: cli_command
     value:
       group: allowlist
@@ -311,12 +305,12 @@ template_contribution:
       handler: cli_throughput_central_allowlist_add
       shortcuts:
         - name: a
-      help: "Add address to allowlist"
+      help: Add address to allowlist
       argument:
         - type: string
-          help: "Bluetooth address in 'XX:XX:XX:XX:XX:XX' format"
+          help: Bluetooth address in 'XX:XX:XX:XX:XX:XX' format
       condition:
-        - "cli"
+        - cli
   - name: cli_command
     value:
       group: allowlist
@@ -324,9 +318,9 @@ template_contribution:
       handler: cli_throughput_central_allowlist_clear
       shortcuts:
         - name: c
-      help: "Clear allowlist"
+      help: Clear allowlist
       condition:
-        - "cli"
+        - cli
   - name: cli_command
     value:
       group: allowlist
@@ -334,11 +328,14 @@ template_contribution:
       handler: cli_throughput_central_allowlist_get
       shortcuts:
         - name: g
-      help: "Read allowlist table"
+      help: Read allowlist table
     condition:
-      - "cli"
+      - cli
 validation_library:
   - path: ../../../common/validation/autonumber_common.lua
     name: autonumber_common
 validation_helper:
   - path: throughput_central_validation.lua
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/throughput-central

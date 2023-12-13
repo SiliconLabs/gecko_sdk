@@ -38,7 +38,7 @@ struct tfm_crypto_pack_iovec {
     uint32_t sfn_id;             /*!< Secure function ID used to dispatch the
                                   *   request
                                   */
-    uint16_t step;               /*!< Key derivation step */
+    uint16_t step;               /*!< Key derivation or PAKE step */
     psa_key_id_t key_id;         /*!< Key id */
     psa_algorithm_t alg;         /*!< Algorithm */
     uint32_t op_handle;          /*!< Frontend context handle associated to a

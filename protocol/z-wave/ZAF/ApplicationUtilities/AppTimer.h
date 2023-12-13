@@ -36,6 +36,8 @@
  * Max number of application timers
  */
 #define MAX_NUM_APP_TIMERS           12 // Max number of timers total. I.e. the sum of normal timers and persistent timers
+#define MAX_NUM_PERSISTENT_APP_TIMERS 6 // Max number of persistent timers.
+#define APP_TIMER_RETENTION_REGISTER_RESERVED_COUNT (MAX_NUM_PERSISTENT_APP_TIMERS + 2) // Number of reserved retention registers.
 
 /**
 * AppTimer object

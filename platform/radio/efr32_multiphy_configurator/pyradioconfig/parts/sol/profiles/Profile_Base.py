@@ -19,7 +19,7 @@ class Profile_Base_Sol(Profile_Base_Ocelot):
 
         #Fixed variables (required inputs for other Profiles)
         #Using .value only so that we can force this in internal test PHYs
-        model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1
+        model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
 
     def build_optional_profile_inputs(self, model, profile):
         IProfile.make_optional_input(profile, model.vars.syncword_tx_skip, "syncword",

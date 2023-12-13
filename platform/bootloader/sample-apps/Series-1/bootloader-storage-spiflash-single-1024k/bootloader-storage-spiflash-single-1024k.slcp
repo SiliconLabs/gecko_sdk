@@ -1,7 +1,7 @@
 project_name: bootloader-storage-spiflash-single-1024k
 package: bootloader
 quality: production
-label: Bootloader - SoC SPI Flash Storage (single image with slot size of 1024k)
+label: Bootloader - SoC SPI Flash Storage (single image with slot size of 1024kB)
 description: >
   This sample configuration of the Gecko bootloader configures the bootloader to use an external SPI flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x0 of the SPI flash, and have a size of 1024 kB. This can be configured on the "Storage" tab.
 

@@ -348,7 +348,7 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
 
       /* Restart general advertising and re-enable connections after disconnection. */
       sc = sl_bt_legacy_advertiser_start(0,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert(sc == SL_STATUS_OK,
                  "[E: 0x%04x] Failed to start advertising\n",
                  (int)sc);

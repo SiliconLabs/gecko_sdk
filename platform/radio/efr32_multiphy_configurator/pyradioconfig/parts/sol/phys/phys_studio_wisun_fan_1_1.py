@@ -125,3 +125,22 @@ class PhysStudioWisunFan1v1Sol(PhysStudioWisunFan1v1Ocelot):
                                              'Wi-SUN FAN, JP 920-928 MHz, OFDM OPTION 2')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
+
+    ### IN Region PHYs From Wi-SUN FAN 1.1 Spec###
+
+    # ChanPlanID 40
+    def PHY_WISUN_FAN_1v1_866MHz_Plan40_OFDM_OPT4_IN(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsSol('IN', 84, 40, 200000, 865100000,
+                                             'Wi-SUN FAN, IN 865-867 MHz, OFDM OPTION 4')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy
+
+
+    ### SG Region PHYs From Wi-SUN FAN 1.1 Spec###
+    
+    # ChanPlanID 33
+    def PHY_WISUN_FAN_1v1_867MHz_Plan33_OFDM_OPT4_SG(self, model, phy_name=None):
+        params = WisunFan1v1ChannelParamsSol('SG', 84, 33, 200000, 866100000,
+                                             'Wi-SUN FAN, SG 865-867 MHz, OFDM OPTION 4')
+        phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
+        return phy

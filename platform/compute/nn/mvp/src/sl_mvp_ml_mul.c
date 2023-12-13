@@ -42,6 +42,7 @@ sl_status_t sli_mvp_ml_mul_s8(const sli_mvp_ml_mul_s8_params_t *params)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  sl_status_t status;
   sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
 
   int remaining = params->length;
@@ -164,7 +165,9 @@ sl_status_t sli_mvp_ml_mul_s8(const sli_mvp_ml_mul_s8_params_t *params)
                           SLI_MVP_INSTR(3),
                           0, 0);
 
-    sli_mvp_prog_execute(prog, true);
+    if ((status = sli_mvp_prog_execute(prog, true)) != SL_STATUS_OK) {
+      return status;
+    }
 
     input1_data += num_elements;
     input2_data += num_elements;
@@ -188,9 +191,7 @@ sl_status_t sli_mvp_ml_mul_s8(const sli_mvp_ml_mul_s8_params_t *params)
     }
   }
 
-  sl_math_mvp_clamp_i8(params->output, params->length, params->activation_min, params->activation_max);
-
-  return SL_STATUS_OK;
+  return sl_math_mvp_clamp_i8(params->output, params->length, params->activation_min, params->activation_max);
 }
 
 bool sli_mvp_ml_mul_s8_is_supported(const sli_mvp_ml_mul_s8_params_t *params)

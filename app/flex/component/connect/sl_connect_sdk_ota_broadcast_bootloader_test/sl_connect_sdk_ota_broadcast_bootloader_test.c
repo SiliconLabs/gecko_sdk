@@ -32,7 +32,6 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "sl_connect_sdk_ota_bootloader_test_common.h"
 #include "app_log.h"
 #include "sl_cli.h"
@@ -49,8 +48,10 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+#if defined(SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT)
 /// Maximum number of nodes for image transmission
 #define MAX_TARGET_LIST_SIZE                     50
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -64,9 +65,9 @@ EmberEventControl emAfPluginOtaBootloaderTestEventControl;
 #if defined(SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT)
 /// Number of registered client nodes subject to image transmission.
 static uint8_t target_list_length;
-#endif
 /// Client nodes list for image transmission.
 static EmberNodeId target_list[MAX_TARGET_LIST_SIZE];
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -203,7 +204,7 @@ void emberAfPluginOtaBootloaderClientIncomingImageSegmentCallback(EmberNodeId se
                                                                   uint8_t *imageSegment)
 {
   (void)serverId;
-  app_log_info("(client): incoming segment, start: %d, end: %d, tag: 0x%x\n",
+  app_log_info("(client): incoming segment, start: %ld, end: %ld, tag: 0x%x\n",
                startIndex, endIndex, imageTag);
 
   //Initialize bootloader (and flash part) if not yet initialized or in shutdown.
@@ -239,7 +240,7 @@ void emberAfPluginOtaBootloaderClientImageDownloadCompleteCallback(EmberAfOtaBoo
                                                                    uint32_t imageSize)
 {
   if (status == EMBER_OTA_BROADCAST_BOOTLOADER_STATUS_SUCCESS) {
-    app_log_info("Image download COMPLETED tag=0x%x size=%d\n",
+    app_log_info("Image download COMPLETED tag=0x%x size=%ld\n",
                  imageTag, imageSize);
   } else {
     app_log_error("Image download FAILED status=0x%x\n", status);
@@ -267,7 +268,7 @@ bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId
   bool accept = (imageTag == ota_bootloader_test_image_tag);
 
   if (accept) {
-    app_log_info("bootload request for image with tag 0x%x accepted, will bootload in %d ms\n",
+    app_log_info("bootload request for image with tag 0x%x accepted, will bootload in %ld ms\n",
                  imageTag, bootloadDelayMs);
     // Schedule a bootload action.
     emberEventControlSetDelayMS(emAfPluginOtaBootloaderTestEventControl,
@@ -291,6 +292,7 @@ bool emberAfPluginOtaBootloaderClientIncomingRequestBootloadCallback(EmberNodeId
  *****************************************************************************/
 void cli_bootloader_broadcast_set_target(sl_cli_command_arg_t *arguments)
 {
+  #if defined(SL_CATALOG_CONNECT_OTA_BROADCAST_BOOTLOADER_SERVER_PRESENT)
   if ((arguments == NULL)
       || (arguments->argv == NULL)
       || (arguments->argv[arguments->arg_ofs + 0] == NULL)
@@ -309,6 +311,7 @@ void cli_bootloader_broadcast_set_target(sl_cli_command_arg_t *arguments)
 
   target_list[target_index] = target_id;
   app_log_info("target set\n");
+  #endif
 }
 
 /**************************************************************************//**

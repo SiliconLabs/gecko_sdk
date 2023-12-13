@@ -1,0 +1,19 @@
+id: abr_ras
+package: Bluetooth
+label: ABR Ranging Service
+description: >
+  ABR Ranging Service
+category: Bluetooth|Application|ABR
+quality: experimental
+root_path: app/bluetooth/common/abr_ras
+include:
+  - path: .
+    file_list:
+      - path: abr_ras.h
+source:
+  - path: abr_ras.c
+requires:
+  - name: app_log
+  - name: app_assert
+provides:
+  - name: abr_ras

@@ -349,6 +349,9 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
   RAIL_ZWAVE_REGIONID_US_LR1,  /**< United States, with first long range PHY*/
   RAIL_ZWAVE_REGIONID_US_LR2,  /**< United States, with second long range PHY*/
   RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE, /**< United States long range end device PHY for both LR frequencies*/
+  RAIL_ZWAVE_REGIONID_EU_LR1,  /**< European Union, with first long range PHY*/
+  RAIL_ZWAVE_REGIONID_EU_LR2,  /**< European Union, with second long range PHY*/
+  RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE, /**< European Union long range end device PHY for both LR frequencies*/
   RAIL_ZWAVE_REGIONID_COUNT    /**< Count of known regions, must be last*/
 };
 
@@ -369,6 +372,9 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #define RAIL_ZWAVE_REGIONID_US_LR1 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR1)
 #define RAIL_ZWAVE_REGIONID_US_LR2 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR2)
 #define RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_US_LR_END_DEVICE)
+#define RAIL_ZWAVE_REGIONID_EU_LR1 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR1)
+#define RAIL_ZWAVE_REGIONID_EU_LR2 ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR2)
+#define RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_EU_LR_END_DEVICE)
 #define RAIL_ZWAVE_REGIONID_COUNT ((RAIL_ZWAVE_RegionId_t) RAIL_ZWAVE_REGIONID_COUNT)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
@@ -921,6 +927,15 @@ extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_US_LR2;
 
 /** US-Long Range End Device, RAIL_ZWAVE_REGION_US_LR_END_DEVICE */
 extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_US_LR_END_DEVICE;
+
+/** EU-Long Range 1, RAIL_ZWAVE_REGION_EU_LR1 */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR1;
+
+/** EU-Long Range 2, RAIL_ZWAVE_REGION_EU_LR2 */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR2;
+
+/** EU-Long Range End Device, RAIL_ZWAVE_REGION_EU_LR_END_DEVICE */
+extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU_LR_END_DEVICE;
 
 /** Invalid Region */
 extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_INVALID;

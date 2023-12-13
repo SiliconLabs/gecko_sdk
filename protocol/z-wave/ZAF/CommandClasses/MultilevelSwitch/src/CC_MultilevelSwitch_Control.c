@@ -25,7 +25,7 @@ typedef struct _multi_level_switch_set_t_
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
-CMD_CLASS_GRP cmdGrp;
+CMD_CLASS_GRP cmdGrp = { 0 };
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -47,14 +47,17 @@ CmdClassMultilevelSwitchStartLevelChange(
   uint8_t duration,
   uint8_t secondarySwitchStepSize)
 {
-  ccc_pair_t ccc_pair = {COMMAND_CLASS_SWITCH_MULTILEVEL_V4, SWITCH_MULTILEVEL_START_LEVEL_CHANGE_V4};
+  ccc_pair_t ccc_pair = {
+    .cmdClass = COMMAND_CLASS_SWITCH_MULTILEVEL_V4,
+    .cmd = SWITCH_MULTILEVEL_START_LEVEL_CHANGE_V4
+  };
   uint8_t payload[] = {
     (uint8_t)((primarySwitch << 6) | (fIgnoreStartLevel << 5) | (secondarySwitch << 3)),
     primarySwitchStartLevel,
     duration,
     secondarySwitchStepSize
   };
-  
+
   return cc_engine_multicast_request(pProfile,
       sourceEndpoint,
       &ccc_pair,
@@ -93,14 +96,12 @@ CmdClassMultilevelSwitchSetTransmit(
   uint8_t value,
   uint8_t duration)
 {
-  multi_level_switch_set_t multi_level_switch_set;
-  multi_level_switch_set.value = value;
-  multi_level_switch_set.dimmingDuration = duration;
-
+  multi_level_switch_set_t multi_level_switch_set = {
+    .value = value,
+    .dimmingDuration = duration
+  };
   cmdGrp.cmdClass = COMMAND_CLASS_SWITCH_MULTILEVEL_V4;
   cmdGrp.cmd = SWITCH_MULTILEVEL_SET_V4;
-
-
   return cc_engine_multicast_request(
       pProfile,
       sourceEndpoint,

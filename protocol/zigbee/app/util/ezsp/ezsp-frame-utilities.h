@@ -146,7 +146,7 @@ void fetchEmberRouteTableEntry(EmberRouteTableEntry *value);
   do {                                             \
     appendInt8u((value)->core_key_type);           \
     appendInt8u((value)->key_index);               \
-    appendInt8u((value)->derived_type);            \
+    appendInt16u((value)->derived_type);           \
     appendInt8uArray(EUI64_SIZE, (value)->eui64);  \
     appendInt8u((value)->multi_network_index);     \
     appendInt8u((value)->flags);                   \
@@ -157,7 +157,7 @@ void fetchEmberRouteTableEntry(EmberRouteTableEntry *value);
   do {                                               \
     (value)->core_key_type = fetchInt8u();           \
     (value)->key_index = fetchInt8u();               \
-    (value)->derived_type = fetchInt8u();            \
+    (value)->derived_type = fetchInt16u();           \
     fetchInt8uArray(EUI64_SIZE, (value)->eui64);     \
     (value)->multi_network_index = fetchInt8u();     \
     (value)->flags = fetchInt8u();                   \
@@ -377,12 +377,6 @@ void formatStructEmberPerDeviceDutyCycleIntoBytes(uint8_t maxDevices,
     (value)->freeGroupIdMin = fetchInt16u();  \
     (value)->freeGroupIdMax = fetchInt16u();  \
   } while (0)
-
-// Secure EZSP frame utilities
-#define appendSecureEzspRandomNumber(value) \
-  (appendInt8uArray(SECURE_EZSP_RANDOM_NUMBER_SIZE, (value)->contents))
-#define fetchSecureEzspRandomNumber(value) \
-  (fetchInt8uArray(SECURE_EZSP_RANDOM_NUMBER_SIZE, (value)->contents))
 
 #define appendEmberBeaconIterator(value)                                   \
   do {                                                                     \

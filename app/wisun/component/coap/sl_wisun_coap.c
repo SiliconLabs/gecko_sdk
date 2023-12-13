@@ -37,6 +37,7 @@
 #include <string.h>
 #include "sl_wisun_coap.h"
 #include "sl_wisun_coap_rhnd.h"
+#include "sl_wisun_coap_notify.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 
@@ -174,7 +175,272 @@ void sl_wisun_coap_init(const sl_wisun_coap_tx_callback tx_callback,
   _wisun_coap_mutex_release();
 
   sl_wisun_coap_rhnd_init();
+  sl_wisun_coap_notify_init();
 }
+
+#if SL_WISUN_COAP_EASY_CLNT_SRV_INSTANCE_ENABLE
+sl_status_t sl_wisun_coap_init_srv(sl_wisun_coap_srv_t * const srv,
+                                   sockaddr_in6_t *addr,
+                                   uint8_t * const buf,
+                                   const uint32_t buf_size)
+{
+  socklen_t sock_len = sizeof(struct sockaddr_in6);
+
+  // Check buf size
+  if (!buf_size) {
+    return SL_STATUS_FAIL;
+  }
+
+  // Create socket
+  srv->sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  if (srv->sockid == SOCKET_INVALID_ID) {
+    return SL_STATUS_FAIL;
+  }
+
+  // fill the server address structure
+  srv->addr.sin6_family = addr->sin6_family;
+  srv->addr.sin6_addr   = addr->sin6_addr;
+  srv->addr.sin6_port   = addr->sin6_port;
+
+  // Bind socket to address
+  if (bind(srv->sockid,
+           (const struct sockaddr *) &srv->addr,
+           sock_len) == SOCKET_RETVAL_ERROR) {
+    close(srv->sockid);
+    return SL_STATUS_FAIL;
+  }
+
+  // If buf is NULL, the buffer is allocated to the heap
+  if (buf == NULL) {
+    srv->buf = (uint8_t *) sl_wisun_coap_malloc(buf_size);
+    if (srv->buf == NULL) {
+      return SL_STATUS_FAIL;
+    }
+  } else {
+    srv->buf = buf;
+  }
+  srv->buf_size = buf_size;
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_init_clnt(sl_wisun_coap_clnt_t * const clnt,
+                                    sockaddr_in6_t *addr,
+                                    uint8_t * const buf,
+                                    const uint32_t buf_size)
+{
+  // Check buf size
+  if (!buf_size) {
+    return SL_STATUS_FAIL;
+  }
+
+  // Create socket
+  clnt->sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  if (clnt->sockid == SOCKET_INVALID_ID) {
+    return SL_STATUS_FAIL;
+  }
+
+  // fill the server address structure
+  clnt->addr.sin6_family = addr->sin6_family;
+  clnt->addr.sin6_addr   = addr->sin6_addr;
+  clnt->addr.sin6_port   = addr->sin6_port;
+
+  // If buf is NULL, the buffer is allocated to the heap
+  if (buf == NULL) {
+    clnt->buf = (uint8_t *) sl_wisun_coap_malloc(buf_size);
+    if (clnt->buf == NULL) {
+      return SL_STATUS_FAIL;
+    }
+  } else {
+    clnt->buf = buf;
+  }
+  clnt->buf_size = buf_size;
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_srv_recvfrom(sl_wisun_coap_srv_t * const srv,
+                                       sl_wisun_coap_clnt_t * const clnt,
+                                       sl_wisun_coap_packet_t *packet)
+{
+  socklen_t sock_len = 0UL;
+
+  if (srv == NULL || clnt == NULL || packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  packet = NULL;
+  srv->data_size = SOCKET_RETVAL_ERROR;
+
+  sock_len = sizeof(sockaddr_in6_t);
+  srv->data_size = recvfrom(srv->sockid,
+                            srv->buf,
+                            srv->buf_size,
+                            0L,
+                            (struct sockaddr *)&clnt->addr,
+                            &sock_len);
+
+  if (srv->data_size <= 0) {
+    return SL_STATUS_FAIL;
+  }
+
+  packet = sl_wisun_coap_parser((uint16_t)srv->data_size, srv->buf);
+
+  if (packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_srv_sendto(sl_wisun_coap_srv_t * const srv,
+                                     sl_wisun_coap_clnt_t * const clnt,
+                                     sl_wisun_coap_packet_t * const packet)
+{
+  socklen_t sock_len  = 0UL;
+  size_t resp_len     = 0UL;
+  int16_t res         = 0;
+  int32_t sock_res    = 0;
+
+  if (srv == NULL || clnt == NULL || packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  sock_len = sizeof(sockaddr_in6_t);
+  resp_len = sl_wisun_coap_builder_calc_size(packet);
+
+  if (resp_len > srv->buf_size) {
+    printf("[Buffer overflow occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  res = sl_wisun_coap_builder(srv->buf, packet);
+  if (res < 0L) {
+    printf("[Response build error occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  sock_res = sendto(srv->sockid,
+                    srv->buf,
+                    resp_len,
+                    0L,
+                    (const struct sockaddr *) &clnt->addr,
+                    sock_len);
+  if (sock_res == SOCKET_RETVAL_ERROR) {
+    printf("[Response send error occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_clnt_recvfrom(sl_wisun_coap_clnt_t * const clnt,
+                                        sl_wisun_coap_srv_t * const srv,
+                                        sl_wisun_coap_packet_t *packet)
+{
+  socklen_t sock_len = 0UL;
+
+  if (srv == NULL || clnt == NULL || packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  packet = NULL;
+  clnt->data_size = SOCKET_RETVAL_ERROR;
+
+  sock_len = sizeof(sockaddr_in6_t);
+  clnt->data_size = recvfrom(clnt->sockid,
+                             clnt->buf,
+                             clnt->buf_size,
+                             0L,
+                             (struct sockaddr *)&srv->addr,
+                             &sock_len);
+
+  if (clnt->data_size <= 0) {
+    return SL_STATUS_FAIL;
+  }
+
+  packet = sl_wisun_coap_parser((uint16_t)clnt->data_size, clnt->buf);
+
+  if (packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_clnt_sendto(sl_wisun_coap_clnt_t * const clnt,
+                                      sl_wisun_coap_srv_t * const srv,
+                                      sl_wisun_coap_packet_t * const packet)
+{
+  socklen_t sock_len  = 0UL;
+  size_t resp_len     = 0UL;
+  int16_t res         = 0;
+  int32_t sock_res    = 0;
+
+  if (srv == NULL || clnt == NULL || packet == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  sock_len = sizeof(sockaddr_in6_t);
+  resp_len = sl_wisun_coap_builder_calc_size(packet);
+
+  if (resp_len > clnt->buf_size) {
+    printf("[Buffer overflow occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  res = sl_wisun_coap_builder(clnt->buf, packet);
+  if (res < 0L) {
+    printf("[Response build error occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  sock_res = sendto(clnt->sockid,
+                    clnt->buf,
+                    resp_len,
+                    0L,
+                    (const struct sockaddr *) &srv->addr,
+                    sock_len);
+  if (sock_res == SOCKET_RETVAL_ERROR) {
+    printf("[Response send error occured]\n");
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_destroy_srv(sl_wisun_coap_srv_t * const srv)
+{
+  int32_t res = 0;
+
+  res = close(srv->sockid);
+
+  if (res != SOCKET_RETVAL_OK) {
+    return SL_STATUS_FAIL;
+  }
+
+  sl_wisun_coap_free(srv->buf);
+  memset(srv, 0, sizeof(sl_wisun_coap_srv_t));
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wisun_coap_destroy_clnt(sl_wisun_coap_clnt_t * const clnt)
+{
+  int32_t res = 0;
+
+  res = close(clnt->sockid);
+
+  if (res != SOCKET_RETVAL_OK) {
+    return SL_STATUS_OK;
+  }
+
+  sl_wisun_coap_free(clnt->buf);
+  memset(clnt, 0, sizeof(sl_wisun_coap_clnt_t));
+
+  return SL_STATUS_OK;
+}
+#endif
 
 /* Wi-SUN CoAP malloc */
 void *sl_wisun_coap_malloc(uint16_t size)

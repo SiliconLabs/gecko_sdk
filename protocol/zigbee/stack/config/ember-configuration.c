@@ -147,7 +147,11 @@ const EmberMacFilterMatchData zigbeeMacFilterList[] = {
 // Pass a pointer to child table in memory to the unified mac layer.
 //sl_mac_child_entry_t *sli_zigbee_child_table_data = (sl_mac_child_entry_t *) &emAvailableMemory[0];
 sl_mac_child_entry_t sli_zigbee_child_table_data[1 + EMBER_CHILD_TABLE_SIZE * EMBER_ZC_AND_ZR_DEVICE_COUNT];
+#if defined(SL_ZIGBEE_LEAF_STACK) && defined(EMBER_AF_NCP)
+uint8_t emberChildTableSize = 0;
+#else // !(defined(SL_ZIGBEE_LEAF_STACK) && defined(EMBER_AF_NCP))
 uint8_t emberChildTableSize = EMBER_CHILD_TABLE_SIZE;
+#endif // defined(SL_ZIGBEE_LEAF_STACK) && defined(EMBER_AF_NCP)
 
 //------------------------------------------------------------------------------
 // NWK Layer
@@ -409,7 +413,6 @@ uint8_t emberEndDevicekeepAliveSupportMode = EMBER_END_DEVICE_KEEP_ALIVE_SUPPORT
 uint8_t emberEndDevicePollTimeout = EMBER_END_DEVICE_POLL_TIMEOUT;
 //STATIC_ASSERT(EMBER_END_DEVICE_POLL_TIMEOUT <= MINUTES_16384, "End device timeout out of range");
 uint16_t emberLinkPowerDeltaInterval = EMBER_LINK_POWER_DELTA_INTERVAL;
-uint8_t sli_zigbee_end_device_bind_timeout = EMBER_END_DEVICE_BIND_TIMEOUT;
 uint8_t sli_zigbee_request_key_timeout = EMBER_REQUEST_KEY_TIMEOUT;
 uint8_t sli_zigbee_pan_id_conflict_report_threshold = EMBER_PAN_ID_CONFLICT_REPORT_THRESHOLD;
 uint8_t sli_zigbee_zc_and_zr_count = EMBER_ZC_AND_ZR_DEVICE_COUNT;
@@ -1001,6 +1004,7 @@ EmberMacFilterMatchData sli_zigbee_custom_mac_filter_match_list_data[EMBER_CUSTO
 // the mask so that the rejoin interface will be selected. As per the SE 1.4 errata, the
 // "Multi-MAC Selection" end device can change the rejoin interface (this is default) where as the
 // Multi-MAC Joining end devices shall not, hence supply the channel mask based on the joined interface.
+extern uint8_t emberGetLogicalChannel(void);
 WEAK(void emberUpdateMultiMacRejoinChannelMaskForSelectionOrJoiningDevice(uint32_t *rejoinChannelMask))
 {
 #ifdef SL_CATALOG_ZIGBEE_PHY_2_4_SUBGHZ_JOINING_END_DEVICE_PRESENT

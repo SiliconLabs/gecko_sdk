@@ -63,6 +63,12 @@ int8_t emberAfGpdfSend(uint8_t frameType,
                        uint8_t payloadLength,
                        uint8_t repeatNumber)
 {
+  // EMZIGBEE-11785 : Using CSMA in GPDF Send function is restricted.
+  // The reasons is that the GPD being min energy devices, don't use CSMA in most of the designs,
+  // rather the designs prefer to send out multiple packets using the same energy budget.
+  if (!gpd->skipCca) {
+    return FAILED;
+  }
   // Check packet length
 #if defined(EMBER_AF_PLUGIN_APPS_APPLICATION_ID) && (EMBER_AF_PLUGIN_APPS_APPLICATION_ID == EMBER_GPD_APP_ID_SRC_ID)
   payloadLength = SL_MIN(payloadLength, EMBER_GPD_SRC_ID_MAX_PAYLOAD_SIZE);
@@ -72,7 +78,8 @@ int8_t emberAfGpdfSend(uint8_t frameType,
 #error "Unsupported GPD Application Id"
 #endif
 
-  if (frameType == EMBER_GPD_NWK_FC_FRAME_TYPE_DATA) {
+  if (frameType == EMBER_GPD_NWK_FC_FRAME_TYPE_DATA
+      || frameType == EMBER_GPD_NWK_FC_FRAME_TYPE_MAINT) {
     // update Security frame counter before building packet
 #if defined(EMBER_AF_PLUGIN_APPS_MAC_SEQ) && (EMBER_AF_PLUGIN_APPS_MAC_SEQ == EMBER_GPD_MAC_SEQ_INCREMENTAL)
     gpd->securityFrameCounter++;
@@ -92,10 +99,10 @@ int8_t emberAfGpdfSend(uint8_t frameType,
                                          payload,
                                          payloadLength,
                                          gpd);
-  emberGpdRailWriteTxFifoWrapper(txMpdu, length);
   // local variable
   uint8_t repeat = 0;
   do {
+    emberGpdRailWriteTxFifoWrapper(txMpdu, length);
     emberGpdRailIdleWrapper();
     uint32_t preTxRailTime = RAIL_GetTime();
     //

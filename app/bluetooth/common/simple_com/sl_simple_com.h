@@ -52,7 +52,7 @@ void sl_simple_com_step(void);
 /**************************************************************************//**
  * Transmit function
  *****************************************************************************/
-void sl_simple_com_transmit(uint32_t len, uint8_t *data);
+void sl_simple_com_transmit(uint32_t len, const uint8_t *data);
 
 /**************************************************************************//**
  * Transmit completed callback

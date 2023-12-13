@@ -12,11 +12,16 @@ include:
   - path: .
     file_list:
       - path: abr_reflector.h
+      - path: abr_reflector_connmanager.h
+      - path: abr_reflector_event_buf.h
 config_file:
   - path: abr_reflector.xml
     directory: btconf
+  - path: config/abr_reflector_config.h
 source:
   - path: abr_reflector.c
+  - path: abr_reflector_connmanager.c
+  - path: abr_reflector_event_buf.c
 requires:
   - name: app_log
   - name: app_assert
@@ -33,8 +38,7 @@ requires:
   - name: power_manager
   - name: bluetooth_feature_cs
   - name: bluetooth_feature_cs_test
-
-
+  - name: abr_ras
 provides:
   - name: abr_reflector
 template_contribution:

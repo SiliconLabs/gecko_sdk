@@ -109,6 +109,13 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
                                            size_t key_buffer_size,
                                            size_t *key_buffer_length);
 
+psa_status_t sli_se_opaque_copy_key(const psa_key_attributes_t *attributes,
+                                    const uint8_t *source_key,
+                                    size_t source_key_length,
+                                    uint8_t *target_key_buffer,
+                                    size_t target_key_buffer_size,
+                                    size_t *target_key_buffer_length);
+
 //------------------------------------------------------------------------------
 // MAC
 

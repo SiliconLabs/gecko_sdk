@@ -35,23 +35,44 @@
 // Helper macro.
 #define CHECK_TYPE(x, t)  if (((x) == NULL) || ((x)->type != (t))) return SL_STATUS_FAIL
 
+/// Check pointer to NULL, return error code
+#define CHECK_NULL_RETURN(p, sc) \
+  do {                           \
+    if ((p) == NULL) {           \
+      return (sc);               \
+    }                            \
+  } while (0)
+
 /***************************************************************************//**
  * Serialize IQ report data structure into string.
  ******************************************************************************/
-sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char** str)
+sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char **str)
 {
   if ((iq_report == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
+  cJSON_bool b;
+  cJSON *obj = NULL;
   cJSON *root = cJSON_CreateObject();
+  CHECK_NULL_RETURN(root, SL_STATUS_FAIL);
   cJSON *samples = cJSON_CreateArray();
-  cJSON_AddIntegerToObject(root, "channel", (int)iq_report->channel);
-  cJSON_AddIntegerToObject(root, "rssi", (int)iq_report->rssi);
-  cJSON_AddIntegerToObject(root, "sequence", (int)iq_report->event_counter);
+  CHECK_NULL_RETURN(samples, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "channel", (int)iq_report->channel);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "rssi", (int)iq_report->rssi);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "sequence", (int)iq_report->event_counter);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
   for (int i = 0; i < iq_report->length; i++) {
-    cJSON_AddItemToArray(samples, cJSON_CreateInteger(iq_report->samples[i]));
+    b = cJSON_AddItemToArray(samples, cJSON_CreateNumber(iq_report->samples[i]));
+    if (!b) {
+      return SL_STATUS_FAIL;
+    }
   }
-  cJSON_AddItemToObject(root, "samples", samples);
+  b = cJSON_AddItemToObject(root, "samples", samples);
+  if (!b) {
+    return SL_STATUS_FAIL;
+  }
   *str = cJSON_Print(root);
   cJSON_Delete(root);
   return SL_STATUS_OK;
@@ -60,7 +81,7 @@ sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char** str)
 /***************************************************************************//**
  * Deserialize IQ report data structure from string.
  ******************************************************************************/
-sl_status_t aoa_deserialize_iq_report(char* str, aoa_iq_report_t *iq_report)
+sl_status_t aoa_deserialize_iq_report(char *str, aoa_iq_report_t *iq_report)
 {
   if ((iq_report == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;
@@ -93,19 +114,28 @@ sl_status_t aoa_deserialize_iq_report(char* str, aoa_iq_report_t *iq_report)
 /***************************************************************************//**
  * Serialize angle data structure into string.
  ******************************************************************************/
-sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char** str)
+sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char **str)
 {
   if ((angle == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
+  cJSON *obj = NULL;
   cJSON *root = cJSON_CreateObject();
-  cJSON_AddDoubleToObject(root, "azimuth", (double)angle->azimuth);
-  cJSON_AddDoubleToObject(root, "azimuth_stdev", (double)angle->azimuth_stdev);
-  cJSON_AddDoubleToObject(root, "elevation", (double)angle->elevation);
-  cJSON_AddDoubleToObject(root, "elevation_stdev", (double)angle->elevation_stdev);
-  cJSON_AddDoubleToObject(root, "distance", (double)angle->distance);
-  cJSON_AddDoubleToObject(root, "distance_stdev", (double)angle->distance_stdev);
-  cJSON_AddIntegerToObject(root, "sequence", (int)angle->sequence);
+  CHECK_NULL_RETURN(root, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "azimuth", (double)angle->azimuth);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "azimuth_stdev", (double)angle->azimuth_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "elevation", (double)angle->elevation);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "elevation_stdev", (double)angle->elevation_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "distance", (double)angle->distance);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "distance_stdev", (double)angle->distance_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "sequence", (int)angle->sequence);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
   *str = cJSON_Print(root);
   cJSON_Delete(root);
   return SL_STATUS_OK;
@@ -114,7 +144,7 @@ sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char** str)
 /***************************************************************************//**
  * Deserialize angle data structure from string.
  ******************************************************************************/
-sl_status_t aoa_deserialize_angle(char* str, aoa_angle_t *angle)
+sl_status_t aoa_deserialize_angle(char *str, aoa_angle_t *angle)
 {
   if ((angle == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;
@@ -149,19 +179,28 @@ sl_status_t aoa_deserialize_angle(char* str, aoa_angle_t *angle)
 /***************************************************************************//**
  * Serialize position data structure into string.
  ******************************************************************************/
-sl_status_t aoa_serialize_position(aoa_position_t *position, char** str)
+sl_status_t aoa_serialize_position(aoa_position_t *position, char **str)
 {
   if ((position == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;
   }
+  cJSON *obj = NULL;
   cJSON *root = cJSON_CreateObject();
-  cJSON_AddDoubleToObject(root, "x", position->x);
-  cJSON_AddDoubleToObject(root, "x_stdev", position->x_stdev);
-  cJSON_AddDoubleToObject(root, "y", position->y);
-  cJSON_AddDoubleToObject(root, "y_stdev", position->y_stdev);
-  cJSON_AddDoubleToObject(root, "z", position->z);
-  cJSON_AddDoubleToObject(root, "z_stdev", position->z_stdev);
-  cJSON_AddIntegerToObject(root, "sequence", (int)position->sequence);
+  CHECK_NULL_RETURN(root, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "x", position->x);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "x_stdev", position->x_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "y", position->y);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "y_stdev", position->y_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "z", position->z);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "z_stdev", position->z_stdev);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
+  obj = cJSON_AddNumberToObject(root, "sequence", (int)position->sequence);
+  CHECK_NULL_RETURN(obj, SL_STATUS_FAIL);
   *str = cJSON_Print(root);
   cJSON_Delete(root);
   return SL_STATUS_OK;
@@ -170,7 +209,7 @@ sl_status_t aoa_serialize_position(aoa_position_t *position, char** str)
 /***************************************************************************//**
  * Deserialize position data structure from string.
  ******************************************************************************/
-sl_status_t aoa_deserialize_position(char* str, aoa_position_t *position)
+sl_status_t aoa_deserialize_position(char *str, aoa_position_t *position)
 {
   if ((position == NULL) || (str == NULL)) {
     return SL_STATUS_NULL_POINTER;

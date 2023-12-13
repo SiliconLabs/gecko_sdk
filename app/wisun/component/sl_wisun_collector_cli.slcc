@@ -33,9 +33,9 @@ template_contribution:
       group: "wisun"
       name: "register_meter"
       handler: "app_register_meter"
-      help: "Register meter for measurement loop"
+      help: "Register collector to the given meter"
       shortcuts:
-        - name: "a"
+        - name: "r"
       argument:
         - type: string
           help: "Meter address"
@@ -45,12 +45,33 @@ template_contribution:
       group: "wisun"
       name: "remove_meter"
       handler: "app_remove_meter"
-      help: "Remove meter from measurement loop"
+      help: "Remove registration from the given meter"
+      shortcuts:
+        - name: "d"
+      argument:
+        - type: string
+          help: "Meter address"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "async_request"
+      handler: "app_async_request"
+      help: "Send an async request to the given meter"
       shortcuts:
         - name: "a"
       argument:
         - type: string
           help: "Meter address"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "list_meters"
+      handler: "app_list_meters"
+      help: "List registered and async meters"
+      shortcuts:
+        - name: "p"
 
   - name: "cli_command"
     value:

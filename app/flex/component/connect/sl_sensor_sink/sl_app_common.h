@@ -35,7 +35,6 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "em_chip.h"
 #include "sl_sensor_sink_config.h"
 

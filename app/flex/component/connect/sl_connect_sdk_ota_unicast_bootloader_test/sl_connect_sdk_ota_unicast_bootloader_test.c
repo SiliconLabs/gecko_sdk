@@ -32,7 +32,6 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "sl_connect_sdk_ota_bootloader_test_common.h"
 #include "sl_connect_sdk_btl-interface.h"
 #include "sl_cli.h"
@@ -55,8 +54,10 @@ EmberEventControl emAfPluginOtaUnicastBootloaderTestEventControl;
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
+#if defined(SL_CATALOG_CONNECT_OTA_UNICAST_BOOTLOADER_SERVER_PRESENT)
 /// Node ID of the target
 static EmberNodeId target;
+#endif
 #if defined(SL_CATALOG_CONNECT_OTA_UNICAST_BOOTLOADER_CLIENT_PRESENT)
 /// Enable resuming an image after the timeout period.
 static bool ota_resume_enable = true;
@@ -263,11 +264,11 @@ void cli_bootloader_unicast_set_target(sl_cli_command_arg_t *arguments)
     app_log_error("argument error\n");
     return;
   }
-
+#if defined(SL_CATALOG_CONNECT_OTA_UNICAST_BOOTLOADER_SERVER_PRESENT)
   EmberNodeId target_id = sl_cli_get_argument_uint16(arguments, 0);
-
   target = target_id;
   app_log_info("unicast target set\n");
+#endif
 }
 
 /**************************************************************************//**

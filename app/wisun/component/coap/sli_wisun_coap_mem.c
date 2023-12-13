@@ -121,10 +121,10 @@ static _coap_mem_t _mem[WISUN_COAP_MEMORY_OPTION_COUNT] = {
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 
-static sl_memory_region_t _heap_region = { 
+static sl_memory_region_t _heap_region = {
   .addr = 0U,
   .size = 0U
- };
+};
 /* Using dynamic memory allocation which provided by OS */
 /**************************************************************************//**
  * @brief OS malloc
@@ -160,8 +160,8 @@ __STATIC_INLINE void* __os_malloc(size_t size)
 /* os free */
 __STATIC_INLINE void __os_free(void *addr)
 {
-  if (addr < _heap_region.addr || 
-      addr >= (void *)((uint32_t)_heap_region.addr + _heap_region.size)) {
+  if (addr < _heap_region.addr
+      || addr >= (void *)((uint32_t)_heap_region.addr + _heap_region.size)) {
     return;
   }
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)

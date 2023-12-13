@@ -1,12 +1,11 @@
 package: Zigbee
-description: Code common to both the client and server of the Silicon Labs standalone bootload
-  protocol.
+description: Code common to both the client and server of the Silicon Labs standalone bootload protocol.
 id: zigbee_standalone_bootloader_common
 label: Standalone Bootloader Common
-category: Zigbee|Utility|Standalone Bootloader
+category: Zigbee|Bootloader
 quality: production
 provides:
-   - name: zigbee_standalone_bootloader_common
+  - name: zigbee_standalone_bootloader_common
 source:
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-common/bootloader-protocol.c
   - path: protocol/zigbee/app/framework/plugin/standalone-bootloader-common/bootloader-message-host.c
@@ -24,11 +23,11 @@ template_contribution:
   - name: component_catalog
     value: zigbee_standalone_bootloader_common
   - name: zigbee_stack_callback
-    value: 
+    value:
       callback_type: incoming_bootload_message
       function_name: sli_zigbee_af_standalone_bootloader_common_incoming_bootload_message_callback
   - name: zigbee_stack_callback
-    value: 
+    value:
       callback_type: bootload_transmit_complete
       function_name: sli_zigbee_af_standalone_bootloader_common_bootload_transmit_complete_callback
 

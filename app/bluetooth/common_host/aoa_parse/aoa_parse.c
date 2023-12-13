@@ -402,6 +402,9 @@ sl_status_t aoa_parse_azimuth(float *min, float *max, aoa_id_t locator_id)
 
   // Get next azimuth mask from the array.
   param = cJSON_GetArrayItem(array, azimuth_mask_index);
+  if (NULL == param) {
+    return SL_STATUS_NOT_FOUND;
+  }
 
   subparam = cJSON_GetObjectItem(param, "min");
   CHECK_TYPE(subparam, cJSON_Number);
@@ -455,6 +458,9 @@ sl_status_t aoa_parse_elevation(float *min, float *max, aoa_id_t locator_id)
 
   // Get next elevation mask from the array.
   param = cJSON_GetArrayItem(array, elevation_mask_index);
+  if (NULL == param) {
+    return SL_STATUS_NOT_FOUND;
+  }
 
   subparam = cJSON_GetObjectItem(param, "min");
   CHECK_TYPE(subparam, cJSON_Number);
@@ -557,9 +563,15 @@ sl_status_t aoa_parse_antenna_array(uint8_t **antenna_array,
   array_size = cJSON_GetArraySize(array);
 
   *antenna_array = malloc(array_size * sizeof(uint8_t));
+  if (NULL == *antenna_array) {
+    return SL_STATUS_ALLOCATION_FAILED;
+  }
 
   while (i < array_size) {
     param = cJSON_GetArrayItem(array, i);
+    if (NULL == param) {
+      return SL_STATUS_NOT_FOUND;
+    }
     (*antenna_array)[i] = param->valueint;
     i++;
   }

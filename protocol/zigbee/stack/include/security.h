@@ -132,38 +132,6 @@ EmberStatus emberGetExtendedSecurityBitmask(EmberExtendedSecurityBitmask* mask);
  */
 EmberStatus emberGetCurrentSecurityState(EmberCurrentSecurityState* state);
 
-/** @brief Get the specified key and its associated data.  This can retrieve
- *  the Trust Center Link Key, Current Network Key, or Next Network Key.
- *  On the 35x series chips, the data returned by this call is governed by the
- *  security policy set in the manufacturing token for TOKEN_MFG_SECURITY_CONFIG.
- *  See the API calls ::emberSetMfgSecurityConfig() and ::emberGetMfgSecurityConfig()
- *  for more information.  If the security policy is not set to
- *  ::EMBER_KEY_PERMISSIONS_READING_ALLOWED, the actual encryption key
- *  value will not be returned.  Other metadata about the key will be returned.
- *
- *  @param type The Type of key to get (e.g., Trust Center Link or Network).
- *  @param keyStruct A pointer to the ::EmberKeyStruct data structure that will
- *     be populated with the pertinent information.
- *
- *  @return ::EMBER_SUCCESS if the key was retrieved successfully.
- *    ::EMBER_INVALID_CALL if an attempt was made to retrieve an
- *    ::EMBER_APPLICATION_LINK_KEY.
- */
-EmberStatus emberGetKey(EmberKeyType type,
-                        EmberKeyStruct* keyStruct);
-
-/** @brief Return true if a link key is available for securing messages
- * sent to the remote device.
- * This function simply checks for the existence of a key, it doesn't care if the key is authorized or not.
- * This function searches in a few different places, and it may always return true if certain bits/policies are set.
- * E.g: On trust center, this function always returns true if hashed link keys are used
- *      or if EMBER_TRUST_CENTER_GLOBAL_LINK_KEY is set
- *
- * @param remoteDevice The long address of a some other device in the network.
- * @return bool Returns true if a link key is available.
- */
-bool emberHaveLinkKey(EmberEUI64 remoteDevice);
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 extern uint8_t emberKeyTableSize;
 extern uint32_t sli_zigbee_incoming_aps_frame_counters[];
@@ -254,66 +222,6 @@ EmberStatus emberUpdateTcLinkKey(uint8_t maxAttempts);
  * @param status The status of the key establishment.
  */
 void emberZigbeeKeyEstablishmentHandler(EmberEUI64 partner, EmberKeyStatus status);
-
-/** @brief Get data from the Key Table.
- *  On the 35x series chips, the data returned by this call is governed by the
- *  security policy set in the manufacturing token for TOKEN_MFG_SECURITY_CONFIG.
- *  See the API calls ::emberSetMfgSecurityConfig() and ::emberGetMfgSecurityConfig()
- *  for more information.  If the security policy is not set to
- *  ::EMBER_KEY_PERMISSIONS_READING_ALLOWED, the actual encryption key
- *  value will not be returned.  Other metadata about the key will be returned.
- *
- * @param index The index in the key table of the entry to get.
- * @param result A pointer to the location of an ::EmberKeyStruct that will
- *   contain the results retrieved by the stack.
- * @return ::EMBER_TABLE_ENTRY_ERASED if the index is an erased key entry.
- *   ::EMBER_INDEX_OUT_OF_RANGE if the passed index is not valid.
- *   ::EMBER_SUCCESS on success.
- */
-EmberStatus emberGetKeyTableEntry(uint8_t index,
-                                  EmberKeyStruct* result);
-
-/** @brief Set an entry in the key table.
- *
- * @param index The index in the key table of the entry to set.
- * @param address The address of the partner device associated with the key.
- * @param keyData A pointer to the key data associated with the key entry.
- * @param linkKey A bool indicating whether this is a Link or Master Key.
- *
- * @return ::EMBER_KEY_INVALID if the passed key data is using one of the
- *   reserved key values.  ::EMBER_INDEX_OUT_OF_RANGE if passed index is not
- *   valid.  ::EMBER_SUCCESS on success.
- */
-EmberStatus emberSetKeyTableEntry(uint8_t index,
-                                  EmberEUI64 address,
-                                  bool linkKey,
-                                  EmberKeyData* keyData);
-
-/** @brief Add a new entry in the key table or
- *  updates an existing entry with a new key. It first searches
- *  the key table for an entry that has a matching EUI64. If
- *  it does not find one, it searches for the first free entry.
- *  If it is successful in either case, it sets the entry with
- *  the EUI64, key data, and flag that indicates if it is a Link
- *  or Master Key. The Incoming Frame Counter for that key is
- *  also reset to 0. If no existing entry was found and there are
- *  no free entries in the table, the call will fail.
- *
- * @param address The IEEE Address of the partner device that shares
- *   the key.
- * @param linkKey A bool indicating whether this is a Link or Master
- *   key.
- * @param keyData A pointer to the actual key data.
- *
- * @return ::EMBER_TABLE_FULL if no free entry was found to add.
- *   ::EMBER_KEY_INVALID if the passed key was a reserved value.
- *   ::EMBER_KEY_TABLE_ADDRESS_NOT_VALID if the passed address is
- *   reserved or invalid.
- *   ::EMBER_SUCCESS on success.
- */
-EmberStatus emberAddOrUpdateKeyTableEntry(EmberEUI64 address,
-                                          bool linkKey,
-                                          EmberKeyData* keyData);
 
 /** @brief Search the key table to find an entry
  *  matching the specified IEEE address and key type.
@@ -444,19 +352,19 @@ EmberStatus emberGetMfgSecurityConfig(EmberMfgSecurityStruct* settings);
  *
  *    This function will disable external access to the actual
  *    key data used for decryption/encryption outside the stack.
- *    Attempts to call ::emberGetKey() or ::emberGetKeyTableEntry() will
- *    return the metadata (e.g., sequence number, associated EUI64, frame
- *    counters) but the key value may be modified, see below.
+ *    Attempts to export the key will return the metadata if applicable
+ *    (e.g., sequence number, associated EUI64, frame counters)
+ *    but the key value may be modified, see below.
  *
  *    The stack always has access to the actual key data.
  *
  *    If the ::EmberKeySettings within the ::EmberMfgSecurityStruct are set to
  *    ::EMBER_KEY_PERMISSIONS_NONE, the key value will be set to zero
- *    when ::emberGetKey() or ::emberGetKeyTableEntry() is called.
+ *    when ::sl_zb_sec_man_export_key() or similar functions are called.
  *    If the ::EmberKeySettings within the ::EmberMfgSecurityStruct are set to
  *    ::EMBER_KEY_PERMISSIONS_HASHING_ALLOWED, the AES-MMO hash of the key
- *    will replace the actual key data when calls to ::emberGetKey() or
- *    ::emberGetKeyTableEntry() are made.
+ *    will replace the actual key data when calls to functions like
+ *    ::sl_zb_sec_man_export_key() are made.
  *    If the ::EmberKeySettings within the ::EmberMfgSecurityStruct are set to
  *    ::EMBER_KEY_PERMISSIONS_READING_ALLOWED, the actual key data is
  *    returned.  This is the default value of the token.
@@ -529,59 +437,12 @@ EmberStatus sli_zigbee_set_frame_counter(EmberKeyType keyType,
                                          uint32_t desiredValue);
 #endif
 
-/** @brief Add a temporary link key for a joining device. The link key will
- *  be stored for emberTransientKeyTimeoutS seconds. After that time, the
- *  key will be removed. The removed key will need to be added again using this
- *  API before it can be used by a joining device again.
- *
- * @param partnerEUI64 The EUI of the joining device. If all FF's are entered
- * for this value, then the key can be used for all joining devices
- * that do not already have transient key table entries.
- *
- * @param key The temporary link key to the joining device.
- *
- * @return ::EMBER_SUCCESS if the transient key has been added.
- *         ::EMBER_NO_BUFFERS if there are no buffers.
- */
-EmberStatus emberAddTransientLinkKey(EmberEUI64 partnerEUI64,
-                                     EmberKeyData *key);
-
-/** @brief Get the transient link key at the index specified in the transient
- *  key table.
- *
- * @param index The index in the transient key table to fetch data from.
- *
- * @param transientKeyData The transient key structure that is filled in upon
- * success.
- *
- * @return ::EMBER_SUCCESS if a valid transient key is returned.
- *         ::EMBER_NOT_FOUND if no valid key is found at the specified index.
- *         ::EMBER_INVALID_CALL if transient key support is missing.
- */
-EmberStatus emberGetTransientKeyTableEntry(uint8_t index,
-                                           EmberTransientKeyData *transientKeyData);
-
-/** @brief Get the transient link key for a device. This function searches the
- *  transient key table for an entry matching the EUI passed in.
- *
- * @param eui The IEEE address to look up.
- *
- * @param transientKeyData The transient key structure that is filled in upon
- * success.
- *
- * @return ::EMBER_SUCCESS if the transient key for the EUI is found.
- *         ::EMBER_INVALID_CALL if the this function is stubbed.
- *         ::EMBER_NOT_FOUND if the transient key for the EUI is not found.
- */
-EmberStatus emberGetTransientLinkKey(const EmberEUI64 eui,
-                                     EmberTransientKeyData *transientKeyData);
-
 /** @brief Clear all transient link keys from RAM. */
 void emberClearTransientLinkKeys(void);
 
 /** @brief The length of time, in seconds, that a trust center will store
  *  a transient link key that a device can use to join its network. A
- *  transient key is added with a call to emberAddTransientLinkKey. After the
+ *  transient key is added with a call to sl_zb_sec_man_import_transient_key. After the
  *  transient key is added, it will be removed once this amount of time has
  *  passed. A joining device will not be able to use that key to join until
  *  it is added again on the trust center. The default value is 300 seconds,

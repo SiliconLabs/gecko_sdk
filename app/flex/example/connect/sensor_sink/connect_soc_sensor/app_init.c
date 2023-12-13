@@ -130,7 +130,7 @@ void emberAfInitCallback(void)
     if (psa_status == PSA_SUCCESS) {
       app_log_info("Security key import successful, key id: %lu\n", security_key_id);
     } else {
-      app_log_info("Security Key import failed: %d\n", psa_status);
+      app_log_info("Security Key import failed: %ld\n", psa_status);
     }
   } else {
     app_log_info("PSA AES key found, using the existing one.\n");

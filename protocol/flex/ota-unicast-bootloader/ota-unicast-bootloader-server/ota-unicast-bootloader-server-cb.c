@@ -33,12 +33,12 @@
 //------------------------------------------------------------------------------
 // Weak callbacks definitions
 
-WEAK(bool emberAfPluginOtaUnicastBootloaderServerGetImageSegmentCallback(
-       uint32_t startIndex,
-       uint32_t endIndex,
-       uint8_t imageTag,
-       uint8_t *imageSegment
-       ))
+SL_WEAK bool emberAfPluginOtaUnicastBootloaderServerGetImageSegmentCallback(
+  uint32_t startIndex,
+  uint32_t endIndex,
+  uint8_t imageTag,
+  uint8_t *imageSegment
+  )
 {
   (void)startIndex;
   (void)endIndex;
@@ -48,14 +48,14 @@ WEAK(bool emberAfPluginOtaUnicastBootloaderServerGetImageSegmentCallback(
   return false;
 }
 
-WEAK(void emberAfPluginOtaUnicastBootloaderServerImageDistributionCompleteCallback(
-       EmberAfOtaUnicastBootloaderStatus status))
+SL_WEAK void emberAfPluginOtaUnicastBootloaderServerImageDistributionCompleteCallback(
+  EmberAfOtaUnicastBootloaderStatus status)
 {
   (void)status;
 }
 
-WEAK(void emberAfPluginOtaUnicastBootloaderServerRequestTargetBootloadCompleteCallback(
-       EmberAfOtaUnicastBootloaderStatus status))
+SL_WEAK void emberAfPluginOtaUnicastBootloaderServerRequestTargetBootloadCompleteCallback(
+  EmberAfOtaUnicastBootloaderStatus status)
 {
   (void)status;
 }

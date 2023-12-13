@@ -63,13 +63,11 @@
 #define HIGH_PRIORITY                  0
 /// No Timer Options
 #define NO_FLAGS                       0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA               (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA               NULL
 
-/// Friend finding timer handler
-static app_timer_t lpn_friend_find_timer;
-/// Node configuration timer handler
-static app_timer_t lpn_node_configured_timer;
+/// Friend finding and node configuration timer handler
+static app_timer_t lpn_timer;
 /// High throughput timer handler
 static app_timer_t lpn_high_throughput_timer;
 
@@ -221,7 +219,7 @@ void sl_btmesh_lpn_feature_deinit(void)
   }
 
   // Cancel friend finding timer
-  sl_status_t sc = app_timer_stop(&lpn_friend_find_timer);
+  sl_status_t sc = app_timer_stop(&lpn_timer);
   app_assert_status_f(sc, "Failed to stop timer");
 
   // Terminate friendship if exist
@@ -300,7 +298,7 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
         evt->data.evt_lpn_friendship_failed.reason);
 
       // try again after timer expires
-      sl_status_t sc = app_timer_start(&lpn_friend_find_timer,
+      sl_status_t sc = app_timer_start(&lpn_timer,
                                        SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
                                        lpn_friend_find_timer_cb,
                                        NO_CALLBACK_DATA,
@@ -316,7 +314,7 @@ void sl_btmesh_lpn_on_event(sl_btmesh_msg_t* evt)
       friend_address = 0;
       if (num_mesh_proxy_conn == 0) {
         // try again after timer expires
-        sl_status_t sc = app_timer_start(&lpn_friend_find_timer,
+        sl_status_t sc = app_timer_start(&lpn_timer,
                                          SL_BTMESH_LPN_FRIEND_FIND_TIMEOUT_CFG_VAL,
                                          lpn_friend_find_timer_cb,
                                          NO_CALLBACK_DATA,
@@ -451,7 +449,7 @@ static void lpn_establish_friendship(void)
  ******************************************************************************/
 static void set_configuration_timer(uint32_t delay)
 {
-  sl_status_t sc = app_timer_start(&lpn_node_configured_timer,
+  sl_status_t sc = app_timer_start(&lpn_timer,
                                    delay,
                                    lpn_node_configured_timer_cb,
                                    NO_CALLBACK_DATA,

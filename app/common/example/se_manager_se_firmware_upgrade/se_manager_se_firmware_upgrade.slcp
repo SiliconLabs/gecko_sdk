@@ -1,7 +1,7 @@
 project_name: se_manager_se_firmware_upgrade
 package: platform
 quality: production
-label: Platform - SE Manager SE Firmware Upgrade
+label: Platform Security - SoC SE Manager SE Firmware Upgrade
 description: >
   This example project demonstrates the SE firmware upgrade API of SE Manager.
 category: Example|Platform

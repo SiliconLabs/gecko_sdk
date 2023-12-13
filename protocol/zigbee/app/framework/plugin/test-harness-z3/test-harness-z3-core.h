@@ -37,7 +37,7 @@
 
 // -----------------------------------------------------------------------------
 // Globals
-
+// Bit 0 is set if the device is address assignment capable
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum sli_zigbee_af_test_harness_z3_device_mode_enum
 #else

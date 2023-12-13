@@ -479,4 +479,4 @@ typedef struct {
 /** @} End of group BGM24_PCNT */
 /** @} End of group Parts */
 
-#endif /* BGM24_PCNT_H */
+#endif // BGM24_PCNT_H

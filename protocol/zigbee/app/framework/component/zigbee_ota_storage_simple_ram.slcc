@@ -1,17 +1,14 @@
 package: Zigbee
-description: This is a test implementation of a storage driver for the Over-the-air
-  simple storage module.  It uses RAM to store a single, non-bootable, test image.  It
-  is intended for basic demonstration purposes only and is not production-ready.  It
-  can be used for either an OTA Client or OTA Server.
+description: This is a test implementation of a storage driver for the Over-the-air simple storage module.  It uses RAM to store a single, non-bootable, test image.  It is intended for basic demonstration purposes only and is not production-ready.  It can be used for either an OTA Client or OTA Server.
 label: OTA Simple Storage RAM Driver
 quality: production
 id: zigbee_ota_storage_simple_ram
 category: Zigbee|Over-The-Air Bootloading
 provides:
-   - name: "zigbee_ota_storage_simple_ram"
-   - name: "zigbee_ota_storage_implementation"
+  - name: zigbee_ota_storage_simple_ram
+  - name: zigbee_ota_storage_implementation
 requires:
-   - name: "zigbee_ota_storage_simple"
+  - name: zigbee_ota_storage_simple
 source:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-simple-ram/ota-storage-ram.c
 include:

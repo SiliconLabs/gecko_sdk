@@ -27,19 +27,24 @@ ESL Access Point logger class.
 import os
 import sys
 import logging
+import threading
 try:
     import colorlog
 except ImportError:
     pass
+from functools import partial, partialmethod
 
 LEVELS = {'NOTSET': logging.NOTSET,
+          'TRACE': logging.DEBUG - 5,
           'DEBUG': logging.DEBUG,
           'INFO' : logging.INFO,
           'WARNING' : logging.WARNING,
           'ERROR': logging.ERROR,
           'CRITICAL': logging.CRITICAL}
 
-COLORS = {'DEBUG': 'light_black',
+COLORS = {'NOTSET': 'light_purple',
+          'TRACE': 'light_blue',
+          'DEBUG' : 'light_black',
           'INFO' : 'light_green',
           'WARNING' : 'light_yellow',
           'ERROR': 'light_red',
@@ -47,13 +52,15 @@ COLORS = {'DEBUG': 'light_black',
 
 stdout = False
 level = logging.INFO
+lock = threading.Lock()
 
 _logger_list = {}
 
 def log(*args, _half_indent_log :bool=False, **kwargs):
     ''' Print with 1 tab + 1 whitespace indentation '''
     args = [arg.replace('\n', '\n\t ') if isinstance(arg, str) else arg for arg in args]
-    print('\t' if not _half_indent_log else 3*' ', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
+    with lock:
+        print('\t' if not _half_indent_log else 3*' ', *args, file=sys.stdout if stdout else sys.stderr, **kwargs)
 
 class StreamHandler(logging.StreamHandler):
     def __init__(self):
@@ -95,3 +102,21 @@ def logLevelName():
 
 def logLevel():
     return level
+
+def addLogLevel(value, name):
+    """
+    Extend logging levels of Python's built-in logging facility with custom `name`.
+
+    This `name` will be added with lower case as an attribute of the `logging` module using the given trace `value`.
+    This method will raise an `AttributeError` if the given level name already exists in the logging module.
+
+    """
+    attribute = name.lower()
+
+    if hasattr(logging.getLoggerClass(), attribute) or hasattr(logging, attribute):
+        raise AttributeError(f"The level name '{attribute}' is already defined in logger facility!")
+    else:
+        setattr(logging.getLoggerClass(), attribute, partialmethod(logging.getLoggerClass().log, value))
+        setattr(logging, attribute, partial(logging.log, value))
+        setattr(logging, name, value)
+        logging.addLevelName(value, name)

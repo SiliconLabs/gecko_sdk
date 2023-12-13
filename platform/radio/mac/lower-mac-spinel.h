@@ -18,7 +18,6 @@
 #ifndef LOWER_MAC_SPINEL_H
 #define LOWER_MAC_SPINEL_H
 #include "stack/include/ember.h"
-#include "lower-mac-spinel-config.h"
 
 sl_status_t sl_mac_spinel_add_src_match_short_entry(uint16_t short_address);
 sl_status_t sl_mac_spinel_add_src_match_ext_entry(uint8_t *ext_address);

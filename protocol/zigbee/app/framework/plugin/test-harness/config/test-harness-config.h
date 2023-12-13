@@ -48,6 +48,11 @@
 // <i> For testing purposes only, when set to 1, the ota client will delay for a period of time (seconds) before starting downloading new image.
 #define EMBER_TEST_BLOCK_PERIOD_IN_SECONDS   0
 
+// <q EMBER_PROMISCUOUS_MODE_SUPPORT> Test configuration Enable promiscuous mode during joining.
+// <i> Default: FALSE
+// <i> indicates whether the test harness supports promiscuous mode during touchlinking, where the node is not currently joined to a network, but we may wish to detect device announcements and similar messages. Experimental only.
+#define EMBER_PROMISCUOUS_MODE_SUPPORT   0
+
 // </h>
 
 // <<< end of configuration section >>>

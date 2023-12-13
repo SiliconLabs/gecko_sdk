@@ -264,10 +264,6 @@ static void cpc_flush(void *data)
     return;
   }
 
-  if (sl_cpc_get_endpoint_state(&sl_iostream_cpc_endpoint_handle) != SL_CPC_STATE_OPEN) {
-    return;
-  }
-
   // Atomic copy.
   CORE_ENTER_ATOMIC();
   idx = tx_buf.idx;
@@ -281,14 +277,22 @@ static void cpc_flush(void *data)
 
   // Flush as many bytes as possible from the transmit buffer.
   ret = sl_cpc_write(&sl_iostream_cpc_endpoint_handle, tx_buf.buf + idx, cnt, 0, (void *)(uintptr_t)cnt);
-  if (ret != SL_STATUS_OK) {
+  if (ret == SL_STATUS_OK) {
+    sl_atomic_store(write_completed, false);
+  } else if (ret == SL_STATUS_INVALID_STATE) {
+    // Endpoint was disconnected since cpc_flush was dispatched, abort write.
+    CORE_ENTER_ATOMIC();
+    tx_buf.idx = ((size_t)tx_buf.idx + (size_t)cnt) % (size_t)SL_IOSTREAM_CPC_TX_BUFFER_SIZE;
+    cnt = tx_buf.cnt - cnt;
+    tx_buf.cnt = cnt;
+    write_completed = true;
+    CORE_EXIT_ATOMIC();
+  } else {
+    // Unspecifed CPC write error
+    // start a retry timeout to get another chance of transmitting the payload
     ret = sl_sleeptimer_start_timer_ms(&write_retry_timer, SL_IOSTREAM_CPC_TX_RETRY_TIMEOUT, cpc_on_write_retry, NULL, 0, 0);
     EFM_ASSERT(ret == SL_STATUS_OK);
   }
-
-  sl_atomic_store(write_completed, false);
-
-  return;
 }
 
 /***************************************************************************//**
@@ -350,6 +354,11 @@ static sl_status_t cpc_write(void *context,
   // Check if buffer_length is valid.
   if (buffer_length > (size_t)SL_IOSTREAM_CPC_TX_BUFFER_SIZE - cnt) {
     return SL_STATUS_MESSAGE_TOO_LONG;
+  }
+
+  // No remote connected, discard the data
+  if (sl_cpc_get_endpoint_state(&sl_iostream_cpc_endpoint_handle) != SL_CPC_STATE_CONNECTED) {
+    return SL_STATUS_INVALID_STATE;
   }
 
   // Add buffer's data to the transmit buffer.

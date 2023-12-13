@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_ircal import calc_ircal_viper
+from pyradioconfig.parts.bobcat.calculators.calc_ircal import Calc_IrCal_Bobcat
 
 
-class CalcIrcalRainier(calc_ircal_viper):
+class CalcIrcalRainier(Calc_IrCal_Bobcat):
     pass

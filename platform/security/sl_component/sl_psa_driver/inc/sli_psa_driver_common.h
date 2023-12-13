@@ -37,10 +37,6 @@
 
 #include <stddef.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // -----------------------------------------------------------------------------
 // Static inline functions
 
@@ -166,17 +162,16 @@ static inline uint8_t sli_psa_safer_memcmp(const uint8_t *a,
  *   in order to make it harder for the compiler to optimize out some of the
  *   "time-constantness".
  *
- * @param padding_bytes
- *   The expected padding bytes (likely derived from padded_block[15]).
+ * @param[out] padding_bytes
+ *   The amount of padding bytes that the data contains.
+
  *
  * @return
  *   PSA_SUCCESS if the padding is valid, PSA_ERROR_INVALID_PADDING otherwise.
  ******************************************************************************/
 psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
                                             size_t padded_data_length,
-                                            uint8_t padding_bytes);
-
-#if defined(SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION)
+                                            size_t *padding_bytes);
 
 /**
  * \brief Initialize Galois field (2^128) multiplication table
@@ -219,18 +214,16 @@ void sli_psa_software_ghash_multiply(const uint64_t HL[16],
                                      uint8_t output[16],
                                      const uint8_t input[16]);
 
-#endif // SLI_PSA_DRIVER_FEATURE_GCM_IV_CALCULATION
+#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) \
+  && !defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
 
 // Declare the TRNG function prototype if it's not already declared by PSA
-#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && !defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
-psa_status_t mbedtls_psa_external_get_random(
-  void *context,
-  uint8_t *output, size_t output_size, size_t *output_length);
-#endif
+psa_status_t mbedtls_psa_external_get_random(void *context,
+                                             uint8_t *output,
+                                             size_t output_size,
+                                             size_t *output_length);
 
-#ifdef __cplusplus
-}
-#endif
+#endif // MBEDTLS_ENTROPY_HARDWARE_ALT && MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
 
 /// @endcond
 

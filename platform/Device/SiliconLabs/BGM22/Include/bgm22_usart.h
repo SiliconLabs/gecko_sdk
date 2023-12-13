@@ -1428,4 +1428,4 @@ typedef struct {
 /** @} End of group BGM22_USART */
 /** @} End of group Parts */
 
-#endif /* BGM22_USART_H */
+#endif // BGM22_USART_H

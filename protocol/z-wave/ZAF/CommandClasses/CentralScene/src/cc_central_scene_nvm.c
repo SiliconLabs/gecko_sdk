@@ -37,8 +37,8 @@ cc_central_scene_migrate(void)
   #ifdef ZW_MIGRATION_TO_7_19
 
   zpal_status_t status;
-  central_scene_configuration_t application_data;
-  central_scene_configuration_t central_scene_data;
+  central_scene_configuration_t application_data = { 0 };
+  central_scene_configuration_t central_scene_data = { 0 };
   // On initial implementation of CentralScene Command Class
   // This information belonged to the application
   // From SDK 7.19.0 this information was moved to the command class

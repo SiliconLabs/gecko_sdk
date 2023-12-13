@@ -108,8 +108,9 @@ uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_
   sl_status_t status;
 
   sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_key_t plaintext_key;
-  sl_zb_sec_man_aps_key_metadata_t key_data;
+  sl_zb_sec_man_init_context(&context);
+  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
+  context.flags |= ZB_SEC_MAN_FLAG_KEY_INDEX_IS_VALID;
 
   if (!linkKey) {
     return EMBER_INVALID_CALL;
@@ -140,15 +141,13 @@ uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_
         return i;
       }
     } else {
-      status = sl_zb_sec_man_export_link_key_by_index(i,
-                                                      &context,
-                                                      &plaintext_key,
-                                                      &key_data);
+      context.key_index = i;
+      status = sl_zb_sec_man_check_key_context(&context);
 
       if ((0 == MEMCOMPARE(&tok[KEY_ENTRY_IEEE_OFFSET],
                            address,
                            EUI64_SIZE))
-          && ((status == SL_STATUS_OK) && !sli_zigbee_is_null_key((EmberKeyData *)plaintext_key.key))
+          && ((status == SL_STATUS_OK))
           && ((tokenBitmask & KEY_TABLE_TYPE_MASK) == KEY_TABLE_TYPE_LINK_KEY)
           && ((bitmask == 0xFF) || (bitmask == 0 && !(tokenBitmask & KEY_TABLE_SYMMETRIC_PASSPHRASE)) || (bitmask != 0 && (bitmask & tokenBitmask) == bitmask))  // match bitmask only if bitmask is valid
           && sli_zigbee_get_key_entry_network_index(tokenBitmask) == sli_zigbee_get_current_network_index()) { // search only for those keys with the correct nwk index
@@ -157,82 +156,6 @@ uint8_t sli_zigbee_find_key_table_entry(EmberEUI64 address, bool linkKey, uint8_
     }
   }
   return 0xFF;
-}
-
-EmberStatus emberGetKeyTableEntry(uint8_t index, EmberKeyStruct *result)
-{
-  sl_status_t status;
-
-  sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_key_t plaintext_key;
-  sl_zb_sec_man_aps_key_metadata_t key_data;
-
-  context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_APP_LINK;
-
-  status = sl_zb_sec_man_export_link_key_by_index(index,
-                                                  &context,
-                                                  &plaintext_key,
-                                                  &key_data);
-
-  if (status != SL_STATUS_OK) {
-    return EMBER_NOT_FOUND;
-  }
-
-  //returned key struct always contains the actual key,
-  //even if this key is stored in PSA
-  key_data.bitmask &= ~(EMBER_KEY_HAS_PSA_ID);
-  key_data.bitmask |= EMBER_KEY_HAS_KEY_DATA;
-
-  MEMMOVE(result->partnerEUI64, context.eui64, EUI64_SIZE);
-  result->incomingFrameCounter = key_data.incoming_frame_counter;
-  result->outgoingFrameCounter = key_data.outgoing_frame_counter;
-  result->bitmask = key_data.bitmask;
-  MEMMOVE(result->key.contents, plaintext_key.key, EMBER_ENCRYPTION_KEY_SIZE);
-
-  return EMBER_SUCCESS;
-}
-
-EmberStatus emberAddOrUpdateKeyTableEntry(EmberEUI64 address,
-                                          bool linkKey,
-                                          EmberKeyData* keyData)
-{
-  if (!linkKey) {
-    return EMBER_INVALID_CALL;
-  }
-
-  if (!KEY_TABLE_TYPE_LINK_KEY) {
-    return EMBER_INVALID_CALL;
-  }
-
-  sl_status_t status;
-
-  sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_key_t plaintext_key;
-  sl_zb_sec_man_aps_key_metadata_t key_metadata;
-  EmberEUI64 emptyEui;
-  MEMSET(emptyEui, 0, sizeof(EmberEUI64));
-
-  // Try to find the exact EUI first, so to update it
-  status = sl_zb_sec_man_export_link_key_by_eui(address,
-                                                &context,
-                                                &plaintext_key,
-                                                &key_metadata);
-  // If we didn't find it, find a free entry
-  if (status != SL_STATUS_OK) {
-    status = sl_zb_sec_man_export_link_key_by_eui(emptyEui,
-                                                  &context,
-                                                  &plaintext_key,
-                                                  &key_metadata);
-  }
-
-  if (status == SL_STATUS_OK) {
-    status = sl_zb_sec_man_import_link_key(context.key_index,
-                                           address,
-                                           (sl_zb_sec_man_key_t*)keyData);
-    return ((status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_KEY_TABLE_INVALID_ADDRESS);
-  }
-
-  return EMBER_TABLE_FULL;
 }
 
 // This function searches through the Key table to find an entry
@@ -260,17 +183,6 @@ uint8_t emberFindKeyTableEntry(EmberEUI64 address, bool linkKey)
     return 0xFF;
   }
   return context.key_index;
-}
-
-EmberStatus emberSetKeyTableEntry(uint8_t index,
-                                  EmberEUI64 address,
-                                  bool linkKey,
-                                  EmberKeyData* keyData)
-{
-  sl_status_t status;
-  status = sl_zb_sec_man_import_link_key(index, address, (sl_zb_sec_man_key_t*)keyData->contents);
-
-  return (status == SL_STATUS_OK) ? EMBER_SUCCESS : EMBER_KEY_TABLE_INVALID_ADDRESS;
 }
 
 EmberStatus emberEraseKeyTableEntry(uint8_t index)

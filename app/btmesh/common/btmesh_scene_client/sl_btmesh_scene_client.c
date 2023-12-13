@@ -60,8 +60,8 @@
 
 /// High Priority
 #define HIGH_PRIORITY                       0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA                    (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA                    NULL
 /// Immediate transition time is 0 seconds
 #define IMMEDIATE                           0
 /// Parameter ignored for publishing
@@ -179,6 +179,7 @@ void sl_btmesh_handle_scene_client_on_event(sl_btmesh_msg_t *evt)
 {
   sl_status_t sc;
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_initialized_id:
       sc = sl_btmesh_scene_client_init(BTMESH_SCENE_CLIENT_MAIN);
       app_assert_status_f(sc, "Failed to init scene client model");

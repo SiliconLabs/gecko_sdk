@@ -1,0 +1,22 @@
+!!omap
+- id: xg22_rb4402a
+- label: XG22-RB4402A
+- package: platform
+- description: Kit BSP support for the EFR32xG22 2.4GHz 6 dBm QFN40 Rev.D Radio board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_xg22-rb4402a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"XG22-RB4402A"'
+  - name: SL_KIT_REV
+    value: '"A00"'
+- tag:
+  - kit:opn:xG22-RB4402A
+  - kit:pn:RB4402
+  - kit:variant:A
+  - kit:revision:A00

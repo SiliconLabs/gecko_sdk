@@ -28,7 +28,7 @@ requires:
     condition: [device_security_rot, psa_crypto_ecc_curve25519]
 template_contribution:
   - name: psa_crypto_config
-    value: PSA_WANT_ALG_ECDH
+    value: PSA_WANT_ALG_ECDH 1
   - name: psa_crypto_builtin_config
     value: "MBEDTLS_PSA_BUILTIN_ALG_ECDH 1"
     condition: [mbedtls_ecdh]

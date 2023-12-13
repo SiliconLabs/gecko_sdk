@@ -301,4 +301,4 @@ typedef struct {
 /** @} End of group EFR32BG22_LFRCO */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_LFRCO_H */
+#endif // EFR32BG22_LFRCO_H

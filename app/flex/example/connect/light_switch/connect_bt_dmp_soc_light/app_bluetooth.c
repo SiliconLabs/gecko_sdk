@@ -260,7 +260,8 @@ sl_bt_on_event(sl_bt_msg_t *evt)
       // read request of the light state
       if (gattdb_light_state_connect
           == evt->data.evt_gatt_server_user_read_request.characteristic) {
-        demo_light_t light_state = sl_get_light_state();
+        uint8_t light_state = (uint8_t)sl_get_light_state();
+
         // Send response to read request
         bt_status = sl_bt_gatt_server_send_user_read_response(
           evt->data.evt_gatt_server_user_read_request.connection,
@@ -301,12 +302,12 @@ sl_bt_on_event(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_gatt_server_characteristic_status_id:
-      if (gatt_server_confirmation
+      if (sl_bt_gatt_server_confirmation
           == evt->data.evt_gatt_server_characteristic_status.status_flags) {
         sl_remove_last_indication(
           evt->data.evt_gatt_server_characteristic_status.characteristic);
         indication_is_under_way = false;
-      } else if (gatt_server_client_config
+      } else if (sl_bt_gatt_server_client_config
                  == evt->data.evt_gatt_server_characteristic_status.status_flags) {
         sl_update_indication_enabled(
           evt->data.evt_gatt_server_characteristic_status.characteristic,

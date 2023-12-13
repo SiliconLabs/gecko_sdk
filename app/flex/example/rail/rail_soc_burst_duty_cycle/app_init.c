@@ -39,15 +39,12 @@
 #include "sl_rail_util_init.h"
 #include "app_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
 #include "sl_component_catalog.h"
 #include "sl_flex_rail_channel_selector.h"
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-#include "app_log.h"
-#endif
 #include "sl_duty_cycle_config.h"
 #include "sl_duty_cycle_utility.h"
 #include "sl_power_manager.h"
+#include "simple_rail_assistance.h"
 
 #if DUTY_CYCLE_USE_LCD_BUTTON == 1
   #include "app_graphics.h"
@@ -89,11 +86,7 @@ RAIL_RxDutyCycleConfig_t duty_cycle_config = {
  *****************************************************************************/
 SL_WEAK void print_sample_app_name(const char* app_name)
 {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
   app_log_info("%s\n", app_name);
-#else
-  (void) app_name;
-#endif
 }
 
 /******************************************************************************
@@ -113,24 +106,19 @@ RAIL_Handle_t app_init(void)
   bit_rate = RAIL_GetBitRate(rail_handle);
 
   // Turn OFF LEDs
-  sl_led_turn_off(&sl_led_led0);
-  sl_led_turn_off(&sl_led_led1);
+  clear_receive_led();
+  clear_send_led();
 
 #if DUTY_CYCLE_USE_LCD_BUTTON == 1
   // LCD start
   graphics_init();
 #endif
 
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-  // CLI info message
   print_sample_app_name("Burst Duty Cycle");
   app_log_info("Bitrate is %lu b/s with %lu us off time and %lu us on time\n",
                bit_rate,
                duty_cycle_config.delay,
                duty_cycle_config.parameter);
-#else
-  (void) bit_rate;
-#endif
 
   // Allow state machine to run without interrupt
   set_first_run(true);

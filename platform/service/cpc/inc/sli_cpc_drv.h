@@ -40,9 +40,9 @@
 #define SLI_CPC_RX_FRAME_MAX_LENGTH ((uint16_t)(SLI_CPC_RX_DATA_MAX_LENGTH + SLI_CPC_HDLC_HEADER_RAW_SIZE))
 
 typedef struct {
-  bool use_raw_rx_buffer;
-  bool preprocess_hdlc_header;
-  bool uart_flowcontrol;
+  bool use_raw_rx_buffer;                 ///< Does the driver use raw RX buffers
+  bool preprocess_hdlc_header;            ///< Is the HDLC header validated by driver
+  bool uart_flowcontrol;                  ///< Is UART flow control enabled
 } sli_cpc_drv_capabilities_t;
 
 #ifdef __cplusplus
@@ -54,19 +54,39 @@ extern "C"
 // Core to driver commands
 
 /***************************************************************************//**
- * Initializes CPC driver.
+ * Initialize only the hardware peripheral to be used in a standalone manner
+ * (during the bootloader poking)
+ ******************************************************************************/
+sl_status_t sli_cpc_drv_hw_init(void);
+
+/***************************************************************************//**
+ * Initialize the rest of the driver after the hardware peripheral has been
+ * initialized in sli_cpc_drv_hw_init.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sli_cpc_drv_init(void);
+
+/***************************************************************************//**
+ * Start recveiving packets
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+sl_status_t sli_cpc_drv_start_rx(void);
+
+/***************************************************************************//**
+ * De-Initializes CPC driver for the firmware upgrade to take over control.
+ ******************************************************************************/
+void sli_cpc_drv_deinit_for_firmware_upgrade(void);
 
 /***************************************************************************//**
  * Gets CPC driver capabilities.
  *
  * @param capabilities Pointer to structure that will receive the driver
  *                     capabilities.
+ *  @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
-void sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilities);
+sl_status_t sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilities);
 
 /***************************************************************************//**
  * Reads data from driver.
@@ -76,9 +96,9 @@ void sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilities);
  * @param payload_rx_len Pointer to variable that will receive the received
  *                       payload length, in bytes.
  *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle, uint16_t *payload_rx_len);
+sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle);
 
 /***************************************************************************//**
  * Checks if driver is ready to transmit.
@@ -92,26 +112,9 @@ bool sli_cpc_drv_is_transmit_ready(void);
  *
  * @param buffer_handle Pointer to the buffer handle.
  *
- * @param payload_tx_len Payload length to transmit, in bytes.
- *
- * @return 0 if successful. Error code otherwise.
+ * @return SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_transmit_data(sl_cpc_buffer_handle_t *buffer_handle, uint16_t payload_tx_len);
-
-// -----------------------------------------------------------------------------
-// Driver to core notifications
-
-/***************************************************************************//**
- * Notifies core of tx completion.
- *
- * @param buffer_handle Pointer to the buffer handle that was transmitted.
- ******************************************************************************/
-void sli_cpc_drv_notify_tx_complete(sl_cpc_buffer_handle_t *buffer_handle);
-
-/***************************************************************************//**
- * Notifies core of rx completion.
- ******************************************************************************/
-void sli_cpc_drv_notify_rx_data(void);
+sl_status_t sli_cpc_drv_transmit_data(sl_cpc_buffer_handle_t *buffer_handle);
 
 /***************************************************************************//**
  * Get currently configured bus bitrate
@@ -119,9 +122,24 @@ void sli_cpc_drv_notify_rx_data(void);
 uint32_t sli_cpc_drv_get_bus_bitrate(void);
 
 /***************************************************************************//**
+ * Set bus bitrate
+ ******************************************************************************/
+void sli_cpc_drv_set_bus_bitrate(uint32_t bus_bitrate);
+
+/***************************************************************************//**
  * Get maximum bus bitrate
  ******************************************************************************/
 uint32_t sli_cpc_drv_get_bus_max_bitrate(void);
+
+/***************************************************************************//**
+ * Notification on freed RX buffer_handle
+ ******************************************************************************/
+SL_WEAK void sli_cpc_drv_on_rx_buffer_handle_free(void);
+
+/***************************************************************************//**
+ * Notification on freed RX buffer
+ ******************************************************************************/
+SL_WEAK void sli_cpc_drv_on_rx_buffer_free(void);
 
 /** @} (end addtogroup cpc) */
 

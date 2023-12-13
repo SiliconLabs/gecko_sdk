@@ -10,6 +10,8 @@ class CALC_Modulator_Ocelot(CALC_Modulator):
 
         #Add variable for LOW ramp level
         self._addModelVariable(model, 'am_low_ramplev', int, ModelVariableFormat.DECIMAL)
+        self._addModelVariable(model, 'tx_grp_delay_us', float, ModelVariableFormat.DECIMAL,
+                               desc='TX group delay in us')
 
         super().buildVariables(model)
 
@@ -213,11 +215,15 @@ class CALC_Modulator_Ocelot(CALC_Modulator):
     def calc_symbol_encoding(self, model):
 
         encoding = model.vars.symbol_encoding.value
+        demod_select = model.vars.demod_select.value
 
         if encoding == model.vars.symbol_encoding.var_enum.DSSS:
             coding = 2
-        elif encoding == model.vars.symbol_encoding.var_enum.Manchester or \
-                encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester:
+        elif (encoding == model.vars.symbol_encoding.var_enum.Manchester or
+                encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester) and\
+                demod_select != model.vars.demod_select.var_enum.TRECS_VITERBI:
+            # Decoder not implemented with Viterbi demod
+            # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2046
             coding = 1
         else:
             coding = 0
@@ -292,3 +298,19 @@ class CALC_Modulator_Ocelot(CALC_Modulator):
 
         self._reg_write(model.vars.MODEM_TXBR_TXBRNUM, int(round(num)))
         self._reg_write(model.vars.MODEM_TXBR_TXBRDEN, int(den))
+
+    def calc_tx_delay(self, model):
+        """ calculate tx delay in ns """
+        # : Get Model Variables
+        shaping = model.vars.MODEM_CTRL0_SHAPING.value
+        shaping_filter_taps = model.vars.shaping_filter_taps.value
+        tx_baud_rate_actual = model.vars.tx_baud_rate_actual.value
+
+        # : FIR filter is operating at 8x baud rate
+        if shaping == 1: # : odd symmetric
+            shaping_filter_delay = (shaping_filter_taps + 1) / 2
+        else: # : assume even
+            shaping_filter_delay = shaping_filter_taps/2
+        tx_grp_delay_us = shaping_filter_delay / (8 * tx_baud_rate_actual) * 1e6
+
+        model.vars.tx_grp_delay_us.value = tx_grp_delay_us

@@ -68,8 +68,8 @@
 
 #if !defined(EZSP_HOST)
 extern uint8_t sli_zigbee_router_neighbor_table_size;
+extern uint8_t sl_mac_lower_mac_get_radio_channel(uint8_t mac_index);
   #if defined(EMBER_TEST) || defined(EMBER_STACK_TEST_HARNESS)
-extern uint8_t sli_zigbee_router_neighbor_table_size;
     #define STACK_TEST_HARNESS
   #endif
 #endif
@@ -230,21 +230,31 @@ static void resetTimeouts(void)
 #endif // SL_CATALOG_ZIGBEE_KEY_ESTABLISHMENT_PRESENT
 }
 
-#if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_PRESENT)
+#if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) \
+  && defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT)
+
 static bool unicastKeyUpdate = false;
 
 extern EmberStatus emberAfTrustCenterStartUnicastNetworkKeyUpdate(void);
 extern EmberStatus emberAfTrustCenterStartBroadcastNetworkKeyUpdate(void);
-
+// This function is renamed in the broadcast and unicast plugins, but is still
+// called directly by the periodic key update plugin, and in one or two other
+// places, so we route it through here to use the appropriate method.
 EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void)
 {
-  testHarnessPrintln("Using %p key update method",
-                     (unicastKeyUpdate
-                      ? "unicast"
-                      : "broadcast"));
-  return (unicastKeyUpdate
-          ? emberAfTrustCenterStartUnicastNetworkKeyUpdate()
-          : emberAfTrustCenterStartBroadcastNetworkKeyUpdate());
+  EmberStatus status;
+  sl_zigbee_app_debug_println("Using %s key update method",
+                              (unicastKeyUpdate
+                               ? "unicast"
+                               : "broadcast"));
+  status = unicastKeyUpdate ? emberAfTrustCenterStartUnicastNetworkKeyUpdate()
+           : emberAfTrustCenterStartBroadcastNetworkKeyUpdate();
+
+  sl_zigbee_app_debug_println("%s: %s: 0x%X",
+                              TEST_HARNESS_PRINT_NAME,
+                              "Network Key Update",
+                              status);
+  return status;
 }
 #endif
 
@@ -254,8 +264,6 @@ EmberStatus emberAfTrustCenterStartNetworkKeyUpdate(void)
 #if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_PRESENT)
 extern sl_zigbee_event_t emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent;
 #endif // SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_PRESENT
-
-void emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(sl_zigbee_event_t * event);
 
 #if defined(STACK_TEST_HARNESS)
 void sli_zigbee_test_harness_beacon_suppress_set(bool enable);
@@ -792,29 +800,57 @@ void emberAfPluginTestHarnessOtaImageMangleCommand(sl_cli_command_arg_t *argumen
 #endif
 }
 
-#if defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_PRESENT)
+#if defined (SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST_PRESENT) \
+  && defined(SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_UNICAST_PRESENT)
 void emberAfPluginTestHarnessKeyUpdateCommand(sl_cli_command_arg_t *arguments)
 {
   uint8_t position = sl_cli_get_command_count(arguments) - 1;
   uint8_t commandChar0 = sl_cli_get_command_string(arguments, position)[0];
-
   if (commandChar0 == 'u') {
     unicastKeyUpdate = true;
+    sl_zigbee_app_debug_println("Key update set to unicast");
   } else if (commandChar0 == 'b') {
     unicastKeyUpdate = false;
+    sl_zigbee_app_debug_println("Key update set to broadcast");
   } else if (commandChar0 == 'n') {
-    emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEventHandler(&emberAfPluginTrustCenterNwkKeyUpdatePeriodicMyEvent);
+    EmberStatus status = emberAfTrustCenterStartNetworkKeyUpdate();
+    sl_zigbee_app_debug_println("Starting NWK Key update, status: 0x%02X", status);
   }
 }
-
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+extern void sli_zigbee_set_trust_center_aps_encryption(EmberTcApsEncryptMode option);
+void sl_zigbee_af_test_harness_key_update_security_command(sl_cli_command_arg_t *arguments)
+{
+#ifndef EZSP_HOST
+  uint8_t position = sl_cli_get_command_count(arguments) - 1;
+  uint8_t commandChar1 = sl_cli_get_command_string(arguments, position)[1];
+  if (commandChar1 == 'n') {
+    sli_zigbee_set_trust_center_aps_encryption(TC_APS_ENCRYPT_ENABLE);
+    sl_zigbee_app_debug_println("Key update security set to enable");
+  } else if (commandChar1 == 'f') {
+    sli_zigbee_set_trust_center_aps_encryption(TC_APS_ENCRYPT_DISABLE);
+    sl_zigbee_app_debug_println("Key update security set to disable");
+  } else if (commandChar1 == 'd') {
+    sli_zigbee_set_trust_center_aps_encryption(TC_APS_ENCRYPT_DEFAULT);
+    sl_zigbee_app_debug_println("Key update security set to default");
+  }
+#else
+  testHarnessPrintln("Not supported on host.");
+#endif
+}
+#endif
 #else
 
 void emberAfPluginTestHarnessKeyUpdateCommand(sl_cli_command_arg_t *arguments)
 {
-  testHarnessPrintln("NWK Key Update Plugin not enabled.");
+  sl_zigbee_app_debug_println("NWK Key Update Plugin not enabled.");
+}
+void sl_zigbee_af_test_harness_key_update_security_command(sl_cli_command_arg_t *arguments)
+{
+  sl_zigbee_app_debug_println("NWK Key Update Plugin not enabled.");
 }
 
-#endif // SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_PERIODIC_PRESENT
+#endif // SL_CATALOG_ZIGBEE_TRUST_CENTER_NWK_KEY_UPDATE_BROADCAST/UNICAST
 
 void emberAfPluginTestHarnessConcentratorStartStopCommand(sl_cli_command_arg_t *arguments)
 {
@@ -996,16 +1032,30 @@ void emberAfPluginTestHarnessRadioOnOffCommand(sl_cli_command_arg_t *arguments)
   } else {
     status = emberStopScan();
   }
-  emberAfCorePrintln("Radio %s status: 0x%X",
-                     (radioOff ? "OFF" : "ON"),
-                     status);
+  sl_zigbee_app_debug_println("Radio %s status: 0x%X",
+                              (radioOff ? "OFF" : "ON"),
+                              status);
 }
 
 void emberAfPluginTestHarnessSetRadioPower(sl_cli_command_arg_t *arguments)
 {
   int8_t val = (int8_t)sl_cli_get_argument_int8(arguments, 0);
   emberSetRadioPower(val);
-  emberAfCorePrintln("radio power %d", val);
+  sl_zigbee_app_debug_println("radio power %d", val);
+}
+
+void emberAfPluginTestHarnessGetRadioChannel(sl_cli_command_arg_t *arguments)
+{
+#ifndef EZSP_HOST
+
+  uint8_t logicalChannel = emberGetRadioChannel();
+  uint8_t radioChannel = sl_mac_lower_mac_get_radio_channel(PHY_INDEX_NATIVE);
+  emberAfAppPrintln("%p %d %p %d", "Logical channel:", logicalChannel, "Radio channel:", radioChannel);
+#else
+
+  testHarnessPrintln("Not supported on host.");
+
+#endif
 }
 
 void emberAfPluginTestHarnessAddChildCommand(sl_cli_command_arg_t *arguments)
@@ -1020,7 +1070,7 @@ void emberAfPluginTestHarnessAddChildCommand(sl_cli_command_arg_t *arguments)
   nodeType = sl_cli_get_argument_uint16(arguments, 2);
 
   status = emberAddChild(shortId, longId, nodeType);
-  emberAfCorePrintln("status 0x%x", status);
+  sl_zigbee_app_debug_println("status 0x%x", status);
 #endif
 }
 
@@ -1034,11 +1084,11 @@ void emberAfPluginTestHarnessSetNodeDescriptorComplianceRevision(SL_CLI_COMMAND_
   EzspStatus status;
   status = ezspSetValue(EZSP_VALUE_ENABLE_R21_BEHAVIOR, 1, &val);
   if (status == EZSP_SUCCESS) {
-    emberAfCorePrintln("The compliance revision of the device has been changed to R%d (0x%X)", val, status);
+    sl_zigbee_app_debug_println("The compliance revision of the device has been changed to R%d (0x%X)", val, status);
   }
 #elif defined(EMBER_TEST)
   sli_zigbee_set_stack_compliance_revision(val);
-  emberAfCorePrintln("The compliance revision of the device has been changed to R%d", val);
+  sl_zigbee_app_debug_println("The compliance revision of the device has been changed to R%d", val);
 #else
   (void)val;
 #endif
@@ -1050,7 +1100,7 @@ void emberAfPluginTestHarnessSetMaxChildren(SL_CLI_COMMAND_ARG)
 
   sl_zigbee_set_max_end_device_children(maxChildren);
 
-  emberAfCorePrintln("Set maximum children to %d", maxChildren);
+  sl_zigbee_app_debug_println("Set maximum children to %d", maxChildren);
 }
 
 void emberAfPluginTestHarnessSetNeighborTableSize(SL_CLI_COMMAND_ARG)
@@ -1070,6 +1120,50 @@ void emberAfPluginTestHarnessSetNeighborTableSize(SL_CLI_COMMAND_ARG)
 #else
   sli_zigbee_router_neighbor_table_size = neighborTableSize;
 #endif
-  emberAfCorePrintln("Set neighbor table size to %d", neighborTableSize);
+  sl_zigbee_app_debug_println("Set neighbor table size to %d", neighborTableSize);
 }
 #endif
+
+//------------------------------------------------------------------------------
+// Zcl response suppression commands
+
+void sl_zigbee_suppress_cluster(sl_cli_command_arg_t *arguments)
+{
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  uint16_t clusterId = (uint16_t)sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t serverClient = (uint8_t)sl_cli_get_argument_uint8(arguments, 1);
+
+  char *action = emberAfGetSuppressCluster(clusterId, serverClient) ? "unsuppress" : "suppress";
+  EmberAfStatus status = emberAfSetSuppressCluster(clusterId, serverClient);
+  sl_zigbee_core_debug_println("%p clstr %d side %d: 0x%02X",
+                               action,
+                               clusterId,
+                               serverClient,
+                               status);
+#endif
+}
+
+void sl_zigbee_suppress_command(sl_cli_command_arg_t *arguments)
+{
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  uint16_t clusterId = (uint16_t)sl_cli_get_argument_uint16(arguments, 0);
+  uint8_t serverClient = (uint8_t)sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t commandId = (uint8_t)sl_cli_get_argument_uint8(arguments, 2);
+
+  char *action = emberAfGetSuppressCommand(clusterId, serverClient, commandId) ? "unsuppress" : "suppress";
+  EmberAfStatus status = emberAfSetSuppressCommand(clusterId, serverClient, commandId);
+  sl_zigbee_core_debug_println("%p clstr %d side %d cmd %d: 0x%02X",
+                               action,
+                               clusterId,
+                               serverClient,
+                               commandId,
+                               status);
+#endif
+}
+
+void sl_zigbee_print_suppression_table(sl_cli_command_arg_t *arguments)
+{
+#ifdef SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
+  emberAfPrintSuppressionTable();
+#endif
+}

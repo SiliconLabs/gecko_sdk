@@ -928,4 +928,4 @@ typedef struct {
 /** @} End of group BGM21_DEVINFO */
 /** @} End of group Parts */
 
-#endif /* BGM21_DEVINFO_H */
+#endif // BGM21_DEVINFO_H

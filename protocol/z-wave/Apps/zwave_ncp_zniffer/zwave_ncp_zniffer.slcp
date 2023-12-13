@@ -1,0 +1,143 @@
+project_name: zwave_ncp_zniffer
+label: Z-Wave - NCP Zniffer Beta
+category: Z-Wave|Apps
+description: The Z-Wave Zniffer Application
+package: Z-Wave
+quality: production
+component:
+  # Z-Wave
+  - id: zaf_ncp
+  - id: zw_core
+  - id: zw_appshw_zniffer
+  - id: zw_apputilities
+  - id: zw_role_type_always_on
+  - id: zw_api_zw
+  - id: zw_dcdc_override
+  - id: zw_zpal_zniffer_app
+  - id: zw_zniffer_dependency
+  # Platform
+  - id: emlib_letimer
+  - id: emlib_timer
+  - id: emlib_msc
+  - id: gpiointerrupt
+  - id: sl_system
+  - id: device_init
+  - id: mpu # disable execution from RAM
+requires:
+  - name: iostream_swo
+    condition: [zw_debug]
+source:
+  - path: Zniffer.c
+  - path: main.c
+  - path: app.c
+  - path: comm_interface.c
+  - path: zniffer_handler.c
+include:
+  - path: .
+    file_list:
+      - path: app.h
+      - path: comm_interface.h
+      - path: zniffer_handler.h
+      - path: commands.h
+  - path: "../../ZAF/configuration/inc/"
+    file_list:
+      - path: "zaf_config_security.h"
+configuration:
+  - name: ZAF_CONFIG_REQUEST_KEY_S0
+    value: 1
+  - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
+    value: 1
+  - name: ZAF_CONFIG_REQUEST_KEY_S2_AUTHENTICATED
+    value: 1
+  - name: ZAF_CONFIG_GENERIC_TYPE
+    value: GENERIC_TYPE_SWITCH_BINARY
+  - name: ZAF_CONFIG_SPECIFIC_TYPE
+    value: SPECIFIC_TYPE_NOT_USED
+  - name: ZAF_CONFIG_PRODUCT_ID
+    value: 2 # Silicon Labs Z-Wave Switch On/Off product ID
+  - name: ZAF_CONFIG_USER_ICON_TYPE
+    value: ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
+  - name: ZAF_CONFIG_INSTALLER_ICON_TYPE
+    value: ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
+  - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
+    value: 1900
+  - name: NVM3_DEFAULT_CACHE_SIZE
+    value: 100
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_DEVICE_INIT_EMU_EM4_STATE
+    value: emuEM4Hibernate
+  - name: SL_DEVICE_INIT_EMU_EM4_RETAIN_LFRCO
+    value: 1
+  - name: SL_DEVICE_INIT_EMU_EM4_PIN_RETENTION_MODE
+    value: emuPinRetentionLatch
+  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # UART RX shouldn't prevent EM2
+  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+    value: 1
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0    # UART RX shouldn't prevent EM2
+  - name: configUSE_IDLE_HOOK
+    value: 1
+  - name: configTIMER_TASK_PRIORITY
+    value: 55
+  - name: configMAX_SYSCALL_INTERRUPT_PRIORITY
+    value: 32
+    condition: [device_series_1]
+  - name: configKERNEL_INTERRUPT_PRIORITY
+    value: 224
+    condition: [device_series_1]
+  - name: configMAX_SYSCALL_INTERRUPT_PRIORITY
+    value: 16
+    condition: [device_series_2]
+  - name: configKERNEL_INTERRUPT_PRIORITY
+    value: 112
+    condition: [device_series_2]
+  - name: configTIMER_QUEUE_LENGTH
+    value: 8
+  - name: SL_DEVICE_INIT_DCDC_BYPASS
+    value: 1
+  - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
+    value: 3
+  - name: SL_PSA_ITS_USER_MAX_FILES
+    value: 32
+    condition: ["device_series_2", "device_security_vault"]
+  - name: SL_PSA_KEY_USER_SLOT_COUNT
+    value: 14
+    condition: ["device_series_2", "device_security_vault"]
+  - name: SL_SLEEPTIMER_PERIPHERAL
+    value: SL_SLEEPTIMER_PERIPHERAL_BURTC
+    condition: ["device_series_2"]
+  - name: CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT
+    value: 1
+  - name: CC_ASSOCIATION_AGI_MAX_NODES_IN_GROUP
+    value: 5
+  - name: ZAF_APP_NAME
+    value: '"zniffer"'
+  - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
+    value: 0
+
+define:
+  - name: APP_PROPERTIES_CONFIG_FILE
+    value: <application_properties_config.h>
+  - name: FILE_ID_APPLICATIONDATA # File identifiers for application file system
+    value: "0x00000" # Range: 0x00000 - 0x0FFFF
+
+other_file:
+  - path: ../../DevTools/postbuild.sh
+
+tag:
+  - prebuilt_demo
+
+post_build:
+  profile: zwave_ncp_zniffer
+
+filter:
+  - name: "Wireless Technology"
+    value: ["Z-Wave"]
+  - name: "Device Type"
+    value: ["NCP"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]

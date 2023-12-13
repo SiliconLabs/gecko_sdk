@@ -63,6 +63,7 @@ enum sl_rtl_error_code{
   SL_RTL_ERROR_ESTIMATION_IN_PROGRESS, ///< Estimation not yet finished
   SL_RTL_ERROR_NUMBER_OF_SNAPHOTS_DO_NOT_MATCH, ///< Initialized and calculated number of snapshots do not match
   SL_RTL_ERROR_ESTIMATOR_NOT_CREATED, ///< Estimator not yet created
+  SL_RTL_ERROR_ESTIMATOR_ALREADY_CREATED, ///< Estimator already created, operation is not supported
   SL_RTL_ERROR_NOT_INITIALIZED, ///< Library item not yet initialized
   SL_RTL_ERROR_INTERNAL, ///< An internal error occurred
   SL_RTL_ERROR_IQ_SAMPLE_QA, ///< IQ sample quality analysis failed
@@ -721,6 +722,7 @@ enum sl_rtl_error_code sl_rtl_aox_antenna_pattern_deinit(sl_rtl_aox_antenna_patt
 /// ABR estimator mode
 enum sl_rtl_abr_algo_mode{
   SL_RTL_ABR_ALGO_MODE_REAL_TIME_BASIC = 1, ///< Medium filtering, medium response, medium CPU cost. Suitable for real-time tracking.
+  SL_RTL_ABR_ALGO_MODE_STATIC, ///< TODO add description,
 
   SL_RTL_ABR_ALGO_MODE_LAST ///< Placeholder
 };
@@ -753,8 +755,11 @@ typedef struct {
 
 // RTP
 typedef struct {
-  uint32_t num_tones; ///< Number of tones (frequencies)
-  float tones_frequency_delta_hz; ///< Frequency delta, Hz
+  uint32_t num_tones; ///< Number of tones (frequencies), including advertisement channels. Advertisement channels should be marked as blank tones, but included into total number of tones. Max value and currently the only supported value is 79. 80 num_tones is accepted as well, but internally it is converted to 79.
+  float tones_frequency_delta_hz; ///< Frequency delta, Hz. Accepted value is 1 MHz for 79 tones configuration.
+} sl_rtl_abr_parameters;
+
+typedef struct {
   uint32_t* blank_tone_indices;  ///< Tones that shall be ignored when making a distance estimation
   uint32_t num_blank_tone_indices;
   enum sl_rtl_abr_tone_quality* tone_qualities_d1; ///< num_tones elements, null ptr means not used
@@ -809,6 +814,15 @@ enum sl_rtl_error_code sl_rtl_abr_set_algo_mode(sl_rtl_abr_libitem* item, enum s
  * phase based cs_mode.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_abr_set_cs_mode(sl_rtl_abr_libitem* item, enum sl_rtl_abr_cs_mode cs_mode);
+
+/**************************************************************************//**
+ * Set parameters for estimation. Must be called before sl_rtl_abr_create_estimator.
+ *
+ * @param[in] item Pointer to the initialized ABR libitem
+ * @param[in] parameters Data structure with CS initialisation parameters for the estimator
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_abr_set_parameters(sl_rtl_abr_libitem* item, sl_rtl_abr_parameters* parameters);
 
 /**************************************************************************//**
  * Create the estimator after initializing the libitem and setting parameters.

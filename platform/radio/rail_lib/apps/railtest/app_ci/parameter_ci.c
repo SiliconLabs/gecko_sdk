@@ -43,21 +43,17 @@
 #include "em_core.h"
 #include "pa_conversions_efr32.h"
 
-static const char *powerModes[] = RAIL_TX_POWER_MODE_NAMES;
-
 // This function gets the power mode index from a string.
 // Returns 0xFF if the string is not found.
 static uint8_t getPowerModeIndexFromString(char *modeString)
 {
-  uint8_t i;
-
   // If modeString has the 'RAIL_TX_POWER_MODE_' prefix, strip it
 #define MODE_PREFIX (sizeof("RAIL_TX_POWER_MODE_") - 1)
   if (strncasecmp(modeString, "RAIL_TX_POWER_MODE_", MODE_PREFIX) == 0) {
     modeString += MODE_PREFIX;
   }
-  for (i = 0; i < sizeof(powerModes) / sizeof(powerModes[0]); i++) {
-    if (strcasecmp(modeString, powerModes[i] + MODE_PREFIX) == 0) {
+  for (uint8_t i = 0U; i <= RAIL_TX_POWER_MODE_NONE; i++) {
+    if (strcasecmp(modeString, paStrings[i] + MODE_PREFIX) == 0) {
       return i;
     }
   }
@@ -147,7 +143,7 @@ void getPowerConfig(sl_cli_command_arg_t *args)
 
   responsePrint(sl_cli_get_command_string(args, 0), "success:%s,mode:%s,modeIndex:%d,voltage:%d,rampTime:%d",
                 status == RAIL_STATUS_NO_ERROR ? "true" : "false",
-                powerModes[config.mode], config.mode, config.voltage, config.rampTime);
+                paStrings[config.mode], config.mode, config.voltage, config.rampTime);
 }
 
 void getPowerLimits(sl_cli_command_arg_t *args)
@@ -167,7 +163,7 @@ void getPowerLimits(sl_cli_command_arg_t *args)
 #if RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
   if (RAIL_POWER_MODE_IS_ANY_DBM_POWERSETTING_MAPPING_TABLE(powerMode)) {
     // dBm-to-powerSetting mode does not support raw power setting
-    responsePrint(sl_cli_get_command_string(args, 0), "%s does not support setting raw power.", powerModes[powerMode]);
+    responsePrint(sl_cli_get_command_string(args, 0), "%s does not support setting raw power.", paStrings[powerMode]);
     return;
   }
 #endif
@@ -184,7 +180,7 @@ void getPowerLimits(sl_cli_command_arg_t *args)
   responsePrint(sl_cli_get_command_string(args, 0),
                 "success:%s,powerMode:%s,minPowerLevel:%d,maxPowerLevel:%d",
                 success ? "Success" : "Failure",
-                powerModes[powerMode], minPowerlevel, maxPowerlevel);
+                paStrings[powerMode], minPowerlevel, maxPowerlevel);
   return;
 }
 
@@ -207,11 +203,7 @@ void setPowerConfig(sl_cli_command_arg_t *args)
   RAIL_TxPowerConfig_t *txPowerConfigPtr;
 
 #if _SILICON_LABS_EFR32_RADIO_TYPE == _SILICON_LABS_EFR32_RADIO_DUALBAND
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  if (mode >= RAIL_TX_POWER_MODE_SUBGIG) {
-#elif defined(_SILICON_LABS_32B_SERIES_2)
   if (mode >= RAIL_TX_POWER_MODE_SUBGIG_HP) {
-#endif
     txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_subghz();
   } else {
     txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
@@ -284,7 +276,7 @@ void setPower(sl_cli_command_arg_t *args)
     RAIL_GetTxPowerConfig(railHandle, &tempCfg);
     if (RAIL_POWER_MODE_IS_ANY_DBM_POWERSETTING_MAPPING_TABLE(tempCfg.mode)) {
       // dBm-to-powerSetting mode does not support raw power setting
-      responsePrintError(sl_cli_get_command_string(args, 0), RAIL_STATUS_INVALID_PARAMETER, "%s does not support setting raw power.", powerModes[tempCfg.mode]);
+      responsePrintError(sl_cli_get_command_string(args, 0), RAIL_STATUS_INVALID_PARAMETER, "%s does not support setting raw power.", paStrings[tempCfg.mode]);
       return;
     }
 #endif
@@ -374,12 +366,6 @@ void sweepTxPower(sl_cli_command_arg_t *args)
     case RAIL_TX_POWER_MODE_SUBGIG_LLP:
       start = RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MIN;
       end = RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MAX;
-      break;
-#endif
-#if (defined(RAIL_TX_POWER_MODE_SUBGIG) && defined(_SILICON_LABS_32B_SERIES_1))
-    case RAIL_TX_POWER_MODE_SUBGIG:
-      start = RAIL_TX_POWER_LEVEL_SUBGIG_MIN;
-      end = RAIL_TX_POWER_LEVEL_SUBGIG_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_OFDM_PA

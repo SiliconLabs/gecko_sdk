@@ -165,7 +165,7 @@ sl_status_t sl_wfx_init(sl_wfx_context_t *context)
   // when the Wi-Fi chip is in *Trusted* mode
 
   /* Get secure link mode */
-  link_mode = startup_info->body.capabilities.linkmode;
+  link_mode = (sl_wfx_secure_link_mode_t)startup_info->body.capabilities.linkmode;
 
   result = sl_wfx_host_get_secure_link_mac_key(sl_wfx_context->secure_link_mac_key);
 
@@ -182,7 +182,7 @@ sl_status_t sl_wfx_init(sl_wfx_context_t *context)
         /* In this mode it is assumed that the key is not burned */
         result = sl_wfx_secure_link_set_mac_key(sl_wfx_context->secure_link_mac_key, SECURE_LINK_MAC_KEY_DEST_RAM);
         SL_WFX_ERROR_CHECK(result);
-      /* Fallthrough on purpose */
+      /* FALLTHROUGH */
       case SL_WFX_LINK_MODE_ACTIVE:
         result = sl_wfx_secure_link_renegotiate_session_key();
         SL_WFX_ERROR_CHECK(result);
@@ -1251,7 +1251,14 @@ sl_status_t sl_wfx_ext_auth(sl_wfx_ext_auth_data_type_t auth_data_type,
   result = sl_wfx_allocate_command_buffer(&frame, SL_WFX_EXT_AUTH_REQ_ID, SL_WFX_CONTROL_BUFFER, request_length);
   SL_WFX_ERROR_CHECK(result);
 
+#if defined(__ICCARM__)
+/* Suppress warnings originating from use of address of unaligned structure member with IAR Embedded Workbench */
+#pragma diag_suppress=Pa039
+#endif
   memset((void *)&frame->header.length, 0, request_length);
+#if defined(__ICCARM__)
+#pragma diag_default=Pa039
+#endif
 
   frame->header.info = SL_WFX_STA_INTERFACE;
 

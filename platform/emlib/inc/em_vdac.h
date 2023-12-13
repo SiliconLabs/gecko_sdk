@@ -369,11 +369,11 @@ typedef struct {
   {                                                                                                  \
     _VDAC_CFG_WARMUPTIME_DEFAULT, /* Number of prescaled DAC_CLK for Vdac to warmup. */              \
     false,                        /* Continue while debugging. */                                    \
-    true,                         /* On demand clock. */                                             \
+    false,                        /* On demand clock. */                                             \
     false,                        /* DMA wake up. */                                                 \
     false,                        /* Bias keep warm. */                                              \
-    vdacRefresh8,                 /* Refresh every 8th cycle. */                                     \
-    vdacCycles2,                  /* Internal overflow every 8th cycle. */                           \
+    vdacRefresh2,                 /* Refresh every 2th cycle. */                                     \
+    vdacCycles2,                  /* Internal overflow every 2th cycle. */                           \
     0,                            /* No prescaling. */                                               \
     vdacRef1V25,                  /* 1.25 V internal low noise reference. */                         \
     false,                        /* Do not reset prescaler on CH 0 start. */                        \
@@ -389,11 +389,11 @@ typedef struct {
   {                                                                                                  \
     _VDAC_CFG_WARMUPTIME_DEFAULT, /* Number of prescaled DAC_CLK for Vdac to warmup. */              \
     false,                        /* Continue while debugging. */                                    \
-    true,                         /* On demand clock. */                                             \
+    false,                        /* On demand clock. */                                             \
     false,                        /* DMA wake up. */                                                 \
     false,                        /* Bias keep warm. */                                              \
-    vdacRefresh8,                 /* Refresh every 8th cycle. */                                     \
-    vdacCycles2,                  /* Internal overflow every 8th cycle. */                           \
+    vdacRefresh2,                 /* Refresh every 2th cycle. */                                     \
+    vdacCycles2,                  /* Internal overflow every 2th cycle. */                           \
     0,                            /* No prescaling. */                                               \
     vdacRef1V25,                  /* 1.25 V internal low noise reference. */                         \
     false,                        /* Do not reset prescaler on CH 0 start. */                        \
@@ -540,16 +540,16 @@ __STATIC_INLINE void VDAC_SineModeStart(VDAC_TypeDef *vdac, bool start)
 {
   EFM_ASSERT(VDAC_REF_VALID(vdac));
 
-  while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) {
+  while (0UL != (vdac->STATUS & VDAC_STATUS_SYNCBUSY)) {
   }
 
   if (start) {
     vdac->CMD = VDAC_CMD_SINEMODESTART;
-    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) == 0) {
+    while (0UL == (vdac->STATUS & VDAC_STATUS_SINEACTIVE)) {
     }
   } else {
     vdac->CMD = VDAC_CMD_SINEMODESTOP;
-    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) != 0) {
+    while (0UL != (vdac->STATUS & VDAC_STATUS_SINEACTIVE)) {
     }
   }
 }

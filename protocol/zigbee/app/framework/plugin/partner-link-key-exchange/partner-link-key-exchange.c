@@ -334,12 +334,7 @@ static EmberZdoStatus validateKeyRequest(EmberEUI64 partner)
 
   // We need an existing entry or an empty entry in the key table to process a
   // partner link key exchange.
-  sl_zb_sec_man_context_t context_existing;
-  sl_zb_sec_man_context_t context_open;
-  sl_zb_sec_man_export_link_key_by_eui(partner, &context_existing, NULL, NULL);
-  sl_zb_sec_man_export_link_key_by_eui(NULL, &context_open, NULL, NULL);
-  if (context_existing.key_index == 0xFF
-      && context_open.key_index == 0xFF) {
+  if (!sl_zigbee_sec_man_link_key_slot_available(partner)) {
     return EMBER_ZDP_TABLE_FULL;
   }
 

@@ -18,6 +18,8 @@ from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICal
 from pycalcmodel.core.variable import ModelVariableFormat
 from pyradioconfig.parts.common.utils.tinynumpy import tinynumpy
 
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
+
 class CALC_Shaping(ICalculator):
 
     """
@@ -51,6 +53,8 @@ class CALC_Shaping(ICalculator):
             'Defines the shaping filter to be used in the TX side.',
             member_data)
 
+        self._addModelVariable(model, 'max_filter_taps', int, ModelVariableFormat.DECIMAL, 'Maximum Filter Taps available in Shaping filter')
+
 
 
     def gaussian_shaping_filter(self, model):
@@ -62,6 +66,14 @@ class CALC_Shaping(ICalculator):
 
         # for gaussian pulse shapes pulse_shape_parameter holds BT value
         bt = model.vars.shaping_filter_param.value
+
+        max_filter_taps = model.vars.max_filter_taps.value
+        req_filter_taps = self.get_required_filter_taps(bt)
+
+        if req_filter_taps > max_filter_taps:
+            minumum_bt_supported = 8 / max_filter_taps
+            LogMgr.Error("ERROR: BT < {} not supported on this part".format(minumum_bt_supported))
+
         # map BT value to standard deviation
         std = 1.05 / bt
 
@@ -135,6 +147,12 @@ class CALC_Shaping(ICalculator):
 
         # for raised cosine pulse shapes pulse_shape_parameter holds roll off factor value
         bt = model.vars.shaping_filter_param.value
+
+        if bt > 1.0 or bt < 0.0:
+            LogMgr.Error("shaping_filter_param for Raised Cosine filter is treated as Roll-off factor. "
+                         "Please ensure that 0 <= shaping_filter_param <= 1. "
+                         "Overriding the current shaping_filter_param value to 1.")
+            bt = 1.0
         # create empty coefficient array
         #h = tinynumpy.zeros((17,), dtype=float)
         h = [0.0] * 17
@@ -166,6 +184,13 @@ class CALC_Shaping(ICalculator):
 
         # for raised cosine pulse shapes pulse_shape_parameter holds roll off factor value
         bt = model.vars.shaping_filter_param.value
+
+        if bt > 1.0 or bt < 0.0:
+            LogMgr.Error("shaping_filter_param for Root Raised Cosine filter is treated as Roll-off factor. "
+                         "Please ensure that 0 <= shaping_filter_param <= 1. "
+                         "Overriding the current shaping_filter_param value to 0.")
+            bt = 0.0
+
         pi = math.pi
         # create empty coefficient array
         #h = tinynumpy.zeros((17,), dtype=float)
@@ -196,19 +221,17 @@ class CALC_Shaping(ICalculator):
                 # MODEM.SHAPINGx.COEFFy) are unsigned registers but root raised cosine filters can have negative
                 # coefficients at the edges. So technically the HW does not support generic root raised cosine filters.
                 #
-                # We have a number of PHYs that use root raised cosine but all of them use BT = 0 in which case all coeffs end up greater or equal to zero.
+                # We have a number of PHYs that use root raised cosine but all of them use BT = 0 in which case all
+                # coeffs end up greater or equal to zero.
                 #
                 # For BT > 0 The negative coeffs will be very small at the edges I think we should be able to get away
                 # with setting them to zero. So let's just set all negative coeffs to zero before writing to the
                 # registers.
                 #
-                # There is also a rounding function missing:  line 191 should read something like: h[x] = py2round(h[x] /
-                # peak * 127)
-                #
-                # In Lynx we converted some of the COEFFx registers to signed to be able to support filters like the
-                # root raised cosine.
-
-                h[x] = 0
+                # Above issue is only present for Nerio and Nixi. In all other parts, the shaping filter coefficients (
+                # MODEM.SHAPINGx.COEFFy) are signed registers. Therefore using a method floor_filter_coefficients to make
+                # sure this applies only to Nerio and Nixi
+                h[x] = self.floor_filter_coefficients(h[x])
 
         # keep only needed half of symmetric coeffs
         coeff = h[0:9]
@@ -232,6 +255,7 @@ class CALC_Shaping(ICalculator):
             shaping = 0
     
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Gaussian.value:
+            # always sing even mode, asymmetric mode version not possible as only 9 filter taps available.
             c = self.gaussian_shaping_filter(model)
             shaping = 2
     
@@ -315,6 +339,25 @@ class CALC_Shaping(ICalculator):
     
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
+    def calc_max_available_filter_taps(self, model):
+        # this is fixed for a family of parts
+        # for jumbo, in asymmetric mode, the maximum taps available are 9
+        # for even mode, max filter taps available are 16
+        # for odd mode, max filter taps available are 17
+        model.vars.max_filter_taps.value = 17
 
+    def get_required_filter_taps(self, bt):
+        """
+        Calculate required filter taps for gaussian shaping filter with BT
+        Pulse shaping will spread over (1/bt) symbols. Since shaping filter is implemented at 8*baudrate, the required
+        taps for a bt will be 8/bt
+        :param bt:Bandwidth time product
+        :return: req_filter_taps
+        """
+        req_filter_taps = math.ceil(8/bt)
+        return req_filter_taps
 
-
+    def floor_filter_coefficients(self, h):
+        # this part supports negative coefficients, so no need to overwrite h[x] to 0 when h[x] < 0.
+        # for now not allowing any negative values untill MCUW_RADIO_CFG-2007 is resolved
+        return 0

@@ -735,4 +735,4 @@ typedef struct {
 /** @} End of group EFR32MG27_SYSCFG_CFGNS */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_SYSCFG_H */
+#endif // EFR32MG27_SYSCFG_H

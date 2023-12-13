@@ -43,6 +43,8 @@
  * This function is to be called from ::sl_token_init()
  * initialization so the data is moved into a new NVM3 before any further
  * token work is perfomed.
+ *
+ * @return EmberStatus
  */
 EmberStatus halSimEeToNvm3Upgrade(void);
 

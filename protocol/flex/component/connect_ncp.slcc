@@ -19,9 +19,6 @@ include:
   - path: "protocol/flex/stack/framework"
     file_list:
       - path: "event-queue.h"
-  - path: "protocol/flex/csp"
-    file_list:
-      - path: "csp-ncp-utilities.h"
   - path: "protocol/flex/ncp"
     file_list:
       - path: "ncp-init.h"

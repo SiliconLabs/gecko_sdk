@@ -1,0 +1,62 @@
+!!omap
+- id: brd2501b
+- label: BRD2501B
+- package: platform
+- description: Board support for BRD2501B.
+- category: Platform|Board|Starter Kit
+- quality: production
+- requires:
+  - name: efm32pg12b500f1024gl125
+  - name: brd2501b_config
+- provides:
+  - name: brd2501b
+  - name: hardware_board
+  - name: hardware_board_stk
+  - name: hardware_board_from_stk
+  - name: hardware_board_has_si70xx
+  - name: hardware_board_has_tempsensor
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_40mhz
+  - name: hardware_board_has_hfxo
+  - name: hardware_board_has_lfxo
+- recommends:
+  - id: iostream_usart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
+  - id: ls013b7dh03
+  - id: memlcd_usart
+  - id: simple_led
+    instance:
+    - led0
+    - led1
+  - id: simple_button
+    instance:
+    - btn0
+    - btn1
+  - id: bootloader_spi_peripheral_usart_driver
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2501B"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
+  - name: HFXO_FREQ
+    value: 40000000
+- tag:
+  - board:pn:BRD2501
+  - board:variant:B
+  - board:revision:A00
+  - board:device:efm32pg12b500f1024gl125
+  - hardware:has:vcom
+  - hardware:has:sensor:si7021
+  - hardware:has:display:ls013b7dh03
+  - hardware:has:led:2
+  - hardware:has:button:2
+  - hardware:has:touch
+  - hardware:has:exp_header:spi
+  - hardware:has:exp_header:uart
+  - hardware:has:exp_header:i2c

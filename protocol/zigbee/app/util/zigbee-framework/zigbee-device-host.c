@@ -124,58 +124,6 @@ EmberStatus ezspMatchDescriptorsRequest(EmberNodeId target,
                                  length);
 }
 
-EmberStatus ezspEndDeviceBindRequest(EmberNodeId localNodeId,
-                                     EmberEUI64 localEui64,
-                                     uint8_t endpoint,
-                                     uint16_t profile,
-                                     uint8_t inCount,
-                                     uint8_t outCount,
-                                     uint16_t *inClusters,
-                                     uint16_t *outClusters,
-                                     EmberApsOption options)
-{
-  uint8_t i;
-  uint8_t *payload = zigDevRequestBuffer + ZDO_MESSAGE_OVERHEAD;
-  uint8_t offset = ZDO_MESSAGE_OVERHEAD + 14;  // Add 2 bytes for our NWK Address
-                                               // Add 8 bytes for our EUI64
-                                               // Add 1 byte for endpoint
-                                               // Add 2 bytes for Profile Id
-                                               // Add 1 byte for in Cluster Count
-  uint8_t length = (offset
-                    + (inCount * 2) // Times 2 for 2 byte Clusters
-                    + 1            // Out Cluster Count
-                    + (outCount * 2)); // Times 2 for 2 byte Clusters
-
-  if (length > EZSP_MAX_FRAME_LENGTH) {
-    return EMBER_NO_BUFFERS;
-  }
-
-  payload[0] = LOW_BYTE(localNodeId);
-  payload[1] = HIGH_BYTE(localNodeId);
-  MEMMOVE(payload + 2, localEui64, 8);
-  payload[10] = endpoint;
-  payload[11] = LOW_BYTE(profile);
-  payload[12] = HIGH_BYTE(profile);
-  payload[13] = inCount;
-
-  for (i = 0; i < inCount; i++) {
-    zigDevRequestBuffer[(i * 2) + offset] = LOW_BYTE(inClusters[i]);
-    zigDevRequestBuffer[(i * 2) + offset + 1] = HIGH_BYTE(inClusters[i]);
-  }
-  offset += (inCount * 2);
-  zigDevRequestBuffer[offset] = outCount;
-  offset++;
-  for (i = 0; i < outCount; i++) {
-    zigDevRequestBuffer[(i * 2) + offset] = LOW_BYTE(outClusters[i]);
-    zigDevRequestBuffer[(i * 2) + offset + 1] = HIGH_BYTE(outClusters[i]);
-  }
-
-  return sendZigDevRequestBuffer(EMBER_ZIGBEE_COORDINATOR_ADDRESS,
-                                 END_DEVICE_BIND_REQUEST,
-                                 options,
-                                 length);
-}
-
 EmberStatus emberSendZigDevRequest(EmberNodeId destination,
                                    uint16_t clusterId,
                                    EmberApsOption options,

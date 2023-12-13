@@ -118,7 +118,7 @@ static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
     .band = RAIL_PA_BAND_COUNT
   }
 };
-#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault10dBm[] = {
   {
     .min = -252,
@@ -197,6 +197,7 @@ static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   }
 };
 #else
+#ifndef RAIL_INTERNAL_BUILD
 static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
   {
     .min = INT16_MIN,
@@ -211,6 +212,7 @@ static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
     .band = RAIL_PA_BAND_COUNT
   }
 };
+#endif
 #endif
 
 #ifdef RAIL_PA_AUTO_MODE_WEAK
@@ -254,7 +256,7 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   (void)chCfgEntry;
 #endif
 
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 4) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6))
   if (RAIL_SupportsTxPowerMode(railHandle,
                                RAIL_TX_POWER_MODE_2P4GIG_LP,
                                NULL)) {

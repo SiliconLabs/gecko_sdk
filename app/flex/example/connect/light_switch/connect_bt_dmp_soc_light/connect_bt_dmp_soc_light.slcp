@@ -17,7 +17,6 @@ component:
   - id: radio_config_simple_connect_singlephy
   - id: app_log
   - id: app_assert
-  - id: legacy_hal
   - id: token_manager
   - id: cli
     instance:
@@ -51,6 +50,7 @@ component:
   - id: iostream_retarget_stdio
 #-------------- Restriction rules -------------------
   - id: restrictions_profile_connect
+  - id: restrictions_profile_connect_ofdm
   - id: restrictions_profile_long_range
 
 #----------------- Require list ----------------------
@@ -94,24 +94,18 @@ readme:
 configuration:
 #----------------- OS --------------------------------
   - name: SL_STACK_SIZE
-    value: "2048"
-    unless:
-      - "device_sdid_200"
-  - name: SL_STACK_SIZE
-    value: "3000"
-    condition:
-      - "device_sdid_200"
+    value: "8192"
   - name: SL_HEAP_SIZE
     value: "16000"
     unless:
       - "device_sdid_230"
       - "device_sdid_235"
   - name: SL_HEAP_SIZE
-    value: "20000"
+    value: "21000"
     condition:
       - "device_sdid_230"
   - name: SL_HEAP_SIZE
-    value: "20000"
+    value: "21000"
     condition:
       - "device_sdid_235"
   - name: APP_LOG_PREFIX_ENABLE
@@ -137,9 +131,8 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "eusartHwFlowControlNone"
 #----------------- Watchdog  -------------------------
-  - name: SL_LEGACY_HAL_DISABLE_WATCHDOG
-    value: "1"
-
+define:
+  - name: SL_CONNECT_DISABLE_WATCHDOG
 #-------------- Template Contribution ----------------
 template_contribution:
 #------------------ CLI commands ---------------------

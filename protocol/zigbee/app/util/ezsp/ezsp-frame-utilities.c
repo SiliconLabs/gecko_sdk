@@ -268,25 +268,6 @@ void fetchEmberNetworkInitStruct(EmberNetworkInitStruct* networkInitStruct)
   networkInitStruct->bitmask = fetchInt16u();
 }
 
-static UNUSED void appendEmberVersionStruct(const EmberVersion* versionStruct)
-{
-  appendInt16u(versionStruct->build);
-  appendInt8u(versionStruct->major);
-  appendInt8u(versionStruct->minor);
-  appendInt8u(versionStruct->patch);
-  appendInt8u(versionStruct->special);
-  appendInt8u(versionStruct->type);
-}
-
-void fetchEmberVersionStruct(EmberVersion* versionStruct)
-{
-  versionStruct->build = fetchInt16u();
-  versionStruct->major = fetchInt8u();
-  versionStruct->minor = fetchInt8u();
-  versionStruct->special = fetchInt8u();
-  versionStruct->type  = fetchInt8u();
-}
-
 void appendEmberZllNetwork(EmberZllNetwork *network)
 {
   appendEmberZigbeeNetwork(&(network->zigbeeNetwork));

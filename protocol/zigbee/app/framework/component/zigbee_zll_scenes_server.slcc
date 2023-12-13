@@ -1,19 +1,13 @@
 package: Zigbee
-description: Silicon Labs implementation of the original Zigbee Light Link profile
-  enhancements to the Scenes server cluster.  The component is only intended to assist
-  with debugging, as the implemented callbacks simply parse requests from the Identify
-  client and blink LEDs. Before production, this component should be replaced with
-  code that acts on the requests in an appropriate way. Note that the extensions do
-  not now require Touchlink commissioning to be used, and that the commands may now
-  be required by other device types, such as Lighting and Occupancy.
+description: Silicon Labs implementation of the original Zigbee Light Link profile enhancements to the Scenes server cluster.  The component is only intended to assist with debugging, as the implemented callbacks simply parse requests from the Identify client and blink LEDs. Before production, this component should be replaced with code that acts on the requests in an appropriate way. Note that the extensions do not now require Touchlink commissioning to be used, and that the commands may now be required by other device types, such as Lighting and Occupancy.
 label: ZLL Scenes Server Cluster Enhancements
 quality: evaluation
 id: zigbee_zll_scenes_server
 category: Zigbee|Zigbee Light Link
 provides:
-   - name: "zigbee_zll_scenes_server"
+  - name: zigbee_zll_scenes_server
 requires:
-   - name: "zigbee_scenes"
+  - name: zigbee_scenes
 source:
   - path: protocol/zigbee/app/framework/plugin/zll-scenes-server/zll-scenes-server.c
 include:
@@ -25,10 +19,10 @@ template_contribution:
     value: zigbee_zll_scenes_server
   - name: cluster_service
     value:
-       cluster_id: "0x0005"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "emberAfZllScenesClusterServerCommandParse"    
+      cluster_id: '0x0005'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfZllScenesClusterServerCommandParse
 documentation:
   docset: zigbee
   document: zigbee-af-api/zll-scenes-server

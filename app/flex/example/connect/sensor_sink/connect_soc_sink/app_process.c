@@ -33,7 +33,6 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "em_chip.h"
 #include "app_log.h"
 #include "sl_app_common.h"

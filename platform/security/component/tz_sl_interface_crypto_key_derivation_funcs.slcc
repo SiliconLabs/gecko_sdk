@@ -24,6 +24,9 @@ template_contribution:
     value: tfm_crypto_key_derivation_input_bytes
 
   - name: tfm_interface_func
+    value: tfm_crypto_key_derivation_input_integer
+
+  - name: tfm_interface_func
     value: tfm_crypto_key_derivation_input_key
 
   - name: tfm_interface_func

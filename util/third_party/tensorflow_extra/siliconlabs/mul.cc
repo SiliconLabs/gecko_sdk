@@ -70,9 +70,11 @@ TfLiteStatus MulPrepare(TfLiteContext* context, TfLiteNode* node) {
   return status;
 }
 
-void EvalQuantized(TfLiteContext* context, TfLiteNode* node,
-                   const SlOpDataMul* sldata, const TfLiteEvalTensor* input1,
-                   const TfLiteEvalTensor* input2, TfLiteEvalTensor* output) {
+TfLiteStatus EvalQuantized(TfLiteContext* context, TfLiteNode* node,
+                           const SlOpDataMul* sldata, const TfLiteEvalTensor* input1,
+                           const TfLiteEvalTensor* input2, TfLiteEvalTensor* output)
+{
+  sl_status_t status = SL_STATUS_OK;
   const OpDataMul* data = &sldata->opdata;
   tflite::ArithmeticParams op_params = {};
 
@@ -117,7 +119,7 @@ void EvalQuantized(TfLiteContext* context, TfLiteNode* node,
       params.length = MatchingElementsSize(tflite::micro::GetTensorShape(input1),
                                tflite::micro::GetTensorShape(input2),
                                tflite::micro::GetTensorShape(output));
-      sli_mvp_ml_mul_s8(&params);
+      status = sli_mvp_ml_mul_s8(&params);
     } else if (input1->type == kTfLiteInt16) {
       arm_elementwise_mul_s16(
           tflite::micro::GetTensorData<int16_t>(input1),
@@ -132,9 +134,12 @@ void EvalQuantized(TfLiteContext* context, TfLiteNode* node,
                                tflite::micro::GetTensorShape(output)));
     }
   }
+  return status == SL_STATUS_OK ? kTfLiteOk : kTfLiteError;
 }
 
-TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
+TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node)
+{
+  TfLiteStatus status = kTfLiteOk;
   TFLITE_DCHECK(node->builtin_data != nullptr);
   auto* params = reinterpret_cast<TfLiteMulParams*>(node->builtin_data);
 
@@ -150,10 +155,8 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (input1->type) {
     case kTfLiteInt8:
-      EvalQuantized(context, node, data, input1, input2, output);
-      break;
     case kTfLiteInt16:
-      EvalQuantized(context, node, data, input1, input2, output);
+      status = EvalQuantized(context, node, data, input1, input2, output);
       break;
     case kTfLiteInt32:
       EvalMulQuantizedReference(context, node, &data->opdata, input1, input2, output);
@@ -167,7 +170,7 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       return kTfLiteError;
   }
 
-  return kTfLiteOk;
+  return status;
 }
 
 } // namespace mul

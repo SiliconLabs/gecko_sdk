@@ -55,8 +55,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
 
         #Only run the PRO2 calculator if the BCR demod is enabled
         if bcr_demod_en or bcr_detector_en == 1:
-        #Create the input dict
-            fdeverror = model.vars.deviation_tol_ppm.value
+            #Create the input dict (see Package\pro2_chip_configurator\test\testcases\revc0\test_case_parameter.docx)
             pro2_inputs = OrderedDict({})
             pro2_inputs["API_freq_xo"] = modem_frequency_hz
             pro2_inputs["API_crystal_tol"] = (rx_xtal_error_ppm + tx_xtal_error_ppm)/2.0
@@ -88,7 +87,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
             pro2_inputs["API_Fs_rx_CH"] = pro2_fs_rx_ch
             pro2_inputs["API_fb_frequency_resolution"] = digmix_res
             pro2_inputs["API_modulation_index"] = model.vars.modulation_index_actual.value
-            pro2_inputs["Fdev_error"] = fdeverror / 1e6
+            pro2_inputs["Fdev_error"] = self._fdev_error_pro2_syntax(model)
             pro2_inputs["API_pm_len"] = model.vars.preamble_detection_length.value
             # overwrite BCR demod setting in concurrent mode which is set by forcing bcr_demod_en at input
             if (model.vars.bcr_demod_en._value_forced != None):
@@ -115,6 +114,21 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
             #Write default values to the BCR demod regs
             self.write_unused_pro2_dsa_regs(model)
             self.write_unused_bcr_regs(model)
+
+    def _fdev_error_pro2_syntax(self, model):
+        # Pro2 input syntax (see Package\pro2_chip_configurator\test\testcases\revc0\test_case_parameter.docx)
+        freq_dev_min = model.vars.freq_dev_min.value
+        freq_dev_max = model.vars.freq_dev_max.value
+        freq_dev_nominal = model.vars.deviation.value
+
+        if freq_dev_nominal != 0:
+            fdev_min_pct = round((freq_dev_nominal - freq_dev_min) / freq_dev_nominal * 100)
+            fdev_max_pct = round((freq_dev_max - freq_dev_nominal) / freq_dev_nominal * 100)
+            fdev_pro2_syntax =  fdev_min_pct + fdev_max_pct * 1000
+        else:
+            fdev_pro2_syntax = 0
+
+        return fdev_pro2_syntax
 
 
     def _map_pro2_dsa_outputs(self, model, pro2_calculator_obj):
@@ -162,6 +176,9 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
             # Always set ENCFEQUAL to 0 for OOK, otherwise use signal_dsa_mode
             if mod_type == model.vars.modulation_type.var_enum.OOK:
                 en_cfe_qual = 0
+            elif mod_type == model.vars.modulation_type.var_enum.FSK4:
+                bcr_align_en = 0
+                en_cfe_qual = signal_dsa_mode
             else:
                 en_cfe_qual = signal_dsa_mode
 
@@ -197,7 +214,7 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_NONSTDPK, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODARR0_PHSPIKETHD, 0)
 
-    def _map_pro2_outputs(self,model, pro2_calculator_obj):
+    def _map_pro2_outputs(self, model, pro2_calculator_obj):
         #This function maps the pro2 calculator outputs to radio configurator variables / outputs
 
         # Write BCRDEMODCTRL
@@ -260,7 +277,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_AFCMAEN, pro2_calculator_obj.demodulator.fields.afcma_en)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENFZPMEND, pro2_calculator_obj.demodulator.fields.enfzpmend)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_NONFRZEN, pro2_calculator_obj.demodulator.fields.non_frzen)
-        self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTWAITCNT, pro2_calculator_obj.demodulator.fields.oneshot_waitcnt)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTAFCEN,pro2_calculator_obj.demodulator.fields.oneshot_afc)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_SKIPPMDET, pro2_calculator_obj.demodulator.fields.skip_pm_det)
         self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ENAFCFRZ, pro2_calculator_obj.demodulator.fields.afc_freez_en)
@@ -270,7 +286,6 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
 
         #Write BCRDEMOD4FSK0
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK0_THD4GFSK, int(pro2_calculator_obj.demodulator.fields.thd4gfsk))
-        self._reg_write(model.vars.MODEM_BCRDEMOD4FSK0_CODE4GFSK, pro2_calculator_obj.demodulator.fields.code4gfsk)
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK0_PHCOMPBYP, pro2_calculator_obj.demodulator.fields.phcompbyp)
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK0_EN4GFSK, int(en4gfsk(pro2_calculator_obj.inputs.API_modulation_type)))
 
@@ -278,10 +293,9 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_PHCOMP4FSK0, pro2_calculator_obj.demodulator.fields.phcomp_gain_4gfsk0)
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_PHCOMP4FSK1,
                         pro2_calculator_obj.demodulator.fields.phcomp_gain_4gfsk1 & 0x7f) #Remove bit 7 which was used in Pro2 for a different purpose
-        self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_S2PMAP, pro2_calculator_obj.demodulator.fields.s2p_map)
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_FDEVCOMPEN, pro2_calculator_obj.demodulator.fields.thd4gfsk_comp_en)
         self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_FDEVCOMPRATIO, pro2_calculator_obj.demodulator.fields.thd4gfsk_comp_ratio)
-        
+
         #Write BCRDEMODANT
         self._reg_write(model.vars.MODEM_BCRDEMODANT_SKIP2PHTHD, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODANT_ANWAIT, pro2_calculator_obj.demodulator.fields.anwait)
@@ -314,11 +328,11 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODARR1_BCRCFESRC, 1)
         self._reg_write(model.vars.MODEM_BCRDEMODARR1_KSICOMPEN, 0)
 
-        # Write BCRDEMODARR2        
+        # Write BCRDEMODARR2
         self._reg_write(model.vars.MODEM_BCRDEMODARR2_RAWDCHKALWAYON, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODARR2_CONSYMOL, 0)
-        
-        # Write BCRDEMODKSI        
+
+        # Write BCRDEMODKSI
         self._reg_write(model.vars.MODEM_BCRDEMODKSI_BCRKSI1, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODKSI_BCRKSI2, 0)
         self._reg_write(model.vars.MODEM_BCRDEMODKSI_BCRKSI3, model.vars.calculated_ksi3.value )
@@ -327,9 +341,59 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_BCRDEMODPMEXP_BCRPHSCALE   ,  model.vars.calculated_phscale.value)
         self._reg_write(model.vars.MODEM_BCRDEMODPMEXP_BCRPMEXP     , 21845)
 
-        # GET afc gain result
+        self._map_pro2_modtype_outputs(model, pro2_calculator_obj)
+
+    def _map_pro2_modtype_outputs(self, model, pro2_calculator_obj):
         digmix_res = model.vars.digmix_res_actual.value
-        model.vars.pro2_afc_gain.value = int(digmix_res * pro2_calculator_obj.demodulator.fields.afc_gain)
+        modtype = model.vars.modulation_type.value
+        preamble_detection_length = model.vars.preamble_detection_length.value
+        fsk_symbol_map = model.vars.fsk_symbol_map.value
+
+        oneshot_waitcnt = pro2_calculator_obj.demodulator.fields.oneshot_waitcnt
+
+        if modtype == model.vars.modulation_type.var_enum.FSK4:
+            if preamble_detection_length >= 16 and preamble_detection_length <= 18:
+                oneshot_waitcnt = 1
+
+            if fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP0:
+                code4gfsk = 225
+                s2p_map = 2
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP1:
+                code4gfsk = 75
+                s2p_map = 2
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP2:
+                code4gfsk = 180
+                s2p_map = 2
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP3:
+                code4gfsk = 30
+                s2p_map = 2
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP4:
+                code4gfsk = 225
+                s2p_map = 3
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP5:
+                code4gfsk = 75
+                s2p_map = 3
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP6:
+                code4gfsk = 180
+                s2p_map = 3
+            elif fsk_symbol_map == model.vars.fsk_symbol_map.var_enum.MAP7:
+                code4gfsk = 30
+                s2p_map = 3
+        else:
+            code4gfsk = 0
+            s2p_map = 2
+
+        self._reg_write(model.vars.MODEM_BCRDEMODAFC1_ONESHOTWAITCNT, oneshot_waitcnt)
+        self._reg_write(model.vars.MODEM_BCRDEMOD4FSK0_CODE4GFSK, code4gfsk)
+        self._reg_write(model.vars.MODEM_BCRDEMOD4FSK1_S2PMAP, s2p_map)
+
+        # GET afc gain result
+        if modtype == model.vars.modulation_type.var_enum.FSK4:
+            afc_gain = pro2_calculator_obj.demodulator.fields.afc_gain / 15
+        else:
+            afc_gain = pro2_calculator_obj.demodulator.fields.afc_gain
+
+        model.vars.pro2_afc_gain.value = int(digmix_res * afc_gain)
 
     def write_unused_bcr_regs(self,model):
         # Write BCRDEMODCTRL
@@ -595,24 +659,27 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         ber_force_fdm0 = model.vars.ber_force_fdm0.value
         directmode_rx = model.vars.directmode_rx.value
 
+        # Get simplest periodic preamble pattern
+        simple_pmpatt_str = self._get_simplest_pmpattern(preamble_pattern, preamble_pattern_len_actual)
+
         if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
             pro2_pm_pattern = 1000      # Direct mode
 
         elif (preamble_detection_length >= 32) and not ber_force_fdm0:
-            if ((preamble_pattern == 1) or (preamble_pattern==2)) and (preamble_pattern_len_actual == 2):
+            if simple_pmpatt_str in ["01", "10"]:
                 # 1010 or 0101 repeating
                 pro2_pm_pattern = 0
-            elif ((preamble_pattern == 1) and (preamble_pattern_len_actual == 1)) or ((preamble_pattern == 3) and (preamble_pattern_len_actual == 2)):
+            elif simple_pmpatt_str == "1":
                 # 1111 repeating
                 pro2_pm_pattern = 1
-            elif (preamble_pattern == 0):
+            elif simple_pmpatt_str == "0":
                 # 0000 repeating
                 pro2_pm_pattern = 2
             else:
                 # Any other sequence
                 pro2_pm_pattern = 3
         elif (preamble_detection_length >= 16) and not ber_force_fdm0:
-            if ((preamble_pattern == 1) or (preamble_pattern==2)) and (preamble_pattern_len_actual == 2):
+            if simple_pmpatt_str in ["01", "10"]:
                 # 1010 or 0101 repeating
                 pro2_pm_pattern = 100
             else:
@@ -624,6 +691,21 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
 
         # Load local variables back into model variables
         model.vars.pro2_pm_pattern.value = pro2_pm_pattern
+
+    def _get_simplest_pmpattern(self, pmpatt, pmlength):
+        """
+        Check if preamble is periodic and returns shortest non-repeating preamble string
+        E.g:
+            pmpatt = 1, pmlength = 3 returns "1"
+            pmpatt = 10, pmlength = 4 returns "10"
+            pmpatt = 5, pmlength = 4 returns "01"
+            pmpatt = 21, pmlength = 6 returns "01"
+        Algorithm doubles the bitstring and finds if said bitstring occurs within doubled bitstring from index 1 onwards
+        If bitstring occurs at index I, then bitstring is periodic with period i-1
+        """
+        pmpatt_binstr = format(pmpatt, f"0{pmlength}b")
+        i = (pmpatt_binstr + pmpatt_binstr).find(pmpatt_binstr, 1, -1)
+        return pmpatt_binstr if i == -1 else pmpatt_binstr[:i]
 
     def calc_pro2_antdiv(self,model):
         # This function calculates the pro2 antenna diversity enable
@@ -682,10 +764,16 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
         # Reading variables from model variables
         fskmap = model.vars.MODEM_CTRL0_MAPFSK.value
         demod_select = model.vars.demod_select.value
+        modulation_type = model.vars.modulation_type.value
 
         # Always read the FSKMAP and use it to invert RX bits (this is also used for OOK)
         if demod_select == model.vars.demod_select.var_enum.BCR:
-            invrxbit = fskmap
+
+            # Set the register value based on mod type and preamble length
+            if (modulation_type == model.vars.modulation_type.var_enum.FSK4):
+                invrxbit = 0
+            else:
+                invrxbit = fskmap
         else:
             invrxbit = 0
 
@@ -704,14 +792,19 @@ class CALC_Pro2_Demod_Ocelot(ICalculator):
             manchph = 0
 
         self._reg_write(model.vars.MODEM_BCRDEMODCTRL_MANCHPH, manchph)
-		
+
     def calc_eyeopenthd_reg(self, model):
 
         phscale = model.vars.phscale_actual.value
         ksi3 = model.vars.calculated_ksi3.value
         demod_select = model.vars.demod_select.value
+        mod_type = model.vars.modulation_type.value
+        deviation_tol_ppm = model.vars.deviation_tol_ppm.value
 
-        if (demod_select == model.vars.demod_select.var_enum.BCR):
+        if demod_select == model.vars.demod_select.var_enum.BCR and deviation_tol_ppm >= 30000 and \
+                mod_type == model.vars.modulation_type.var_enum.FSK4:
+            eyeopenthd = int(4 * ksi3 * phscale * 1.2)
+        elif demod_select == model.vars.demod_select.var_enum.BCR:
             eyeopenthd = int(4 * ksi3 * phscale)
         else:
             eyeopenthd = 0

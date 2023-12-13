@@ -57,7 +57,7 @@ bool verifyConfigEnabled = false;
 // Channel Config Selection Variable
 uint8_t configIndex = 0;
 
-const char* paStrings[] = RAIL_TX_POWER_MODE_NAMES;
+const char * const paStrings[] = RAIL_TX_POWER_MODE_NAMES;
 
 /******************************************************************************
  * Command Line Interface functions
@@ -237,6 +237,9 @@ void configRfSenseSelectiveOokWakeupPhy(sl_cli_command_arg_t *args)
   }
 
   RAIL_Status_t status = RAIL_ConfigRfSenseSelectiveOokWakeupPhy(railHandle);
+  if (status == RAIL_STATUS_NO_ERROR) {
+    changeChannel(0);
+  }
   responsePrint(sl_cli_get_command_string(args, 0), "RFSense Wakeup PHY:%s", status ? "Disabled" : "Enabled");
 }
 

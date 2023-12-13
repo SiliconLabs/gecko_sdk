@@ -27,3 +27,6 @@ template_contribution:
       function: "{ struct sl_btctrl_pawr_advertiser_config _pawr_config = {.max_pawr_sets = SL_BT_CONFIG_MAX_PAWR_ADVERTISERS, .max_advertised_data_length_hint = SL_BT_CONFIG_MAX_PAWR_ADVERTISED_DATA_LENGTH_HINT, .subevent_data_request_count = SL_BT_CONFIG_PAWR_PACKET_REQUEST_COUNT, .subevent_data_request_advance = SL_BT_CONFIG_PAWR_PACKET_REQUEST_ADVANCE }; sl_btctrl_pawr_advertiser_configure(&_pawr_config); }"
       deinit: "{ struct sl_btctrl_pawr_advertiser_config _pawr_config = {.max_pawr_sets = 0, }; sl_btctrl_pawr_advertiser_configure(&_pawr_config); }"
     priority: 3
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-pawr-advertiser

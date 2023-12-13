@@ -80,7 +80,7 @@ bool ZAF_TSE_Trigger(zaf_tse_callback_t pCallback,
 * @return                           True if initialization completed successfully
 *                                   False if initialization could not be done without errors
 */
-bool ZAF_TSE_Init();
+bool ZAF_TSE_Init(void);
 
 /**
  * Must be passed as a callback to zaf_transport_tx() in functions used as TSE callbacks.

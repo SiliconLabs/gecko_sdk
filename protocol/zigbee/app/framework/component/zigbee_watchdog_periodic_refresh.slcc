@@ -3,7 +3,6 @@ package: Zigbee
 label: Watchdog periodic refresh sample implementation
 category: Zigbee|Utility
 quality: production
-
 description: Sample watchdog handler to reset watchdog timer periodically
 
 provides:
@@ -13,7 +12,7 @@ config_file:
   - path: protocol/zigbee/app/framework/common/config/zigbee_watchdog_periodic_refresh_config.h
 
 source:
-  - path: "protocol/zigbee/app/framework/common/sl_zigbee_watchdog_periodic_refresh.c"
+  - path: protocol/zigbee/app/framework/common/sl_zigbee_watchdog_periodic_refresh.c
     project:
       transfer_ownership: true
 

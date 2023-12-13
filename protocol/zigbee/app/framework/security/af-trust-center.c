@@ -333,6 +333,7 @@ EmberJoinDecision sli_zigbee_af_trust_center_join_callback(EmberNodeId newNodeId
   else {
     sl_zb_sec_man_context_t context;
     sl_zb_sec_man_aps_key_metadata_t key_info;
+    sl_zb_sec_man_init_context(&context);
     context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK_WITH_TIMEOUT;
     MEMMOVE(context.eui64, newNodeEui64, EUI64_SIZE);
     context.flags |= ZB_SEC_MAN_FLAG_EUI_IS_VALID;
@@ -346,10 +347,12 @@ EmberJoinDecision sli_zigbee_af_trust_center_join_callback(EmberNodeId newNodeId
 #endif
 
 #if defined(DELAYED_JOIN_PRESENT)
-  joinDecision = (status == EMBER_STANDARD_SECURITY_SECURED_REJOIN
-                  || status == EMBER_STANDARD_SECURITY_UNSECURED_REJOIN)
-                 ? EMBER_USE_PRECONFIGURED_KEY
-                 : EMBER_NO_ACTION;
+  if (emberDelayedJoinIsActivated()) {
+    joinDecision = (status == EMBER_STANDARD_SECURITY_SECURED_REJOIN
+                    || status == EMBER_STANDARD_SECURITY_UNSECURED_REJOIN)
+                   ? EMBER_USE_PRECONFIGURED_KEY
+                   : EMBER_NO_ACTION;
+  }
 #endif
 
   // EMZIGBEE-9283 Allow unsecured rejoin if default decision is EMBER_ALLOW_REJOINS_ONLY

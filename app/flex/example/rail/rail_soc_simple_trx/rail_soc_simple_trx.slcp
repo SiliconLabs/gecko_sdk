@@ -27,14 +27,8 @@ component:
   - id: app_assert
   - id: sl_flex_rail_package_assistant
   - id: sl_flex_rail_packet_asm
-  - id: simple_button
-    instance:
-      - btn0
-      - btn1
-  - id: simple_led
-    instance:
-      - led0
-      - led1
+  - id: simple_rail_assistance
+
 #------------Memory Protection Unit-------------------
   - id: mpu
 #---------------------- CLI --------------------------
@@ -52,6 +46,7 @@ component:
   - id: restrictions_profile_wisun_fan_1_1
   - id: restrictions_profile_wisun_han
   - id: restrictions_profile_wisun_ofdm
+  - id: restrictions_profile_connect_ofdm
   - id: restrictions_profile_sun
   - id: restrictions_profile_sidewalk
 
@@ -68,6 +63,8 @@ requires:
   - name: radio_config_singlephy_device_family_fgm23
     condition:
       - "device_family_fgm23"
+  - name: simple_button
+  - name: simple_led
 
 #----------------- Project files ---------------------
 include:

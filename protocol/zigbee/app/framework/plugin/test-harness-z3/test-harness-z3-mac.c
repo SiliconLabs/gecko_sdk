@@ -18,10 +18,11 @@
 #include "app/framework/include/af.h"
 
 #include "test-harness-z3-core.h"
-
+#include "network-steering-config.h"
 // -----------------------------------------------------------------------------
 // Globals
 
+//
 #define NEGATIVE_BEHAVIOR_BAD_NWK_PROTOCOL_VERSION (BIT32(0))
 #define NEGATIVE_BEHAVIOR_NO_ROUTER_CAPACITY       (BIT32(1))
 #define NEGATIVE_BEHAVIOR_NO_END_DEVICE_CAPACITY   (BIT32(2))
@@ -46,6 +47,8 @@
 
 // Delay before turning radio off after sending a beacon
 #define BEACON_RADIO_OFF_DELAY_MS 1000
+
+// Private stack API's
 
 static uint32_t beaconConfigNegativeBehaviorMask = 0;
 sl_zigbee_event_t emberAfPluginTestHarnessZ3BeaconSendEvent;
@@ -75,27 +78,17 @@ static void radioControl(bool state)
 // plugin test-harness z3 beacon beacon-req
 void sli_zigbee_af_test_harness_z3_beacon_beacon_req_command(SL_CLI_COMMAND_ARG)
 {
-  EmberNetworkParameters networkParameters;
   EmberStatus status;
-#ifdef EZSP_HOST
-  EmberNodeType nodeType;
-  status = ezspGetNetworkParameters(&nodeType, &networkParameters);
-#else
-  status = emberGetNetworkParameters(&networkParameters);
-#endif
+  // Per the ZTT API, we scan on the configured primary channels.
+  extern uint32_t sli_zigbee_af_network_steering_primary_channel_mask;
 
-  if (status == EMBER_SUCCESS) {
-    status = emberStartScan(EMBER_ACTIVE_SCAN,
-                            BIT32(networkParameters.radioChannel),
-                            2); // scan duration, whatever
-  } else {
-    // We probably are not on a network, so try to use the network-steering
-    // channels.
-    extern uint32_t sli_zigbee_af_network_steering_primary_channel_mask;
-    status = emberStartScan(EMBER_ACTIVE_SCAN,
-                            sli_zigbee_af_network_steering_primary_channel_mask,
-                            2); // scan duration, whatever
-  }
+  // Restore the default power, in case we're doing a beacon request
+  // (otherwise the radio will be on minimum power if just switched on)
+  emberSetRadioPower(EMBER_AF_PLUGIN_NETWORK_STEERING_RADIO_TX_POWER);
+
+  status = emberStartScan(EMBER_ACTIVE_SCAN,
+                          sli_zigbee_af_network_steering_primary_channel_mask,
+                          4); // 4 = 261 msec - will cause problems if too short
 
   emberAfCorePrintln("%s: %s: 0x%X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -162,19 +155,22 @@ void sli_zigbee_af_test_harness_z3_beacon_beacons_config_command(SL_CLI_COMMAND_
 void emberAfPluginTestHarnessZ3BeaconSendEventHandler(sl_zigbee_event_t * event)
 {
   sl_zigbee_event_set_inactive(z3BeaconSendEventControl);
-  emberAfDebugPrintln("SendEventHandler - Switching radio off");
+  sl_zigbee_app_debug_println("SendEventHandler - Switching radio off");
   radioControl(false); // switch radio off
 }
+extern uint8_t sl_mac_lower_mac_get_radio_channel(uint8_t mac_index);
 
 // Allow the framework to modify the beacon, for negative conformance test cases.
 // The function is called from our implementation of emberAfOutgoingPacketFilterCallback.
 EmberPacketAction sli_zigbee_af_test_harness_z3_modify_beacon_payload(uint8_t *beaconPayload, uint8_t *payloadLength)
 {
+  sl_zigbee_app_debug_println("%s %d %s %d", "sli_zigbee_af_test_harness_z3_modify_beacon_payload: Logical channel:",
+                              emberGetRadioChannel(), "Radio channel:", sl_mac_lower_mac_get_radio_channel(PHY_INDEX_NATIVE));
   if (beaconConfigNegativeBehaviorMask) {
-    emberAfDebugPrintln("Modifying beacon, mask = %4X", beaconConfigNegativeBehaviorMask);
+    sl_zigbee_app_debug_println("Modifying beacon, mask = %04X", beaconConfigNegativeBehaviorMask);
 
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_BAD_NWK_PROTOCOL_VERSION) {
-      beaconPayload[BEACON_NWK_PROTOCOL_ID_OFFSET] = 0x08;
+      beaconPayload[BEACON_STACK_PROFILE_OFFSET] = (beaconPayload[BEACON_STACK_PROFILE_OFFSET] & 0x0f) | 0x80;;
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_NO_ROUTER_CAPACITY) {
       beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] &= ~0x04;
@@ -186,13 +182,13 @@ EmberPacketAction sli_zigbee_af_test_harness_z3_modify_beacon_payload(uint8_t *b
       beaconPayload[BEACON_STACK_PROFILE_OFFSET] = (beaconPayload[BEACON_STACK_PROFILE_OFFSET] & 0xf0) | 0x03;
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_BAD_PROTOCOL_ID) {
-      beaconPayload[BEACON_STACK_PROFILE_OFFSET] = (beaconPayload[BEACON_STACK_PROFILE_OFFSET] & 0x0f) | 0x10;
+      beaconPayload[BEACON_NWK_PROTOCOL_ID_OFFSET] = 0x01;
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_RESERVED_BIT_16_ENABLED) {
-      beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] = (beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] & 0xfc) | 0x01;
+      beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] = (beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] & 0xfe) | 0x01;
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_RESERVED_BIT_17_ENABLED) {
-      beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] = (beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] & 0xfc) | 0x02;
+      beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] = (beaconPayload[BEACON_DEVICE_CAPACITY_OFFSET] & 0xfd) | 0x02;
     }
     if (beaconConfigNegativeBehaviorMask & NEGATIVE_BEHAVIOR_2_BYTE_PAYLOAD) {
       *payloadLength = 2;
@@ -212,6 +208,7 @@ EmberPacketAction sli_zigbee_af_test_harness_z3_modify_beacon_payload(uint8_t *b
     }
     return EMBER_MANGLE_PACKET;
   } else {
+    sl_zigbee_app_debug_println("Not modifying beacon, mask = %04X", beaconConfigNegativeBehaviorMask);
     return EMBER_ACCEPT_PACKET;
   }
 }

@@ -18,6 +18,10 @@
 #include "btl_interface.h"
 #include "em_core.h"
 #include "btl_interface_cfg.h"
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -842,3 +846,6 @@ void SMU_SECURE_IRQHandler(void)
 #endif // BOOTLOADER_ENABLE_NVM3_FAULT_HANDLING
 
 #endif // BOOTLOADER_INTERFACE_TRUSTZONE_AWARE
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

@@ -3,7 +3,7 @@ from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.common.profiles.jumbo_regs import *
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutputs, buildRailOutputs
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
-    buildWhiteOutputs, build_ircal_sw_vars
+    buildWhiteOutputs, build_ircal_sw_vars, buildStudioLogOutput
 
 class Profile_Long_Range_Jumbo(IProfile):
 
@@ -32,6 +32,10 @@ class Profile_Long_Range_Jumbo(IProfile):
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
+
+        buildStudioLogOutput(model, profile)
+
+        return profile
 
     def build_required_profile_inputs(self, model, profile):
 

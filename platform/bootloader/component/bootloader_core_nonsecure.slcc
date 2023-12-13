@@ -43,6 +43,8 @@ requires:
   - name: bootloader_tz_nonsecure
   - name: emlib
   - name: tz_sl_interface
+  - name: bootloader_aes_ctr_stream_block_cfg
+    condition: [device_has_semailbox]
 
 recommends:
   - id: bootloader_delay_driver_nonsecure

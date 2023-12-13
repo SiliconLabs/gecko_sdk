@@ -152,6 +152,10 @@ void mbedtls_sha512_clone(mbedtls_sha512_context *dst,
 
 int mbedtls_sha512_starts(mbedtls_sha512_context *ctx, int is384)
 {
+  if (is384 > 1) {
+    return MBEDTLS_ERR_SHA512_BAD_INPUT_DATA;
+  }
+
   return psa_status_to_mbedtls(HASH_SETUP_FCT(ctx, is384 ? PSA_ALG_SHA_384 : PSA_ALG_SHA_512), PSA_ALG_SHA_512);
 }
 
@@ -199,6 +203,10 @@ int mbedtls_sha256_starts(mbedtls_sha256_context *ctx, int is224)
 {
   SHA256_VALIDATE_RET(ctx != NULL);
   SHA256_VALIDATE_RET(is224 == 0 || is224 == 1);
+
+  if (is224 > 1) {
+    return MBEDTLS_ERR_SHA256_BAD_INPUT_DATA;
+  }
 
   return psa_status_to_mbedtls(HASH_SETUP_FCT((void *)ctx, is224 ? PSA_ALG_SHA_224 : PSA_ALG_SHA_256), PSA_ALG_SHA_256);
 }

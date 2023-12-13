@@ -58,6 +58,9 @@ void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
                                             ZCL_TIME_ATTRIBUTE_ID,
                                             CLUSTER_MASK_SERVER,
                                             EMBER_AF_NULL_MANUFACTURER_CODE);
+  if (metadata == NULL) {
+    return;
+  }
   if (emberAfAttributeIsSingleton(metadata)) {
     if (singleton != INVALID_ENDPOINT) {
       return;
@@ -215,6 +218,9 @@ void sli_zigbee_af_time_cluster_server_set_current_time(uint32_t utcTime)
                                                                           ZCL_TIME_ATTRIBUTE_ID,
                                                                           CLUSTER_MASK_SERVER,
                                                                           EMBER_AF_NULL_MANUFACTURER_CODE);
+      if (metadata == NULL) {
+        return;
+      }
       if (!emberAfAttributeIsSingleton(metadata) || singleton == endpoint) {
         writeTime(endpoint, utcTime);
       }

@@ -31,6 +31,10 @@
 #ifndef __SILABS_WISUN_LOGO_H
 #define __SILABS_WISUN_LOGO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -55,5 +59,9 @@ extern const unsigned char silabs_wisun_logo_bits[];
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SILABS_WISUN_LOGO_H */

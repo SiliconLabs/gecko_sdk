@@ -105,14 +105,18 @@ config_file:
     - "hardware_board_supports_rf_band_915"
     - "hardware_board_supports_rf_band_2400"
     unless:
-    - "device_sdid_235"
     - "hardware_board_supports_rf_band_924"
     - "hardware_board_supports_rf_band_914"
 
-  # Special case for xG28
-  - path: config/868_915/sl_flex_util_802154_init_config.h
+  # The board has 868MHz, 915MHz and 2.4GHz RF bands
+  - path: config/2p4_868_915/sl_flex_util_802154_init_config.h
     condition:
-    - "device_sdid_235"
+    - "hardware_board_supports_rf_band_868"
+    - "hardware_board_supports_rf_band_914"
+    - "hardware_board_supports_rf_band_924"
+    - "hardware_board_supports_rf_band_2400"
+    unless:
+    - "hardware_board_supports_rf_band_915"
 
 include:
   - path: .

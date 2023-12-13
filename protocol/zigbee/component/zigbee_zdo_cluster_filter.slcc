@@ -3,10 +3,7 @@ label: ZDO Cluster Command Filter
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
-description: |-
-  enables stack policies for filtering "restricted" ZDO clusters
-
+description: "enables stack policies for filtering \"restricted\" ZDO clusters"
 provides:
   - name: zigbee_zdo_cluster_filter
 

@@ -12,3 +12,5 @@ quality: production
 root_path: platform/common
 provides:
   - name: memory_layout_legacy_hal
+define:
+  - name: SL_LEGACY_LINKER

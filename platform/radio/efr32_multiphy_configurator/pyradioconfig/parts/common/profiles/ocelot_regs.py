@@ -29,7 +29,7 @@ def build_modem_regs_ocelot(model,profile):
         build_modem_regs_ocelot_only(model, profile)
 
     # Ocelot shared
-    if model.part_family.lower() in ["ocelot", "bobcat", "sol", "viper", "margay","caracal","rainier"]:
+    if model.part_family.lower() in ["ocelot", "bobcat", "sol", "margay","caracal","rainier"]:
         build_modem_regs_ocelot_shared(model, profile)
 
 def build_modem_regs_ocelot_shared(model, profile):
@@ -156,18 +156,29 @@ def build_modem_regs_ocelot_shared(model, profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_PMENDSCHEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.PMENDSCHEN'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_PMRSTSYCNEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.PMRSTSYCNEN'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_FRMSCHTIME_DSARSTSYCNEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.FRMSCHTIME.DSARSTSYCNEN'))
-    if model.part_family.lower() not in ["viper","rainier"]: ### removed in Series 3
+    if model.part_family.lower() not in ["rainier"]: ### removed in Series 3
         profile.outputs.append(ModelOutput(model.vars.MODEM_REALTIMCFE_EXTENSCHBYP, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.REALTIMCFE.EXTENSCHBYP'))
-    if model.part_family.lower() not in ["bobcat","viper","caracal","rainier"]:
+        profile.outputs.append(ModelOutput(model.vars.RAC_IFADCTRIM0_IFADCCLKSEL, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.IFADCTRIM0.IFADCCLKSEL'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELHI'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELLO, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELLO'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYLODIVLDOTRIMNDIORX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX'))
+        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_BOOSTLNA, '', ModelOutputType.SVD_REG_FIELD,readable_name='AGC.LNABOOST.BOOSTLNA'))
+        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_LNABWADJBOOST, '', ModelOutputType.SVD_REG_FIELD,readable_name='AGC.LNABOOST.LNABWADJBOOST'))
+        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_LNABWADJ, '', ModelOutputType.SVD_REG_FIELD,readable_name='AGC.LNABOOST.LNABWADJ'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDMODERX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYMMDCTRL.SYMMDMODERX'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_IFADCTRIM1_IFADCENNEGRES, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.IFADCTRIM1.IFADCENNEGRES'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYEN_SYCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYEN.SYCHPLPENRX'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPREPLICACURRADJ'))
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPSRCENRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPSRCENRX'))
+
+
+
+
+
+    if model.part_family.lower() not in ["bobcat","caracal", "rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYNTHENCTRL_MMDPOWERBALANCEDISABLE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYNTHENCTRL.MMDPOWERBALANCEDISABLE'           ))
 
-    if model.part_family.lower() not in ["rainier"]:
-        profile.outputs.append(ModelOutput(model.vars.RAC_IFADCTRIM0_IFADCCLKSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCTRIM0.IFADCCLKSEL'           ))
-        profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELHI'           ))
-        profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELLO, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXTRIM4.LNAMIXRFPKDTHRESHSELLO'           ))
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYLODIVLDOTRIMNDIORX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYLODIVLDOTRIMNDIORX'))
-
-    if model.part_family.lower() not in ["bobcat","viper","caracal","rainier"]:
+    if model.part_family.lower() not in ["bobcat","caracal", "rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYLODIVLDOTRIMCORERX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYLODIVLDOTRIMCORERX'           ))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYLODIVLDOTRIMCORETX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYLODIVLDOTRIMCORETX'           ))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYLODIVLDOTRIMNDIOTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYLODIVLDOTRIMNDIOTX'))
@@ -189,16 +200,12 @@ def build_modem_regs_ocelot_shared(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_GAINSTEPLIM1_PNINDEXMAX, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.GAINSTEPLIM1.PNINDEXMAX'))
     #profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT0_LNAMIXRFATT1, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT0.LNAMIXRFATT1'))
     #profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT0.LNAMIXRFATT2'))
-    if model.part_family.lower() not in ["viper","rainier"]: ### removed in Series 3
-        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_BOOSTLNA, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.LNABOOST.BOOSTLNA'))
-        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_LNABWADJBOOST, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.LNABOOST.LNABWADJBOOST'))
-        profile.outputs.append(ModelOutput(model.vars.AGC_LNABOOST_LNABWADJ, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.LNABOOST.LNABWADJ'))
     profile.outputs.append(ModelOutput(model.vars.FRC_TRAILTXDATACTRL_POSTAMBLEEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.TRAILTXDATACTRL.POSTAMBLEEN'))
     profile.outputs.append(ModelOutput(model.vars.AGC_ANTDIV_GAINMODE, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.ANTDIV.GAINMODE'))
     profile.outputs.append(ModelOutput(model.vars.AGC_ANTDIV_DEBOUNCECNTTHD, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.ANTDIV.DEBOUNCECNTTHD'))
 
     # Not in Sol.
-    if model.part_family.lower() in ["ocelot", "bobcat", "margay","caracal", "viper","rainier"]:
+    if model.part_family.lower() in ["ocelot", "bobcat", "margay","caracal", "rainier"]:
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF0, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF0'           ))
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF1, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF1'           ))
         profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCOE00_SET0COEFF2, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCOE00.SET0COEFF2'           ))
@@ -458,8 +465,6 @@ def build_modem_regs_ocelot_shared(model, profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_SQEXT_SQSTG2TIMOUT, '', ModelOutputType.SVD_REG_FIELD,readable_name='MODEM.SQEXT.SQSTG2TIMOUT'))
 
     if model.part_family.lower() not in["rainier"]:
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDMODERX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYMMDCTRL.SYMMDMODERX'))
-        profile.outputs.append(ModelOutput(model.vars.RAC_IFADCTRIM1_IFADCENNEGRES, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCTRIM1.IFADCENNEGRES'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYTRIMCHPREGAMPBIAS'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBW, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYTRIMCHPREGAMPBW'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM1.SYTRIMMMDREGAMPBIAS'))
@@ -469,12 +474,14 @@ def build_modem_regs_ocelot_shared(model, profile):
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPCURRRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPCURRRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_LNAMIXLDOLOWCUR, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.LNAMIXLDOLOWCUR'))
 
+    if model.part_family.lower() not in ["viper", "caracal", "rainier"]:
+        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPLEVPSRCRX'))
+
     if model.part_family.lower() not in ["bobcat","viper","caracal","rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPSRCENTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPSRCENTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYEN_SYCHPLPENTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYEN.SYCHPLPENTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYCHPBIASTRIMBUFRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.SYCHPBIASTRIMBUFRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_TX_SYCHPBIASTRIMBUFTX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.TX.SYCHPBIASTRIMBUFTX'))
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPLEVPSRCRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCTX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYTRIM0.SYCHPLEVPSRCTX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYPFDFPWENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.RX.SYPFDFPWENRX'))
         profile.outputs.append(ModelOutput(model.vars.RAC_TX_SYPFDFPWENTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.TX.SYPFDFPWENTX'))
@@ -486,13 +493,8 @@ def build_modem_regs_ocelot_shared(model, profile):
         profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDMODETX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.SYMMDCTRL.SYMMDMODETX'))
 
     # Viper only
-    if model.part_family.lower() not in ["bobcat","caracal","rainier"]:
+    if model.part_family.lower() not in ["bobcat","caracal", "viper", "rainier"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_RX_SYPFDCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD,readable_name='RAC.RX.SYPFDCHPLPENRX'))
-
-    if model.part_family.lower() not in ["rainier"]:
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYEN_SYCHPLPENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYEN.SYCHPLPENRX'))
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPREPLICACURRADJ'))
-        profile.outputs.append(ModelOutput(model.vars.RAC_SYTRIM0_SYCHPSRCENRX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYTRIM0.SYCHPSRCENRX'))
 
 def build_modem_regs_ocelot_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_OOKSHAPING_OOKSHAPINGEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.OOKSHAPING.OOKSHAPINGEN'           ))

@@ -37,7 +37,7 @@
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_util_config.h"
 #include "app_project_info.h"
-
+#include "sl_wisun_config.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ void app_wisun_wait_for_connection(void)
 #if (HEARTBEAT_ENABLED == 1)
   uint8_t dot_line_cnt = 0;
 #endif
-  msleep(10);
+  osDelay(10);
   printf("\n");
   while (1) {
     if (app_wisun_network_is_connected()) {
@@ -109,7 +109,7 @@ void app_wisun_wait_for_connection(void)
     printf((dot_line_cnt == HEARBEAT_SECTION_LENGTH ? "[%ds]\n" : "#"), dot_line_cnt);
     dot_line_cnt = dot_line_cnt == HEARBEAT_SECTION_LENGTH ? 0 : dot_line_cnt + 1;
 #endif
-    msleep(1000); // 1s
+    osDelay(1000); // 1s
   }
 }
 
@@ -117,6 +117,26 @@ bool app_wisun_network_is_connected(void)
 {
   sl_wisun_join_state_t join_state = app_wisun_get_join_state();
   return join_state == SL_WISUN_JOIN_STATE_OPERATIONAL ? true : false;
+}
+
+void app_wisun_dispatch_thread(void)
+{
+#if !defined(WISUN_CONFIG_DEVICE_TYPE)
+  uint8_t device_type = SL_WISUN_ROUTER;
+#else
+  uint8_t device_type = WISUN_CONFIG_DEVICE_TYPE;
+#endif
+
+  if (device_type == SL_WISUN_LFN) {
+    osDelay(APP_THREAD_LP_DISPATCH_MS);
+  } else {
+    osDelay(1UL);
+  }
+}
+
+const app_project_info_t * app_wisun_project_info_get(void)
+{
+  return (const app_project_info_t * ) &_app_project_info;
 }
 
 // -----------------------------------------------------------------------------

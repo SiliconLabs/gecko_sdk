@@ -82,7 +82,7 @@ Next time you issue the `wisun start_fan11` command in the case of a FAN-1.1 PHY
 | wisun.number_of_channels | R/W | integer | [uint16] | Number of channels | - explicit |
 | wisun.protocol_id | R/W | integer | [uint16] | Radioconf protocol ID | - join by IDs |
 | wisun.channel_id | R/W | integer | [uint16] | Radioconf protocol ID | - join by IDs |
-| wisun.network_size                   | R/W | integer     | - automatic (0) <br> - small (default): less than 100 nodes (1) <br> - medium: 100 to 1000 nodes (2) <br> - large: more than 1000 nodes (3) <br> - test (4) <br> - certification (6) |  Used to optimize network timings considering the number of expected nodes on the network. |  |
+| wisun.network_size                   | R/W | integer     | - automatic (0) <br> - small (default): less than 100 nodes (1) <br> - medium: 100 to 1000 nodes (2) <br> - large: more than 1000 nodes (3) <br> - test (4) <br> - certification (5) |  Used to optimize network timings considering the number of expected nodes on the network. |  |
 | wisun.allowed_channels | R/W | integer | Allowed channel ranges (e.g. 0-54,57-60,64,67-68) |Allowed channel ranges |  |
 | wisun.unicast_dwell_interval | R/W | integer | 15 to 255 | Unicast dwell interval in milliseconds |  |
 | wisun.broadcast_dwell_interval | R/W | integer | 100 to 255 | Broadcast dwell interval in milliseconds |  |

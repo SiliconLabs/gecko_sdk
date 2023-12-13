@@ -90,6 +90,12 @@
 // <i> Default: 300
 // <i> The amount of time a device will store a transient link key that can be used to join a network.
 #define EMBER_TRANSIENT_KEY_TIMEOUT_S   300
+
+// <o EMBER_BINDING_TABLE_SIZE> Binding Table Size <1-127>
+// <i> Default: 3
+// <i> The number of entries that the binding table can hold.
+#define EMBER_BINDING_TABLE_SIZE   3
+
 // </h>
 
 // <<< end of configuration section >>>

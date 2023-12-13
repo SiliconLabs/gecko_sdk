@@ -66,8 +66,8 @@
 #define NO_FLAGS                  0
 /// Immediate transition time is 0 seconds
 #define IMMEDIATE                 0
-/// Callback has not parameters
-#define NO_CALLBACK_DATA          (void *)NULL
+/// Callback has no parameters
+#define NO_CALLBACK_DATA          NULL
 /// High Priority
 #define HIGH_PRIORITY             0
 /// Minimum color temperature 800K
@@ -76,12 +76,18 @@
 #define TEMPERATURE_MAX           0x4e20
 /// Scale factor for temperature calculations
 #define TEMPERATURE_SCALE_FACTOR  100
+/// Maximum lightness
+#define LIGHTNESS_MAX             0xffff
 /// Delta UV is hardcoded to 0
 #define DELTA_UV                  0
 /// Maximum temperature percentage value
 #define TEMPERATURE_PCT_MAX       100
+/// Maximum lightness percentage value
+#define LIGHTNESS_PCT_MAX         100
 /// Temperature level initial value @ref temperature_level
-#define TEMPERATURE_LEVEL_INIT    0
+#define TEMPERATURE_LEVEL_INIT    TEMPERATURE_MIN
+/// Lightness level initial value @ref lightness_level
+#define LIGHTNESS_LEVEL_INIT      0
 /// Delay unit value for request for ctl messages in millisecond
 #define REQ_DELAY_MS              50
 
@@ -94,6 +100,8 @@ static void ctl_retransmission_timer_cb(app_timer_t *handle,
 
 /// temperature level converted from percentage to actual value, range 0..65535
 static uint16_t temperature_level = TEMPERATURE_LEVEL_INIT;
+/// lightness level converted from percentage to actual value, range 0..65535
+static uint16_t lightness_level = LIGHTNESS_LEVEL_INIT;
 /// number of ctl requests to be sent
 static uint8_t ctl_request_count = 0;
 /// ctl transaction identifier
@@ -119,7 +127,7 @@ static void send_ctl_request(uint8_t retrans)
   sl_status_t sc;
 
   req.kind = mesh_lighting_request_ctl;
-  req.ctl.lightness = sl_btmesh_get_lightness();
+  req.ctl.lightness = lightness_level;
   req.ctl.temperature = temperature_level;
   req.ctl.deltauv = DELTA_UV; //hardcoded delta uv
 
@@ -156,14 +164,9 @@ static void send_ctl_request(uint8_t retrans)
 }
 
 /*******************************************************************************
- * This function change the temperature and send it to the server.
- *
- * @param[in] temperature_percent  Defines new color temperature
- * value as percentage.
- *    Valid values 0-100 %
- *
+ * This function change the temperature and send it to the server
  ******************************************************************************/
-void sl_btmesh_set_temperature(uint8_t temperature_percent)
+void sl_btmesh_ctl_client_set_temperature(uint8_t temperature_percent)
 {
   // Adjust light temperature, using Light CTL model
   if (temperature_percent > TEMPERATURE_PCT_MAX) {
@@ -180,6 +183,36 @@ void sl_btmesh_set_temperature(uint8_t temperature_percent)
   log("Set temperature to %u %% / level %u K" NL,
       temperature_percent * temperature_percent / TEMPERATURE_PCT_MAX,
       temperature_level);
+
+  // Request is sent multiple times to improve reliability
+  ctl_request_count = SL_BTMESH_CTL_CLIENT_RETRANSMISSION_COUNT_CFG_VAL;
+
+  send_ctl_request(0);  //Send the first request
+
+  // If there are more requests to send, start a repeating soft timer
+  // to trigger retransmission of the request after 50 ms delay
+  if (ctl_request_count > 0) {
+    sl_status_t sc = app_timer_start(&ctl_retransmission_timer,
+                                     SL_BTMESH_CTL_CLIENT_RETRANSMISSION_TIMEOUT_CFG_VAL,
+                                     ctl_retransmission_timer_cb,
+                                     NO_CALLBACK_DATA,
+                                     true);
+    app_assert_status_f(sc, "Failed to start periodic timer");
+  }
+}
+
+/*******************************************************************************
+ * This function changes the lightness and send it to the server
+ ******************************************************************************/
+void sl_btmesh_ctl_client_set_lightness(uint8_t lightness_percent)
+{
+  // Adjust lightness, using Light CTL model
+  if (lightness_percent > LIGHTNESS_PCT_MAX) {
+    return;
+  }
+
+  lightness_level = LIGHTNESS_MAX * lightness_percent / LIGHTNESS_PCT_MAX;
+  log("Set CTL lightness to %u %% / level %u K" NL, lightness_percent, lightness_level);
 
   // Request is sent multiple times to improve reliability
   ctl_request_count = SL_BTMESH_CTL_CLIENT_RETRANSMISSION_COUNT_CFG_VAL;

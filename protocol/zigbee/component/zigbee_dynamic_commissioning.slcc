@@ -4,14 +4,7 @@ package: Zigbee
 category: Zigbee|Stack
 quality: production
 
-
-description: |-
-  Provides support for Dynamic Commissioning features as part of Revision 23 of ZigBee Specification, including Dynamic Link Keys and Device Interview.
-
-  Zigbee Dynamic Link Key Negotation provides support for negotiating link keys via new ZDO clusters.
-  This enables devices to commission new link keys both on-network and during joining,
-  and Device Interview allows Centralized Networks to implement additional security screening of new
-  devices before authorizing them on the network.
+description: Provides support for Dynamic Commissioning features as part of Revision 23 of ZigBee Specification, including Dynamic Link Keys and Device Interview. Zigbee Dynamic Link Key Negotation provides support for negotiating link keys via new ZDO clusters. This enables devices to commission new link keys both on-network and during joining, and Device Interview allows Centralized Networks to implement additional security screening of new devices before authorizing them on the network.
 
 provides:
   - name: zigbee_dynamic_commissioning
@@ -24,10 +17,10 @@ requires:
   - name: zigbee_dynamic_commissioning_implementation
   - name: zigbee_dynamic_commissioning_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
 
 recommends:
-  - id: zigbee_dynamic_commissioning_source
+  - id: zigbee_dynamic_commissioning_library_internal
 
 include:
   - path: protocol/zigbee/stack/include

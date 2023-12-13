@@ -89,6 +89,8 @@ requires:
     condition: [device_family_efm32pg28, bootloader_uart_xmodem]
   - name: sl_fault_injection_hardening
     condition: [device_series_2]
+  - name: bootloader_aes_ctr_stream_block_cfg
+    condition: [device_has_semailbox]
 recommends:
   - id: bootloader_include_parser
   - id: bootloader_uart_xmodem

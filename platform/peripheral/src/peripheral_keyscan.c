@@ -46,10 +46,10 @@
 /***************************************************************************//**
  * Initializes KEYSCAN module.
  ******************************************************************************/
-void sl_keyscan_init(const sl_keyscan_config_t *p_config)
+void sl_hal_keyscan_init(const sl_hal_keyscan_config_t *p_config)
 {
   // Wait to be ready
-  sl_keyscan_wait_ready();
+  sl_hal_keyscan_wait_ready();
 
   if (KEYSCAN->EN == KEYSCAN_EN_EN) {
     // Disable KEYSCAN module
@@ -63,9 +63,9 @@ void sl_keyscan_init(const sl_keyscan_config_t *p_config)
   EFM_ASSERT(p_config->clock_divider <= _KEYSCAN_CFG_CLKDIV_MASK);
   EFM_ASSERT(p_config->column_number <= KEYSCAN_COLNUM);
   EFM_ASSERT(p_config->row_number <= KEYSCAN_ROWNUM);
-  EFM_ASSERT(p_config->scan_delay <= SL_KEYSCAN_DELAY_32MS);
-  EFM_ASSERT(p_config->debounce_delay <= SL_KEYSCAN_DELAY_32MS);
-  EFM_ASSERT(p_config->stable_delay <= SL_KEYSCAN_DELAY_32MS);
+  EFM_ASSERT(p_config->scan_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
+  EFM_ASSERT(p_config->debounce_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
+  EFM_ASSERT(p_config->stable_delay <= SL_HAL_KEYSCAN_DELAY_32MS);
 
   // Set configuration
   KEYSCAN->CFG = ((p_config->clock_divider) << _KEYSCAN_CFG_CLKDIV_SHIFT)
@@ -82,11 +82,11 @@ void sl_keyscan_init(const sl_keyscan_config_t *p_config)
 /***************************************************************************//**
  * Enables KEYSCAN module.
  ******************************************************************************/
-void sl_keyscan_enable(void)
+void sl_hal_keyscan_enable(void)
 {
   if (KEYSCAN->EN != 0U) {
     // Wait for synchronization before writing to EN register
-    sl_keyscan_wait_sync();
+    sl_hal_keyscan_wait_sync();
   }
 
   // Enable KEYSCAN module
@@ -96,7 +96,7 @@ void sl_keyscan_enable(void)
 /***************************************************************************//**
  * Disables KEYSCAN module.
  ******************************************************************************/
-void sl_keyscan_disable(void)
+void sl_hal_keyscan_disable(void)
 {
   // Quick exit if we want to disable KEYSCAN and it's already disabled.
   if (KEYSCAN->EN == 0U) {
@@ -105,11 +105,11 @@ void sl_keyscan_disable(void)
 
   // Stop scan if running
   if (KEYSCAN->STATUS & _KEYSCAN_STATUS_RUNNING_MASK) {
-    sl_keyscan_stop_scan();
+    sl_hal_keyscan_stop_scan();
   }
 
   // Wait for synchronization to complete
-  sl_keyscan_wait_sync();
+  sl_hal_keyscan_wait_sync();
 
   // Disable module
   KEYSCAN->EN_CLR = KEYSCAN_EN_EN;
@@ -122,17 +122,17 @@ void sl_keyscan_disable(void)
  *   The register STATUS get reset value after enabling the module because
  *   it is of type RSYNC
  ******************************************************************************/
-void sl_keyscan_reset(void)
+void sl_hal_keyscan_reset(void)
 {
   // Stop scan if running
   if (KEYSCAN->STATUS & _KEYSCAN_STATUS_RUNNING_MASK) {
-    sl_keyscan_stop_scan();
+    sl_hal_keyscan_stop_scan();
   }
 
-  sl_keyscan_enable();
+  sl_hal_keyscan_enable();
 
   // Wait for synchronization to complete
-  sl_keyscan_wait_sync();
+  sl_hal_keyscan_wait_sync();
 
   // Software reset command
   KEYSCAN->SWRST_SET = KEYSCAN_SWRST_SWRST;

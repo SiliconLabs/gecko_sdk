@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*            (c) 1995 - 2021 SEGGER Microcontroller GmbH             *
+*            (c) 1995 - 2023 SEGGER Microcontroller GmbH             *
 *                                                                    *
 *       www.segger.com     Support: support@segger.com               *
 *                                                                    *
@@ -42,14 +42,14 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       SystemView version: 3.32                                    *
+*       SystemView version: 3.52                                    *
 *                                                                    *
 **********************************************************************
 -------------------------- END-OF-HEADER -----------------------------
 
 File    : SEGGER_SYSVIEW.c
 Purpose : System visualization API implementation.
-Revision: $Rev: 26232 $
+Revision: $Rev: 29105 $
 
 Additional information:
   Packet format:
@@ -435,8 +435,8 @@ static U8* _EncodeData(U8* pPayload, const char* pSrc, unsigned int NumBytes) {
     *pPayload++ = (U8)NumBytes;
   } else {
     *pPayload++ = 255;
-    *pPayload++ = (NumBytes & 255);
     *pPayload++ = ((NumBytes >> 8) & 255);
+    *pPayload++ = (NumBytes & 255);
   }
   while (n < NumBytes) {
     *pPayload++ = *p++;
@@ -468,38 +468,38 @@ static U8* _EncodeData(U8* pPayload, const char* pSrc, unsigned int NumBytes) {
 *    No more than 1 + Limit bytes will be encoded to the payload.
 */
 static U8 *_EncodeStr(U8 *pPayload, const char *pText, unsigned int Limit) {
-  unsigned int n;
-  unsigned int Len;
+  U8* pLen;
+  const char* sStart;
+
+  sStart = pText; // Remember start of string.
   //
-  // Compute string len
+  // Save space to store count byte(s).
   //
-  Len = 0;
-  if (pText != NULL) {
-    while(*(pText + Len) != 0) {
-      Len++;
-    }
-    if (Len > Limit) {
-      Len = Limit;
-    }
+  pLen = pPayload++;
+#if (SEGGER_SYSVIEW_MAX_STRING_LEN >= 255)  // Length always encodes in 3 bytes
+  pPayload += 2;
+#endif
+  //
+  // Limit string to maximum length and copy into payload buffer.
+  //
+  if (Limit > SEGGER_SYSVIEW_MAX_STRING_LEN) {
+    Limit = SEGGER_SYSVIEW_MAX_STRING_LEN;
   }
-  //
-  // Write Len
-  //
-  if (Len < 255)  {
-    *pPayload++ = (U8)Len;
-  } else {
-    *pPayload++ = 255;
-    *pPayload++ = (Len & 255);
-    *pPayload++ = ((Len >> 8) & 255);
-  }
-  //
-  // copy string
-  //
-  n = 0;
-  while (n < Len) {
+  while ((Limit-- > 0) && (*pText != '\0')) {
     *pPayload++ = *pText++;
-    n++;
   }
+  //
+  // Save string length to buffer.
+  //
+#if (SEGGER_SYSVIEW_MAX_STRING_LEN >= 255)  // Length always encodes in 3 bytes
+  Limit = (unsigned int)(pText - sStart);
+  *pLen++ = (U8)255;
+  *pLen++ = (U8)((Limit >> 8) & 255);
+  *pLen++ = (U8)(Limit & 255);
+#else   // Length always encodes in 1 byte
+  *pLen = (U8)(pText - sStart);
+#endif
+  //
   return pPayload;
 }
 
@@ -686,7 +686,6 @@ static void _SendSyncInfo(void) {
     for (n = 0; n < _NumModules; n++) {
       SEGGER_SYSVIEW_SendModule(n);
     }
-    SEGGER_SYSVIEW_SendModuleDescription();
   }
 }
 #endif  // (SEGGER_SYSVIEW_POST_MORTEM_MODE == 1)
@@ -773,14 +772,14 @@ Send:
       //
       // Backwards U32 encode EventId.
       //
-      if (NumBytes < (1u << 14)) { // Encodes in 2 bytes
+      if (NumBytes < (1ul << 14)) { // Encodes in 2 bytes
         *--pStartPacket = (U8)(NumBytes >>  7);
         *--pStartPacket = (U8)(NumBytes | 0x80);
-      } else if (NumBytes < (1u << 21)) {    // Encodes in 3 bytes
+      } else if (NumBytes < (1ul << 21)) {    // Encodes in 3 bytes
         *--pStartPacket = (U8)(NumBytes >> 14);
         *--pStartPacket = (U8)((NumBytes >>  7) | 0x80);
         *--pStartPacket = (U8)(NumBytes | 0x80);
-      } else if (NumBytes < (1u << 28)) {    // Encodes in 4 bytes
+      } else if (NumBytes < (1ul << 28)) {    // Encodes in 4 bytes
         *--pStartPacket = (U8)(NumBytes >> 21);
         *--pStartPacket = (U8)((NumBytes >> 14) | 0x80);
         *--pStartPacket = (U8)((NumBytes >>  7) | 0x80);
@@ -814,11 +813,11 @@ Send:
       if (EventId < (1u << 14)) { // Encodes in 2 bytes
         *--pStartPacket = (U8)(EventId >>  7);
         *--pStartPacket = (U8)(EventId | 0x80);
-      } else if (EventId < (1u << 21)) {    // Encodes in 3 bytes
+      } else if (EventId < (1ul << 21)) {    // Encodes in 3 bytes
         *--pStartPacket = (U8)(EventId >> 14);
         *--pStartPacket = (U8)((EventId >>  7) | 0x80);
         *--pStartPacket = (U8)(EventId | 0x80);
-      } else if (EventId < (1u << 28)) {    // Encodes in 4 bytes
+      } else if (EventId < (1ul << 28)) {    // Encodes in 4 bytes
         *--pStartPacket = (U8)(EventId >> 21);
         *--pStartPacket = (U8)((EventId >> 14) | 0x80);
         *--pStartPacket = (U8)((EventId >>  7) | 0x80);
@@ -1210,6 +1209,7 @@ static void _VPrintTarget(const char* sFormat, U32 Options, va_list* pParamList)
   unsigned int  FormatFlags;
   unsigned int  FieldWidth;
   U8*           pPayloadStart;
+  const char*   s;
 #if SEGGER_SYSVIEW_USE_STATIC_BUFFER == 0
   RECORD_START(SEGGER_SYSVIEW_INFO_SIZE + SEGGER_SYSVIEW_MAX_STRING_LEN + 1 + 2 * SEGGER_SYSVIEW_QUANTA_U32);
   SEGGER_SYSVIEW_LOCK();
@@ -1314,6 +1314,20 @@ static void _VPrintTarget(const char* sFormat, U32 Options, va_list* pParamList)
         v = va_arg(*pParamList, int);
         _PrintUnsigned(&BufferDesc, (unsigned int)v, 16u, NumDigits, FieldWidth, FormatFlags);
         break;
+      case 's':
+        s = va_arg(*pParamList, const char*);
+        if (s == NULL) {
+          s = "(null)";
+        }
+        do {
+          c = *s;
+          s++;
+          if (c == '\0') {
+            break;
+          }
+         _StoreChar(&BufferDesc, c);
+        } while (BufferDesc.Cnt < SEGGER_SYSVIEW_MAX_STRING_LEN);
+        break;
       case 'p':
         v = va_arg(*pParamList, int);
         _PrintUnsigned(&BufferDesc, (unsigned int)v, 16u, 8u, 8u, 0u);
@@ -1361,7 +1375,7 @@ static void _VPrintTarget(const char* sFormat, U32 Options, va_list* pParamList)
 *
 *  Function description
 *    Initializes the SYSVIEW module.
-*    Must be called before the Systemview Application connects to
+*    Must be called before the SystemView Application connects to
 *    the system.
 *
 *  Parameters
@@ -1859,7 +1873,7 @@ void SEGGER_SYSVIEW_Start(void) {
 *    Stop recording SystemView events.
 *
 *    This function is triggered by the SystemView Application on disconnect.
-*    For single-shot or post-mortem mode recording, it can be called
+*    For single-shot or postmortem mode recording, it can be called
 *    by the application.
 *
 *  Additional information
@@ -1965,7 +1979,7 @@ void SEGGER_SYSVIEW_SendTaskList(void) {
 *
 *  Function description
 *    Send the system description string to the host.
-*    The system description is used by the Systemview Application
+*    The system description is used by the SystemView Application
 *    to identify the current application and handle events accordingly.
 *
 *    The system description is usually called by the system description
@@ -2432,6 +2446,179 @@ void SEGGER_SYSVIEW_NameResource(U32 ResourceId, const char* sName) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_HeapDefine()
+*
+*  Function description
+*    Define heap.
+*
+*  Parameters
+*    pHeap        - Pointer to heap control structure.
+*    pBase        - Pointer to managed heap memory.
+*    HeapSize     - Size of managed heap memory in bytes.
+*    MetadataSize - Size of metadata associated with each heap allocation.
+*
+*  Additional information
+*    SystemView can track allocations across multiple heaps.
+*
+*    HeapSize must be a multiple of the natural alignment unit of the
+*    target.  This size is subject to compression, controlled by the
+*    specific setting of SEGGER_SYSVIEW_ID_SHIFT.
+*
+*    MetadataSize defines the size of the per-allocation metadata.
+*    For many heap implementations, the metadata size is a multiple of
+*    the word size of the machine and typically contains the size
+*    of the allocated block (used upon deallocation), optional
+*    pointers to the preceding and/or following blocks, and optionally
+*    a tag identifying the owner of the block.  Note that MetadataSize
+*    is not compressed within the SystemView packet and is not
+*    required to be a multiple of 1<<SEGGER_SYSVIEW_ID_SHIFT.
+*/
+void SEGGER_SYSVIEW_HeapDefine(void* pHeap, void *pBase, unsigned int HeapSize, unsigned int MetadataSize) {
+  U8* pPayload;
+  U8* pPayloadStart;
+  RECORD_START(SEGGER_SYSVIEW_INFO_SIZE + 4 * SEGGER_SYSVIEW_QUANTA_U32);
+  //
+  pPayload = pPayloadStart;
+  ENCODE_U32(pPayload, SYSVIEW_EVTID_EX_HEAP_DEFINE);
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pHeap));
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pBase));
+  ENCODE_U32(pPayload, HeapSize >> SEGGER_SYSVIEW_ID_SHIFT);
+  ENCODE_U32(pPayload, MetadataSize);
+  _SendPacket(pPayloadStart, pPayload, SYSVIEW_EVTID_EX);
+  RECORD_END();
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_HeapAlloc()
+*
+*  Function description
+*    Record a system-heap allocation event.
+*
+*  Parameters
+*    pHeap       - Pointer to heap where allocation was made.
+*    pUserData   - Pointer to allocated user data.
+*    UserDataLen - Size of block allocated to hold user data, excluding any metadata.
+*
+*  Additional information
+*    The user data must be correctly aligned for the architecture, which
+*    typically requires that the alignment is at least the alignment
+*    of a double or a long long.  pUserData is, therefore, compressed by
+*    shrinking as IDs are compressed, controlled by the specific setting
+*    of SEGGER_SYSVIEW_ID_SHIFT.
+*
+*    In the same way, UserDataLen must reflect the size of the allocated
+*    block, not the allocation size requested by the application.  This
+*    size is also subject to compression, controlled by the specific setting
+*    of SEGGER_SYSVIEW_ID_SHIFT.
+*
+*    As an example, assume the allocator is running on a Cortex-M device
+*    with SEGGER_SYSVIEW_ID_SHIFT set to 2 (the word alignment of the device).
+*    If a user requests an allocation of 5 bytes, a hypothetical heap
+*    allocator could allocate a block with size 32 bytes for this.  The value
+*    of UserDataLen sent to SystemView for recording should be 32, not 5,
+*    and the 32 is compressed by shifting by two bits, the configured value
+*    of SEGGER_SYSVIEW_ID_SHIFT, and describes the number of bytes that are
+*    consumed from managed memory from which SystemView can calculate
+*    accurate heap metrics.
+*/
+void SEGGER_SYSVIEW_HeapAlloc(void *pHeap, void* pUserData, unsigned int UserDataLen) {
+  U8* pPayload;
+  U8* pPayloadStart;
+  RECORD_START(SEGGER_SYSVIEW_INFO_SIZE + 3 * SEGGER_SYSVIEW_QUANTA_U32);
+  //
+  pPayload = pPayloadStart;
+  ENCODE_U32(pPayload, SYSVIEW_EVTID_EX_HEAP_ALLOC);
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pHeap));
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pUserData));
+  ENCODE_U32(pPayload, UserDataLen >> SEGGER_SYSVIEW_ID_SHIFT);
+  _SendPacket(pPayloadStart, pPayload, SYSVIEW_EVTID_EX);
+  RECORD_END();
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_HeapAllocEx()
+*
+*  Function description
+*    Record a per-heap allocation event.
+*
+*  Parameters
+*    pHeap       - Pointer to heap where allocation was made.
+*    pUserData   - Pointer to allocated user data.
+*    UserDataLen - Size of block allocated to hold user data, excluding any metadata.
+*    Tag         - Block tag, typically used to identify the owner of the block.
+*
+*  Additional information
+*    The user data must be correctly aligned for the architecture, which
+*    typically requires that the alignment is at least the alignment
+*    of a double or a long long.  pUserData is, therefore, compressed by
+*    shrinking as IDs are compressed, controlled by the specific setting
+*    of SEGGER_SYSVIEW_ID_SHIFT.
+*
+*    In the same way, UserDataLen must reflect the size of the allocated
+*    block, not the allocation size requested by the application.  This
+*    size is also subject to compression, controlled by the specific setting
+*    of SEGGER_SYSVIEW_ID_SHIFT.
+*
+*    As an example, assume the allocator is running on a Cortex-M device
+*    with SEGGER_SYSVIEW_ID_SHIFT set to 2 (the word alignment of the device).
+*    If a user requests an allocation of 5 bytes, a hypothetical heap
+*    allocator could allocate a block with size 32 bytes for this.  The value
+*    of UserDataLen sent to SystemView for recording should be 32, not 5,
+*    and the 32 is compressed by shifting by two bits, the configured value
+*    of SEGGER_SYSVIEW_ID_SHIFT, and describes the number of bytes that are
+*    consumed from managed memory from which SystemView can calculate
+*    accurate heap metrics.
+*
+*  See also
+*    SEGGER_SYSVIEW_HeapAlloc().
+*/
+void SEGGER_SYSVIEW_HeapAllocEx(void *pHeap, void* pUserData, unsigned int UserDataLen, unsigned int Tag) {
+  U8* pPayload;
+  U8* pPayloadStart;
+  RECORD_START(SEGGER_SYSVIEW_INFO_SIZE + 5 * SEGGER_SYSVIEW_QUANTA_U32);
+  //
+  pPayload = pPayloadStart;
+  ENCODE_U32(pPayload, SYSVIEW_EVTID_EX_HEAP_ALLOC_EX);
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pHeap));
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pUserData));
+  ENCODE_U32(pPayload, UserDataLen >> SEGGER_SYSVIEW_ID_SHIFT);
+  ENCODE_U32(pPayload, Tag);
+  _SendPacket(pPayloadStart, pPayload, SYSVIEW_EVTID_EX);
+  RECORD_END();
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_HeapFree()
+*
+*  Function description
+*    Record a heap deallocation event.
+*
+*  Parameters
+*    pHeap     - Pointer to heap where allocation was made.
+*    pUserData - Pointer to allocated user data.
+*
+*  Additional information
+*    SystemViews track allocations and knows the size of the
+*    allocated data.
+*/
+void SEGGER_SYSVIEW_HeapFree(void* pHeap, void* pUserData) {
+  U8* pPayload;
+  U8* pPayloadStart;
+  RECORD_START(SEGGER_SYSVIEW_INFO_SIZE + 2 * SEGGER_SYSVIEW_QUANTA_U32);
+  //
+  pPayload = pPayloadStart;
+  ENCODE_U32(pPayload, SYSVIEW_EVTID_EX_HEAP_FREE);
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pHeap));
+  ENCODE_U32(pPayload, SHRINK_ID((U32)pUserData));
+  _SendPacket(pPayloadStart, pPayload, SYSVIEW_EVTID_EX);
+  RECORD_END();
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_SendPacket()
 *
 *  Function description
@@ -2629,9 +2816,6 @@ void SEGGER_SYSVIEW_RegisterModule(SEGGER_SYSVIEW_MODULE* pModule) {
     _NumModules++;
   }
   SEGGER_SYSVIEW_SendModule(0);
-  if (pModule->pfSendModuleDesc) {
-    pModule->pfSendModuleDesc();
-  }
   SEGGER_SYSVIEW_UNLOCK();
 }
 
@@ -2715,6 +2899,9 @@ void SEGGER_SYSVIEW_SendModule(U8 ModuleId) {
       _SendPacket(pPayloadStart, pPayload, SYSVIEW_EVTID_MODULEDESC);
       RECORD_END();
     }
+    if (pModule && pModule->pfSendModuleDesc) {
+      pModule->pfSendModuleDesc();
+    }
   }
 }
 
@@ -2797,6 +2984,39 @@ void SEGGER_SYSVIEW_PrintfHostEx(const char* s, U32 Options, ...) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_VPrintfHostEx()
+*
+*  Function description
+*    Print a string which is formatted on the host by the SystemView Application
+*    with Additional information.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    Options    - Options for the string. i.e. Log level.
+*    pParamList - Pointer to the list of arguments for the format string
+*
+*  Additional information
+*    All format arguments are treated as 32-bit scalar values.
+*/
+void SEGGER_SYSVIEW_VPrintfHostEx(const char* s, U32 Options, va_list *pParamList) {
+#if SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT
+  int r;
+  va_list ParamListCopy;
+  va_copy(ParamListCopy, *pParamList);
+
+  r = _VPrintHost(s, Options, pParamList);
+
+  if (r == -1) {
+    _VPrintTarget(s, Options, &ParamListCopy);
+  }
+  va_end(ParamListCopy);
+#else
+  _VPrintHost(s, Options, pParamList);
+#endif
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_PrintfHost()
 *
 *  Function description
@@ -2826,6 +3046,37 @@ void SEGGER_SYSVIEW_PrintfHost(const char* s, ...) {
   va_start(ParamList, s);
   _VPrintHost(s, SEGGER_SYSVIEW_LOG, &ParamList);
   va_end(ParamList);
+#endif
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_VPrintfHost()
+*
+*  Function description
+*    Print a string which is formatted on the host by the SystemView Application.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*
+*  Additional information
+*    All format arguments are treated as 32-bit scalar values.
+*/
+void SEGGER_SYSVIEW_VPrintfHost(const char* s, va_list *pParamList) {
+#if SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT
+  int r;
+  va_list ParamListCopy;
+  va_copy(ParamListCopy, *pParamList);
+
+  r = _VPrintHost(s, SEGGER_SYSVIEW_LOG, pParamList);
+
+  if (r == -1) {
+    _VPrintTarget(s, SEGGER_SYSVIEW_LOG, &ParamListCopy);
+  }
+  va_end(ParamListCopy);
+#else
+  _VPrintHost(s, SEGGER_SYSVIEW_LOG, pParamList);
 #endif
 }
 
@@ -2866,6 +3117,38 @@ void SEGGER_SYSVIEW_WarnfHost(const char* s, ...) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_VWarnfHost()
+*
+*  Function description
+*    Print a warning string which is formatted on the host by
+*    the SystemView Application.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*
+*  Additional information
+*    All format arguments are treated as 32-bit scalar values.
+*/
+void SEGGER_SYSVIEW_VWarnfHost(const char* s, va_list *pParamList) {
+#if SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT
+  int r;
+  va_list ParamListCopy;
+  va_copy(ParamListCopy, *pParamList);
+
+  r = _VPrintHost(s, SEGGER_SYSVIEW_WARNING, pParamList);
+
+  if (r == -1) {
+    _VPrintTarget(s, SEGGER_SYSVIEW_WARNING, &ParamListCopy);
+  }
+  va_end(ParamListCopy);
+#else
+  _VPrintHost(s, SEGGER_SYSVIEW_WARNING, pParamList);
+#endif
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_ErrorfHost()
 *
 *  Function description
@@ -2901,6 +3184,38 @@ void SEGGER_SYSVIEW_ErrorfHost(const char* s, ...) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_VErrorfHost()
+*
+*  Function description
+*    Print a warning string which is formatted on the host by
+*    the SystemView Application.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*
+*  Additional information
+*    All format arguments are treated as 32-bit scalar values.
+*/
+void SEGGER_SYSVIEW_VErrorfHost(const char* s, va_list *pParamList) {
+#if SEGGER_SYSVIEW_PRINTF_IMPLICIT_FORMAT
+  int r;
+  va_list ParamListCopy;
+  va_copy(ParamListCopy, *pParamList);
+
+  r = _VPrintHost(s, SEGGER_SYSVIEW_ERROR, pParamList);
+
+  if (r == -1) {
+    _VPrintTarget(s, SEGGER_SYSVIEW_ERROR, &ParamListCopy);
+  }
+  va_end(ParamListCopy);
+#else
+  _VPrintHost(s, SEGGER_SYSVIEW_ERROR, pParamList);
+#endif
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_PrintfTargetEx()
 *
 *  Function description
@@ -2917,6 +3232,23 @@ void SEGGER_SYSVIEW_PrintfTargetEx(const char* s, U32 Options, ...) {
   va_start(ParamList, Options);
   _VPrintTarget(s, Options, &ParamList);
   va_end(ParamList);
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_VPrintfTargetEx()
+*
+*  Function description
+*    Print a string which is formatted on the target before sent to
+*    the host with Additional information.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    Options    - Options for the string. i.e. Log level.
+*    pParamList - Pointer to the list of arguments for the format string
+*/
+void SEGGER_SYSVIEW_VPrintfTargetEx(const char* s, U32 Options, va_list *pParamList) {
+  _VPrintTarget(s, Options, pParamList);
 }
 
 /*********************************************************************
@@ -2940,6 +3272,22 @@ void SEGGER_SYSVIEW_PrintfTarget(const char* s, ...) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_VPrintfTarget()
+*
+*  Function description
+*    Print a string which is formatted on the target before sent to
+*    the host.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*/
+void SEGGER_SYSVIEW_VPrintfTarget(const char* s, va_list* pParamList) {
+  _VPrintTarget(s, SEGGER_SYSVIEW_LOG, pParamList);
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_WarnfTarget()
 *
 *  Function description
@@ -2959,6 +3307,22 @@ void SEGGER_SYSVIEW_WarnfTarget(const char* s, ...) {
 
 /*********************************************************************
 *
+*       SEGGER_SYSVIEW_VWarnfTarget()
+*
+*  Function description
+*    Print a warning string which is formatted on the target before
+*    sent to the host.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*/
+void SEGGER_SYSVIEW_VWarnfTarget(const char* s, va_list* pParamList) {
+  _VPrintTarget(s, SEGGER_SYSVIEW_WARNING, pParamList);
+}
+
+/*********************************************************************
+*
 *       SEGGER_SYSVIEW_ErrorfTarget()
 *
 *  Function description
@@ -2974,6 +3338,22 @@ void SEGGER_SYSVIEW_ErrorfTarget(const char* s, ...) {
   va_start(ParamList, s);
   _VPrintTarget(s, SEGGER_SYSVIEW_ERROR, &ParamList);
   va_end(ParamList);
+}
+
+/*********************************************************************
+*
+*       SEGGER_SYSVIEW_VErrorfTarget()
+*
+*  Function description
+*    Print an error string which is formatted on the target before
+*    sent to the host.
+*
+*  Parameters
+*    s          - String to be formatted.
+*    pParamList - Pointer to the list of arguments for the format string
+*/
+void SEGGER_SYSVIEW_VErrorfTarget(const char* s, va_list* pParamList) {
+  _VPrintTarget(s, SEGGER_SYSVIEW_ERROR, pParamList);
 }
 #endif // SEGGER_SYSVIEW_EXCLUDE_PRINTF
 

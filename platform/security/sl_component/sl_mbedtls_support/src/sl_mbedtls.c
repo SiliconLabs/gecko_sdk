@@ -29,7 +29,7 @@
  ******************************************************************************/
 #include "sl_mbedtls.h"
 #include "sl_assert.h"
-#include "mbedtls/threading.h"
+#include "mbedtls/build_info.h"
 #if !defined(SL_TRUSTZONE_NONSECURE)
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 #include "sl_se_manager.h"
@@ -40,6 +40,7 @@
 #endif // #if !defined(SL_TRUSTZONE_NONSECURE)
 
 #if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+#include "mbedtls/threading.h"
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 #include "cmsis_os2.h"
 #include <stdbool.h>

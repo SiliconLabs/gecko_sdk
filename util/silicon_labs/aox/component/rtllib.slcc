@@ -13,7 +13,7 @@ include:
       - path: sl_rtl_clib_api.h
 library:
   - system: "stdc++"
-  - path: lib/gcc/release/libaox_static_arm_m33.a
+  - path: lib/release/gcc/arm_m33/generic/libaox_static.a
 requires:
   - name: cortexm33
   - name: toolchain_gcc

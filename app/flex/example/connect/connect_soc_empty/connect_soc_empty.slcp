@@ -24,6 +24,7 @@ component:
   - id: mpu
 #-------------- Restriction rules -------------------
   - id: restrictions_profile_connect
+  - id: restrictions_profile_connect_ofdm
   - id: restrictions_profile_long_range
 
 #----------------- Require list ----------------------
@@ -64,12 +65,13 @@ configuration:
     value: "usartHwFlowControlNone"
   - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
     value: "eusartHwFlowControlNone"
-  - name: "SL_HEAP_SIZE"
+  - name: "SL_STACK_SIZE"
     value: "8192"
+  - name: "SL_HEAP_SIZE"
+    value: "10240"
 #----------------- Watchdog  -------------------------
-  - name: SL_LEGACY_HAL_DISABLE_WATCHDOG
-    value: "1"
-
+define:
+  - name: SL_CONNECT_DISABLE_WATCHDOG
 #--------------------- Toolchain ------------------------
 toolchain_settings:
   - option: optimize

@@ -186,15 +186,14 @@ static bool checkForWellKnownTrustCenterLinkKey(void)
 {
 #if !defined(ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY)
   sl_zb_sec_man_context_t context;
-  sl_zb_sec_man_key_t plaintext_key;
   sl_zb_sec_man_init_context(&context);
 
   context.core_key_type = SL_ZB_SEC_MAN_KEY_TYPE_TC_LINK;
 
-  sl_status_t status = sl_zb_sec_man_export_key(&context, &plaintext_key);
+  sl_status_t status = sl_zb_sec_man_check_key_context(&context);
 
-  const EmberKeyData smartEnergyWellKnownTestKey = SE_SECURITY_TEST_LINK_KEY;
-  const EmberKeyData zigbeeAlliance09Key = ZIGBEE_PROFILE_INTEROPERABILITY_LINK_KEY;
+  const sl_zb_sec_man_key_t smartEnergyWellKnownTestKey = SE_SECURITY_TEST_LINK_KEY;
+  const sl_zb_sec_man_key_t zigbeeAlliance09Key = ZIGBEE_PROFILE_INTEROPERABILITY_LINK_KEY;
 
   if (status != SL_STATUS_OK) {
     // Assume by default we have a well-known key if we failed to retrieve it.
@@ -204,12 +203,8 @@ static bool checkForWellKnownTrustCenterLinkKey(void)
     return true;
   }
 
-  if ((0 == MEMCOMPARE(plaintext_key.key,
-                       emberKeyContents(&(smartEnergyWellKnownTestKey)),
-                       EMBER_ENCRYPTION_KEY_SIZE))
-      || (0 == MEMCOMPARE(plaintext_key.key,
-                          emberKeyContents(&(zigbeeAlliance09Key)),
-                          EMBER_ENCRYPTION_KEY_SIZE))) {
+  if (sl_zb_sec_man_compare_key_to_value(&context, &smartEnergyWellKnownTestKey)
+      || sl_zb_sec_man_compare_key_to_value(&context, &zigbeeAlliance09Key)) {
     return true;
   }
 #endif // ALLOW_REJOINS_WITH_WELL_KNOWN_LINK_KEY

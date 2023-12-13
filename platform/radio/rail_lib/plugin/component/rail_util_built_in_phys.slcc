@@ -25,10 +25,13 @@ include:
     file_list:
       - path: sl_rail_ble_config_38M4Hz.h
       - path: sl_rail_ieee802154_config_38M4Hz.h
+      - path: sl_rail_rfsense_ook_config_38M4Hz.h
       - path: sl_rail_ble_config_39MHz.h
       - path: sl_rail_ieee802154_config_39MHz.h
+      - path: sl_rail_rfsense_ook_config_39MHz.h
       - path: sl_rail_ble_config_40MHz.h
       - path: sl_rail_ieee802154_config_40MHz.h
+      - path: sl_rail_rfsense_ook_config_40MHz.h
 source:
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/sl_rail_phy_overrides.c
     condition: [device_sdid_215]
@@ -39,15 +42,24 @@ source:
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_ieee802154_config_38M4Hz.c
     condition: [device_sdid_215]
     unless: [device_is_module]
+  - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_rfsense_ook_config_38M4Hz.c
+    condition: [device_sdid_215]
+    unless: [device_is_module]
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_ble_config_39MHz.c
     condition: [device_sdid_215]
     unless: [device_is_module]
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_ieee802154_config_39MHz.c
     condition: [device_sdid_215]
     unless: [device_is_module]
+  - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_rfsense_ook_config_39MHz.c
+    condition: [device_sdid_215]
+    unless: [device_is_module]
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_ble_config_40MHz.c
     condition: [device_sdid_215]
     unless: [device_is_module]
   - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_ieee802154_config_40MHz.c
+    condition: [device_sdid_215]
+    unless: [device_is_module]
+  - path: platform/radio/rail_lib/plugin/rail_util_built_in_phys/efr32xg24/sl_rail_rfsense_ook_config_40MHz.c
     condition: [device_sdid_215]
     unless: [device_is_module]

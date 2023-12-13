@@ -26,6 +26,7 @@ component:
   - id: bluetooth_feature_nvm
   - id: bluetooth_feature_sm
   - id: bootloader_interface
+  - id: bt_post_build
   - id: btmesh_dcd_configuration
   - id: btmesh_stack_config_client
   - id: btmesh_stack_friend
@@ -61,6 +62,7 @@ component:
   - id: btmesh_stack
   - id: mpu
   - id: ncp
+  - id: ncp_btmesh_user_cmd
   - id: rail_util_pti
   - id: uartdrv_usart
     instance:
@@ -86,8 +88,6 @@ readme:
   - path: ../../documentation/example/btmesh_ncp_empty/readme.md
 
 other_file:
-  - path: ../../../bluetooth/script/create_bl_files.bat
-  - path: ../../../bluetooth/script/create_bl_files.sh
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img0.png
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img1.png
   - path: ../../documentation/example/btmesh_ncp_empty/readme_img2.png

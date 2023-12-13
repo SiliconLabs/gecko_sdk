@@ -17,8 +17,7 @@
 // *** Generated file. Do not edit! ***
 // vNCP Version: 1.0
 
-#include PLATFORM_HEADER
-
+#include <assert.h>
 #include "stack/include/ember.h"
 
 #include "csp-format.h"
@@ -39,6 +38,7 @@ void emberStackStatusHandler(EmberStatus status)
 }
 static void stackStatusCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberStatus status;
   fetchCallbackParams(callbackParams,
                       "u",
@@ -62,6 +62,7 @@ void emberChildJoinHandler(EmberNodeType nodeType,
 }
 static void childJoinCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberNodeType nodeType;
   EmberNodeId nodeId;
   fetchCallbackParams(callbackParams,
@@ -87,6 +88,7 @@ void emberRadioNeedsCalibratingHandler(void)
 static void radioNeedsCalibratingCommandHandler(uint8_t *callbackParams)
 {
   (void)callbackParams;
+  (void)callbackParams;
 
   emberAfRadioNeedsCalibratingCallback();
   emberAfRadioNeedsCalibrating();
@@ -99,7 +101,7 @@ void emberMessageSentHandler(EmberStatus status,
   uint16_t length = formatResponseCommand(callbackCommandBuffer,
                                           MAX_STACK_API_COMMAND_SIZE,
                                           EMBER_MESSAGE_SENT_HANDLER_IPC_COMMAND_ID,
-                                          "uuvuuubuw",
+                                          "uuvuulbuw",
                                           status,
                                           message->options,
                                           message->destination,
@@ -114,12 +116,13 @@ void emberMessageSentHandler(EmberStatus status,
 }
 static void messageSentCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberStatus status;
   EmberOutgoingMessage message;
-  uint8_t payload[127];
+  uint8_t payload[EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE];
   message.payload = payload;
   fetchCallbackParams(callbackParams,
-                      "uuvuuubuw",
+                      "uuvuulbuw",
                       &status,
                       &message.options,
                       &message.destination,
@@ -127,8 +130,9 @@ static void messageSentCommandHandler(uint8_t *callbackParams)
                       &message.tag,
                       &message.length,
                       message.payload,
+                      CSP_FETCH_ARG_IS_UINT16,
                       &message.length,
-                      127,
+                      EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE,
                       &message.ackRssi,
                       &message.timestamp);
 
@@ -144,7 +148,7 @@ void emberIncomingMessageHandler(EmberIncomingMessage *message)
   uint16_t length = formatResponseCommand(callbackCommandBuffer,
                                           MAX_STACK_API_COMMAND_SIZE,
                                           EMBER_INCOMING_MESSAGE_HANDLER_IPC_COMMAND_ID,
-                                          "uvuuubwu",
+                                          "uvuulbwu",
                                           message->options,
                                           message->source,
                                           message->endpoint,
@@ -158,19 +162,21 @@ void emberIncomingMessageHandler(EmberIncomingMessage *message)
 }
 static void incomingMessageCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberIncomingMessage message;
-  uint8_t payload[127];
+  uint8_t payload[EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE];
   message.payload = payload;
   fetchCallbackParams(callbackParams,
-                      "uvuuubwu",
+                      "uvuulbwu",
                       &message.options,
                       &message.source,
                       &message.endpoint,
                       &message.rssi,
                       &message.length,
                       message.payload,
+                      CSP_FETCH_ARG_IS_UINT16,
                       &message.length,
-                      127,
+                      EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE,
                       &message.timestamp,
                       &message.lqi);
 
@@ -184,7 +190,7 @@ void emberIncomingMacMessageHandler(EmberIncomingMacMessage *message)
   uint16_t length = formatResponseCommand(callbackCommandBuffer,
                                           MAX_STACK_API_COMMAND_SIZE,
                                           EMBER_INCOMING_MAC_MESSAGE_HANDLER_IPC_COMMAND_ID,
-                                          "uvbuvbuvvuuuuwubw",
+                                          "uvbuvbuvvuuuuwlbw",
                                           message->options,
                                           message->macFrame.srcAddress.addr.shortAddress,
                                           message->macFrame.srcAddress.addr.longAddress,
@@ -209,20 +215,23 @@ void emberIncomingMacMessageHandler(EmberIncomingMacMessage *message)
 }
 static void incomingMacMessageCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberIncomingMacMessage message;
   uint8_t eui64Size = EUI64_SIZE;
-  uint8_t payload[127];
+  uint8_t payload[EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE];
   message.payload = payload;
   fetchCallbackParams(callbackParams,
-                      "uvbuvbuvvuuuuwubw",
+                      "uvbuvbuvvuuuuwlbw",
                       &message.options,
                       &message.macFrame.srcAddress.addr.shortAddress,
                       message.macFrame.srcAddress.addr.longAddress,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &eui64Size,
                       EUI64_SIZE,
                       &message.macFrame.srcAddress.mode,
                       &message.macFrame.dstAddress.addr.shortAddress,
                       message.macFrame.dstAddress.addr.longAddress,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &eui64Size,
                       EUI64_SIZE,
                       &message.macFrame.dstAddress.mode,
@@ -235,8 +244,9 @@ static void incomingMacMessageCommandHandler(uint8_t *callbackParams)
                       &message.frameCounter,
                       &message.length,
                       message.payload,
+                      CSP_FETCH_ARG_IS_UINT16,
                       &message.length,
-                      127,
+                      EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE,
                       &message.timestamp);
 
   emberAfIncomingMacMessageCallback(&message);
@@ -250,7 +260,7 @@ void emberMacMessageSentHandler(EmberStatus status,
   uint16_t length = formatResponseCommand(callbackCommandBuffer,
                                           MAX_STACK_API_COMMAND_SIZE,
                                           EMBER_MAC_MESSAGE_SENT_HANDLER_IPC_COMMAND_ID,
-                                          "uuvbuvbuvvuuuwubuw",
+                                          "uuvbuvbuvvuuuwlbuw",
                                           status,
                                           message->options,
                                           message->macFrame.srcAddress.addr.shortAddress,
@@ -276,22 +286,25 @@ void emberMacMessageSentHandler(EmberStatus status,
 }
 static void macMessageSentCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberStatus status;
   EmberOutgoingMacMessage message;
   uint8_t eui64Size = EUI64_SIZE;
-  uint8_t payload[127];
+  uint8_t payload[EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE];
   message.payload = payload;
   fetchCallbackParams(callbackParams,
-                      "uuvbuvbuvvuuuwubuw",
+                      "uuvbuvbuvvuuuwlbuw",
                       &status,
                       &message.options,
                       &message.macFrame.srcAddress.addr.shortAddress,
                       message.macFrame.srcAddress.addr.longAddress,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &eui64Size,
                       EUI64_SIZE,
                       &message.macFrame.srcAddress.mode,
                       &message.macFrame.dstAddress.addr.shortAddress,
                       message.macFrame.dstAddress.addr.longAddress,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &eui64Size,
                       EUI64_SIZE,
                       &message.macFrame.dstAddress.mode,
@@ -303,8 +316,9 @@ static void macMessageSentCommandHandler(uint8_t *callbackParams)
                       &message.frameCounter,
                       &message.length,
                       message.payload,
+                      CSP_FETCH_ARG_IS_UINT16,
                       &message.length,
-                      127,
+                      EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE,
                       &message.ackRssi,
                       &message.timestamp);
 
@@ -345,6 +359,7 @@ void emberIncomingBeaconHandler(EmberPanId panId,
 }
 static void incomingBeaconCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberPanId panId;
   EmberMacAddress source;
   int8_t rssi;
@@ -359,6 +374,7 @@ static void incomingBeaconCommandHandler(uint8_t *callbackParams)
                       &panId,
                       &source.addr.shortAddress,
                       source.addr.longAddress,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &eui64Size,
                       EUI64_SIZE,
                       &source.mode,
@@ -366,10 +382,12 @@ static void incomingBeaconCommandHandler(uint8_t *callbackParams)
                       &permitJoining,
                       &beaconFieldsLength,
                       beaconFields,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &beaconFieldsLength,
                       EMBER_MAC_MAX_BEACON_FIELDS_LENGTH,
                       &beaconPayloadLength,
                       beaconPayload,
+                      CSP_FETCH_ARG_IS_UINT8,
                       &beaconPayloadLength,
                       EMBER_MAC_STACK_BEACON_PAYLOAD_LENGTH + EMBER_MAC_MAX_APP_BEACON_PAYLOAD_LENGTH);
 
@@ -403,6 +421,7 @@ void emberActiveScanCompleteHandler(void)
 static void activeScanCompleteCommandHandler(uint8_t *callbackParams)
 {
   (void)callbackParams;
+  (void)callbackParams;
 
   emberAfActiveScanCompleteCallback();
   emberAfActiveScanComplete();
@@ -426,6 +445,7 @@ void emberEnergyScanCompleteHandler(int8_t mean,
 }
 static void energyScanCompleteCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   int8_t mean;
   int8_t min;
   int8_t max;
@@ -459,6 +479,7 @@ void emberFrequencyHoppingStartClientCompleteHandler(EmberStatus status)
 }
 static void frequencyHoppingStartClientCompleteCommandHandler(uint8_t *callbackParams)
 {
+  (void)callbackParams;
   EmberStatus status;
   fetchCallbackParams(callbackParams,
                       "u",
@@ -511,7 +532,7 @@ void handleIncomingCallbackCommand(uint16_t commandId,
       frequencyHoppingStartClientCompleteCommandHandler(callbackParams);
       break;
     default: {
-      assert(0);
+      unknownCommandIdHandler(commandId);
     }
   }
 }

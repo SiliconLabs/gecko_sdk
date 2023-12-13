@@ -419,4 +419,4 @@ typedef struct {
 /** @} End of group MGM21_RTCC */
 /** @} End of group Parts */
 
-#endif /* MGM21_RTCC_H */
+#endif // MGM21_RTCC_H

@@ -3,7 +3,6 @@ label: Zigbee 2.4GHz Device
 package: Zigbee
 category: Zigbee|Stack|PHY support
 quality: production
-
 description: Standard Zigbee 2.4GHz physical layer.
 
 provides:

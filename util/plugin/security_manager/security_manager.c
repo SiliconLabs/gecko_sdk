@@ -19,10 +19,10 @@
 #include "em_device.h"
 #include "em_system.h"
 #include "psa/crypto.h"
-#if defined(SEMAILBOX_PRESENT)
-#include "sli_se_opaque_functions.h"
-#include "sli_se_opaque_types.h"
-#endif
+#include "sl_psa_crypto.h"
+#include "sli_psa_crypto.h"
+#include "psa/internal_trusted_storage.h"
+#include "psa/sli_internal_trusted_storage.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
@@ -30,7 +30,8 @@
 #include "nvm3.h"
 #endif
 
-#define SL_MAN_AES_BLOCK_SIZE 16
+#define SL_SEC_MAN_AES_BLOCK_SIZE       16
+#define SL_SEC_MAN_TRANSIENT_KEY_ID 0x200F0
 
 static bool is_security_manager_initialised = false;
 
@@ -59,15 +60,19 @@ static void sl_sec_man_set_key_attributes(psa_key_id_t *        sl_psa_key_id,
   psa_key_location_t sl_psa_key_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
 
 #if defined(SEMAILBOX_PRESENT)
-  // Dont wrap keys used for HMAC operation, as opaque keys cannot be used for multi-part HMAC.
-  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault && sl_psa_key_type != PSA_KEY_TYPE_HMAC) {
-    sl_psa_key_location = PSA_KEY_LOCATION_SLI_SE_OPAQUE;
+  if (SYSTEM_GetSecurityCapability() == securityCapabilityVault) {
+    sl_psa_key_location = SL_PSA_KEY_LOCATION_WRAPPED;
+  }
+
+  // Dont wrap volatile keys used for HMAC operation, as opaque keys cannot be used for multi-part HMAC.
+  if (sl_psa_key_type == PSA_KEY_TYPE_HMAC && sl_psa_key_persistence == PSA_KEY_PERSISTENCE_VOLATILE) {
+    sl_psa_key_location = PSA_KEY_LOCATION_LOCAL_STORAGE;
   }
 #endif
   psa_key_lifetime_t sl_psa_key_lifetime =
     PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(sl_psa_key_persistence, sl_psa_key_location);
 
-  if (sl_psa_key_persistence == PSA_KEY_LIFETIME_PERSISTENT) {
+  if (sl_psa_key_persistence == PSA_KEY_PERSISTENCE_DEFAULT) {
     psa_set_key_id(sl_psa_key_attr, *sl_psa_key_id);
   }
 
@@ -168,6 +173,54 @@ psa_status_t sl_sec_man_destroy_key(psa_key_id_t sl_psa_key_id)
   return psa_destroy_key(sl_psa_key_id);
 }
 
+psa_status_t sl_sec_man_copy_key(psa_key_id_t          sl_psa_source_key_id,
+                                 psa_key_attributes_t *sl_psa_key_attributes,
+                                 psa_key_id_t         *sl_psa_dest_key_id)
+{
+  psa_status_t          status;
+  bool                  overwrite_original;
+
+  if (sl_psa_key_attributes == NULL || sl_psa_dest_key_id == NULL) {
+    status = PSA_ERROR_INVALID_ARGUMENT;
+    goto exit;
+  }
+
+  // Do we need to overwrite original key?
+  overwrite_original    = (sl_psa_source_key_id == *sl_psa_dest_key_id);
+
+  if (overwrite_original) {
+#ifndef SL_TRUSTZONE_NONSECURE
+    // Set the target key id to a default value.
+    // Note, this needs to be either in thread or zigbee NVM range.
+    *sl_psa_dest_key_id = SL_SEC_MAN_TRANSIENT_KEY_ID;
+#else
+    status = PSA_ERROR_NOT_SUPPORTED;
+    goto exit;
+#endif
+  }
+
+  // Set the key id for the new key
+  psa_set_key_id(sl_psa_key_attributes, *sl_psa_dest_key_id);
+  // Copy the key from source to destnation
+  status = psa_copy_key(sl_psa_source_key_id, sl_psa_key_attributes, sl_psa_dest_key_id);
+
+  if (status != PSA_SUCCESS) {
+    goto exit;
+  }
+
+#ifndef SL_TRUSTZONE_NONSECURE
+  if (overwrite_original) {
+    // After making a copy, if we need to replace the old key,
+    // first destroy the original key.
+    psa_destroy_key(sl_psa_source_key_id);
+    //Set the new key's keyid to match the original keyid
+    status = sli_psa_its_change_key_id(*sl_psa_dest_key_id, sl_psa_source_key_id);
+  }
+#endif
+  exit:
+  return status;
+}
+
 psa_status_t sl_sec_man_aes_encrypt(psa_key_id_t    sl_psa_key_id,
                                     psa_algorithm_t sl_psa_aes_alg,
                                     const uint8_t * sl_psa_aes_input,
@@ -181,8 +234,8 @@ psa_status_t sl_sec_man_aes_encrypt(psa_key_id_t    sl_psa_key_id,
     goto exit;
   }
 
-  status = psa_cipher_encrypt(sl_psa_key_id, sl_psa_aes_alg, sl_psa_aes_input, SL_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
-                              SL_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len);
+  status = psa_cipher_encrypt(sl_psa_key_id, sl_psa_aes_alg, sl_psa_aes_input, SL_SEC_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
+                              SL_SEC_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len);
 
   exit:
   return status;
@@ -201,8 +254,8 @@ psa_status_t sl_sec_man_aes_decrypt(psa_key_id_t    sl_psa_key_id,
     goto exit;
   }
 
-  status = psa_cipher_decrypt(sl_psa_key_id, sl_psa_aes_alg, sl_psa_aes_input, SL_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
-                              SL_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len);
+  status = psa_cipher_decrypt(sl_psa_key_id, sl_psa_aes_alg, sl_psa_aes_input, SL_SEC_MAN_AES_BLOCK_SIZE, sl_psa_aes_output,
+                              SL_SEC_MAN_AES_BLOCK_SIZE, &sl_psa_aes_enc_len);
 
   exit:
   return status;

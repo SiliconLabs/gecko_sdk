@@ -35,10 +35,9 @@
 #include "sl_status_string_config.h"
 #endif
 
-
 void sl_math_mvp_clear_errors(void)
 {
-  sli_mvp_clear_error_flags(SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK | SLI_MVP_FAULT_FLAG);
+  sli_mvp_clear_error_flags(SLI_MVP_NUMERIC_EXCEPTION_FLAG_MASK);
 }
 
 sl_status_t sl_math_mvp_get_error(sl_status_t *error_code, char *error_message, uint32_t buffer_length)
@@ -50,10 +49,7 @@ sl_status_t sl_math_mvp_get_error(sl_status_t *error_code, char *error_message, 
   uint32_t flag;
   uint32_t flags = sli_mvp_get_error_flags();
 
-  if (flags & SLI_MVP_FAULT_FLAG) {
-    *error_code = SL_STATUS_COMPUTE_MATH_FAULT;
-    flag = SLI_MVP_FAULT_FLAG;
-  } else if (flags & (MVP_IF_ALUNAN | MVP_IF_STORECONVERTNAN)) {
+  if (flags & (MVP_IF_ALUNAN | MVP_IF_STORECONVERTNAN)) {
     *error_code = SL_STATUS_COMPUTE_MATH_NAN;
     flag = MVP_IF_ALUNAN | MVP_IF_STORECONVERTNAN;
   } else if (flags & MVP_IF_STORECONVERTINF) {
@@ -72,7 +68,7 @@ sl_status_t sl_math_mvp_get_error(sl_status_t *error_code, char *error_message, 
 
   sli_mvp_clear_error_flags(flag);
 
-#if defined(SL_CATALOG_STATUS_STRING_PRESENT) && (SL_STATUS_STRING_ENABLE_COMPUTE == 1)  
+#if defined(SL_CATALOG_STATUS_STRING_PRESENT) && (SL_STATUS_STRING_ENABLE_COMPUTE == 1)
   if (error_message != NULL) {
     sl_status_get_string_n(*error_code, error_message, buffer_length);
   }

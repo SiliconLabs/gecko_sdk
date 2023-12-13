@@ -1,0 +1,25 @@
+id: "wisun_legacy_socket_wrapper"
+label: "Wi-SUN Legacy Socket Wrapper"
+description: "Radio board template contributions to the component catalog."
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+root_path: "protocol/wisun"
+quality: "production"
+
+requires:
+  - name: "wisun_stack"
+
+provides:
+  - name: "wisun_legacy_socket_wrapper"
+
+source:
+  - path: "plugin/sl_wisun_legacy_socket_wrapper.c"
+
+include:
+  - path: "plugin"
+    file_list:
+      - path: "sl_wisun_legacy_socket_wrapper.h"
+
+template_contribution:
+  - name: component_catalog
+    value: wisun_legacy_socket_wrapper

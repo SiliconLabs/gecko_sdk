@@ -30,11 +30,10 @@
 //------------------------------------------------------------------------------
 // Protocol Definitions
 
-#define EZSP_PROTOCOL_VERSION     0x0C
+#define EZSP_PROTOCOL_VERSION     0x0D
 
-// EZSP max length + Frame Control extra byte +
-// Secure EZSP autentication header + Frame ID extra byte + Secure EZSP MIC
-#define EZSP_MAX_FRAME_LENGTH     (200 + 1 + 14 + 1 + 4)
+// EZSP max length + Frame Control extra byte + Frame ID extra byte
+#define EZSP_MAX_FRAME_LENGTH     (200 + 1 + 1)
 
 // EZSP Sequence Index for both legacy and extended frame format
 #define EZSP_SEQUENCE_INDEX       0
@@ -65,7 +64,7 @@
                                         | serialGetResponseByte(EZSP_EXTENDED_FRAME_ID_LB_INDEX))
 
 #include "ezsp-enum.h"
-#include "secure-ezsp-protocol.h"
+#include "stack/include/ember-types.h"
 
 //------------------------------------------------------------------------------
 // Frame Control Lower Byte (LB) Definitions

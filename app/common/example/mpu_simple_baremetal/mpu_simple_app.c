@@ -77,7 +77,17 @@ static void function_executing_from_flash(void)
  */
 SL_RAMFUNC_DECLARATOR static void function_executing_from_ram(void)
 {
+/* suppressing [Ta022], [Ta023] iar warnings
+   Error[Ta022]: Possible rom access (<Constant "  Normal function exe...">) from within a __ramfunc function
+   Error[Ta023]: Call to a non __ramfunc function (printf) from within a __ramfunc function
+ */
+#if defined(__ICCARM__)
+  #pragma diag_suppress = Ta022,Ta023
+#endif
   printf("  Normal function executing from appropriate section in ram.\r\n");
+#if defined(__ICCARM__)
+  #pragma diag_default = Ta022,Ta023
+#endif
 }
 
 /**

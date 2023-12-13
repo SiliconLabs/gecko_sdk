@@ -23,3 +23,6 @@ template_contribution:
     value:
       function: sl_btctrl_init_adv_ext()
     priority: 7
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-extended-advertiser

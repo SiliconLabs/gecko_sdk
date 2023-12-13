@@ -31,6 +31,11 @@
 #include "api/btl_interface.h"
 #include "api/btl_interface_storage.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 // Default to using storage slot 0
 static int32_t storageSlot = 0;
 
@@ -375,3 +380,7 @@ bool halAppBootloaderSupportsIbr(void)
 #endif
   }
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

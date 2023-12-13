@@ -1,8 +1,9 @@
-Wi-SUN SDK 1.6.0.0
+Wi-SUN SDK 1.8.0
 - Wi-SUN Stack
-  - EFR32FG28 support 
-  - Connection time improvements
-  - LFN support improvements
-- Wi-SUN Applications
-  - Firmware over-the-air update
-  - Wi-SUN configurator update
+  - Added support for LFN multicast reception
+  - Added support for non-standard PHY configurations
+  - Added support for blocking sockets
+- Wi-SUN Applications Improvements
+  - Configurable LFN Support for all the applications
+  - Wi-SUN – SoC Network Measurement
+  - Wi-SUN – SoC (CoAP) Meter and Wi-SUN – SoC (CoAP) Collector

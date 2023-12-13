@@ -2336,8 +2336,8 @@ class NodeImpl:
 
     def get_netdata(self):
         raw_netdata = self.netdata_show()
-        netdata = {'Prefixes': [], 'Routes': [], 'Services': [], 'Contexts': []}
-        key_list = ['Prefixes', 'Routes', 'Services', 'Contexts']
+        netdata = {'Prefixes': [], 'Routes': [], 'Services': [], 'Contexts': [], 'Commissioning': []}
+        key_list = ['Prefixes', 'Routes', 'Services', 'Contexts', 'Commissioning']
         key = None
 
         for i in range(0, len(raw_netdata)):
@@ -3257,6 +3257,12 @@ class NodeImpl:
         self.send_command(cmd)
         self._expect_done()
 
+    def link_metrics_mgr_set_enabled(self, enable: bool):
+        op_str = "enable" if enable else "disable"
+        cmd = f'linkmetricsmgr {op_str}'
+        self.send_command(cmd)
+        self._expect_done()
+
     def send_address_notification(self, dst: str, target: str, mliid: str):
         cmd = f'fake /a/an {dst} {target} {mliid}'
         self.send_command(cmd)
@@ -3310,6 +3316,31 @@ class NodeImpl:
 
         return list(zip(ip, ttl))
 
+    def _parse_dns_service_info(self, output):
+        # Example of `output`
+        #   Port:22222, Priority:2, Weight:2, TTL:7155
+        #   Host:host2.default.service.arpa.
+        #   HostAddress:0:0:0:0:0:0:0:0 TTL:0
+        #   TXT:[a=00, b=02bb] TTL:7155
+
+        m = re.match(
+            r'.*Port:(\d+), Priority:(\d+), Weight:(\d+), TTL:(\d+)\s+Host:(.*?)\s+HostAddress:(\S+) TTL:(\d+)\s+TXT:\[(.*?)\] TTL:(\d+)',
+            '\r'.join(output))
+        if not m:
+            return {}
+        port, priority, weight, srv_ttl, hostname, address, aaaa_ttl, txt_data, txt_ttl = m.groups()
+        return {
+            'port': int(port),
+            'priority': int(priority),
+            'weight': int(weight),
+            'host': hostname,
+            'address': address,
+            'txt_data': txt_data,
+            'srv_ttl': int(srv_ttl),
+            'txt_ttl': int(txt_ttl),
+            'aaaa_ttl': int(aaaa_ttl),
+        }
+
     def dns_resolve_service(self, instance, service, server=None, port=53):
         """
         Resolves the service instance and returns the instance information as a dict.
@@ -3335,33 +3366,10 @@ class NodeImpl:
         self.send_command(cmd)
         self.simulator.go(10)
         output = self._expect_command_output()
-
-        # Example output:
-        # DNS service resolution response for ins2 for service _ipps._tcp.default.service.arpa.
-        # Port:22222, Priority:2, Weight:2, TTL:7155
-        # Host:host2.default.service.arpa.
-        # HostAddress:0:0:0:0:0:0:0:0 TTL:0
-        # TXT:[a=00, b=02bb] TTL:7155
-        # Done
-
-        m = re.match(
-            r'.*Port:(\d+), Priority:(\d+), Weight:(\d+), TTL:(\d+)\s+Host:(.*?)\s+HostAddress:(\S+) TTL:(\d+)\s+TXT:\[(.*?)\] TTL:(\d+)',
-            '\r'.join(output))
-        if m:
-            port, priority, weight, srv_ttl, hostname, address, aaaa_ttl, txt_data, txt_ttl = m.groups()
-            return {
-                'port': int(port),
-                'priority': int(priority),
-                'weight': int(weight),
-                'host': hostname,
-                'address': address,
-                'txt_data': txt_data,
-                'srv_ttl': int(srv_ttl),
-                'txt_ttl': int(txt_ttl),
-                'aaaa_ttl': int(aaaa_ttl),
-            }
-        else:
+        info = self._parse_dns_service_info(output)
+        if not info:
             raise Exception('dns resolve service failed: %s.%s' % (instance, service))
+        return info
 
     @staticmethod
     def __parse_hex_string(hexstr: str) -> bytes:
@@ -3404,9 +3412,10 @@ class NodeImpl:
 
         self.send_command(cmd)
         self.simulator.go(10)
-        output = '\n'.join(self._expect_command_output())
+        output = self._expect_command_output()
 
         # Example output:
+        # DNS browse response for _ipps._tcp.default.service.arpa.
         # ins2
         #     Port:22222, Priority:2, Weight:2, TTL:7175
         #     Host:host2.default.service.arpa.
@@ -3420,21 +3429,11 @@ class NodeImpl:
         # Done
 
         result = {}
-        for ins, port, priority, weight, srv_ttl, hostname, address, aaaa_ttl, txt_data, txt_ttl in re.findall(
-                r'(.*?)\s+Port:(\d+), Priority:(\d+), Weight:(\d+), TTL:(\d+)\s*Host:(\S+)\s+HostAddress:(\S+) TTL:(\d+)\s+TXT:\[(.*?)\] TTL:(\d+)',
-                output):
-            result[ins] = {
-                'port': int(port),
-                'priority': int(priority),
-                'weight': int(weight),
-                'host': hostname,
-                'address': address,
-                'txt_data': txt_data,
-                'srv_ttl': int(srv_ttl),
-                'txt_ttl': int(txt_ttl),
-                'aaaa_ttl': int(aaaa_ttl),
-            }
-
+        index = 1  # skip first line
+        while index < len(output):
+            ins = output[index].strip()
+            result[ins] = self._parse_dns_service_info(output[index + 1:index + 6])
+            index = index + (5 if result[ins] else 1)
         return result
 
     def set_mliid(self, mliid: str):
@@ -3630,6 +3629,24 @@ class LinuxHost():
             pass
 
         return resp_count
+
+    def get_ip6_address(self, address_type: config.ADDRESS_TYPE):
+        """Get specific type of IPv6 address configured on thread device.
+
+        Args:
+            address_type: the config.ADDRESS_TYPE type of IPv6 address.
+
+        Returns:
+            IPv6 address string.
+        """
+        if address_type == config.ADDRESS_TYPE.BACKBONE_GUA:
+            return self._getBackboneGua()
+        elif address_type == config.ADDRESS_TYPE.ONLINK_ULA:
+            return self._getInfraUla()
+        elif address_type == config.ADDRESS_TYPE.ONLINK_GUA:
+            return self._getInfraGua()
+        else:
+            raise ValueError(f'unsupported address type: {address_type}')
 
     def _getBackboneGua(self) -> Optional[str]:
         for addr in self.get_ether_addrs():
@@ -3886,6 +3903,12 @@ class OtbrNode(LinuxHost, NodeImpl, OtbrDocker):
         cmd = f'python3 /app/third_party/openthread/repo/tests/scripts/thread-cert/mcast6.py {self.TUN_DEV} {ip} &'
         self.bash(cmd)
 
+    def get_ip6_address(self, address_type: config.ADDRESS_TYPE):
+        try:
+            return super(OtbrNode, self).get_ip6_address(address_type)
+        except Exception as e:
+            return super(LinuxHost, self).get_ip6_address(address_type)
+
 
 class HostNode(LinuxHost, OtbrDocker):
     is_host = True
@@ -3922,25 +3945,6 @@ class HostNode(LinuxHost, OtbrDocker):
                 addrs.append(addr)
 
         return addrs
-
-    def get_ip6_address(self, address_type: config.ADDRESS_TYPE):
-        """Get specific type of IPv6 address configured on thread device.
-
-        Args:
-            address_type: the config.ADDRESS_TYPE type of IPv6 address.
-
-        Returns:
-            IPv6 address string.
-        """
-
-        if address_type == config.ADDRESS_TYPE.BACKBONE_GUA:
-            return self._getBackboneGua()
-        elif address_type == config.ADDRESS_TYPE.ONLINK_ULA:
-            return self._getInfraUla()
-        elif address_type == config.ADDRESS_TYPE.ONLINK_GUA:
-            return self._getInfraGua()
-        else:
-            raise ValueError(f'unsupported address type: {address_type}')
 
 
 if __name__ == '__main__':

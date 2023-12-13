@@ -42,6 +42,7 @@ ARG RELEASE
 ARG REST_API
 ARG WEB_GUI
 ARG MDNS
+ARG FIREWALL
 
 ENV INFRA_IF_NAME=${INFRA_IF_NAME:-eth0}
 ENV BORDER_ROUTING=${BORDER_ROUTING:-1}
@@ -59,6 +60,7 @@ ENV NAT64_DYNAMIC_POOL=${NAT64_DYNAMIC_POOL:-192.168.255.0/24}
 ENV DNS64=${DNS64:-0}
 ENV WEB_GUI=${WEB_GUI:-1}
 ENV REST_API=${REST_API:-1}
+ENV FIREWALL=${FIREWALL:-1}
 ENV DOCKER 1
 
 RUN env
@@ -94,6 +96,7 @@ RUN apt-get update \
 
 # Copy OTBR scripts
 COPY ./ot-br-posix/script /app/script
+COPY ./ot-br-posix/third_party/mDNSResponder /app/third_party/mDNSResponder
 WORKDIR /app
 
 # Run OTBR bootstrap
@@ -119,6 +122,7 @@ RUN ([ "${DNS64}" = "0" ] || chmod 644 /etc/bind/named.conf.options) \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_BUILD_DEPS  \
     && ([ "${RELEASE}" = 1 ] ||  apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false "$OTBR_NORELEASE_DEPS";) \
     && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* \
   ))
 
 ENTRYPOINT ["/app/etc/docker/docker_entrypoint.sh"]

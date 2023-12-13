@@ -71,37 +71,25 @@
 #error "This driver is only compatible with Series 1 & 2"
 #endif
 
-#define DMA_MAX_XFER_LEN ((_LDMA_CH_CTRL_XFERCNT_MASK >> _LDMA_CH_CTRL_XFERCNT_SHIFT) + 1)
-
-typedef struct {
-  sl_slist_node_t node;
-  sl_cpc_buffer_handle_t *handle;
-  uint16_t payload_len;
-} sli_buf_entry_t;
-
-#define SL_CPC_CONCAT_PASTER_2(first, second)                 first ##  second
-#define SL_CPC_CONCAT_PASTER_3(first, second, third)          first ##  second ## third
-#define SL_CPC_CONCAT_PASTER_4(first, second, third, fourth)  first ##  second ## third ## fourth
-
 #if defined(SL_CPC_DRV_SPI_IS_EUSART)
-#define PRS_SIGNAL_EXTI(cs_pin_no)          SL_CPC_CONCAT_PASTER_2(prsSignalGPIO_PIN, cs_pin_no)
-#define PRS_SIGNAL_USART(periph_no, signal) SL_CPC_CONCAT_PASTER_4(prsSignalEUSART, periph_no, _, signal)
-#define SPI_CMU_CLOCK(periph_no)            SL_CPC_CONCAT_PASTER_2(cmuClock_EUSART, periph_no)
-#define DMA_SIGNAL_TX(periph_no)            SL_CPC_CONCAT_PASTER_3(dmadrvPeripheralSignal_EUSART, periph_no, _TXBL)
-#define DMA_SIGNAL_RX(periph_no)            SL_CPC_CONCAT_PASTER_3(dmadrvPeripheralSignal_EUSART, periph_no, _RXDATAV)
-#define GPIO_PORT_SHIFT(route)              SL_CPC_CONCAT_PASTER_3(_GPIO_EUSART_, route, _PORT_SHIFT)
-#define GPIO_PIN_SHIFT(route)               SL_CPC_CONCAT_PASTER_3(_GPIO_EUSART_, route, _PIN_SHIFT)
+#define PRS_SIGNAL_EXTI(cs_pin_no)          SL_CONCAT_PASTER_2(prsSignalGPIO_PIN, cs_pin_no)
+#define PRS_SIGNAL_USART(periph_no, signal) SL_CONCAT_PASTER_4(prsSignalEUSART, periph_no, _, signal)
+#define SPI_CMU_CLOCK(periph_no)            SL_CONCAT_PASTER_2(cmuClock_EUSART, periph_no)
+#define DMA_SIGNAL_TX(periph_no)            SL_CONCAT_PASTER_3(dmadrvPeripheralSignal_EUSART, periph_no, _TXBL)
+#define DMA_SIGNAL_RX(periph_no)            SL_CONCAT_PASTER_3(dmadrvPeripheralSignal_EUSART, periph_no, _RXDATAV)
+#define GPIO_PORT_SHIFT(route)              SL_CONCAT_PASTER_3(_GPIO_EUSART_, route, _PORT_SHIFT)
+#define GPIO_PIN_SHIFT(route)               SL_CONCAT_PASTER_3(_GPIO_EUSART_, route, _PIN_SHIFT)
 #define GPIO_ROUTEEN                        (GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_RXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN | GPIO_EUSART_ROUTEEN_CSPEN)
 #define EUSART_OR_USART_ROUTE               EUSARTROUTE
-#define EUSART_TX_IRQHandler(periph_no)     SL_CPC_CONCAT_PASTER_3(EUSART, periph_no, _TX_IRQHandler)
-#define EUSART_TX_IRQn(periph_no)           SL_CPC_CONCAT_PASTER_3(EUSART, periph_no, _TX_IRQn)
+#define EUSART_TX_IRQHandler(periph_no)     SL_CONCAT_PASTER_3(EUSART, periph_no, _TX_IRQHandler)
+#define EUSART_TX_IRQn(periph_no)           SL_CONCAT_PASTER_3(EUSART, periph_no, _TX_IRQn)
 #elif defined(SL_CPC_DRV_SPI_IS_USART)
-#define PRS_SIGNAL_USART(periph, signal)    SL_CPC_CONCAT_PASTER_4(prsSignalUSART, periph, _, signal)
-#define SPI_CMU_CLOCK(periph_no)            SL_CPC_CONCAT_PASTER_2(cmuClock_USART, periph_no)
-#define DMA_SIGNAL_TX(periph_no)            SL_CPC_CONCAT_PASTER_3(dmadrvPeripheralSignal_USART, periph_no, _TXBL)
-#define DMA_SIGNAL_RX(periph_no)            SL_CPC_CONCAT_PASTER_3(dmadrvPeripheralSignal_USART, periph_no, _RXDATAV)
-#define GPIO_PORT_SHIFT(route)              SL_CPC_CONCAT_PASTER_3(_GPIO_USART_, route, _PORT_SHIFT)
-#define GPIO_PIN_SHIFT(route)               SL_CPC_CONCAT_PASTER_3(_GPIO_USART_, route, _PIN_SHIFT)
+#define PRS_SIGNAL_USART(periph, signal)    SL_CONCAT_PASTER_4(prsSignalUSART, periph, _, signal)
+#define SPI_CMU_CLOCK(periph_no)            SL_CONCAT_PASTER_2(cmuClock_USART, periph_no)
+#define DMA_SIGNAL_TX(periph_no)            SL_CONCAT_PASTER_3(dmadrvPeripheralSignal_USART, periph_no, _TXBL)
+#define DMA_SIGNAL_RX(periph_no)            SL_CONCAT_PASTER_3(dmadrvPeripheralSignal_USART, periph_no, _RXDATAV)
+#define GPIO_PORT_SHIFT(route)              SL_CONCAT_PASTER_3(_GPIO_USART_, route, _PORT_SHIFT)
+#define GPIO_PIN_SHIFT(route)               SL_CONCAT_PASTER_3(_GPIO_USART_, route, _PIN_SHIFT)
 #define GPIO_ROUTEEN                        (GPIO_USART_ROUTEEN_TXPEN | GPIO_USART_ROUTEEN_RXPEN | GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN)
 #define EUSART_OR_USART_ROUTE               USARTROUTE
 #endif
@@ -204,40 +192,24 @@ static LDMA_TransferCfg_t tx_dma_config;
 // attached buffer.
 static sl_slist_node_t *rx_free_list_head;
 
-// List of "sli_buf_entry_t" which DO NOT have a "sl_cpc_buffer_handle_t" attached to them.
-// Those are entries that were previously received frames that the core read. When the core
-// gets notified of a RX frame event, it reads entries from the "rx_pending_list_head" below,
-// detaches and take ownership of the "sl_cpc_buffer_handle_t" buffer to process it and
-// give back to the driver the dangling entry and put it in this list. Those entries
-// are waiting for a "sl_cpc_buffer_handle_t" to be available and re-attached to them
-// and be put back into the "rx_free_list_head" list.
-static sl_slist_node_t *rx_free_no_buf_list_head;
-
 // List of "sli_buf_entry_t" which have a "sl_cpc_buffer_handle_t" attached to them.
 // Those are entries that have fully received frame written in the attached
-// "sl_cpc_buffer_handle_t". They are waiting for the core to pick them up,
-// detach the filled buffer and being put in the "rx_free_no_buf_list_head" list.
+// "sl_cpc_buffer_handle_t". They are waiting for the core to pick them up.
 static sl_slist_node_t *rx_pending_list_head;
-
-// List of "sli_buf_entry_t" which DO NOT have a "sl_cpc_buffer_handle_t" attached to them.
-// Those are available entries waiting for the core to attach a filled up "sl_cpc_buffer_handle_t"
-// to them. Then, they are placed in the "tx_submitted_list_head" .
-static sl_slist_node_t *tx_free_list_head;
 
 // List of "sli_buf_entry_t" which have a FILLED "sl_cpc_buffer_handle_t" attached to them.
 // Those are entries that are waiting for its buffer to be sent on the wire.
 static sl_slist_node_t *tx_submitted_list_head;
 
-static sli_buf_entry_t rx_buf_entries_tbl[SL_CPC_DRV_SPI_RX_QUEUE_SIZE];
-static sli_buf_entry_t tx_buf_entries_tbl[SL_CPC_DRV_SPI_TX_QUEUE_SIZE];
+static uint16_t tx_buf_available_count = SL_CPC_DRV_SPI_TX_QUEUE_SIZE;
 
 // When not null, points to the first entry in "rx_free_list_head" when the driver
 // Set itself up to receive a new frame. During the transaction, it is in this entry's
 // buffer that the DMA writes the data.
-static sli_buf_entry_t *currently_receiving_rx_entry = NULL;
+static sl_cpc_buffer_handle_t *currently_receiving_rx_buffer_handle = NULL;
 
 // When not null,
-static sli_buf_entry_t *currently_transmiting_tx_entry = NULL;
+static sl_cpc_buffer_handle_t *currently_transmiting_buffer_handle = NULL;
 
 static bool pending_late_header = false;
 
@@ -254,15 +226,15 @@ static LDMA_Descriptor_t rx_desc_wait_cs_high_after_header;
 static LDMA_Descriptor_t rx_desc_wait_cs_low_before_payload;
 static LDMA_Descriptor_t rx_desc_set_irq_high;
 static LDMA_Descriptor_t rx_desc_recv_payload;
-#if (SLI_CPC_RX_DATA_MAX_LENGTH > DMA_MAX_XFER_LEN)
+#if (SLI_CPC_RX_DATA_MAX_LENGTH > LDMA_DESCRIPTOR_MAX_XFER_SIZE)
 static LDMA_Descriptor_t rx_desc_recv_payload_large_buf;
 #endif
 static LDMA_Descriptor_t rx_desc_wait_cs_high_after_payload;
 static LDMA_Descriptor_t rx_desc_flush_fifo;
 static LDMA_Descriptor_t rx_desc_wait_cs_low_before_header;
 static LDMA_Descriptor_t rx_desc_clear_availability_sync_bit;
+static LDMA_Descriptor_t rx_desc_set_irq_high_after_header_cs_low;
 static LDMA_Descriptor_t rx_desc_recv_header;
-static LDMA_Descriptor_t rx_desc_set_irq_high_after_header;
 #if defined(_SILICON_LABS_32B_SERIES_1)
 static LDMA_Descriptor_t rx_desc_clear_cs_and_cs_inv_sync_bits;
 #endif
@@ -279,7 +251,7 @@ static LDMA_Descriptor_t tx_desc_xfer_header;
 static LDMA_Descriptor_t tx_desc_wait_header_tranfered;
 static LDMA_Descriptor_t tx_desc_set_tx_frame_complete_variable_after_header;
 static LDMA_Descriptor_t tx_desc_xfer_payload;
-#if (SLI_CPC_RX_DATA_MAX_LENGTH > DMA_MAX_XFER_LEN)
+#if (SLI_CPC_RX_DATA_MAX_LENGTH > LDMA_DESCRIPTOR_MAX_XFER_SIZE)
 static LDMA_Descriptor_t tx_desc_xfer_payload_large_buf;
 #endif
 #if (SL_CPC_ENDPOINT_SECURITY_ENABLED == 1)
@@ -288,8 +260,6 @@ static LDMA_Descriptor_t tx_desc_xfer_tag;
 static LDMA_Descriptor_t tx_desc_xfer_checksum;
 static LDMA_Descriptor_t tx_desc_wait_checksum_tranfered;
 static LDMA_Descriptor_t tx_desc_set_tx_frame_complete_variable_after_checksum;
-
-#define LINKABS_ADDR(addr) (int32_t) ((uint32_t)addr >> 2)
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
@@ -306,33 +276,11 @@ static bool end_of_payload_xfer(void);
 static void prime_dma_for_transmission(void);
 
 /***************************************************************************/ /**
- * Initiate SPI Hardware.
+ * Initialize only the SPI peripheral to be used in a standalone manner
+ * (during the bootloader poking)
  ******************************************************************************/
-sl_status_t sli_cpc_drv_init(void)
+sl_status_t sli_cpc_drv_hw_init(void)
 {
-  // Initialize the lists
-  {
-    sl_slist_init(&rx_free_list_head);
-    sl_slist_init(&rx_free_no_buf_list_head);
-    sl_slist_init(&rx_pending_list_head);
-    sl_slist_init(&tx_free_list_head);
-    sl_slist_init(&tx_submitted_list_head);
-
-    for (uint32_t buf_cnt = 0; buf_cnt < SL_CPC_DRV_SPI_RX_QUEUE_SIZE; buf_cnt++) {
-      sli_buf_entry_t *entry = &rx_buf_entries_tbl[buf_cnt];
-      if (sli_cpc_get_buffer_handle_for_rx(&entry->handle) != SL_STATUS_OK) {
-        EFM_ASSERT(false);
-        return SL_STATUS_ALLOCATION_FAILED;
-      }
-      sli_cpc_push_buffer_handle(&rx_free_list_head, &entry->node, entry->handle);
-    }
-
-    for (uint32_t buf_cnt = 0; buf_cnt < SL_CPC_DRV_SPI_TX_QUEUE_SIZE; buf_cnt++) {
-      sli_buf_entry_t *entry = &tx_buf_entries_tbl[buf_cnt];
-      sl_slist_push(&tx_free_list_head, &entry->node);
-    }
-  }
-
   // Enable the clocks of all the peripheral used in this driver
   CMU_ClockEnable(cmuClock_PRS, true);
   CMU_ClockEnable(cmuClock_GPIO, true);
@@ -442,6 +390,33 @@ sl_status_t sli_cpc_drv_init(void)
 
     SL_CPC_DRV_SPI_PERIPHERAL->CMD = USART_CMD_RXEN | USART_CMD_TXEN;
   #endif
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************/ /**
+ * Initialize the rest of the driver after the SPI peripheral has been
+ * initialized in sli_cpc_drv_hw_init.
+ ******************************************************************************/
+sl_status_t sli_cpc_drv_init(void)
+{
+  // Initialize the lists
+  {
+    sl_slist_init(&rx_free_list_head);
+    sl_slist_init(&rx_pending_list_head);
+    sl_slist_init(&tx_submitted_list_head);
+
+    for (uint32_t buf_cnt = 0; buf_cnt < SL_CPC_DRV_SPI_RX_QUEUE_SIZE; buf_cnt++) {
+      sl_cpc_buffer_handle_t *buffer_handle;
+      if (sli_cpc_get_buffer_handle_for_rx(&buffer_handle) != SL_STATUS_OK) {
+        EFM_ASSERT(false);
+        return SL_STATUS_ALLOCATION_FAILED;
+      }
+      sli_cpc_push_driver_buffer_handle(&rx_free_list_head, buffer_handle);
+    }
+
+    tx_buf_available_count = SL_CPC_DRV_SPI_TX_QUEUE_SIZE;
   }
 
   // Init the DMA and allocate two channels
@@ -661,7 +636,7 @@ sl_status_t sli_cpc_drv_init(void)
     // when when CS goes low, the SYNC signal will go high.
 
     // Fixed branching of previous descriptor
-    rx_desc_wait_cs_high_after_header.sync.linkAddr = LINKABS_ADDR(&rx_desc_inv_cs_before_payload);
+    rx_desc_wait_cs_high_after_header.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_inv_cs_before_payload);
 
     // Invert CS polarity using PRS FNSEL
     {
@@ -671,7 +646,7 @@ sl_status_t sli_cpc_drv_init(void)
         );
 
       // Fixed branching
-      rx_desc_inv_cs_before_payload.wri.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_low_before_payload);
+      rx_desc_inv_cs_before_payload.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_low_before_payload);
     }
 
     // Sync descriptor to wait for the CS low before payload clocking
@@ -689,7 +664,7 @@ sl_status_t sli_cpc_drv_init(void)
       #endif
 
       // Fixed branching
-      rx_desc_wait_cs_low_before_payload.sync.linkAddr = LINKABS_ADDR(&rx_desc_revert_cs_before_payload);
+      rx_desc_wait_cs_low_before_payload.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_revert_cs_before_payload);
     }
 
     // Revert CS polarity using PRS FNSEL
@@ -700,11 +675,11 @@ sl_status_t sli_cpc_drv_init(void)
         );
 
       // Fixed branching
-      rx_desc_revert_cs_before_payload.wri.linkAddr = LINKABS_ADDR(&rx_desc_set_irq_high);
+      rx_desc_revert_cs_before_payload.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_set_irq_high);
     }
     #else
     // Fixed branching of previous descriptor
-    rx_desc_wait_cs_high_after_header.sync.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_low_before_payload);
+    rx_desc_wait_cs_high_after_header.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_low_before_payload);
 
     // Sync descriptor to wait for the CS low before payload clocking
     {
@@ -721,7 +696,7 @@ sl_status_t sli_cpc_drv_init(void)
       #endif
 
       // Fixed branching
-      rx_desc_wait_cs_low_before_payload.sync.linkAddr = LINKABS_ADDR(&rx_desc_set_irq_high);
+      rx_desc_wait_cs_low_before_payload.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_set_irq_high);
     }
     #endif
 
@@ -754,10 +729,10 @@ sl_status_t sli_cpc_drv_init(void)
 
       // When NOT large buffer, this descriptor's branching remains fixed
       // When large buffer, the branching is computed before each arming
-      rx_desc_recv_payload.xfer.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+      rx_desc_recv_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
     }
 
-    #if (SLI_CPC_RX_DATA_MAX_LENGTH > DMA_MAX_XFER_LEN)
+    #if (SLI_CPC_RX_DATA_MAX_LENGTH > LDMA_DESCRIPTOR_MAX_XFER_SIZE)
     // Transfer descriptor to receive the large buffer payload
     {
       rx_desc_recv_payload_large_buf = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_LINKREL_P2M_BYTE(
@@ -774,7 +749,7 @@ sl_status_t sli_cpc_drv_init(void)
       rx_desc_recv_payload_large_buf.xfer.doneIfs = 0;
 
       // Fixed branching
-      rx_desc_recv_payload_large_buf.xfer.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+      rx_desc_recv_payload_large_buf.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
     }
     #endif
 
@@ -794,7 +769,7 @@ sl_status_t sli_cpc_drv_init(void)
       rx_desc_wait_cs_high_after_payload.sync.doneIfs = 1;
 
       // Fixed branching
-      rx_desc_wait_cs_high_after_payload.sync.linkAddr = LINKABS_ADDR(&rx_desc_flush_fifo);
+      rx_desc_wait_cs_high_after_payload.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_flush_fifo);
     }
 
     // Transfer descriptor to flush the USART FIFO
@@ -834,7 +809,7 @@ sl_status_t sli_cpc_drv_init(void)
     // when when CS goes low, the SYNC signal will go high.
 
     // Fixed branching of previous descriptor
-    rx_desc_flush_fifo.xfer.linkAddr = LINKABS_ADDR(&rx_desc_inv_cs_before_header);
+    rx_desc_flush_fifo.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_inv_cs_before_header);
 
     // Invert CS polarity using PRS FNSEL
     {
@@ -844,7 +819,7 @@ sl_status_t sli_cpc_drv_init(void)
         );
 
       // Fixed branching
-      rx_desc_inv_cs_before_header.wri.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_low_before_header);
+      rx_desc_inv_cs_before_header.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_low_before_header);
     }
 
     // Sync descriptor to wait for the falling edge of the UART CS of the next header.
@@ -862,7 +837,7 @@ sl_status_t sli_cpc_drv_init(void)
       #endif
 
       // Fixed branching
-      rx_desc_wait_cs_low_before_header.sync.linkAddr = LINKABS_ADDR(&rx_desc_revert_cs_before_header);
+      rx_desc_wait_cs_low_before_header.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_revert_cs_before_header);
     }
 
     // Revert CS polarity using PRS FNSEL
@@ -873,11 +848,11 @@ sl_status_t sli_cpc_drv_init(void)
         &PRS->ASYNC_CH_TGL[SL_CPC_DRV_SPI_CS_SYNCTRIG_PRS_CH].CTRL
         );
       // Fixed branching
-      rx_desc_revert_cs_before_header.wri.linkAddr = LINKABS_ADDR(&rx_desc_clear_availability_sync_bit);
+      rx_desc_revert_cs_before_header.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_clear_availability_sync_bit);
     }
     #else
     // Fixed branching of previous descriptor
-    rx_desc_flush_fifo.xfer.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_low_before_header);
+    rx_desc_flush_fifo.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_low_before_header);
 
     // Sync descriptor to wait for the falling edge of the UART CS of the next header.
     {
@@ -894,7 +869,7 @@ sl_status_t sli_cpc_drv_init(void)
       #endif
 
       // Fixed branching
-      rx_desc_wait_cs_low_before_header.sync.linkAddr = LINKABS_ADDR(&rx_desc_clear_availability_sync_bit);
+      rx_desc_wait_cs_low_before_header.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_clear_availability_sync_bit);
     }
     #endif
 
@@ -907,16 +882,31 @@ sl_status_t sli_cpc_drv_init(void)
         0x0);
 
       // Fixed branching
-      rx_desc_clear_availability_sync_bit.sync.linkAddr = LINKABS_ADDR(&rx_desc_recv_header);
+      rx_desc_clear_availability_sync_bit.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_set_irq_high_after_header_cs_low);
     }
 
-    // Transfer the received header
+    // Immediate write to set the IRQ pin high.
     {
-      rx_desc_recv_header = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_LINKREL_P2M_BYTE(
+      rx_desc_set_irq_high_after_header_cs_low = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_LINKABS_WRITE(
+        IRQ_PIN_SET_MASK,
+        irq_set_addr);
+
+      // Fixed branching
+      rx_desc_set_irq_high_after_header_cs_low.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_recv_header);
+    }
+
+    // Transfer the received header. Because its a _SINGLE_ descriptor, the
+    // .doneIfs bit is set and an interrupt will fire after it gets executed
+    {
+      rx_desc_recv_header = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(
         &(SL_CPC_DRV_SPI_PERIPHERAL->RXDATA),
         &header_buffer,
-        SLI_CPC_HDLC_HEADER_RAW_SIZE,
-        1); // Will be overridden below
+        SLI_CPC_HDLC_HEADER_RAW_SIZE);
+
+      #if defined(_SILICON_LABS_32B_SERIES_1)
+      // In case of Series 1, this descriptor is not the end of the chain and needs to
+      // branch to the following one
+      rx_desc_recv_header.wri.link = 1;
 
       // The macro LDMA_DESCRIPTOR_LINKABS_P2M_BYTE does not exist for whatever reason.
       // Force this descriptor to use absolute linking
@@ -926,22 +916,7 @@ sl_status_t sli_cpc_drv_init(void)
       rx_desc_recv_header.xfer.doneIfs = 0;
 
       // Fixed branching
-      rx_desc_recv_header.xfer.linkAddr = LINKABS_ADDR(&rx_desc_set_irq_high_after_header);
-    }
-
-    // Immediate write to set the IRQ pin high. Because its a _SINGLE_ descriptor, the
-    // .doneIfs bit is set and an interrupt will fire after it gets executed
-    {
-      rx_desc_set_irq_high_after_header = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_WRITE(
-        IRQ_PIN_SET_MASK,
-        irq_set_addr);
-
-      #if defined(_SILICON_LABS_32B_SERIES_1)
-      // In case of Series 1, this descriptor is not the end of the chain and needs to
-      // branch to the following one
-      rx_desc_set_irq_high_after_header.wri.link = 1;
-      rx_desc_set_irq_high_after_header.wri.linkMode = ldmaLinkModeAbs;
-      rx_desc_set_irq_high_after_header.wri.linkAddr = LINKABS_ADDR(&rx_desc_clear_cs_and_cs_inv_sync_bits);
+      rx_desc_recv_header.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_clear_cs_and_cs_inv_sync_bits);
       #endif
     }
 
@@ -966,18 +941,6 @@ sl_status_t sli_cpc_drv_init(void)
       rx_desc_clear_cs_and_cs_inv_sync_bits.sync.doneIfs = 0;
     }
     #endif
-
-    // Do a manual initial reception priming.
-    {
-      // The initial reception priming is special because we prime the RX DMA channel from
-      // a descriptor in the middle of the chain.
-      Ecode_t ecode = DMADRV_LdmaStartTransfer(rx_dma_channel,
-                                               &rx_dma_config,
-                                               &rx_desc_flush_fifo, // This is important
-                                               rx_dma_callback,
-                                               (void*)true); // Give a special "initial_pass" = true parameter.
-      EFM_ASSERT(ecode == ECODE_OK);
-    }
   }
 
   // Prepare the transmission DMA descriptor chain
@@ -994,7 +957,7 @@ sl_status_t sli_cpc_drv_init(void)
         ENABLE_SYNC_ON_TX_READY_WINDOW);
 
       // Fixed branching
-      tx_desc_wait_availability_sync_bit.sync.linkAddr = LINKABS_ADDR(&tx_desc_set_irq_low);
+      tx_desc_wait_availability_sync_bit.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_set_irq_low);
     }
 
     // Set the IRQ pin LOW
@@ -1003,7 +966,7 @@ sl_status_t sli_cpc_drv_init(void)
         IRQ_PIN_SET_MASK,
         irq_clr_addr);
 
-      tx_desc_set_irq_low.wri.linkAddr = LINKABS_ADDR(&tx_desc_xfer_header);
+      tx_desc_set_irq_low.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_header);
     }
 
     // Send header
@@ -1039,7 +1002,7 @@ sl_status_t sli_cpc_drv_init(void)
         ENABLE_SYNC_ON_TXC_PRS_CHANNEL);
 
       // Fixed branching
-      tx_desc_wait_header_tranfered.sync.linkAddr = LINKABS_ADDR(&tx_desc_set_tx_frame_complete_variable_after_header);
+      tx_desc_wait_header_tranfered.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_set_tx_frame_complete_variable_after_header);
     }
 
     // Write descriptor to set the "tx_frame_complete" variable to 1.
@@ -1072,10 +1035,10 @@ sl_status_t sli_cpc_drv_init(void)
       // In the case of NO large buffer and NO security, this descriptor branches  to the
       // send checksum descriptor no matter what, else its link address is computed each
       // time the chain is arms. In the case it never changes, set it right now
-      tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+      tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
     }
 
-    #if (SLI_CPC_RX_DATA_MAX_LENGTH > DMA_MAX_XFER_LEN)
+    #if (SLI_CPC_RX_DATA_MAX_LENGTH > LDMA_DESCRIPTOR_MAX_XFER_SIZE)
     // Transfer descriptor for the large buffer payload
     {
       tx_desc_xfer_payload_large_buf = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_LINKREL_M2P_BYTE(
@@ -1094,7 +1057,7 @@ sl_status_t sli_cpc_drv_init(void)
       // In the case of large buffer and NO security, this descriptor branches  to the
       // send checksum descriptor no matter what, else its link address is computed each
       // time the chain is arms. In the case it never changes, set it right now
-      tx_desc_xfer_payload_large_buf.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+      tx_desc_xfer_payload_large_buf.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
     }
     #endif
 
@@ -1115,7 +1078,7 @@ sl_status_t sli_cpc_drv_init(void)
       tx_desc_xfer_tag.xfer.doneIfs = 0;
 
       // Fixed branching
-      tx_desc_xfer_tag.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+      tx_desc_xfer_tag.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
     }
     #endif
 
@@ -1135,7 +1098,7 @@ sl_status_t sli_cpc_drv_init(void)
       tx_desc_xfer_checksum.xfer.doneIfs = 0;
 
       // Fixed branching
-      tx_desc_xfer_checksum.xfer.linkAddr = LINKABS_ADDR(&tx_desc_wait_checksum_tranfered);
+      tx_desc_xfer_checksum.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_wait_checksum_tranfered);
     }
 
     // Wait until the checksum has been sent on the wire
@@ -1147,7 +1110,7 @@ sl_status_t sli_cpc_drv_init(void)
         ENABLE_SYNC_ON_TXC_PRS_CHANNEL);
 
       // Fixed branching
-      tx_desc_wait_checksum_tranfered.sync.linkAddr = LINKABS_ADDR(&tx_desc_set_tx_frame_complete_variable_after_checksum);
+      tx_desc_wait_checksum_tranfered.sync.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_set_tx_frame_complete_variable_after_checksum);
     }
 
     // Write descriptor to set the "tx_frame_complete" variable to 1.
@@ -1170,45 +1133,61 @@ sl_status_t sli_cpc_drv_init(void)
   return SL_STATUS_OK;
 }
 
+/***************************************************************************//**
+ * Start reception
+ ******************************************************************************/
+sl_status_t sli_cpc_drv_start_rx(void)
+{
+  // The initial reception priming is special because we prime the RX DMA channel from
+  // a descriptor in the middle of the chain.
+  Ecode_t ecode = DMADRV_LdmaStartTransfer(rx_dma_channel,
+                                           &rx_dma_config,
+                                           &rx_desc_flush_fifo, // This is important
+                                           rx_dma_callback,
+                                           (void*)true); // Give a special "initial_pass" = true parameter.
+  EFM_ASSERT(ecode == ECODE_OK);
+  return SL_STATUS_OK;
+}
+
 /***************************************************************************/ /**
  * Gets CPC driver capabilities.
  ******************************************************************************/
-void sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilities)
+sl_status_t sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilities)
 {
   if (capabilities == NULL) {
-    return;
+    return SL_STATUS_NULL_POINTER;
   }
 
   *capabilities = (sli_cpc_drv_capabilities_t){.use_raw_rx_buffer = false,
                                                .preprocess_hdlc_header = true,
                                                .uart_flowcontrol = false };
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************/ /**
  * Read bytes from SPI.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle, uint16_t *payload_rx_len)
+sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle)
 {
   sl_status_t status;
   MCU_DECLARE_IRQ_STATE;
 
+  sl_cpc_buffer_handle_t *new_buffer_handle;
+
   MCU_ENTER_ATOMIC();
-  sli_buf_entry_t *entry = (sli_buf_entry_t *)SLI_CPC_POP_BUFFER_HANDLE_LIST(&rx_pending_list_head, sli_buf_entry_t);
-  if (entry == NULL) {
+  sl_cpc_buffer_handle_t *pending_buffer_handle = sli_cpc_pop_driver_buffer_handle(&rx_pending_list_head);
+  if (pending_buffer_handle == NULL) {
     MCU_EXIT_ATOMIC();
     return SL_STATUS_EMPTY;
   }
   MCU_EXIT_ATOMIC();
 
-  *buffer_handle = entry->handle;
-  *payload_rx_len = SLI_CPC_RX_DATA_MAX_LENGTH;
+  *buffer_handle = pending_buffer_handle;
 
   MCU_ENTER_ATOMIC();
-  status = sli_cpc_get_buffer_handle_for_rx(&entry->handle);
+  status = sli_cpc_get_buffer_handle_for_rx(&new_buffer_handle);
   if (status == SL_STATUS_OK) {
-    sli_cpc_push_buffer_handle(&rx_free_list_head, &entry->node, entry->handle);
-  } else {
-    sl_slist_push(&rx_free_no_buf_list_head, &entry->node);
+    sli_cpc_push_driver_buffer_handle(&rx_free_list_head, new_buffer_handle);
   }
   MCU_EXIT_ATOMIC();
 
@@ -1218,24 +1197,17 @@ sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle, uint16
 /**************************************************************************/ /**
  * Write bytes to SPI.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_transmit_data(sl_cpc_buffer_handle_t *buffer_handle, uint16_t payload_tx_len)
+sl_status_t sli_cpc_drv_transmit_data(sl_cpc_buffer_handle_t *buffer_handle)
 {
-  sli_buf_entry_t *entry;
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
-  entry = (sli_buf_entry_t *)sl_slist_pop(&tx_free_list_head);
-  MCU_EXIT_ATOMIC();
-
-  if (entry == NULL) {
+  if (tx_buf_available_count == 0) {
+    MCU_EXIT_ATOMIC();
     return SL_STATUS_NOT_READY;
   }
-
-  entry->handle = buffer_handle;
-  entry->payload_len = payload_tx_len;
-
-  MCU_ENTER_ATOMIC();
-  sli_cpc_push_back_buffer_handle(&tx_submitted_list_head, &entry->node, entry->handle);
+  tx_buf_available_count--;
+  sli_cpc_push_back_driver_buffer_handle(&tx_submitted_list_head, buffer_handle);
 
   prime_dma_for_transmission();
 
@@ -1249,11 +1221,9 @@ sl_status_t sli_cpc_drv_transmit_data(sl_cpc_buffer_handle_t *buffer_handle, uin
  ******************************************************************************/
 bool sli_cpc_drv_is_transmit_ready(void)
 {
-  sl_slist_node_t *head;
-
-  MCU_ATOMIC_LOAD(head, tx_free_list_head);
-
-  return (head != NULL);
+  uint16_t tx_free;
+  MCU_ATOMIC_LOAD(tx_free, tx_buf_available_count);
+  return (tx_free > 0);
 }
 
 /***************************************************************************//**
@@ -1285,29 +1255,22 @@ uint32_t sli_cpc_drv_get_bus_max_bitrate(void)
 }
 
 /**************************************************************************/ /**
- * Notification when RX buffer becomes free.
+ * Notification when RX buffer handle becomes free.
  ******************************************************************************/
-void sli_cpc_memory_on_rx_buffer_free(void)
+void sli_cpc_drv_on_rx_buffer_free(void)
 {
   sl_status_t status;
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
-  if (rx_free_no_buf_list_head == NULL) {
-    MCU_EXIT_ATOMIC();
-    return;
-  }
-
   do {
-    sli_buf_entry_t *entry = (sli_buf_entry_t *)rx_free_no_buf_list_head;
+    sl_cpc_buffer_handle_t *buffer_handle;
 
-    status = sli_cpc_get_buffer_handle_for_rx(&entry->handle);
+    status = sli_cpc_get_buffer_handle_for_rx(&buffer_handle);
     if (status == SL_STATUS_OK) {
-      (void)sl_slist_pop(&rx_free_no_buf_list_head);
-
-      sli_cpc_push_buffer_handle(&rx_free_list_head, &entry->node, entry->handle);
+      sli_cpc_push_driver_buffer_handle(&rx_free_list_head, buffer_handle);
     }
-  } while (status == SL_STATUS_OK && rx_free_no_buf_list_head != NULL);
+  } while (status == SL_STATUS_OK);
   MCU_EXIT_ATOMIC();
 }
 
@@ -1322,31 +1285,32 @@ static void prime_dma_for_reception(size_t payload_size, enum header_situation l
     // First, its not worth retrieving a rx_buffer_entry just yet.
     // Second, we will configure the reception descriptor chain
     // to skip the payload(s) descriptors
-    rx_desc_set_irq_high.wri.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+    rx_desc_set_irq_high.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
 
     goto start_transfer;
   }
 
   // Since we received a valid header, we are going to need a rx_entry to place it into
-  if (currently_receiving_rx_entry == NULL) {
-    currently_receiving_rx_entry = (sli_buf_entry_t *)SLI_CPC_POP_BUFFER_HANDLE_LIST(&rx_free_list_head, sli_buf_entry_t);
+  if (currently_receiving_rx_buffer_handle == NULL) {
+    currently_receiving_rx_buffer_handle = sli_cpc_pop_driver_buffer_handle(&rx_free_list_head);
   }
 
-  if (currently_receiving_rx_entry == NULL) {
+  if (currently_receiving_rx_buffer_handle == NULL) {
     // running out of buffer. We will drop this frame.
     // Configure the reception chain to skip the payload.
-    // Having currently_receiving_rx_entry == NULL when flushing_rx will drop this frame
-    rx_desc_set_irq_high.wri.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+    // Having currently_receiving_rx_buffer_handle == NULL when flushing_rx will drop this frame
+    rx_desc_set_irq_high.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
+    SL_CPC_JOURNAL_RECORD_DEBUG("[DRV] Dropping frame due to lack of RX buffers", __LINE__);
 
     goto start_transfer;
   }
 
   // Copy the valid header from the static header buffer into the buffer_handle
-  *(uint64_t*)currently_receiving_rx_entry->handle->hdlc_header = header_buffer;
+  *(uint64_t*)currently_receiving_rx_buffer_handle->hdlc_header = header_buffer;
 
   if (payload_size == 0) {
     // If we won't receive a payload, skip over the payload descriptor(s)
-    rx_desc_set_irq_high.wri.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+    rx_desc_set_irq_high.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
 
     // Keep indent small, we are done so go to the end of this function directly
     goto start_transfer;
@@ -1354,12 +1318,12 @@ static void prime_dma_for_reception(size_t payload_size, enum header_situation l
 
   // If we expect to receive a payload, configure the reception descriptor chain
   // to include the payload reception descriptor
-  rx_desc_set_irq_high.wri.linkAddr = LINKABS_ADDR(&rx_desc_recv_payload);
+  rx_desc_set_irq_high.wri.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_recv_payload);
 
   // Set the RX buffer address in the payload descriptor
-  rx_desc_recv_payload.xfer.dstAddr = (uint32_t) currently_receiving_rx_entry->handle->data;
+  rx_desc_recv_payload.xfer.dstAddr = (uint32_t) currently_receiving_rx_buffer_handle->data;
 
-  #if (SLI_CPC_RX_DATA_MAX_LENGTH <= DMA_MAX_XFER_LEN) // Non-large-buffer
+  #if (SLI_CPC_RX_DATA_MAX_LENGTH <= LDMA_DESCRIPTOR_MAX_XFER_SIZE) // Non-large-buffer
   {
     // Configure the length of the payload to receive
     rx_desc_recv_payload.xfer.xferCnt = payload_size - 1;
@@ -1368,21 +1332,21 @@ static void prime_dma_for_reception(size_t payload_size, enum header_situation l
   }
   #else // Large-buffer
   {
-    if (payload_size <= DMADRV_MAX_XFER_COUNT) {
+    if (payload_size <= LDMA_DESCRIPTOR_MAX_XFER_SIZE) {
       // We have large buffer compiled, but this payload doesn't span 2 descriptors.
       // load the first descriptor, and jump over the large-buffer reception descriptor.
       rx_desc_recv_payload.xfer.xferCnt = payload_size - 1;
-      rx_desc_recv_payload.xfer.linkAddr = LINKABS_ADDR(&rx_desc_wait_cs_high_after_payload);
+      rx_desc_recv_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_wait_cs_high_after_payload);
     } else {
       // We have large buffer compiled, and the payload spans the two payload descriptors
       // load the first descriptor to the max, and link to the one right under it
-      rx_desc_recv_payload.xfer.xferCnt = DMADRV_MAX_XFER_COUNT - 1;
-      rx_desc_recv_payload.xfer.linkAddr = LINKABS_ADDR(&rx_desc_recv_payload_large_buf);
+      rx_desc_recv_payload.xfer.xferCnt = LDMA_DESCRIPTOR_MAX_XFER_SIZE - 1;
+      rx_desc_recv_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&rx_desc_recv_payload_large_buf);
 
       // We have large buffer compiled, and the payload spans the two payload descriptors
       // load the first descriptor to the max, and link to the one right under it
-      rx_desc_recv_payload_large_buf.xfer.dstAddr = (uint32_t) &((uint8_t*)currently_receiving_rx_entry->handle->data)[DMADRV_MAX_XFER_COUNT];
-      rx_desc_recv_payload_large_buf.xfer.xferCnt = (payload_size - DMADRV_MAX_XFER_COUNT) - 1;
+      rx_desc_recv_payload_large_buf.xfer.dstAddr = (uint32_t) &((uint8_t*)currently_receiving_rx_buffer_handle->data)[LDMA_DESCRIPTOR_MAX_XFER_SIZE];
+      rx_desc_recv_payload_large_buf.xfer.xferCnt = (payload_size - LDMA_DESCRIPTOR_MAX_XFER_SIZE) - 1;
     }
   }
   #endif
@@ -1407,7 +1371,7 @@ static void prime_dma_for_reception(size_t payload_size, enum header_situation l
  ******************************************************************************/
 static void prime_dma_for_transmission(void)
 {
-  if (currently_transmiting_tx_entry) {
+  if (currently_transmiting_buffer_handle) {
     // There is already a frame programmed to be sent. Do nothing now, when the
     // frame currently programmed in the TX DMA chain gets tx_flushed(), the
     // frame for which this function was called will be cocked in.
@@ -1415,10 +1379,10 @@ static void prime_dma_for_transmission(void)
   }
 
   // Pick the next frame to send
-  currently_transmiting_tx_entry = (sli_buf_entry_t*) tx_submitted_list_head;
+  currently_transmiting_buffer_handle = SL_SLIST_ENTRY(tx_submitted_list_head, sl_cpc_buffer_handle_t, driver_node);
 
   // Bug if this function is called but there is nothing in the submitted list
-  EFM_ASSERT(currently_transmiting_tx_entry != NULL);
+  EFM_ASSERT(currently_transmiting_buffer_handle != NULL);
 
   #if defined(CPC_TEST_SPI_DRIVER_CRC_ERROR_INJECTION)
   {
@@ -1436,7 +1400,7 @@ static void prime_dma_for_transmission(void)
       // Make a copy of the good header we are going to transmit
       // We have to make a copy, because otherwise if we modify the good header itself,
       // we will retransmit a bad header indefinitely.
-      bad_crc_header = *(uint64_t*)currently_transmiting_tx_entry->handle->hdlc_header;
+      bad_crc_header = *(uint64_t*)currently_transmiting_buffer_handle->hdlc_header;
 
       // Invert a byte to corrupt the CRC
       ((uint8_t*)&bad_crc_header)[4] = ~((uint8_t*)&bad_crc_header)[4];
@@ -1444,80 +1408,80 @@ static void prime_dma_for_transmission(void)
       // set header source address to the bad header
       tx_desc_xfer_header.xfer.srcAddr = (uint32_t) &bad_crc_header;
     } else {
-      tx_desc_xfer_header.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->hdlc_header;
+      tx_desc_xfer_header.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->hdlc_header;
     }
   }
   #else
   // set header source address
-  tx_desc_xfer_header.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->hdlc_header;
+  tx_desc_xfer_header.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->hdlc_header;
   #endif
 
-  if (currently_transmiting_tx_entry->payload_len == 0) {
-    tx_desc_xfer_header.xfer.linkAddr = LINKABS_ADDR(&tx_desc_wait_header_tranfered);
+  if (currently_transmiting_buffer_handle->data_length == 0) {
+    tx_desc_xfer_header.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_wait_header_tranfered);
 
     // Keep indent small, we are done so go to the end of this function directly
     goto start_transfer;
   }
 
-  tx_desc_xfer_header.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_payload);
+  tx_desc_xfer_header.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_payload);
 
   // Set the payload source address
-  tx_desc_xfer_payload.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->data;
+  tx_desc_xfer_payload.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->data;
 
-  #if (SLI_CPC_RX_DATA_MAX_LENGTH <= DMA_MAX_XFER_LEN) //Non-large-buffer
+  #if (SLI_CPC_RX_DATA_MAX_LENGTH <= LDMA_DESCRIPTOR_MAX_XFER_SIZE) //Non-large-buffer
   {
-    tx_desc_xfer_payload.xfer.xferCnt = currently_transmiting_tx_entry->payload_len - 1;
+    tx_desc_xfer_payload.xfer.xferCnt = currently_transmiting_buffer_handle->data_length - 1;
 
     #if (SL_CPC_ENDPOINT_SECURITY_ENABLED == 1)
     {
-      if (currently_transmiting_tx_entry->handle->security_tag) {
-        tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_tag);
-        tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->security_tag;
+      if (currently_transmiting_buffer_handle->security_tag) {
+        tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_tag);
+        tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->security_tag;
       } else {
-        tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+        tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
       }
-      tx_desc_xfer_checksum.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->fcs;
+      tx_desc_xfer_checksum.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->fcs;
     }
     #endif
   }
   #else // Large-buffer
   {
-    if (currently_transmiting_tx_entry->payload_len <= DMADRV_MAX_XFER_COUNT) {
+    if (currently_transmiting_buffer_handle->data_length <= LDMA_DESCRIPTOR_MAX_XFER_SIZE) {
       // We have large buffer compiled, but this payload doesn't span 2 descriptors.
       // load the first descriptor, and jump over the one that follows.
-      tx_desc_xfer_payload.xfer.xferCnt = currently_transmiting_tx_entry->payload_len - 1;
+      tx_desc_xfer_payload.xfer.xferCnt = currently_transmiting_buffer_handle->data_length - 1;
 
       #if (SL_CPC_ENDPOINT_SECURITY_ENABLED == 1)
       {
-        if (currently_transmiting_tx_entry->handle->security_tag) {
-          tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_tag);
-          tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->security_tag;
+        if (currently_transmiting_buffer_handle->security_tag) {
+          tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_tag);
+          tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->security_tag;
         } else {
-          tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+          tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
         }
       }
       #else
       {
-        tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+        tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
       }
       #endif
     } else {
       // We have large buffer compiled, and the payload spans the two payload descriptors
       // load the first payload descriptor to the max, and link it to the large buffer payload descriptor
-      tx_desc_xfer_payload.xfer.xferCnt = DMADRV_MAX_XFER_COUNT - 1;
-      tx_desc_xfer_payload.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_payload_large_buf);
+      tx_desc_xfer_payload.xfer.xferCnt = LDMA_DESCRIPTOR_MAX_XFER_SIZE - 1;
+      tx_desc_xfer_payload.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_payload_large_buf);
 
       // Load the large buffer payload descriptor with the remaining data
-      tx_desc_xfer_payload_large_buf.xfer.srcAddr = (uint32_t) &((uint8_t*)currently_transmiting_tx_entry->handle->data)[DMADRV_MAX_XFER_COUNT];
-      tx_desc_xfer_payload_large_buf.xfer.xferCnt = (currently_transmiting_tx_entry->payload_len - DMADRV_MAX_XFER_COUNT) - 1;
+      tx_desc_xfer_payload_large_buf.xfer.srcAddr = (uint32_t) &((uint8_t*)currently_transmiting_buffer_handle->data)[LDMA_DESCRIPTOR_MAX_XFER_SIZE];
+      tx_desc_xfer_payload_large_buf.xfer.xferCnt = (currently_transmiting_buffer_handle->data_length - LDMA_DESCRIPTOR_MAX_XFER_SIZE) - 1;
 
       #if (SL_CPC_ENDPOINT_SECURITY_ENABLED == 1)
       {
-        if (currently_transmiting_tx_entry->handle->security_tag) {
-          tx_desc_xfer_payload_large_buf.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_tag);
-          tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->security_tag;
+        if (currently_transmiting_buffer_handle->security_tag) {
+          tx_desc_xfer_payload_large_buf.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_tag);
+          tx_desc_xfer_tag.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->security_tag;
         } else {
-          tx_desc_xfer_payload_large_buf.xfer.linkAddr = LINKABS_ADDR(&tx_desc_xfer_checksum);
+          tx_desc_xfer_payload_large_buf.xfer.linkAddr = LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(&tx_desc_xfer_checksum);
         }
       }
       #endif
@@ -1526,7 +1490,7 @@ static void prime_dma_for_transmission(void)
   #endif
 
   // Finally load the checksum descriptor
-  tx_desc_xfer_checksum.xfer.srcAddr = (uint32_t) currently_transmiting_tx_entry->handle->fcs;
+  tx_desc_xfer_checksum.xfer.srcAddr = (uint32_t) currently_transmiting_buffer_handle->fcs;
 
   Ecode_t ecode;
 
@@ -1581,7 +1545,7 @@ static void end_of_header_xfer(void)
   size_t rx_payload_length = 0;
   MCU_DECLARE_IRQ_STATE;
 
-  MCU_ENTER_CRITICAL();
+  MCU_ENTER_ATOMIC();
 
   LOGIC_ANALYZER_TRACE_HEADER_TRANSFER_ISR_START;
 
@@ -1627,7 +1591,7 @@ static void end_of_header_xfer(void)
 
   LOGIC_ANALYZER_TRACE_HEADER_TRANSFER_ISR_END;
 
-  MCU_EXIT_CRITICAL();
+  MCU_EXIT_ATOMIC();
 }
 
 /***************************************************************************/ /**
@@ -1640,19 +1604,19 @@ static bool end_of_payload_xfer(void)
 {
   MCU_DECLARE_IRQ_STATE;
 
-  MCU_ENTER_CRITICAL();
+  MCU_ENTER_ATOMIC();
 
   LOGIC_ANALYZER_TRACE_PAYLOAD_TRANSFER_ISR_START;
 
   // Check if we had a late header transmission situation
-  if (currently_transmiting_tx_entry) {
+  if (currently_transmiting_buffer_handle) {
     // At this point, a header have been exchanged and we realize a TX entry is registered for transmission
-    // We need to know is this "currently_transmiting_tx_entry" had the chance to have its header clocked in the header
+    // We need to know is this "currently_transmiting_buffer_handle" had the chance to have its header clocked in the header
     // exchange that just happened
     if (tx_frame_complete == 0) {
-      // This "currently_transmiting_tx_entry" has arrived lated. Yes it is at this point the current active TX frame, but
+      // This "currently_transmiting_buffer_handle" has arrived lated. Yes it is at this point the current active TX frame, but
       // at the moment the primary started clocking the header, its header did't go through. Mark this current
-      // TX entry transmission as a "pending_late_header" so that we don't try to flush this "currently_transmiting_tx_entry"
+      // TX entry transmission as a "pending_late_header" so that we don't try to flush this "currently_transmiting_buffer_handle"
       // as having been sent on the wire.
       pending_late_header = true;
     }
@@ -1675,10 +1639,10 @@ static bool end_of_payload_xfer(void)
   LOGIC_ANALYZER_TRACE_PAYLOAD_TRANSFER_ISR_END;
 
   if (LDMA_TransferDone(rx_dma_channel)) {
-    MCU_EXIT_CRITICAL();
+    MCU_EXIT_ATOMIC();
     return true;
   } else {
-    MCU_EXIT_CRITICAL();
+    MCU_EXIT_ATOMIC();
     return false;
   }
 }
@@ -1688,7 +1652,7 @@ static bool end_of_payload_xfer(void)
  ******************************************************************************/
 static void flush_rx(void)
 {
-  if (currently_receiving_rx_entry && received_header_situation == HEADER_VALID) {
+  if (currently_receiving_rx_buffer_handle && received_header_situation == HEADER_VALID) {
     #if defined(CPC_TEST_SPI_DRIVER_CRC_ERROR_INJECTION)
     {
       // Start the payload CRC error injection out of phase with the header error
@@ -1703,19 +1667,17 @@ static void flush_rx(void)
           printf("Invalidated the payload CRC\n");
 
           //Mess with the first byte of the payload CRC by inverting it
-          ((uint8_t*)currently_receiving_rx_entry->handle->data)[0] = ~((uint8_t*)currently_receiving_rx_entry->handle->data)[0];
+          ((uint8_t*)currently_receiving_rx_buffer_handle->data)[0] = ~((uint8_t*)currently_receiving_rx_buffer_handle->data)[0];
         }
       }
     }
     #endif
 
-    sli_cpc_push_back_buffer_handle(&rx_pending_list_head,
-                                    &currently_receiving_rx_entry->node,
-                                    currently_receiving_rx_entry->handle);
+    sli_cpc_push_back_driver_buffer_handle(&rx_pending_list_head, currently_receiving_rx_buffer_handle);
 
-    currently_receiving_rx_entry = NULL;
+    currently_receiving_rx_buffer_handle = NULL;
 
-    sli_cpc_drv_notify_rx_data();
+    sli_cpc_notify_rx_data_from_drv();
   }
 }
 
@@ -1724,7 +1686,8 @@ static void flush_rx(void)
  ******************************************************************************/
 static void flush_tx(void)
 {
-  if (currently_transmiting_tx_entry == NULL) {
+  MCU_DECLARE_IRQ_STATE;
+  if (currently_transmiting_buffer_handle == NULL) {
     // Nothing to notify the core about if there is no current TX entry
     return;
   }
@@ -1735,18 +1698,21 @@ static void flush_tx(void)
   }
 
   // Remove the first entry from the TX submitted list.
-  sli_buf_entry_t *entry = (sli_buf_entry_t *)SLI_CPC_POP_BUFFER_HANDLE_LIST(&tx_submitted_list_head, sli_buf_entry_t);
+  sl_cpc_buffer_handle_t *buffer_handle = sli_cpc_pop_driver_buffer_handle(&tx_submitted_list_head);
 
-  // Paranoia. The first entry in the TX submitted list NEEDS to be the currently_transmiting_tx_entry
-  EFM_ASSERT(entry == currently_transmiting_tx_entry);
+  // Paranoia. The first entry in the TX submitted list NEEDS to be the currently_transmiting_buffer_handle
+  EFM_ASSERT(buffer_handle == currently_transmiting_buffer_handle);
 
   // Notify the core that this entry has been sent on the wire. It will detach its buffer
-  sli_cpc_drv_notify_tx_complete(entry->handle);
+  sli_cpc_notify_tx_data_by_drv(buffer_handle);
 
-  sl_slist_push(&tx_free_list_head, &entry->node);
+  MCU_ENTER_ATOMIC();
+  ++tx_buf_available_count;
+  EFM_ASSERT(tx_buf_available_count <= SL_CPC_DRV_SPI_TX_QUEUE_SIZE);
+  MCU_EXIT_ATOMIC();
 
   // Important to set this back to NULL
-  currently_transmiting_tx_entry = NULL;
+  currently_transmiting_buffer_handle = NULL;
 
   LOGIC_ANALYZER_TRACE_TX_FLUSHED;
 }

@@ -43,9 +43,9 @@
 #include "sl_wisun_types.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_config.h"
-#include "sl_sleeptimer.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_trace_util.h"
+#include "sl_sleeptimer.h"
 
 #if defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
   #include "sl_wisun_app_setting.h"
@@ -133,7 +133,7 @@ __STATIC_INLINE void _app_wisun_mutex_release(void);
  *****************************************************************************/
 static void _store_address(const char *addr_name,
                            const sl_wisun_ip_address_type_t addr_type,
-                           sl_wisun_ip_address_t *addr);
+                           in6_addr_t *addr);
 
 /**************************************************************************//**
  * @brief Setting error flag
@@ -192,14 +192,14 @@ static const app_setting_wisun_t _app_default_settings = {
 #endif
 #if defined(WISUN_CONFIG_DEFAULT_PHY_FAN10)
   .phy = {
-    .type = WISUN_CONFIG_DEFAULT_PHY_FAN10,
+    .type = SL_WISUN_PHY_CONFIG_FAN10,
     .config.fan10.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
     .config.fan10.op_class = WISUN_CONFIG_OPERATING_CLASS,
     .config.fan10.op_mode = WISUN_CONFIG_OPERATING_MODE,
   },
 #elif defined(WISUN_CONFIG_DEFAULT_PHY_FAN11)
   .phy = {
-    .type = WISUN_CONFIG_DEFAULT_PHY_FAN11,
+    .type = SL_WISUN_PHY_CONFIG_FAN11,
     .config.fan11.reg_domain = WISUN_CONFIG_REGULATORY_DOMAIN,
     .config.fan11.chan_plan_id = WISUN_CONFIG_CHANNEL_PLAN_ID,
     .config.fan11.phy_mode_id = WISUN_CONFIG_PHY_MODE_ID,
@@ -232,9 +232,6 @@ static const osMutexAttr_t _app_wisun_network_mtx_attr = {
 /// Current address storage
 static current_addr_t _current_addr = { 0U };
 
-/// Timestamp variable for internal usage
-static uint32_t _timestamp = 0U;
-
 /// error flag for errors
 static app_core_error_state_flag_t _error_flag = CONNECTION_FAILED_ERROR_FLAG_BIT;
 
@@ -242,7 +239,10 @@ static app_core_error_state_flag_t _error_flag = CONNECTION_FAILED_ERROR_FLAG_BI
 static sl_wisun_join_state_t _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
 
 /// Internal setting storage
-static app_setting_wisun_t _setting = { 0 };
+static app_setting_wisun_t _setting = { 0U };
+
+/// Time statistic storage
+static app_core_time_stat_t _time_stat = { 0U };
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -251,44 +251,81 @@ static app_setting_wisun_t _setting = { 0 };
 /* Network update event handler */
 void sl_wisun_network_update_event_hnd(sl_wisun_evt_t *evt)
 {
+  const char *ip_str = NULL;
+  const char *time_str = NULL;
+  static sl_wisun_trace_util_time_t time = { 0U };
+  uint64_t time_ms = 0ULL;
+
+  sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
+  time_ms = time_ms - _time_stat.connected_ms;
+  app_wisun_trace_util_timestamp_init(time_ms, &time);
+  time_str = app_wisun_trace_util_time_to_str(&time);
+  if (time_str == NULL) {
+    time_str = "";
+  }
+
   if (evt->evt.network_update.status == SL_STATUS_OK) {
-    printf("[Network update]\n");
     if (evt->evt.network_update.flags & (1 << SL_WISUN_NETWORK_UPDATE_FLAGS_GLOBAL_IP)) {
       _store_address("GLOBAL", SL_WISUN_IP_ADDRESS_TYPE_GLOBAL, &_current_addr.global);
+      ip_str = app_wisun_trace_util_get_ip_str(&_current_addr.global);
+      printf("[%s Network update: Global %s]\n", time_str, ip_str);
     }
     if (evt->evt.network_update.flags & (1 << SL_WISUN_NETWORK_UPDATE_FLAGS_PRIMARY_PARENT)) {
       _store_address("PRIM_PARENT", SL_WISUN_IP_ADDRESS_TYPE_PRIMARY_PARENT, &_current_addr.primary_parent);
+      ip_str = app_wisun_trace_util_get_ip_str(&_current_addr.primary_parent);
+      printf("[%s Network update: Primary Parent %s]\n", time_str, ip_str);
     }
     if (evt->evt.network_update.flags & (1 << SL_WISUN_NETWORK_UPDATE_FLAGS_SECONDARY_PARENT)) {
       _store_address("SEC_PARENT", SL_WISUN_IP_ADDRESS_TYPE_SECONDARY_PARENT, &_current_addr.secondary_parent);
+      ip_str = app_wisun_trace_util_get_ip_str(&_current_addr.secondary_parent);
+      printf("[%s Network update: Secondary Parent %s]\n", time_str, ip_str);
     }
   }
+
+  app_wisun_trace_util_destroy_ip_str(ip_str);
+  app_wisun_trace_util_destroy_time_str(time_str);
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
 /* Connected event handler */
 void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
 {
-  uint32_t curr_timestamp = 0;
-  uint32_t time_ms = 0;
-  (void) evt;
+  uint64_t time_ms = 0;
+
   if (evt->evt.connected.status != SL_STATUS_OK) {
     printf("[Connection failed. Status: %lu]\n", evt->evt.connected.status);
     return;
   }
   // store the current addresses
   _store_current_addresses();
-  curr_timestamp = sl_sleeptimer_get_tick_count();
-  time_ms = sl_sleeptimer_tick_to_ms(curr_timestamp - _timestamp);
-  printf("[%lu s]\n", time_ms / 1000U);
+
+  // update internal time stat
+  sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
+  _time_stat.tot_disconnected_ms += (time_ms  - _time_stat.connected_ms);
+  _time_stat.curr_ms = time_ms;
+  _time_stat.connected_ms = time_ms;
+  ++_time_stat.conn_cnt;
+
+  time_ms = time_ms - _time_stat.disconnected_ms;
+
+  printf("[%lu s]\n", (uint32_t)time_ms / 1000U);
+
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
 /* Socket disconnected event handler */
 void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
 {
-  _timestamp = sl_sleeptimer_get_tick_count();
+  uint64_t time_ms = 0;
+
   printf("[Disconnected]\n");
+
+  // update internal time stat
+  sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
+  _time_stat.tot_connected_ms += (time_ms  - _time_stat.disconnected_ms);
+  _time_stat.curr_ms = time_ms;
+  _time_stat.disconnected_ms = time_ms;
+
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
@@ -330,6 +367,11 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
+void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
+{
+  __CHECK_FOR_STATUS(evt->evt.error.status);
+}
+
 /* Wisun app core init */
 void app_wisun_core_init(void)
 {
@@ -349,6 +391,7 @@ void app_wisun_network_connect(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  uint64_t time_ms = 0ULL;
 
   _app_wisun_mutex_acquire(); // get mutex
 
@@ -397,7 +440,12 @@ void app_wisun_network_connect(void)
   ret = sl_wisun_join((const uint8_t *)_setting.network_name, &_setting.phy);
 
   if (ret == SL_STATUS_OK) {
-    _timestamp = sl_sleeptimer_get_tick_count();
+    // update internal time stat
+    sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
+    _time_stat.curr_ms = time_ms;
+    _time_stat.connected_ms = time_ms;
+    _time_stat.disconnected_ms = time_ms;
+
     printf("\n[Connecting to \"%s\"]\n", _setting.network_name);
   } else {
     _app_wisun_core_set_error(CONNECTION_FAILED_ERROR_FLAG_BIT);
@@ -414,11 +462,11 @@ void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 void app_wisun_get_current_addresses(current_addr_t * const dest_addresses)
 {
   _app_wisun_mutex_acquire();
-  memcpy(&dest_addresses->global, &_current_addr.global, sizeof(sl_wisun_ip_address_t));
-  memcpy(&dest_addresses->border_router, &_current_addr.border_router, sizeof(sl_wisun_ip_address_t));
-  memcpy(&dest_addresses->link_local, &_current_addr.link_local, sizeof(sl_wisun_ip_address_t));
-  memcpy(&dest_addresses->primary_parent, &_current_addr.primary_parent, sizeof(sl_wisun_ip_address_t));
-  memcpy(&dest_addresses->secondary_parent, &_current_addr.secondary_parent, sizeof(sl_wisun_ip_address_t));
+  memcpy(&dest_addresses->global, &_current_addr.global, sizeof(in6_addr_t));
+  memcpy(&dest_addresses->border_router, &_current_addr.border_router, sizeof(in6_addr_t));
+  memcpy(&dest_addresses->link_local, &_current_addr.link_local, sizeof(in6_addr_t));
+  memcpy(&dest_addresses->primary_parent, &_current_addr.primary_parent, sizeof(in6_addr_t));
+  memcpy(&dest_addresses->secondary_parent, &_current_addr.secondary_parent, sizeof(in6_addr_t));
   _app_wisun_mutex_release();
 }
 
@@ -489,6 +537,28 @@ sl_wisun_join_state_t app_wisun_get_join_state(void)
   return join_state;
 }
 
+void app_wisun_get_time_stat(app_core_time_stat_t * const tstat)
+{
+  uint64_t time_ms = 0ULL;
+
+  _app_wisun_mutex_acquire();
+
+  // update current time
+  sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
+
+  memcpy(tstat, &_time_stat, sizeof(app_core_time_stat_t));
+
+  // add diff beetween current time and last update time to the actual state
+  tstat->curr_ms = time_ms;
+  time_ms = tstat->curr_ms - _time_stat.curr_ms;
+  if (_join_state != SL_WISUN_JOIN_STATE_OPERATIONAL) {
+    tstat->tot_disconnected_ms += time_ms;
+  } else {
+    tstat->tot_connected_ms += time_ms;
+  }
+
+  _app_wisun_mutex_release();
+}
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
 
 sl_wisun_device_type_t app_wisun_get_device_type(void)
@@ -725,7 +795,7 @@ __STATIC_INLINE void _app_wisun_mutex_release(void)
 /* Storing address */
 static void _store_address(const char *addr_name,
                            const sl_wisun_ip_address_type_t addr_type,
-                           sl_wisun_ip_address_t *addr)
+                           in6_addr_t *addr)
 {
   sl_status_t stat = SL_STATUS_FAIL;
   const char *ip_str = NULL;

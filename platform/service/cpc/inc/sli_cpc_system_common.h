@@ -31,6 +31,7 @@
 #ifndef SLI_CPC_SYSTEM_COMMON_H
 #define SLI_CPC_SYSTEM_COMMON_H
 
+#include "sl_common.h"
 #include "sl_enum.h"
 #include "sl_status.h"
 #include "sl_cpc.h"
@@ -61,9 +62,11 @@ SL_ENUM_GENERIC(sli_cpc_property_id_t, uint32_t)
   PROP_SECONDARY_CPC_VERSION  = 0x03,
   PROP_SECONDARY_APP_VERSION  = 0x04,
   PROP_RX_CAPABILITY          = 0x20,
+  PROP_TX_CAPABILITY          = 0x21,
   PROP_FC_VALIDATION_VALUE    = 0x30,
   PROP_BUS_BITRATE_VALUE      = 0x40,
   PROP_BUS_MAX_BITRATE_VALUE  = 0x50,
+  PROP_PRIMARY_VERSION_VALUE  = 0x60,
   PROP_BOOTLOADER_INFO        = 0x200,
   PROP_BOOTLOADER_REBOOT_MODE = 0x202,
   PROP_SECURITY_STATE         = 0x301,
@@ -420,6 +423,16 @@ typedef struct {
 } sli_cpc_system_enter_irq_cmd_t;
 
 /***************************************************************************//**
+ * Primary Set Version parameters
+ ******************************************************************************/
+typedef struct {
+  uint8_t major;
+  uint8_t minor;
+  uint8_t patch;
+  uint8_t tweak;
+} sli_cpc_system_primary_version_t;
+
+/***************************************************************************//**
  * Capabilities mask.
  *
  * @note
@@ -440,6 +453,7 @@ SL_ENUM(sli_cpc_system_cmd_id_t)
   CMD_SYSTEM_PROP_VALUE_GET = 0x02,
   CMD_SYSTEM_PROP_VALUE_SET = 0x03,
   CMD_SYSTEM_PROP_VALUE_IS  = 0x06,
+  CMD_SYSTEM_INVALID        = 0xFF,
 };
 
 /***************************************************************************//**
@@ -448,20 +462,29 @@ SL_ENUM(sli_cpc_system_cmd_id_t)
 #define PAYLOAD_LENGTH_MAX    16
 
 typedef struct {
-  sli_cpc_system_cmd_id_t command_id;                 ///< Identifier of the command.
-  uint8_t                seq;                         ///< Command sequence number.
-  uint16_t               length;                      ///< Length of the payload in bytes.
-} sli_cpc_system_cmd_header_t;
-
-typedef struct {
-  sli_cpc_system_cmd_header_t header;                      ///< Command header
-  uint8_t                     payload[PAYLOAD_LENGTH_MAX]; ///< Command payload.
+  sli_cpc_system_cmd_id_t command_id;                  ///< Identifier of the command.
+  uint8_t                 seq;                         ///< Command sequence number.
+  uint16_t                length;                      ///< Length of the payload in bytes.
+  uint8_t                 payload[PAYLOAD_LENGTH_MAX]; ///< Command payload.
 } sli_cpc_system_cmd_t;
+
+/***************************************************************************//**
+ * Used to return the size of a system command buffer, primarily to pass to
+ * sl_cpc_write.
+ ******************************************************************************/
+#define SIZEOF_SYSTEM_COMMAND(command) (sizeof(sli_cpc_system_cmd_t) - PAYLOAD_LENGTH_MAX + command->length)
 
 typedef struct {
   sli_cpc_property_id_t property_id;        ///< Identifier of the property.
   uint8_t payload[];                        ///< Property value.
 } sli_cpc_system_property_cmd_t;
+
+/***************************************************************************/ /**
+ * Returns the state of the reset sequence
+ *
+ * @return Whether the reset and boot sequence is completed
+ ******************************************************************************/
+bool sli_cpc_reboot_is_sequence_done(void);
 
 #ifdef __cplusplus
 }

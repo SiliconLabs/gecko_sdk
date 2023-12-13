@@ -37,11 +37,11 @@
 
 #include "common/code_utils.hpp"
 #include "common/encoding.hpp"
-#include "common/instance.hpp"
 #include "common/locator_getters.hpp"
 #include "common/log.hpp"
 #include "common/num_utils.hpp"
 #include "common/numeric_limits.hpp"
+#include "instance/instance.hpp"
 #include "mac/mac.hpp"
 #include "thread/link_metrics_tlvs.hpp"
 #include "thread/neighbor_table.hpp"
@@ -219,7 +219,7 @@ void Initiator::HandleReport(const Message &aMessage, uint16_t aOffset, uint16_t
     VerifyOrExit(hasStatus || hasReport);
 
     mReportCallback.Invoke(&aAddress, hasStatus ? nullptr : &values,
-                           hasStatus ? static_cast<Status>(status) : kStatusSuccess);
+                           hasStatus ? MapEnum(static_cast<Status>(status)) : MapEnum(kStatusSuccess));
 
 exit:
     LogDebg("HandleReport, error:%s", ErrorToString(error));
@@ -337,7 +337,7 @@ Error Initiator::HandleManagementResponse(const Message &aMessage, const Ip6::Ad
 
     VerifyOrExit(hasStatus, error = kErrorParse);
 
-    mMgmtResponseCallback.Invoke(&aAddress, status);
+    mMgmtResponseCallback.Invoke(&aAddress, MapEnum(static_cast<Status>(status)));
 
 exit:
     return error;

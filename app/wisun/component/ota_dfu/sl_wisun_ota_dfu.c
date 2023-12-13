@@ -46,9 +46,10 @@
 #include "sl_wisun_coap.h"
 #include "sl_string.h"
 #include "sl_sleeptimer.h"
+#include "socket/socket.h"
 
 #if SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED
-#include "socket.h"
+#include "socket/socket.h"
 #endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -86,22 +87,23 @@
 
 /// OTA DFU status json format string
 #define SL_WISUN_OTA_DFU_STATUS_JSON_FORMAT_STR \
-  "{\n"                                     \
-  "\"elapsed_t\":\"%.2lu:%.2lu:%.2lu\",\n"  \
-  "\"downl_bytes\":%lu,\n"                  \
-  "\"flags\": \"0x%.8lx\",\n"               \
-  "\"fw_update_started\": %u,\n"            \
-  "\"fw_downloaded\": %u,\n"                \
-  "\"fw_verified\": %u,\n"                  \
-  "\"fw_set\": %u,\n"                       \
-  "\"fw_stopped\": %u,\n"                   \
-  "\"fw_download_error\": %u,\n"            \
-  "\"fw_verify_error\": %u,\n"              \
-  "\"fw_set_error\": %u\n"                  \
+  "{\n"                                         \
+  "\"ip\":\"%s\",\n"                            \
+  "\"elapsed_t\":\"%.2lu:%.2lu:%.2lu\",\n"      \
+  "\"downl_bytes\":%lu,\n"                      \
+  "\"flags\": \"0x%.8lx\",\n"                   \
+  "\"fw_update_started\": %u,\n"                \
+  "\"fw_downloaded\": %u,\n"                    \
+  "\"fw_verified\": %u,\n"                      \
+  "\"fw_set\": %u,\n"                           \
+  "\"fw_stopped\": %u,\n"                       \
+  "\"fw_download_error\": %u,\n"                \
+  "\"fw_verify_error\": %u,\n"                  \
+  "\"fw_set_error\": %u\n"                      \
   "}\n"
 
 /// OTA DFU status json string max length
-#define SL_WISUN_OTA_DFU_STATUS_JSON_STR_MAX_LEN            280UL
+#define SL_WISUN_OTA_DFU_STATUS_JSON_STR_MAX_LEN            320UL
 
 /// OTA DFU delay in ms
 #define SL_WISUN_OTA_DFU_DELAY_MS                           1000UL
@@ -120,6 +122,9 @@
 
 /// OTA DFU firmware update stop payload string
 #define SL_WISUN_OTA_DFU_STOP_PAYLOAD_STR                   "stop"
+
+/// OTA DFU firmware reboot and install
+#define SL_WISUN_OTA_DFU_REBOOT_AND_INSTALL_PAYLOAD_STR     "install"
 
 /// Error firmware download format string
 #define SL_WISUN_OTA_DFU_ERROR_FW_DOWNLOAD_FORMAT_STR \
@@ -151,7 +156,7 @@ typedef struct sl_wisun_ota_dfu_notify_ch {
   /// Notification socket
   int32_t sockid;
   /// Notification address
-  wisun_addr_t addr;
+  sockaddr_in6_t addr;
   /// Notification packet
   sl_wisun_coap_packet_t pkt;
 } sl_wisun_ota_dfu_notify_ch_t;
@@ -159,15 +164,15 @@ typedef struct sl_wisun_ota_dfu_notify_ch {
 
 /// OTA DFU log macro function
 #if SL_WISUN_OTA_DFU_VERBOSE_MODE_ENABLED
-# define sl_wisun_ota_dfu_log(format, ...)                    \
+# define sl_wisun_ota_dfu_log(format, ...)                \
   do {                                                    \
     printf("[wisun-btl] (%lu) ", _get_elapsed_time_ms()); \
     printf(format, ##__VA_ARGS__);                        \
   } while (0)
 #else
 # define sl_wisun_ota_dfu_log(format, ...) \
-  do {                                 \
-    (void) format;                     \
+  do {                                     \
+    (void) format;                         \
   } while (0)
 #endif
 
@@ -252,6 +257,9 @@ static uint32_t _downl_bytes = 0UL;
 
 /// Start tick count reference
 static uint32_t _start_tick_cnt = 0UL;
+
+/// Global IP String
+static const char * _global_ip_str = NULL;
 
 /// OTA DFU task attribute
 static const osThreadAttr_t _ota_dfu_thr_attr = {
@@ -343,6 +351,16 @@ sl_status_t sl_wisun_ota_dfu_stop_fw_update(void)
   return SL_STATUS_OK;
 }
 
+#if !SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED
+sl_status_t sl_wisun_ota_dfu_reboot_and_install(void)
+{
+  bootloader_rebootAndInstall();
+
+  // If the function returns, error occured.
+  return SL_STATUS_FAIL;
+}
+#endif
+
 uint32_t sl_wisun_ota_dfu_get_fw_update_status(void)
 {
   return osEventFlagsGet(_ota_dfu_evt);
@@ -372,20 +390,20 @@ SL_WEAK void sl_wisun_ota_dfu_error_hnd(const sl_wisun_ota_dfu_error_code_t erro
   switch (error_code) {
     case SL_WISUN_OTA_DFU_ERROR_FW_DOWNLOAD:
       sl_wisun_ota_dfu_log(SL_WISUN_OTA_DFU_ERROR_FW_DOWNLOAD_FORMAT_STR,
-                       error_code,
-                       error_ctx->download.ret_val,
-                       error_ctx->download.offset,
-                       error_ctx->download.data_size);
+                           error_code,
+                           error_ctx->download.ret_val,
+                           error_ctx->download.offset,
+                           error_ctx->download.data_size);
       break;
 
     case SL_WISUN_OTA_DFU_ERROR_FW_VERIFY:
       sl_wisun_ota_dfu_log(SL_WISUN_OTA_DFU_ERROR_FW_VERIFY_FORMAT_STR,
-                       error_code, error_ctx->verify.ret_val);
+                           error_code, error_ctx->verify.ret_val);
       break;
 
     case SL_WISUN_OTA_DFU_ERROR_FW_SET:
       sl_wisun_ota_dfu_log(SL_WISUN_OTA_DFU_ERROR_FW_SET_FORMAT_STR,
-                       error_code, error_ctx->set.ret_val);
+                           error_code, error_ctx->set.ret_val);
       break;
 
     default:
@@ -439,6 +457,7 @@ static const char *_get_status_json_string(void)
 
   (void) snprintf(str, SL_WISUN_OTA_DFU_STATUS_JSON_STR_MAX_LEN,
                   SL_WISUN_OTA_DFU_STATUS_JSON_FORMAT_STR,
+                  _global_ip_str,
                   th, tm, ts,
                   _downl_bytes,
                   flags,
@@ -470,20 +489,40 @@ static sl_wisun_coap_packet_t * _ota_dfu_coap_response_cb(const sl_wisun_coap_pa
     return NULL;
   }
 
+  // Handle incoming empty payload
+  if (req_packet->payload_ptr == NULL && req_packet->msg_code == COAP_MSG_CODE_REQUEST_POST) {
+    return resp_packet;
+  }
+
+  // Init global IP string
+  if (_global_ip_str == NULL) {
+    _global_ip_str = sl_tftp_get_global_addr();
+  }
+
   resp_packet->msg_code = COAP_MSG_CODE_RESPONSE_CREATED;
   resp_packet->content_format = COAP_CT_JSON;
 
   // CoAP PUT request to start firmware updaet
   if (req_packet->msg_code == COAP_MSG_CODE_REQUEST_POST) {
     // Start fw update
-    if (!memcmp(SL_WISUN_OTA_DFU_START_PAYLOAD_STR, req_packet->payload_ptr, req_packet->payload_len)) {
+    if (!memcmp(SL_WISUN_OTA_DFU_START_PAYLOAD_STR,
+                req_packet->payload_ptr,
+                req_packet->payload_len)) {
       _start_tick_cnt = sl_sleeptimer_get_tick_count();
       (void) sl_wisun_ota_dfu_start_fw_update();
 
       // Stop fw update
-    } else if (!memcmp(SL_WISUN_OTA_DFU_STOP_PAYLOAD_STR, req_packet->payload_ptr, req_packet->payload_len)) {
+    } else if (!memcmp(SL_WISUN_OTA_DFU_STOP_PAYLOAD_STR,
+                       req_packet->payload_ptr,
+                       req_packet->payload_len)) {
       (void) sl_wisun_ota_dfu_stop_fw_update();
-
+#if !SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED
+      // Reboot and install firmware
+    } else if (!memcmp(SL_WISUN_OTA_DFU_REBOOT_AND_INSTALL_PAYLOAD_STR,
+                       req_packet->payload_ptr,
+                       req_packet->payload_len)) {
+      (void) sl_wisun_ota_dfu_reboot_and_install();
+#endif
       // Bad request
     } else {
       resp_packet->msg_code = COAP_MSG_CODE_RESPONSE_BAD_REQUEST;
@@ -539,12 +578,24 @@ static void _tftp_data_hnd(sl_tftp_clnt_t * const clnt,
   }
 
   sl_wisun_ota_dfu_log("download: received chunk %u, offset: 0x%.8lx\n",
-                   clnt->packet.content.data.block_num, offset);
+                       clnt->packet.content.data.block_num, offset);
+}
+
+static void _tftp_error_hnd(sl_tftp_clnt_t * const clnt,
+                            const uint16_t error_code,
+                            const char *error_msg)
+{
+  (void)clnt;
+  (void)error_code;
+  (void)error_msg;
+
+  _change_status(SL_WISUN_OTA_DFU_EVT_FLAG_FW_DOWNLOAD_ERROR_MSK);
+  _notify_host();
 }
 
 static void _ota_dfu_thr_fnc(void * args)
 {
-  static BootloaderStorageInformation_t info;
+  static BootloaderStorageInformation_t info = { 0U };
   static sl_tftp_clnt_t tftp_clnt = { 0U };
   static sl_wisun_ota_dfu_error_ctx_t error_ctx = { 0U };
   uint32_t flags = 0UL;
@@ -553,14 +604,14 @@ static void _ota_dfu_thr_fnc(void * args)
 
 #if SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED
   // Create socket
-  _notify_ch.sockid = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+  _notify_ch.sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
   assert(_notify_ch.sockid != -1L);
 
   // Set address
-  _notify_ch.addr.sin6_family = AF_WISUN;
+  _notify_ch.addr.sin6_family = AF_INET6;
   _notify_ch.addr.sin6_port = SL_WISUN_OTA_DFU_NOTIFY_PORT;
-  assert(inet_pton(AF_WISUN, SL_WISUN_OTA_DFU_NOTIFY_HOST_ADDR,
-                   &_notify_ch.addr.sin6_addr.s6_addr) != -1L);
+  assert(inet_pton(AF_INET6, SL_WISUN_OTA_DFU_NOTIFY_HOST_ADDR,
+                   &_notify_ch.addr.sin6_addr) != -1L);
 
   // prepare packet
   _notify_ch.pkt.msg_code = COAP_MSG_CODE_REQUEST_PUT;
@@ -588,11 +639,12 @@ static void _ota_dfu_thr_fnc(void * args)
       osDelay(SL_WISUN_OTA_DFU_DELAY_MS);
       continue;
     }
+
     // Start tick count
     _start_tick_cnt = sl_sleeptimer_get_tick_count();
 
     sl_wisun_ota_dfu_log("Storage info: version: %lu, capabilities: %lu, storageType: %lu, numStorageSlots: %lu\n",
-                     info.version, info.capabilities, (uint32_t)info.storageType, info.numStorageSlots);
+                         info.version, info.capabilities, (uint32_t)info.storageType, info.numStorageSlots);
     sl_wisun_ota_dfu_log("Firmware upgrade started\n");
 
     // check stop request
@@ -608,21 +660,22 @@ static void _ota_dfu_thr_fnc(void * args)
     if (sl_tftp_clnt_init(&tftp_clnt,
                           SL_WISUN_OTA_DFU_HOST_ADDR,
                           SL_WISUN_OTA_DFU_TFTP_PORT,
-                          _tftp_data_hnd, NULL) != SL_STATUS_OK) {
+                          _tftp_data_hnd,
+                          _tftp_error_hnd) != SL_STATUS_OK) {
       _change_status(SL_WISUN_OTA_DFU_EVT_FLAG_FW_DOWNLOAD_ERROR_MSK);
       osDelay(SL_WISUN_OTA_DFU_DELAY_MS);
       continue;
     }
 
-    sl_wisun_ota_dfu_log("TFTT init done\n");
+    sl_wisun_ota_dfu_log("TFTP init done\n");
 
     // notify host
     _notify_host();
 
     sl_wisun_ota_dfu_log("TFTP download started: tftp://[%s]:%u/%s\n",
-                     SL_WISUN_OTA_DFU_HOST_ADDR,
-                     SL_WISUN_OTA_DFU_TFTP_PORT,
-                     SL_WISUN_OTA_DFU_GBL_FILE);
+                         SL_WISUN_OTA_DFU_HOST_ADDR,
+                         SL_WISUN_OTA_DFU_TFTP_PORT,
+                         SL_WISUN_OTA_DFU_GBL_FILE);
 
     if (sl_tftp_clnt_request(&tftp_clnt,
                              SL_TFTP_OPCODE_RRQ,
@@ -638,6 +691,12 @@ static void _ota_dfu_thr_fnc(void * args)
         break;
       }
       osDelay(SL_WISUN_OTA_DFU_DELAY_MS);
+    }
+
+    // check download error
+    if (sl_wisun_ota_dfu_get_fw_update_status_flag(SL_WISUN_OTA_DFU_STATUS_FW_DOWNLOAD_ERROR)) {
+      osDelay(SL_WISUN_OTA_DFU_DELAY_MS);
+      continue;
     }
 
     // check stop request
@@ -681,7 +740,9 @@ static void _ota_dfu_thr_fnc(void * args)
       continue;
     }
 
+#if SL_WISUN_OTA_DFU_AUTO_INSTALL_ENABLED
     bootloader_rebootAndInstall();
+#endif
   }
 }
 
@@ -711,11 +772,11 @@ static void _notify_host(void)
   }
 
   (void) sendto(_notify_ch.sockid, buff, req_buff_size, 0L,
-                (const struct sockaddr *) &_notify_ch.addr, sizeof(wisun_addr_t));
+                (const struct sockaddr *) &_notify_ch.addr, sizeof(sockaddr_in6_t));
   sl_wisun_ota_dfu_log("notify: coap://[%s]:%u%s\n",
-                   SL_WISUN_OTA_DFU_NOTIFY_HOST_ADDR,
-                   SL_WISUN_OTA_DFU_NOTIFY_PORT,
-                   SL_WISUN_OTA_DFU_NOTIFY_URI_PATH);
+                       SL_WISUN_OTA_DFU_NOTIFY_HOST_ADDR,
+                       SL_WISUN_OTA_DFU_NOTIFY_PORT,
+                       SL_WISUN_OTA_DFU_NOTIFY_URI_PATH);
   sl_wisun_coap_free(_notify_ch.pkt.payload_ptr);
   sl_wisun_coap_free(buff);
 #else

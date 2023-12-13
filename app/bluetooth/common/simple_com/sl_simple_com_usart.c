@@ -3,7 +3,7 @@
  * @brief Simple Communication Interface (UART)
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -109,8 +109,7 @@ void sl_simple_com_init(void)
   // Get the default UARTDRV handle to use for Simple COM
   uartdrv_handle = sl_uartdrv_get_default();
   irq_number = irq_number_from_handle(uartdrv_handle);
-  app_assert(irq_number >= (IRQn_Type)(0),
-             "Unknown UARTDRV handle\n");
+  app_assert(irq_number >= (IRQn_Type)(0), "Unknown UARTDRV handle\n");
 
   // calculate the maximum amount of time to wait for UART TX buffer to empty
   time_to_wait_tx_callback = CMU_ClockFreqGet(cmuClock_CORE)
@@ -124,7 +123,7 @@ void sl_simple_com_init(void)
 void sl_simple_com_step(void)
 {
   if (tx_cb_signal.finished) {
-    // wait until UART finished transfer
+    // Wait until UART finished transfer
     if ((!(UARTDRV_GetPeripheralStatus(tx_cb_signal.handle) & UARTDRV_STATUS_TXC))
         && (tx_cb_signal.timeout < time_to_wait_tx_callback)) {
       tx_cb_signal.timeout++;
@@ -148,16 +147,18 @@ void sl_simple_com_step(void)
  * @param[out] len Message length
  * @param[out] data Message data
  *****************************************************************************/
-void sl_simple_com_transmit(uint32_t len, uint8_t *data)
+void sl_simple_com_transmit(uint32_t len, const uint8_t *data)
 {
   Ecode_t ec;
-  // make a copy of the data to be sent to guarantee its integrity until
+  // Make a copy of the data to be sent to guarantee its integrity until
   // transmission completes
-  app_assert(len <= SL_SIMPLE_COM_TX_BUF_SIZE,
-             "TX length is bigger than allocated buffer\n");
 #if defined(SL_SIMPLE_COM_ROBUST) && SL_SIMPLE_COM_ROBUST == 1
+  app_assert(sl_simple_com_robust_get_pack_buffer_size(len) <= SL_SIMPLE_COM_TX_BUF_SIZE,
+             "TX length is bigger than allocated buffer\n");
   len = sl_simple_com_robust_pack_data(tx_buf, data, (size_t)len);
 #else // SL_SIMPLE_COM_ROBUST
+  app_assert(len <= SL_SIMPLE_COM_TX_BUF_SIZE,
+             "TX length is bigger than allocated buffer\n");
   memcpy((void *)tx_buf, (void *)data, (size_t)len);
 #endif // SL_SIMPLE_COM_ROBUST
 
@@ -194,15 +195,10 @@ void sl_simple_com_receive(void)
      | USART_TIMECMP1_TSTART_RXEOF
      | (0xff << _USART_TIMECMP1_TCMPVAL_SHIFT));
   // Clear any USART interrupt flags
-  USART_IntClear(uartdrv_handle->peripheral.uart,
-                 _USART_IF_MASK);
-  USART_IntEnable(uartdrv_handle->peripheral.uart,
-                  USART_IF_TXIDLE | USART_IF_TCMP1);
+  USART_IntClear(uartdrv_handle->peripheral.uart, _USART_IF_MASK);
+  USART_IntEnable(uartdrv_handle->peripheral.uart, USART_IF_TXIDLE | USART_IF_TCMP1);
   // Start reception with callback set
-  ec = UARTDRV_Receive(uartdrv_handle,
-                       rx_buf,
-                       sizeof(rx_buf),
-                       receive_cb);
+  ec = UARTDRV_Receive(uartdrv_handle, rx_buf, sizeof(rx_buf), receive_cb);
   app_assert(ECODE_EMDRV_UARTDRV_OK == ec,
              "[E: 0x%04x] Failed to start receiving\n",
              (int)ec);
@@ -384,17 +380,6 @@ static void receive_cb(UARTDRV_Handle_t handle,
                               ? SL_STATUS_OK : SL_STATUS_FAIL | result.status),
                              result.payload_size,
                              result.payload);
-
-    // Calculate processed data from buf_in_packed. (Payload + overhead)
-    int32_t processed = result.payload_size + sl_simple_com_robust_get_pack_buffer_size(0);
-
-    // Clear processed data from RX buffer
-    memmove(rx_buf, &rx_buf[processed], transferCount - processed);
-    memset(&rx_buf[transferCount - processed],
-           0,
-           sizeof(rx_buf) - (transferCount - processed));
-
-    sl_simple_com_os_task_proceed();
   } else {
 #else // SL_SIMPLE_COM_ROBUST
   {
@@ -404,11 +389,11 @@ static void receive_cb(UARTDRV_Handle_t handle,
                              ? SL_STATUS_OK : SL_STATUS_FAIL,
                              transferCount,
                              data);
-
-    // Clear RX buffer
-    memset(rx_buf, 0, sizeof(rx_buf));
-    sl_simple_com_os_task_proceed();
   }
+
+  // Clear RX buffer
+  memset(rx_buf, 0, sizeof(rx_buf));
+  sl_simple_com_os_task_proceed();
 }
 
 /**************************************************************************//**
@@ -607,8 +592,7 @@ static IRQn_Type irq_number_from_handle(UARTDRV_Handle_t handle)
       break;
 #endif
     default:
-      app_assert(false,
-                 "Unknown UARTDRV handle\n");
+      app_assert(false, "Unknown UARTDRV handle\n");
       break;
   }
 

@@ -13,6 +13,7 @@ ui_hints:
 source:
   - path: util/third_party/mbedtls/library/ecp.c
   - path: util/third_party/mbedtls/library/ecp_curves.c
+  - path: util/third_party/mbedtls/library/ecp_curves_new.c
 provides:
   - name: mbedtls_ecc
 requires:

@@ -32,6 +32,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdbool.h>
+#include <stdint.h>
 #include "sl_status.h"
 #include "em_device.h"
 
@@ -68,6 +69,14 @@
 
 // Shortcut for Invalid Block Size Log constant
 #define INVALID_BLOCK_SIZE_LOG SL_BTMESH_BLOB_TRANSFER_CLIENT_INVALID_BLOCK_SIZE_LOG
+
+// Returns string which represents the retry status of the BLOB Transfer Client procedure
+#define blob_transfer_procedure_retry_to_string(self) \
+  (((self)->retry_counter_remote || (self)->retry_counter_local) ? "retry " : "")
+
+// Returns string which represents the recoverable error status of BLOB Transfer Client procedure
+#define blob_transfer_procedure_recoverable_status_to_string(sc) \
+  (((SL_STATUS_BUSY == (sc)) ? "busy " : (SL_STATUS_NO_MORE_RESOURCE == (sc)) ? "no memory " : ""))
 
 // Logs non-temporary procedure errors
 #define log_procedure_status_error(sc, procedure, elem_index)               \
@@ -169,10 +178,8 @@ typedef struct {
   /// BLOB Transfer Server responds or times out.
   ///
   /// The @ref blob_transfer_client_t::retry_time_ms is measured from the
-  /// reception of the BT Mesh stack event
-  /// @ref sl_btmesh_evt_mbt_client_tx_complete_id. If the retry timer elapses
-  /// and maximum number of retries (@ref blob_transfer_client_t::retry_max) is
-  /// not yet reached, then the current state is entered again
+  /// reception of the BT Mesh stack event @ref sl_btmesh_evt_mbt_client_tx_complete_id.
+  /// If the retry timer elapses then the current state is entered again
   /// (self-transition), which executes the proper state entry and exit actions.
   ///
   /// The Mesh Model 1.1 Specification refers to these retries as:
@@ -214,9 +221,13 @@ typedef struct {
   uint16_t current_block_number;
   uint16_t elem_index;
   uint16_t separation_time_ms;
-  uint16_t retry_time_ms;
-  uint16_t retry_max;
-  uint16_t retry_counter;
+  uint16_t retry_time_local_ms;
+  uint16_t retry_time_push_ms;
+  uint16_t retry_time_pull_ms;
+  uint16_t retry_max_local;
+  uint16_t retry_threshold_remote;
+  uint16_t retry_counter_local;
+  uint16_t retry_counter_remote;
   uint16_t max_chunk_size_min;
   uint16_t max_chunks_min;
   uint8_t  block_size_log;
@@ -225,6 +236,7 @@ typedef struct {
   bool retry_time_elapsed : 1;
   bool separation_time_elapsed : 1;
   bool chunk_requested : 1;
+  bool local_retry_active : 1;
   uint8_t chunk_data[SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_CHUNK_SIZE_CFG_VAL];
   const uint8_t *chunk_data_ptr;
 } blob_transfer_client_t;
@@ -407,10 +419,14 @@ sl_status_t sl_btmesh_blob_transfer_client_setup(uint16_t elem_index,
   return sc;
 }
 
+// Set up additional parameters for new BLOB transfers
 sl_status_t sl_btmesh_blob_transfer_client_set_params(uint16_t elem_index,
                                                       uint16_t separation_time_ms,
-                                                      uint16_t retry_time_ms,
-                                                      uint16_t retry_max)
+                                                      uint16_t retry_time_local_ms,
+                                                      uint16_t retry_time_push_ms,
+                                                      uint16_t retry_time_pull_ms,
+                                                      uint16_t retry_max_local,
+                                                      uint16_t retry_threshold_remote)
 {
   (void) elem_index;
   blob_transfer_client_t *const self = &blob_tf_client;
@@ -422,9 +438,17 @@ sl_status_t sl_btmesh_blob_transfer_client_set_params(uint16_t elem_index,
     return SL_STATUS_INVALID_STATE;
   }
 
+  if (retry_time_local_ms == 0) {
+    // Local retry time shall not be zero because it would lead to infinite recursion
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
   self->separation_time_ms = separation_time_ms;
-  self->retry_time_ms = retry_time_ms;
-  self->retry_max = retry_max;
+  self->retry_time_local_ms = retry_time_local_ms;
+  self->retry_time_push_ms = retry_time_push_ms;
+  self->retry_time_pull_ms = retry_time_pull_ms;
+  self->retry_max_local = retry_max_local;
+  self->retry_threshold_remote = retry_threshold_remote;
 
   return SL_STATUS_OK;
 }
@@ -833,18 +857,32 @@ static void process_transfer_failed(blob_transfer_client_t *const self)
 static void start_retry_timer(blob_transfer_client_t *const self)
 {
   sl_status_t sc;
+  uint16_t retry_time_ms;
 
-  if (0 == self->retry_time_ms) {
+  if (self->local_retry_active) {
+    // Make sure that local retry time is greater than zero to avoid infinite recursion
+    retry_time_ms = self->retry_time_local_ms > 0 ? self->retry_time_local_ms : 1;
+  } else {
+    if (self->transfer_mode == sl_btmesh_mbt_client_mbt_transfer_mode_pull) {
+      retry_time_ms = self->retry_time_pull_ms;
+    } else {
+      retry_time_ms = self->retry_time_push_ms;
+    }
+    if (self->retry_threshold_remote <= self->retry_counter_remote) {
+      retry_time_ms *= 2;
+    }
+  }
+
+  if (retry_time_ms == 0) {
     // If the retry time is zero then it means that the retry shall be performed
-    // immediately after the current messages are sent to the server.
-    // (tx complete)
+    // immediately after the current messages are sent to the server (tx complete)
     retry_timer_cb(&self->retry_timer, self);
   } else {
     // Wait for the retry time to provide some time for the servers to respond
     // This also spares bandwidth, because the BLOB transfer client does not
     // flood the mesh network with messages
     sc = app_timer_start(&self->retry_timer,
-                         self->retry_time_ms,
+                         retry_time_ms,
                          retry_timer_cb,
                          self,
                          false);
@@ -857,8 +895,10 @@ static void start_retry_timer(blob_transfer_client_t *const self)
 static void restart_retry_timer(blob_transfer_client_t *const self)
 {
   // In case in the meantime the state-machine transitioned into a state without
-  // retry, to avoid unintended behavior.
-  if (!state_flags[self->state].retry) {
+  // retry, to avoid unintended behavior or the BT Mesh stack rejected the last
+  // message transmission request (API) so the retry timer shall not be restarted
+  // because it waits for the repetition of the local request.
+  if (!state_flags[self->state].retry || self->local_retry_active) {
     return;
   }
   start_retry_timer(self);
@@ -920,6 +960,12 @@ static void sl_btmesh_blob_transfer_client_element_init(uint16_t elem_index)
   self->data_provider.type = BLOB_DATA_PROVIDER_NONE;
   self->elem_index = elem_index;
   self->state = STATE_UNINIT;
+  self->separation_time_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_SEPARATION_TIME_MS_DEFAULT_CFG_VAL;
+  self->retry_max_local = SL_BTMESH_BLOB_TRANSFER_CLIENT_LOCAL_RETRY_MAX_DEFAULT_CFG_VAL;
+  self->retry_threshold_remote = SL_BTMESH_BLOB_TRANSFER_CLIENT_REMOTE_RETRY_THRESHOLD_DEFAULT_CFG_VAL;
+  self->retry_time_local_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_LOCAL_RETRY_TIME_MS_DEFAULT_CFG_VAL;
+  self->retry_time_push_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_PUSH_RETRY_TIME_MS_DEFAULT_CFG_VAL;
+  self->retry_time_pull_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_PULL_RETRY_TIME_MS_DEFAULT_CFG_VAL;
 
   sc = sl_btmesh_mbt_client_init(elem_index,
                                  SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_SERVERS_CFG_VAL,
@@ -940,21 +986,35 @@ static void sl_btmesh_blob_transfer_client_init(void)
 static void process_mbt_procedure_status(blob_transfer_client_t *const self,
                                          sl_status_t sc)
 {
-  if (SL_STATUS_OK != sc) {
-    if ((SL_STATUS_BUSY == sc) || (SL_STATUS_NO_MORE_RESOURCE == sc)) {
-      // The retry counter is not incremented here, because the message was not
-      // sent at all due to busy transport layer or not enough memory but the
-      // current operation shall be retried later
-      start_retry_timer(self);
-    } else {
-      // The retry counter is incremented to reduce number of retries in case
-      // of unrecoverable errors but the retry timer is started for additional
-      // robustness in case of unexpected temporary errors
-      if ((self->retry_counter + 1) < self->retry_max) {
-        // The retry counter is incremented by 2 overall (other in state_transition)
-        self->retry_counter++;
+  if (SL_STATUS_OK == sc) {
+    // The retry timer shall be started after the BLOB transfer message is
+    // transmitted because it doesn't make sense to wait for the response from
+    // BLOB Transfer Servers until the message is transmitted by the node.
+    // The BT Mesh stack reports the transmission of BLOB messages by triggering
+    // sl_btmesh_evt_mbt_client_tx_complete event which is handled by starting
+    // the retry timer.
+    self->local_retry_active = false;
+  } else if (self->retry_counter_local < self->retry_max_local) {
+    self->local_retry_active = true;
+    switch (sc) {
+      case SL_STATUS_BUSY:
+      case SL_STATUS_NO_MORE_RESOURCE:
+        // The retry counter is not incremented here, because the message was not
+        // sent at all due to busy transport layer or not enough memory but the
+        // current operation shall be retried later
         start_retry_timer(self);
-      }
+        break;
+
+      default:
+        // The local retry counter is incremented to reduce number of retries
+        // in case of unrecoverable errors but the retry timer is started for
+        // additional robustness in case of unexpected temporary errors
+        if ((self->retry_counter_local + 1) < self->retry_max_local) {
+          // The retry counter is incremented by 2 overall (other in state_transition)
+          self->retry_counter_local++;
+          start_retry_timer(self);
+        }
+        break;
     }
   }
 }
@@ -962,10 +1022,11 @@ static void process_mbt_procedure_status(blob_transfer_client_t *const self,
 static void super_state_idle_entry(blob_transfer_client_t *const self)
 {
   self->data_provider.type = BLOB_DATA_PROVIDER_NONE;
-  self->separation_time_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_SEPARATION_TIME_MS_DEFAULT_CFG_VAL;
-  self->retry_max = SL_BTMESH_BLOB_TRANSFER_CLIENT_RETRY_MAX_DEFAULT_CFG_VAL;
-  self->retry_time_ms = SL_BTMESH_BLOB_TRANSFER_CLIENT_RETRY_TIME_MS_DEFAULT_CFG_VAL;
   self->blob_size = 0;
+  self->retry_time_elapsed = false;
+  self->separation_time_elapsed = false;
+  self->chunk_requested = false;
+  self->local_retry_active = false;
 }
 
 static void state_send_query_info_entry(blob_transfer_client_t *const self)
@@ -978,9 +1039,8 @@ static void state_send_query_info_entry(blob_transfer_client_t *const self)
   sc = sl_btmesh_mbt_client_query_information(self->elem_index);
 
   log_info(LOG_PREFIX "Query Info procedure %s%s(elem=%d)" NL,
-           (0 < self->retry_counter) ? "retry " : "",
-           (SL_STATUS_BUSY == sc) ? "busy "
-           : ((SL_STATUS_NO_MORE_RESOURCE == sc) ? "no memory " : ""),
+           blob_transfer_procedure_retry_to_string(self),
+           blob_transfer_procedure_recoverable_status_to_string(sc),
            self->elem_index);
 
   process_mbt_procedure_status(self, sc);
@@ -998,11 +1058,11 @@ static void state_send_transfer_start_entry(blob_transfer_client_t *const self)
                                            self->block_size_log,
                                            self->transfer_mode);
 
-  log_info(LOG_PREFIX "Start procedure %s%s(elem=%d,blk_log=%d,tf_mode=%s)" NL,
-           (0 < self->retry_counter) ? "retry " : "",
-           (SL_STATUS_BUSY == sc) ? "busy "
-           : ((SL_STATUS_NO_MORE_RESOURCE == sc) ? "no memory " : ""),
+  log_info(LOG_PREFIX "Start procedure %s%s(elem=%d,blob_size=0x%08lX,blk_log=%d,tf_mode=%s)" NL,
+           blob_transfer_procedure_retry_to_string(self),
+           blob_transfer_procedure_recoverable_status_to_string(sc),
            self->elem_index,
+           self->blob_size,
            self->block_size_log,
            sl_btmesh_blob_transfer_client_transfer_mode_to_string(self->transfer_mode));
 
@@ -1027,9 +1087,8 @@ static void state_send_start_block_entry(blob_transfer_client_t *const self)
                                         &block_size);
 
   log_info(LOG_PREFIX "Block Start procedure %s%s(elem=%d,chunk_size=%d)" NL,
-           (0 < self->retry_counter) ? "retry " : "",
-           (SL_STATUS_BUSY == sc) ? "busy "
-           : ((SL_STATUS_NO_MORE_RESOURCE == sc) ? "no memory " : ""),
+           blob_transfer_procedure_retry_to_string(self),
+           blob_transfer_procedure_recoverable_status_to_string(sc),
            self->elem_index,
            self->current_block_chunk_size);
 
@@ -1044,9 +1103,8 @@ static void state_send_block_query_entry(blob_transfer_client_t *const self)
   sc = sl_btmesh_mbt_client_query_block_status(self->elem_index);
 
   log_info(LOG_PREFIX "Block Query procedure %s%s(elem=%d)" NL,
-           (0 < self->retry_counter) ? "retry " : "",
-           (SL_STATUS_BUSY == sc) ? "busy "
-           : ((SL_STATUS_NO_MORE_RESOURCE == sc) ? "no memory " : ""),
+           blob_transfer_procedure_retry_to_string(self),
+           blob_transfer_procedure_recoverable_status_to_string(sc),
            self->elem_index);
 
   process_mbt_procedure_status(self, sc);
@@ -1060,9 +1118,8 @@ static void state_send_cancel(blob_transfer_client_t *const self)
   sc = sl_btmesh_mbt_client_cancel_transfer(self->elem_index);
 
   log_info(LOG_PREFIX "Transfer Cancel procedure %s%s(elem=%d)" NL,
-           (0 < self->retry_counter) ? "retry " : "",
-           (SL_STATUS_BUSY == sc) ? "busy "
-           : ((SL_STATUS_NO_MORE_RESOURCE == sc) ? "no memory " : ""),
+           blob_transfer_procedure_retry_to_string(self),
+           blob_transfer_procedure_recoverable_status_to_string(sc),
            self->elem_index);
 
   process_mbt_procedure_status(self, sc);
@@ -1255,12 +1312,16 @@ static void handle_query_information_complete(blob_transfer_client_t *const self
                                               const sl_btmesh_evt_mbt_client_query_information_complete_t *const evt)
 {
   if (STATE_SEND_QUERY_INFO == self->state) {
-    self->max_chunks_min = evt->max_chunks_min;
-
     if (SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_CHUNK_SIZE_CFG_VAL < evt->max_chunk_size_min) {
       self->max_chunk_size_min = SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_CHUNK_SIZE_CFG_VAL;
     } else {
       self->max_chunk_size_min = evt->max_chunk_size_min;
+    }
+
+    if (SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_CHUNKS_PER_BLOCK_CFG_VAL < evt->max_chunks_min) {
+      self->max_chunks_min = SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_CHUNKS_PER_BLOCK_CFG_VAL;
+    } else {
+      self->max_chunks_min = evt->max_chunks_min;
     }
 
     self->block_size_log =
@@ -1269,7 +1330,7 @@ static void handle_query_information_complete(blob_transfer_client_t *const self
                                                               evt->block_size_log_max,
                                                               SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_BLOCKS_CFG_VAL,
                                                               self->max_chunk_size_min,
-                                                              evt->max_chunks_min);
+                                                              self->max_chunks_min);
     if (INVALID_BLOCK_SIZE_LOG == self->block_size_log) {
       self->block_size_log = evt->block_size_log_max;
       log_error(LOG_PREFIX
@@ -1281,8 +1342,8 @@ static void handle_query_information_complete(blob_transfer_client_t *const self
                 evt->block_size_log_min,
                 evt->block_size_log_max,
                 SL_BTMESH_BLOB_TRANSFER_CLIENT_MAX_BLOCKS_CFG_VAL,
-                evt->max_chunk_size_min,
-                evt->max_chunks_min);
+                self->max_chunk_size_min,
+                self->max_chunks_min);
     }
 
     sl_btmesh_mbt_client_transfer_mode_t supported_transfer_modes =
@@ -1300,8 +1361,8 @@ static void handle_query_information_complete(blob_transfer_client_t *const self
              evt->elem_index,
              evt->block_size_log_min,
              evt->block_size_log_max,
-             evt->max_chunk_size_min,
-             evt->max_chunks_min,
+             self->max_chunk_size_min,
+             self->max_chunks_min,
              sl_btmesh_blob_transfer_client_transfer_mode_to_string(supported_transfer_modes),
              sl_btmesh_blob_transfer_client_transfer_mode_to_string(common_transfer_modes));
 
@@ -1519,12 +1580,10 @@ static void handle_tx_complete(blob_transfer_client_t *const self)
   // If the state supports retry, then it shall start the retry timer if the max
   // number of retries is not reached.
   // If the maximum number of retries is reached, then the state machine waits
-  // in the current state until the BT Mesh stack drops the nonresponding BLOB
+  // in the current state until the BT Mesh stack drops the non-responding BLOB
   // servers and continues with the active servers. (BT Mesh stack event)
   if (0 != state_flags[self->state].retry) {
-    if (self->retry_counter < self->retry_max) {
-      start_retry_timer(self);
-    }
+    start_retry_timer(self);
   }
 
   // If multiple consecutive mesh messages need to be sent (send chunks), then
@@ -1639,7 +1698,6 @@ static void retry_timer_cb(app_timer_t *timer, void *data)
 {
   (void) timer;
   blob_transfer_client_t *const self = data;
-
   app_assert(NULL != data, "The data is NULL in retry timer callback");
 
   // Register that the retry timer elapsed which is important in states which
@@ -1671,13 +1729,11 @@ static void separation_timer_cb(app_timer_t *timer, void *data)
 static void send_chunk_request_response(app_timer_t *timer, void *data)
 {
   sl_status_t sc;
-
   blob_transfer_client_t *const self = data;
 
   sc = sl_btmesh_mbt_client_send_chunk_request_rsp(self->elem_index,
                                                    self->current_chunk_length,
                                                    self->chunk_data_ptr);
-
   switch (sc) {
     default:
       log_status_error_f(sc,
@@ -1690,9 +1746,9 @@ static void send_chunk_request_response(app_timer_t *timer, void *data)
     case SL_STATUS_NO_MORE_RESOURCE:
       // In these two cases, start the retry timer with this callback function
       sc = app_timer_start(timer,
-                           self->retry_time_ms,
+                           self->retry_time_local_ms,
                            send_chunk_request_response,
-                           &data,
+                           data,
                            false);
       app_assert_status_f(sc,
                           "Failed to start chunk request response retry timer (elem=%d)",
@@ -1808,12 +1864,6 @@ static void state_transition(blob_transfer_client_t *const self,
   source_state_flags = state_flags[self->state];
   target_state_flags = state_flags[target_state];
 
-  // No state can support the separation and retry at the same time because
-  // only one app timer data structure is allocated, therefore only one timer
-  // can run at any point of time in the BLOB Transfer Client
-  app_assert_s((0 == source_state_flags.retry)
-               || (0 == source_state_flags.separation));
-
   // If a state with the retry feature is exited, then the retry timer shall
   // be stopped, even in case of a retry self-transition, because in this case
   // the retry timer is started again by the tx complete event handler
@@ -1841,9 +1891,17 @@ static void state_transition(blob_transfer_client_t *const self,
     // transfer and not as a result of a retry self-transition then the retry
     // counter shall be cleared.
     if (false == self->retry_time_elapsed) {
-      self->retry_counter = 0;
+      self->retry_counter_remote = 0;
+      self->retry_counter_local = 0;
+      self->local_retry_active = false;
     } else {
-      self->retry_counter++;
+      if (self->local_retry_active) {
+        self->retry_counter_local++;
+      } else {
+        if (self->retry_counter_remote < UINT16_MAX) {
+          self->retry_counter_remote++;
+        }
+      }
       self->retry_time_elapsed = false;
     }
   }

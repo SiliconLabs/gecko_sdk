@@ -639,4 +639,4 @@ typedef struct {
 /** @} End of group MGM21_EMU */
 /** @} End of group Parts */
 
-#endif /* MGM21_EMU_H */
+#endif // MGM21_EMU_H

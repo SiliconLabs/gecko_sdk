@@ -89,7 +89,7 @@ configuration:
   - name: SL_STACK_SIZE
     value: "3000"
   - name: SL_HEAP_SIZE
-    value: "12600"
+    value: "14080"
 
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
@@ -133,14 +133,10 @@ configuration:
   # ------------- RAIL init, Project -------------------
   - name: SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_BLE_SUPPORT_INST0_ENABLE
-    value: "1"
   - name: SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
     value: "1"
-  - name: SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_INST0_ENABLE
-    value: "1"
   # ------------- RAIL init, Protocol ------------------
-  - name: SL_RAIL_UTIL_BLE_SUPPORT_ENABLE
+  - name: SL_RAIL_UTIL_PROTOCOL_BLE_ENABLE
     value: "0"
   - name: SL_RAIL_UTIL_INIT_PROTOCOLS_INST0_ENABLE
     value: "1"

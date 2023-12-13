@@ -48,7 +48,7 @@ uint16_t emberMessageBufferLength(EmberMessageBuffer buffer);
 void emberHoldMessageBuffer(EmberMessageBuffer buffer);
 void emberReleaseMessageBuffer(EmberMessageBuffer buffer);
 uint8_t *emberMessageBufferContents(EmberMessageBuffer buffer);
-EmberStatus emberAppendPgmStringToLinkedBuffers(EmberMessageBuffer buffer, PGM_P suffix);
+EmberStatus emberAppendPgmStringToLinkedBuffers(EmberMessageBuffer buffer, const char *suffix);
 EmberMessageBuffer emberFillLinkedBuffers(uint8_t *contents, uint8_t length);
 
 #endif // !DOXYGEN_SHOULD_SKIP_THIS

@@ -3,7 +3,7 @@
  * @brief NCP reset module.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,80 +30,82 @@
 
 #include <stdbool.h>
 #include "ncp_reset.h"
+#include "ncp_reset_config.h"
 #include "sl_bt_api.h"
+#include "sl_bt_version.h"
 #include "app_log.h"
 #include "app_timer.h"
-#include "ncp_host.h"
 #include "app_assert.h"
 
-#define MAX_NCP_BOOT_N 5
-#define BOOT_DELAY_MS 1000
-
-static void ncp_reset_on_boot_timer_expire(app_timer_t *timer, void *data);
-
-static bool ncp_booted;
-static uint8_t ncp_boot_retries;
+static bool booted;
+static uint8_t boot_retry_count;
 static app_timer_t boot_timer;
 
-/**************************************************************************//**
- * Ble event callback
- *****************************************************************************/
-sl_status_t ncp_reset_on_event(sl_bt_msg_t *evt)
-{
-  sl_status_t ret_val;
-  // Catch boot event...
-  if (ncp_booted || SL_BT_MSG_ID(evt->header) == sl_bt_evt_system_boot_id) {
-    if (!ncp_booted) {
-      app_timer_stop(&boot_timer);
-      app_log_info("NCP booted." APP_LOG_NL);
-      ncp_booted = true;
-    }
-    ret_val = SL_STATUS_OK;
-  } else {
-    ret_val = SL_STATUS_BUSY;
-  }
+static void on_boot_timer_expire(app_timer_t *timer, void *data);
 
-  return ret_val;
+/**************************************************************************//**
+ * Module initialization.
+ *****************************************************************************/
+void ncp_reset_init(void)
+{
+  booted = false;
+  boot_retry_count = 0;
+  sl_status_t sc = app_timer_start(&boot_timer,
+                                   NCP_RESET_TIMEOUT_INIT_MS,
+                                   on_boot_timer_expire,
+                                   NULL,
+                                   false);
+  app_assert_status(sc);
 }
 
 /**************************************************************************//**
- * Reset NCP target
+ * Bluetooth stack event handler.
+ *****************************************************************************/
+sl_status_t ncp_reset_on_event(sl_bt_msg_t *evt)
+{
+  if (booted) {
+    // Target is operational, nothing to do.
+    return SL_STATUS_OK;
+  }
+
+  // Catch boot event
+  if (SL_BT_MSG_ID(evt->header) == sl_bt_evt_system_boot_id) {
+    (void)app_timer_stop(&boot_timer);
+    booted = true;
+    return SL_STATUS_OK;
+  }
+
+  return SL_STATUS_NOT_READY;
+}
+
+/**************************************************************************//**
+ * Send system reset request to the NCP target.
  *****************************************************************************/
 void ncp_reset(void)
 {
-  sl_status_t sc;
-
-  ncp_booted = false;
-  ncp_boot_retries = 0;
-
-  app_log_info("Resetting NCP target..." APP_LOG_NL);
-  sc = ncp_host_flush_data();
-  app_assert_status(sc);
-
-  sl_bt_system_reset(sl_bt_system_boot_mode_normal);
-
-  sc = app_timer_start(&boot_timer, BOOT_DELAY_MS, ncp_reset_on_boot_timer_expire, NULL, true);
-  app_assert_status(sc);
+  booted = false;
+  boot_retry_count = 0;
+  on_boot_timer_expire(&boot_timer, NULL);
 }
 
 /**************************************************************************//**
  * Boot timer callback.
  *****************************************************************************/
-static void ncp_reset_on_boot_timer_expire(app_timer_t *timer, void *data)
+static void on_boot_timer_expire(app_timer_t *timer, void *data)
 {
-  sl_status_t sc;
-
-  (void)timer;
   (void)data;
 
-  if (ncp_boot_retries < MAX_NCP_BOOT_N) {
-    app_log_info("Resetting NCP target..." APP_LOG_NL);
-    sc = ncp_host_flush_data();
-    app_assert_status(sc);
+  if (boot_retry_count < NCP_RESET_RETRY_COUNT) {
+    app_log_info("Resetting NCP target (%d)..." APP_LOG_NL, boot_retry_count);
+    boot_retry_count++;
     sl_bt_system_reset(sl_bt_system_boot_mode_normal);
-    ncp_boot_retries++;
+    sl_status_t sc = app_timer_start(timer,
+                                     NCP_RESET_TIMEOUT_RETRY_MS,
+                                     on_boot_timer_expire,
+                                     NULL,
+                                     false);
+    app_assert_status(sc);
   } else {
-    app_timer_stop(&boot_timer);
-    app_assert(false, "Failed to reset NCP. Giving up.");
+    app_assert(false, "NCP target unreachable.");
   }
 }

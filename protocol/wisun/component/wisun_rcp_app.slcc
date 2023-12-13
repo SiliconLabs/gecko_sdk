@@ -14,7 +14,7 @@ ui_hints:
 
 requires:
   - name: device_init
-  - name: sl_system_init
+  - name: sl_system
   - name: wisun_mac
   - name: wisun_radioconf
   - name: dmadrv

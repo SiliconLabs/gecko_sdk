@@ -114,7 +114,7 @@ void sli_zigbee_af_reporting_set_entry(uint16_t index, EmberAfPluginReportingEnt
 {
   ifValidIndex(MEMMOVE(&table[index], value, sizeof(EmberAfPluginReportingEntry)));
 }
-#elif (ENABLE_EXPANDED_TABLE)
+#elif defined(ENABLE_EXPANDED_TABLE)
 #define reportingTableKey(index) (NVM3KEY_REPORTING_TABLE_EXPANDED + (index))
 void sli_zigbee_af_reporting_get_entry(uint16_t index, EmberAfPluginReportingEntry *result)
 {

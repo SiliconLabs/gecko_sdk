@@ -324,7 +324,7 @@ class CALC_Misc_jumbo(CALC_Misc):
             elif wisun_phy_mode_id_select is not None:
                 # Get WiSUN specific parameters
                 version = 1  # FAN1.1 version
-                wisun_channel_plan_id = model.vars.wisun_channel_plan_id.value
+                wisun_channel_plan_id = model.vars.wisun_channel_plan_id.value.value
                 wisun_reg_domain = int(model.vars.wisun_reg_domain.value)
                 # Fill in the specific parameters
                 specific_parameters.extend([version, wisun_channel_plan_id, wisun_reg_domain])

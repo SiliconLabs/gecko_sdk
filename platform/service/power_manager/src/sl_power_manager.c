@@ -37,7 +37,9 @@
 #include "sl_atomic.h"
 
 #include "em_device.h"
+#if !defined(_SILICON_LABS_32B_SERIES_3)
 #include "em_emu.h"
+#endif
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -558,6 +560,16 @@ void sli_power_manager_initiate_restore(void)
   CORE_EXIT_CRITICAL();
 #endif
 }
+
+#if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+/*******************************************************************************
+ * Gets the status of power manager variable is_sleeping_waiting_for_clock_restore.
+ ******************************************************************************/
+bool sli_power_manager_get_clock_restore_status(void)
+{
+  return is_sleeping_waiting_for_clock_restore;
+}
+#endif
 
 /***************************************************************************//**
  * Registers a callback to be called on given Energy Mode transition(s).
@@ -1135,6 +1147,8 @@ void sli_hfxo_manager_notify_ready_for_power_manager(void)
 void sli_hfxo_notify_ready_for_power_manager_from_prs(void)
 {
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+  // Set clock restore to true to indicate that HFXO has been restored from a
+  // PRS interrupt unless already in EM0 indicating HFXO didn't need to be restored.
   if (current_em != SL_POWER_MANAGER_EM0) {
     is_sleeping_waiting_for_clock_restore = true;
   }

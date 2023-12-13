@@ -58,6 +58,8 @@ class Profile_Base_Ocelot(Profile_Base):
 
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
+        self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
+
         return profile
 
     def build_required_profile_inputs(self, model, profile):
@@ -248,6 +250,9 @@ class Profile_Base_Ocelot(Profile_Base):
         IProfile.make_hidden_input(profile, model.vars.lock_bandwidth_hz, 'Advanced',
                                 readable_name="Lock Channel Bandwidth", value_limit_min=100,
                                 value_limit_max=self.bandwidth_limit_adc, units_multiplier=UnitsMultiplier.KILO)
+        IProfile.make_hidden_input(profile, model.vars.modulation_index_for_ksi, "Advanced",
+                                   readable_name="Modulation index used by ksi calculation",
+                                   value_limit_min=0.0, value_limit_max=5.0, fractional_digits=2)
 
     def build_frame_configuration_inputs(self, model, profile):
         self._frame_profile_inputs_common.build_frame_inputs(model, profile)

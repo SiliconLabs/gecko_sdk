@@ -104,8 +104,8 @@ typedef struct sli_mem_pool_handle{
  ******************************************************************************/
 #endif // DOXYGEN
 void sli_mem_pool_create(sli_mem_pool_handle_t *mem_pool,
-                         uint32_t block_size,
-                         uint32_t block_count,
+                         uint16_t block_size,
+                         uint16_t block_count,
                          void* buffer,
                          uint32_t buffer_size);
 

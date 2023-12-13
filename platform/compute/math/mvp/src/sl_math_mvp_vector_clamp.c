@@ -37,6 +37,7 @@ static void sli_clamp_i8(int8_t *data, size_t num_elements, int8_t min, int8_t m
 
 sl_status_t sl_math_mvp_clamp_i8(int8_t *data, size_t num_elements, int8_t min, int8_t max)
 {
+  sl_status_t status;
   size_t remaining = num_elements;
   const size_t threshold = 160; // non-mvp algorithm is faster bellow this threshold
   sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
@@ -136,7 +137,9 @@ sl_status_t sl_math_mvp_clamp_i8(int8_t *data, size_t num_elements, int8_t min, 
                           SLI_MVP_NOINCR,
                           SLI_MVP_NORST);
 
-    sli_mvp_prog_execute(prog, true);
+    if ((status = sli_mvp_prog_execute(prog, true)) != SL_STATUS_OK) {
+      return status;
+    }
 
     data += num_elements;
     remaining -= num_elements;
@@ -147,9 +150,7 @@ sl_status_t sl_math_mvp_clamp_i8(int8_t *data, size_t num_elements, int8_t min, 
     sli_clamp_i8(data, remaining, min, max);
   }
 
-  sli_mvp_cmd_wait_for_completion();
-
-  return sli_mvp_fault_flag ? SL_STATUS_FAIL : SL_STATUS_OK;
+  return SL_STATUS_OK;
 }
 
 static void sli_clamp_i8(int8_t *data, size_t num_elements, int8_t min, int8_t max)

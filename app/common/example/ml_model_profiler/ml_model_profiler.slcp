@@ -57,7 +57,6 @@ toolchain_settings:
   - option: gcc_linker_option
     value: "-u _printf_float"
   - option: optimize
-    #   "value": "none"
     "value": "speed"
 readme:
   - path: readme.md

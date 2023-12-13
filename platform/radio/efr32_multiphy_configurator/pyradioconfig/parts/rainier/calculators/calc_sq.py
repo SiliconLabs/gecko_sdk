@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_sq import calc_sq_viper
+from pyradioconfig.parts.bobcat.calculators.calc_sq import Calc_SQ_Bobcat
 
 
-class CalcSqRainier(calc_sq_viper):
+class CalcSqRainier(Calc_SQ_Bobcat):
     pass

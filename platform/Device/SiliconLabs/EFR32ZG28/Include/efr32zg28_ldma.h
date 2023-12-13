@@ -682,4 +682,4 @@ typedef struct {
 /** @} End of group EFR32ZG28_LDMA */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG28_LDMA_H */
+#endif // EFR32ZG28_LDMA_H

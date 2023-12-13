@@ -27,7 +27,7 @@
  *
  ******************************************************************************/
 
-#include PLATFORM_HEADER
+#include <assert.h>
 #include "cmsis-rtos-ipc-config.h"
 
 #include "stack/include/ember.h"

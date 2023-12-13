@@ -1,7 +1,7 @@
 project_name: psa_crypto_symmetric_key
 package: platform
 quality: production
-label: Platform - PSA Crypto Symmetric Key
+label: Platform Security - SoC PSA Crypto Symmetric Key
 description: >
   This example project demonstrates the symmetric key API.
 category: Example|Platform

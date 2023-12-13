@@ -68,7 +68,7 @@
 // <cmuDPLLLockMode_Freq=> Frequency-Lock Loop
 // <cmuDPLLLockMode_Phase=> Phase-Lock Loop
 // <i> Default: cmuDPLLLockMode_Freq
-#define SL_DEVICE_INIT_DPLL_LOCKMODE            cmuDPLLLockMode_Freq
+#define SL_DEVICE_INIT_DPLL_LOCKMODE            cmuDPLLLockMode_Phase
 
 // <q SL_DEVICE_INIT_DPLL_AUTORECOVER> Automatic Lock Recovery
 // <i> Default: 1

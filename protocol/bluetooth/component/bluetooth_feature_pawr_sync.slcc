@@ -32,3 +32,6 @@ template_contribution:
       function: "{ struct sl_btctrl_pawr_synchronizer_config _pawr_config = {.max_pawr_sets = SL_BT_CONFIG_MAX_PAWR_SYNCHRONIZERS}; sl_btctrl_pawr_synchronizer_configure(&_pawr_config); }"
       deinit: "{ struct sl_btctrl_pawr_synchronizer_config _pawr_config = {.max_pawr_sets = 0, }; sl_btctrl_pawr_synchronizer_configure(&_pawr_config); }"
     priority: 3
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-pawr-sync

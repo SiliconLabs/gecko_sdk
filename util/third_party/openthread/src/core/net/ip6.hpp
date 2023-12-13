@@ -49,6 +49,7 @@
 #include "common/log.hpp"
 #include "common/message.hpp"
 #include "common/non_copyable.hpp"
+#include "common/owned_ptr.hpp"
 #include "common/time_ticker.hpp"
 #include "common/timer.hpp"
 #include "net/icmp6.hpp"
@@ -113,20 +114,6 @@ class Ip6 : public InstanceLocator, private NonCopyable
     friend class Mpl;
 
 public:
-    /**
-     * Represents an IPv6 message origin.
-     *
-     * In case the message is originating from host, it also indicates whether or not it is allowed to passed back the
-     * message to the host.
-     *
-     */
-    enum MessageOrigin : uint8_t
-    {
-        kFromThreadNetif,          ///< Message originates from Thread Netif.
-        kFromHostDisallowLoopBack, ///< Message originates from host and should not be passed back to host.
-        kFromHostAllowLoopBack,    ///< Message originates from host and can be passed back to host.
-    };
-
     /**
      * Initializes the object.
      *
@@ -208,11 +195,7 @@ public:
     /**
      * Sends a raw IPv6 datagram with a fully formed IPv6 header.
      *
-     * The caller transfers ownership of @p aMessage when making this call. OpenThread will free @p aMessage when
-     * processing is complete, including when a value other than `kErrorNone` is returned.
-     *
-     * @param[in]  aMessage               A reference to the message.
-     * @param[in]  aAllowLoopBackToHost   Indicate whether or not the message is allowed to be passed back to host.
+     * @param[in]  aMessage   An owned pointer to a message (ownership is transferred to the method).
      *
      * @retval kErrorNone     Successfully processed the message.
      * @retval kErrorDrop     Message was well-formed but not fully processed due to packet processing rules.
@@ -221,13 +204,12 @@ public:
      * @retval kErrorParse    Encountered a malformed header when processing the message.
      *
      */
-    Error SendRaw(Message &aMessage, bool aAllowLoopBackToHost);
+    Error SendRaw(OwnedPtr<Message> aMessage);
 
     /**
      * Processes a received IPv6 datagram.
      *
-     * @param[in]  aMessage          A reference to the message.
-     * @param[in]  aOrigin           The message oirgin.
+     * @param[in]  aMessage          An owned pointer to a message.
      * @param[in]  aLinkMessageInfo  A pointer to link-specific message information.
      *
      * @retval kErrorNone     Successfully processed the message.
@@ -237,10 +219,9 @@ public:
      * @retval kErrorParse    Encountered a malformed header when processing the message.
      *
      */
-    Error HandleDatagram(Message      &aMessage,
-                         MessageOrigin aOrigin,
-                         const void   *aLinkMessageInfo = nullptr,
-                         bool          aIsReassembled   = false);
+    Error HandleDatagram(OwnedPtr<Message> aMessagePtr,
+                         const void       *aLinkMessageInfo = nullptr,
+                         bool              aIsReassembled   = false);
 
     /**
      * Registers a callback to provide received raw IPv6 datagrams.
@@ -381,25 +362,26 @@ private:
 
     static constexpr uint16_t kMinimalMtu = 1280;
 
-    void HandleSendQueue(void);
-
     static uint8_t PriorityToDscp(Message::Priority aPriority);
+    static Error   TakeOrCopyMessagePtr(OwnedPtr<Message> &aTargetPtr,
+                                        OwnedPtr<Message> &aMessagePtr,
+                                        Message::Ownership aMessageOwnership);
 
     void  EnqueueDatagram(Message &aMessage);
-    Error PassToHost(Message           &aMessage,
-                     MessageOrigin      aOrigin,
+    void  HandleSendQueue(void);
+    Error PassToHost(OwnedPtr<Message> &aMessagePtr,
                      const MessageInfo &aMessageInfo,
                      uint8_t            aIpProto,
                      bool               aApplyFilter,
+                     bool               aReceive,
                      Message::Ownership aMessageOwnership);
-    Error HandleExtensionHeaders(Message      &aMessage,
-                                 MessageOrigin aOrigin,
-                                 MessageInfo  &aMessageInfo,
-                                 Header       &aHeader,
-                                 uint8_t      &aNextHeader,
-                                 bool         &aReceive);
+    Error HandleExtensionHeaders(OwnedPtr<Message> &aMessagePtr,
+                                 MessageInfo       &aMessageInfo,
+                                 Header            &aHeader,
+                                 uint8_t           &aNextHeader,
+                                 bool              &aReceive);
     Error FragmentDatagram(Message &aMessage, uint8_t aIpProto);
-    Error HandleFragment(Message &aMessage, MessageOrigin aOrigin, MessageInfo &aMessageInfo);
+    Error HandleFragment(Message &aMessage, MessageInfo &aMessageInfo);
 #if OPENTHREAD_CONFIG_IP6_FRAGMENTATION_ENABLE
     void CleanupFragmentationBuffer(void);
     void HandleTimeTick(void);
@@ -407,12 +389,12 @@ private:
     void SendIcmpError(Message &aMessage, Icmp::Header::Type aIcmpType, Icmp::Header::Code aIcmpCode);
 #endif
     Error AddMplOption(Message &aMessage, Header &aHeader);
-    Error AddTunneledMplOption(Message &aMessage, Header &aHeader);
+    Error PrepareMulticastToLargerThanRealmLocal(Message &aMessage, const Header &aHeader);
     Error InsertMplOption(Message &aMessage, Header &aHeader);
     Error RemoveMplOption(Message &aMessage);
-    Error HandleOptions(Message &aMessage, Header &aHeader, bool aIsOutbound, bool &aReceive);
+    Error HandleOptions(Message &aMessage, Header &aHeader, bool &aReceive);
     Error HandlePayload(Header            &aIp6Header,
-                        Message           &aMessage,
+                        OwnedPtr<Message> &aMessagePtr,
                         MessageInfo       &aMessageInfo,
                         uint8_t            aIpProto,
                         Message::Ownership aMessageOwnership);

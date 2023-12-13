@@ -182,9 +182,6 @@ extern "C" {
      | MVP_IF_STORECONVERTOF | MVP_IF_STORECONVERTUF    \
      | MVP_IF_STORECONVERTINF | MVP_IF_STORECONVERTNAN)
 
-// MVP fault flag.
-#define SLI_MVP_FAULT_FLAG  1U
-
 /**
  * ALU Registers are always represented as a complex float16_t type.
  * This structure is used to allow a program to assign value to either
@@ -421,12 +418,6 @@ typedef struct {
 
 /**
  * @brief
- *   Keeps track of presence of an MVP fault.
- */
-extern bool sli_mvp_fault_flag;
-
-/**
- * @brief
  *   Clear MVP exception and fault flags.
  *
  * @param[in] flags
@@ -517,8 +508,12 @@ void sli_mvp_cmd_enable(void);
 /**
  * @brief
  *   If there is a program running, wait for it to to complete.
+ *
+ * @return
+ *   SL_STATUS_OK on success, SL_STATUS_COMPUTE_DRIVER_FAULT on
+ *   MVP faults.
  */
-void sli_mvp_cmd_wait_for_completion(void);
+sl_status_t sli_mvp_cmd_wait_for_completion(void);
 
 /**
  * @brief
@@ -536,7 +531,8 @@ void sli_mvp_cmd_wait_for_completion(void);
  *   caller before the program is completed.
  *
  * @return
- *   SL_STATUS_OK on success, other value on failure.
+ *   SL_STATUS_OK on success, SL_STATUS_COMPUTE_DRIVER_FAULT on
+ *   MVP faults.
  */
 sl_status_t sli_mvp_prog_execute(sli_mvp_program_t *program, bool wait);
 
@@ -899,8 +895,12 @@ void sli_mvp_pb_end_loop(sli_mvp_program_context_t *p);
  *   This function is part of the MVP program builder (pb) convenience API.
  *
  * @param[in] p Pointer to MVP program context.
+ *
+ * @return
+ *   SL_STATUS_OK on success, SL_STATUS_COMPUTE_DRIVER_FAULT on
+ *   MVP faults.
  */
-void sli_mvp_pb_execute_program(sli_mvp_program_context_t *p);
+sl_status_t sli_mvp_pb_execute_program(sli_mvp_program_context_t *p);
 
 /**
  * @brief
@@ -916,21 +916,6 @@ void sli_mvp_pb_init_program(sli_mvp_program_context_t *p);
 
 /**
  * @brief
- *  Set array dimension reset in previous loop iterator.
- *  When used after a call to @ref sli_mvp_end_loop(), the index will be reset
- *  on loop exit.
- *
- * @note
- *   This function is part of the MVP program builder (pb) convenience API.
- *
- * @param[in] p Pointer to MVP program context.
- * @param[in] array_index Index of array.
- * @param[in] dimension Dimension to reset.
- */
-void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
-
-/**
- * @brief
  *  Set array dimension index incrementer in previous loop iterator.
  *  When used after a call to @ref sli_mvp_end_loop(), the index will increment
  *  on loop exit.
@@ -941,6 +926,21 @@ void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p, uint8_t array_in
  * @param[in] p Pointer to MVP program context.
  * @param[in] array_index Index of array.
  * @param[in] dimension Dimension to increment.
+ */
+void sli_mvp_pb_postloop_incr_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
+
+/**
+ * @brief
+ *  Set array dimension reset in previous loop iterator.
+ *  When used after a call to @ref sli_mvp_end_loop(), the index will be reset
+ *  on loop exit.
+ *
+ * @note
+ *   This function is part of the MVP program builder (pb) convenience API.
+ *
+ * @param[in] p Pointer to MVP program context.
+ * @param[in] array_index Index of array.
+ * @param[in] dimension Dimension to reset.
  */
 void sli_mvp_pb_postloop_reset_dim(sli_mvp_program_context_t *p, uint8_t array_index, uint8_t dimension);
 

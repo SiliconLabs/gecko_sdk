@@ -34,12 +34,10 @@
 #include <stdint.h>
 #include "printf.h"
 #include "sl_component_catalog.h"
-#include "app_assert.h"
-#include "app_log.h"
 #include "rail.h"
 #include "app_process.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
+#include "simple_rail_assistance.h"
 #include "demo-ui.h"
 #include "em_system.h"
 #include "em_core.h"
@@ -468,7 +466,7 @@ void transmit_packet(RAIL_Handle_t rail_handle)
   set_role(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], DEMO_CONTROL_ROLE_LIGHT);
   // Advertisement packet
   if (LIGHT_MODE_ADVERTISE == light.mode) {
-    set_command_type(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], DEMO_CONTROL_CMD_ADVERTISE);
+    set_command_type(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], (demo_control_command_type_t)DEMO_CONTROL_CMD_ADVERTISE);
   } else {   // Status packet
     set_command_type(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], LIGHT_STATE_REPORT);
     set_light_state(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], light.state);
@@ -611,9 +609,9 @@ static inline void broadcast_timer_expired()
 static inline void set_LEDs(void)
 {
   (light.state == false) \
-  ? sl_led_turn_off(&sl_led_led0) : sl_led_turn_on(&sl_led_led0);
+  ? clear_receive_led() : set_receive_led();
   (light.state == false) \
-  ? sl_led_turn_off(&sl_led_led1) : sl_led_turn_on(&sl_led_led1);
+  ? clear_send_led() : set_send_led();
 }
 
 /******************************************************************************

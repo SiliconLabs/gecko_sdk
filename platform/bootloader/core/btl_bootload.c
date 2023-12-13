@@ -20,6 +20,11 @@
 #include "btl_reset.h"
 #include "btl_util.h"
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 MISRAC_DISABLE
 #include "em_se.h"
@@ -1020,3 +1025,6 @@ SL_WEAK uint32_t bootload_getUpgradeLocation(void)
 {
   return BTL_UPGRADE_LOCATION;
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

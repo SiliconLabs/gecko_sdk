@@ -89,7 +89,7 @@ void app_init(void)
   printf("  will work for matrixes as well.\n");
   printf("\n");
 
-  // Clear any errors frm previous operations.
+  // Clear any errors from previous operations.
   sl_math_mvp_clear_errors();
 
   printf("Fill vector A with 1.0:\n");
@@ -260,20 +260,13 @@ void app_init(void)
   printf("\n");
   printf("Demonstrate the use of an unaligned address:\n");
   status = sl_math_mvp_vector_fill_f16((float16_t *)&byte_buffer[1], 1.0f, 1);
-  printf("  Execution status: expected=%lu, actual=%lu\n", SL_STATUS_FAIL, status);
-  status = sli_mvp_get_error(&err_code, err_string, sizeof(err_string));
-  printf("  Error code:       expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, err_code);
-  printf("  Error string:     %s\n", err_string);
-  sli_mvp_clear_error_flags(SLI_MVP_FAULT_FLAG);
+  printf("  Execution status: expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, status);
 
   printf("\n");
   printf("Demonstrate the use of an invalid address:\n");
   status = sl_math_mvp_vector_fill_f16((float16_t *)4, 1.0f, 1);
-  printf("  Execution status: expected=%lu, actual=%lu\n", SL_STATUS_FAIL, status);
+  printf("  Execution status: expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, status);
   status = sli_mvp_get_error(&err_code, err_string, sizeof(err_string));
-  printf("  Error code:       expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, err_code);
-  printf("  Error string:     %s\n", err_string);
-  sli_mvp_clear_error_flags(SLI_MVP_FAULT_FLAG);
 
   printf("\n");
   printf("Demonstrate a sequence of function calls with a math exception in the first, the last is good:\n");
@@ -282,7 +275,8 @@ void app_init(void)
   byte_buffer[0] = 100;
   byte_buffer[1] = 100;
   // Execute one command that will generate a math overflow.
-  sl_math_mvp_vector_add_i8(&byte_buffer[0], &byte_buffer[1], &byte_buffer[2], 1);
+  status = sl_math_mvp_vector_add_i8(&byte_buffer[0], &byte_buffer[1], &byte_buffer[2], 1);
+  printf("  First function,        status: expected=%lu, actual=%lu\n", SL_STATUS_OK, status);
   byte_buffer[0] = 1;
   byte_buffer[1] = 2;
   // Execute one command that has no math exceptions.
@@ -298,16 +292,13 @@ void app_init(void)
   err_code = 0;
   err_string[0] = '\0';
   // Execute one command with error.
-  sl_math_mvp_vector_fill_f16((float16_t *)4, 1.0f, 1);
+  status = sl_math_mvp_vector_fill_f16((float16_t *)4, 1.0f, 1);
+  printf("  First function,         status: expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, status);
   // Execute one command that is OK.
-  // If it wasn't for the previous command, this would have returned SL_STATUS_OK.
   status = sl_math_mvp_vector_fill_f16(input_a, 1.0f, 1);
-  printf("  Last function,  status: expected=%lu, actual=%lu\n", SL_STATUS_FAIL, status);
+  printf("  Last function,  status: expected=%lu, actual=%lu\n", SL_STATUS_OK, status);
   status = sli_mvp_get_error(&err_code, err_string, sizeof(err_string));
-  printf("  Get error code, status: expected=%lu, actual=%lu\n", SL_STATUS_OK, status);
-  printf("  Error code:             expected=%lu, actual=%lu\n", SL_STATUS_COMPUTE_DRIVER_FAULT, err_code);
-  printf("  Error string:           %s\n", err_string);
-  sli_mvp_clear_error_flags(SLI_MVP_FAULT_FLAG);
+  printf("  Get error code, status: expected=%lu, actual=%lu\n", SL_STATUS_NOT_FOUND, status);
 
   printf("\n");
   printf("=== Math MVP demo, done. ===\n");

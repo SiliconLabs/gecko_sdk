@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_white import calc_whitening_viper
+from pyradioconfig.parts.bobcat.calculators.calc_white import Calc_Whitening_Bobcat
 
 
-class CalcWhiteningRainier(calc_whitening_viper):
+class CalcWhiteningRainier(Calc_Whitening_Bobcat):
     pass

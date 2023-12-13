@@ -30,7 +30,6 @@
 #endif //TEST_COEX_HAL_CONFIG
 #include "coexistence.h"
 #include "em_gpio.h"
-#include "em_prs.h"
 #include "gpiointerrupt.h"
 
 #ifdef __cplusplus
@@ -88,6 +87,9 @@ bool COEX_HAL_GetWifiTx(void);
 void sli_coex_enableGpioInt(COEX_GpioHandle_t gpioHandle,
                             bool enabled,
                             bool *wasAsserted);
+
+/** Set the respective gpio by COEX_SetGpioInputOverride. */
+#define COEX_WIFI_SIM_SetGpio COEX_SetGpioInputOverride
 
 #define PRS_GPIO_SIGNAL(pin) ((pin) & 7U)
 

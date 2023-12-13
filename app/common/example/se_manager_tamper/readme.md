@@ -24,7 +24,24 @@ The example redirects standard I/O to the virtual serial port (VCOM) of the kit.
 
 The example has been instrumented with code to count the number of clock cycles spent in different operations. The results are printed on the VCOM serial port console. This feature can be disabled by defining `SE_MANAGER_PRINT=0` (default is 1) in the IDE setting (`Properties->Settings->Preprocessor->Defined symbols`).
 
-## Tamper Responses
+## Getting Started
+
+1. Upgrade the kit's firmware to the latest version (see `Adapter Firmware` under [General Device Information](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information) in Simplicity Studio 5 Users Guide).
+2. Upgrade the device's SE firmware to the latest version (see `Secure Firmware` under [General Device Information](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information) in Simplicity Studio 5 Users Guide).
+3. Open any terminal program and connect to the kit's VCOM port (if using `Device Console` in Simplicity Studio 5, `Line terminator:` must be set to `None`).
+4. Create this platform example project in the Simplicity IDE (see [Examples](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples) in the Simplicity Studio 5 User's Guide).
+5. Build the example and download it to the kit (see [Simple Build](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build) and [Flash Programmer](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer) in Simplicity Studio 5 Users Guide).
+6. Run the example and follow the instructions shown on the console.
+
+## Additional Information
+
+1. The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for tamper disable.
+2. This example does not enable secure boot when provisioning the tamper configuration in `app_se_manager_tamper.c`.
+3. The device should disconnect from the debugger when running this example.
+4. **Warning:** Loading the tamper configuration and a public command key into the SE are a **ONE-TIME-ONLY** process. Both of these assignment operations are irrevocable and persist for the life of the device.
+5. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
+
+### Tamper Responses
 
 | Level | Responses | Description |
 | --- | --- | --- |
@@ -34,7 +51,7 @@ The example has been instrumented with code to count the number of clock cycles 
 | 4 | Reset | The device is reset |
 | 7 | Erase OTP | Erases the OTP configuration of the device (make the device and all wrapped secrets unrecoverable) |
 
-## Tamper Sources (EFR32xG21B Device)
+### Tamper Sources (EFR32xG21B Device)
 
 | Number | Name | Default level | User level in this example |
 | --- | --- | --- | --- |
@@ -71,7 +88,7 @@ The example has been instrumented with code to count the number of clock cycles 
 | 30 | Digital glitch | 0 | 2 |
 | 31 | SE ICACHE | 4 | 4 |
 
-## Tamper Sources (Other Series 2 Secure Vault High Devices)
+### Tamper Sources (Other Series 2 Secure Vault High Devices)
 
 | Number | Name | Default level | User level in this example |
 | --- | --- | --- | --- |
@@ -119,7 +136,7 @@ For EFR32xG25B devices, the default value of `TAMPER_DISABLE_MASK` is `0xE400000
 
 For other Series 2 Secure Vault High devices, the default value of `TAMPER_DISABLE_MASK` is `0xf2000000`. It restores PRS6, PRS5, PRS4, PRS3, and PRS0 to the default level 0 (Ignore) after running the disable tamper command.
 
-## Tamper Settings
+### Tamper Settings
 
 | Setting | User value in this example |
 | --- | --- |
@@ -129,7 +146,7 @@ For other Series 2 Secure Vault High devices, the default value of `TAMPER_DISAB
 | Flag (not available on EFR32xG21B devices) | Keep Tamper Alive During Sleep: Disabled |
 | Reset threshold | 5 |
 
-## SE Manager API
+### SE Manager API
 
 The following SE Manager APIs are used in this example:
 
@@ -153,25 +170,28 @@ The following SE Manager APIs are used in this example:
 * `sl_se_disable_tamper`
 * `sl_se_roll_challenge`
 
-## Getting Started
+## Troubleshooting
 
-1. Upgrade the kit's firmware to the latest version (see `Adapter Firmware` under [General Device Information](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information) in Simplicity Studio 5 Users Guide).
-2. Upgrade the device's SE firmware to the latest version (see `Secure Firmware` under [General Device Information](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-about-the-launcher/welcome-and-device-tabs#general-device-information) in Simplicity Studio 5 Users Guide).
-3. Open any terminal program and connect to the kit's VCOM port (if using `Device Console` in Simplicity Studio 5, `Line terminator:` must be set to `None`).
-4. Create this platform example project in the Simplicity IDE (see [Examples](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples) in the Simplicity Studio 5 User's Guide).
-5. Build the example and download it to the kit (see [Simple Build](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build) and [Flash Programmer](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer) in Simplicity Studio 5 Users Guide).
-6. Run the example and follow the instructions shown on the console.
+### Serial Port Settings
 
-## Additional Information
+Be sure to select the following settings to see the serial output of this example:
 
-1. The hard-coded private command key is an insecure method so the user should find a way to import the signed access certificate for tamper disable.
-2. This example does not enable secure boot when provisioning the tamper configuration in `app_se_manager_tamper.c`.
-3. The device should disconnect from the debugger when running this example.
-4. **Warning:** Loading the tamper configuration and a public command key into the SE are a **ONE-TIME-ONLY** process. Both of these assignment operations are irrevocable and persist for the life of the device.
-5. The default optimization level is `Optimize for debugging (-Og)` on Simplicity IDE and `None` on IAR Embedded Workbench.
+* 115200 Baud Rate 
+* 8-N-1 configuration
+* Line terminator should be set to "None" if using Device Console in Simplicity Studio
+
+### Programming the Radio Board
+
+Before programming the radio board mounted on the mainboard, make sure the power supply switch is in the AEM position (right side) as shown below.
+
+![Radio board power supply switch](image/readme_img0.png)
 
 ## Resources
 
 [SE Manager API](https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager)<br>
 
 [AN1247: Anti-Tamper Protection Configuration and Use](https://www.silabs.com/documents/public/application-notes/an1247-efr32-secure-vault-tamper.pdf)
+
+## Report Bugs & Get Support
+
+You are always encouraged and welcome to report any issues you found to us via [Silicon Labs Community](https://community.silabs.com/).

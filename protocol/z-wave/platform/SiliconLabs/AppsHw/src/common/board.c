@@ -387,9 +387,8 @@ static inline void ButtonCheckHold(button_id_t btn, BUTTON_EVENT btn_event_base)
  *
  * @param pTimer  Not used.
  */
-static void ButtonTimerCallback(SSwTimer *pTimer)
+static void ButtonTimerCallback(__attribute__((unused)) SSwTimer *pTimer)
 {
-  UNUSED(pTimer);
   bool stop_timer = true;
 
   m_button_timer_value += DEBOUNCE_FILTER_TIME_STEP;
@@ -670,7 +669,7 @@ static bool ButtonEnableEM4PinWakeup(GPIO_Port_TypeDef port, uint32_t pin, uint3
  * 
  */
 NO_RETURN static void 
-Board_DefaultHandler() {
+Board_DefaultHandler(void) {
   while(1) {
     Board_SetLed(BOARD_LED2, LED_OFF);
     Board_SetLed(BOARD_LED3, LED_ON);
@@ -1028,7 +1027,7 @@ void Board_GPIO_PinOutSet(GPIO_Port_TypeDef port, unsigned int pin)
 
 /* ------------------------------ BOARD INIT ------------------------------ */
 
-uint32_t Board_Initialize()
+uint32_t Board_Initialize(void)
 {
   CMU_ClockEnable(cmuClock_GPIO, true);
   m_button_timer_value = 0;
@@ -1233,7 +1232,7 @@ void Board_ResetHandler(void)
 }
 
 #ifdef ZWAVE_SERIES_800
-void HardFault_Handler() {
+void HardFault_Handler(void) {
   while(1) {
     Board_SetLed(BOARD_LED2, LED_OFF);
     for(int i=0; i< 1000000; i++) ;

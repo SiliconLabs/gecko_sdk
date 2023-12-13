@@ -61,8 +61,8 @@
 
 #define NULL_INDEX 0xFFFF
 
-#if ENABLE_EXPANDED_TABLE
-  #include "platform/emdrv/nvm3/inc/nvm3.h"
+#if defined(ENABLE_EXPANDED_TABLE)
+  #include "nvm3.h"
 
   #define REPORTING_TABLE_MAX_RANGE 0x400
   #define REPORTING_TABLE_PLUGIN_SIZE (EMBER_AF_PLUGIN_REPORTING_EXPANDED_TABLE_SIZE)
@@ -86,7 +86,7 @@
 #endif
 
 #if REPORT_TABLE_SIZE > REPORTING_TABLE_MAX_RANGE
- #if ENABLE_EXPANDED_TABLE
+ #if defined(ENABLE_EXPANDED_TABLE)
    #error "Reporting Table total size exceeds the maximum configuration"
  #else
    #error "Reporting Table total size exceeds the maximum size.  Try enabling the expanded table option"

@@ -352,6 +352,16 @@ EmberStatus sli_zigbee_af_gp_forward_gpd_to_mapped_endpoint(EmberGpAddress *addr
       emberAfAppendToExternalBuffer(&genericTranslationTable->zclPayloadDefault[1],
                                     genericTranslationTable->zclPayloadDefault[0]);
     }
+    if (gpdCommandId >= EMBER_ZCL_GP_GPDF_MOVE_UP
+        && gpdCommandId <= EMBER_ZCL_GP_GPDF_MOVE_DOWN
+        && gpdCommandPayload != NULL) {
+      if (gpdCommandPayload[0] == 0) {
+        // If the rate field is not present
+        // we set it to 0xff so the device shall move at the default rate
+        gpdCommandPayload[0] = 1;
+        gpdCommandPayload[1] = 0xff;
+      }
+    }
     // Overwrite the payload from gpd command source - as this is the priority
     if ((genericTranslationTable->payloadSrc & EMBER_AF_GREEN_POWER_ZCL_PAYLOAD_SRC_GPD_CMD)
         && gpdCommandPayload != NULL) {
@@ -359,7 +369,12 @@ EmberStatus sli_zigbee_af_gp_forward_gpd_to_mapped_endpoint(EmberGpAddress *addr
                                     gpdCommandPayload[0]);
     }
   }
-  emberAfSetCommandEndpoints(EMBER_AF_PLUGIN_GREEN_POWER_SERVER_HIDDEN_PROXY_ZCL_MESSAGE_SRC_ENDPOINT, endpoint);
+#if defined(EMBER_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+  uint8_t appEp = emberGetEndpoint(0);
+#else
+  uint8_t appEp = sli_zigbee_af_endpoints[0].endpoint;
+#endif
+  emberAfSetCommandEndpoints(appEp, endpoint);
   return emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT, emberAfGetNodeId());
 }
 

@@ -25,7 +25,7 @@
 //-- Build structure defines
 
 /**
- * @description Simple declarations of all of the token types so that they can
+ * Simple declarations of all of the token types so that they can
  * be referenced from anywhere in the code base.
  */
 #define DEFINETYPES
@@ -49,7 +49,7 @@
 #define DEFINETOKENS
 
 /**
- * @description Macro for translating token defs into address variables
+ * Macro for translating token defs into address variables
  * that point to the correct location in the Info Blocks.  (This is the
  * extern, the actual definition is found in hal/micro/cortexm3/token.c)
  *
@@ -66,7 +66,7 @@
 #undef TOKEN_MFG
 
 /**
- * @description Macro for translating token definitions into size variables.
+ * Macro for translating token definitions into size variables.
  * This provides a convenience for abstracting the 'sizeof(type)' anywhere.
  *
  * @param name: The name of the token.
@@ -85,7 +85,7 @@ enum {
 #undef TOKEN_DEF
 
 /**
- * @description Macro for typedef'ing the CamelCase token type found in
+ * Macro for typedef'ing the CamelCase token type found in
  * token-stack.h to a capitalized TOKEN style name that ends in _TYPE.
  * This macro allows other macros below to use 'token##_TYPE' to declare
  * a local copy of that token.
@@ -106,7 +106,7 @@ enum {
 #define DEFINEADDRESSES
 
 /**
- * @description Macro for creating a 'region' element in the enum below.  This
+ * Macro for creating a 'region' element in the enum below.  This
  * creates an element in the enum that provides a starting point (address) for
  * subsequent tokens to align against.
  *
@@ -118,7 +118,7 @@ enum {
   TOKEN_##region##_NEXT_ADDRESS = ((address) - 1),
 
 /**
- * @description Macro for creating ADDRESS and END elements for each token in
+ * Macro for creating ADDRESS and END elements for each token in
  * the enum below.  The ADDRESS element is linked to from the the normal
  * TOKEN_##name macro and provides the value passed into the internal token
  * system calls.  The END element is a placeholder providing the starting
@@ -135,7 +135,7 @@ enum {
                        + (TOKEN_##name##_SIZE * arraysize) - 1,
 
 /**
- * @description The enum that operates on the two macros above.
+ * The enum that operates on the two macros above.
  */
 enum {
   // Multiple inclusion of unguarded token-related header files is by design; suppress violation.
@@ -151,7 +151,7 @@ enum {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 /**
- * @description Copies the token value from non-volatile storage into a RAM
+ * Copies the token value from non-volatile storage into a RAM
  * location.  This is the internal function that the exposed API
  * (halCommonGetMfgToken) expands out to.  The
  * API simplifies the access into this function by hiding the size parameter.
@@ -173,7 +173,7 @@ enum {
 void halInternalGetMfgTokenData(void *data, uint16_t token, uint8_t index, uint32_t len);
 
 /**
- * @description Sets the value of a token in non-volatile storage.  This is
+ * Sets the value of a token in non-volatile storage.  This is
  * the internal function that the exposed API (halCommonSetMfgToken)
  * expands out to.  The API simplifies the access into this function
  * by hiding the size parameter.

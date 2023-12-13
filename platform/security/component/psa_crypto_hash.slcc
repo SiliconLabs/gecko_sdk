@@ -14,6 +14,9 @@ provides:
 requires:
   - name: psa_crypto
   - name: psa_hash_function
+  - name: sl_si91x_psa_sha
+    from: wiseconnect3_sdk
+    condition: [device_si91x]
 
 recommends:
   - id: psa_crypto_sha256

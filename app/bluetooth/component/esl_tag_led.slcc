@@ -12,32 +12,29 @@ quality: production
 root_path: app/bluetooth/common/esl_tag_led
 tag:
   - Custom-Code
-
 config_file:
   - path: config/esl_tag_led.xml
     file_id: esl_tag_led_characteristics
     directory: btconf
   - path: config/esl_tag_led_config.h
     file_id: esl_tag_led_config
-
 include:
   - path: ./inc
     file_list:
       - path: esl_tag_led.h
-
 source:
   - path: src/esl_tag_led.c
-
 requires:
   - name: esl_tag_core
   - name: sleeptimer
-
 provides:
   - name: esl_tag_led
-
 template_contribution:
   - name: bluetooth_on_event
     value:
       include: esl_tag_led.h
       function: esl_led_bt_on_event
     priority: -8189
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/esl-tag-led

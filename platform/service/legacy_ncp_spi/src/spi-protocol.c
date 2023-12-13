@@ -374,6 +374,7 @@ static bool halInternalHostSerialTick(bool responseReady)
         spipNcpState.state = spipNcpCommand;
         commandOffset = 0;
         // fall through to the spiNcpCommand case immediately
+        SL_FALLTHROUGH
       } else {
         break;
       }

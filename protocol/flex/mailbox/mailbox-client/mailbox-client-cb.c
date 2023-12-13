@@ -33,21 +33,10 @@
 //------------------------------------------------------------------------------
 // Weak callbacks definitions
 
-WEAK(void emberAfPluginMailboxClientMessageSubmitCallback(EmberAfMailboxStatus status,
-                                                          EmberNodeId mailboxServer,
-                                                          EmberNodeId messageDestination,
-                                                          uint8_t tag))
-{
-  (void)status;
-  (void)mailboxServer;
-  (void)messageDestination;
-  (void)tag;
-}
-
-WEAK(void emberAfPluginMailboxClientMessageDeliveredCallback(EmberAfMailboxStatus status,
+SL_WEAK void emberAfPluginMailboxClientMessageSubmitCallback(EmberAfMailboxStatus status,
                                                              EmberNodeId mailboxServer,
                                                              EmberNodeId messageDestination,
-                                                             uint8_t tag))
+                                                             uint8_t tag)
 {
   (void)status;
   (void)mailboxServer;
@@ -55,13 +44,24 @@ WEAK(void emberAfPluginMailboxClientMessageDeliveredCallback(EmberAfMailboxStatu
   (void)tag;
 }
 
-WEAK(void emberAfPluginMailboxClientCheckInboxCallback(EmberAfMailboxStatus status,
-                                                       EmberNodeId mailboxServer,
-                                                       EmberNodeId messageSource,
-                                                       uint8_t *message,
-                                                       EmberMessageLength messageLength,
-                                                       uint8_t tag,
-                                                       bool moreMessages))
+SL_WEAK void emberAfPluginMailboxClientMessageDeliveredCallback(EmberAfMailboxStatus status,
+                                                                EmberNodeId mailboxServer,
+                                                                EmberNodeId messageDestination,
+                                                                uint8_t tag)
+{
+  (void)status;
+  (void)mailboxServer;
+  (void)messageDestination;
+  (void)tag;
+}
+
+SL_WEAK void emberAfPluginMailboxClientCheckInboxCallback(EmberAfMailboxStatus status,
+                                                          EmberNodeId mailboxServer,
+                                                          EmberNodeId messageSource,
+                                                          uint8_t *message,
+                                                          EmberMessageLength messageLength,
+                                                          uint8_t tag,
+                                                          bool moreMessages)
 {
   (void)status;
   (void)mailboxServer;

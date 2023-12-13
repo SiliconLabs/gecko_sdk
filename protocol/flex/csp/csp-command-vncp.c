@@ -17,8 +17,7 @@
 // *** Generated file. Do not edit! ***
 // vNCP Version: 1.0
 
-#include PLATFORM_HEADER
-
+#include <assert.h>
 #include "stack/include/ember.h"
 #include "ncp/ncp-security.h"
 #include "stack/core/sli-connect-api.h"
@@ -30,6 +29,7 @@
 // networkState
 static void networkStateCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNetworkStatus networkStatus = emApiNetworkState();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -43,6 +43,7 @@ static void networkStateCommandHandler(uint8_t *apiCommandData)
 // stackIsUp
 static void stackIsUpCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   bool stackIsUp = emApiStackIsUp();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -56,11 +57,13 @@ static void stackIsUpCommandHandler(uint8_t *apiCommandData)
 // setSecurityKey
 static void setSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberKeyData key;
   uint8_t emberEncryptionKeySize = EMBER_ENCRYPTION_KEY_SIZE;
   fetchApiParams(apiCommandData,
                  "b",
                  &key,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &emberEncryptionKeySize,
                  EMBER_ENCRYPTION_KEY_SIZE);
   EmberStatus status = emApiSetSecurityKey(&key);
@@ -76,11 +79,13 @@ static void setSecurityKeyCommandHandler(uint8_t *apiCommandData)
 // GetSecurityKey
 static void GetSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberKeyData key;
   uint8_t emberEncryptionKeySize = EMBER_ENCRYPTION_KEY_SIZE;
   fetchApiParams(apiCommandData,
                  "b",
                  &key.contents,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &emberEncryptionKeySize,
                  EMBER_ENCRYPTION_KEY_SIZE);
   EmberStatus status = emApiGetSecurityKey(&key);
@@ -99,6 +104,7 @@ static void GetSecurityKeyCommandHandler(uint8_t *apiCommandData)
 // setPsaSecurityKey
 static void setPsaSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   mbedtls_svc_key_id_t key_id;
   fetchApiParams(apiCommandData,
                  "w",
@@ -119,6 +125,7 @@ static void setPsaSecurityKeyCommandHandler(uint8_t *apiCommandData)
 // RemovePsaSecurityKey
 static void RemovePsaSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiRemovePsaSecurityKey();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -134,12 +141,14 @@ static void RemovePsaSecurityKeyCommandHandler(uint8_t *apiCommandData)
 // setNcpSecurityKeyPersistent
 static void setNcpSecurityKeyPersistentCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t keyLength;
   uint32_t key_id;
   uint8_t *key;
   fetchApiParams(apiCommandData,
                  "pw",
                  &key,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &keyLength,
                  &key_id);
   EmberStatus status = emApiSetNcpSecurityKeyPersistent(key,
@@ -157,11 +166,13 @@ static void setNcpSecurityKeyPersistentCommandHandler(uint8_t *apiCommandData)
 // setNcpSecurityKey
 static void setNcpSecurityKeyCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t keyLength;
   uint8_t *key;
   fetchApiParams(apiCommandData,
                  "p",
                  &key,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &keyLength);
   EmberStatus status = emApiSetNcpSecurityKey(key,
                                               keyLength);
@@ -178,6 +189,7 @@ static void setNcpSecurityKeyCommandHandler(uint8_t *apiCommandData)
 // getKeyId
 static void getKeyIdCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   mbedtls_svc_key_id_t key_id = emApiGetKeyId();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -193,6 +205,7 @@ static void getKeyIdCommandHandler(uint8_t *apiCommandData)
 // getCounter
 static void getCounterCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberCounterType counterType;
   uint32_t count;
   fetchApiParams(apiCommandData,
@@ -213,6 +226,7 @@ static void getCounterCommandHandler(uint8_t *apiCommandData)
 // setRadioChannelExtended
 static void setRadioChannelExtendedCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t channel;
   bool persistent;
   fetchApiParams(apiCommandData,
@@ -233,6 +247,7 @@ static void setRadioChannelExtendedCommandHandler(uint8_t *apiCommandData)
 // setRadioChannel
 static void setRadioChannelCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t channel;
   fetchApiParams(apiCommandData,
                  "v",
@@ -250,6 +265,7 @@ static void setRadioChannelCommandHandler(uint8_t *apiCommandData)
 // getRadioChannel
 static void getRadioChannelCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t channel = emApiGetRadioChannel();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -263,6 +279,7 @@ static void getRadioChannelCommandHandler(uint8_t *apiCommandData)
 // setRadioPower
 static void setRadioPowerCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   int16_t power;
   bool persistent;
   fetchApiParams(apiCommandData,
@@ -283,6 +300,7 @@ static void setRadioPowerCommandHandler(uint8_t *apiCommandData)
 // getRadioPower
 static void getRadioPowerCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   int16_t power = emApiGetRadioPower();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -296,6 +314,7 @@ static void getRadioPowerCommandHandler(uint8_t *apiCommandData)
 // setRadioPowerMode
 static void setRadioPowerModeCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   bool radioOn;
   fetchApiParams(apiCommandData,
                  "u",
@@ -313,6 +332,7 @@ static void setRadioPowerModeCommandHandler(uint8_t *apiCommandData)
 // setMacParams
 static void setMacParamsCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   int8_t ccaThreshold;
   uint8_t maxCcaAttempts;
   uint8_t minBackoffExp;
@@ -354,6 +374,7 @@ static void setMacParamsCommandHandler(uint8_t *apiCommandData)
 // currentStackTasks
 static void currentStackTasksCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t currentTasks = emApiCurrentStackTasks();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -367,6 +388,7 @@ static void currentStackTasksCommandHandler(uint8_t *apiCommandData)
 // okToNap
 static void okToNapCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   bool isOkToNap = emApiOkToNap();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -380,6 +402,7 @@ static void okToNapCommandHandler(uint8_t *apiCommandData)
 // okToHibernate
 static void okToHibernateCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   bool isOkToHibernate = emApiOkToHibernate();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -393,6 +416,7 @@ static void okToHibernateCommandHandler(uint8_t *apiCommandData)
 // getEui64
 static void getEui64CommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t eui64Size = EUI64_SIZE;
   uint8_t* eui64 = emApiGetEui64();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
@@ -408,12 +432,14 @@ static void getEui64CommandHandler(uint8_t *apiCommandData)
 // macGetParentAddress
 static void macGetParentAddressCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddress parentAddress;
   uint8_t eui64Size = EUI64_SIZE;
   fetchApiParams(apiCommandData,
                  "vbu",
                  &parentAddress.addr.shortAddress,
                  &parentAddress.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &parentAddress.mode);
@@ -434,11 +460,13 @@ static void macGetParentAddressCommandHandler(uint8_t *apiCommandData)
 // isLocalEui64
 static void isLocalEui64CommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t eui64[EUI64_SIZE];
   uint8_t eui64Size = EUI64_SIZE;
   fetchApiParams(apiCommandData,
                  "b",
                  &eui64,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE);
   bool localEui64 = emApiIsLocalEui64(eui64);
@@ -454,6 +482,7 @@ static void isLocalEui64CommandHandler(uint8_t *apiCommandData)
 // getNodeId
 static void getNodeIdCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId nodeId = emApiGetNodeId();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -467,6 +496,7 @@ static void getNodeIdCommandHandler(uint8_t *apiCommandData)
 // getPanId
 static void getPanIdCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberPanId panId = emApiGetPanId();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -480,6 +510,7 @@ static void getPanIdCommandHandler(uint8_t *apiCommandData)
 // getParentId
 static void getParentIdCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId parentNodeId = emApiGetParentId();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -493,6 +524,7 @@ static void getParentIdCommandHandler(uint8_t *apiCommandData)
 // getNodeType
 static void getNodeTypeCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeType nodeType = emApiGetNodeType();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -506,6 +538,7 @@ static void getNodeTypeCommandHandler(uint8_t *apiCommandData)
 // calibrateCurrentChannel
 static void calibrateCurrentChannelCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiCalibrateCurrentChannel();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -519,6 +552,7 @@ static void calibrateCurrentChannelCommandHandler(uint8_t *apiCommandData)
 // calibrateCurrentChannelExtended
 static void calibrateCurrentChannelExtendedCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint32_t calValueIn;
   uint32_t calValueOut;
   fetchApiParams(apiCommandData,
@@ -539,6 +573,7 @@ static void calibrateCurrentChannelExtendedCommandHandler(uint8_t *apiCommandDat
 // applyIrCalibration
 static void applyIrCalibrationCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint32_t calValue;
   fetchApiParams(apiCommandData,
                  "w",
@@ -556,6 +591,7 @@ static void applyIrCalibrationCommandHandler(uint8_t *apiCommandData)
 // tempCalibration
 static void tempCalibrationCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiTempCalibration();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -569,6 +605,7 @@ static void tempCalibrationCommandHandler(uint8_t *apiCommandData)
 // getCalType
 static void getCalTypeCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberCalType calType = emApiGetCalType();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -582,6 +619,7 @@ static void getCalTypeCommandHandler(uint8_t *apiCommandData)
 // getMaximumPayloadLength
 static void getMaximumPayloadLengthCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddressMode srcAddressMode;
   EmberMacAddressMode dstAddressMode;
   bool interpan;
@@ -592,15 +630,15 @@ static void getMaximumPayloadLengthCommandHandler(uint8_t *apiCommandData)
                  &dstAddressMode,
                  &interpan,
                  &secured);
-  uint8_t payloadLength = emApiGetMaximumPayloadLength(srcAddressMode,
-                                                       dstAddressMode,
-                                                       interpan,
-                                                       secured);
+  uint16_t payloadLength = emApiGetMaximumPayloadLength(srcAddressMode,
+                                                        dstAddressMode,
+                                                        interpan,
+                                                        secured);
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
                                                  MAX_STACK_API_COMMAND_SIZE,
                                                  EMBER_GET_MAXIMUM_PAYLOAD_LENGTH_IPC_COMMAND_ID,
-                                                 "u",
+                                                 "v",
                                                  payloadLength);
   sendResponse(apiCommandBuffer, commandLength);
 }
@@ -608,6 +646,7 @@ static void getMaximumPayloadLengthCommandHandler(uint8_t *apiCommandData)
 // setIndirectQueueTimeout
 static void setIndirectQueueTimeoutCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint32_t timeoutMs;
   fetchApiParams(apiCommandData,
                  "w",
@@ -622,9 +661,24 @@ static void setIndirectQueueTimeoutCommandHandler(uint8_t *apiCommandData)
   sendResponse(apiCommandBuffer, commandLength);
 }
 
+// getInt32uMillisecondTick
+static void getInt32uMillisecondTickCommandHandler(uint8_t *apiCommandData)
+{
+  (void)apiCommandData;
+  uint32_t time_ms = emApiGetInt32uMillisecondTick();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_GET_INT32U_MILLISECOND_TICK_IPC_COMMAND_ID,
+                                                 "w",
+                                                 time_ms);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
 // getVersionInfo
 static void getVersionInfoCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t gsdkVersion;
   uint16_t connectStackVersion;
   uint32_t bootloaderVersion;
@@ -645,9 +699,78 @@ static void getVersionInfoCommandHandler(uint8_t *apiCommandData)
   sendResponse(apiCommandBuffer, commandLength);
 }
 
+// ofdmSetMcs
+static void ofdmSetMcsCommandHandler(uint8_t *apiCommandData)
+{
+  (void)apiCommandData;
+  uint8_t mcs;
+  fetchApiParams(apiCommandData,
+                 "u",
+                 &mcs);
+  EmberStatus status = emApiOfdmSetMcs(mcs);
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_OFDM_SET_MCS_IPC_COMMAND_ID,
+                                                 "u",
+                                                 status);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
+// ofdmGetMcs
+static void ofdmGetMcsCommandHandler(uint8_t *apiCommandData)
+{
+  (void)apiCommandData;
+  uint8_t mcs;
+  fetchApiParams(apiCommandData,
+                 "");
+  EmberStatus status = emApiOfdmGetMcs(&mcs);
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_OFDM_GET_MCS_IPC_COMMAND_ID,
+                                                 "uu",
+                                                 status,
+                                                 mcs);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
+// ncpSetLongMessagesUse
+static void ncpSetLongMessagesUseCommandHandler(uint8_t *apiCommandData)
+{
+  (void)apiCommandData;
+  bool useLongMessages;
+  fetchApiParams(apiCommandData,
+                 "u",
+                 &useLongMessages);
+  EmberStatus status = emApiNcpSetLongMessagesUse(useLongMessages);
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_NCP_SET_LONG_MESSAGES_USE_IPC_COMMAND_ID,
+                                                 "u",
+                                                 status);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
+// usingLongMessages
+static void usingLongMessagesCommandHandler(uint8_t *apiCommandData)
+{
+  (void)apiCommandData;
+  bool usingLongMessages = emApiUsingLongMessages();
+  uint8_t *apiCommandBuffer = getApiCommandPointer();
+  uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
+                                                 MAX_STACK_API_COMMAND_SIZE,
+                                                 EMBER_USING_LONG_MESSAGES_IPC_COMMAND_ID,
+                                                 "u",
+                                                 usingLongMessages);
+  sendResponse(apiCommandBuffer, commandLength);
+}
+
 // messageSend
 static void messageSendCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId destination;
   uint8_t endpoint;
   uint8_t messageTag;
@@ -655,12 +778,13 @@ static void messageSendCommandHandler(uint8_t *apiCommandData)
   EmberMessageOptions options;
   uint8_t *message;
   fetchApiParams(apiCommandData,
-                 "vuuupu",
+                 "vuulpu",
                  &destination,
                  &endpoint,
                  &messageTag,
                  &messageLength,
                  &message,
+                 CSP_FETCH_ARG_IS_UINT16,
                  &messageLength,
                  &options);
   EmberStatus status = emApiMessageSend(destination,
@@ -681,6 +805,7 @@ static void messageSendCommandHandler(uint8_t *apiCommandData)
 // pollForData
 static void pollForDataCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiPollForData();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -694,6 +819,7 @@ static void pollForDataCommandHandler(uint8_t *apiCommandData)
 // macMessageSend
 static void macMessageSendCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacFrame macFrame;
   uint8_t messageTag;
   EmberMessageLength messageLength;
@@ -701,14 +827,16 @@ static void macMessageSendCommandHandler(uint8_t *apiCommandData)
   uint8_t eui64Size = EUI64_SIZE;
   uint8_t *message;
   fetchApiParams(apiCommandData,
-                 "vbuvbuvvuuuupu",
+                 "vbuvbuvvuuulpu",
                  &macFrame.srcAddress.addr.shortAddress,
                  &macFrame.srcAddress.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &macFrame.srcAddress.mode,
                  &macFrame.dstAddress.addr.shortAddress,
                  &macFrame.dstAddress.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &macFrame.dstAddress.mode,
@@ -719,6 +847,7 @@ static void macMessageSendCommandHandler(uint8_t *apiCommandData)
                  &messageTag,
                  &messageLength,
                  &message,
+                 CSP_FETCH_ARG_IS_UINT16,
                  &messageLength,
                  &options);
   EmberStatus status = emApiMacMessageSend(&macFrame,
@@ -738,6 +867,7 @@ static void macMessageSendCommandHandler(uint8_t *apiCommandData)
 // macSetPanCoordinator
 static void macSetPanCoordinatorCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   bool isCoordinator;
   fetchApiParams(apiCommandData,
                  "u",
@@ -755,12 +885,14 @@ static void macSetPanCoordinatorCommandHandler(uint8_t *apiCommandData)
 // setPollDestinationAddress
 static void setPollDestinationAddressCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddress destination;
   uint8_t eui64Size = EUI64_SIZE;
   fetchApiParams(apiCommandData,
                  "vbu",
                  &destination.addr.shortAddress,
                  &destination.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &destination.mode);
@@ -777,12 +909,14 @@ static void setPollDestinationAddressCommandHandler(uint8_t *apiCommandData)
 // removeChild
 static void removeChildCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddress address;
   uint8_t eui64Size = EUI64_SIZE;
   fetchApiParams(apiCommandData,
                  "vbu",
                  &address.addr.shortAddress,
                  &address.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &address.mode);
@@ -799,6 +933,7 @@ static void removeChildCommandHandler(uint8_t *apiCommandData)
 // getChildFlags
 static void getChildFlagsCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddress address;
   EmberChildFlags flags;
   uint8_t eui64Size = EUI64_SIZE;
@@ -806,6 +941,7 @@ static void getChildFlagsCommandHandler(uint8_t *apiCommandData)
                  "vbu",
                  &address.addr.shortAddress,
                  &address.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &address.mode);
@@ -824,6 +960,7 @@ static void getChildFlagsCommandHandler(uint8_t *apiCommandData)
 // getChildInfo
 static void getChildInfoCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberMacAddress address;
   EmberMacAddress addressResp;
   EmberChildFlags flags;
@@ -832,6 +969,7 @@ static void getChildInfoCommandHandler(uint8_t *apiCommandData)
                  "vbu",
                  &address.addr.shortAddress,
                  &address.addr.longAddress,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE,
                  &address.mode);
@@ -855,6 +993,7 @@ static void getChildInfoCommandHandler(uint8_t *apiCommandData)
 // purgeIndirectMessages
 static void purgeIndirectMessagesCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiPurgeIndirectMessages();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -868,6 +1007,7 @@ static void purgeIndirectMessagesCommandHandler(uint8_t *apiCommandData)
 // macAddShortToLongAddressMapping
 static void macAddShortToLongAddressMappingCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId shortId;
   uint8_t longId[EUI64_SIZE];
   uint8_t eui64Size = EUI64_SIZE;
@@ -875,6 +1015,7 @@ static void macAddShortToLongAddressMappingCommandHandler(uint8_t *apiCommandDat
                  "vb",
                  &shortId,
                  &longId,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &eui64Size,
                  EUI64_SIZE);
   EmberStatus status = emApiMacAddShortToLongAddressMapping(shortId,
@@ -891,6 +1032,7 @@ static void macAddShortToLongAddressMappingCommandHandler(uint8_t *apiCommandDat
 // macClearShortToLongAddressMappings
 static void macClearShortToLongAddressMappingsCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiMacClearShortToLongAddressMappings();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -904,6 +1046,7 @@ static void macClearShortToLongAddressMappingsCommandHandler(uint8_t *apiCommand
 // networkLeave
 static void networkLeaveCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiNetworkLeave();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -917,6 +1060,7 @@ static void networkLeaveCommandHandler(uint8_t *apiCommandData)
 // networkInit
 static void networkInitCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiNetworkInit();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -930,6 +1074,7 @@ static void networkInitCommandHandler(uint8_t *apiCommandData)
 // startActiveScan
 static void startActiveScanCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t channel;
   fetchApiParams(apiCommandData,
                  "v",
@@ -947,6 +1092,7 @@ static void startActiveScanCommandHandler(uint8_t *apiCommandData)
 // startEnergyScan
 static void startEnergyScanCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t channel;
   uint8_t samples;
   fetchApiParams(apiCommandData,
@@ -967,11 +1113,13 @@ static void startEnergyScanCommandHandler(uint8_t *apiCommandData)
 // setApplicationBeaconPayload
 static void setApplicationBeaconPayloadCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t payloadLength;
   uint8_t *payload;
   fetchApiParams(apiCommandData,
                  "p",
                  &payload,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &payloadLength);
   EmberStatus status = emApiSetApplicationBeaconPayload(payloadLength,
                                                         payload);
@@ -987,11 +1135,13 @@ static void setApplicationBeaconPayloadCommandHandler(uint8_t *apiCommandData)
 // setSelectiveJoinPayload
 static void setSelectiveJoinPayloadCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t payloadLength;
   uint8_t *payload;
   fetchApiParams(apiCommandData,
                  "p",
                  &payload,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &payloadLength);
   EmberStatus status = emApiSetSelectiveJoinPayload(payloadLength,
                                                     payload);
@@ -1007,6 +1157,7 @@ static void setSelectiveJoinPayloadCommandHandler(uint8_t *apiCommandData)
 // clearSelectiveJoinPayload
 static void clearSelectiveJoinPayloadCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiClearSelectiveJoinPayload();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1020,6 +1171,7 @@ static void clearSelectiveJoinPayloadCommandHandler(uint8_t *apiCommandData)
 // formNetwork
 static void formNetworkCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNetworkParameters parameters;
   fetchApiParams(apiCommandData,
                  "vvv",
@@ -1039,6 +1191,7 @@ static void formNetworkCommandHandler(uint8_t *apiCommandData)
 // joinNetworkExtended
 static void joinNetworkExtendedCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeType nodeType;
   EmberNodeId nodeId;
   EmberNetworkParameters parameters;
@@ -1064,6 +1217,7 @@ static void joinNetworkExtendedCommandHandler(uint8_t *apiCommandData)
 // joinNetwork
 static void joinNetworkCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeType nodeType;
   EmberNetworkParameters parameters;
   fetchApiParams(apiCommandData,
@@ -1086,6 +1240,7 @@ static void joinNetworkCommandHandler(uint8_t *apiCommandData)
 // macFormNetwork
 static void macFormNetworkCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNetworkParameters parameters;
   fetchApiParams(apiCommandData,
                  "vvv",
@@ -1105,6 +1260,7 @@ static void macFormNetworkCommandHandler(uint8_t *apiCommandData)
 // permitJoining
 static void permitJoiningCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t duration;
   fetchApiParams(apiCommandData,
                  "u",
@@ -1122,6 +1278,7 @@ static void permitJoiningCommandHandler(uint8_t *apiCommandData)
 // joinCommissioned
 static void joinCommissionedCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeType nodeType;
   EmberNodeId nodeId;
   EmberNetworkParameters parameters;
@@ -1147,6 +1304,7 @@ static void joinCommissionedCommandHandler(uint8_t *apiCommandData)
 // resetNetworkState
 static void resetNetworkStateCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   emApiResetNetworkState();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1159,11 +1317,13 @@ static void resetNetworkStateCommandHandler(uint8_t *apiCommandData)
 // frequencyHoppingSetChannelMask
 static void frequencyHoppingSetChannelMaskCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t channelMaskLength;
   uint8_t *channelMask;
   fetchApiParams(apiCommandData,
                  "p",
                  &channelMask,
+                 CSP_FETCH_ARG_IS_UINT8,
                  &channelMaskLength);
   EmberStatus status = emApiFrequencyHoppingSetChannelMask(channelMaskLength,
                                                            channelMask);
@@ -1179,6 +1339,7 @@ static void frequencyHoppingSetChannelMaskCommandHandler(uint8_t *apiCommandData
 // frequencyHoppingStartServer
 static void frequencyHoppingStartServerCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiFrequencyHoppingStartServer();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1192,6 +1353,7 @@ static void frequencyHoppingStartServerCommandHandler(uint8_t *apiCommandData)
 // frequencyHoppingStartClient
 static void frequencyHoppingStartClientCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId serverNodeId;
   EmberPanId serverPanId;
   fetchApiParams(apiCommandData,
@@ -1212,6 +1374,7 @@ static void frequencyHoppingStartClientCommandHandler(uint8_t *apiCommandData)
 // frequencyHoppingStop
 static void frequencyHoppingStopCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiFrequencyHoppingStop();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1225,6 +1388,7 @@ static void frequencyHoppingStopCommandHandler(uint8_t *apiCommandData)
 // setAuxiliaryAddressFilteringEntry
 static void setAuxiliaryAddressFilteringEntryCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberNodeId nodeId;
   uint8_t entryIndex;
   fetchApiParams(apiCommandData,
@@ -1245,6 +1409,7 @@ static void setAuxiliaryAddressFilteringEntryCommandHandler(uint8_t *apiCommandD
 // getAuxiliaryAddressFilteringEntry
 static void getAuxiliaryAddressFilteringEntryCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint8_t entryIndex;
   fetchApiParams(apiCommandData,
                  "u",
@@ -1262,6 +1427,7 @@ static void getAuxiliaryAddressFilteringEntryCommandHandler(uint8_t *apiCommandD
 // startTxStream
 static void startTxStreamCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberTxStreamParameters parameters;
   uint16_t channel;
   fetchApiParams(apiCommandData,
@@ -1282,6 +1448,7 @@ static void startTxStreamCommandHandler(uint8_t *apiCommandData)
 // stopTxStream
 static void stopTxStreamCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   EmberStatus status = emApiStopTxStream();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1295,6 +1462,7 @@ static void stopTxStreamCommandHandler(uint8_t *apiCommandData)
 // setActiveScanDuration
 static void setActiveScanDurationCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t durationMs;
   fetchApiParams(apiCommandData,
                  "v",
@@ -1312,6 +1480,7 @@ static void setActiveScanDurationCommandHandler(uint8_t *apiCommandData)
 // getActiveScanDuration
 static void getActiveScanDurationCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t durationMs = emApiGetActiveScanDuration();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1325,6 +1494,7 @@ static void getActiveScanDurationCommandHandler(uint8_t *apiCommandData)
 // getDefaultChannel
 static void getDefaultChannelCommandHandler(uint8_t *apiCommandData)
 {
+  (void)apiCommandData;
   uint16_t firstChannel = emApiGetDefaultChannel();
   uint8_t *apiCommandBuffer = getApiCommandPointer();
   uint16_t commandLength = formatResponseCommand(apiCommandBuffer,
@@ -1454,8 +1624,23 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
     case EMBER_SET_INDIRECT_QUEUE_TIMEOUT_IPC_COMMAND_ID:
       setIndirectQueueTimeoutCommandHandler(apiCommandData);
       break;
+    case EMBER_GET_INT32U_MILLISECOND_TICK_IPC_COMMAND_ID:
+      getInt32uMillisecondTickCommandHandler(apiCommandData);
+      break;
     case EMBER_GET_VERSION_INFO_IPC_COMMAND_ID:
       getVersionInfoCommandHandler(apiCommandData);
+      break;
+    case EMBER_OFDM_SET_MCS_IPC_COMMAND_ID:
+      ofdmSetMcsCommandHandler(apiCommandData);
+      break;
+    case EMBER_OFDM_GET_MCS_IPC_COMMAND_ID:
+      ofdmGetMcsCommandHandler(apiCommandData);
+      break;
+    case EMBER_NCP_SET_LONG_MESSAGES_USE_IPC_COMMAND_ID:
+      ncpSetLongMessagesUseCommandHandler(apiCommandData);
+      break;
+    case EMBER_USING_LONG_MESSAGES_IPC_COMMAND_ID:
+      usingLongMessagesCommandHandler(apiCommandData);
       break;
     case EMBER_MESSAGE_SEND_IPC_COMMAND_ID:
       messageSendCommandHandler(apiCommandData);
@@ -1566,7 +1751,7 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
       getDefaultChannelCommandHandler(apiCommandData);
       break;
     default: {
-      assert(0);
+      unknownCommandIdHandler(commandId);
     }
   }
 }

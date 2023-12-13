@@ -36,28 +36,42 @@
 
 #include "openthread-br/config.h"
 
-#include "ncp/ncp_openthread.hpp"
+#include "agent/application.hpp"
 
 namespace otbr {
+
+class Application;
+
 namespace vendor {
 
+/**
+ * An interface for customized behavior depending on OpenThread API and state.
+ */
 class VendorServer
 {
 public:
-    /**
-     * The constructor of vendor server.
-     *
-     * @param[in] aNcp  A reference to the NCP controller.
-     *
-     */
-    VendorServer(otbr::Ncp::ControllerOpenThread &aNcp);
+    virtual ~VendorServer(void) = default;
 
     /**
-     * This method initializes the vendor server.
+     * Creates a new instance of VendorServer.
      *
+     * Custom vendor servers should implement this method to return an object of the derived class.
+     *
+     * @param[in]  aApplication  The OTBR application.
+     *
+     * @returns  New derived VendorServer instance.
      */
-    void Init(void);
+    static std::shared_ptr<VendorServer> newInstance(Application &aApplication);
+
+    /**
+     * Initializes the vendor server.
+     *
+     * This will be called by `Application::Init()` after OpenThread instance and other built-in
+     * servers have been created and initialized.
+     */
+    virtual void Init(void) = 0;
 };
+
 } // namespace vendor
 } // namespace otbr
 #endif // OTBR_AGENT_VENDOR_HPP_

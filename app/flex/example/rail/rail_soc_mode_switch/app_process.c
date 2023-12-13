@@ -33,12 +33,10 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
-#include "app_assert.h"
-#include "app_log.h"
 #include "rail.h"
 #include "app_process.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
+#include "simple_rail_assistance.h"
 #include "rail_config.h"
 #include "sl_flex_packet_asm.h"
 #include "rail_types.h"
@@ -395,7 +393,7 @@ static void handle_state_packet_received(RAIL_Handle_t rail_handle)
                         (uint8_t)rail_status);
       }
     }
-    sl_led_toggle(&sl_led_led0);
+    toggle_receive_led();
     rx_packet_handle = RAIL_GetRxPacketInfo(rail_handle,
                                             RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE,
                                             &packet_info);
@@ -442,11 +440,7 @@ static void handle_state_packet_sent(RAIL_Handle_t rail_handle)
                    get_fsk_whitening());
     }
   }
-#if defined(SL_CATALOG_LED1_PRESENT)
-  sl_led_toggle(&sl_led_led1);
-#else
-  sl_led_toggle(&sl_led_led0);
-#endif
+  toggle_send_led();
   state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   app_task_notify();

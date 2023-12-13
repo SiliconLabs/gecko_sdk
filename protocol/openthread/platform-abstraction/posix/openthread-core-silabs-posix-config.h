@@ -52,7 +52,7 @@ sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=1 DNS64=1 \
 sudo INFRA_IF_NAME=eth0 \
      RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.3 \
-                   -DOT_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON" \
      ./script/setup
 */
@@ -69,12 +69,12 @@ sudo INFRA_IF_NAME=eth0 \
      RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.3 \
                    -DOT_MULTIPAN_RCP=ON \
-                   -DCMAKE_MODULE_PATH=$GSDK_DIR/protocol/openthread/platform-abstraction/posix \
                    -DCPCD_SOURCE_DIR=$GSDK_DIR/platform/service/cpc/daemon \
-                   -DOT_POSIX_CONFIG_RCP_BUS=VENDOR \
-                   -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=SilabsRcpDeps \
+                   -DOT_POSIX_RCP_VENDOR_BUS=ON \
+                   -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_rcp.cmake \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/cpc_interface.cpp \
-                   -DOT_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOT_CLI_VENDOR_EXTENSION=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_cli.cmake \
+                   -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON" \
      ./script/setup
 */
@@ -89,7 +89,7 @@ sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=0 DNS64=0 \
 
 sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 DNS64=0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.2 \
-                   -DOT_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF" \
      ./script/setup
 */
@@ -105,30 +105,27 @@ sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=0 DNS64=0 \
 sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 DNS64=0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.2 \
                    -DOT_MULTIPAN_RCP=ON \
-                   -DCMAKE_MODULE_PATH=$GSDK_DIR/protocol/openthread/platform-abstraction/posix \
                    -DCPCD_SOURCE_DIR=$GSDK_DIR/platform/service/cpc/daemon \
-                   -DOT_POSIX_CONFIG_RCP_BUS=VENDOR \
-                   -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=SilabsRcpDeps \
+                   -DOT_POSIX_RCP_VENDOR_BUS=ON \
+                   -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_rcp.cmake \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/cpc_interface.cpp \
-                   -DOT_CONFIG=openthread-core-silabs-posix-config.h \
+                   -DOT_CLI_VENDOR_EXTENSION=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_cli.cmake \
+                   -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF"  \
         ./script/setup
 */
 
 /******************************************************************************
- * RCP BUS defaults
+ * Vendor defaults
  *****************************************************************************/
-
 /**
- * This setting configures what type of RCP bus to use (default UART)
+ * OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME
  *
- * UART: OT_POSIX_RCP_BUS_UART
- * SPI: OT_POSIX_RCP_BUS_SPI
- * CPC: OT_POSIX_RCP_BUS_VENDOR
+ * Define the URL protocol name of our vendor Spinel interface, which is CPC
  *
  */
-#ifndef OPENTHREAD_POSIX_CONFIG_RCP_BUS
-#define OPENTHREAD_POSIX_CONFIG_RCP_BUS OT_POSIX_RCP_BUS_UART
+#ifndef OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME
+#define OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_URL_PROTOCOL_NAME "spinel+cpc"
 #endif
 
 /**
@@ -136,9 +133,9 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
  *
  * This supports Multipan/CPC configurations:
  * (OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE &&
- *  OPENTHREAD_POSIX_CONFIG_RCP_BUS == OT_POSIX_RCP_BUS_VENDOR)
+ *  OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE)
  *
- * Unfortunately this file is included prior to OPENTHREAD_POSIX_CONFIG_RCP_BUS
+ * Unfortunately this file is included prior to OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE
  * being defined so we can't check here.
  */
 #define OT_VENDOR_RADIO_URL_HELP_BUS                                 \
@@ -167,7 +164,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #endif
 
 /**
- * @def OPENTHREAD_CONFIG_DUA_ENABLE
+ * OPENTHREAD_CONFIG_DUA_ENABLE
  *
  * Define as 1 to support Thread 1.2 Domain Unicast Address feature.
  *
@@ -176,7 +173,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_DUA_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
 /**
- * @def OPENTHREAD_CONFIG_MLR_ENABLE
+ * OPENTHREAD_CONFIG_MLR_ENABLE
  *
  * Define as 1 to support Thread 1.2 Multicast Listener Registration feature.
  *
@@ -185,7 +182,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_MLR_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
 /**
- * @def OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+ * OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
  *
  * Define to 1 to enable Border Routing Manager feature.
  *
@@ -194,7 +191,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION == OT_THREAD_VERSION_1_3)
 
 /**
- * @def OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE
+ * OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE
  *
  * Define to 1 to enable DHCPv6 Client support.
  *
@@ -203,7 +200,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION == OT_THREAD_VERSION_1_3)
 
 /**
- * @def OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE
+ * OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE
  *
  * Define to 1 to enable DHCPv6 Server support.
  *
@@ -212,7 +209,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION == OT_THREAD_VERSION_1_3)
 
 /**
- * @def OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
+ * OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
  *
  * Define to 1 to enable SRP Client support.
  *
@@ -221,7 +218,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION == OT_THREAD_VERSION_1_3)
 
 /**
- * @def OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+ * OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
  *
  * Set to 1 to enable support for Thread Radio Encapsulation Link (TREL).
  *
@@ -230,7 +227,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE (OPENTHREAD_CONFIG_THREAD_VERSION == OT_THREAD_VERSION_1_3)
 
 /**
- * @def OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
+ * OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
  *
  * The maximum number of children, set on the OTBR host.
  *
@@ -253,7 +250,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN 128
 
 /**
- * @def OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
+ * OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
  *
@@ -264,7 +261,7 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
 #define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 5000
 
 /**
- * @def OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD
+ * OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD
  *
  * Transmission scheduling and ramp up time needed for the CSL transmitter
  * to be ready, in units of microseconds. This time must include at least

@@ -41,7 +41,7 @@ class ModelOutputType(Enum):
 class ModelOutput(object):
     def __init__(self, var, category, output_type, readable_name=None,
                  value_limit_min=None, value_limit_max=None, override=None,
-                 fractional_digits=None):
+                 fractional_digits=None, in_public_log=False):
         # assert isinstance(var, ModelVariable), "FATAL ERROR: var is not ModelVariable"
         self._var = var
         if readable_name is None:
@@ -56,6 +56,7 @@ class ModelOutput(object):
         #: The maximum limit of the value (inclusive)
         self.value_limit_max = value_limit_max
         self.fractional_digits = fractional_digits
+        self.in_public_log = in_public_log
 
     @property
     def var_name(self):
@@ -133,6 +134,15 @@ class ModelOutput(object):
         self._fractional_digits = value
 
     @property
+    def in_public_log(self):
+        return self._in_public_log
+
+    @in_public_log.setter
+    def in_public_log(self, value):
+        assert isinstance(value, bool), "FATAL ERROR: Invalid in_public_log type"
+        self._in_public_log = value
+
+    @property
     def var(self):
         return self._var
 
@@ -184,6 +194,7 @@ class ModelOutput(object):
             out += '            value_limit_max:  {}\n'.format(self.value_limit_max)
         if self.fractional_digits is not None:
             out += '            fractional_digits: {}\n'.format(self.fractional_digits)
+        out += '            in_public_log: {}\n'.format(self.in_public_log)
         return out
 
 

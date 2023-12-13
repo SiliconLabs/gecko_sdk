@@ -68,15 +68,15 @@ extern "C" {
 #define SL_CLI_ACTIVE_FLAG_EN   1
 #endif
 
-#define SL_CLI_NVM3_KEY_COUNT    (0x100)
-#define SL_CLI_NVM3_KEY_BEGIN    (0x3000)
-#define SL_CLI_NVM3_KEY_END      (SL_CLI_NVM3_KEY_BEGIN + SL_CLI_NVM3_KEY_COUNT)
+#define SL_CLI_NVM3_KEY_COUNT    (0x100)                                                             ///< sl cli nvm3 key count
+#define SL_CLI_NVM3_KEY_BEGIN    (0x3000)                                                            ///< sl cli nvm3 key begin
+#define SL_CLI_NVM3_KEY_END      (SL_CLI_NVM3_KEY_BEGIN + SL_CLI_NVM3_KEY_COUNT)                     ///< sl cli nvm3 key end
 
 // Defines for return types
-#define SL_CLI_INPUT_ORDINARY   (0U)   // Ordinary text or non-special characters
-#define SL_CLI_INPUT_RETURN     (1U)   // RETURN ('\r')
-#define SL_CLI_INPUT_ESCAPE     (2U)   // escape character (0xb)
-#define SL_CLI_INPUT_ARROW      (3U)   // Must follow escape character. (0x5b)
+#define SL_CLI_INPUT_ORDINARY   (0U)   ///< Ordinary text or non-special characters
+#define SL_CLI_INPUT_RETURN     (1U)   ///< RETURN character
+#define SL_CLI_INPUT_ESCAPE     (2U)   ///< escape character (0xb)
+#define SL_CLI_INPUT_ARROW      (3U)   ///< Must follow escape character. (0x5b)
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 #if defined(SL_CATALOG_CLI_DELAY_PRESENT)
@@ -135,7 +135,7 @@ typedef struct {
 } sl_cli_command_group_t;
 
 // Distinguishing different input types
-typedef uint8_t sl_cli_input_type_t;
+typedef uint8_t sl_cli_input_type_t;               ///< sl cli input type t
 
 /// @brief Struct representing an instance of the CLI.
 typedef struct sl_cli {
@@ -164,14 +164,14 @@ typedef struct sl_cli {
   uint32_t loop_delay_tick;                    ///< A delay in the CLI task loop in ticks.
 #else
   int input_char;                              ///< A buffer that may contain the last input character.
-  bool block_sleep;
+  bool block_sleep;                            ///< Block sleep
 #if defined(SL_CATALOG_CLI_DELAY_PRESENT)
   cli_delay_t cli_delay;                       ///< Instance data for the CLI delay function.
 #endif
 #endif
 } sl_cli_t;
 
-typedef sl_cli_t *sl_cli_handle_t;
+typedef sl_cli_t *sl_cli_handle_t;             ///< sl cli handle t
 
 /// @brief The structure defining the parameters for creating a CLI instance.
 typedef struct {

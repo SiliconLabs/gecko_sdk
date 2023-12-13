@@ -17,7 +17,6 @@
 
 #include "app/framework/include/af.h"
 #include "simple-metering-server.h"
-#include "simple-metering-test.h"
 
 #include  "sl_cli.h"
 

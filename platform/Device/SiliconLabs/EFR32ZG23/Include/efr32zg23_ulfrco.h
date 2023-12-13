@@ -144,4 +144,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_ULFRCO */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_ULFRCO_H */
+#endif // EFR32ZG23_ULFRCO_H

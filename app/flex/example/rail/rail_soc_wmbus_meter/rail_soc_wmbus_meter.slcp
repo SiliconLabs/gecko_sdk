@@ -17,10 +17,7 @@ component:
       - inst0
   - id: rail_util_recommended
   - id: radio_config_wmbus_meter
-  - id: simple_led
-    instance:
-      - led0
-      - led1
+  - id: simple_rail_assistance
 #------------------- WMBUS --------------------------- 
   - id: sl_wmbus_support
 #------------Memory Protection Unit-------------------
@@ -44,6 +41,7 @@ requires:
   - name: radio_config_wmbus_meter_device_family_fgm23
     condition:
       - "device_family_fgm23"
+  - name: simple_led
 
 #----------------- Project files ---------------------
 include:

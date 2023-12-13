@@ -72,6 +72,10 @@ typedef enum {
   SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID        = 0x8E,
   /// This event is sent on frame receptions.
   SL_WISUN_MSG_RX_FRAME_IND_ID                    = 0x8F,
+  /// This event is sent on LFN Wake Up.
+  SL_WISUN_MSG_LFN_WAKE_UP_IND_ID                 = 0x90,
+  /// Indicate a multicast group registration finishes
+  SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID      = 0x91,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -140,9 +144,9 @@ typedef struct {
   /// Status of the indication
   uint32_t status;
   /// ID of the socket
-  uint32_t socket_id;
+  int32_t socket_id;
   /// IP address of the sender
-  sl_wisun_ip_address_t remote_address;
+  in6_addr_t remote_address;
   /// Port number of the sender
   uint16_t remote_port;
   /// Amount of received data
@@ -337,7 +341,7 @@ typedef struct {
   /// Status of the indication
   uint32_t status;
   /// ID of the socket
-  uint32_t socket_id;
+  int32_t socket_id;
   /// Amount of free space in the transmission buffer
   uint32_t socket_space_left;
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_socket_data_sent_ind_body_t;
@@ -496,6 +500,62 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_RX_FRAME_IND) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_LFN_WAKE_UP_IND sl_wisun_msg_lfn_wake_up_ind
+ * @{
+ ******************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the indication
+  uint32_t status;
+  /// Expected wake-up duration in microseconds
+  uint32_t wup_duration_us;
+  /// Expected time to next wake-up in microseconds.
+  uint64_t next_wup_us;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_lfn_wake_up_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_lfn_wake_up_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_lfn_wake_up_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_LFN_WAKE_UP_IND) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_LFN_MULTICAST_REG_IND sl_wisun_msg_lfn_multicast_reg_ind
+ * @{
+ ******************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the indication
+  uint32_t status;
+  /// Registered multicast IP address
+  in6_addr_t ip_address;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_lfn_multicast_reg_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_lfn_multicast_reg_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_lfn_multicast_reg_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_LFN_MULTICAST_REG_IND) */
+
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
 SL_PACK_START(1)
@@ -539,6 +599,10 @@ typedef struct {
     sl_wisun_msg_mode_switch_fallback_ind_body_t mode_switch_fallback;
     /// #SL_WISUN_MSG_RX_FRAME_IND_ID event data
     sl_wisun_msg_rx_frame_ind_body_t rx_frame;
+    /// #SL_WISUN_MSG_LFN_WAKE_UP_IND_ID event data
+    sl_wisun_msg_lfn_wake_up_ind_body_t lfn_wake_up;
+    /// #SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID event data
+    sl_wisun_msg_lfn_multicast_reg_ind_body_t lfn_multicast_reg;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

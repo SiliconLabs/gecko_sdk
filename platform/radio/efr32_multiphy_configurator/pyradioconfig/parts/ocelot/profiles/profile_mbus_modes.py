@@ -104,8 +104,8 @@ class profile_MBus_modes(object):
 
         #Xtal tolerance form spec is 15. The tolerance is reduced top optimize sensitivity and performance
         #Details available in https://jira.silabs.com/browse/MCUW_RADIO_CFG-1486
-        model.vars.rx_xtal_error_ppm.value_forced = 11
-        model.vars.tx_xtal_error_ppm.value_forced = 11
+        model.vars.rx_xtal_error_ppm.value_forced = 15
+        model.vars.tx_xtal_error_ppm.value_forced = 15
         # Baudrate from spec
         model.vars.baudrate_tol_ppm.value_forced = 100
 
@@ -113,11 +113,11 @@ class profile_MBus_modes(object):
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.Gaussian
         model.vars.shaping_filter_param.value_forced = 0.5
 
-        #Timing detection is tricky for this PHY due to the short preamble. We would prefer to use FDM0, however
-        #there is a bug that prevents this from working correctly with 4FSK. It makes sense that we have to
-        #optimize this a bit here for robust detection.
-        model.vars.symbols_in_timing_window.value_forced = 6
-        model.vars.timing_detection_threshold.value_forced = 10
+
+        # Switching to BCR to resolve false detects on OTA testing (see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2230)
+        model.vars.demod_select.value_forced = model.vars.demod_select.var_enum.BCR
+        model.vars.MODEM_BCRDEMODARR0_SCHPRDHI.value_forced = 2     # Empirically improves performance for 130% fdev
+        model.vars.MODEM_BCRDEMODAFC1_GEARSW.value_forced = 2       # Reduces inoperable regions across center frequency sweep at 70/130% fdev
 
     # Owner: Efrain Gaxiola
     # JIRA Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-179
@@ -289,8 +289,6 @@ class profile_MBus_modes(object):
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.Gaussian
         model.vars.shaping_filter_param.value_forced = 0.5
 
-        # Timing detection is tricky for this PHY due to the short preamble. We would prefer to use FDM0, however
-        # there is a bug that prevents this from working correctly with 4FSK. It makes sense that we have to
-        # optimize this a bit here for robust detection.
-        model.vars.symbols_in_timing_window.value_forced = 6
-        model.vars.target_osr.value_forced = 5
+        # Switching to BCR to resolve false detects on OTA testing (see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2230)
+        model.vars.demod_select.value_forced = model.vars.demod_select.var_enum.BCR
+        model.vars.bandwidth_hz.value_forced = 23000                # Widens sensitivity bathtub curve for 130% fdev to meet spec

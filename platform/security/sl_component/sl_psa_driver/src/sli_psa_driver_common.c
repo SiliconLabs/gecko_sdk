@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/***************************************************************************/ /**
  * @file
  * @brief PSA Driver common utility functions
  *******************************************************************************
@@ -30,27 +30,36 @@
 
 #include "sli_psa_driver_common.h"
 
-#include "psa/crypto.h"
+#include "constant_time_internal.h"
+#include "constant_time_impl.h"
+
+//------------------------------------------------------------------------------
+// Function definitions
 
 psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
                                             size_t padded_data_length,
-                                            uint8_t padding_bytes)
+                                            size_t *padding_bytes)
 {
-  // Check that the last padding byte is valid.
-  // Note that the below checks are valid for both partial block padding
-  // and complete padding blocks.
-  size_t invalid_padding = 0;
-  invalid_padding |= (padding_bytes > padded_data_length);
-  invalid_padding |= (padding_bytes == 0);
+  size_t i, pad_idx;
+  unsigned char padding_len;
 
-  // Check that every padding byte is correct (equal to padding_bytes)
-  size_t pad_index = padded_data_length - padding_bytes;
-  for (size_t i = 0; i < padded_data_length; ++i) {
-    // The number of checks should be independent of padding_bytes,
-    // so use pad_index instead to make the result zero for non-padding
-    // bytes in out_buf.
-    invalid_padding |= (padded_data[i] ^ padding_bytes) * (i >= pad_index);
+  padding_len = padded_data[padded_data_length - 1];
+  *padding_bytes = padding_len;
+
+  mbedtls_ct_condition_t bad =
+    mbedtls_ct_uint_gt(padding_len, padded_data_length);
+  bad = mbedtls_ct_bool_or(bad, mbedtls_ct_uint_eq(padding_len, 0));
+
+  // The number of bytes checked must be independent of padding_len, so pick
+  // input_len, which is 16 bytes (one block) for our use cases.
+  pad_idx = padded_data_length - padding_len;
+  for (i = 0; i < padded_data_length; i++) {
+    mbedtls_ct_condition_t in_padding = mbedtls_ct_uint_ge(i, pad_idx);
+    mbedtls_ct_condition_t different =
+      mbedtls_ct_uint_ne(padded_data[i], padding_len);
+    bad = mbedtls_ct_bool_or(bad, mbedtls_ct_bool_and(in_padding, different));
   }
 
-  return invalid_padding ? PSA_ERROR_INVALID_PADDING : PSA_SUCCESS;
+  return (psa_status_t)mbedtls_ct_error_if_else_0(bad,
+                                                  PSA_ERROR_INVALID_PADDING);
 }

@@ -35,11 +35,9 @@
 #include "em_system.h"
 #include "sl_component_catalog.h"
 #include "app_process.h"
-#include "app_assert.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "rail.h"
 #include "sl_simple_button_instances.h"
-#include "sl_simple_led_instances.h"
 #include "sl_flex_packet_asm.h"
 #ifdef SL_CATALOG_FLEX_IEEE802154_SUPPORT_PRESENT
   #include "sl_flex_util_802154_protocol_types.h"
@@ -155,7 +153,7 @@ sl_flex_ieee802154_status_t comm_status = {
   .destination_address = 0,
   .destination_pan_id = 0,
   .source_address = 0,
-  .std = SL_FLEX_UTIL_INIT_PROTOCOL_INSTANCE_DEFAULT
+  .std = (sl_flex_ieee802154_std_t)SL_FLEX_UTIL_INIT_PROTOCOL_INSTANCE_DEFAULT
 };
 #endif
 // -----------------------------------------------------------------------------
@@ -281,9 +279,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
         rail_packet_sent = false;
         app_log_info("Packet has been sent\n");
         // toggle when the TX packet sent
-#if defined(SL_CATALOG_LED1_PRESENT)
-        sl_led_toggle(&sl_led_led1);
-#endif
+        toggle_send_led();
       }
 
       if (rail_packet_received) {
@@ -319,9 +315,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
     case S_RECEIVE:
       // receive the packet for IEEE 802.15.4 and BLE standards
       handle_receive(rail_handle);
-#if defined(SL_CATALOG_LED0_PRESENT)
-      sl_led_toggle(&sl_led_led0);
-#endif
+      toggle_receive_led();
       start_rx = true;
       state = S_IDLE;
 #if defined(SL_CATALOG_KERNEL_PRESENT)

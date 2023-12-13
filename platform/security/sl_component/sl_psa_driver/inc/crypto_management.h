@@ -45,14 +45,11 @@
  * \{
  ******************************************************************************/
 
-#include <mbedtls/build_info.h>
-
-#include <stdlib.h>
-
 #include "em_device.h"
 
 #if defined(CRYPTO_PRESENT)
 #include "em_crypto.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -938,4 +938,4 @@ typedef struct {
 /** @} End of group EFR32BG21_IADC */
 /** @} End of group Parts */
 
-#endif /* EFR32BG21_IADC_H */
+#endif // EFR32BG21_IADC_H

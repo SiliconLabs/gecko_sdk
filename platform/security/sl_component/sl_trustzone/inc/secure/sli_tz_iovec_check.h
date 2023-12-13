@@ -33,6 +33,7 @@
 
 #include "sli_tz_iovec.h"
 #include "sl_assert.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 #if defined(TZ_SERVICE_PSA_ITS_PRESENT) || defined(TZ_SERVICE_NVM3_PRESENT)
@@ -54,16 +55,32 @@ extern "C" {
 
 /**
  * \brief Validate the number of IOVECs passed.
+ *
+ * Potentially apply FI hardening.
  */
-#define SLI_TZ_IOVEC_ASSERT_N_IOVECS(expected_invecs, expected_outvecs) \
-  EFM_ASSERT(in_len == expected_invecs);                                \
-  EFM_ASSERT(out_len == expected_outvecs);
+#define SLI_TZ_IOVEC_ASSERT_N_IOVECS(expected_invecs, expected_outvecs, error_code) \
+  do {                                                                              \
+    if ((in_len != expected_invecs) || (out_len != expected_outvecs)) {             \
+      return error_code;                                                            \
+    }                                                                               \
+  } while (0)
 
 /**
  * \brief Validate the number of IOVECs passed.
+ *
+ * Potentially apply FI hardening.
  */
-#define SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec, expected_struct_type) \
+#if defined(SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE_AND_RETURN_ERROR_CODE)
+  #define SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec, expected_struct_type, error_code) \
+  do {                                                                             \
+    if (iovec.len == sizeof(expected_struct_type)) {                               \
+      return error_code;                                                           \
+    }                                                                              \
+  } while (0)
+#else
+  #define SLI_TZ_IOVEC_ASSERT_STRUCT_SIZE(iovec, expected_struct_type, error_code) \
   EFM_ASSERT(iovec.len == sizeof(expected_struct_type));
+#endif
 
 //------------------------------------------------------------------------------
 // Typedefs

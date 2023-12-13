@@ -314,7 +314,9 @@ static void processAppEvent(EmberGpd_t * gpd, GpdAppEventActionType *appAction)
       gpdDebugPrintf("Decomm Cmd : ");
     } else if (*appAction == APP_EVENT_ACTION_SEND_COMMISSION) {
       emberGpdAfPluginCommission(gpd);
-      emberGpdStoreSecDataToNV(gpd);
+      if (gpd->gpdState > EMBER_GPD_APP_STATE_NOT_COMMISSIONED) {
+        emberGpdStoreSecDataToNV(gpd);
+      }
       gpdDebugPrintf("Comm. Cmd : ");
     } else if (*appAction == APP_EVENT_ACTION_SEND_REPORT) {
       sendReport(gpd);

@@ -224,4 +224,4 @@ typedef struct {
 /** @} End of group BGM22_DPLL */
 /** @} End of group Parts */
 
-#endif /* BGM22_DPLL_H */
+#endif // BGM22_DPLL_H

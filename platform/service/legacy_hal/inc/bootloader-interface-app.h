@@ -106,9 +106,12 @@ void halAppBootloaderImageIsValidReset(void);
 ///
 uint16_t halAppBootloaderImageIsValid(void);
 
-/** @brief Invokes the bootloader to install the application in storage.
+/**
+ * @brief Invokes the bootloader to install the application in storage.
  *  This function resets the device to start the bootloader code and
  *  does not return!
+ *
+ * @return This function does not return!
  */
 EmberStatus halAppBootloaderInstallNewImage(void);
 
@@ -218,17 +221,24 @@ uint8_t halAppBootloaderWriteDownloadSpace(uint16_t pageToBeWritten,
  */
 uint8_t halAppBootloaderGetImageData(uint32_t *timestamp, uint8_t *userData);
 
-/** @brief Returns the application bootloader version.
+/**
+ * @brief Returns the application bootloader version.
+ *
+ * @return version of application bootloader.
  */
 uint16_t halAppBootloaderGetVersion(void);
 
-/** @brief Returns the recovery image version.
+/**
+ * @brief Returns the recovery image version.
+ *
+ * @return version of the recovery image.
  */
 uint16_t halAppBootloaderGetRecoveryVersion(void);
 
-/** @brief Return a value indicating whether the app bootloader supports IBRs
+/**
+ * @brief Return a value indicating whether the app bootloader supports IBRs.
  *
- *  @return true if the app bootloader supports IBRs, false otherwise
+ *  @return true if the app bootloader supports IBRs, false otherwise.
  */
 bool halAppBootloaderSupportsIbr(void);
 

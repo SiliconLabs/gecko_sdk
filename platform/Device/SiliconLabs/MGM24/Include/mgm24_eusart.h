@@ -1316,4 +1316,4 @@ typedef struct {
 /** @} End of group MGM24_EUSART */
 /** @} End of group Parts */
 
-#endif /* MGM24_EUSART_H */
+#endif // MGM24_EUSART_H

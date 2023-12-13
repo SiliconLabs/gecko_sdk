@@ -1956,7 +1956,7 @@ template_contribution:
         - type: int32
           help: "delayUs: when to cancel it"
         - type: uint8opt
-          help: "stopMode: [0=RAIL_Idle] >0=RAIL_StopMode_t"
+          help: "stopMode: [0=RAIL_IDLE_ABORT] 1-3=RAIL_StopMode_t\\n                                         4-7=4+RAIL_IdleMode_t"
 
   - name: cli_command
     value:

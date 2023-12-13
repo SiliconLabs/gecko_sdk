@@ -56,16 +56,10 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         dec1_actual = model.vars.dec1_actual.value
         dec2_actual = model.vars.dec2_actual.value
         src2ratio_actual = model.vars.src2_ratio_actual.value
-        subfrac_actual = model.vars.subfrac_actual.value
         rxbrfrac_actual = model.vars.rxbrfrac_actual.value
 
-        if subfrac_actual > 0:
-            frac = subfrac_actual
-        else:
-            frac = rxbrfrac_actual
-
         # Calculate actual baudrate once the ADC, decimator, SRC, and rxbr settings are kown
-        baudrate_actual = (adc_freq * src2ratio_actual) / (dec0_actual * dec1_actual * dec2_actual * 8 * 2 * frac)
+        baudrate_actual = (adc_freq * src2ratio_actual) / (dec0_actual * dec1_actual * dec2_actual * 8 * 2 * rxbrfrac_actual)
 
         # Load local variables back into model variables
         model.vars.rx_baud_rate_actual.value = baudrate_actual

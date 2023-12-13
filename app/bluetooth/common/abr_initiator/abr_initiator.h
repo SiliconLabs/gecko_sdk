@@ -34,6 +34,10 @@
 #include "sl_rtl_clib_api.h"
 #include "abr_initiator_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*******************************************************************************
  ********************************  TYPEDEFS  ***********************************
  ******************************************************************************/
@@ -58,6 +62,11 @@ void abr_initiator_init(abr_result_cb_t result_cb,
                         abr_initiator_config_t *initiator_config);
 
 /**************************************************************************//**
+ * ABR initiator deinit
+ *****************************************************************************/
+void abr_initiator_deinit(void);
+
+/**************************************************************************//**
  * ABR initiator public function that configures and enables the radio
  * and starts scanning.
  *****************************************************************************/
@@ -68,5 +77,48 @@ void abr_initiator_enable(void);
  * @param[in] evt Event coming from the Bluetooth stack.
  *****************************************************************************/
 void bt_on_event_initiator(sl_bt_msg_t *evt);
+
+/**************************************************************************//**
+ * Periodically called step function.
+ *****************************************************************************/
+void abr_initiator_step(void);
+
+/**************************************************************************//**
+ * Initialize RTL library.
+ * @param[in] handle RTL library item handle.
+ * @param[in] abr_mode Specifying ABR method.
+ *****************************************************************************/
+void abr_rtl_library_init(sl_rtl_abr_libitem *handle, uint8_t abr_mode);
+
+/**************************************************************************//**
+ * Process a channel sounding result event from the initiator.
+ * @param[in] evt_cs_result sl.bt.cs.result package.
+ * @return true if it is necessary to restart the cs procedure.
+ *****************************************************************************/
+bool abr_process_initiator_cs_result(sl_bt_evt_cs_result_t *evt_cs_result);
+
+/**************************************************************************//**
+ * Process a channel sounding result event from the reflector.
+ * @param[in] evt_cs_result sl.bt.cs.result package.
+ * @param[in] initiator_connection Initiator connection handle from BLE stack.
+ * @return true if it is necessary to restart the cs procedure.
+ *****************************************************************************/
+bool abr_process_reflector_cs_result(sl_bt_evt_cs_result_t *evt_cs_result, uint8_t initiator_connection);
+
+/**************************************************************************//**
+ * Get Board Name from target.
+ * Antenna switching should only work on BRD4406A.
+ * @return true if the board the target is running on is BRD4406A.
+ *****************************************************************************/
+bool abr_initiator_decide_antenna_switching();
+
+/**************************************************************************//**
+ * Get antenna offset value from target.
+ *****************************************************************************/
+void abr_set_antenna_offset();
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif // ABR_INITIATOR_H

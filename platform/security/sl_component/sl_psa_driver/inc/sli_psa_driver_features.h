@@ -260,70 +260,106 @@
 // -------------------------------------
 // Elliptic curve cryptography
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
   && defined(PSA_WANT_ECC_SECP_R1_192)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P192R1
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_SECP_R1_224)          \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_SECP_R1_224)                 \
   && !defined(SLI_MBEDTLS_DEVICE_HSE_V1)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P224R1
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
   && defined(PSA_WANT_ECC_SECP_R1_256)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P256R1
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_SECP_R1_384)          \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_SECP_R1_384)                 \
   && defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P384R1
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_SECP_R1_521)          \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_SECP_R1_521)                 \
   && defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P521R1
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_MONTGOMERY_255)       \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_SECP_K1_256)                 \
+  && defined(SLI_MBEDTLS_DEVICE_VSE)
+  #define SLI_PSA_DRIVER_FEATURE_ECC
+  #define SLI_PSA_DRIVER_FEATURE_SECPK1
+  #define SLI_PSA_DRIVER_FEATURE_P256K1
+#endif
+
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_MONTGOMERY_255)              \
   && defined(SLI_MBEDTLS_DEVICE_HSE)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_MONTGOMERY
   #define SLI_PSA_DRIVER_FEATURE_CURVE25519
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_MONTGOMERY_448)       \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_MONTGOMERY_448)              \
   && defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_MONTGOMERY
   #define SLI_PSA_DRIVER_FEATURE_CURVE448
 #endif
 
-#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
-  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
-  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)  \
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
+  || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
+  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)         \
   && defined(SLI_MBEDTLS_DEVICE_HSE)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_EDWARDS
@@ -343,7 +379,8 @@
 // Signature
 
 #if defined(PSA_WANT_ALG_ECDSA) && defined(MBEDTLS_PSA_ACCEL_ALG_ECDSA) \
-  && defined(SLI_PSA_DRIVER_FEATURE_SECPR1)
+  && (defined(SLI_PSA_DRIVER_FEATURE_SECPR1)                            \
+  || defined(SLI_PSA_DRIVER_FEATURE_SECPK1))
   #define SLI_PSA_DRIVER_FEATURE_SIGNATURE
   #define SLI_PSA_DRIVER_FEATURE_ECDSA
 #endif

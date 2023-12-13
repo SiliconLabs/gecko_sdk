@@ -26,6 +26,7 @@ source:
   - path: platform/service/token_manager/src/sl_token_def.c
   - path: platform/service/token_manager/src/sl_token_manager.c
   - path: platform/service/token_manager/src/sl_token_manufacturing.c
+  - path: platform/service/token_manager/src/sl_token_manufacturing_generic.c
 include:
   - path: platform/service/token_manager/inc
     file_list:
@@ -36,6 +37,7 @@ include:
       - path: sl_token_manufacturing_api.h
       - path: sl_token_manufacturing_series_1.h
       - path: sl_token_manufacturing_series_2.h
+      - path: sl_token_manufacturing_generic.h
 template_contribution:
   - name: component_catalog
     value: token_manager

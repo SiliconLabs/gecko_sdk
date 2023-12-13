@@ -249,6 +249,7 @@ sl_status_t sli_zigbee_zdo_handle_clear_all_bindings_req(Buffer request,
  * successful or if an error status needs to be sent back.
  */
 sl_status_t sli_zigbee_zdo_handle_retrieve_authentication_token_rsp(Buffer response,
+                                                                    EmberApsFrame *apsFrame,
                                                                     uint8_t payload_index,
                                                                     EmberNodeId source);
 
@@ -291,11 +292,11 @@ void sl_zigbee_retrieve_authentication_token(EmberNodeId destination,
 /**
  * @brief sends a security challenge request out over the air
  * @param destShort the short id of the message destination
- * @param keyToChallenge the key data being challenged (synchronized)
+ * @param context Reference to the key being challenged (synchronized)
  * @return A valid sl_status_t
  */
 sl_status_t sl_zigbee_send_security_challenge_request(EmberNodeId destShort,
-                                                      EmberKeyData *keyToChallenge);
+                                                      sl_zb_sec_man_context_t *context);
 /**
  * @brief handles an incoming security challenge by validating the contents
  * and issuing a response

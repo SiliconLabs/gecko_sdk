@@ -150,7 +150,7 @@ sl_status_t sl_wisun_util_connect(const uint8_t * network_name)
   sl_wisun_phy_config_t phy_config;
 
   status = sl_wisun_util_get_phy_config(&phy_config);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, status);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(status == SL_STATUS_OK, SL_STATUS_FAIL);
 
   status = sl_wisun_join(network_name, &phy_config);
 

@@ -1,6 +1,15 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 
+# Regex fields to match registers used for OFDM in concurrent mode
+# To be used in concurrent_phy decorators
+concurrent_ofdm_regfield_list = [
+    '(?!AGC_ANTDIV_GAINMODE)(AGC_.*)',  # (?!REG1)(REG2) matches REG2 and not REG1
+    'FEFILT1_*',
+    'SUNOFDM_*',
+    'TXFRONT_*',
+    'RAC_PGACTRL_PGABWMODE']
+
 def build_modem_regs_sol_only(model, profile):
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL5_INTOSR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL5.INTOSR'           ))
@@ -403,6 +412,9 @@ def build_modem_regs_sol_only(model, profile):
 
     #FRC Spare
     profile.outputs.append(ModelOutput(model.vars.FRC_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.SPARE.SPARE'))
+
+    #SMCTRL
+    profile.outputs.append(ModelOutput(model.vars.SMCTRL_TXDONE_TXDONE, '', ModelOutputType.SVD_REG_FIELD, readable_name='SMCTRL.TXDONE.TXDONE'))
 	
 	# Add SPARE register for ECO fix for DEC1 gain log2 calculation
     profile.outputs.append(ModelOutput(model.vars.MODEM_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SPARE.SPARE'))

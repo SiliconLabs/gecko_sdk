@@ -9,7 +9,7 @@ class RM_Register_RFCRC_S_IPVERSION(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_IPVERSION, self).__init__(rmio, label,
-            0xa8010000, 0x000,
+            0xa0210000, 0x000,
             'IPVERSION', 'RFCRC_S.IPVERSION', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -25,7 +25,7 @@ class RM_Register_RFCRC_S_EN(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_EN, self).__init__(rmio, label,
-            0xa8010000, 0x004,
+            0xa0210000, 0x004,
             'EN', 'RFCRC_S.EN', 'read-write',
             u"",
             0x00000000, 0x00000001,
@@ -41,7 +41,7 @@ class RM_Register_RFCRC_S_CTRL(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_CTRL, self).__init__(rmio, label,
-            0xa8010000, 0x008,
+            0xa0210000, 0x008,
             'CTRL', 'RFCRC_S.CTRL', 'read-write',
             u"",
             0x00000704, 0x00001FEF,
@@ -71,7 +71,7 @@ class RM_Register_RFCRC_S_STATUS(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_STATUS, self).__init__(rmio, label,
-            0xa8010000, 0x00C,
+            0xa0210000, 0x00C,
             'STATUS', 'RFCRC_S.STATUS', 'read-only',
             u"",
             0x00000000, 0x00000001,
@@ -87,7 +87,7 @@ class RM_Register_RFCRC_S_CMD(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_CMD, self).__init__(rmio, label,
-            0xa8010000, 0x010,
+            0xa0210000, 0x010,
             'CMD', 'RFCRC_S.CMD', 'write-only',
             u"",
             0x00000000, 0x00000001,
@@ -103,7 +103,7 @@ class RM_Register_RFCRC_S_INPUTDATA(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_INPUTDATA, self).__init__(rmio, label,
-            0xa8010000, 0x014,
+            0xa0210000, 0x014,
             'INPUTDATA', 'RFCRC_S.INPUTDATA', 'write-only',
             u"",
             0x00000000, 0x0000FFFF,
@@ -119,7 +119,7 @@ class RM_Register_RFCRC_S_INIT(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_INIT, self).__init__(rmio, label,
-            0xa8010000, 0x018,
+            0xa0210000, 0x018,
             'INIT', 'RFCRC_S.INIT', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -135,7 +135,7 @@ class RM_Register_RFCRC_S_DATA(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_DATA, self).__init__(rmio, label,
-            0xa8010000, 0x01C,
+            0xa0210000, 0x01C,
             'DATA', 'RFCRC_S.DATA', 'read-only',
             u"",
             0x00000000, 0xFFFFFFFF,
@@ -151,7 +151,7 @@ class RM_Register_RFCRC_S_POLY(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
         super(RM_Register_RFCRC_S_POLY, self).__init__(rmio, label,
-            0xa8010000, 0x020,
+            0xa0210000, 0x020,
             'POLY', 'RFCRC_S.POLY', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,

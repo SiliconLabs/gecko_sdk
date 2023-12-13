@@ -47,13 +47,6 @@ include:
     file_list:
       - path: events.h
 configuration:
-  # Version numbers are equal to ZAF_VERSION_MAJOR, ZAF_VERSION_MINOR, ZAF_VERSION_PATCH
-  - name: APP_VERSION
-    value: 10
-  - name: APP_REVISION
-    value: 20
-  - name: APP_PATCH
-    value: 2
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
@@ -91,7 +84,7 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2    
+    value: 0    # UART RX shouldn't prevent EM2
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY
@@ -147,7 +140,7 @@ define:
     value: <application_properties_config.h>
   - name: FILE_ID_APPLICATIONDATA # File identifiers for application file system
     value: "0x00000" # Range: 0x00000 - 0x0FFFF
-    
+
 other_file:
   - path: ../../DevTools/postbuild.sh
 

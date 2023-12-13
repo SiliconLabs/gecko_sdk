@@ -441,10 +441,10 @@ static void em_EM2_LfrcoSYSRTC(bool powerdown_ram)
   CMU_ClockEnable(cmuClock_SYSRTC, true);
 
   // Setup RTC parameters.
-  sl_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
+  sl_hal_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
 
   // Initialize RTC.
-  sl_sysrtc_init(&sysrtc_config);
+  sl_hal_sysrtc_init(&sysrtc_config);
 
   // Power down all RAM blocks except block 1
   if (powerdown_ram) {
@@ -476,10 +476,10 @@ static void em_EM2_LfxoSYSRTC(bool powerdown_ram)
   CMU_ClockEnable(cmuClock_SYSRTC, true);
 
   // Setup RTC parameters.
-  sl_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
+  sl_hal_sysrtc_config_t sysrtc_config = SYSRTC_CONFIG_DEFAULT;
 
   // Initialize RTC.
-  sl_sysrtc_init(&sysrtc_config);
+  sl_hal_sysrtc_init(&sysrtc_config);
 
   // Power down all RAM blocks except block 1
   if (powerdown_ram) {

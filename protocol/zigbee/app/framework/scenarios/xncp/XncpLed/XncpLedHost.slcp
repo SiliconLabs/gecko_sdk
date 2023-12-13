@@ -1,34 +1,34 @@
-project_name: "XncpLedHost"
-label: "Zigbee - Host XncpLedHost"
-package: "Zigbee"
-category: "Zigbee Host Application"
-quality: "production"
-
-description: >
-  This is a demonstration of a UNIX HOST controlling an LED on an NCP.
-author: "Silicon Laboratories, Inc."
+project_name: XncpLedHost
+label: Zigbee - Host XncpLedHost
+package: Zigbee
+category: Zigbee Host Application
+quality: production
+description: This is a demonstration of a UNIX HOST controlling an LED on an NCP.
+author: Silicon Laboratories, Inc.
 
 component:
-  - id: "cli"
+  - id: cli
     instance:
-    - example
-  - id: "native"
-  - id: "iostream_stdio"
-  - id: "zigbee_address_table"
-  - id: "zigbee_concentrator"
-  - id: "zigbee_counters"
-  - id: "zigbee_ezsp"
-  - id: "zigbee_ezsp_uart"
-  - id: "zigbee_file_descriptor_dispatch"
-  - id: "zigbee_form_and_join"
-  - id: "zigbee_gateway"
-  - id: "zigbee_identify"
-  - id: "zigbee_identify_feedback"
-  - id: "zigbee_ncp_configuration"
-  - id: "zigbee_network_find"
-  - id: "zigbee_price_common"
-  - id: "zigbee_zcl_framework_core"
-  - id: "zigbee_debug_print"  
+      - example
+  - id: native
+  - id: iostream_stdio
+  - id: zigbee_address_table
+  - id: zigbee_concentrator
+  - id: zigbee_counters
+  - id: zigbee_ezsp
+  - id: zigbee_ezsp_uart
+  - id: zigbee_file_descriptor_dispatch
+  - id: zigbee_form_and_join
+  - id: zigbee_gateway
+  - id: zigbee_identify
+  - id: zigbee_identify_feedback
+  - id: zigbee_ncp_configuration
+  - id: zigbee_network_find
+  - id: zigbee_price_common
+  - id: zigbee_zcl_framework_core
+  - id: zigbee_zcl_cli
+  - id: zigbee_core_cli
+  - id: zigbee_debug_print
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
@@ -42,19 +42,19 @@ configuration:
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
     value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_HA
   - name: SL_CLI_PROMPT_STRING
-    value:  "\"XncpLedHost>\""
+    value: "\"XncpLedHost>\""
 
 source:
-  - path: "main.c"
-  - path: "app.c"
+  - path: main.c
+  - path: app.c
 
 config_file:
-  - path: "config/zcl/zcl_config.zap"
+  - path: config/zcl/zcl_config.zap
     file_id: zap_configuration_file_id
-    directory: "zcl"
+    directory: zcl
 
 include:
-  - path: "./"
+  - path: ./
   - path: ../../../../ncp/sample-app/xncp-led
     file_list:
       - path: led-protocol.h
@@ -76,7 +76,7 @@ template_contribution:
       handler: setLedCommand
       help: Set the state of an LED on the NCP using a custom LED protocol command.
       argument:
-      - type: uint8
+        - type: uint8
   - name: cli_command
     value:
       group: custom
@@ -90,7 +90,7 @@ template_contribution:
       handler: setFrequencyCommand
       help: Set the frequency of the LED strobe on the NCP.
       argument:
-      - type: uint32
+        - type: uint32
   - name: cli_command
     value:
       group: custom
@@ -107,9 +107,9 @@ ui_hints:
       focus: false
 
 filter:
-  - name: "Wireless Technology"
-    value: ["Zigbee"]
-  - name: "Device Type"
-    value: ["Host"]
-  - name: "Project Difficulty"
-    value: ["Advanced"]
+  - name: Wireless Technology
+    value: [Zigbee]
+  - name: Device Type
+    value: [Host]
+  - name: Project Difficulty
+    value: [Advanced]

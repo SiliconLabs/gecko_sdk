@@ -1550,4 +1550,4 @@ typedef struct {
 /** @} End of group FGM23_PRS */
 /** @} End of group Parts */
 
-#endif /* FGM23_PRS_H */
+#endif // FGM23_PRS_H

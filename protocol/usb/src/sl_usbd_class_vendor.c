@@ -544,6 +544,115 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t        class_nbr,
 }
 #endif
 
+
+/****************************************************************************************************//**
+ * Abort read bulk transfer.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_read_bulk(uint8_t class_nbr)
+{
+  sli_usbd_vendor_ctrl_t *p_ctrl;
+  bool                    conn;
+  sl_status_t             status;
+
+  sl_usbd_vendor_is_enabled(class_nbr, &conn);
+
+  // Chk class state.
+  if (conn != true) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Get Vendor class instance ctrl struct.
+  p_ctrl = &usbd_vendor.ctrl_table[class_nbr];
+
+  status = sl_usbd_core_abort_endpoint(p_ctrl->comm_ptr->data_bulk_out_endpoint_address);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/****************************************************************************************************//**
+ * Abort write bulk transfer.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_write_bulk(uint8_t class_nbr)
+{
+  sli_usbd_vendor_ctrl_t *p_ctrl;
+  bool                    conn;
+  sl_status_t             status;
+
+  sl_usbd_vendor_is_enabled(class_nbr, &conn);
+
+  // Chk class state.
+  if (conn != true) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Get Vendor class instance ctrl struct.
+  p_ctrl = &usbd_vendor.ctrl_table[class_nbr];
+
+  status = sl_usbd_core_abort_endpoint(p_ctrl->comm_ptr->data_bulk_in_endpoint_address);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/****************************************************************************************************//**
+ * Abort read interrupt transfer.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_read_interrupt(uint8_t class_nbr)
+{
+  sli_usbd_vendor_ctrl_t *p_ctrl;
+  bool                    conn;
+  sl_status_t             status;
+
+  sl_usbd_vendor_is_enabled(class_nbr, &conn);
+
+  // Chk class state.
+  if (conn != true) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Get Vendor class instance ctrl struct.
+  p_ctrl = &usbd_vendor.ctrl_table[class_nbr];
+
+  status = sl_usbd_core_abort_endpoint(p_ctrl->comm_ptr->interrupt_out_endpoint_address);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/****************************************************************************************************//**
+ * Abort write interrupt transfer.
+ *******************************************************************************************************/
+sl_status_t sl_usbd_vendor_abort_write_interrupt(uint8_t class_nbr)
+{
+  sli_usbd_vendor_ctrl_t *p_ctrl;
+  bool                    conn;
+  sl_status_t             status;
+
+  sl_usbd_vendor_is_enabled(class_nbr, &conn);
+
+  // Chk class state.
+  if (conn != true) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Get Vendor class instance ctrl struct.
+  p_ctrl = &usbd_vendor.ctrl_table[class_nbr];
+
+  status = sl_usbd_core_abort_endpoint(p_ctrl->comm_ptr->interrupt_in_endpoint_address);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return SL_STATUS_OK;
+}
+
 /****************************************************************************************************//**
  * Receive the data from the host through the Bulk OUT endpoint
  *******************************************************************************************************/

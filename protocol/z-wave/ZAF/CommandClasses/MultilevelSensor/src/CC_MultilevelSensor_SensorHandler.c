@@ -39,7 +39,7 @@
 //                Static Variables
 // -----------------------------------------------------------------------------
 /**< SENSOR_ADMINISTRATION instance which holds the registered sensor interface references. */
-static sensor_administration_t sensor_administrator;
+static sensor_administration_t sensor_administrator = { 0 };
 // -----------------------------------------------------------------------------
 //              Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -122,7 +122,7 @@ cc_multilevel_sensor_get_interface(uint8_t sensor_type_value, sensor_interface_t
   {
     retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
-  
+
 
     return retval;
 }
@@ -152,7 +152,7 @@ cc_multilevel_sensor_get_supported_scale(uint8_t sensor_type_value , uint8_t* o_
   {
     retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
-  
+
 
     return retval;
 }
@@ -182,7 +182,7 @@ cc_multilevel_sensor_get_supported_sensors(uint8_t* o_supported_sensor_buffer)
   {
     retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
-  
+
 
   return retval;
 }
@@ -216,8 +216,8 @@ cc_multilevel_sensor_registration(sensor_interface_t* i_new_sensor)
   {
     retval = CC_MULTILEVEL_SENSOR_RETURN_VALUE_ERROR;
   }
-  
-  
+
+
   return retval;
 }
 
@@ -234,7 +234,7 @@ cc_multilevel_sensor_init_iterator(sensor_interface_iterator_t** i_iterator)
   {
     *i_iterator = sensor_administrator.registrated_sensors[0];
   }
-  
+
 
   return retval;
 }
@@ -274,7 +274,7 @@ cc_multilevel_sensor_next_iterator(sensor_interface_iterator_t** i_iterator)
       {
         *i_iterator = sensor_administrator.registrated_sensors[current_interface_ix + 1];
       }
-    }     
+    }
   }
   else
   {

@@ -55,9 +55,6 @@ requires:
     condition: [psa_crypto_sha384]
   - name: mbedtls_sha512
     condition: [psa_crypto_sha512]
-# Will not become compatible until upper layer TLS code only uses PSA APIs.
-conflicts:
-  - name: tz_secure_key_library_ns
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_SSL_TLS_C

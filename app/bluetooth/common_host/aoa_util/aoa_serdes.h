@@ -40,7 +40,7 @@
  * @param[in] iq_report IQ report data structure.
  * @param[out] str Pointer to the string buffer, should be freed after use.
  ******************************************************************************/
-sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char** str);
+sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char **str);
 
 /***************************************************************************//**
  * Deserialize IQ report data structure from string.
@@ -48,7 +48,7 @@ sl_status_t aoa_serialize_iq_report(aoa_iq_report_t *iq_report, char** str);
  * @param[in] str String buffer.
  * @param[out] iq_report IQ report data structure.
  ******************************************************************************/
-sl_status_t aoa_deserialize_iq_report(char* str, aoa_iq_report_t *iq_report);
+sl_status_t aoa_deserialize_iq_report(char *str, aoa_iq_report_t *iq_report);
 
 /***************************************************************************//**
  * Serialize angle data structure into string.
@@ -56,7 +56,7 @@ sl_status_t aoa_deserialize_iq_report(char* str, aoa_iq_report_t *iq_report);
  * @param[in] angle Angle data structure.
  * @param[out] str Pointer to the string buffer, should be freed after use.
  ******************************************************************************/
-sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char** str);
+sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char **str);
 
 /***************************************************************************//**
  * Deserialize angle data structure from string.
@@ -64,7 +64,7 @@ sl_status_t aoa_serialize_angle(aoa_angle_t *angle, char** str);
  * @param[in] str String buffer.
  * @param[out] angle Angle data structure.
  ******************************************************************************/
-sl_status_t aoa_deserialize_angle(char* str, aoa_angle_t *angle);
+sl_status_t aoa_deserialize_angle(char *str, aoa_angle_t *angle);
 
 /***************************************************************************//**
  * Serialize position data structure into string.
@@ -72,7 +72,7 @@ sl_status_t aoa_deserialize_angle(char* str, aoa_angle_t *angle);
  * @param[in] position Position data structure.
  * @param[out] str Pointer to the string buffer, should be freed after use.
  ******************************************************************************/
-sl_status_t aoa_serialize_position(aoa_position_t *position, char** str);
+sl_status_t aoa_serialize_position(aoa_position_t *position, char **str);
 
 /***************************************************************************//**
  * Deserialize position data structure from string.
@@ -80,6 +80,6 @@ sl_status_t aoa_serialize_position(aoa_position_t *position, char** str);
  * @param[in] str String buffer.
  * @param[out] position Position data structure.
  ******************************************************************************/
-sl_status_t aoa_deserialize_position(char* str, aoa_position_t *position);
+sl_status_t aoa_deserialize_position(char *str, aoa_position_t *position);
 
 #endif // AOA_SERDES_H

@@ -58,6 +58,12 @@ static const osThreadAttr_t thread_hci_attr = {
   .priority = (osPriority_t) SL_BTCTRL_RTOS_HCI_TASK_PRIORITY
 };
 
+uint8_t sl_btctrl_hci_cpc_get_stack_space(uint32_t *stack_space)
+{
+  *stack_space = osThreadGetStackSpace(tid_thread_hci);
+  return 0;
+}
+
 void sl_btctrl_hci_cpc_rtos_deinit(void)
 {
   (void) osSemaphoreDelete(hci_rx_semaphore);

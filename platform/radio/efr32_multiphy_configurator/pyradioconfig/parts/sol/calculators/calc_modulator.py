@@ -70,11 +70,11 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
                 softmodem_tx_interpolation1 = 7 #Static for now
-                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+                if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                     softmodem_tx_interpolation2 = 2
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                     softmodem_tx_interpolation2 = 4
-                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+                elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                     softmodem_tx_interpolation2 = 8
                 else:
                     softmodem_tx_interpolation2 = 16
@@ -332,11 +332,11 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         if modulation_type == model.vars.modulation_type.var_enum.OFDM:
             ofdm_option = model.vars.ofdm_option.value
 
-            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1:
+            if ofdm_option == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
                 ofdm_min_bitrate = 100000
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
                 ofdm_min_bitrate = 50000
-            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3:
+            elif ofdm_option == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
                 ofdm_min_bitrate = 25000
             else:
                 ofdm_min_bitrate = 12500
@@ -443,3 +443,48 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
 
         # Update model variable
         model.vars.hardmodem_txbr_compensation.value = hardmodem_txbr_compensation
+
+    def calc_tx_delay(self, model):
+        """ calculate tx delay in ns """
+        # : Get Model Variables
+        modulator_select = model.vars.modulator_select.value
+        shaping = model.vars.MODEM_CTRL0_SHAPING.value
+        shaping_filter_taps = model.vars.shaping_filter_taps.value
+        tx_baud_rate_actual = model.vars.tx_baud_rate_actual.value
+        softmodem_interp1_ratio = model.vars.softmodem_tx_interpolation1.value
+        softmodem_interp2_ratio = model.vars.softmodem_tx_interpolation2.value
+
+        if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:  # : IQ modulator for OFDM
+            # : Sol design book pp. 2769 - IQ_MOD
+            # : soft modem delay
+            softmodem_filter_taps = 32 # : coproc filter has 32 taps
+            softmodem_filter_rate = 2*tx_baud_rate_actual # : softmodem operates at 2xFs
+            softmodem_delay = softmodem_filter_taps/2
+            softmodem_grp_delay_us = softmodem_delay / softmodem_filter_rate * 1e6
+
+            # : interp1 delay
+            interp1_ratio = softmodem_interp1_ratio
+            interp1_rate = interp1_ratio * softmodem_filter_rate
+            interp1_taps = 5 # : FIR Polyphase filter with 5 taps
+            interp1_delay = interp1_taps/2
+            interp1_grp_delay_us = interp1_delay / softmodem_filter_rate * 1e6
+
+            # : interp2 delay
+            interp2_ratio = softmodem_interp2_ratio
+            interp2_rate = interp2_ratio * interp1_rate
+            interp2_taps = 3 * interp2_ratio # : 3 additional taps for each interpolation since 3rd order CIC
+            interp2_delay = interp2_taps/2
+            interp2_grp_delay_us = interp2_delay / interp2_rate * 1e6
+
+            # : calculate total delay
+            tx_grp_delay_us = softmodem_grp_delay_us + interp1_grp_delay_us + interp2_grp_delay_us
+        else:
+            # : Sol design book pp. 2329
+            # : FIR filter is operating at 8x baud rate
+            if shaping == 1: # : odd symmetric
+                shaping_filter_delay = (shaping_filter_taps + 1) / 2
+            else: # : assume even
+                shaping_filter_delay = shaping_filter_taps/2
+            tx_grp_delay_us = shaping_filter_delay / (8 * tx_baud_rate_actual) * 1e6
+
+        model.vars.tx_grp_delay_us.value = tx_grp_delay_us

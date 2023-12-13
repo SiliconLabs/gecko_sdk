@@ -1,28 +1,26 @@
 package: Zigbee
-description: This component provides support both for generating traffic when doing coexistence
-  testing, and for measuring network throughput. Packets are sent periodically on
-  a CLI-programmable interval unless the packets-in-flight limit is exceeded.
+description: This component provides support both for generating traffic when doing coexistence testing, and for measuring network throughput. Packets are sent periodically on a CLI-programmable interval unless the packets-in-flight limit is exceeded.
 id: zigbee_throughput
 label: Throughput
 category: Zigbee|Utility
 quality: production
 provides:
-   - name: "zigbee_throughput"
+  - name: zigbee_throughput
 requires:
-   - name: "zigbee_counters"
+  - name: zigbee_counters
 source:
-  - path: protocol/zigbee/app/framework/plugin/throughput/throughput.c  
+  - path: protocol/zigbee/app/framework/plugin/throughput/throughput.c
 template_contribution:
   - name: component_catalog
     value: zigbee_throughput
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: sli_zigbee_af_throughput_init_callback  
+      function_name: sli_zigbee_af_throughput_init_callback
   - name: zigbee_stack_callback
     value:
       callback_type: message_sent
-      function_name: sli_zigbee_af_throughput_message_sent_callback  
+      function_name: sli_zigbee_af_throughput_message_sent_callback
   - name: cli_group
     value:
       group: plugin
@@ -53,8 +51,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_destination
       help: Set the destination nodeId
       argument:
-      - type: uint16
-        help: Destination nodeId
+        - type: uint16
+          help: Destination nodeId
   - name: cli_command
     value:
       group: throughput
@@ -62,8 +60,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_interval
       help: Set the interval
       argument:
-      - type: uint16
-        help: Interval in ms
+        - type: uint16
+          help: Interval in ms
   - name: cli_command
     value:
       group: throughput
@@ -71,8 +69,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_test_timeout
       help: Set the test timeout
       argument:
-      - type: uint32
-        help: Timeout in ms
+        - type: uint32
+          help: Timeout in ms
   - name: cli_command
     value:
       group: throughput
@@ -80,8 +78,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_test_count
       help: Set the number of packets to send
       argument:
-      - type: uint16
-        help: Packets to send
+        - type: uint16
+          help: Packets to send
   - name: cli_command
     value:
       group: throughput
@@ -89,8 +87,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_in_flight_count
       help: Set the number of packets in flight during the test.
       argument:
-      - type: uint8
-        help: Packets in flight
+        - type: uint8
+          help: Packets in flight
   - name: cli_command
     value:
       group: throughput
@@ -98,8 +96,8 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_packet_size
       help: Set the packet length
       argument:
-      - type: uint8
-        help: Packet length in bytes
+        - type: uint8
+          help: Packet length in bytes
   - name: cli_command
     value:
       group: throughput
@@ -107,20 +105,20 @@ template_contribution:
       handler: sli_zigbee_af_throughput_cli_set_all_parameters
       help: Set all parameters Destination Count Interval packetLength maxInFlight testTimeout
       argument:
-      - type: uint16
-        help: Destination nodeId
-      - type: uint16
-        help: Packets to send
-      - type: uint16
-        help: Interval in ms
-      - type: uint8
-        help: Packet length in bytes
-      - type: uint8
-        help: Packets in flight
-      - type: uint16
-        help: APS Options
-      - type: uint32
-        help: Timeout in ms
+        - type: uint16
+          help: Destination nodeId
+        - type: uint16
+          help: Packets to send
+        - type: uint16
+          help: Interval in ms
+        - type: uint8
+          help: Packet length in bytes
+        - type: uint8
+          help: Packets in flight
+        - type: uint16
+          help: APS Options
+        - type: uint32
+          help: Timeout in ms
   - name: cli_command
     value:
       group: throughput

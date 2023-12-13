@@ -18,20 +18,14 @@ config_file:
 - path: config/restrictions/lfn_not_supported.restriction
   directory: wisun
   unless:
-    - "sl_wisun_lfn_device_support"
+    - "wisun_stack_lfn"
     - "wisun_cli"
 # tabs' restriction files
-- path: config/restrictions/only_radio.restriction  # other applications
+- path: config/restrictions/only_radio.restriction
   directory: wisun
   unless:
     - "sl_wisun_full_config"
-    - "wisun_cli"
 
-- path: config/restrictions/only_radio.restriction  # for wisun_cli app
-  directory: wisun
-  condition:
-    - "wisun_cli"
-    
 #------------------------------------------------ default full configuration
 # EU_1_1a
 - path: config/EU_1_1a/wisun_settings.wisunconf

@@ -3,7 +3,6 @@ label: Zigbee Direct Security Curve25519
 package: Zigbee
 category: Zigbee|Zigbee Direct ZDD
 quality: production
-
 description: Zigbee Direct Security using Curve25519
 
 config_file:

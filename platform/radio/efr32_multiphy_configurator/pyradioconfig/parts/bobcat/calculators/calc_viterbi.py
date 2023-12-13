@@ -46,21 +46,20 @@ class Calc_Viterbi_Bobcat(CALC_Viterbi_ocelot):
         self._reg_write(model.vars.MODEM_VTCORRCFG1_KSI3SWENABLE, ksi3swenable)
 
     def calc_pmoffset_reg(self, model):
-        #Copied old Ocelot method to avoid regression impact on later parts
+        """
+        Calcs moved from Viper to handle dual syncword detection
+        see https://jira.silabs.com/browse/MCUW_RADIO_CFG-2183
+        """
 
+        afc_oneshot_enabled = (model.vars.MODEM_AFC_AFCONESHOT.value == 1)
+        rtschmode = model.vars.MODEM_REALTIMCFE_RTSCHMODE.value
         osr = model.vars.MODEM_TRECSCFG_TRECSOSR.value
         pmwinsize = model.vars.pmacquingwin_actual.value
-        baudrate = model.vars.baudrate.value
-        dual_sync_en = model.vars.MODEM_CTRL1_DUALSYNC.value == 1
-        modulation_index = model.vars.modulation_index.value
-        freq_offset_hz = model.vars.freq_offset_hz.value
 
-        relative_freq_offs = freq_offset_hz / baudrate
-
-        if dual_sync_en and ((modulation_index <= 0.5 and relative_freq_offs > 0.57) or baudrate > 90000):
+        if (rtschmode == 1) and afc_oneshot_enabled:
             # Special case for dual syncword detection case where hard slicing on syncword is required
-            # because frequency tolerance is more difficult when RTSCHMODE is 1
-            pmoffset = osr * 2 + 2
+            # In this case we choose a minimal PMOFFSET to avoid a bad estimate due to AFC transient
+            pmoffset = 2
         else:
             # + 2 for processing delay. See expsynclen register description. These are used in the same way.
             pmoffset = osr * pmwinsize + 2

@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_legacy_vars import calc_legacy_vars_viper
+from pyradioconfig.parts.bobcat.calculators.calc_legacy_vars import Calc_Legacy_Vars_Bobcat
 
 
-class CalcLegacyVarsRainier(calc_legacy_vars_viper):
+class CalcLegacyVarsRainier(Calc_Legacy_Vars_Bobcat):
     pass

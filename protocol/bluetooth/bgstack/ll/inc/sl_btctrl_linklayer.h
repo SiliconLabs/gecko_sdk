@@ -156,6 +156,18 @@ sl_status_t sl_btctrl_alloc_periodic_scan(uint8_t num_scan);
 sl_status_t sl_btctrl_alloc_periodic_adv(uint8_t num_adv);
 
 /**
+ * Call to import the conn scheduler state variables in the binary
+ */
+void sli_btctrl_enable_conn_scheduler_state(void);
+
+/**
+ * @brief Set maximum number of advertisement reports allowed to be queued
+ *
+ * @param num_adv Maximum number of advertisement reports allowed to be queued
+ */
+void sl_btctrl_configure_max_queued_adv_reports(uint8_t num_reports);
+
+/**
  * Call to enable the even connection scheduling algorithm.
  * This function should be called before link layer initialization.
  */
@@ -209,10 +221,16 @@ sl_status_t sl_btctrl_init_cte_transmitter();
 sl_status_t sl_btctrl_init_cte();
 
 /**
- * Initialize Accurate Bluetooth Ranging initiator and reflector
+ * Initialize Channel Sounding
  */
-sl_status_t sl_btctrl_init_cs_initiator();
-sl_status_t sl_btctrl_init_cs_reflector();
+struct sl_btctrl_cs_config {
+  /** number of channel sounding configurations per connection */
+  uint8_t configs_per_connection;
+  /** number of simultaneous channel sounding procedures */
+  uint8_t procedures;
+};
+
+sl_status_t sl_btctrl_init_cs(const struct sl_btctrl_cs_config *config);
 
 /**
  * Check if event bitmap indicates pending events

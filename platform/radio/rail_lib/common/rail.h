@@ -3228,11 +3228,15 @@ RAIL_Status_t RAIL_StartScheduledCcaLbtTx(RAIL_Handle_t railHandle,
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] mode Configure the types of transmits to stop.
  * @return \ref RAIL_STATUS_NO_ERROR if the transmit was successfully
- *   canceled.
- *   Returns \ref RAIL_STATUS_INVALID_STATE if the requested
- *                transmit mode cannot be stopped.
+ *   stopped or \ref RAIL_STATUS_INVALID_STATE if there is no transmit
+ *   operation to stop.
  *
- * @note This function will stop an auto-ACK in active transmit.
+ * @note When mode includes \ref RAIL_STOP_MODE_ACTIVE, this can also stop
+ *   an active auto-ACK transmit. When an active transmit is stopped, \ref
+ *   RAIL_EVENT_TX_ABORTED or \ref RAIL_EVENT_TXACK_ABORTED should occur.
+ *   When mode includes \ref RAIL_STOP_MODE_PENDING this can also stop
+ *   a \ref RAIL_TX_OPTION_CCA_ONLY transmit operation. When a pending
+ *   transmit is stopped, \ref RAIL_EVENT_TX_BLOCKED should occur.
  */
 RAIL_Status_t RAIL_StopTx(RAIL_Handle_t railHandle, RAIL_StopMode_t mode);
 
@@ -4969,6 +4973,149 @@ RAIL_Status_t RAIL_Calibrate(RAIL_Handle_t railHandle,
 RAIL_CalMask_t RAIL_GetPendingCal(RAIL_Handle_t railHandle);
 
 /**
+ * Apply a given image rejection calibration value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] imageRejection The image rejection value to apply.
+ * @return A status code indicating success of the function call.
+ *
+ * Take an image rejection calibration value and apply it. This value should be
+ * determined from a previous run of \ref RAIL_CalibrateIr on the same
+ * physical device with the same radio configuration. The imageRejection value
+ * will also be stored to the \ref RAIL_ChannelConfigEntry_t::attr, if possible.
+ *
+ * If multiple protocols are used, this function will return
+ * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
+ * not active. In that case, the caller must attempt to re-call this function later.
+ *
+ * @deprecated Please use \ref RAIL_ApplyIrCalibrationAlt instead.
+ */
+RAIL_Status_t RAIL_ApplyIrCalibration(RAIL_Handle_t railHandle,
+                                      uint32_t imageRejection);
+
+/**
+ * Apply a given image rejection calibration value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] imageRejection Pointer to the image rejection value to apply.
+ * @param[in] rfPath RF path to calibrate.
+ * @return A status code indicating success of the function call.
+ *
+ * Take an image rejection calibration value and apply it. This value should be
+ * determined from a previous run of \ref RAIL_CalibrateIrAlt on the same
+ * physical device with the same radio configuration. The imageRejection value
+ * will also be stored to the \ref RAIL_ChannelConfigEntry_t::attr, if possible.
+ * @note: To make sure the imageRejection value is stored/configured correctly,
+ * \ref RAIL_ConfigAntenna should be called before calling this API.
+ *
+ * If multiple protocols are used, this function will return
+ * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
+ * not active. In that case, the caller must attempt to re-call this function later.
+ */
+RAIL_Status_t RAIL_ApplyIrCalibrationAlt(RAIL_Handle_t railHandle,
+                                         RAIL_IrCalValues_t *imageRejection,
+                                         RAIL_AntennaSel_t rfPath);
+
+/**
+ * Run the image rejection calibration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] imageRejection The result of the image rejection calibration.
+ * @return A status code indicating success of the function call.
+ *
+ * Run the image rejection calibration and apply the resulting value. If the
+ * imageRejection parameter is not NULL, store the value at that
+ * location. The imageRejection value will also be stored to the
+ * \ref RAIL_ChannelConfigEntry_t::attr, if possible. This is a long-running
+ * calibration that adds significant code space when run and can be run with a
+ * separate firmware image on each device to save code space in the
+ * final image.
+ *
+ * If multiple protocols are used, this function will make the given railHandle
+ * active, if not already, and perform calibration. If called during a protocol
+ * switch, it will return \ref RAIL_STATUS_INVALID_STATE. In this case,
+ * \ref RAIL_ApplyIrCalibration may be called to apply a previously determined
+ * IR calibration value, or the app must defer calibration until the
+ * protocol switch is complete. Silicon Labs recommends calling this function
+ * from the application main loop.
+ *
+ * @deprecated Please use \ref RAIL_CalibrateIrAlt instead.
+ */
+RAIL_Status_t RAIL_CalibrateIr(RAIL_Handle_t railHandle,
+                               uint32_t *imageRejection);
+
+/**
+ * Run the image rejection calibration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] imageRejection Pointer to the image rejection result.
+ * @param[in] rfPath RF path to calibrate.
+ * @return A status code indicating success of the function call.
+ *
+ * Run the image rejection calibration and apply the resulting value. If the
+ * imageRejection parameter is not NULL, store the value at that
+ * location. The imageRejection value will also be stored to the
+ * \ref RAIL_ChannelConfigEntry_t::attr, if possible. This is a long-running
+ * calibration that adds significant code space when run and can be run with a
+ * separate firmware image on each device to save code space in the
+ * final image.
+ * @note: To make sure the imageRejection value is stored/configured correctly,
+ * \ref RAIL_ConfigAntenna should be called before calling this API.
+ *
+ * If multiple protocols are used, this function will return
+ * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
+ * not active. In that case, the caller must attempt to re-call this function later.
+ */
+RAIL_Status_t RAIL_CalibrateIrAlt(RAIL_Handle_t railHandle,
+                                  RAIL_IrCalValues_t *imageRejection,
+                                  RAIL_AntennaSel_t rfPath);
+
+/**
+ * Run the temperature calibration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return A status code indicating success of the function call.
+ *
+ * Run the temperature calibration, which needs to recalibrate the synth if
+ * the temperature crosses 0C or the temperature delta since the last
+ * calibration exceeds 70C while in receive. RAIL will run the VCO calibration
+ * automatically upon entering receive or transmit states, so the application
+ * can omit this calibration if the stack re-enters receive or transmit with
+ * enough frequency to avoid reaching the temperature delta. If the application
+ * does not calibrate for temperature, it's possible to miss receive packets due
+ * to a drift in the carrier frequency.
+ *
+ * If multiple protocols are used, this function will return
+ * \ref RAIL_STATUS_INVALID_STATE if it is called and the given railHandle is
+ * not active. In that case, the calibration will be automatically performed
+ * next time the radio enters receive.
+ */
+RAIL_Status_t RAIL_CalibrateTemp(RAIL_Handle_t railHandle);
+
+/**
+ * Performs HFXO compensation.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] crystalPPMError Current deviation that has been corrected,
+ *   measured in PPM. May be NULL.
+ * @return A status code indicating the result of the function call.
+ *
+ * Compute the PPM correction using the thermistor value available when
+ * \ref RAIL_EVENT_THERMISTOR_DONE occurs, after
+ * \ref RAIL_StartThermistorMeasurement() call.
+ * Then correct the RF frequency as well as TX and RX sampling.
+ *
+ * This function calls the following RAIL functions in sequence saving having
+ * to call them individually:
+ *   - \ref RAIL_ConvertThermistorImpedance()
+ *   - \ref RAIL_ComputeHFXOPPMError()
+ *   - \ref RAIL_CompensateHFXO()
+ *
+ * @note This function makes the radio idle.
+ */
+RAIL_Status_t RAIL_CalibrateHFXO(RAIL_Handle_t railHandle, int8_t *crystalPPMError);
+
+/**
  * Enable/disable the PA calibration.
  *
  * @param[in] enable Enables/disables the PA calibration.
@@ -5160,7 +5307,8 @@ bool RAIL_IsRfSensed(RAIL_Handle_t railHandle);
  * as channel changes will be done implicitly, without requiring numerous calls
  * to \ref RAIL_StartRx. Currently, while this feature is enabled, the radio
  * will hop channels in the given sequence each time it enters RX.
- * Note that RX Channel hopping and EFR32xG25's concurrent mode are mutually exclusive.
+ * Note that RX Channel hopping and EFR32xG25's concurrent mode / collision
+ * detection are mutually exclusive.
  *
  * The channel hopping buffer requires RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL
  * number of 32-bit words of overhead per channel, plus 3 words overall plus the
@@ -5803,7 +5951,7 @@ RAIL_Status_t RAIL_StopInfinitePreambleTx(RAIL_Handle_t railHandle);
  */
 RAIL_Status_t RAIL_ConfigVerification(RAIL_Handle_t railHandle,
                                       RAIL_VerifyConfig_t *configVerify,
-                                      const uint32_t *radioConfig,
+                                      RAIL_RadioConfig_t radioConfig,
                                       RAIL_VerifyCallbackPtr_t cb);
 
 /**
@@ -6773,15 +6921,15 @@ bool RAIL_SupportsTxPowerMode(RAIL_Handle_t railHandle,
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in,out] powerMode A pointer to PA power mode to check if supported.
- *   In case of  RAIL_TX_POWER_MODE_2P4_HIGHEST or
- *   RAIL_TX_POWER_MODE_SUBGIG_HIGHEST is used as input
- *   then the highest selected PA on the chip is updated here.
+ *   For platforms that support \ref RAIL_TX_POWER_MODE_2P4_HIGHEST or
+ *   \ref RAIL_TX_POWER_MODE_SUBGIG_HIGHEST the powerMode is updated
+ *   to the highest corresponding PA available on the chip.
  * @param[out] maxPowerLevel A pointer to a \ref RAIL_TxPowerLevel_t that
  *   if non-NULL will be filled in with the power mode's highest power level
- *   allowed if this function returns \ref RAIL_STATUS_NO_ERROR.
+ *   allowed if this function returns true.
  * @param[out] minPowerLevel A pointer to a \ref RAIL_TxPowerLevel_t that
  *   if non-NULL will be filled in with the power mode's lowest power level
- *   allowed if this function returns \ref RAIL_STATUS_NO_ERROR.
+ *   allowed if this function returns true.
  * @return true if powerMode is supported; false otherwise.
  */
 bool RAIL_SupportsTxPowerModeAlt(RAIL_Handle_t railHandle,
@@ -7284,6 +7432,16 @@ bool RAIL_IEEE802154_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_FAST_RX2RX.
  */
 bool RAIL_SupportsFastRx2Rx(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports collision detection.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if collision detection is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_COLLISION_DETECTION.
+ */
+bool RAIL_SupportsCollisionDetection(RAIL_Handle_t railHandle);
 
 /**
  * Indicate whether this chip supports Sidewalk protocol.

@@ -479,4 +479,4 @@ typedef struct {
 /** @} End of group FGM23_PCNT */
 /** @} End of group Parts */
 
-#endif /* FGM23_PCNT_H */
+#endif // FGM23_PCNT_H

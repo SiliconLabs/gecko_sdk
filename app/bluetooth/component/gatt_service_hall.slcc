@@ -9,7 +9,6 @@ quality: production
 root_path: app/bluetooth/common/gatt_service_hall
 tag:
   - No-Code
-
 config_file:
   - path: config/sl_gatt_service_hall_config.h
   - path: gatt_service_hall.xml
@@ -36,3 +35,6 @@ template_contribution:
       function: sl_gatt_service_hall_on_event
   - name: component_catalog
     value: gatt_service_hall
+documentation:
+  docset: bluetooth
+  document: bluetooth-service-api/gatt-service-hall

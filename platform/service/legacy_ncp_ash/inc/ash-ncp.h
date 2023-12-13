@@ -17,22 +17,30 @@
 #ifndef __ASH_NCP_H__
 #define __ASH_NCP_H__
 
-/** @description  Allocates buffers held until ashReleaseStaticBuffers()
+/**
+ *  Allocates buffers held until ashReleaseStaticBuffers()
  *  is called.  Returns the head of the allocated buffer chain for use
  *  by the higher layer.
+ *
+ *  @return EmberMessageBuffer
  */
 EmberMessageBuffer ashAllocateStaticBuffers(void);
 
-/** @description  Releases the buffers allocated by ashAllocateStaticBuffers()
+/**
+ *  Releases the buffers allocated by ashAllocateStaticBuffers()
  *  if none are in use.
+ *
+ *  @return bool value
  */
 bool ashReleaseStaticBuffers(void);
 
-/** @description  Initializes the ASH protocol and serial port.
+/**
+ *  Initializes the ASH protocol and serial port.
  */
 void ashStart(void);
 
-/** @description  Sends a frame to the host.
+/**
+ *  Sends a frame to the host.
  *
  * @param buffer: index of a linked buffer containing the DATA frame to send
  * @param highPriority: set true if the frame should be sent even if the host
@@ -40,12 +48,14 @@ void ashStart(void);
  */
 void ashSend(EmberMessageBuffer buffer, bool highPriority);
 
-/** @description  Calls ASH protocol to manage transmission of DATA and
+/**
+ *  Calls ASH protocol to manage transmission of DATA and
  * other frames to the host.
  */
 void ashSendExec(void);
 
-/** @description  Returns a DATA frame, if one has been received.
+/**
+ *  Returns a DATA frame, if one has been received.
  *
  * @param outBuf: pointer to a variable where the index of the linked buffers
  * containing a complete data frame will be written. The caller is responsible
@@ -60,14 +70,16 @@ void ashSendExec(void);
  */
 EzspStatus ashReceive(EmberMessageBuffer *outBuf);
 
-/** @description  Checks whether there is room in the serial output buffer.
+/**
+ *  Checks whether there is room in the serial output buffer.
  *
  * @return  EZSP_SUCCESS
  *          EZSP_ASH_NO_TX_SPACE
  */
 EzspStatus ashSerialWriteAvailable(void);
 
-/** @description  Reads a byte from the serial port, if one is available.
+/**
+ *  Reads a byte from the serial port, if one is available.
  *
  * @param byte:   pointer to a variable where the byte read will be output
  *
@@ -76,24 +88,58 @@ EzspStatus ashSerialWriteAvailable(void);
  */
 EzspStatus ashSerialReadByte(uint8_t *byte);
 
-/** @description  Writes a byte to the serial output buffer.
+/**
+ *  Writes a byte to the serial output buffer.
  *
  * @param byte:   byte to write
  */
 void ashSerialWriteByte(uint8_t byte);
 
 #ifdef SLEEPY_EZSP_UART
+
+/**
+ *  Serial host is active.
+ *
+ * @return bool value
+ */
 bool serialHostIsActive(void);
+
+/**
+ *  Serial waiting for host to wake.
+ *
+ *	@return bool value
+ */
 bool serialWaitingForHostToWake(void);
+
+/**
+ *  Serial monitor Rxd.
+ */
 void serialMonitorRxd(uint8_t sleepMode);
+
+/**
+ *  Serial power down.
+ */
 void serialPowerDown(void);
+
+/**
+ *  Serial power up.
+ */
 void serialPowerUp(void);
+
+/**
+ *  Serial send awake signal.
+ */
 void serialSendAwakeSignal(void);
+
+/**
+ *  Serial inhibit callback Signal.
+ */
 void serialInhibitCallbackSignal(void);
 
 #endif
 
-/** @description  Informs ASH whether or not cany callbacks are pending.
+/**
+ *  Informs ASH whether or not cany callbacks are pending.
  *
  */
 void ashPendingCallbacks(bool pending);
@@ -114,27 +160,29 @@ void ashPendingCallbacks(bool pending);
   (defaultValue)
 #endif
 
-// Define the ASH configuration manufacturing indexed token as a struct.
-// Each member must be a word and the struct size may not exceed 16 words.
-// Token values of 0xFFFF are ignored, and a default value is used instead.
-// All times are in milliseconds.
+/**
+ * @brief Define the ASH configuration manufacturing indexed token as a struct.
+ * Each member must be a word and the struct size may not exceed 16 words.
+ * Token values of 0xFFFF are ignored, and a default value is used instead.
+ * All times are in milliseconds.
+ */
 typedef struct
 { uint16_t
-    baudRate,           // SerialBaudRate enum value
-    traceFlags,         // trace output control bit flags (see defs below)
-    unused0,            // (not used)
-    txK,                // max frames that can be sent w/o being ACKed (1-7)
-    randomize,          // enables randomizing DATA frame payloads
-    ackTimeInit,        // adaptive rec'd ACK timeout initial value
-    ackTimeMin,         //  "     "     "     "     "  minimum
-    ackTimeMax,         //  "     "     "     "     "  maximum
-    maxTimeouts,        // ACK timeouts needed to enter the ERROR state
-    unused1,            // (not used)
-    rebootDelay,        // reboot delay before sending RSTACK
-    unused2,            // (not used)
-    unused3,            // (not used)
-    unused4,            // (not used)
-    nrTime;             // time after which a rec'd nFlag expires
+    baudRate,           ///< SerialBaudRate enum value
+    traceFlags,         ///< trace output control bit flags (see defs below)
+    unused0,            ///< (not used)
+    txK,                ///< max frames that can be sent w/o being ACKed (1-7)
+    randomize,          ///< enables randomizing DATA frame payloads
+    ackTimeInit,        ///< adaptive rec'd ACK timeout initial value
+    ackTimeMin,         ///<  "     "     "     "     "  minimum
+    ackTimeMax,         ///<  "     "     "     "     "  maximum
+    maxTimeouts,        ///< ACK timeouts needed to enter the ERROR state
+    unused1,            ///< (not used)
+    rebootDelay,        ///< reboot delay before sending RSTACK
+    unused2,            ///< (not used)
+    unused3,            ///< (not used)
+    unused4,            ///< (not used)
+    nrTime;             ///< time after which a rec'd nFlag expires
 } AshNcpConfig;
 
 //ASH configuration manufacturing token storage locations

@@ -21,12 +21,15 @@ class PhyFilters_Sol(IPhyFilter):
                            'Phys_RAIL_Base_Standard_IEEE802154',
                            'Phys_RAIL_Base_Standard_IEEE802154GB',
                            'Phys_RAIL_Base_Standard_ZWave',
+                           'Phys_Internal_Base_Customer_Melco'
                         ]
+
     # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = ['Phys_Studio_Base',
                                     'Phys_Studio_Base_Standard_SUNFSK',
                                     'Phys_Studio_Sidewalk',
                                     'Phys_Studio_Connect',
+                                    'Phys_Studio_Connect_OFDM',
                                     'Phys_Studio_SUN_OQPSK',
                                     'phys_studio_wisun_fan_1_0',
                                     'phys_studio_wisun_fan_1_1',

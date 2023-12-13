@@ -61,8 +61,6 @@ void app_tcp_client(sl_cli_command_arg_t *arguments)
   const char *remote_ip = NULL;
   uint16_t remote_port = 0;
 
-  (void) arguments;
-
   app_wisun_cli_mutex_lock();
   remote_ip = sl_cli_get_argument_string(arguments, 0);
   remote_port = sl_cli_get_argument_uint16(arguments, 1);
@@ -74,8 +72,6 @@ void app_tcp_client(sl_cli_command_arg_t *arguments)
 void app_socket_close(sl_cli_command_arg_t *arguments)
 {
   uint32_t sockid = 0;
-
-  (void) arguments;
 
   app_wisun_cli_mutex_lock();
   sockid = sl_cli_get_argument_uint32(arguments, 0);
@@ -89,8 +85,6 @@ void app_socket_write(sl_cli_command_arg_t *arguments)
   uint32_t sockid = 0;
   const char *str;
 
-  (void) arguments;
-
   app_wisun_cli_mutex_lock();
   sockid = sl_cli_get_argument_uint32(arguments, 0);
   str = sl_cli_get_argument_string(arguments, 1);
@@ -103,8 +97,6 @@ void app_socket_read(sl_cli_command_arg_t *arguments)
 {
   uint32_t sockid = 0;
   uint16_t size;
-
-  (void) arguments;
 
   app_wisun_cli_mutex_lock();
   sockid = sl_cli_get_argument_uint32(arguments, 0);

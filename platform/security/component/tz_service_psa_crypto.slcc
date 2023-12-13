@@ -105,9 +105,16 @@ source:
     condition: [trustzone_secure]
   - path: secure_fw/partitions/crypto/crypto_rng.c
     condition: [trustzone_secure]
+  - path: secure_fw/partitions/crypto/crypto_pake.c
+    condition: [trustzone_secure]
 
   # Service interface (NS)
   - path: interface/src/tfm_crypto_func_api.c
+    condition: [trustzone_nonsecure]
+
+  # Workaround required in order to give TLS code living in the NS application
+  # access to helper functions that normally live in psa_crypto.c.
+  - path: ../../../platform/security/sl_component/sl_trustzone/src/sli_tz_tls_helpers.c
     condition: [trustzone_nonsecure]
 
 define:

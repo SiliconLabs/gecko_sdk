@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "sl_common.h"
 #include "nvm3.h"
+#include "sl_common.h"
 #include "sl_wisun_cli_util.h"
+#include "sl_wisun_test_certificates.h"
 #include "app_certificate_store.h"
-#include "wisun_test_certificates.h"
 
 static const app_enum_t app_certificate_type_enum[] =
 {

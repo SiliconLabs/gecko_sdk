@@ -1,8 +1,8 @@
-from pyradioconfig.parts.viper.targets.Target_FPGA import target_fpga_viper
+from pyradioconfig.parts.bobcat.targets.Target_FPGA import Target_FPGA_Bobcat
 from os.path import join
 
 
-class TargetFpgaRainier(target_fpga_viper):
+class TargetFpgaRainier(Target_FPGA_Bobcat):
 
     _targetName = "FPGA"
     _description = "Supports the OTA FPGA"

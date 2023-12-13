@@ -33,16 +33,10 @@
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include "sl_component_catalog.h"
-#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
-#include "app_assert.h"
-#endif
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-#include "app_log.h"
-#endif
+#include "simple_rail_assistance.h"
 #include "rail.h"
 #include "app_init.h"
 #include "app_process.h"
-#include "sl_simple_led_instances.h"
 #include "sl_duty_cycle_config.h"
 #include "sl_flex_rail_package_assistant.h"
 #include "sl_flex_rail_config.h"
@@ -247,15 +241,13 @@ void app_process_action(RAIL_Handle_t rail_handle)
       // wait out sending
       break;
     case S_PACKET_SENT:
-      sl_led_toggle(&sl_led_led1);
+      toggle_send_led();
       packet_transmitted++;
       state = S_IDLE;
       refresh_display = true;
       radio_interrupt = true;
       duty_cycle_end = true;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_info("Packet has been sent\n");
-#endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
       app_task_notify();
 #endif
@@ -268,17 +260,15 @@ void app_process_action(RAIL_Handle_t rail_handle)
         uint8_t *start_of_packet = 0;
         uint16_t packet_size = unpack_packet(rx_fifo, &packet_info, &start_of_packet);
         rail_status = RAIL_ReleaseRxPacket(rail_handle, rx_packet_handle);
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
+
         if (rail_status != RAIL_STATUS_NO_ERROR) {
           app_log_warning("RAIL_ReleaseRxPacket() result:%d", rail_status);
         }
         if (rx_requested) {
           printf_rx_packet(start_of_packet, packet_size);
         }
-#else
-        (void) rail_status;
-#endif
-        sl_led_toggle(&sl_led_led0);
+
+        toggle_receive_led();
         packet_received++;
 
         rx_packet_handle = RAIL_GetRxPacketInfo(rail_handle,
@@ -295,9 +285,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
       break;
     default:
       // Unexpected state
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_error("Unexpected Simple TRX state occurred:%d\n", state);
-#endif
 #if DUTY_CYCLE_USE_LCD_BUTTON == 1
       display_error_on_lcd(INVALID_APP_STATE);
       refresh_display = false;
@@ -401,27 +389,22 @@ static void process_rail_errors(void)
 {
   if (rail_tx_error) {
     rail_tx_error = false;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_warning("Radio TX Error occurred\nEvents: %lld\n",
                     (current_rail_err & RAIL_EVENTS_TX_COMPLETION));
-#endif
     duty_cycle_end = true;
   }
   if (rail_rx_error) {
     rail_rx_error = false;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_warning("Radio RX Error occurred\nEvents: %lld\n",
                     (current_rail_err & RAIL_EVENTS_RX_COMPLETION));
-#endif
     duty_cycle_end = true;
   }
   if (rail_cal_error) {
     rail_cal_error = false;
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    uint64_t current_rail_err_tmp = current_rail_err;
     app_log_error("Radio Calibration Error occurred\nEvents: %lld\nRAIL_Calibrate() result:%d\n",
-                  (current_rail_err & RAIL_EVENT_CAL_NEEDED),
+                  (current_rail_err_tmp & RAIL_EVENT_CAL_NEEDED),
                   calibration_status);
-#endif
   }
 }
 
@@ -441,11 +424,9 @@ static RAIL_Status_t send_tx_packet(RAIL_Handle_t rail_handle)
   RAIL_Idle(rail_handle, RAIL_IDLE_ABORT, true);
 #endif
   rail_status = RAIL_StartTx(rail_handle, get_selected_channel(), RAIL_TX_OPTION_ALT_PREAMBLE_LEN, NULL);
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
   if (rail_status != RAIL_STATUS_NO_ERROR) {
     app_log_warning("RAIL_StartTx() result:%d ", rail_status);
   }
-#endif
 
   return rail_status;
 }

@@ -475,9 +475,6 @@ void init_mode_switch(RAIL_Handle_t rail_handle)
 
   RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
 
-  // Save available channels locally
-  update_channel_list(rail_handle);
-
   // Radio calibration
   calibrate_radio(rail_handle);
 
@@ -513,6 +510,9 @@ void init_mode_switch(RAIL_Handle_t rail_handle)
 
   // Init the PA setting for Mode Switch
   init_rail_pa_settings();
+
+  // Save available channels locally
+  update_channel_list(rail_handle);
 }
 
 /******************************************************************************

@@ -67,12 +67,6 @@ const uint8_t* ezspErrorString(uint8_t error);
   #include "app/ezsp-host/ash/ash-host.h"
   #include "app/ezsp-host/ash/ash-host-ui.h"
   #define readConfig(x) ashReadConfig(x)
-#elif defined(EZSP_USB)
-  #include "app/ezsp-host/usb/usb-host.h"
-  #include "app/ezsp-host/usb/usb-host-ui.h"
-  #define readConfig(x) usbReadConfig(x)
-  #define BUMP_HOST_COUNTER(mbr)
-  #define ADD_HOST_COUNTER(op, mbr)
 #elif defined(EZSP_SPI)
   #include "app/ezsp-host/spi/spi-host.h"
   #include "app/ezsp-host/spi/spi-host-ui.h"
@@ -85,7 +79,7 @@ const uint8_t* ezspErrorString(uint8_t error);
   #define readConfig(x) 0
   #define BUMP_HOST_COUNTER(mbr)
   #define ADD_HOST_COUNTER(op, mbr)
-#endif // EZSP_ASH || EZSP_USB || EZSP_SPI || EZSP_CPC
+#endif // EZSP_ASH || EZSP_SPI || EZSP_CPC
 
 #endif //__EZSP_HOST_UI_H___
 

@@ -800,4 +800,4 @@ typedef struct {
 /** @} End of group EFR32MG27_EMU */
 /** @} End of group Parts */
 
-#endif /* EFR32MG27_EMU_H */
+#endif // EFR32MG27_EMU_H

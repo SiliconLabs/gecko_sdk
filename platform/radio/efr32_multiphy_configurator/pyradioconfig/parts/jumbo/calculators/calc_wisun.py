@@ -2,6 +2,7 @@ from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICal
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 from enum import Enum
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
+from pyradioconfig.parts.jumbo.profiles.profile_wisun_fan_1_1 import ProfileWisunFan1v1Jumbo
 
 class CALC_WiSUN_Jumbo(ICalculator):
 
@@ -51,6 +52,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
             ['SG', 0x0D, 'Singapore'],
             ['TH', 0x0E, 'Thailand'],
             ['VN', 0x0F, 'Vietnam'],
+            ['WW', 0x10, 'Worldwide'],
         ]
         var.var_enum = CreateModelVariableEnum(
             'WiSUNRegDomainEnum',
@@ -59,11 +61,52 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
         self._addModelVariable(model, 'wisun_operating_class', int, ModelVariableFormat.DECIMAL, desc='WiSUN Operating Class')
         self._addModelVariable(model, 'wisun_phy_mode_id', int, ModelVariableFormat.DECIMAL, desc='WiSUN PhyModeID', is_array=True)
-        self._addModelVariable(model, 'wisun_phy_mode_id_select', int, ModelVariableFormat.DECIMAL, desc='WiSUN PhyModeID')
         self._addModelVariable(model, 'wisun_mode_switch_phr', int, ModelVariableFormat.DECIMAL, desc='WiSUN Mode Switch PHR', is_array=True)
-        self._addModelVariable(model, 'wisun_channel_plan_id', int, ModelVariableFormat.DECIMAL, desc='WiSUN ChanPlanID')
+
+        var = self._addModelVariable(model, 'wisun_phy_mode_id_select', Enum, ModelVariableFormat.DECIMAL, desc='WiSUN PhyModeID')
+        member_data = [
+            ['PhyID_1_FSK_50kbps_mi0p5',        0x01, 'PhyID_1_FSK_50kbps_mi0p5'],
+            ['PhyID_2_FSK_50kbps_mi1',          0x02, 'PhyID_2_FSK_50kbps_mi1'],
+            ['PhyID_3_FSK_100kbps_mi0p5',       0x03, 'PhyID_3_FSK_100kbps_mi0p5'],
+            ['PhyID_4_FSK_100kbps_mi1',         0x04, 'PhyID_4_FSK_100kbps_mi1'],
+            ['PhyID_5_FSK_150kbps_mi0p5',       0x05, 'PhyID_5_FSK3_150kbps_mi0p5'],
+            ['PhyID_6_FSK_200kbps_mi0p5',       0x06, 'PhyID_6_FSK_200kbps_mi0p5'],
+            ['PhyID_7_FSK_200kbps_mi1',         0x07, 'PhyID_7_FSK_200kbps_mi1'],
+            ['PhyID_8_FSK_300kbps_mi0p5',       0x08, 'PhyID_8_FSK_300kbps_mi0p5'],
+            ['PhyID_17_FSK_50kbps_mi0p5_FEC',   0x11, 'PhyID_17_FSK_50kbps_mi0p5_FEC'],
+            ['PhyID_18_FSK_50kbps_mi1_FEC',     0x12, 'PhyID_18_FSK_50kbps_mi1_FEC'],
+            ['PhyID_19_FSK_100kbps_mi0p5_FEC',  0x13, 'PhyID_19_FSK_100kbps_mi0p5_FEC'],
+            ['PhyID_20_FSK_100kbps_mi1_FEC',    0x14, 'PhyID_20_FSK_100kbps_mi1_FEC'],
+            ['PhyID_21_FSK_150kbps_mi0p5_FEC',  0x15, 'PhyID_21_FSK_150kbps_mi0p5_FEC'],
+            ['PhyID_22_FSK_200kbps_mi0p5_FEC',  0x16, 'PhyID_22_FSK_200kbps_mi0p5_FEC'],
+            ['PhyID_23_FSK_200kbps_mi1_FEC',    0x17, 'PhyID_23_FSK_200kbps_mi1_FEC'],
+            ['PhyID_24_FSK_300kbps_mi0p5_FEC',  0x18, 'PhyID_24_FSK_300kbps_mi0p5_FEC'],
+        ]
+
+        var.var_enum = CreateModelVariableEnum(
+            'WiSUNPhyModeIdEnum',
+            'List of supported PHY Mode IDs defined in WiSUN FAN 1v1',
+            member_data
+        )
 
 
+
+
+
+
+        # Retrieve info and create enums from profile table
+        var = self._addModelVariable(model, 'wisun_channel_plan_id', Enum, ModelVariableFormat.DECIMAL,
+                                     desc='WiSUN ChanPlanID')
+        member_data = []
+        table = ProfileWisunFan1v1Jumbo.wisun_1v1_chplan_table
+        for id in table:
+            member_data.append([table[id].enum_name, id, table[id].enum_name])
+
+        var.var_enum = CreateModelVariableEnum(
+            'WiSUNChPlanEnum',
+            'List of channel plan IDs defined in WiSUN FAN 1v1',
+            member_data
+        )
 
     def calc_wisun_freq_spacing(self, model):
 
@@ -312,7 +355,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
                 # FEC on
                 wisun_phy_mode_id.append((1 << 4) | phy_mode)
         elif profile_name in ["wisun_fan_1_1"]:
-            wisun_phy_mode_id_select = model.vars.wisun_phy_mode_id_select.value
+            wisun_phy_mode_id_select = model.vars.wisun_phy_mode_id_select.value.value
             wisun_phy_mode_id = [0]
             if wisun_phy_mode_id_select >= 16:
                 #FEC is enabled
@@ -333,7 +376,7 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
         profile_name = model.profile.name.lower()
 
-        if "wisun" in profile_name:
+        if "wisun" in profile_name or profile_name == "connect_ofdm":
             wisun_phy_mode_id = model.vars.wisun_phy_mode_id.value
             wisun_mode_switch_phr = []
             for phy_mode_id in wisun_phy_mode_id:

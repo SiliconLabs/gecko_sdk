@@ -4,7 +4,7 @@
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/padding.h"
 #include "tensorflow/lite/micro/kernels/kernel_util.h"
-#include "CMSIS/NN/Include/arm_nnfunctions.h"
+#include "Include/arm_nnfunctions.h"
 
 #include "sl_mvp_ml_conv2d.h"
 
@@ -272,9 +272,10 @@ TfLiteStatus eval_mvp_int8(TfLiteContext* context,
     data->op_params.scratch_buffer = (float16_t*)context->GetScratchBuffer(context, data->scratch_buffer_index);
   }
 
-  TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, sli_mvp_ml_conv2d_s8(&data->op_params));
+  sl_status_t status = sli_mvp_ml_conv2d_s8(&data->op_params);
+  TF_LITE_ENSURE_EQ(context, SL_STATUS_OK, status);
 
-  return kTfLiteOk;
+  return status == SL_STATUS_OK ? kTfLiteOk : kTfLiteError;
 }
 
 TfLiteStatus eval_cmsis_int8(TfLiteContext* context,

@@ -44,12 +44,11 @@ static received_frame_status_t
 CC_Security_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt, /* IN receive options of type RECEIVE_OPTIONS_TYPE_EX  */
   ZW_APPLICATION_TX_BUFFER *pCmd, /* IN  Payload from the received frame */
-  uint8_t cmdLength,              /* IN Number of command bytes including the command */
+  __attribute__((unused)) uint8_t cmdLength,              /* IN Number of command bytes including the command */
   ZW_APPLICATION_TX_BUFFER * pFrameOut,
   uint8_t * pLengthOut)
 {
   uint8_t length;
-  UNUSED(cmdLength);
 
   if(true == Check_not_legal_response_job(rxOpt))
   {

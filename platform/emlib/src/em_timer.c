@@ -52,7 +52,20 @@
 #if defined(_PRS_CONSUMER_TIMER0_CC0_MASK)
 
 /** Map TIMER reference to index of device. */
-#if defined(TIMER7)
+#if defined(TIMER9)
+#define TIMER_DEVICE_ID(timer) ( \
+    (timer) == TIMER0     ? 0    \
+    : (timer) == TIMER1   ? 1    \
+    : (timer) == TIMER2   ? 2    \
+    : (timer) == TIMER3   ? 3    \
+    : (timer) == TIMER4   ? 4    \
+    : (timer) == TIMER5   ? 5    \
+    : (timer) == TIMER6   ? 6    \
+    : (timer) == TIMER7   ? 7    \
+    : (timer) == TIMER8   ? 8    \
+    : (timer) == TIMER9   ? 9    \
+    : -1)
+#elif defined(TIMER7)
 #define TIMER_DEVICE_ID(timer) ( \
     (timer) == TIMER0     ? 0    \
     : (timer) == TIMER1   ? 1    \
@@ -127,12 +140,14 @@ static void timerPrsConfig(TIMER_TypeDef * timer, unsigned int cc, unsigned int 
 {
   int i = TIMER_DEVICE_ID(timer);
   volatile PRS_TIMERn_TypeDef * base = (PRS_TIMERn_TypeDef *) &PRS->CONSUMER_TIMER0_CC0;
-  EFM_ASSERT(i != -1);
+  EFM_ASSERT(i >= 0);
 
-  if (async) {
-    base->TIMER_CONSUMER[i].CONSUMER_CH[cc] = prsCh << _PRS_CONSUMER_TIMER0_CC0_PRSSEL_SHIFT;
-  } else {
-    base->TIMER_CONSUMER[i].CONSUMER_CH[cc] = prsCh << _PRS_CONSUMER_TIMER0_CC0_SPRSSEL_SHIFT;
+  if (i >= 0) {
+    if (async) {
+      base->TIMER_CONSUMER[i].CONSUMER_CH[cc] = prsCh << _PRS_CONSUMER_TIMER0_CC0_PRSSEL_SHIFT;
+    } else {
+      base->TIMER_CONSUMER[i].CONSUMER_CH[cc] = prsCh << _PRS_CONSUMER_TIMER0_CC0_SPRSSEL_SHIFT;
+    }
   }
 }
 #endif
@@ -181,7 +196,8 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
                | (init->oneShot          ?   TIMER_CFG_OSMEN     : 0)
                | (init->sync             ?   TIMER_CFG_SYNC      : 0)
                | (init->disSyncOut       ?   TIMER_CFG_DISSYNCOUT : 0)
-               | (init->ati              ?   TIMER_CFG_ATI       : 0);
+               | (init->ati              ?   TIMER_CFG_ATI       : 0)
+               | (init->rssCoist         ?   TIMER_CFG_RSSCOIST  : 0);
   timer->EN_SET = TIMER_EN_EN;
 #endif
 
@@ -208,9 +224,10 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
 #endif
                | (init->sync                 ?   TIMER_CTRL_SYNC      : 0);
 
-#if defined(TIMER_CTRL_X2CNT) && defined(TIMER_CTRL_ATI)
+#if defined(TIMER_CTRL_X2CNT) && defined(TIMER_CTRL_ATI) && defined(TIMER_CTRL_RSSCOIST)
   ctrlRegVal |= (init->count2x              ?   TIMER_CTRL_X2CNT     : 0)
-                | (init->ati                ?   TIMER_CTRL_ATI       : 0);
+                | (init->ati                ?   TIMER_CTRL_ATI       : 0)
+                | (init->rssCoist           ?   TIMER_CTRL_RSSCOIST  : 0);
 #endif
 
 #else

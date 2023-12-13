@@ -229,4 +229,4 @@ typedef struct {
 /** @} End of group EFR32ZG23_DPLL */
 /** @} End of group Parts */
 
-#endif /* EFR32ZG23_DPLL_H */
+#endif // EFR32ZG23_DPLL_H

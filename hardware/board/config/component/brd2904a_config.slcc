@@ -30,6 +30,16 @@
       file_id: btl_uart_driver_cfg
     path: brd2904a/btl_uart_driver_cfg.h
   - override:
+      component: cpc_primary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: mikroe
+    path: brd2904a/sl_cpc_drv_uart_eusart_mikroe_config.h
+  - override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: mikroe
+    path: brd2904a/sl_cpc_drv_uart_usart_mikroe_config.h
+  - override:
       component: cpc_secondary_driver_spi_eusart
       file_id: cpc_drv_secondary_spi_eusart_config
       instance: mikroe
@@ -41,28 +51,32 @@
     path: brd2904a/sl_cpc_drv_secondary_spi_usart_mikroe_config.h
   - override:
       component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_secondary_uart_eusart_config
+      file_id: cpc_drv_uart_eusart_config
       instance: vcom
-    path: brd2904a/sl_cpc_drv_secondary_uart_eusart_vcom_config.h
+    path: brd2904a/sl_cpc_drv_uart_eusart_vcom_config.h
   - override:
       component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_secondary_uart_eusart_config
+      file_id: cpc_drv_uart_eusart_config
       instance: mikroe
-    path: brd2904a/sl_cpc_drv_secondary_uart_eusart_mikroe_config.h
+    path: brd2904a/sl_cpc_drv_uart_eusart_mikroe_config.h
   - override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: vcom
-    path: brd2904a/sl_cpc_drv_secondary_uart_usart_vcom_config.h
+    path: brd2904a/sl_cpc_drv_uart_usart_vcom_config.h
   - override:
       component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_secondary_uart_usart_config
+      file_id: cpc_drv_uart_usart_config
       instance: mikroe
-    path: brd2904a/sl_cpc_drv_secondary_uart_usart_mikroe_config.h
+    path: brd2904a/sl_cpc_drv_uart_usart_mikroe_config.h
   - override:
       component: device_init_dcdc
       file_id: device_init_dcdc_config
     path: brd2904a/sl_device_init_dcdc_config.h
+  - override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd2904a/sl_device_init_hfxo_config.h
   - override:
       component: device_init_lfxo
       file_id: device_init_lfxo_config

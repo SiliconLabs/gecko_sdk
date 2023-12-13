@@ -328,7 +328,7 @@ void sli_power_manager_restore_states(void)
     is_hf_x_oscillator_already_started = false;
   }
 
-#if 0 // TODO This seems to cause issues in some cases. That has to be fixed.
+#if 0 // TODO PLATFORM_MTL-8499
 #if defined(_CMU_DPLLCTRL_MASK)
   if (is_dpll_used) {
     // If DPLL is used, wait for it to be ready.

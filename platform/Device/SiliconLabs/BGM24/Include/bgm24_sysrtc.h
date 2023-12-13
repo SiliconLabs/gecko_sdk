@@ -418,4 +418,4 @@ typedef struct {
 /** @} End of group BGM24_SYSRTC */
 /** @} End of group Parts */
 
-#endif /* BGM24_SYSRTC_H */
+#endif // BGM24_SYSRTC_H

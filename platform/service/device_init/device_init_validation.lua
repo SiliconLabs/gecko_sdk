@@ -32,3 +32,32 @@ if slc.is_selected("device_init_hfxo") and slc.is_provided("device_series_1") th
     nil)
   end
 end
+
+if slc.is_selected("device_init_dpll") and slc.is_provided("device_series_2") then
+  local ref_clock = slc.config("SL_DEVICE_INIT_DPLL_REFCLK")
+
+  if ref_clock.value == "cmuSelect_HFXO" then
+    if slc.is_provided("device_init_hfxo") then
+      local hfxo_freq = tonumber(slc.config("SL_DEVICE_INIT_HFXO_FREQ").value)
+      local dpll_n = tonumber(slc.config("SL_DEVICE_INIT_DPLL_N").value)
+      local dpll_m = tonumber(slc.config("SL_DEVICE_INIT_DPLL_M").value)
+      local dpll_freq_expert = tonumber(slc.config("SL_DEVICE_INIT_DPLL_FREQ").value)
+
+      -- check formula validation: dpll_freq = hfxo_freq * (N+1)/(M+1)
+      local dpll_freq = hfxo_freq * (dpll_n + 1) / (dpll_m + 1)
+      if dpll_freq ~= dpll_freq_expert then
+        validation.warning(
+        "Target frequency is not reacheable based on HFXO_FREQ",
+        validation.target_for_defines({"SL_DEVICE_INIT_DPLL_FREQ"}),
+        nil,
+        nil)
+      end
+    else
+      validation.warning(
+      "HFXO is not initialized in this project",
+      validation.target_for_defines({"SL_DEVICE_INIT_DPLL_REFCLK"}),
+      "HFXO needs to be initialized",
+      nil)
+    end
+  end
+end

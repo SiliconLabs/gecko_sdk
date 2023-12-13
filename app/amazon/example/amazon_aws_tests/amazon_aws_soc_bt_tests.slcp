@@ -67,7 +67,7 @@ configuration:
     value: 1
   # Bluetooth HAL settings
   - name: SL_BT_HAL_DEFAULT_IO_CAPABILITIES
-    value: sm_io_capability_displayyesno
+    value: sl_bt_sm_io_capability_displayyesno
   - name: SL_BT_HAL_DEFAULT_SECURITY_CONFIG_BONDING_REQUIRES_MITM_PROTECTION
     value: 1
   - name: SL_BT_HAL_DEFAULT_SECURITY_CONFIG_ENCRYPTION_REQUIRES_BONDING

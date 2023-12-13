@@ -33,8 +33,8 @@
 // -----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "em_chip.h"
+#include "em_cmu.h"
 #include "app_log.h"
 #include "app_framework_common.h"
 #include "sl_simple_led_instances.h"
@@ -183,6 +183,7 @@ void emberAfStackStatusCallback(EmberStatus status)
  *****************************************************************************/
 void state_machine_handler(void)
 {
+  static bool reset_needed = false;
   emberEventControlSetInactive(*state_machine_event);
   switch (state) {
     case S_INIT:
@@ -237,13 +238,17 @@ void state_machine_handler(void)
       break;
     case S_ERROR:
       app_log_error("Error occurred\n");
-      halReboot();
+      reset_needed = true;
       break;
 
     default:
       app_log_warning("Invalid state\n");
       state = S_ERROR;
       break;
+  }
+
+  if (reset_needed) {
+    NVIC_SystemReset();
   }
 
   sl_send_bluetooth_indications();

@@ -1,5 +1,5 @@
-from pyradioconfig.parts.viper.calculators.calc_crc import calc_crc_viper
+from pyradioconfig.parts.bobcat.calculators.calc_crc import Calc_CRC_Bobcat
 
 
-class CalcCrcViper(calc_crc_viper):
+class CalcCrcRainier(Calc_CRC_Bobcat):
     pass

@@ -1,7 +1,7 @@
 project_name: dci_swd_programming
 package: platform
 quality: production
-label: Platform - Series 2 DCI and SWD Programming
+label: Platform Security - SoC Series 2 DCI and SWD Programming
 description: >
   This example project demonstrates the DCI and SWD Programming on Series 2 devices.
 category: Example|Platform

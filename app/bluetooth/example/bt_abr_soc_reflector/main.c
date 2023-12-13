@@ -30,7 +30,6 @@
 #include "sl_component_catalog.h"
 #include "sl_system_init.h"
 #include "app.h"
-#include "app_log.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif // SL_CATALOG_POWER_MANAGER_PRESENT
@@ -57,9 +56,7 @@ int main(void)
 #else // SL_CATALOG_KERNEL_PRESENT
   while (1) {
     // Do not remove this call: Silicon Labs components process action routine
-    // must be called from the super loop.
-    app_log_filter_threshold_set(APP_LOG_LEVEL_INFO);
-
+    // must be called from the super loop
     sl_system_process_action();
 
     // Application process.

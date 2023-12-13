@@ -23,16 +23,26 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         self._addModelVariable(model, 'antdiv_enable_dual_window', bool, ModelVariableFormat.ASCII, desc='Enable dual correlation window')
         self._addModelVariable(model, 'antdiv_adpcsigampthr', int, ModelVariableFormat.DECIMAL, desc='Signal Amplitude Threshold')
         self._addModelVariable(model, 'antdiv_adpcwndsize', int, ModelVariableFormat.DECIMAL, desc='Antenna Diversity Correlation window size in chips')
+        self._addModelVariable(model, 'antdiv_adbbss_refamp', int, ModelVariableFormat.DECIMAL, desc='Antenna Diversity ADBBSS LUT reference amplitude (coherent only)')
     pass
 
     def calc_diversity_default_configs(self, model):
+        demod_sel = model.vars.demod_select.value
+
         # : Assign default values to antenna diversity profile inputs on non-diversity phys
         model.vars.antdiv_enable_parallel_correlation.value = False
         model.vars.antdiv_switch_delay_us.value = 0.0
         model.vars.antdiv_switch_skip_us.value = 0.0
         model.vars.antdiv_adpcwndsize.value = 32
-        model.vars.antdiv_freq_offset_bias.value = -16
         model.vars.antdiv_adpcsigampthr.value = 0
+        model.vars.antdiv_adbbss_refamp.value = 0
+
+        # : Disable freq offset bias for coherent mode
+        if demod_sel == model.vars.demod_select.var_enum.COHERENT:
+            freq_offset_bias = 0
+        else:
+            freq_offset_bias = -16
+        model.vars.antdiv_freq_offset_bias.value = freq_offset_bias
 
     def calc_diversity_adpcen(self, model):
         enable_parallel_correlation = model.vars.antdiv_enable_parallel_correlation.value
@@ -127,6 +137,7 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             self._reg_write(model.vars.MODEM_ADPC8_ADPCANTSAMPSWITCH, 0xBE)
 
     def calc_diversity_adctrl1(self, model):
+        demod_sel = model.vars.demod_select.value
         adpcen = model.vars.MODEM_ADPC1_ADPCEN.value
         frequency_offset_bias = model.vars.antdiv_freq_offset_bias.value
         adbacorrthr = model.vars.MODEM_ADQUAL6_ADBACORRTHR.value
@@ -135,11 +146,18 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         # : Enable or disable correlation threshold decision
         adbacorrthr_dis_val = 1 if adbacorrthr == 0 else 0
 
+
         # : Enable or disable correlation difference decision
         adbacorrdiff_dis_val = 1 if adbacorrdiff == 0 else 0
 
         # : Calculate frequency offset bias by converting to two's complement
         frequency_offset_bias_val = frequency_offset_bias + 32 if frequency_offset_bias < 0 else frequency_offset_bias
+
+        # : calculate
+        if demod_sel == model.vars.demod_select.var_enum.COHERENT:
+            adbarssithr_dis_val = 1
+        else:
+            adbarssithr_dis_val = 0
 
         # : Register field definitions for adctrl1 does not exists in cmsis.
         # : Manually define offsets for each field within adctrl1 register
@@ -162,7 +180,7 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             'BA_OPT'            : [15, 0],
             'BA_CORR_HI_DIS'    : [16, adbacorrthr_dis_val],
             'BA_CORR_EQ_DIS'    : [17, adbacorrdiff_dis_val],
-            'BA_RSSI_HI_DIS'    : [18, 0],
+            'BA_RSSI_HI_DIS'    : [18, adbarssithr_dis_val],
             'BA_RSSI_EQ_DIS'    : [19, 1],
             'BA_GAIN_LO_DIS'    : [20, 0],
             'FGR_HI_CORR_DIS'   : [21, 0],
@@ -183,7 +201,16 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         self._reg_write(model.vars.MODEM_ADCTRL1_ADCTRL1, adctrl1)
 
     def calc_diversity_adctrl2(self, model):
+        demod_sel = model.vars.demod_select.value
         adpcen = model.vars.MODEM_ADPC1_ADPCEN.value
+
+        if demod_sel == model.vars.demod_select.var_enum.COHERENT:
+            wnd_amp_rst = 0
+            wnd_rst_amp = 1
+        else:
+            wnd_amp_rst = 1
+            wnd_rst_amp = 0
+
 
         # : Register field definitions for adctrl2 does not exists in cmsis.
         # : Manually define offsets for each field within adctrl2 register
@@ -191,8 +218,12 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             'PCORR_EN_BC' : [0,  1],
             'ANTSEL_DELAY': [11, 1],
             'BA_AMP_DIS'  : [19, 0],
-            'WND_AMP_RST' : [20, 1],
+            'WND_AMP_RST' : [20, wnd_amp_rst],
             'TIM_AMP_THR' : [21, 0],
+            'FOC_MODE0': [23, 0],
+            'FOC_MODE1': [24, 0],
+            'WND_RST_AMP' : [25, wnd_rst_amp],
+            'WND_RST_BBSS': [27, 0],
         }
 
         # : calculate ctrl2 register by applying offsets to each field
@@ -228,3 +259,43 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             antdiv_adprethresh_scale = 0.0
 
         model.vars.antdiv_adprethresh_scale.value = antdiv_adprethresh_scale
+
+    def adbbss_lut(self, refamp, nbitgain, index):
+        sat_val = round(math.pow(2, nbitgain) - 1)
+        if index == 0:
+            int_val = sat_val
+        else:
+            int_val = round(1.0 * refamp / index * math.pow(2, nbitgain - 1))
+            if int_val > sat_val:
+                int_val = sat_val
+        return int_val
+
+    def calc_adpc_adbbss(self, model):
+        demod_sel = model.vars.demod_select.value
+        refamp = model.vars.antdiv_adbbss_refamp.value
+        antdivmode = model.vars.antdivmode.value
+
+        if demod_sel == model.vars.demod_select.var_enum.COHERENT and antdivmode != model.vars.antdivmode.var_enum.DISABLE:
+            nbitgain = 5
+            adbbss_lut = []
+            for lut_idx in range(16):
+                adbbss_lut.append(self.adbbss_lut(refamp, nbitgain, lut_idx))
+        else:
+            adbbss_lut = [31, 31, 31, 31, 31, 31, 31, 27, 24, 21, 19, 17, 16, 14, 13, 12]
+
+        self._reg_write(model.vars.MODEM_ADPC4_ADBBSSAMPLUT0, adbbss_lut[0])
+        self._reg_write(model.vars.MODEM_ADPC4_ADBBSSAMPLUT1, adbbss_lut[1])
+        self._reg_write(model.vars.MODEM_ADPC4_ADBBSSAMPLUT2, adbbss_lut[2])
+        self._reg_write(model.vars.MODEM_ADPC4_ADBBSSAMPLUT3, adbbss_lut[3])
+        self._reg_write(model.vars.MODEM_ADPC5_ADBBSSAMPLUT4, adbbss_lut[4])
+        self._reg_write(model.vars.MODEM_ADPC5_ADBBSSAMPLUT5, adbbss_lut[5])
+        self._reg_write(model.vars.MODEM_ADPC5_ADBBSSAMPLUT6, adbbss_lut[6])
+        self._reg_write(model.vars.MODEM_ADPC5_ADBBSSAMPLUT7, adbbss_lut[7])
+        self._reg_write(model.vars.MODEM_ADPC6_ADBBSSAMPLUT8, adbbss_lut[8])
+        self._reg_write(model.vars.MODEM_ADPC6_ADBBSSAMPLUT9, adbbss_lut[9])
+        self._reg_write(model.vars.MODEM_ADPC6_ADBBSSAMPLUT10, adbbss_lut[10])
+        self._reg_write(model.vars.MODEM_ADPC6_ADBBSSAMPLUT11, adbbss_lut[11])
+        self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT12, adbbss_lut[12])
+        self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT13, adbbss_lut[13])
+        self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT14, adbbss_lut[14])
+        self._reg_write(model.vars.MODEM_ADPC7_ADBBSSAMPLUT15, adbbss_lut[15])

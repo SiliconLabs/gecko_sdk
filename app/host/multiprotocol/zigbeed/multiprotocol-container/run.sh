@@ -117,7 +117,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         -P|--pro-compliance)
             echo "Starting pro-compliance..."
-            docker exec -it multiprotocol /usr/local/bin/pro-compliance-posix '-r spinel+cpc://cpcd_0?iid=1&iid-list=0'
+            docker exec -it multiprotocol /usr/local/bin/pro-compliance-posix -r 'spinel+cpc://cpcd_0?iid=1&iid-list=0'
             exit
             ;;
         -L|--bluetoothctl)

@@ -493,4 +493,4 @@ typedef struct {
 /** @} End of group EFR32BG22_LETIMER */
 /** @} End of group Parts */
 
-#endif /* EFR32BG22_LETIMER_H */
+#endif // EFR32BG22_LETIMER_H

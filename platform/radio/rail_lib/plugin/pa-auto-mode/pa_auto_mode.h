@@ -106,6 +106,10 @@ RAIL_Status_t RAIL_ConfigPaAutoEntry(RAIL_Handle_t railHandle,
  * end of RAIL_API
  */
 
+#ifdef RAIL_INTERNAL_BUILD
+#include "pa_auto_mode_internal.h"
+#endif
+
 #ifdef __cplusplus
 }
 #endif

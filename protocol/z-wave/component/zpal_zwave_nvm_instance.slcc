@@ -1,0 +1,20 @@
+id: zpal_zwave_nvm_instance
+label: ZPAL Z-Wave NVM instance
+category: Z-Wave|Platform
+description: >
+  This component is used to configure the Z-Wave NVM instance used on 700 series
+  to store data from ZAF and application.
+package: Z-Wave
+quality: production
+include:
+  - path: "protocol/z-wave/platform/SiliconLabs/PAL/inc"
+    file_list:
+      - path: "zpal_zwave_nvm_instance.h"
+  - path: "platform/emdrv/nvm3/inc"
+source:
+  - path: "protocol/z-wave/platform/SiliconLabs/PAL/src/zpal_zwave_nvm_instance.c"
+provides:
+  - name: zpal_zwave_nvm_instance
+config_file:
+  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zpal_zwave_nvm_instance_config.h
+    file_id: zpal_zwave_nvm_instance

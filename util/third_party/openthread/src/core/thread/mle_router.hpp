@@ -47,13 +47,14 @@
 #include "meshcop/meshcop_tlvs.hpp"
 #include "net/icmp6.hpp"
 #include "net/udp6.hpp"
+#include "thread/child.hpp"
 #include "thread/child_table.hpp"
 #include "thread/mle.hpp"
 #include "thread/mle_tlvs.hpp"
+#include "thread/router.hpp"
 #include "thread/router_table.hpp"
 #include "thread/thread_tlvs.hpp"
 #include "thread/tmf.hpp"
-#include "thread/topology.hpp"
 
 namespace ot {
 namespace Mle {
@@ -143,7 +144,7 @@ public:
      */
     Error BecomeLeader(void);
 
-#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3_1)
+#if OPENTHREAD_CONFIG_MLE_DEVICE_PROPERTY_LEADER_WEIGHT_ENABLE
     /**
      * Gets the device properties which are used to determine the Leader Weight.
      *
@@ -264,26 +265,36 @@ public:
     /**
      * Returns the ROUTER_SELECTION_JITTER value.
      *
-     * @returns The ROUTER_SELECTION_JITTER value.
+     * @returns The ROUTER_SELECTION_JITTER value in seconds.
      *
      */
-    uint8_t GetRouterSelectionJitter(void) const { return mRouterSelectionJitter; }
+    uint8_t GetRouterSelectionJitter(void) const { return mRouterRoleTransition.GetJitter(); }
 
     /**
      * Sets the ROUTER_SELECTION_JITTER value.
      *
-     * @returns The ROUTER_SELECTION_JITTER value.
+     * @param[in] aRouterJitter  The router selection jitter value (in seconds).
      *
      */
-    Error SetRouterSelectionJitter(uint8_t aRouterJitter);
+    void SetRouterSelectionJitter(uint8_t aRouterJitter) { mRouterRoleTransition.SetJitter(aRouterJitter); }
 
     /**
-     * Returns the current router selection jitter timeout value.
+     * Indicates whether or not router role transition (upgrade from REED or downgrade to REED) is pending.
      *
-     * @returns The current router selection jitter timeout value.
+     * @retval TRUE    Router role transition is pending.
+     * @retval FALSE   Router role transition is not pending
      *
      */
-    uint8_t GetRouterSelectionJitterTimeout(void) const { return mRouterSelectionJitterTimeout; }
+    bool IsRouterRoleTransitionPending(void) const { return mRouterRoleTransition.IsPending(); }
+
+    /**
+     * Returns the current timeout delay in seconds till router role transition (upgrade from REED or downgrade to
+     * REED).
+     *
+     * @returns The timeout in seconds till router role transition, or zero if not pending role transition.
+     *
+     */
+    uint8_t GetRouterRoleTransitionTimeout(void) const { return mRouterRoleTransition.GetTimeout(); }
 
     /**
      * Returns the ROUTER_UPGRADE_THRESHOLD value.
@@ -502,6 +513,14 @@ public:
      */
     void ResetAdvertiseInterval(void);
 
+    /**
+     * Updates the MLE Advertisement Trickle timer max interval (if timer is running).
+     *
+     * This is called when there is change in router table.
+     *
+     */
+    void UpdateAdvertiseInterval(void);
+
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
     /**
      * Generates an MLE Time Synchronization message.
@@ -513,16 +532,6 @@ public:
     Error SendTimeSync(void);
 #endif
 
-#if OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-    /**
-     * Sets the delay before registering Backbone Router service.
-     *
-     * @param[in]  aDelay  The delay before registering Backbone Router service.
-     *
-     */
-    void SetBackboneRouterRegistrationDelay(uint8_t aDelay) { mBackboneRouterRegistrationDelay = aDelay; }
-#endif
-
     /**
      * Gets the maximum number of IP addresses that each MTD child may register with this device as parent.
      *
@@ -532,6 +541,7 @@ public:
     uint8_t GetMaxChildIpAddresses(void) const;
 
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+
     /**
      * Sets/restores the maximum number of IP addresses that each MTD child may register with this
      * device as parent.
@@ -560,9 +570,36 @@ public:
      *
      */
     void SetThreadVersionCheckEnabled(bool aEnabled) { mThreadVersionCheckEnabled = aEnabled; }
-#endif
+
+    /**
+     * Gets the current Interval Max value used by Advertisement trickle timer.
+     *
+     * @returns The Interval Max of Advertisement trickle timer in milliseconds.
+     *
+     */
+    uint32_t GetAdvertisementTrickleIntervalMax(void) const { return mAdvertiseTrickleTimer.GetIntervalMax(); }
+
+#endif // OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
 
 private:
+    // Advertisement trickle timer constants - all times are in milliseconds.
+    static constexpr uint32_t kAdvIntervalMin                = 1000;  // I_MIN
+    static constexpr uint32_t kAdvIntervalNeighborMultiplier = 4000;  // Multiplier for I_MAX per router neighbor
+    static constexpr uint32_t kAdvIntervalMaxLowerBound      = 12000; // Lower bound for I_MAX
+    static constexpr uint32_t kAdvIntervalMaxUpperBound      = 32000; // Upper bound for I_MAX
+    static constexpr uint32_t kReedAdvIntervalMin            = 570000;
+    static constexpr uint32_t kReedAdvIntervalMax            = 630000;
+#if OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE
+    static constexpr uint32_t kAdvIntervalMaxLogRoutes = 5000;
+#endif
+
+    static constexpr uint32_t kMaxNeighborAge                = 100000; // Max neighbor age (in msec)
+    static constexpr uint32_t kMaxLeaderToRouterTimeout      = 90000;  // (in msec)
+    static constexpr uint8_t  kMinDowngradeNeighbors         = 7;
+    static constexpr uint8_t  kNetworkIdTimeout              = 120; // (in sec)
+    static constexpr uint8_t  kRouterSelectionJitter         = 120; // (in sec)
+    static constexpr uint8_t  kRouterDowngradeThreshold      = 23;
+    static constexpr uint8_t  kRouterUpgradeThreshold        = 16;
     static constexpr uint16_t kDiscoveryMaxJitter            = 250; // Max jitter delay Discovery Responses (in msec).
     static constexpr uint16_t kChallengeTimeout              = 2;   // Challenge timeout (in sec).
     static constexpr uint16_t kUnsolicitedDataResponseJitter = 500; // Max delay for unsol Data Response (in msec).
@@ -583,6 +620,30 @@ private:
 
     static constexpr uint16_t kChildSupervisionDefaultIntervalForOlderVersion =
         OPENTHREAD_CONFIG_CHILD_SUPERVISION_OLDER_VERSION_CHILD_DEFAULT_INTERVAL;
+
+    static constexpr int8_t kParentPriorityHigh        = 1;
+    static constexpr int8_t kParentPriorityMedium      = 0;
+    static constexpr int8_t kParentPriorityLow         = -1;
+    static constexpr int8_t kParentPriorityUnspecified = -2;
+
+    class RouterRoleTransition
+    {
+    public:
+        RouterRoleTransition(void);
+
+        bool    IsPending(void) const { return (mTimeout != 0); }
+        void    StartTimeout(void);
+        void    StopTimeout(void) { mTimeout = 0; }
+        void    IncreaseTimeout(uint8_t aIncrement) { mTimeout += aIncrement; }
+        uint8_t GetTimeout(void) const { return mTimeout; }
+        bool    HandleTimeTick(void);
+        uint8_t GetJitter(void) const { return mJitter; }
+        void    SetJitter(uint8_t aJitter) { mJitter = aJitter; }
+
+    private:
+        uint8_t mTimeout;
+        uint8_t mJitter;
+    };
 
     void  HandleDetachStart(void);
     void  HandleChildStart(AttachMode aMode);
@@ -606,7 +667,9 @@ private:
     Error ProcessRouteTlv(const RouteTlv &aRouteTlv, RxInfo &aRxInfo);
     Error ReadAndProcessRouteTlvOnFed(RxInfo &aRxInfo, uint8_t aParentId);
 
-    void  StopAdvertiseTrickleTimer(void);
+    void     StopAdvertiseTrickleTimer(void);
+    uint32_t DetermineAdvertiseIntervalMax(void) const;
+
     Error SendAddressSolicit(ThreadStatusTlv::Status aStatus);
     void  SendAddressSolicitResponse(const Coap::Message    &aRequest,
                                      ThreadStatusTlv::Status aResponseStatus,
@@ -617,14 +680,14 @@ private:
     Error SendLinkAccept(const Ip6::MessageInfo &aMessageInfo,
                          Neighbor               *aNeighbor,
                          const TlvList          &aRequestedTlvList,
-                         const Challenge        &aChallenge);
-    void  SendParentResponse(Child *aChild, const Challenge &aChallenge, bool aRoutersOnlyRequest);
+                         const RxChallenge      &aChallenge);
+    void  SendParentResponse(Child *aChild, const RxChallenge &aChallenge, bool aRoutersOnlyRequest);
     Error SendChildIdResponse(Child &aChild);
     Error SendChildUpdateRequest(Child &aChild);
     void  SendChildUpdateResponse(Child                  *aChild,
                                   const Ip6::MessageInfo &aMessageInfo,
                                   const TlvList          &aTlvList,
-                                  const Challenge        &aChallenge);
+                                  const RxChallenge      &aChallenge);
     void  SendDataResponse(const Ip6::Address &aDestination,
                            const TlvList      &aTlvList,
                            uint16_t            aDelay,
@@ -661,15 +724,15 @@ private:
 
     TrickleTimer mAdvertiseTrickleTimer;
 
-#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_3_1)
+#if OPENTHREAD_CONFIG_MLE_DEVICE_PROPERTY_LEADER_WEIGHT_ENABLE
     DeviceProperties mDeviceProperties;
 #endif
 
     ChildTable  mChildTable;
     RouterTable mRouterTable;
 
-    uint8_t   mChallengeTimeout;
-    Challenge mChallenge;
+    uint8_t     mChallengeTimeout;
+    TxChallenge mChallenge;
 
     uint16_t mNextChildId;
     uint8_t  mNetworkIdTimeout;
@@ -693,15 +756,11 @@ private:
     uint8_t  mPreviousPartitionRouterIdSequence; ///< The router ID sequence when last attached
     uint8_t  mPreviousPartitionIdTimeout;        ///< The partition ID timeout when last attached
 
-    uint8_t mRouterSelectionJitter;        ///< The variable to save the assigned jitter value.
-    uint8_t mRouterSelectionJitterTimeout; ///< The Timeout prior to request/release Router ID.
+    RouterRoleTransition mRouterRoleTransition;
 
     uint8_t mChildRouterLinks;
 
     int8_t mParentPriority; ///< The assigned parent priority value, -2 means not assigned.
-#if OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-    uint8_t mBackboneRouterRegistrationDelay; ///< Delay before registering Backbone Router service.
-#endif
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     uint8_t mMaxChildIpAddresses;
 #endif
@@ -709,6 +768,8 @@ private:
 #if OPENTHREAD_CONFIG_MLE_STEERING_DATA_SET_OOB_ENABLE
     MeshCoP::SteeringData mSteeringData;
 #endif
+
+    Ip6::Netif::UnicastAddress mLeaderAloc;
 
     Callback<otThreadDiscoveryRequestCallback> mDiscoveryRequestCallback;
 };
@@ -742,7 +803,7 @@ public:
 
     Error SendChildUpdateRequest(void) { return Mle::SendChildUpdateRequest(); }
 
-    Error CheckReachability(uint16_t aMeshDest, Ip6::Header &aIp6Header)
+    Error CheckReachability(uint16_t aMeshDest, const Ip6::Header &aIp6Header)
     {
         return Mle::CheckReachability(aMeshDest, aIp6Header);
     }

@@ -5,11 +5,11 @@ quality: production
 id: zigbee_green_power_server
 category: Zigbee|Green Power
 provides:
-   - name: "zigbee_green_power_server"
+  - name: zigbee_green_power_server
 requires:
-   - name: "zigbee_gp"
-   - name: "zigbee_gp_util"
-   - name: "zigbee_green_power_common"
+  - name: zigbee_gp
+  - name: zigbee_gp_util
+  - name: zigbee_green_power_common
 
 config_file:
   - path: protocol/zigbee/app/framework/plugin/green-power-server/config/green-power-server-config.h
@@ -39,10 +39,10 @@ template_contribution:
     value: zigbee_green_power_server
   - name: cluster_service
     value:
-       cluster_id: "0x0021"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "SERVER"
-       service_function: "emberAfGreenPowerClusterServerCommandParse"    
+      cluster_id: '0x0021'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: SERVER
+      service_function: emberAfGreenPowerClusterServerCommandParse
   - name: zigbee_af_callback
     value:
       callback_type: event_init

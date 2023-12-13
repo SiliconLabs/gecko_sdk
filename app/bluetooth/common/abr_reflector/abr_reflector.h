@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief ABR reflector.
+ * @brief ABR reflector
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,14 +33,23 @@
 
 #include "sl_bt_api.h"
 #include "sl_common.h"
+#include "abr_reflector_config.h"
 
 /**************************************************************************//**
  * Bluetooth stack event handler.
- * @param[in] evt Event coming from the Bluetooth stack.
+ *
+ * @param[in] evt Event coming from the Bluetooth stack
  *****************************************************************************/
 void abr_reflector_on_bt_event(sl_bt_msg_t *evt);
 
+/**************************************************************************//**
+ * Start advertisement.
+ *****************************************************************************/
 void abr_reflector_advertise(void);
+
+/**************************************************************************//**
+ * Restart advertisement.
+ *****************************************************************************/
 void abr_reflector_restart_advertise(void);
 
 #endif // ABR_REFLECTOR_H

@@ -336,10 +336,38 @@ EmberStatus emberSetIndirectQueueTimeout(uint32_t timeoutMs);
  * passed parameters or \b 0xFF if the node is currently active on a network or
  * any of the passed parameters are invalid.
  **/
-uint8_t emberGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
-                                     EmberMacAddressMode dstAddressMode,
-                                     bool interpan,
-                                     bool secured);
+uint16_t emberGetMaximumPayloadLength(EmberMacAddressMode srcAddressMode,
+                                      EmberMacAddressMode dstAddressMode,
+                                      bool interpan,
+                                      bool secured);
+
+/**
+ * @brief Indicates if the stack is currently using long messages or not.
+ *
+ * @return True if the stack currently uses long messages (length stored in a
+ * uint16_t) or false if it is not the case (length stored in a uint8_t).
+ *
+ **/
+bool emberUsingLongMessages(void);
+
+/**
+ * @brief Set the current message length that the stack uses.
+ *
+ * @param[in] useLongMessages True to use long messages (length stored in a
+ * uint16_t), false to use short messages (length stored in a uint8_t).
+ *
+ * @note This API is here to assure retro compatibility with old NCP Host lib versions.
+ * In NCP Host lib versions that do not support OFDM features (v1.1 and older),
+ * only short messaging is supported.
+ * For the NCP, short messages are used by default. The Host lib needs to call
+ * this API with useLongMessages set to true if it supports OFDM.
+ *
+ * @warning This API changes the behavior of the Connect Serialization Protocol.
+ * It only has effect when using a RTOS or the NCP. Changing it may result in
+ * packets being incorrectly transfered through CSP when using a SUN-OFDM or
+ * SUN-FSK PHY.
+ **/
+EmberStatus emberNcpSetLongMessagesUse(bool useLongMessages);
 
 #endif //__MESSAGE_H__
 

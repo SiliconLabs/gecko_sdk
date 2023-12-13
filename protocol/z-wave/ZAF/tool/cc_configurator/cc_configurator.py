@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import glob
 import argparse
@@ -24,27 +25,17 @@ def handle_templates(configuration: Any) -> List[cc_data]:
         List[cc_data]: A list of Command Class data
     """
     command_classes = [
-        cc_base('zw_cc_color_switch', [
-            'cc_color_switch_config.c.jinja'], 'colors'),
-        cc_base('zw_cc_binaryswitch', [
-            'cc_binary_switch_config.c.jinja'], 'binary_switches'),
-        cc_base('zw_cc_multilevel_switch_support', [
-            'cc_multilevel_switch_support_config.c.jinja'], 'switches'),
+        cc_base('zw_cc_color_switch', ['cc_color_switch_config.c.jinja'], 'colors'),
+        cc_base('zw_cc_binaryswitch', ['cc_binary_switch_config.c.jinja'], 'binary_switches'),
+        cc_base('zw_cc_multilevel_switch_support', ['cc_multilevel_switch_support_config.c.jinja'], 'switches'),
         cc_multilevel_sensor(),
-        cc_base('zw_cc_configuration', [
-            'cc_configuration_config.c.jinja'], 'configurations'),
-        cc_base('zw_cc_door_lock', [
-            'cc_door_lock_config.h.jinja'], 'configuration'),
-        cc_base('zw_cc_notification', [
-            'cc_notification_config.c.jinja'], 'notifications'),
-        cc_base('zw_cc_zwaveplusinfo', [
-            'cc_zwaveplusinfo_config.c.jinja'], 'endpoints'),
-        cc_base('zw_cc_agi', [
-            'cc_agi_config.c.jinja'], 'endpoints'),
-        cc_base('zw_cc_multi_channel', [
-            'cc_multi_channel_config.c.jinja'], 'endpoints'),
-        cc_base('zw_cc_central_scene', [
-            'cc_central_scene_config.c.jinja'], 'central_scene'),
+        cc_base('zw_cc_configuration', ['cc_configuration_config.c.jinja'], 'configurations'),
+        cc_base('zw_cc_door_lock', ['cc_door_lock_config.h.jinja'], 'configuration'),
+        cc_base('zw_cc_notification', ['cc_notification_config.c.jinja'], 'notifications'),
+        cc_base('zw_cc_zwaveplusinfo', ['cc_zwaveplusinfo_config.c.jinja'], 'endpoints'),
+        cc_base('zw_cc_agi', ['cc_agi_config.c.jinja'], 'endpoints'),
+        cc_base('zw_cc_multi_channel', ['cc_multi_channel_config.c.jinja'], 'endpoints'),
+        cc_base('zw_cc_central_scene', ['cc_central_scene_config.c.jinja'], 'central_scene'),
     ]
     current_dir = os.path.dirname(os.path.abspath(__file__))
     templates_dir = os.path.join(current_dir, "templates")
@@ -91,6 +82,9 @@ def take_action(files: List[cc_data], action: str, output_dir: str) -> int:
     ret = 0
     for file in files:
         file_path = os.path.join(output_dir, file.name)
+        
+        if os.path.isdir(output_dir) == False:
+            os.mkdir(output_dir)
 
         # Generate the cc config files
         if action == "generate":
@@ -101,9 +95,7 @@ def take_action(files: List[cc_data], action: str, output_dir: str) -> int:
             with open(file_path, 'r') as fd:
                 written_data = fd.read()
                 if written_data != file.data:
-                    logging.error("{} does not match the expected content".format(
-                        os.path.basename(file_path)
-                    ))
+                    logging.error(f"{os.path.basename(file_path)} does not match the expected content")
                     ret = -1
 
     # Read files from disk and compare if they are needed
@@ -119,42 +111,24 @@ def take_action(files: List[cc_data], action: str, output_dir: str) -> int:
         only_generated = set_generated.difference(set_written)
 
         for written in only_written:
-            logging.error("{} is only written in disk but not generated".format(
-                written
-            ))
+            logging.error(f"{written} is only written in disk but not generated")
             ret = -1
         for generated in only_generated:
-            logging.error("{} is not written in disk but is generated".format(
-                generated
-            ))
+            logging.error(f"{generated} is not written in disk but is generated")
             ret = -1
 
     return ret
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description='Z-Wave Command Class configuration to C converter.')
-    parser.add_argument('-i', required=True,
-                        help='Input directory containing .cc_config files')
-    parser.add_argument(
-        '-o', required=True, help='Output directory to populate with serialized content.')
-
-    subparsers = parser.add_subparsers(
-        help='Action to be taken', dest="action")
-    subparsers.add_parser(
-        'generate', help='Generate the files from the templates')
-    subparsers.add_parser(
-        'verify', help='Verify that the files generate match the templates')
-
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Z-Wave Command Class configuration to C converter.')
+    parser.add_argument('-i', required=True, help='Input directory containing .cc_config files')
+    parser.add_argument('-o', required=True, help='Output directory to populate with serialized content.')
+    subparsers = parser.add_subparsers(help='Action to be taken', dest="action")
+    subparsers.add_parser('generate', help='Generate the files from the templates')
+    subparsers.add_parser('verify', help='Verify that the files generate match the templates')
     args = parser.parse_args()
 
     files = generate(args.i)
-
     ret = take_action(files, args.action, args.o)
-
     sys.exit(ret)
-
-
-if __name__ == "__main__":
-    main()

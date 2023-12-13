@@ -255,6 +255,10 @@ sl_status_t sl_iostream_vprintf(sl_iostream_t *stream,
                                 const char *format,
                                 va_list argp);
 
+#if defined(__GNUC__)
+__attribute__((format(printf, 2, 3)))
+#endif
+
 /***************************************************************************//**
  * Print a formated string on stream.
  *
@@ -269,9 +273,6 @@ sl_status_t sl_iostream_vprintf(sl_iostream_t *stream,
  *
  * @return  Status result
  ******************************************************************************/
-#if defined(__GNUC__)
-__attribute__((format(printf, 2, 3)))
-#endif
 sl_status_t sl_iostream_printf(sl_iostream_t *stream,
                                const char *format,
                                ...);

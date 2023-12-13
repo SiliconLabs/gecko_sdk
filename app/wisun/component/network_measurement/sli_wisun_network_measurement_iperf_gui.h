@@ -31,6 +31,10 @@
 #ifndef __SL_WISUN_NETWORK_MEASUREMENT_IPERF_GUI_H__
 #define __SL_WISUN_NETWORK_MEASUREMENT_IPERF_GUI_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
@@ -47,4 +51,9 @@
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 void sli_wisun_nwm_iperf_form(void *args);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

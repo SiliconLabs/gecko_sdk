@@ -332,16 +332,6 @@ uint32_t sl_iperf_bytes_from_formatted_bandwidth(const sl_iperf_opt_bw_format fo
                                                  const uint32_t amount_bandwidth);
 
 /**************************************************************************//**
- * @brief Calculate data bytes from formatted bandwidth
- * @details Helper function
- * @param[in] format Bandwidth format
- * @param[in] amount_bandwidth Bandwidth format
- * @return uint32_t Bytes amount
- *****************************************************************************/
-uint32_t sl_iperf_bytes_from_formatted_bandwidth(const sl_iperf_opt_bw_format format,
-                                                 const uint32_t amount_bandwidth);
-
-/**************************************************************************//**
  * @brief Check test logger pointer
  * @details Helper function
  * @param test Test

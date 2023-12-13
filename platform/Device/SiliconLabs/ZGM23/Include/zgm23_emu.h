@@ -776,4 +776,4 @@ typedef struct {
 /** @} End of group ZGM23_EMU */
 /** @} End of group Parts */
 
-#endif /* ZGM23_EMU_H */
+#endif // ZGM23_EMU_H

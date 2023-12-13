@@ -147,7 +147,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Start advertising and enable connections.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
 
       break;
@@ -163,7 +163,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       // Restart advertising after client has disconnected.
       sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_advertiser_connectable_scannable);
+                                         sl_bt_legacy_advertiser_connectable);
       app_assert_status(sc);
       app_log_info("Start advertisement." APP_LOG_NL);
       break;

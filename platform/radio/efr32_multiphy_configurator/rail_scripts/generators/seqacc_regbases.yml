@@ -1,0 +1,23 @@
+Name: seqacc_regbases
+Version: 0.01
+
+# Warning: This file should be unique and modified only when necessary.
+# The base address configurations can be referenced by their name in the source YAML file located in RAIL,
+# under the field BaseAddrCfg.
+
+# All config must end with 0xFFFFFFFF: 0xFFFFFFFF
+
+#sixg301
+rainier:
+  BaseAddrCfgDefault:
+    BasePos: 24
+    BaseAddr:
+      0x400C0000: 0
+      0xA8000000: 1
+      0xA8010000: 2
+      0xA8020000: 3
+      0xA8030000: 4
+      0xA8040000: 5
+      0xB0000000: 6
+      0xB5000000: 7
+      0xFFFFFFFF: 0xFFFFFFFF

@@ -107,8 +107,8 @@ ifneq ($(CPC), 0)
     endif
   endif
 
-  override INCLUDEPATHS += $(SDK_DIR)/app/bluetooth/common_host/cpc
-  override C_SRC += $(SDK_DIR)/app/bluetooth/common_host/cpc/cpc.c
+  override INCLUDEPATHS += $(SDK_DIR)/app/bluetooth/common_host/cpc_bt
+  override C_SRC += $(SDK_DIR)/app/bluetooth/common_host/cpc_bt/cpc_bt.c
   override CFLAGS += -DCPC
   override LDFLAGS += -lpthread -lutil
 endif

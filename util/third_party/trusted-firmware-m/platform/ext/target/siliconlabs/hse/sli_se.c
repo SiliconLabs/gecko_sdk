@@ -33,6 +33,11 @@
 #include "tfm_hal_defs.h"
 #include "tfm_hal_platform.h"
 
+int32_t tfm_hal_random_init(void)
+{
+  return TFM_HAL_SUCCESS;
+}
+
 int32_t tfm_hal_random_generate(uint8_t *rand, size_t size)
 {
   sl_status_t ret;

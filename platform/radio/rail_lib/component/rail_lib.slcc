@@ -27,11 +27,17 @@ requires:
     condition: [device_is_module]
   - name: rail_util_sequencer
     condition: [device_sdid_215]
+  - name: rail_util_sequencer
+    condition: [device_sdid_89]
   - name: rail_util_features
   - name: rail_util_power_manager_init
     condition: [power_manager]
   - name: rail_util_sfm_sequencer
     condition: [device_sdid_220]
+  - name: rail_util_hadm_gdcomp
+    condition: [hardware_board_supports_hadm]
+  - name: rail_util_hadm_antenna_offset
+    condition: [hardware_board_supports_hadm]
 
   # Note: In the future, this rail_util_rf_path dependency needs to be required by a more generic component.
   - name: rail_util_rf_path

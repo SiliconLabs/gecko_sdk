@@ -1,7 +1,7 @@
 project_name: se_manager_host_firmware_upgrade
 package: platform
 quality: production
-label: Platform - SE Manager Host Firmware Upgrade and Debug Lock
+label: Platform Security - SoC SE Manager Host Firmware Upgrade and Debug Lock
 description: >
   This example project demonstrates the host firmware upgrade and debug lock API of SE Manager.
 category: Example|Platform

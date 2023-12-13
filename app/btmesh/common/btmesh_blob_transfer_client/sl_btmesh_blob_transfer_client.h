@@ -230,7 +230,12 @@ sl_btmesh_blob_transfer_client_setup_data_provider_blob_storage(uint16_t elem_in
 
 /***************************************************************************//**
  *
- * Set up additional parameters for a new BLOB transfer
+ * Set up additional parameters for new BLOB transfers
+ *
+ * The separation and retry parameters are set for all future BLOB Transfers
+ * until the next reset (stored in RAM).
+ * On reset, the respective default separation and retry parameters are set
+ * based on the component configuration at component initialization time.
  *
  * @note This function is separated from @ref sl_btmesh_blob_transfer_client_setup
  *   because the @ref sl_btmesh_blob_transfer_client_setup shall not be called
@@ -241,20 +246,50 @@ sl_btmesh_blob_transfer_client_setup_data_provider_blob_storage(uint16_t elem_in
  * @param[in] elem_index Client model element index
  * @param[in] separation_time_ms Minimum separation time between two chunks
  *    in the same block, in milliseconds
- * @param[in] retry_time_ms Retry time of message transmissions in milliseconds
- *   (query info, transfer start, block start, block query)
- * @param[in] retry_max Maximum number of retries of message transmissions
- *   (query info, transfer start, block start, block query)
+ * @param[in] retry_time_local_ms Local retry time of message transmission
+ *    requests during query info, transfer start, block start, block query,
+ *    chunk transfer and transfer cancel procedures. Local retry time is used
+ *    when the BT Mesh stack rejects sending BLOB Transfer messages due to a
+ *    recoverable error, so BT Mesh stack API returns with recoverable error code,
+ *    for example due to lack of memory.
+ *    Local retry time shall be greater than zero.
+ * @param[in] retry_time_push_ms Retry time of message transmissions during push
+ *    transfer. The transfer start, block start, block query and transfer cancel
+ *    procedures use this retry time during push transfer to send the procedure
+ *    specific message again if at least one receiver haven't responded when retry
+ *    timeout is reached. The query info procedure use this retry time value when
+ *    the push transfer mode is selected explicitly by upper layer or both transfer
+ *    modes (push & pull) are allowed by the upper layer.
+ * @param[in] retry_time_pull_ms Retry time of message transmissions during pull
+ *    transfer. The transfer start, block start, block query and transfer cancel
+ *    procedures use this retry time during pull transfer to send the procedure
+ *    specific message again if at least one receiver haven't responded when this
+ *    retry timeout is reached.The query info procedure use this retry time when
+ *    the pull transfer mode is selected explicitly by upper layer.
+ * @param[in] retry_max_local Local max retries of message transmission
+ *    requests during query info, transfer start, block start, block query
+ *    chunk transfer and transfer cancel procedures. Max local retry is used when
+ *    the BT Mesh stack rejects sending BLOB Transfer messages due to a recoverable
+ *    error, so BT Mesh stack API returns with recoverable error code, for example
+ *    due to lack of memory
+ * @param[in] retry_threshold_remote Retry threshold of frequent message
+ *    transmissions during query info, transfer start, block start, block query
+ *    and transfer cancel procedures before infrequent message transmission is
+ *    activated with doubled retry time.
  *
  * @return Result of the parameter setup
  * @retval SL_STATUS_OK if successful
  * @retval SL_STATUS_INVALID_STATE Parameter setup called in non-idle state
+ * @retval SL_STATUS_INVALID_PARAMETER One or more parameters are invalid
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_blob_transfer_client_set_params(uint16_t elem_index,
                                                       uint16_t separation_time_ms,
-                                                      uint16_t retry_time_ms,
-                                                      uint16_t retry_max);
+                                                      uint16_t retry_time_local_ms,
+                                                      uint16_t retry_time_push_ms,
+                                                      uint16_t retry_time_pull_ms,
+                                                      uint16_t retry_max_local,
+                                                      uint16_t retry_threshold_remote);
 
 /***************************************************************************//**
  *

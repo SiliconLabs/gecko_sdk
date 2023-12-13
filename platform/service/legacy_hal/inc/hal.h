@@ -77,20 +77,94 @@
 #else
 void simulatedTimePasses(void);
 #endif // EMBER_TEST
-
+/**
+ * @brief This function will get 16u ms tick data
+ *
+ * @return
+ */
 uint16_t halCommonGetInt16uMillisecondTick(void);
+
+/**
+ * @brief This function will get 32u ms tick data
+ *
+ * @return
+ */
 uint32_t halCommonGetInt32uMillisecondTick(void);
+
+/**
+ * @brief This function will get 64u ms tick data
+ *
+ * @return
+ */
 uint64_t halCommonGetInt64uMillisecondTick(void);
+
+/**
+ * @brief This function will get 16u quater second tick data
+ *
+ * @return
+ */
 uint16_t halCommonGetInt16uQuarterSecondTick(void);
+
+/**
+ * @brief This function will start system timer
+ *
+ * @return
+ */
 uint16_t halInternalStartSystemTimer(void);
+
+/**
+ * @brief This function will delay an amount of time in us
+ *
+ * @param us second in us
+ */
 void halCommonDelayMicroseconds(uint16_t us);
+
+/**
+ * @brief This function will delay an amount of time in ms
+ *
+ * @param ms second in ms
+ */
 void halCommonDelayMilliseconds(uint16_t ms);
+
+/**
+ * @brief This function will set state to idle for an amount of time in ms
+ *
+ * @param duration second in us
+ *
+ * @return EmberStatus
+ */
 EmberStatus halCommonIdleForMilliseconds(uint32_t *duration);
+
+/**
+ * @brief This function is halStackSymbolDelayAIsr
+ */
 void halStackSymbolDelayAIsr(void);
+
+/**
+ * @brief This function is halStackRadioPowerUpBoard
+ */
 void halStackRadioPowerUpBoard(void);
+
+/**
+ * @brief This function is halStackRadioPowerUpBoard
+ */
 void halStackRadioPowerDownBoard(void);
+
+/**
+ * @brief This function is halStackProcessBootCount
+ */
 void halStackProcessBootCount(void);
+
+/**
+ * @brief This function is sli_util_debug_init
+ *
+ * @return EmberStatus
+ */
 EmberStatus sli_util_debug_init(void);
+
+/**
+ * @brief This function is sli_802154phy_radio_seed_random
+ */
 void sli_802154phy_radio_seed_random(void);
 
 /** @} (end addtogroup legacyhal) */

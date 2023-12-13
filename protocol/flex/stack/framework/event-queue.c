@@ -28,8 +28,10 @@
 // to the halfway point in the list.  This would cut the lookup time
 // almost in half without adding much complexity.
 
+#include <assert.h>
 #include "stack/include/ember.h"
-#include "hal/hal.h"
+#include "core/sli-connect-api.h"
+#include "stack/core/sli-connect-interrupt-manipulation.h"
 #include "event-queue.h"
 
 #ifdef EMBER_TEST
@@ -68,7 +70,7 @@ void emberCancelAllEvents(EventQueue *queue)
 {
   while (true) {
     Event *events = LIST_END;
-    ATOMIC(
+    CORE_ATOMIC_SECTION(
       if (queue->isrEvents != NULL) {
       events = queue->isrEvents->next;
       queue->isrEvents->next = LIST_END;
@@ -130,7 +132,7 @@ uint32_t emberEventGetRemainingMs(Event *event)
     return 0;
   } else {
     uint32_t remaining =
-      event->timeToExecute - halCommonGetInt32uMillisecondTick();
+      event->timeToExecute - emApiGetInt32uMillisecondTick();
     if (remaining < HALF_MAX_INT32U_VALUE) {
       return remaining;
     } else {
@@ -203,10 +205,10 @@ uint32_t emberMsToNextQueueEvent(EventQueue *queue)
 
 void emberRunEventQueue(EventQueue *queue)
 {
-  uint32_t now = halCommonGetInt32uMillisecondTick();
+  uint32_t now = emApiGetInt32uMillisecondTick();
   while (true) {
     Event *event = LIST_END;
-    ATOMIC(
+    CORE_ATOMIC_SECTION(
       if (queue->isrEvents != NULL) {
       event = queue->isrEvents->next;
       if (event->next == event) {
@@ -256,7 +258,7 @@ void emberEventSetDelayMs(Event *event, uint32_t delay)
   EventQueue *queue = event->actions->queue;
   if (event->actions->marker == emIsrEventMarker) {
     assert(delay == 0);
-    ATOMIC(
+    CORE_ATOMIC_SECTION(
       if (event->next != NULL) {
       // already scheduled, do nothing
     } else if (queue->isrEvents == NULL) {
@@ -272,7 +274,7 @@ void emberEventSetDelayMs(Event *event, uint32_t delay)
     // happened in ISR context and we should recompute delay times.
     // emApiEventDelayUpdatedFromIsrHandler(event);
   } else {
-    uint32_t now = halCommonGetInt32uMillisecondTick();
+    uint32_t now = emApiGetInt32uMillisecondTick();
     uint32_t timeToExecute = now + (delay < EMBER_MAX_EVENT_DELAY_MS
                                     ? delay
                                     : EMBER_MAX_EVENT_DELAY_MS);
@@ -295,7 +297,7 @@ void emberEventSetInactive(Event *event)
 {
   EventQueue *queue = event->actions->queue;
   if (event->actions->marker == emIsrEventMarker) {
-    ATOMIC(
+    CORE_ATOMIC_SECTION(
       if (event->next == NULL) {
       // do nothing
     } else if (event->next == event) {

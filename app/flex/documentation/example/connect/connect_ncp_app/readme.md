@@ -30,7 +30,7 @@ Sink*, so it can be used with *Connect - SoC Sensor* devices.
 
 For further details, review the documentation and readme of the above github
 projects and [UG435.08 - Network Co-Processor Applications with Silicon Labs
-Connect v3.x](https://www.silabs.com/documents/public/user-guides/ug435-08-network-co-processor-applications-connect-v3x.pdf)
+Connect v3.x](https://www.silabs.com/documents/public/user-guides/ug435-08-network-co-processor-applications-connect-v3.x.pdf)
 
 ## Report Bugs & Get Support
 

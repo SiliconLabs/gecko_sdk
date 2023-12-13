@@ -34,6 +34,6 @@ bool ZAF_AppName_Read(char * app_name);
  *
  * @return status of the write operation
  */
-bool ZAF_AppName_Write();
+bool ZAF_AppName_Write(void);
 
 #endif /* ZAF_APPNAME_H */

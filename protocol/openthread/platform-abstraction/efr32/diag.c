@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2021, The OpenThread Authors.
+ *  Copyright (c) 2023, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,24 +32,26 @@
  *
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/time.h>
 
-#include "common/code_utils.hpp"
-#include "common/logging.hpp"
-#include <openthread/cli.h>
 #include <openthread-core-config.h>
+#include <utils/code_utils.h>
+#include <openthread/cli.h>
 #include <openthread/platform/alarm-milli.h>
 #include <openthread/platform/diag.h>
 #include <openthread/platform/radio.h>
-#include <utils/code_utils.h>
+#include "common/code_utils.hpp"
+#include "common/debug.hpp"
+#include "common/logging.hpp"
 
-#include "platform-efr32.h"
-#include "platform-band.h"
-#include "rail_ieee802154.h"
 #include "diag.h"
 #include "em_gpio.h"
+#include "platform-band.h"
+#include "platform-efr32.h"
+#include "rail_ieee802154.h"
 
 #include "sl_status.h"
 
@@ -68,9 +70,10 @@
 #define GET_GPIO_PIN(x)     (x & GPIO_PIN_BITMASK)
 #define GET_GPIO_PORT(x)    ((x & GPIO_PORT_BITMASK) >> 16)
 
-struct PlatformDiagCommand {
-  const char *mName;
-  otError (*mCommand)(otInstance *aInstance, uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen);
+struct PlatformDiagCommand
+{
+    const char *mName;
+    otError (*mCommand)(otInstance *aInstance, uint8_t aArgsLength, char *aArgs[], char *aOutput, size_t aOutputMaxLen);
 };
 
 // Diagnostics mode variables.
@@ -103,10 +106,13 @@ static otError processAddressMatch(otInstance *aInstance,
     VerifyOrExit(otPlatDiagModeGet(), error = OT_ERROR_INVALID_STATE);
     VerifyOrExit(aArgsLength > 0, error = OT_ERROR_INVALID_ARGS);
 
-    if (strcmp(aArgs[0], "enable") == 0) {
-      error = otPlatDiagRadioAddressMatch(true);
-    } else if (strcmp(aArgs[0], "disable") == 0) {
-      error = otPlatDiagRadioAddressMatch(false);
+    if (strcmp(aArgs[0], "enable") == 0)
+    {
+        error = otPlatDiagRadioAddressMatch(true);
+    }
+    else if (strcmp(aArgs[0], "disable") == 0)
+    {
+        error = otPlatDiagRadioAddressMatch(false);
     }
 
 exit:
@@ -127,10 +133,13 @@ static otError processAutoAck(otInstance *aInstance,
     VerifyOrExit(otPlatDiagModeGet(), error = OT_ERROR_INVALID_STATE);
     VerifyOrExit(aArgsLength > 0, error = OT_ERROR_INVALID_ARGS);
 
-    if (strcmp(aArgs[0], "enable") == 0) {
-      error = otPlatDiagRadioAutoAck(true);
-    } else if (strcmp(aArgs[0], "disable") == 0) {
-      error = otPlatDiagRadioAutoAck(false);
+    if (strcmp(aArgs[0], "enable") == 0)
+    {
+        error = otPlatDiagRadioAutoAck(true);
+    }
+    else if (strcmp(aArgs[0], "disable") == 0)
+    {
+        error = otPlatDiagRadioAutoAck(false);
     }
 
 exit:
@@ -147,10 +156,10 @@ const struct PlatformDiagCommand sCommands[] = {
 };
 
 otError otPlatDiagProcess(otInstance *aInstance,
-                           uint8_t     aArgsLength,
-                           char       *aArgs[],
-                           char       *aOutput,
-                           size_t      aOutputMaxLen)
+                          uint8_t     aArgsLength,
+                          char       *aArgs[],
+                          char       *aOutput,
+                          size_t      aOutputMaxLen)
 {
     otError error = OT_ERROR_INVALID_COMMAND;
     size_t  i;
@@ -159,7 +168,10 @@ otError otPlatDiagProcess(otInstance *aInstance,
     {
         if (strcmp(aArgs[0], sCommands[i].mName) == 0)
         {
-            error = sCommands[i].mCommand(aInstance, aArgsLength - 1, aArgsLength > 1 ? &aArgs[1] : NULL, aOutput,
+            error = sCommands[i].mCommand(aInstance,
+                                          aArgsLength - 1,
+                                          aArgsLength > 1 ? &aArgs[1] : NULL,
+                                          aOutput,
                                           aOutputMaxLen);
             break;
         }
@@ -184,47 +196,50 @@ bool otPlatDiagModeGet()
 
 static RAIL_Status_t startTxStream(RAIL_StreamMode_t aMode)
 {
-    uint16_t txChannel;
+    uint16_t      txChannel;
     RAIL_Status_t status;
 
     SuccessOrExit(status = RAIL_GetChannel(gRailHandle, &txChannel));
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-  RAIL_TxOptions_t txOptions = RAIL_TX_OPTIONS_DEFAULT;
-  // Translate Tx antenna diversity mode into RAIL Tx Antenna options:
-  // If enabled, use the currently-selected antenna, otherwise leave
-  // both options 0 so Tx antenna tracks Rx antenna.
-  if (sl_rail_util_ant_div_get_tx_antenna_mode() != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED) {
-    txOptions |= ((sl_rail_util_ant_div_get_tx_antenna_selected() == SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1)
-                  ? RAIL_TX_OPTION_ANTENNA0 : RAIL_TX_OPTION_ANTENNA1);
-  }
+    RAIL_TxOptions_t txOptions = RAIL_TX_OPTIONS_DEFAULT;
+    // Translate Tx antenna diversity mode into RAIL Tx Antenna options:
+    // If enabled, use the currently-selected antenna, otherwise leave
+    // both options 0 so Tx antenna tracks Rx antenna.
+    if (sl_rail_util_ant_div_get_tx_antenna_mode() != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
+    {
+        txOptions |= ((sl_rail_util_ant_div_get_tx_antenna_selected() == SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1)
+                          ? RAIL_TX_OPTION_ANTENNA0
+                          : RAIL_TX_OPTION_ANTENNA1);
+    }
 
-  status =  RAIL_StartTxStreamAlt(gRailHandle, txChannel, aMode, txOptions);
-#else // !SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-  status =  RAIL_StartTxStream(gRailHandle, txChannel, aMode);
-#endif  // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+    status = RAIL_StartTxStreamAlt(gRailHandle, txChannel, aMode, txOptions);
+#else  // !SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
+    status = RAIL_StartTxStream(gRailHandle, txChannel, aMode);
+#endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
 exit:
-  return status;
+    return status;
 }
 
 static RAIL_Status_t stopTxStream(void)
 {
-  RAIL_Status_t status;
-  uint16_t currentChannel;
-  RAIL_SchedulerInfo_t rxSchedulerInfo = {
-    .priority = RADIO_SCHEDULER_BACKGROUND_RX_PRIORITY,
-  };
+    RAIL_Status_t        status;
+    uint16_t             currentChannel;
+    RAIL_SchedulerInfo_t rxSchedulerInfo = {
+        .priority = RADIO_SCHEDULER_BACKGROUND_RX_PRIORITY,
+    };
 
-  SuccessOrExit(status = RAIL_StopTxStream(gRailHandle));
-  // Since start transmit stream turn off the radio state,
-  // call the RAIL_StartRx to turn on radio
-  IgnoreError(RAIL_GetChannel(gRailHandle, &currentChannel));
-  assert(RAIL_StartRx(gRailHandle, currentChannel, &rxSchedulerInfo)
-                      == RAIL_STATUS_NO_ERROR);
+    SuccessOrExit(status = RAIL_StopTxStream(gRailHandle));
+    // Since start transmit stream turn off the radio state,
+    // call the RAIL_StartRx to turn on radio
+    IgnoreError(RAIL_GetChannel(gRailHandle, &currentChannel));
+
+    status = RAIL_StartRx(gRailHandle, currentChannel, &rxSchedulerInfo);
+    OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
 
 exit:
-  return status;
+    return status;
 }
 
 otError otPlatDiagRadioTransmitCarrier(otInstance *aInstance, bool aEnable)
@@ -233,14 +248,17 @@ otError otPlatDiagRadioTransmitCarrier(otInstance *aInstance, bool aEnable)
 
     RAIL_Status_t status;
 
-    if (aEnable) {
-      otLogInfoPlat("Diag CARRIER-WAVE/Tone start");
-      status = startTxStream(RAIL_STREAM_CARRIER_WAVE);
-    } else {
-      otLogInfoPlat("Diag CARRIER-WAVE/Tone stop");
-      status = stopTxStream();
+    if (aEnable)
+    {
+        otLogInfoPlat("Diag CARRIER-WAVE/Tone start");
+        status = startTxStream(RAIL_STREAM_CARRIER_WAVE);
     }
-    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED: OT_ERROR_NONE);
+    else
+    {
+        otLogInfoPlat("Diag CARRIER-WAVE/Tone stop");
+        status = stopTxStream();
+    }
+    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED : OT_ERROR_NONE);
 }
 
 otError otPlatDiagRadioTransmitStream(otInstance *aInstance, bool aEnable)
@@ -251,13 +269,15 @@ otError otPlatDiagRadioTransmitStream(otInstance *aInstance, bool aEnable)
 
     if (aEnable)
     {
-      otLogInfoPlat("Diag Stream PN9 start");
-      status = startTxStream(RAIL_STREAM_PN9_STREAM);
-    } else {
-      otLogInfoPlat("Diag Stream stop");
-      status = stopTxStream();
+        otLogInfoPlat("Diag Stream PN9 start");
+        status = startTxStream(RAIL_STREAM_PN9_STREAM);
     }
-    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED: OT_ERROR_NONE);
+    else
+    {
+        otLogInfoPlat("Diag Stream stop");
+        status = stopTxStream();
+    }
+    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED : OT_ERROR_NONE);
 }
 
 otError otPlatDiagRadioAddressMatch(bool aEnable)
@@ -266,9 +286,8 @@ otError otPlatDiagRadioAddressMatch(bool aEnable)
 
     otLogInfoPlat("Diag address-match %s", aEnable ? "enable" : "disable");
 
-    status = RAIL_IEEE802154_SetPromiscuousMode(gRailHandle,
-                                       !aEnable);
-    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED: OT_ERROR_NONE);
+    status = RAIL_IEEE802154_SetPromiscuousMode(gRailHandle, !aEnable);
+    return (status != RAIL_STATUS_NO_ERROR ? OT_ERROR_FAILED : OT_ERROR_NONE);
 }
 
 otError otPlatDiagRadioAutoAck(bool aAutoAckEnabled)

@@ -20,12 +20,16 @@
 #include "stack/include/ember.h"
 #include "stack/include/error.h"
 #include "stack/include/message.h"
+#ifdef SL_CATALOG_ZIGBEE_DELAYED_JOIN_PRESENT
+#include "stack/include/trust-center.h"
+#endif
 
 extern EmberMulticastTableEntry emberMulticastTable[];
 extern uint8_t emberMulticastTableSize;
 extern uint16_t emberApsAckTimeoutMs;
 extern uint8_t emberBindingTableSize;
 extern uint8_t sli_zigbee_max_end_device_children;
+extern uint16_t sli_zigbee_transient_device_timeout;
 extern uint8_t sli_zigbee_stack_compliance_revision;
 
 EmberMulticastTableEntry* sl_zigbee_get_multicast_table(void)
@@ -82,6 +86,24 @@ sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
 uint8_t sl_zigbee_get_max_end_device_children(void)
 {
   return sli_zigbee_max_end_device_children;
+}
+
+sl_status_t sl_zigbee_set_transient_device_table_timeout_ms(uint16_t timeout)
+{
+  sl_status_t status = SL_STATUS_OK;
+#ifdef SL_CATALOG_ZIGBEE_DELAYED_JOIN_PRESENT
+  if (timeout >= SL_ZIGBEE_TRANSIENT_DEVICE_MINIMUM_TIMEOUT_MS) {
+    sli_zigbee_transient_device_timeout = timeout;
+  } else {
+    status  = SL_STATUS_FAIL;
+  }
+#endif
+  return status;
+}
+
+uint16_t sl_zigbee_get_transient_device_table_timeout_ms(void)
+{
+  return sli_zigbee_transient_device_timeout;
 }
 
 uint8_t sl_zigbee_get_stack_compliance_revision(void)

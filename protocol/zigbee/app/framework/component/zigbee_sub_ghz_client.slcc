@@ -1,17 +1,16 @@
 package: Zigbee
-description: The Smart Energy Sub-GHz client suspends the transmission of any ZCL
-  messages for a given period when instructed so by the Sub-GHz server.
+description: The Smart Energy Sub-GHz client suspends the transmission of any ZCL messages for a given period when instructed so by the Sub-GHz server.
 id: zigbee_sub_ghz_client
 label: Sub-GHz Client
 category: Zigbee|Cluster Library|Smart Energy
 quality: production
 provides:
-   - name: "zigbee_sub_ghz_client"
+  - name: zigbee_sub_ghz_client
 source:
   - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client.c
   - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client-cli.c
     condition:
-      - "cli"
+      - cli
   - path: protocol/zigbee/app/framework/plugin/sub-ghz-client/sub-ghz-client-cb.c
 include:
   - path: protocol/zigbee/app/framework/plugin/sub-ghz-client
@@ -22,10 +21,10 @@ template_contribution:
     value: zigbee_sub_ghz_client
   - name: cluster_service
     value:
-       cluster_id: "0x070B"
-       mfg_id: "NOT_MFG_SPECIFIC"
-       side: "CLIENT"       
-       service_function: "emberAfSubGhzClusterClientCommandParse"
+      cluster_id: '0x070B'
+      mfg_id: NOT_MFG_SPECIFIC
+      side: CLIENT
+      service_function: emberAfSubGhzClusterClientCommandParse
   - name: cli_group
     value:
       group: plugin
@@ -38,10 +37,10 @@ template_contribution:
       handler: sli_zigbee_af_sub_ghz_client_cli_get_suspend_status
       help: Send the GetSuspendZCLMessagesStatus command to the Sub-GHz server.
       argument:
-      - type: uint16
-        help: Servers node ID
-      - type: uint8
-        help: Servers endpoint
+        - type: uint16
+          help: Servers node ID
+        - type: uint8
+          help: Servers endpoint
   - name: cli_command
     value:
       group: sub-ghz
@@ -49,8 +48,8 @@ template_contribution:
       handler: sli_zigbee_af_sub_ghz_client_cli_ignore_suspend_status
       help: Ignore the suspend status when sending ZCL messages (for testing purposes only).
       argument:
-      - type: int8
-        help: Whether or not the suspend status should be ignored
+        - type: int8
+          help: Whether or not the suspend status should be ignored
   - name: cli_command
     value:
       group: sub-ghz
@@ -58,13 +57,20 @@ template_contribution:
       handler: sli_zigbee_af_sub_ghz_client_cli_request_channel_change
       help: Send the Mgmt_NWK_Unsolicited_Enhanced_Update_notify command to the Sub-GHz server.
       argument:
-      - type: uint16
-        help: Servers node ID
-      - type: uint8
-        help: Current channel page
-      - type: uint8
-        help: Current channel
-      - type: uint16
+        - type: uint16
+          help: Servers node ID
+        - type: uint8
+          help: Current channel page
+        - type: uint8
+          help: Current channel
+        - type: uint16
+          help: Total number of Mac Tx transaction attempts
+        - type: uint16
+          help: Total number of Mac Tx transaction failures
+        - type: uint16
+          help: Total number of Mac Tx transaction retries
+        - type: uint8
+          help: Time in minutes over which the Mac Tx counts were measured
 documentation:
   docset: zigbee
   document: zigbee-af-api/sub-ghz-client

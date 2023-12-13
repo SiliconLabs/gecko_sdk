@@ -121,6 +121,8 @@ configuration:
     condition: [device_sdid_220, hardware_board_default_rf_band_470]
   - name: SL_MBEDTLS_SSL_IN_CONTENT_LEN
     value: 1024
+  - name: BUFFER_SIZE_UP
+    value: 8192
 
 template_contribution:
   - name: "event_handler"
@@ -150,6 +152,30 @@ template_contribution:
       help: "Connect to a Wi-SUN network using FAN1.1 settings: w j11"
       shortcuts:
         - name: "j11"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_fsk"
+      handler: "app_join_custom_fsk"
+      help: "Connect to a Wi-SUN network using custom FSK PHY settings: w jcf"
+      shortcuts:
+        - name: "jcf"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_ofdm"
+      handler: "app_join_custom_ofdm"
+      help: "Connect to a Wi-SUN network using custom OFDM PHY settings: w jcof"
+      shortcuts:
+        - name: "jcof"
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "join_custom_oqpsk"
+      handler: "app_join_custom_oqpsk"
+      help: "Connect to a Wi-SUN network using custom OQPSK PHY settings: w jcoq"
+      shortcuts:
+        - name: "jcoq"
 
   - name: "cli_command"
     value:
@@ -361,6 +387,15 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
+      name: "set_lfn_support"
+      handler: "app_set_lfn_support"
+      help: "configure LFN support"
+      argument:
+        - type: uint8
+          help: "lfn_limit: Number of locally supported LFN"
+  - name: "cli_command"
+    value:
+      group: "wisun"
       name: "mode_switch"
       handler: "app_mode_switch"
       help: "configure mode witch: w ms"
@@ -434,7 +469,7 @@ template_contribution:
         - name: "sttx"
 
 readme:
-  - path: ../../../../app/wisun/documentation/example/wisun_cli/readme_lfn.md
+  - path: ../../../../app/wisun/documentation/example/wisun_cli/readme.md
 
 other_file:
   - path: ../../../../app/wisun/documentation/example/wisun_cli/readme_img0.png

@@ -63,6 +63,10 @@ static void mainloop(void *aContext)
 {
     (void)aContext;
 
+#if defined(SL_CATALOG_OT_CRASH_HANDLER_PRESENT)
+    efr32PrintResetInfo();
+#endif
+
     otInstance *instance = otGetInstance();
     while (!otSysPseudoResetWasRequested())
     {

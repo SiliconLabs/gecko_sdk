@@ -10,6 +10,16 @@ def _buildModelOutputStringFromRegisterField(hw_string, category):
     return "ModelOutput(model.vars.{0}, '{1}', ModelOutputType.SVD_REG_FIELD, readable_name = '{0}')".format(hw_string, category)
 
 """
+Builds studio log outputs into modem model
+"""
+def buildStudioLogOutput(model, profile):
+    for var_name in model.profile.outputs.__dict__.keys():
+        model_attr = getattr(model.profile.outputs, var_name)
+        if 'ModelOutput' in str(type(model_attr)):
+            if model_attr.output_type == ModelOutputType.INFO or model_attr.output_type == ModelOutputType.LINKED_IO:
+                model_attr.in_public_log = True
+
+"""
 Builds the inputs and outputs of the CRC block
 """
 def buildCrcInputs(model, profile):

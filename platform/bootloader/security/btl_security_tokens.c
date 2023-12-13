@@ -30,8 +30,12 @@ const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
   CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
   uint8_t se_platform_pubKey[64];
-  SE_Response_t ret = SE_readPubkey(SE_KEY_TYPE_BOOT, &se_platform_pubKey, 64, false);
-  if (ret == SE_RESPONSE_INTERNAL_ERROR || ret == SE_RESPONSE_NOT_INITIALIZED) {
+  sl_se_command_context_t cmd_ctx = { 0u };
+  sl_status_t ret = sl_se_read_pubkey(&cmd_ctx,
+                                      SL_SE_KEY_TYPE_IMMUTABLE_BOOT,
+                                      &se_platform_pubKey,
+                                      64);
+  if (ret == SL_STATUS_FAIL || ret == SL_STATUS_NOT_INITIALIZED) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_X);
   } else {
     return NULL;
@@ -53,8 +57,12 @@ const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
   CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
   uint8_t se_platform_pubKey[64];
-  SE_Response_t ret = SE_readPubkey(SE_KEY_TYPE_BOOT, &se_platform_pubKey, 64, false);
-  if (ret == SE_RESPONSE_INTERNAL_ERROR || ret == SE_RESPONSE_NOT_INITIALIZED) {
+  sl_se_command_context_t cmd_ctx = { 0u };
+  sl_status_t ret = sl_se_read_pubkey(&cmd_ctx,
+                                      SL_SE_KEY_TYPE_IMMUTABLE_BOOT,
+                                      &se_platform_pubKey,
+                                      64);
+  if (ret == SL_STATUS_FAIL || ret == SL_STATUS_NOT_INITIALIZED) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_Y);
   } else {
     return NULL;

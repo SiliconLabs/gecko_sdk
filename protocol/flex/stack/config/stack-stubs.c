@@ -33,7 +33,6 @@
 #endif
 
 #include "stack/include/ember.h"
-#include "hal/hal.h"
 #include "sl_component_catalog.h"
 #include "stack/include/radio-stream.h"
 #include "stack/core/sli-connect-api.h"
@@ -149,6 +148,7 @@ EmberStatus emApiFrequencyHoppingStop(void)
 // Parent Support
 
 #ifndef SL_CATALOG_CONNECT_PARENT_SUPPORT_PRESENT
+#include "stack/framework/sli-connect-random.h"
 
 extern EmberNodeId emNewChildShortId;
 
@@ -188,7 +188,7 @@ EmberStatus emParentSubmit(EmberNodeId macSource,
 EmberNodeId emParentGetNewChildId(void)
 {
   if (emNewChildShortId == EMBER_NULL_NODE_ID) {
-    return halCommonGetRandom();
+    return sli_connect_get_random();
   } else {
     return emNewChildShortId;
   }

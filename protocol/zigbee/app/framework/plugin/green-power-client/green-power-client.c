@@ -811,6 +811,21 @@ bool sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response(uint
   return status;
 }
 
+static UNUSED uint8_t qualityBasedDelay(uint8_t gpdLink)
+{
+  uint8_t ourLqi = (gpdLink & 0xC0) >> 5;
+  return ((3 - ourLqi) << 5);
+}
+
+static UNUSED void gppTunnelingDelay(uint8_t bidirectionalInfo, uint8_t gpdLink)
+{
+  if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
+    sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+  } else {
+    sli_zigbee_af_set_add_delay(GP_DMIN_U + qualityBasedDelay(gpdLink));
+  }
+}
+
 static bool autoCommissioningCallback(GP_PARAMS)
 {
   uint16_t options = 0;
@@ -856,23 +871,26 @@ static bool autoCommissioningCallback(GP_PARAMS)
   options |= gpdfSecurityKeyType
              << GP_COMMISSIONING_SECURITY_KEY_TYPE_TO_OPTIONS_SHIFT; //security key type
   options |= EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_PROXY_INFO_PRESENT;
-  emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
-                                                                      addr->id.sourceId,
-                                                                      addr->id.gpdIeeeAddress,
-                                                                      addr->endpoint,
-                                                                      sequenceNumber,
-                                                                      gpdfSecurityLevel,
-                                                                      gpdSecurityFrameCounter,
-                                                                      gpdCommandId,
-                                                                      gpdCommandPayloadLength,
-                                                                      gpdCommandPayload,
-                                                                      emberGetNodeId(),
-                                                                      gpdLink,
-                                                                      mic);
+  if (emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
+                                                                          addr->id.sourceId,
+                                                                          addr->id.gpdIeeeAddress,
+                                                                          addr->endpoint,
+                                                                          sequenceNumber,
+                                                                          gpdfSecurityLevel,
+                                                                          gpdSecurityFrameCounter,
+                                                                          gpdCommandId,
+                                                                          gpdCommandPayloadLength,
+                                                                          gpdCommandPayload,
+                                                                          emberGetNodeId(),
+                                                                          gpdLink,
+                                                                          mic) == 0) {
+    return true;
+  }
+
   apsFrame = emberAfGetCommandApsFrame();
   apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
   apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
-  sli_zigbee_af_set_add_delay(GP_DMIN_U);
+  gppTunnelingDelay(bidirectionalInfo, gpdLink);
   if (commissioningState.unicastCommunication) {
     emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                               commissioningState.commissioningSink);
@@ -885,12 +903,6 @@ static bool autoCommissioningCallback(GP_PARAMS)
   }
   sli_zigbee_af_set_add_delay(0);
   return true;
-}
-
-static UNUSED uint8_t qualityBasedDelay(uint8_t gpdLink)
-{
-  uint8_t ourLqi = (gpdLink & 0xC0) >> 5;
-  return ((3 - ourLqi) << 5);
 }
 
 static bool commissioningGpdfCallback(GP_PARAMS)
@@ -978,24 +990,23 @@ static bool commissioningGpdfCallback(GP_PARAMS)
                << GP_COMMISSIONING_SECURITY_LEVEL_TO_OPTIONS_SHIFT;
     options |= EMBER_AF_GP_COMMISSIONING_NOTIFICATION_OPTION_PROXY_INFO_PRESENT;
     if (commissioningState.unicastCommunication) {
-      emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
-                                                                          addr->id.sourceId,
-                                                                          addr->id.gpdIeeeAddress,
-                                                                          addr->endpoint,
-                                                                          sequenceNumber,
-                                                                          gpdfSecurityLevel,
-                                                                          gpdSecurityFrameCounter,
-                                                                          gpdCommandId,
-                                                                          gpdCommandPayloadLength,
-                                                                          gpdCommandPayload,
-                                                                          emberGetNodeId(),
-                                                                          gpdLink,
-                                                                          mic);
-      if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        sli_zigbee_af_set_add_delay(GP_DMIN_B);
-      } else {
-        sli_zigbee_af_set_add_delay(GP_DMIN_U);
+      if (emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
+                                                                              addr->id.sourceId,
+                                                                              addr->id.gpdIeeeAddress,
+                                                                              addr->endpoint,
+                                                                              sequenceNumber,
+                                                                              gpdfSecurityLevel,
+                                                                              gpdSecurityFrameCounter,
+                                                                              gpdCommandId,
+                                                                              gpdCommandPayloadLength,
+                                                                              gpdCommandPayload,
+                                                                              emberGetNodeId(),
+                                                                              gpdLink,
+                                                                              mic) == 0) {
+        goto kickout;
       }
+
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
@@ -1003,29 +1014,28 @@ static bool commissioningGpdfCallback(GP_PARAMS)
                                                             commissioningState.commissioningSink);
       sli_zigbee_af_set_add_delay(0);
     } else {
-      emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
-                                                                          addr->id.sourceId,
-                                                                          addr->id.gpdIeeeAddress,
-                                                                          addr->endpoint,
-                                                                          sequenceNumber,
-                                                                          gpdfSecurityLevel,
-                                                                          gpdSecurityFrameCounter,
-                                                                          gpdCommandId,
-                                                                          gpdCommandPayloadLength,
-                                                                          gpdCommandPayload,
-                                                                          emberGetNodeId(),
-                                                                          gpdLink,
-                                                                          mic);
+      if (emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
+                                                                              addr->id.sourceId,
+                                                                              addr->id.gpdIeeeAddress,
+                                                                              addr->endpoint,
+                                                                              sequenceNumber,
+                                                                              gpdfSecurityLevel,
+                                                                              gpdSecurityFrameCounter,
+                                                                              gpdCommandId,
+                                                                              gpdCommandPayloadLength,
+                                                                              gpdCommandPayload,
+                                                                              emberGetNodeId(),
+                                                                              gpdLink,
+                                                                              mic) == 0) {
+        goto kickout;
+      }
+
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
       apsFrame->sequence = sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
-      if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
-      } else {
-        sli_zigbee_af_set_add_delay(GP_DMIN_U);
-      }
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
 
       UNUSED EmberStatus retval = emberAfSendCommandBroadcastWithAlias(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
                                                                        sli_zigbee_af_gpd_alias(addr),
@@ -1072,46 +1082,52 @@ static bool channelRequestGpdfCallback(GP_PARAMS)
     EmberApsFrame *apsFrame;
 
     if (commissioningState.unicastCommunication) {
-      emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
-                                                                          0x00000000, //addr.id.sourceId,
-                                                                          NULL, //addr.id.gpdIeeeAddress,
-                                                                          0, //addr.endpoint,
-                                                                          sequenceNumber,
-                                                                          gpdfSecurityLevel,
-                                                                          gpdSecurityFrameCounter,
-                                                                          gpdCommandId,
-                                                                          gpdCommandPayloadLength,
-                                                                          gpdCommandPayload,
-                                                                          emberGetNodeId(),
-                                                                          gpdLink,
-                                                                          mic);
+      if (emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
+                                                                              0x00000000, //addr.id.sourceId,
+                                                                              NULL, //addr.id.gpdIeeeAddress,
+                                                                              0, //addr.endpoint,
+                                                                              sequenceNumber,
+                                                                              gpdfSecurityLevel,
+                                                                              gpdSecurityFrameCounter,
+                                                                              gpdCommandId,
+                                                                              gpdCommandPayloadLength,
+                                                                              gpdCommandPayload,
+                                                                              emberGetNodeId(),
+                                                                              gpdLink,
+                                                                              mic) == 0) {
+        return true;
+      }
+
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
-      sli_zigbee_af_set_add_delay(GP_DMIN_B);
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
       UNUSED EmberStatus retval = emberAfSendCommandUnicast(EMBER_OUTGOING_DIRECT,
                                                             commissioningState.commissioningSink);
       sli_zigbee_af_set_add_delay(0);
     } else {
-      emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
-                                                                          0x00000000, //addr.id.sourceId,
-                                                                          NULL, //addr.id.gpdIeeeAddress,
-                                                                          0, //addr.endpoint,
-                                                                          sequenceNumber,
-                                                                          gpdfSecurityLevel,
-                                                                          gpdSecurityFrameCounter,
-                                                                          gpdCommandId,
-                                                                          gpdCommandPayloadLength,
-                                                                          gpdCommandPayload,
-                                                                          emberGetNodeId(),
-                                                                          gpdLink,
-                                                                          mic);
+      if (emberAfFillCommandGreenPowerClusterGpCommissioningNotificationSmart(options,
+                                                                              0x00000000, //addr.id.sourceId,
+                                                                              NULL, //addr.id.gpdIeeeAddress,
+                                                                              0, //addr.endpoint,
+                                                                              sequenceNumber,
+                                                                              gpdfSecurityLevel,
+                                                                              gpdSecurityFrameCounter,
+                                                                              gpdCommandId,
+                                                                              gpdCommandPayloadLength,
+                                                                              gpdCommandPayload,
+                                                                              emberGetNodeId(),
+                                                                              gpdLink,
+                                                                              mic) == 0) {
+        return true;
+      }
+
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT; //emberAfCurrentEndpoint();
       apsFrame->sequence = sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
-      sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
       UNUSED EmberStatus retval = emberAfSendCommandBroadcastWithAlias(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
                                                                        sli_zigbee_af_gpd_alias(addr),
                                                                        sequenceNumber - EMBER_GP_COMMISSIONING_NOTIFICATION_SEQUENCE_NUMBER_OFFSET);
@@ -1190,16 +1206,19 @@ static bool gpdfForwardCallback(GP_PARAMS)
     gpdSecurityFrameCounter = (uint32_t)(sequenceNumber & 0x000000ff);
   }
 
-  emberAfFillCommandGreenPowerClusterGpNotificationSmart(options,
-                                                         addr->id.sourceId,
-                                                         addr->id.gpdIeeeAddress,
-                                                         addr->endpoint,
-                                                         gpdSecurityFrameCounter,
-                                                         gpdCommandId,
-                                                         gpdCommandPayloadLength,
-                                                         gpdCommandPayload,
-                                                         emberGetNodeId(),
-                                                         gpdLink);
+  if (emberAfFillCommandGreenPowerClusterGpNotificationSmart(options,
+                                                             addr->id.sourceId,
+                                                             addr->id.gpdIeeeAddress,
+                                                             addr->endpoint,
+                                                             gpdSecurityFrameCounter,
+                                                             gpdCommandId,
+                                                             gpdCommandPayloadLength,
+                                                             gpdCommandPayload,
+                                                             emberGetNodeId(),
+                                                             gpdLink) == 0) {
+    return true;
+  }
+
   // The Proxy table gets populated from the Gp Pairing message that does not have capability to accept the
   // sink group list. But in a combo application, that has both sink and proxy, the sink list can be supplied
   // using the Gp Pairing Configuration command from a commissioning tool and the sink table holds those
@@ -1216,11 +1235,7 @@ static bool gpdfForwardCallback(GP_PARAMS)
       apsFrame = emberAfGetCommandApsFrame();
       apsFrame->sourceEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
       apsFrame->destinationEndpoint = EMBER_GP_ENDPOINT;  //emberAfCurrentEndpoint();
-      if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        sli_zigbee_af_set_add_delay(GP_DMIN_B);
-      } else {
-        sli_zigbee_af_set_add_delay(GP_DMIN_U);
-      }
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
       // The sinkNodeId is optimised to not be in the proxy table token structure because it can be looked up.
       // Incase the proxy table is updated witha valid address earlier it needs to use that.
       // So, check if the proxy table node id is not valid UCAST id before looking up the map and then forward the notification.
@@ -1241,11 +1256,7 @@ static bool gpdfForwardCallback(GP_PARAMS)
       apsFrame->sequence = sequenceNumber - EMBER_GP_NOTIFICATION_COMMISSIONED_GROUPCAST_SEQUENCE_NUMBER_OFFSET;
       apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
       apsFrame->radius = entry.groupcastRadius;
-      if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-        sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
-      } else {
-        sli_zigbee_af_set_add_delay(GP_DMIN_U);
-      }
+      gppTunnelingDelay(bidirectionalInfo, gpdLink);
       UNUSED EmberStatus retval = emberAfSendCommandMulticastWithAlias(entry.sinkList[i].target.groupcast.groupID,
                                                                        (entry.sinkList[i].target.groupcast.alias == 0xFFFF)
                                                                        ? sli_zigbee_af_gpd_alias(addr)
@@ -1261,11 +1272,7 @@ static bool gpdfForwardCallback(GP_PARAMS)
     apsFrame->sequence = sequenceNumber;
     apsFrame->options |= EMBER_APS_OPTION_USE_ALIAS_SEQUENCE_NUMBER;
     apsFrame->radius = entry.groupcastRadius;
-    if (bidirectionalInfo & EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK) {
-      sli_zigbee_af_set_add_delay(GP_DMIN_B + qualityBasedDelay(gpdLink));
-    } else {
-      sli_zigbee_af_set_add_delay(GP_DMIN_U);
-    }
+    gppTunnelingDelay(bidirectionalInfo, gpdLink);
 
     //get derived alias for address alias and group ID alias
     if (entry.options & EMBER_AF_GP_PROXY_TABLE_ENTRY_OPTIONS_ASSIGNED_ALIAS) {

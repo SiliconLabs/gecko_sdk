@@ -340,16 +340,16 @@ CC_MultilevelSwitch_report_stx(zaf_tx_options_t *tx_options, void* p_switch)
 {
   DPRINT("\nCC_MultilevelSwitch_report_stx()");
   /* Prepare payload for report */
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
   cc_multilevel_switch_t *p_switch_data = (cc_multilevel_switch_t *)p_switch;
 
-  txBuf.ZW_SwitchMultilevelReportV4Frame.cmdClass     = COMMAND_CLASS_SWITCH_MULTILEVEL;
-  txBuf.ZW_SwitchMultilevelReportV4Frame.cmd          = SWITCH_MULTILEVEL_REPORT;
-  txBuf.ZW_SwitchMultilevelReportV4Frame.currentValue = ZAF_Actuator_GetCurrentValue(&p_switch_data->actuator);
-  txBuf.ZW_SwitchMultilevelReportV4Frame.targetValue  = ZAF_Actuator_GetTargetValue(&p_switch_data->actuator);
-  txBuf.ZW_SwitchMultilevelReportV4Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator);
-
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_SwitchMultilevelReportV4Frame.cmdClass     = COMMAND_CLASS_SWITCH_MULTILEVEL,
+    .ZW_SwitchMultilevelReportV4Frame.cmd          = SWITCH_MULTILEVEL_REPORT,
+    .ZW_SwitchMultilevelReportV4Frame.currentValue = ZAF_Actuator_GetCurrentValue(&p_switch_data->actuator),
+    .ZW_SwitchMultilevelReportV4Frame.targetValue  = ZAF_Actuator_GetTargetValue(&p_switch_data->actuator),
+    .ZW_SwitchMultilevelReportV4Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator)
+  };
+  tx_options->use_supervision = true;
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_SWITCH_MULTILEVEL_REPORT_V4_FRAME),
                           ZAF_TSE_TXCallback,
@@ -479,19 +479,18 @@ uint8_t cc_multilevel_switch_get_last_on_value(cc_multilevel_switch_t * p_switch
   return ZAF_Actuator_GetLastOnValue(&p_switch->actuator);
 }
 
-uint8_t cc_multilevel_switch_get_min_value()
+uint8_t cc_multilevel_switch_get_min_value(void)
 {
   return CC_MULTILEVEL_SWITCH_ACTUATOR_MIN_VALUE;
 }
 
-uint8_t cc_multilevel_switch_get_max_value()
+uint8_t cc_multilevel_switch_get_max_value(void)
 {
   return CC_MULTILEVEL_SWITCH_ACTUATOR_MAX_VALUE;
 }
 
-ZW_WEAK void cc_multilevel_switch_support_cb(struct cc_multilevel_switch_t * p_switch)
+ZW_WEAK void cc_multilevel_switch_support_cb(__attribute__((unused)) struct cc_multilevel_switch_t * p_switch)
 {
-  UNUSED(p_switch);
 }
 
 /**************************************************************************************************

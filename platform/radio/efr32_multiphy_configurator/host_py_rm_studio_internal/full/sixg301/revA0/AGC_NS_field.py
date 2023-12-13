@@ -334,6 +334,16 @@ class RM_Field_AGC_NS_CTRL0_ADCATTENMODE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
+class RM_Field_AGC_NS_CTRL0_INRXRSTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL0_INRXRSTEN, self).__init__(register,
+            'INRXRSTEN', 'AGC_NS.CTRL0.INRXRSTEN', 'read-write',
+            u"",
+            24, 1)
+        self.__dict__['zz_frozen'] = True
+
+
 class RM_Field_AGC_NS_CTRL0_ADCATTENCODE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -471,6 +481,66 @@ class RM_Field_AGC_NS_CTRL1_CFLOOPINCREQMODE(Base_RM_Field):
             'CFLOOPINCREQMODE', 'AGC_NS.CTRL1.CFLOOPINCREQMODE', 'read-write',
             u"",
             20, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_ENRSSIINITGAINCHG(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_ENRSSIINITGAINCHG, self).__init__(register,
+            'ENRSSIINITGAINCHG', 'AGC_NS.CTRL1.ENRSSIINITGAINCHG', 'read-write',
+            u"",
+            21, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_DISPWRERRCOMP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_DISPWRERRCOMP, self).__init__(register,
+            'DISPWRERRCOMP', 'AGC_NS.CTRL1.DISPWRERRCOMP', 'read-write',
+            u"",
+            25, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_ENAGCRSTALL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_ENAGCRSTALL, self).__init__(register,
+            'ENAGCRSTALL', 'AGC_NS.CTRL1.ENAGCRSTALL', 'read-write',
+            u"",
+            26, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_RSSIVALIDMODE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_RSSIVALIDMODE, self).__init__(register,
+            'RSSIVALIDMODE', 'AGC_NS.CTRL1.RSSIVALIDMODE', 'read-write',
+            u"",
+            27, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_RSSIINITGAINSTEPTHR(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_RSSIINITGAINSTEPTHR, self).__init__(register,
+            'RSSIINITGAINSTEPTHR', 'AGC_NS.CTRL1.RSSIINITGAINSTEPTHR', 'read-write',
+            u"",
+            28, 3)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL1_INRXRSSIGATING(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL1_INRXRSSIGATING, self).__init__(register,
+            'INRXRSSIGATING', 'AGC_NS.CTRL1.INRXRSSIGATING', 'read-write',
+            u"",
+            31, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -1381,6 +1451,16 @@ class RM_Field_AGC_NS_AGCPERIOD0_PERIODHI(Base_RM_Field):
             'PERIODHI', 'AGC_NS.AGCPERIOD0.PERIODHI', 'read-write',
             u"",
             0, 9)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_AGCPERIOD0_PERIODHISTL(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_AGCPERIOD0_PERIODHISTL, self).__init__(register,
+            'PERIODHISTL', 'AGC_NS.AGCPERIOD0.PERIODHISTL', 'read-write',
+            u"",
+            9, 1)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2524,46 +2604,6 @@ class RM_Field_AGC_NS_RSSIABSTHR_SIRSSINEGSTEPTHR(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_AGC_NS_LNABOOST_BOOSTLNA(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_BOOSTLNA, self).__init__(register,
-            'BOOSTLNA', 'AGC_NS.LNABOOST.BOOSTLNA', 'read-write',
-            u"",
-            0, 1)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_LNABWADJ(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_LNABWADJ, self).__init__(register,
-            'LNABWADJ', 'AGC_NS.LNABOOST.LNABWADJ', 'read-write',
-            u"",
-            1, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_LNABWADJBOOST(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_LNABWADJBOOST, self).__init__(register,
-            'LNABWADJBOOST', 'AGC_NS.LNABOOST.LNABWADJBOOST', 'read-write',
-            u"",
-            5, 4)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_LNABOOST_LNABOOSTGAIN(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_LNABOOST_LNABOOSTGAIN, self).__init__(register,
-            'LNABOOSTGAIN', 'AGC_NS.LNABOOST.LNABOOSTGAIN', 'read-write',
-            u"",
-            9, 2)
-        self.__dict__['zz_frozen'] = True
-
-
 class RM_Field_AGC_NS_ANTDIV_GAINMODE(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
@@ -2581,16 +2621,6 @@ class RM_Field_AGC_NS_ANTDIV_DEBOUNCECNTTHD(Base_RM_Field):
             'DEBOUNCECNTTHD', 'AGC_NS.ANTDIV.DEBOUNCECNTTHD', 'read-write',
             u"",
             2, 7)
-        self.__dict__['zz_frozen'] = True
-
-
-class RM_Field_AGC_NS_ANTDIV_DISRSSIANTDIVFIX(Base_RM_Field):
-    def __init__(self, register):
-        self.__dict__['zz_frozen'] = False
-        super(RM_Field_AGC_NS_ANTDIV_DISRSSIANTDIVFIX, self).__init__(register,
-            'DISRSSIANTDIVFIX', 'AGC_NS.ANTDIV.DISRSSIANTDIVFIX', 'read-write',
-            u"",
-            9, 2)
         self.__dict__['zz_frozen'] = True
 
 
@@ -2881,6 +2911,376 @@ class RM_Field_AGC_NS_LNAMIXCODE2_LNAMIXCUREN(Base_RM_Field):
             'LNAMIXCUREN', 'AGC_NS.LNAMIXCODE2.LNAMIXCUREN', 'read-write',
             u"",
             6, 11)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSIVALID(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSIVALID, self).__init__(register,
+            'RSSIVALID', 'AGC_NS.FSWIF.RSSIVALID', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_CCA(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_CCA, self).__init__(register,
+            'CCA', 'AGC_NS.FSWIF.CCA', 'read-write',
+            u"",
+            2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSIPOSSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSIPOSSTEP, self).__init__(register,
+            'RSSIPOSSTEP', 'AGC_NS.FSWIF.RSSIPOSSTEP', 'read-write',
+            u"",
+            3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSINEGSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSINEGSTEP, self).__init__(register,
+            'RSSINEGSTEP', 'AGC_NS.FSWIF.RSSINEGSTEP', 'read-write',
+            u"",
+            4, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSIDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSIDONE, self).__init__(register,
+            'RSSIDONE', 'AGC_NS.FSWIF.RSSIDONE', 'read-write',
+            u"",
+            5, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_SHORTRSSIPOSSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_SHORTRSSIPOSSTEP, self).__init__(register,
+            'SHORTRSSIPOSSTEP', 'AGC_NS.FSWIF.SHORTRSSIPOSSTEP', 'read-write',
+            u"",
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RFPKDPRDDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RFPKDPRDDONE, self).__init__(register,
+            'RFPKDPRDDONE', 'AGC_NS.FSWIF.RFPKDPRDDONE', 'read-write',
+            u"",
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RFPKDCNTDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RFPKDCNTDONE, self).__init__(register,
+            'RFPKDCNTDONE', 'AGC_NS.FSWIF.RFPKDCNTDONE', 'read-write',
+            u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSIHIGH(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSIHIGH, self).__init__(register,
+            'RSSIHIGH', 'AGC_NS.FSWIF.RSSIHIGH', 'read-write',
+            u"",
+            10, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_RSSILOW(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_RSSILOW, self).__init__(register,
+            'RSSILOW', 'AGC_NS.FSWIF.RSSILOW', 'read-write',
+            u"",
+            11, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_CCANODET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_CCANODET, self).__init__(register,
+            'CCANODET', 'AGC_NS.FSWIF.CCANODET', 'read-write',
+            u"",
+            12, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_GAINBELOWGAINTHD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_GAINBELOWGAINTHD, self).__init__(register,
+            'GAINBELOWGAINTHD', 'AGC_NS.FSWIF.GAINBELOWGAINTHD', 'read-write',
+            u"",
+            13, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_GAINUPDATEFRZ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_GAINUPDATEFRZ, self).__init__(register,
+            'GAINUPDATEFRZ', 'AGC_NS.FSWIF.GAINUPDATEFRZ', 'read-write',
+            u"",
+            14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.FSWIF.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.FSWIF.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIF_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIF_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.FSWIF.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSIVALID(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSIVALID, self).__init__(register,
+            'RSSIVALID', 'AGC_NS.FSWIEN.RSSIVALID', 'read-write',
+            u"",
+            0, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_CCA(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_CCA, self).__init__(register,
+            'CCA', 'AGC_NS.FSWIEN.CCA', 'read-write',
+            u"",
+            2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSIPOSSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSIPOSSTEP, self).__init__(register,
+            'RSSIPOSSTEP', 'AGC_NS.FSWIEN.RSSIPOSSTEP', 'read-write',
+            u"",
+            3, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSINEGSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSINEGSTEP, self).__init__(register,
+            'RSSINEGSTEP', 'AGC_NS.FSWIEN.RSSINEGSTEP', 'read-write',
+            u"",
+            4, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSIDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSIDONE, self).__init__(register,
+            'RSSIDONE', 'AGC_NS.FSWIEN.RSSIDONE', 'read-write',
+            u"",
+            5, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_SHORTRSSIPOSSTEP(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_SHORTRSSIPOSSTEP, self).__init__(register,
+            'SHORTRSSIPOSSTEP', 'AGC_NS.FSWIEN.SHORTRSSIPOSSTEP', 'read-write',
+            u"",
+            6, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RFPKDPRDDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RFPKDPRDDONE, self).__init__(register,
+            'RFPKDPRDDONE', 'AGC_NS.FSWIEN.RFPKDPRDDONE', 'read-write',
+            u"",
+            8, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RFPKDCNTDONE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RFPKDCNTDONE, self).__init__(register,
+            'RFPKDCNTDONE', 'AGC_NS.FSWIEN.RFPKDCNTDONE', 'read-write',
+            u"",
+            9, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSIHIGH(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSIHIGH, self).__init__(register,
+            'RSSIHIGH', 'AGC_NS.FSWIEN.RSSIHIGH', 'read-write',
+            u"",
+            10, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_RSSILOW(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_RSSILOW, self).__init__(register,
+            'RSSILOW', 'AGC_NS.FSWIEN.RSSILOW', 'read-write',
+            u"",
+            11, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_CCANODET(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_CCANODET, self).__init__(register,
+            'CCANODET', 'AGC_NS.FSWIEN.CCANODET', 'read-write',
+            u"",
+            12, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_GAINBELOWGAINTHD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_GAINBELOWGAINTHD, self).__init__(register,
+            'GAINBELOWGAINTHD', 'AGC_NS.FSWIEN.GAINBELOWGAINTHD', 'read-write',
+            u"",
+            13, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_GAINUPDATEFRZ(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_GAINUPDATEFRZ, self).__init__(register,
+            'GAINUPDATEFRZ', 'AGC_NS.FSWIEN.GAINUPDATEFRZ', 'read-write',
+            u"",
+            14, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_PNATTEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_PNATTEN, self).__init__(register,
+            'PNATTEN', 'AGC_NS.FSWIEN.PNATTEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_COLLDETRSSIMAPRE(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_COLLDETRSSIMAPRE, self).__init__(register,
+            'COLLDETRSSIMAPRE', 'AGC_NS.FSWIEN.COLLDETRSSIMAPRE', 'read-write',
+            u"",
+            16, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_FSWIEN_COLLDETRSSIMASYNC(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_FSWIEN_COLLDETRSSIMASYNC, self).__init__(register,
+            'COLLDETRSSIMASYNC', 'AGC_NS.FSWIEN.COLLDETRSSIMASYNC', 'read-write',
+            u"",
+            17, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CCASUB_CCASUBPER(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CCASUB_CCASUBPER, self).__init__(register,
+            'CCASUBPER', 'AGC_NS.CCASUB.CCASUBPER', 'read-write',
+            u"",
+            0, 10)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CCASUB_CCASUBNUM(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CCASUB_CCASUBNUM, self).__init__(register,
+            'CCASUBNUM', 'AGC_NS.CCASUB.CCASUBNUM', 'read-write',
+            u"",
+            10, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CCASUB_CCASUBDEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CCASUB_CCASUBDEN, self).__init__(register,
+            'CCASUBDEN', 'AGC_NS.CCASUB.CCASUBDEN', 'read-write',
+            u"",
+            14, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_CTRL8_EARLYRSSIPERIOD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_CTRL8_EARLYRSSIPERIOD, self).__init__(register,
+            'EARLYRSSIPERIOD', 'AGC_NS.CTRL8.EARLYRSSIPERIOD', 'read-write',
+            u"",
+            0, 4)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_AGC_NS_STATUS3_IFPKDHICNT(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_AGC_NS_STATUS3_IFPKDHICNT, self).__init__(register,
+            'IFPKDHICNT', 'AGC_NS.STATUS3.IFPKDHICNT', 'read-only',
+            u"",
+            0, 8)
         self.__dict__['zz_frozen'] = True
 
 

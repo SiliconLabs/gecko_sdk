@@ -100,7 +100,11 @@ extern "C" {
   #include "efr32xg27/sl_rail_util_pa_curves_QFN.h"
   #endif
 #else
+#ifdef RAIL_INTERNAL_BUILD
+#include "pa_curves_efr32_internal.h"
+#else
 #error "Unsupported platform!"
+#endif
 #endif
 
 #ifdef __cplusplus

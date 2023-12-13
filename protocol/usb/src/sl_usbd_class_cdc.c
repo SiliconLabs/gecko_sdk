@@ -156,10 +156,13 @@ typedef struct {
   uint8_t               notify_in;                                  ///< Notification EP (see note #1a).
   uint16_t              data_interface_endpoint_index;              ///< Start ix of data IFs EP information.
   bool                  notify_in_active_transfer;
+  bool                  data_bulk_in_active_transfer;
+  bool                  data_bulk_out_active_transfer;
 } sli_usbd_cdc_comm_t;
 
 /// CDC Class Control Information
 struct sli_usbd_cdc_comm {
+  uint8_t                         class_nbr;                        ///< Class nbr.
   sli_usbd_cdc_state_t            state;                            ///< CDC state.
   bool                            notify_enable;                    ///< CDC mgmt element notifications enable.
   uint16_t                        notify_interval;                  ///< CDC mgmt element notifications interval.
@@ -171,6 +174,10 @@ struct sli_usbd_cdc_comm {
   sl_usbd_cdc_subclass_driver_t   *subclass_driver_ptr;             ///< CDC subclass drv.
   void                            *subclass_arg;                    ///< CDC subclass drv argument.
   sli_usbd_cdc_comm_t             *comm_ptr;                        ///< CDC comm information ptr.
+  sl_usbd_cdc_async_function_t    bulk_read_async_function;         ///< Ptr to async comm read callback.
+  void                            *bulk_read_async_arg_ptr;         ///< Ptr to async comm read arg.
+  sl_usbd_cdc_async_function_t    bulk_write_async_function;        ///< Ptr to async comm write callback.
+  void                            *bulk_write_async_arg_ptr;        ///< Ptr to async comm write arg.
 };
 
 /*
@@ -240,6 +247,20 @@ static void usbd_cdc_notification_complete_cb(uint8_t      ep_addr,
                                               uint32_t     xfer_len,
                                               void         *p_arg,
                                               sl_status_t  status);
+
+static void usbd_cdc_read_async_complete(uint8_t      ep_addr,
+                                         void         *p_buf,
+                                         uint32_t     buf_len,
+                                         uint32_t     xfer_len,
+                                         void         *p_arg,
+                                         sl_status_t  status);
+
+static void usbd_cdc_write_async_complete(uint8_t      ep_addr,
+                                          void         *p_buf,
+                                          uint32_t     buf_len,
+                                          uint32_t     xfer_len,
+                                          void         *p_arg,
+                                          sl_status_t  status);
 
 /********************************************************************************************************
  *                                           CDC CLASS DRIVERS
@@ -329,6 +350,8 @@ sl_status_t sl_usbd_cdc_init(void)
     p_comm->data_interface_endpoint_index = 0u;
     p_comm->cci_interface_nbr = SL_USBD_INTERFACE_NBR_NONE;
     p_comm->notify_in_active_transfer = false;
+    p_comm->data_bulk_in_active_transfer = false;
+    p_comm->data_bulk_out_active_transfer = false;
   }
 
   // Init CDC data IF tbl.
@@ -571,6 +594,7 @@ sl_status_t sl_usbd_cdc_add_to_configuration(uint8_t  class_nbr,
   CORE_ENTER_ATOMIC();
   p_ctrl->state = SLI_USBD_CDC_STATE_INIT;
   p_ctrl->comm_ptr = NULL;
+  p_ctrl->class_nbr = class_nbr;
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
@@ -747,6 +771,85 @@ sl_status_t sl_usbd_cdc_read_data(uint8_t  class_nbr,
   return status;
 }
 
+
+/****************************************************************************************************//**
+ *  Receives data on the CDC data interface asynchronously
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_read_data_async(uint8_t                      class_nbr,
+                                        uint8_t                      data_if_nbr,
+                                        uint8_t                      *p_buf,
+                                        uint32_t                     buf_len,
+                                        sl_usbd_cdc_async_function_t async_fnct,
+                                        void                         *p_async_arg)
+{
+  sli_usbd_cdc_ctrl_t       *p_ctrl;
+  sli_usbd_cdc_comm_t       *p_comm;
+  sli_usbd_cdc_data_interface_t    *p_data_if;
+  sli_usbd_cdc_data_interface_endpoint_t *p_data_ep;
+  uint16_t          data_if_ix;
+  sl_status_t           status;
+
+  if (async_fnct == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if ((p_buf == NULL) && (buf_len != 0u)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  p_ctrl = &usbd_cdc_obj.ctrl_table[class_nbr];
+
+  // Transfers are only valid in config state.
+  if (p_ctrl->state != SLI_USBD_CDC_STATE_CONFIG) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // Check 'data_if_nbr' is valid.
+  if (data_if_nbr >= p_ctrl->data_interface_nbr) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  p_comm = p_ctrl->comm_ptr;
+  p_data_if = p_ctrl->data_interface_head_ptr;
+  // Find data IF struct.
+  for (data_if_ix = 0u; data_if_ix < data_if_nbr; data_if_ix++) {
+    p_data_if = p_data_if->next_ptr;
+  }
+
+  data_if_ix = p_comm->data_interface_endpoint_index + data_if_nbr;
+  p_data_ep = &usbd_cdc_obj.data_interface_endpoint_table[data_if_ix];
+
+  if (p_data_if->isochronous_enable == false) {
+    // Check if another xfer is already in progress.
+    if (p_ctrl->comm_ptr->data_bulk_out_active_transfer == false) {
+      // Indicate that a xfer is in progress.
+      p_ctrl->comm_ptr->data_bulk_out_active_transfer = true;
+
+      // Save app rx callback.
+      p_ctrl->bulk_read_async_function = async_fnct;
+      p_ctrl->bulk_read_async_arg_ptr = p_async_arg;
+
+      status = sl_usbd_core_read_bulk_async(p_data_ep->data_out,
+                                            p_buf,
+                                            buf_len,
+                                            usbd_cdc_read_async_complete,
+                                            (void *)p_ctrl);
+      if (status != SL_STATUS_OK) {
+        p_ctrl->comm_ptr->data_bulk_out_active_transfer = false;
+      }
+    } else {
+      status = SL_STATUS_NOT_READY;
+    }
+  } else {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+  return status;
+}
+
 /****************************************************************************************************//**
  *  Sends data on the CDC data interface
  *******************************************************************************************************/
@@ -813,6 +916,86 @@ sl_status_t sl_usbd_cdc_write_data(uint8_t  class_nbr,
   *p_xfer_len = xfer_len;
   return status;
 }
+
+
+/****************************************************************************************************//**
+ *  Sends data on the CDC data interface asynchronously
+ *******************************************************************************************************/
+sl_status_t sl_usbd_cdc_write_data_async(uint8_t                      class_nbr,
+                                         uint8_t                      data_if_nbr,
+                                         uint8_t                      *p_buf,
+                                         uint32_t                     buf_len,
+                                         sl_usbd_cdc_async_function_t async_fnct,
+                                         void                         *p_async_arg)
+{
+  sli_usbd_cdc_ctrl_t       *p_ctrl;
+  sli_usbd_cdc_comm_t       *p_comm;
+  sli_usbd_cdc_data_interface_t    *p_data_if;
+  sli_usbd_cdc_data_interface_endpoint_t *p_data_ep;
+  uint16_t          data_if_ix;
+  sl_status_t           status;
+
+  if (async_fnct == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if ((p_buf == NULL) && (buf_len != 0u)) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  p_ctrl = &usbd_cdc_obj.ctrl_table[class_nbr];
+
+  // Transfers are only valid in config state.
+  if (p_ctrl->state != SLI_USBD_CDC_STATE_CONFIG) {
+    return SL_STATUS_INVALID_STATE;
+  }
+  // Check 'data_if_nbr' is valid.
+  if (data_if_nbr >= p_ctrl->data_interface_nbr) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  p_comm = p_ctrl->comm_ptr;
+  p_data_if = p_ctrl->data_interface_head_ptr;
+  // Find data IF struct.
+  for (data_if_ix = 0u; data_if_ix < data_if_nbr; data_if_ix++) {
+    p_data_if = p_data_if->next_ptr;
+  }
+
+  data_if_ix = p_comm->data_interface_endpoint_index + data_if_nbr;
+  p_data_ep = &usbd_cdc_obj.data_interface_endpoint_table[data_if_ix];
+
+  if (p_data_if->isochronous_enable == false) {
+    // Check if another xfer is already in progress.
+    if (p_ctrl->comm_ptr->data_bulk_in_active_transfer == false) {
+      // Indicate that a xfer is in progress.
+      p_ctrl->comm_ptr->data_bulk_in_active_transfer = true;
+
+      // Save app tx callback.
+      p_ctrl->bulk_write_async_function = async_fnct;
+      p_ctrl->bulk_write_async_arg_ptr = p_async_arg;
+
+      status = sl_usbd_core_write_bulk_async(p_data_ep->data_in,
+                                             p_buf,
+                                             buf_len,
+                                             usbd_cdc_write_async_complete,
+                                             (void *)p_ctrl,
+                                             true);
+      if (status != SL_STATUS_OK) {
+        p_ctrl->comm_ptr->data_bulk_in_active_transfer = false;
+      }
+    } else {
+      status = SL_STATUS_NOT_READY;
+    }
+  } else {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+  return status;
+}
+
 
 /****************************************************************************************************//**
  *  Sends a communication interface class notification to the host
@@ -891,6 +1074,99 @@ sl_status_t sl_usbd_cdc_notify_host(uint8_t   class_nbr,
  ********************************************************************************************************
  *******************************************************************************************************/
 
+
+
+/****************************************************************************************************//**
+ *                                           usbd_cdc_read_async_complete()
+ *
+ * @brief    Inform the application about the Bulk OUT transfer completion.
+ *
+ * @param    ep_addr     Endpoint address.
+ *
+ * @param    p_buf       Pointer to the receive buffer.
+ *
+ * @param    buf_len     Receive buffer length.
+ *
+ * @param    xfer_len    Number of octets received.
+ *
+ * @param    p_arg       Additional argument provided by application.
+ *
+ * @param    status      Transfer status: success or error.
+ *******************************************************************************************************/
+static void usbd_cdc_read_async_complete(uint8_t      ep_addr,
+                                         void         *p_buf,
+                                         uint32_t     buf_len,
+                                         uint32_t     xfer_len,
+                                         void         *p_arg,
+                                         sl_status_t  status)
+{
+  sli_usbd_cdc_ctrl_t          *p_ctrl;
+  sl_usbd_cdc_async_function_t fnct;
+  void                         *p_fnct_arg;
+
+  (void)&ep_addr;
+
+  p_ctrl = (sli_usbd_cdc_ctrl_t *)p_arg;
+  fnct = p_ctrl->bulk_read_async_function;
+  p_fnct_arg = p_ctrl->bulk_read_async_arg_ptr;
+
+  // Xfer finished, no more active xfer.
+  p_ctrl->comm_ptr->data_bulk_out_active_transfer = false;
+
+  // Notify app about xfer completion.
+  fnct(p_ctrl->class_nbr,
+       p_buf,
+       buf_len,
+       xfer_len,
+       p_fnct_arg,
+       status);
+}
+
+/****************************************************************************************************//**
+ *                                           usbd_cdc_write_async_complete()
+ *
+ * @brief    Inform the application about the Bulk IN transfer completion.
+ *
+ * @param    ep_addr     Endpoint address.
+ *
+ * @param    p_buf       Pointer to the transmit buffer.
+ *
+ * @param    buf_len     Transmit buffer length.
+ *
+ * @param    xfer_len    Number of octets sent.
+ *
+ * @param    p_arg       Additional argument provided by application.
+ *
+ * @param    status      Transfer status: success or error.
+ *******************************************************************************************************/
+static void usbd_cdc_write_async_complete(uint8_t      ep_addr,
+                                          void         *p_buf,
+                                          uint32_t     buf_len,
+                                          uint32_t     xfer_len,
+                                          void         *p_arg,
+                                          sl_status_t  status)
+{
+  sli_usbd_cdc_ctrl_t          *p_ctrl;
+  sl_usbd_cdc_async_function_t fnct;
+  void                         *p_fnct_arg;
+
+  (void)&ep_addr;
+
+  p_ctrl = (sli_usbd_cdc_ctrl_t *)p_arg;
+  fnct = p_ctrl->bulk_write_async_function;
+  p_fnct_arg = p_ctrl->bulk_write_async_arg_ptr;
+
+  // Xfer finished, no more active xfer.
+  p_ctrl->comm_ptr->data_bulk_in_active_transfer = false;
+
+  // Notify app about xfer completion.
+  fnct(p_ctrl->class_nbr,
+       p_buf,
+       buf_len,
+       xfer_len,
+       p_fnct_arg,
+       status);
+}
 /****************************************************************************************************//**
  *                                               usbd_cdc_enable()
  *

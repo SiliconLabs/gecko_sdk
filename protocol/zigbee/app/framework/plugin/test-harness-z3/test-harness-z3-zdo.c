@@ -29,8 +29,16 @@
 #define ZDO_NODE_DESCRIPTOR_BAND_2400_MHZ (0x40)
 
 #define TH_SIMPLE_DESC_REQ_PAYLOAD_LENGTH (4)
+#define TH_USER_DESC_REQ_PAYLOAD_LENGTH (3)
 #define TH_IEEE_ADD_REQ_PAYLOAD_LENGTH (3)
 #define SERVER_MASK_HIGH (0x2C)  // r22
+#define TH_USER_DESC_RSP_PAYLOAD_LENGTH (16)
+
+// Clusters for simple descriptor response
+// server
+#define IN_CLUSTERS { 0x0000, 0x0003, 0x0006, 0x0008, 0x000a, 0x0019, 0x0020, 0x0025, 0x0101 }
+// client
+#define OUT_CLUSTERS { 0x0006, 0x0008, 0x0019, 0x0101, 0x0102, 0x0103 }
 // -----------------------------------------------------------------------------
 // extern functions
 extern bool sli_zigbee_am_network_manager(void);
@@ -42,7 +50,7 @@ sl_zigbee_event_t emberAfPluginTestHarnessZ3ZdoSendEventControl;
 #define NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER (0x00FF)
 static EmberNodeId currentZdoNegativeCommandDestination = EMBER_NULL_NODE_ID;
 static uint16_t currentZdoNegativeCommandCluster = NULL_CURRENT_ZDO_NEGATIVE_COMMAND_CLUSTER;
-static uint8_t currentZdoNegativeCommandFrame[32];
+static uint8_t currentZdoNegativeCommandFrame[64];
 static uint8_t currentZdoNegativeCommandFrameLength;
 
 uint8_t sli_zigbee_af_test_harness_z3_server_mask_high = SERVER_MASK_HIGH;
@@ -70,13 +78,16 @@ static uint32_t negativeZdoCommandFlags = 0;
 #define NEGATIVE_ZDO_COMMAND_FLAGS_NO_ENDPOINT_FIELDS     BIT32(7)
 #define NEGATIVE_ZDO_COMMAND_FLAGS_NO_NWK_ADDR            BIT32(8)
 #define NEGATIVE_ZDO_COMMAND_FLAGS_NO_NEGATIVE_RESPONSE   BIT32(9)
+#define NEGATIVE_ZDO_COMMAND_FLAGS_NO_USER_DESCRIPTOR     BIT32(10)
+#define NEGATIVE_ZDO_COMMAND_FLAGS_NO_NODE_DESCRIPTOR     BIT32(11)
 
 #ifdef EZSP_HOST
 
 static EmberStatus sendZdoCommand(EmberNodeId destination,
                                   uint16_t clusterId,
                                   uint8_t *frame,
-                                  uint8_t frameLength)
+                                  uint8_t frameLength,
+                                  uint8_t sequenceNumber)
 {
   return EMBER_INVALID_CALL;
 }
@@ -88,7 +99,8 @@ extern EmberNodeId sli_zigbee_af_current_sender;
 static EmberStatus sendZdoCommand(EmberNodeId destination,
                                   uint16_t clusterId,
                                   uint8_t *frame,
-                                  uint8_t frameLength)
+                                  uint8_t frameLength,
+                                  uint8_t sequenceNumber)
 {
   EmberStatus status;
   EmberMessageBuffer message;
@@ -101,7 +113,7 @@ static EmberStatus sendZdoCommand(EmberNodeId destination,
     0, // group id
     0, // sequence
   };
-  frame[0] = emberNextZigDevRequestSequence();
+  frame[0] = sequenceNumber ? sequenceNumber : emberNextZigDevRequestSequence();
   message = emberFillLinkedBuffers(frame, frameLength);
 
   if (message == EMBER_NULL_MESSAGE_BUFFER) {
@@ -180,8 +192,7 @@ void sli_zigbee_af_test_harness_z3_mgmt_leave_command(sl_cli_command_arg_t *argu
     }
     finger++;
   }
-
-  status = sendZdoCommand(destination, LEAVE_REQUEST, frame, finger - &frame[0]);
+  status = sendZdoCommand(destination, LEAVE_REQUEST, frame, finger - &frame[0], 0);
 
   done:
   emberAfCorePrintln("%s: %s: 0x%02X",
@@ -225,14 +236,16 @@ void sli_zigbee_af_test_harness_z3_mgmt_nwk_update_request_command(sl_cli_comman
   // Network update id (table 2.90):
   // "This field shall only be present of the ScanDuration is 0xfe or 0xff.
   // If the ScanDuration is 0xff, then the value in the nwkUpdateID shall
-  // be ignored."
+  // be ignored." (But it should still be present, unchanged.)
 
-  if (scanDuration == 0xFF || scanDuration == 0xFE) {
-    *finger++ = options == BIT(1)
+  if (scanDuration == 0xFE || scanDuration == 0xFF) {
+    *finger++ = scanDuration == 0xFF
+                ? networkParameters.nwkUpdateId
+                : options == BIT(1)
                 ? 0x55
-                : networkParameters.nwkUpdateId - (options == BIT(0)
-                                                   ? 1
-                                                   : 0);
+                : options == BIT(0)
+                ? networkParameters.nwkUpdateId - 1
+                : networkParameters.nwkUpdateId + 1;
   }
   // Network manager id (table 2.90):
   // "This field shall be present only if the ScanDuration is set to 0xff,
@@ -246,7 +259,8 @@ void sli_zigbee_af_test_harness_z3_mgmt_nwk_update_request_command(sl_cli_comman
   status = sendZdoCommand(destination,
                           ZDO_NETWORK_UPDATE_REQUEST,
                           frame,
-                          finger - &frame[0]);
+                          finger - &frame[0],
+                          0);
 
   done:
   emberAfCorePrintln("%s: %s: 0x%02X",
@@ -277,7 +291,7 @@ void sli_zigbee_af_test_harness_z3_zdo_node_desc_req_command(sl_cli_command_arg_
   status = sendZdoCommand(destination,
                           NODE_DESCRIPTOR_REQUEST,
                           frame,
-                          1);
+                          1, 0);
 
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -294,12 +308,18 @@ void sli_zigbee_af_test_harness_z3_zdo_zdo_node_desc_rsp_config_command(sl_cli_c
 
   uint32_t options      = sli_zigbee_af_test_harness_z3_get_significant_bit(arguments, 0);
   currentZdoNegativeCommandCluster = NODE_DESCRIPTOR_RESPONSE;
+  status = EMBER_BAD_ARGUMENT;
 
-  if (options == BIT(0)) {
-    negativeZdoCommandFlags = 0;  // negative response only!
-    status = EMBER_SUCCESS;
-  } else {
-    status = EMBER_BAD_ARGUMENT;
+  switch (options) {
+    case BIT(0):
+      negativeZdoCommandFlags = 0;  // negative response only!
+      status = EMBER_SUCCESS;
+      break;
+    case BIT(1):
+      // node descriptor field absent
+      negativeZdoCommandFlags = NEGATIVE_ZDO_COMMAND_FLAGS_NO_NODE_DESCRIPTOR;
+      status = EMBER_SUCCESS;
+      break;
   }
 
 #endif /* EZSP_HOST */
@@ -330,7 +350,8 @@ void sli_zigbee_af_test_harness_z3_zdo_active_endpoint_request_command(sl_cli_co
   status = sendZdoCommand(destination,
                           ACTIVE_ENDPOINTS_REQUEST,
                           frame,
-                          frameLength);
+                          frameLength,
+                          0);
 
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -388,8 +409,8 @@ void sli_zigbee_af_test_harness_z3_zdo_match_desc_req_command(sl_cli_command_arg
   status = sendZdoCommand(destination,
                           MATCH_DESCRIPTORS_REQUEST,
                           frame,
-                          finger - &frame[0]);
-
+                          finger - &frame[0],
+                          0);
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Match descriptor request",
@@ -473,7 +494,8 @@ void sli_zigbee_af_test_harness_z3_zdo_simple_desc_req_command(sl_cli_command_ar
   status = sendZdoCommand(destination,
                           SIMPLE_DESCRIPTOR_REQUEST,
                           frame,
-                          finger - &frame[0]);
+                          finger - &frame[0],
+                          0);
 
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -585,7 +607,8 @@ void sli_zigbee_af_test_harness_z3_zdo_bind_group_command(sl_cli_command_arg_t *
   status = sendZdoCommand(shortAddress,
                           BIND_REQUEST,
                           frame,
-                          finger - &frame[0]);
+                          finger - &frame[0],
+                          0);
 
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -621,7 +644,8 @@ void sli_zigbee_af_test_harness_z3_zdo_nwk_addr_req_command(sl_cli_command_arg_t
   status = sendZdoCommand(destinationShort,
                           NETWORK_ADDRESS_REQUEST,
                           frame,
-                          finger - &frame[0]);
+                          finger - &frame[0],
+                          0);
 
   emberAfCorePrintln("%s: %ss: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -658,7 +682,8 @@ void sli_zigbee_af_test_harness_z3_zdo_ieee_addr_req_command(sl_cli_command_arg_
   status = sendZdoCommand(destination,
                           IEEE_ADDRESS_REQUEST,
                           frame,
-                          finger - &frame[0]);
+                          finger - &frame[0],
+                          0);
 
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
@@ -723,8 +748,8 @@ void sli_zigbee_af_test_harness_z3_zdo_bc_device_announce_command(sl_cli_command
   status = sendZdoCommand(EMBER_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
                           END_DEVICE_ANNOUNCE,
                           frame,
-                          sizeof(frame));
-
+                          sizeof(frame),
+                          0);
   emberAfCorePrintln("%s: %s: 0x%02X",
                      TEST_HARNESS_Z3_PRINT_NAME,
                      "Broadcast device announce",
@@ -736,6 +761,7 @@ EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *
                                                                        uint8_t length,
                                                                        EmberApsFrame *apsFrame)
 {
+  emberAfDebugPrintln("sli_zigbee_af_test_harness_z3_zdo_command_response_handler: cluster = %2X", apsFrame->clusterId);
   EmberStatus status = EMBER_SUCCESS;
   uint16_t clusterId = apsFrame->clusterId;
 
@@ -744,8 +770,10 @@ EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *
     // EMZIGBEE-1317 -The simple descriptor req to reply with a short list.
     // If no cluster is configured for negative test response
     // and a simple descriptor request is received - then handle it with
-    // a shorter list of clusters so that teh pay load does not exhaust.
-    if (clusterId == SIMPLE_DESCRIPTOR_REQUEST) {
+    // a shorter list of clusters so that the payload does not exhaust.
+    if (clusterId == SIMPLE_DESCRIPTOR_REQUEST
+        || clusterId == USER_DESCRIPTOR_REQUEST) { // No config command specified yet
+      negativeZdoCommandFlags = 0;
     } else {
       return EMBER_INVALID_CALL;
     }
@@ -768,7 +796,8 @@ EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *
     }
     status = emberLookupEui64ByNodeId(nwkAddressOfInterest,
                                       &currentZdoNegativeCommandFrame[2]);
-  } else if (clusterId == NODE_DESCRIPTOR_REQUEST) {
+  } else if (clusterId == NODE_DESCRIPTOR_REQUEST && !(negativeZdoCommandFlags
+                                                       & NEGATIVE_ZDO_COMMAND_FLAGS_NO_NODE_DESCRIPTOR)) {
     EmberNodeType nodetype;
     emberGetNodeType(&nodetype);
     currentZdoNegativeCommandFrame[1] = EMBER_ZDP_SUCCESS;
@@ -814,9 +843,10 @@ EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *
                   & NEGATIVE_ZDO_COMMAND_FLAGS_NO_SIMPLE_DESCRIPTOR)) {
     // TODO: do we need these to be legit?
     // Servers Basic,Identify,Level, On/Off and OTA
-    uint16_t inCluster[] = { 0x0000, 0x0003, 0x0006, 0x0019 };
+    // Use pre-defined cluster lists.
+    uint16_t inCluster[] = IN_CLUSTERS;
     uint8_t inClusterCount = sizeof(inCluster) / sizeof(uint16_t);
-    uint16_t outCluster[] = { 0x0019, 0x0100, 0x0101 };
+    uint16_t outCluster[] = OUT_CLUSTERS;
     uint8_t outClusterCount = sizeof(outCluster) / sizeof(uint16_t);
     // Simple Descriptor Request has - seq(1), short address(2),ep(1)
     if (length < TH_SIMPLE_DESC_REQ_PAYLOAD_LENGTH ) {
@@ -920,12 +950,46 @@ EmberStatus sli_zigbee_af_test_harness_z3_zdo_command_response_handler(uint8_t *
     } else {
       status = EMBER_ERR_FATAL;
     }
+  } else if (clusterId == USER_DESCRIPTOR_REQUEST
+             && !(negativeZdoCommandFlags
+                  & NEGATIVE_ZDO_COMMAND_FLAGS_NO_USER_DESCRIPTOR)) {
+    // User Descriptor Request has - seq(1), short address(2)
+    if (length < TH_USER_DESC_REQ_PAYLOAD_LENGTH) {
+      // short length - return.
+      return EMBER_INVALID_CALL;
+    }
+    // Note, this is currently just sends a good response for testing -
+    // there are no negative command options at present.
+    currentZdoNegativeCommandFrameLength = 0;
+    currentZdoNegativeCommandCluster = USER_DESCRIPTOR_RESPONSE;
+    // Sequence number is picked up from request - index 0
+    // Account for the field length, increment the counter
+    currentZdoNegativeCommandFrameLength++;
+    currentZdoNegativeCommandFrame[currentZdoNegativeCommandFrameLength++]
+      = EMBER_ZDP_SUCCESS; //Status - Index 1
+    currentZdoNegativeCommandFrame[currentZdoNegativeCommandFrameLength++]
+      = LOW_BYTE(emberAfGetNodeId()); // Index 2
+    currentZdoNegativeCommandFrame[currentZdoNegativeCommandFrameLength++]
+      = HIGH_BYTE(emberAfGetNodeId()); // Index 3
+
+    // Increment the length to account the length field itself.
+    currentZdoNegativeCommandFrameLength++;
+
+    // Copy a sample user descriptor.
+    static const char userDescriptor[] = "Test Harness App";
+    MEMCOPY(&currentZdoNegativeCommandFrame[currentZdoNegativeCommandFrameLength], userDescriptor, TH_USER_DESC_RSP_PAYLOAD_LENGTH);
+    currentZdoNegativeCommandFrameLength += TH_USER_DESC_RSP_PAYLOAD_LENGTH;
+
+    currentZdoNegativeCommandFrame[4] // user descriptor length
+      = TH_USER_DESC_RSP_PAYLOAD_LENGTH;
   }
 
   if (status == EMBER_SUCCESS) {
     // We use an event for this command so that the positive stuff will go
     // out of the radio first.
     currentZdoNegativeCommandDestination = sli_zigbee_af_current_sender;
+    // Copy sequence number to the response frame, to keep AF discovery happy.
+    currentZdoNegativeCommandFrame[0] = requestBuffer[0];
     sl_zigbee_event_set_active(&emberAfPluginTestHarnessZ3ZdoSendEventControl);
   }
 
@@ -952,6 +1016,16 @@ void emberAfPluginTestHarnessZ3ZdoSendEventHandler(sl_zigbee_event_t * event)
                        sendZdoCommand(currentZdoNegativeCommandDestination,
                                       currentZdoNegativeCommandCluster,
                                       currentZdoNegativeCommandFrame,
-                                      currentZdoNegativeCommandFrameLength));
+                                      currentZdoNegativeCommandFrameLength,
+                                      currentZdoNegativeCommandFrame[0]));
   }
+}
+
+// plugin test-harness z3 change-channel <newChannel:1>
+void sli_zigbeee_af_test_harness_z3_change_channel(SL_CLI_COMMAND_ARG)
+{
+  uint8_t newChannel = (uint8_t)sl_cli_get_argument_uint8(arguments, 0);
+
+  // Just do it, no delays.
+  emberSetRadioChannel(newChannel);
 }

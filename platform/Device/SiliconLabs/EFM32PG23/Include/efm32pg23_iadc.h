@@ -1063,4 +1063,4 @@ typedef struct {
 /** @} End of group EFM32PG23_IADC */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_IADC_H */
+#endif // EFM32PG23_IADC_H

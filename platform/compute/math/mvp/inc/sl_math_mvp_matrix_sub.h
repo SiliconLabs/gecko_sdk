@@ -86,13 +86,17 @@ sl_status_t sl_math_mvp_matrix_sub_f16(const sl_math_matrix_f16_t *input_a,
  * @param[in] num_cols Number of matrix columns.
  * @param[in] num_rows Number of matrix rows.
  * @param[in] data_type @refSLI_MVP_DATATYPE_BINARY16 or @ref SLI_MVP_DATATYPE_COMPLEX_BINARY16.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate sl_status_t
+ *   errorcode is returned.
  */
-void sli_math_mvp_matrix_sub_f16(const float16_t *input_a,
-                                 const float16_t *input_b,
-                                 float16_t *output,
-                                 size_t num_rows,
-                                 size_t num_cols,
-                                 sli_mvp_datatype_t data_type);
+sl_status_t sli_math_mvp_matrix_sub_f16(const float16_t *input_a,
+                                        const float16_t *input_b,
+                                        float16_t *output,
+                                        size_t num_rows,
+                                        size_t num_cols,
+                                        sli_mvp_datatype_t data_type);
 
 /** @} (end addtogroup math_mvp_matrix) */
 

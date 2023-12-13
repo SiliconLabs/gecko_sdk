@@ -68,10 +68,10 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
       break;
 
     // -------------------------------
-    case sl_bt_evt_scanner_scan_report_id:
+    case sl_bt_evt_scanner_extended_advertisement_report_id:
     {
       // Check if the tag is allowlisted.
-      if (SL_STATUS_NOT_FOUND == aoa_db_allowlist_find(evt->data.evt_scanner_scan_report.address.addr)) {
+      if (SL_STATUS_NOT_FOUND == aoa_db_allowlist_find(evt->data.evt_scanner_extended_advertisement_report.address.addr)) {
         break;
       }
 
@@ -82,18 +82,13 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
       // is added to the database. Therefore, the asset tag is unknown at this
       // point, and sync open command is sent multiple times in a row.
       // This is normal and shouldn't cause any issues.
-      if (SL_STATUS_OK == aoa_db_get_tag_by_address(&evt->data.evt_scanner_scan_report.address, &tag)) {
-        break;
-      }
-
-      // Check for extended advertisement packet.
-      if ((evt->data.evt_scanner_scan_report.packet_type & 0x80) == 0) {
+      if (SL_STATUS_OK == aoa_db_get_tag_by_address(&evt->data.evt_scanner_extended_advertisement_report.address, &tag)) {
         break;
       }
 
       // Check for CTE service.
-      if (!find_service_in_advertisement(evt->data.evt_scanner_scan_report.data.data,
-                                         evt->data.evt_scanner_scan_report.data.len,
+      if (!find_service_in_advertisement(evt->data.evt_scanner_extended_advertisement_report.data.data,
+                                         evt->data.evt_scanner_extended_advertisement_report.data.len,
                                          cte_service,
                                          sizeof(cte_service))) {
         break;
@@ -101,10 +96,10 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
 
       // Establish synchronization with the advertising device.
       uint16_t sync_handle;
-      sc = sl_bt_sync_open(evt->data.evt_scanner_scan_report.address,
-                           evt->data.evt_scanner_scan_report.address_type,
-                           evt->data.evt_scanner_scan_report.adv_sid,
-                           &sync_handle);
+      sc = sl_bt_sync_scanner_open(evt->data.evt_scanner_extended_advertisement_report.address,
+                                   evt->data.evt_scanner_extended_advertisement_report.address_type,
+                                   evt->data.evt_scanner_extended_advertisement_report.adv_sid,
+                                   &sync_handle);
       if (SL_STATUS_NO_MORE_RESOURCE == sc) {
         app_log_warning("SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC reached, stop scanning." APP_LOG_NL);
         sc = sl_bt_scanner_stop();
@@ -113,19 +108,19 @@ sl_status_t cte_bt_on_event_conn_less(sl_bt_msg_t *evt)
     }
 
     // -------------------------------
-    case sl_bt_evt_sync_opened_id:
+    case sl_bt_evt_periodic_sync_opened_id:
     {
       // Add connection to the asset tag database.
-      sc = aoa_db_add_tag(evt->data.evt_sync_opened.sync,
-                          &evt->data.evt_sync_opened.address,
-                          evt->data.evt_sync_opened.address_type,
+      sc = aoa_db_add_tag(evt->data.evt_periodic_sync_opened.sync,
+                          &evt->data.evt_periodic_sync_opened.address,
+                          evt->data.evt_periodic_sync_opened.address_type,
                           &tag);
       if (SL_STATUS_OK != sc) {
         break;
       }
 
       // Start listening CTE on advertising packets.
-      sc = sl_bt_cte_receiver_enable_connectionless_cte(evt->data.evt_sync_opened.sync,
+      sc = sl_bt_cte_receiver_enable_connectionless_cte(evt->data.evt_periodic_sync_opened.sync,
                                                         aoa_cte_config.cte_slot_duration,
                                                         aoa_cte_config.cte_count,
                                                         cte_switch_pattern_size,

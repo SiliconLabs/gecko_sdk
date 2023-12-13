@@ -43,7 +43,7 @@
 #define ZB_PSA_KEY_ID_PRECONFIGURED_APS_KEY           (ZB_PSA_KEY_ID_MIN + 2)
 #define ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY                 (ZB_PSA_KEY_ID_MIN + 3)
 #define ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY          (ZB_PSA_KEY_ID_MIN + 4)
-#define ZB_PSA_KEY_ID_SECURE_EZSP_KEY                 (ZB_PSA_KEY_ID_MIN + 5)
+#define ZB_PSA_KEY_ID_SECURE_EZSP_KEY                 (ZB_PSA_KEY_ID_MIN + 5)  // Deprecated
 #define ZB_PSA_KEY_ID_VERSION_KEY                     (ZB_PSA_KEY_ID_MIN + 16)
 #define ZB_PSA_KEY_ID_LINK_KEY_TABLE_START            (ZB_PSA_KEY_ID_MIN + LINK_KEY_TABLE_OFFSET)
 #define ZB_PSA_KEY_ID_LINK_KEY_TABLE_END              (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_KEY_TABLE_SIZE)
@@ -59,5 +59,12 @@ sl_status_t zb_sec_man_store_version_key(void);
 //Get version key byte currently stored in PSA
 //(to see if something may be outdated)
 sl_status_t zb_sec_man_fetch_version_key(uint8_t* version);
+#define ZB_SEC_MAN_CURRENT_VERSION_KEY 0x01
+#define ZB_SEC_MAN_CURRENT_VERSION_KEY_SIZE 1
+
+#if defined(SEMAILBOX_PRESENT)
+#include "sli_se_opaque_functions.h"
+#include "sli_se_opaque_types.h"
+#endif
 
 #endif // ZIGBEE_SECURITY_MANAGER_VAULT_SUPPORT_H

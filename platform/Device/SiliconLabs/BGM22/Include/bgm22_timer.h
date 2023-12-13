@@ -1012,4 +1012,4 @@ typedef struct {
 /** @} End of group BGM22_TIMER */
 /** @} End of group Parts */
 
-#endif /* BGM22_TIMER_H */
+#endif // BGM22_TIMER_H

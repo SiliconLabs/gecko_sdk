@@ -13,7 +13,6 @@ source:
 
 requires:
   - name: "sl_ftp"
-  - name: "sl_wisun_socket"
 
 ui_hints:
   visibility: never

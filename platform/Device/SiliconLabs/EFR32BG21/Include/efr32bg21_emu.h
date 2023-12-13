@@ -639,4 +639,4 @@ typedef struct {
 /** @} End of group EFR32BG21_EMU */
 /** @} End of group Parts */
 
-#endif /* EFR32BG21_EMU_H */
+#endif // EFR32BG21_EMU_H

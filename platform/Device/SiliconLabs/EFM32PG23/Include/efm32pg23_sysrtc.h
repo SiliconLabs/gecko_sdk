@@ -418,4 +418,4 @@ typedef struct {
 /** @} End of group EFM32PG23_SYSRTC */
 /** @} End of group Parts */
 
-#endif /* EFM32PG23_SYSRTC_H */
+#endif // EFM32PG23_SYSRTC_H

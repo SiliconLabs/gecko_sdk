@@ -33,9 +33,9 @@
 //------------------------------------------------------------------------------
 // Weak callbacks definitions
 
-WEAK(void emberAfPluginMailboxServerMessageDeliveredCallback(EmberAfMailboxStatus status,
-                                                             EmberNodeId messageDestination,
-                                                             uint8_t tag))
+SL_WEAK void emberAfPluginMailboxServerMessageDeliveredCallback(EmberAfMailboxStatus status,
+                                                                EmberNodeId messageDestination,
+                                                                uint8_t tag)
 {
   (void)status;
   (void)messageDestination;

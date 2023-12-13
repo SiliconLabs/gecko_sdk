@@ -23,20 +23,10 @@
 // <i> The maximum number of Green Power proxy table entries supported by the stack.
 #define EMBER_GP_PROXY_TABLE_SIZE   5
 
-// <o EMBER_GP_PROXY_TABLE_TOKEN_SIZE> Green Power Proxy Table Token Size <1-126>
-// <i> Default: 5
-// <i> The maximum number of pairings stored in proxy table non-volatile memory,between 0 and EMBER_GP_PROXY_TABLE_SIZE.
-#define EMBER_GP_PROXY_TABLE_TOKEN_SIZE   5
-
 // <o EMBER_GP_SINK_TABLE_SIZE> Green Power Sink Table Size <0-126>
 // <i> Default: 0
 // <i> The maximum number of Green Power sink table entries supported by the stack.
 #define EMBER_GP_SINK_TABLE_SIZE   0
-
-// <o EMBER_GP_SINK_TABLE_TOKEN_SIZE> Green Power Sink Table Token Size <0-126>
-// <i> Default: 0
-// <i> The maximum number of pairings stored in sink table non-volatile memory,between 0 and EMBER_GP_SINK_TABLE_SIZE.
-#define EMBER_GP_SINK_TABLE_TOKEN_SIZE   0
 
 // <o EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT> Green Power incoming FC (as part of proxy table) Token timeout <0-60>
 // <i> Default: 0

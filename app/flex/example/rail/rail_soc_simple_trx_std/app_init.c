@@ -34,8 +34,7 @@
 #include "em_system.h"
 #include "sl_component_catalog.h"
 #include "rail.h"
-#include "sl_simple_led_instances.h"
-#include "app_log.h"
+#include "simple_rail_assistance.h"
 #include "app_process.h"
 #ifdef SL_CATALOG_FLEX_IEEE802154_SUPPORT_PRESENT
   #include "sl_flex_util_802154_init.h"
@@ -88,6 +87,9 @@ RAIL_Handle_t app_init(void)
 
   // initializes the app process
   app_process_init(rail_handle);
+
+  clear_receive_led();
+  clear_send_led();
 
 #ifdef SL_CATALOG_FLEX_IEEE802154_SUPPORT_PRESENT
   print_sample_app_name("\nSimple TRX IEEE 802.15.4");

@@ -153,13 +153,6 @@ extern "C" {
       {                                                                        \
         .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
         .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
-        .min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN,                                 \
-        .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,                                 \
-        .conversion = { .powerCurve = &RAIL_piecewiseData2p4gHp },             \
-      },                                                                       \
-      {                                                                        \
-        .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,                       \
-        .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,                         \
         .min = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN,                              \
         .max = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX,                              \
         .conversion = { .powerCurve = &RAIL_piecewiseDataHp },                 \

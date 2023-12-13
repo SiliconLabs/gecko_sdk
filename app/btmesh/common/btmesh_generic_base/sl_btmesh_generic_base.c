@@ -53,6 +53,7 @@ void sl_btmesh_generic_base_on_event(sl_btmesh_msg_t *evt)
 {
   sl_status_t sc = SL_STATUS_OK;
   switch (SL_BT_MSG_ID(evt->header)) {
+    case sl_btmesh_evt_prov_initialized_id:
     case sl_btmesh_evt_node_initialized_id:
 #if SL_BTMESH_GENERIC_BASE_SERVER_CFG_VAL || defined(SL_CATALOG_BTMESH_LIGHTING_SERVER_PRESENT) \
       || defined(SL_CATALOG_BTMESH_CTL_SERVER_PRESENT)                                          \
@@ -113,17 +114,19 @@ void sl_btmesh_generic_base_on_event(sl_btmesh_msg_t *evt)
       app_assert_status_f(sc, "Failed to common init Generic Server");
 #endif // SL_BTMESH_GENERIC_BASE_SERVER_CFG_VAL
 
-#if SL_BTMESH_GENERIC_BASE_CLIENT_CFG_VAL || defined(SL_CATALOG_BTMESH_LIGHTING_CLIENT_PRESENT) \
-      || defined(SL_CATALOG_BTMESH_CTL_CLIENT_PRESENT)
+#if SL_BTMESH_GENERIC_BASE_CLIENT_CFG_VAL                   \
+      || defined(SL_CATALOG_BTMESH_LIGHTING_CLIENT_PRESENT) \
+      || defined(SL_CATALOG_BTMESH_CTL_CLIENT_PRESENT)      \
+      || defined(SL_CATALOG_BTMESH_GENERIC_LEVEL_CLIENT_EXT_PRESENT)
 
 #if SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL || defined(SL_CATALOG_BTMESH_LIGHTING_CLIENT_PRESENT)
       sc = sl_btmesh_generic_client_init_on_off();
       app_assert_status_f(sc, "Failed to init on/off client");
 #endif // SL_BTMESH_GENERIC_ON_OFF_CLIENT_INIT_CFG_VAL || defined(SL_CATALOG_BTMESH_LIGHTING_CLIENT_PRESENT)
-#if SL_BTMESH_GENERIC_LEVEL_SERVER_INIT_CFG_VAL
+#if SL_BTMESH_GENERIC_LEVEL_CLIENT_INIT_CFG_VAL || defined(SL_CATALOG_BTMESH_GENERIC_LEVEL_CLIENT_EXT_PRESENT)
       sc = sl_btmesh_generic_client_init_level();
       app_assert_status_f(sc, "Failed to init level client");
-#endif // SL_BTMESH_GENERIC_LEVEL_SERVER_INIT_CFG_VAL
+#endif // SL_BTMESH_GENERIC_LEVEL_CLIENT_INIT_CFG_VAL
 #if SL_BTMESH_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_INIT_CFG_VAL
       sc = sl_btmesh_generic_client_init_default_transition_time();
       app_assert_status_f(sc, "Failed to init default transition time client");

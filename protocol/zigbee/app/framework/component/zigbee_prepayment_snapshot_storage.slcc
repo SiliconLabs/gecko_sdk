@@ -5,7 +5,7 @@ quality: production
 id: zigbee_prepayment_snapshot_storage
 category: Zigbee|Cluster Library|Smart Energy
 provides:
-   - name: "zigbee_prepayment_snapshot_storage"
+  - name: zigbee_prepayment_snapshot_storage
 config_file:
   - path: protocol/zigbee/app/framework/plugin/prepayment-snapshot-storage/config/prepayment-snapshot-storage-config.h
 source:

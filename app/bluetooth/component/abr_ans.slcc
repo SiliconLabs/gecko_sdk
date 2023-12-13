@@ -1,0 +1,20 @@
+id: abr_ans
+package: Bluetooth
+label: ABR Antenna Switching
+description: >
+  ABR Antenna Switching component for brd4406A.
+category: Bluetooth|Application|ANS
+quality: experimental
+root_path: app/bluetooth/common/abr_ans
+include:
+  - path: .
+    file_list:
+      - path: abr_ans.h
+source:
+  - path: abr_ans.c
+requires:
+  - name: app_log
+  - name: app_assert
+  - name: rail_util_hadm_antenna_offset
+provides:
+  - name: abr_ans

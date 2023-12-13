@@ -49,11 +49,11 @@
 
 // <o SL_IPERF_STACK_SIZE_WORD> Set test thread stack size in word depth
 // <i> Default value: 512
-#define SL_IPERF_STACK_SIZE_WORD                   512U
+#define SL_IPERF_STACK_SIZE_WORD                   256U
 
 // <o SL_IPERF_BUFFER_SIZE> Server receiver buffer size
 // <i> Default value 1234 (UDPv6 size without fragmentation)
-#define SL_IPERF_BUFFER_SIZE                       1234U
+#define SL_IPERF_BUFFER_SIZE                       1232U
 
 // <o SL_IPERF_LOG_JSON_INDENT> Set json formated log indent in space count
 // <i> Default value: 2

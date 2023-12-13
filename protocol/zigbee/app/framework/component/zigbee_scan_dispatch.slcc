@@ -1,12 +1,11 @@
 package: Zigbee
-description: This component allows the existence of multiple consumers of the stack 802.15.4
-  scan results.
+description: This component allows the existence of multiple consumers of the stack 802.15.4 scan results.
 label: Scan Dispatch
 quality: production
 id: zigbee_scan_dispatch
 category: Zigbee|Network Form and Join
 provides:
-   - name: "zigbee_scan_dispatch"
+  - name: zigbee_scan_dispatch
 config_file:
   - path: protocol/zigbee/app/framework/plugin/scan-dispatch/config/scan-dispatch-config.h
 source:

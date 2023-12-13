@@ -53,6 +53,7 @@
 #include "border_router/infra_if.hpp"
 #include "common/array.hpp"
 #include "common/error.hpp"
+#include "common/heap_allocatable.hpp"
 #include "common/linked_list.hpp"
 #include "common/locator.hpp"
 #include "common/message.hpp"
@@ -374,8 +375,8 @@ public:
      *
      * The favored NAT64 prefix can be discovered from infrastructure link or can be the local NAT64 prefix.
      *
-     * @param[out] aPrefix         A reference to output the favored prefix.
-     * @param[out] aPreference     A reference to output the preference associated with the favored prefix.
+     * @param[out] aPrefix           A reference to output the favored prefix.
+     * @param[out] aRoutePreference  A reference to output the preference associated with the favored prefix.
      *
      * @retval  kErrorInvalidState  The Border Routing Manager is not initialized yet.
      * @retval  kErrorNone          Successfully retrieved the NAT64 prefix.
@@ -624,10 +625,17 @@ private:
         void HandleRouterTimer(void);
 
     private:
+#if !OPENTHREAD_CONFIG_BORDER_ROUTING_USE_HEAP_ENABLE
         static constexpr uint16_t kMaxRouters = OPENTHREAD_CONFIG_BORDER_ROUTING_MAX_DISCOVERED_ROUTERS;
         static constexpr uint16_t kMaxEntries = OPENTHREAD_CONFIG_BORDER_ROUTING_MAX_DISCOVERED_PREFIXES;
+#endif
 
-        class Entry : public LinkedListEntry<Entry>, public Unequatable<Entry>, private Clearable<Entry>
+        class Entry : public LinkedListEntry<Entry>,
+                      public Unequatable<Entry>,
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_USE_HEAP_ENABLE
+                      public Heap::Allocatable<Entry>,
+#endif
+                      private Clearable<Entry>
         {
             friend class LinkedListEntry<Entry>;
             friend class Clearable<Entry>;
@@ -725,7 +733,11 @@ private:
             } mShared;
         };
 
-        struct Router
+        struct Router : public LinkedListEntry<Router>,
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_USE_HEAP_ENABLE
+                        public Heap::Allocatable<Router>,
+#endif
+                        public Clearable<Router>
         {
             // The timeout (in msec) for router staying in active state
             // before starting the Neighbor Solicitation (NS) probes.
@@ -746,10 +758,14 @@ private:
             bool Matches(const Ip6::Address &aAddress) const { return aAddress == mAddress; }
             bool Matches(EmptyChecker) const { return mEntries.IsEmpty(); }
 
+            Router           *mNext;
             Ip6::Address      mAddress;
             LinkedList<Entry> mEntries;
             TimeMilli         mTimeout;
             uint8_t           mNsProbeCount;
+            bool              mManagedAddressConfigFlag : 1;
+            bool              mOtherConfigFlag : 1;
+            bool              mStubRouterFlag : 1;
         };
 
         class Iterator : public PrefixTableIterator
@@ -763,15 +779,15 @@ private:
             void          SetInitTime(void) { mData32 = TimerMilli::GetNow().GetValue(); }
         };
 
-        void         ProcessDefaultRoute(const Ip6::Nd::RouterAdvertMessage::Header &aRaHeader, Router &aRouter);
+        void         ProcessRaHeader(const Ip6::Nd::RouterAdvertMessage::Header &aRaHeader, Router &aRouter);
         void         ProcessPrefixInfoOption(const Ip6::Nd::PrefixInfoOption &aPio, Router &aRouter);
         void         ProcessRouteInfoOption(const Ip6::Nd::RouteInfoOption &aRio, Router &aRouter);
+        void         ProcessRaFlagsExtOption(const Ip6::Nd::RaFlagsExtOption &aFlagsOption, Router &aRouter);
         bool         Contains(const Entry::Checker &aChecker) const;
         void         RemovePrefix(const Entry::Matcher &aMatcher);
         void         RemoveOrDeprecateEntriesFromInactiveRouters(void);
         void         RemoveRoutersWithNoEntries(void);
-        Entry       *AllocateEntry(void) { return mEntryPool.Allocate(); }
-        void         FreeEntry(Entry &aEntry) { mEntryPool.Free(aEntry); }
+        void         FreeRouters(LinkedList<Router> &aRouters);
         void         FreeEntries(LinkedList<Entry> &aEntries);
         void         UpdateNetworkDataOnChangeTo(Entry &aEntry);
         const Entry *FindFavoredEntryToPublish(const Ip6::Prefix &aPrefix) const;
@@ -779,16 +795,30 @@ private:
         void         SignalTableChanged(void);
         void         UpdateRouterOnRx(Router &aRouter);
         void         SendNeighborSolicitToRouter(const Router &aRouter);
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_USE_HEAP_ENABLE
+        Router *AllocateRouter(void) { return Router::Allocate(); }
+        Entry  *AllocateEntry(void) { return Entry::Allocate(); }
+        void    FreeRouter(Router &aRouter) { aRouter.Free(); }
+        void    FreeEntry(Entry &aEntry) { aEntry.Free(); }
+#else
+        Router *AllocateRouter(void) { return mRouterPool.Allocate(); }
+        Entry  *AllocateEntry(void) { return mEntryPool.Allocate(); }
+        void    FreeRouter(Router &aRouter) { mRouterPool.Free(aRouter); }
+        void    FreeEntry(Entry &aEntry) { mEntryPool.Free(aEntry); }
+#endif
 
         using SignalTask  = TaskletIn<RoutingManager, &RoutingManager::HandleDiscoveredPrefixTableChanged>;
         using EntryTimer  = TimerMilliIn<RoutingManager, &RoutingManager::HandleDiscoveredPrefixTableEntryTimer>;
         using RouterTimer = TimerMilliIn<RoutingManager, &RoutingManager::HandleDiscoveredPrefixTableRouterTimer>;
 
-        Array<Router, kMaxRouters> mRouters;
-        Pool<Entry, kMaxEntries>   mEntryPool;
-        EntryTimer                 mEntryTimer;
-        RouterTimer                mRouterTimer;
-        SignalTask                 mSignalTask;
+        LinkedList<Router> mRouters;
+        EntryTimer         mEntryTimer;
+        RouterTimer        mRouterTimer;
+        SignalTask         mSignalTask;
+#if !OPENTHREAD_CONFIG_BORDER_ROUTING_USE_HEAP_ENABLE
+        Pool<Entry, kMaxEntries>  mEntryPool;
+        Pool<Router, kMaxRouters> mRouterPool;
+#endif
     };
 
     class OmrPrefixManager;
@@ -899,15 +929,18 @@ private:
             TimeMilli   mExpireTime;
         };
 
-        void GenerateLocalPrefix(void);
-        void PublishAndAdvertise(void);
-        void Deprecate(void);
-        void ResetExpireTime(TimeMilli aNow);
-        void EnterAdvertisingState(void);
-        void AppendCurPrefix(Ip6::Nd::RouterAdvertMessage &aRaMessage);
-        void AppendOldPrefixes(Ip6::Nd::RouterAdvertMessage &aRaMessage);
-        void DeprecateOldPrefix(const Ip6::Prefix &aPrefix, TimeMilli aExpireTime);
-        void SavePrefix(const Ip6::Prefix &aPrefix, TimeMilli aExpireTime);
+        State GetState(void) const { return mState; }
+        void  SetState(State aState);
+        void  GenerateLocalPrefix(void);
+        void  PublishAndAdvertise(void);
+        void  Deprecate(void);
+        void  ResetExpireTime(TimeMilli aNow);
+        void  AppendCurPrefix(Ip6::Nd::RouterAdvertMessage &aRaMessage);
+        void  AppendOldPrefixes(Ip6::Nd::RouterAdvertMessage &aRaMessage);
+        void  DeprecateOldPrefix(const Ip6::Prefix &aPrefix, TimeMilli aExpireTime);
+        void  SavePrefix(const Ip6::Prefix &aPrefix, TimeMilli aExpireTime);
+
+        static const char *StateToString(State aState);
 
         using ExpireTimer = TimerMilliIn<RoutingManager, &RoutingManager::HandleOnLinkPrefixManagerTimer>;
 
@@ -985,6 +1018,8 @@ private:
         void Stop(void) { Unpublish(); }
         void Evaluate(void);
 
+        void UpdateAdvPioFlags(bool aAdvPioFlag);
+
         RoutePreference GetPreference(void) const { return mPreference; }
         void            SetPreference(RoutePreference aPreference);
         void            ClearPreference(void);
@@ -1019,6 +1054,7 @@ private:
         State           mState;
         RoutePreference mPreference;
         bool            mUserSetPreference;
+        bool            mAdvPioFlag;
         DelayTimer      mTimer;
     };
 

@@ -37,7 +37,7 @@
 #include <assert.h>
 
 #include "cmsis_os2.h"
-#include "socket.h"
+#include "socket/socket.h"
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf_util.h"
 #include "sl_sleeptimer.h"
@@ -75,7 +75,7 @@ static int32_t _set_multicast_sock_opt(const int32_t sockid,
 void sl_iperf_nw_interface_init(void)
 {
   // Assert address type length
-  sl_iperf_assert_sock_addr_len(wisun_addr_t);
+  sl_iperf_assert_sock_addr_len(sockaddr_in6_t);
 }
 
 int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
@@ -84,10 +84,10 @@ int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
 
   switch (protocol) {
     case SL_IPERF_IPROTOV6_UDP:
-      sockid = socket(AF_WISUN, SOCK_DGRAM, IPPROTO_UDP);
+      sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
       break;
     case SL_IPERF_IPROTOV6_TCP:
-      sockid = socket(AF_WISUN, SOCK_STREAM, IPPROTO_TCP);
+      sockid = socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_TCP);
       break;
     // IPv4 is not supported on Wi-SUN
     default: return SL_IPERF_NW_API_ERROR;
@@ -103,7 +103,7 @@ int32_t sl_iperf_socket_close(int32_t sockid)
 
 int32_t sl_iperf_socket_bind(int32_t sockid, const sl_iperf_socket_addr_t *addr)
 {
-  return bind(sockid, (const sockaddr_t *)addr, sizeof(wisun_addr_t));
+  return bind(sockid, (const struct sockaddr *)addr, sizeof(sockaddr_in6_t));
 }
 
 int32_t sl_iperf_socket_listen(int32_t sockid, int32_t backlog)
@@ -115,14 +115,14 @@ int32_t sl_iperf_socket_listen(int32_t sockid, int32_t backlog)
 int32_t sl_iperf_socket_accept(int32_t sockid, sl_iperf_socket_addr_t *addr)
 {
   int32_t res = SL_IPERF_NW_API_ERROR;
-  socklen_t addrlen  = sizeof(wisun_addr_t);
-  res = accept(sockid, (sockaddr_t *)addr, &addrlen);
+  socklen_t addrlen  = sizeof(sockaddr_in6_t);
+  res = accept(sockid, (struct sockaddr *)addr, &addrlen);
   return res;
 }
 
 int32_t sl_iperf_socket_connect(int32_t sockid, const sl_iperf_socket_addr_t *addr)
 {
-  return connect(sockid, (const sockaddr_t *)addr, sizeof(wisun_addr_t));
+  return connect(sockid, (const struct sockaddr *)addr, sizeof(sockaddr_in6_t));
 }
 
 int32_t sl_iperf_socket_send(int32_t sockid, const void *buff, size_t len)
@@ -132,7 +132,7 @@ int32_t sl_iperf_socket_send(int32_t sockid, const void *buff, size_t len)
 
 int32_t sl_iperf_socket_sendto(int32_t sockid, const void *buff, uint32_t len, const sl_iperf_socket_addr_t *dest_addr)
 {
-  return sendto(sockid, buff, len, 0U, (const sockaddr_t *) dest_addr, sizeof(wisun_addr_t));
+  return sendto(sockid, buff, len, 0U, (const struct sockaddr *) dest_addr, sizeof(sockaddr_in6_t));
 }
 
 int32_t sl_iperf_socket_recv(int32_t sockid, void *buff, size_t len)
@@ -144,9 +144,9 @@ int32_t sl_iperf_socket_recvfrom(int32_t sockid, void *buf, uint32_t len,
                                  sl_iperf_socket_addr_t *src_addr)
 {
   int32_t res = SL_IPERF_NW_API_ERROR;
-  socklen_t addrlen  = sizeof(wisun_addr_t);
+  socklen_t addrlen  = sizeof(sockaddr_in6_t);
   assert(buf != NULL);
-  res = recvfrom(sockid, buf, len, 0U, (sockaddr_t *) src_addr, &addrlen);
+  res = recvfrom(sockid, buf, len, 0U, (struct sockaddr *) src_addr, &addrlen);
   return res;
 }
 
@@ -164,32 +164,32 @@ int32_t sl_iperf_socket_getsockopt(int32_t sockid, int32_t level, int32_t optnam
 
 void sl_iperf_set_socket_addr_family(sl_iperf_socket_addr_t * const addr)
 {
-  wisun_addr_t *waddr = (wisun_addr_t *) addr;
-  waddr->sin6_family = AF_WISUN;
+  sockaddr_in6_t *waddr = (sockaddr_in6_t *) addr;
+  waddr->sin6_family = AF_INET6;
 }
 
 void sl_iperf_set_socket_addr_port(sl_iperf_socket_addr_t * const addr, const uint16_t port)
 {
-  wisun_addr_t *waddr = (wisun_addr_t *) addr;
+  sockaddr_in6_t *waddr = (sockaddr_in6_t *) addr;
   waddr->sin6_port = port;
 }
 
 uint16_t sl_iperf_get_socket_addr_port(const sl_iperf_socket_addr_t * const addr)
 {
-  const wisun_addr_t *waddr = (const wisun_addr_t *) addr;
+  const sockaddr_in6_t *waddr = (const sockaddr_in6_t *) addr;
   return (uint16_t) waddr->sin6_port;
 }
 
 void sl_iperf_set_socket_addr_ip(sl_iperf_socket_addr_t * const addr, const void * const ip)
 {
-  wisun_addr_t *waddr = (wisun_addr_t *) addr;
+  sockaddr_in6_t *waddr = (sockaddr_in6_t *) addr;
 
   memcpy(&waddr->sin6_addr, ip, sizeof(in6_addr_t));
 }
 
 void sl_iperf_get_socket_addr_ip(const sl_iperf_socket_addr_t * const addr, void * const ip)
 {
-  const wisun_addr_t *waddr = (const wisun_addr_t *) addr;
+  const sockaddr_in6_t *waddr = (const sockaddr_in6_t *) addr;
   memcpy(ip, &waddr->sin6_addr, sizeof(in6_addr_t));
 }
 
@@ -218,28 +218,30 @@ uint32_t sl_iperf_network_ntohl(uint32_t val)
 int32_t sl_iperf_inet_pton(const char *src_str,
                            sl_iperf_socket_addr_t * const dst_addr)
 {
-  wisun_addr_t * waddr = (wisun_addr_t *) dst_addr;
-  return inet_pton(AF_WISUN, src_str, (void *) &waddr->sin6_addr);
+  sockaddr_in6_t * waddr = (sockaddr_in6_t *) dst_addr;
+  return inet_pton(AF_INET6, src_str, (void *) &waddr->sin6_addr);
 }
 
 const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src_addr,
                                char * const dst_str,
                                const size_t size)
 {
-  const wisun_addr_t * waddr = (const wisun_addr_t *) src_addr;
-  return inet_ntop(AF_WISUN, (const void *)&waddr->sin6_addr, dst_str, size);
+  const sockaddr_in6_t * waddr = (const sockaddr_in6_t *) src_addr;
+  return inet_ntop(AF_INET6, (const void *)&waddr->sin6_addr, dst_str, size);
 }
 
 int32_t sl_iperf_join_multicast_group(const int32_t sockid,
                                       const sl_iperf_socket_addr_t * const multicast_addr)
 {
-  return _set_multicast_sock_opt(sockid, multicast_addr, SL_WISUN_MULTICAST_GROUP_ACTION_JOIN);
+  return _set_multicast_sock_opt(sockid, multicast_addr, 
+                                 (sl_wisun_multicast_group_action_t) IPV6_JOIN_GROUP);
 }
 
 int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
                                        const sl_iperf_socket_addr_t * const multicast_addr)
 {
-  return _set_multicast_sock_opt(sockid, multicast_addr, SL_WISUN_MULTICAST_GROUP_ACTION_LEAVE);
+  return _set_multicast_sock_opt(sockid, multicast_addr, 
+                                 (sl_wisun_multicast_group_action_t) IPV6_LEAVE_GROUP);
 }
 
 sl_iperf_ts_ms_t sl_iperf_get_timestamp_ms(void)
@@ -278,11 +280,11 @@ static int32_t _set_multicast_sock_opt(const int32_t sockid,
   {
     0U
   };
-  const wisun_addr_t *waddr = (const wisun_addr_t *) multicast_addr;
 
-  opt.multicast_group.action = action;
-  memcpy(&opt.multicast_group.address, &waddr->sin6_addr.s6_addr, sizeof(sl_wisun_ip_address_t));
-  r = setsockopt(sockid, SOL_SOCKET, SL_WISUN_SOCKET_OPTION_MULTICAST_GROUP, &opt, sizeof(opt));
+  const sockaddr_in6_t *waddr = (const sockaddr_in6_t *) multicast_addr;
+  memcpy(&opt.ipv6_address, &waddr->sin6_addr, sizeof(in6_addr_t));
+
+  r = setsockopt(sockid, SOL_SOCKET, action, &opt, sizeof(opt));
 
   // Restore the defaults
   #ifdef __GNUC__

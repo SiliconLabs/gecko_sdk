@@ -31,31 +31,48 @@
 #ifndef __SL_WISUN_TRACE_UTIL_H__
 #define __SL_WISUN_TRACE_UTIL_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_component_catalog.h"
 #include "sl_status.h"
 #include "sl_wisun_ip6string.h"
 #include "sl_wisun_types.h"
-#include "sl_string.h"
 #if !defined(SL_CATALOG_WISUN_NCP_PRESENT)
   #include "sl_wisun_connection_params_api.h"
-#endif
-#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-  #include "sl_wisun_lfn_params_api.h"
 #endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
 /// Thread loop definition
-#define SL_WISUN_THREAD_LOOP                      while (1)
+#ifndef SL_WISUN_THREAD_LOOP
+  #define SL_WISUN_THREAD_LOOP  while (1)
+#endif
+
+/**************************************************************************//**
+ * @brief Macro to check a status and print a message if the state is not OK
+ * @details Use this print a short message on any location where unhandled state
+ *          should be noted.
+ * @param[in] __status The status value or variable to compare
+ * @return None
+ *****************************************************************************/
+#if !defined(__CHECK_FOR_STATUS)
+#define __CHECK_FOR_STATUS(__status)                                       \
+  do {                                                                     \
+    if (__status != SL_STATUS_OK) {                                        \
+      printf("%s() returned = 0x%08lx \n", __PRETTY_FUNCTION__, __status); \
+    }                                                                      \
+  } while (0)
+#endif
 
 /// Structure for using enum on the CLI
 typedef struct {
@@ -77,6 +94,20 @@ typedef struct app_wisun_phy_list {
 
 /// Application PHY list filter callback type definition
 typedef bool (*app_wisun_phy_filter_t)(sl_wisun_phy_config_t *phy_cfg);
+
+/// Time structure definition
+typedef struct sl_wisun_trace_util_time {
+  /// Time stamp in milisec
+  uint64_t tot_milisecs;
+  /// Days
+  uint16_t days;
+  /// Hours
+  uint8_t hours;
+  /// Minutes
+  uint8_t minutes;
+  /// Seconds
+  uint8_t seconds;
+} sl_wisun_trace_util_time_t;
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -252,11 +283,19 @@ void app_wisun_destroy_phy_list(app_wisun_phy_list_t *list);
 const char *app_wisun_phy_to_str(sl_wisun_phy_config_t *phy_cfg);
 
 /**************************************************************************//**
- * @brief Destroying the name of the PHY
- * @details It free the allocated PHY name.
+ * @brief MAC address to string
+ * @details Convert MAC address bytes to string
+ * @param[in] mac_addr MAC address storage
+ * @return char* a string that is the name of the given PHY configuration.
+ *****************************************************************************/
+const char *app_wisun_mac_addr_to_str(const sl_wisun_mac_address_t *mac_addr);
+
+/**************************************************************************//**
+ * @brief Destroying MAC address string
+ * @details It free the allocated MAC address
  * @param[in] str is a pointer of the list
  *****************************************************************************/
-__STATIC_INLINE void app_wisun_destroy_phy_str(const char *str)
+__STATIC_INLINE void app_wisun_destroy_mac_addr_str(const char *str)
 {
   app_wisun_free((void *)str);
 }
@@ -274,19 +313,43 @@ const sl_wisun_connection_params_t *sl_wisun_get_conn_param_by_nw_size(const sl_
 #endif
 
 /**************************************************************************//**
- * @brief Macro to check a status and print a message if the state is not OK
- * @details Use this print a short message on any location where unhandled state
- *          should be noted.
- * @param[in] __status The status value or variable to compare
- * @return None
+ * @brief Initialize timestamp
+ * @details This function sets the current tick to the reference point of the
+ *          timestamps.
+ * @param[in] time_ms time in ms to convert
+ * @param[out] time destination time structure
  *****************************************************************************/
-#if !defined(__CHECK_FOR_STATUS)
-#define __CHECK_FOR_STATUS(__status)                                       \
-  do {                                                                     \
-    if (__status != SL_STATUS_OK) {                                        \
-      printf("%s() returned = 0x%08lx \n", __PRETTY_FUNCTION__, __status); \
-    }                                                                      \
-  } while (0)
+void app_wisun_trace_util_timestamp_init(const uint64_t time_ms,
+                                         sl_wisun_trace_util_time_t * const time);
+
+/**************************************************************************//**
+ * @brief Get time in string
+ * @details Returns time in ddd:hh:mm:ss format
+ * @param[in] time time data to convert string
+ * @return time string if succeeded otherwise NULL ptr
+ *****************************************************************************/
+const char *app_wisun_trace_util_time_to_str(const sl_wisun_trace_util_time_t * const time);
+
+/**************************************************************************//**
+ * @brief Destroying time string
+ * @details It frees the allocated time string
+ * @param[in] str string to free
+ *****************************************************************************/
+__STATIC_INLINE void app_wisun_trace_util_destroy_time_str(const char *str)
+{
+  app_wisun_free((void *)str);
+}
+
+/**************************************************************************//**
+ * @brief Get elapsed time in milliseconds
+ * @details This function returns the ellapsed time in milliseconds.
+ * @param ms[out] elapsed time in milliseconds
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t app_wisun_trace_util_timestamp_get_ms(uint64_t * const ms);
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __SL_WISUN_APP_UTIL_H__ */

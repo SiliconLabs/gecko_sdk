@@ -3,12 +3,7 @@ label: R23 support
 package: Zigbee
 category: Zigbee|Stack
 quality: production
-
-description: |-
-  Provides base stack support for Revision 23 of the ZigBee specification.
-  This component provides the minimum set of features, including TLV payload processing,
-  new Commissioning frames, APS Relay and Frame Counter Synchronization, and New ZDO clusters.
-  Optional features are included in the Dynamic Commissioning component
+description: Provides base stack support for Revision 23 of the ZigBee specification. This component provides the minimum set of features, including TLV payload processing, new Commissioning frames, APS Relay and Frame Counter Synchronization, and New ZDO clusters. Optional features are included in the Dynamic Commissioning component.
 
 provides:
   - name: zigbee_r23_support
@@ -18,11 +13,10 @@ requires:
   - name: zigbee_r23_support_implementation
   - name: zigbee_r23_support_library
     condition:
-      - zigbee_force_libraries
+      - zigbee_use_release_libraries
   - name: zigbee_zdo_cluster_filter
-
 recommends:
-  - id: zigbee_r23_support_source
+  - id: zigbee_r23_support_library_internal
 
 source:
   - path: protocol/zigbee/app/test/sl_zigbee_r23_app_stubs.c

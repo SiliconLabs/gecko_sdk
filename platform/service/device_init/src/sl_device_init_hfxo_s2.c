@@ -76,7 +76,7 @@ sl_status_t sl_device_init_hfxo(void)
     } else if (ctune > ((int)(_HFXO_XTALCTRL_CTUNEXOANA_MASK >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT))) {
       ctune = (int)(_HFXO_XTALCTRL_CTUNEXOANA_MASK >> _HFXO_XTALCTRL_CTUNEXOANA_SHIFT);
     }
-    hfxoInit.ctuneXoAna = ctune;
+    hfxoInit.ctuneXoAna = (uint8_t)ctune;
   }
 
   SystemHFXOClockSet(SL_DEVICE_INIT_HFXO_FREQ);

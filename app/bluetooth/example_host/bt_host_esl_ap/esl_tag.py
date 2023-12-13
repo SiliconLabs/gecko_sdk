@@ -557,6 +557,8 @@ class Tag():
         """ Handle event """
         if isinstance(evt, esl_lib.EventConnectionOpened):
             if evt.address == self.ble_address:
+                self._past_timer.cancel()
+                self._past_initiated = False
                 self.connection_handle = evt.connection_handle
                 self.gattdb_handles = evt.gattdb_handles
                 self.pending_unassociate = False
@@ -594,12 +596,17 @@ class Tag():
                 self.log.info("Connection to %s closed with reason %s",self.ble_address, esl_lib.get_enum("SL_STATUS_",evt.reason))
         elif isinstance(evt, esl_lib.EventTagInfo):
             if evt.connection_handle == self.connection_handle:
+                for ix, (tlv, value) in enumerate(evt.tlv_data.items()):
+                    if len(value) == 0: # According to the ESL Service Specification, none of the ESL Information Characteristics can be valid without data!
+                        self.block(elw.ESL_LIB_STATUS_CONN_DISCOVERY_FAILED)
+                        self.log.error("ESL at address %s blocked due to invalid zero length characteristic data for TLV type %d at data index %d", self.ble_address, tlv, ix)
+                        self.close_connection(force_close=True)
                 self.gatt_values.update(evt.tlv_data)
                 if elw.ESL_LIB_DATA_TYPE_GATT_PNP_ID in evt.tlv_data:
                     if self.pnp_vendor_id is None:
                         self.log.error("PnP characteristic not found - vendor opcodes support disabled")
                     elif self.pnp_vendor_id == SIG_VENDOR_ID_SILABS:
-                        self.log.info("Silabs device found - vendor opcodes are not defined")
+                        self.log.info("Silabs ESL found - one vendor opcode is allocated for PAwR interval skipping: 0x1Fnn")
                     else:
                         self.log.info("PnP characteristic '0x%02x' found for %s", self.pnp_vendor_id, self.ble_address)
                 if elw.ESL_LIB_DATA_TYPE_GATT_SERIAL_NUMBER in evt.tlv_data:
@@ -644,6 +651,8 @@ class Tag():
                 if evt.data_sent[0] == TLV_OPCODE_FACTORY_RST:
                     self.reset()
                     self.pending_unassociate = True # need to revert pending_unassociate until AP core processes the same event!
+                elif evt.data_sent[0] == TLV_OPCODE_UPDATE_COMPLETE and self.blocked:
+                    self.unblock() # clear the blocked state for any tag to which the update complete command is sent
         elif isinstance(evt, esl_lib.EventControlPointNotification):
             if evt.connection_handle == self.connection_handle:
                 self.handle_response(evt.data)
@@ -670,23 +679,27 @@ class Tag():
             if evt.lib_status == elw.ESL_LIB_STATUS_BONDING_FAILED:
                 self.state = TagState.IDLE
             elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED:
-                self.block(evt.lib_status)
-                self.log.error("ESL at address %s blocked due to ESL Control Point subscription failure!", self.ble_address)
+                if evt.sl_status == elw.SL_STATUS_BT_ATT_CLIENT_CHARACTERISTIC_CONFIGURATION_DESCRIPTOR_IMPROPERLY_CONFIGURED and not self.blocked:
+                    self.block(evt.lib_status)
+                    self.log.error("ESL at address %s blocked due to violation of ESL Profile / Service specification!", self.ble_address)
+                else:
+                    self.log.warning("Failed subscription attempt to the ESL Control Point at address %s - connection will be terminated!", self.ble_address)
             elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_FAILED:
                 if evt.sl_status is not elw.SL_STATUS_ALREADY_EXISTS:
                     self.connection_handle = None
-                if evt.data in [elw.ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY, elw.ESL_LIB_CONNECTION_STATE_DIS_DISCOVERY, elw.ESL_LIB_CONNECTION_STATE_ESL_DISCOVERY]:
-                    self.log.error("ESL at address %s blocked due to ESL service discovery failure!", self.ble_address)
-                    self.block(evt.lib_status)
                 self.state = TagState.IDLE
             elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_CLOSE_FAILED:
                 self.connection_handle = None
                 self.busy = False
-                if evt.sl_status == elw.SL_STATUS_TIMEOUT and evt.data == elw.ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION and self._past_timer.is_alive():
+                if evt.sl_status == elw.SL_STATUS_TIMEOUT and evt.data in [elw.ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION, elw.ESL_LIB_CONNECTION_STATE_PAST_INIT] and self._past_timer.is_alive():
                     self._past_timer.cancel()
+                self._past_initiated = False
             elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_TIMEOUT:
+                if self._past_timer.is_alive():
+                    self._past_timer.cancel()
+                self._past_initiated = False
                 self.connection_handle = None
-                if evt.data == elw.ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION:
+                if evt.data in [elw.ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION, elw.ESL_LIB_CONNECTION_STATE_PAST_INIT]:
                     self.log.warning("ESL at address %s failed to sync!", self.ble_address)
                     self.reset()
             elif evt.lib_status == elw.ESL_LIB_STATUS_OTS_GOTO_FAILED:
@@ -702,19 +715,20 @@ class Tag():
                     self.log.info("PAST skipped for address %s by ESL already in Synchronized state.", self.ble_address)
                 else:
                     self.log.error("PAST was unsuccesssful, force closing connection to tag at address %s", self.ble_address)
-                    self.close_connection()
+                    self.close_connection(force_close=True)
             elif evt.lib_status == elw.ESL_LIB_STATUS_OTS_INIT_FAILED:
                 self.auto_image_count = 0
 
     def __advertising_timeout(self):
-        self.log.warning("Advertisements from address %s are no longer received!", self.ble_address)
+        if self.advertising:
+            self.log.warning("Advertisements from address %s are no longer received!", self.ble_address)
         self._advertising = False
 
     def __past_timeout(self):
         """ Called on PAST timeout """
         self.log.warning("PAST timeout for address %s, force close!", self.ble_address)
         try:
-            self.close_connection()
+            self.close_connection(force_close=True)
         except Exception as e:
             self.log.error(e)
 
@@ -726,23 +740,28 @@ class Tag():
         """ Connect to the tag """
         if self.state != TagState.IDLE:
             raise InvalidTagStateError(f"Invalid ESL object state: {self._state} at address {self.ble_address}")
-        self._connection_handle = None # silent but forced reset of handle
-        self.state = TagState.CONNECTING
-        if pawr is None:
-            self._advertising = True # necessary step for any connect requests to undetected advertisers!
-        self.lib.connect(address=self.ble_address,
-                         pawr=pawr,
-                         identity=identity,
-                         key_type=key_type,
-                         key=key,
-                         gattdb=self.gattdb_handles)
+        try:
+            self.lib.connect(address=self.ble_address,
+                            pawr=pawr,
+                            identity=identity,
+                            key_type=key_type,
+                            key=key,
+                            gattdb=self.gattdb_handles)
+            self._connection_handle = None # silent but forced reset of handle
+            self.state = TagState.CONNECTING
+            if pawr is None:
+                self._advertising = True # necessary step for any connect requests to undetected advertisers!
+        except Exception as e:
+            self.log.error(e)
 
-    def close_connection(self):
+    def close_connection(self, force_close = False):
         """ Disconnect from the tag """
-        if self.state != TagState.CONNECTED:
+        if self.state != TagState.CONNECTED and not force_close:
             raise InvalidTagStateError(f"Invalid ESL object state: {self._state} at address {self.ble_address}")
         self._past_initiated = False
         try:
+            if (force_close):
+                self.log.debug('Abort connection to ESL at %s.', self.ble_address)
             self.lib.close_connection(self.connection_handle)
             self.busy = True
         except esl_lib.CommandFailedError as e:
@@ -850,7 +869,7 @@ class Tag():
             disp_type = self.display_info[display_ind].type
 
             if ots_object_type and disp_type == ots_object_type:
-                self.log.info("Display type matches object type for address %s", self.ble_address)
+                self.log.debug("Display type matches object type for address %s", self.ble_address)
                 if type(file) == str:
                     self.xbm_converter.open(file)
                     if self.xbm_converter.image is not None:
@@ -875,9 +894,9 @@ class Tag():
     def initiate_past(self, pawr_handle, pa_interval):
         """ Initiate PAST """
         if self.state != TagState.CONNECTED:
-            raise InvalidTagStateError(f"Invalid ESL object state: {self._state} at address {self.ble_address}")
+            raise InvalidTagStateError(f"Invalid ESL object state: {self._state} at address {self.ble_address}!")
         if self._past_initiated:
-            return
+            raise InvalidTagStateError(f"PAST has been already initiated for ESL at address {self.ble_address}!")
         try:
             self.lib.initiate_past(self.connection_handle, pawr_handle)
             self._past_initiated = True
@@ -888,4 +907,6 @@ class Tag():
             self._past_timer.start()
             self.busy = True
         except esl_lib.CommandFailedError as e:
-            self.log.error(e)
+            # self.lib.initiate_past is OK to return SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER if the ESL is already synchronized.
+            if e.sl_status != elw.SL_STATUS_BT_CTRL_UNKNOWN_CONNECTION_IDENTIFIER:
+                self.log.error(e)

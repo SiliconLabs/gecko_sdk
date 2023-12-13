@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4196a brd4197a brd4198a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*mgm21.* .*mgm22.* .*mgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32mg21.* .*efr32mg22.* .*efr32bg24.* .*efr32mg24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc segger"/>
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
@@ -23,7 +23,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4176a brd4179b brd4180a brd4180b brd4181a brd4181b brd4181c brd4186a brd4186b brd4186c brd4187a brd4187b brd4187c brd4188a brd4188b brd4195a brd4196a brd4197a brd4198a brd4308a brd4308b brd4308c brd4308d brd4309a brd4309b brd4316a brd4317a brd4318a brd4319a brd4329a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*bgm21.* .*bgm22.* .*mgm21.* .*mgm22.* .*mgm24.* .*efr32bg21.* .*efr32bg22.* .*efr32mg21.* .*efr32mg22.* .*efr32bg24.* .*efr32mg24.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc segger"/>
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>

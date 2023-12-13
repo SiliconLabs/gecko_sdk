@@ -33,12 +33,12 @@
 //------------------------------------------------------------------------------
 // Weak callbacks definitions
 
-WEAK(bool emberAfPluginOtaUnicastBootloaderClientNewIncomingImageCallback(
-       EmberNodeId serverId,
-       uint8_t imageTag,
-       uint32_t imageSize,
-       uint32_t *startIndex
-       ))
+SL_WEAK bool emberAfPluginOtaUnicastBootloaderClientNewIncomingImageCallback(
+  EmberNodeId serverId,
+  uint8_t imageTag,
+  uint32_t imageSize,
+  uint32_t *startIndex
+  )
 {
   (void)serverId;
   (void)imageTag;
@@ -48,12 +48,12 @@ WEAK(bool emberAfPluginOtaUnicastBootloaderClientNewIncomingImageCallback(
   return false;
 }
 
-WEAK(void emberAfPluginOtaUnicastBootloaderClientIncomingImageSegmentCallback(
-       EmberNodeId serverId,
-       uint32_t startIndex,
-       uint32_t endIndex,
-       uint8_t imageTag,
-       uint8_t *imageSegment))
+SL_WEAK void emberAfPluginOtaUnicastBootloaderClientIncomingImageSegmentCallback(
+  EmberNodeId serverId,
+  uint32_t startIndex,
+  uint32_t endIndex,
+  uint8_t imageTag,
+  uint8_t *imageSegment)
 {
   (void)serverId;
   (void)startIndex;
@@ -62,20 +62,20 @@ WEAK(void emberAfPluginOtaUnicastBootloaderClientIncomingImageSegmentCallback(
   (void)imageSegment;
 }
 
-WEAK(void emberAfPluginOtaUnicastBootloaderClientImageDownloadCompleteCallback(
-       EmberAfOtaUnicastBootloaderStatus status,
-       uint8_t imageTag,
-       uint32_t imageSize))
+SL_WEAK void emberAfPluginOtaUnicastBootloaderClientImageDownloadCompleteCallback(
+  EmberAfOtaUnicastBootloaderStatus status,
+  uint8_t imageTag,
+  uint32_t imageSize)
 {
   (void)status;
   (void)imageTag;
   (void)imageSize;
 }
 
-WEAK(bool emberAfPluginOtaUnicastBootloaderClientIncomingRequestBootloadCallback(
-       EmberNodeId serverId,
-       uint8_t imageTag,
-       uint32_t bootloadDelayMs))
+SL_WEAK bool emberAfPluginOtaUnicastBootloaderClientIncomingRequestBootloadCallback(
+  EmberNodeId serverId,
+  uint8_t imageTag,
+  uint32_t bootloadDelayMs)
 {
   (void)serverId;
   (void)imageTag;

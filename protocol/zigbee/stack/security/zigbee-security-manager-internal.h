@@ -112,10 +112,6 @@ sl_status_t zb_sec_man_store_internal_key(sl_zb_sec_man_context_t* context,
                                           sl_zb_sec_man_key_t* plaintext_key);
 sl_status_t zb_sec_man_fetch_internal_key(sl_zb_sec_man_context_t* context,
                                           sl_zb_sec_man_key_t* plaintext_key);
-sl_status_t zb_sec_man_store_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key);
-sl_status_t zb_sec_man_fetch_secure_ezsp_key(sl_zb_sec_man_context_t* context,
-                                             sl_zb_sec_man_key_t * plaintext_key);
 
 sl_status_t zb_sec_man_hmac_aes_mmo(const uint8_t* input,
                                     const uint8_t data_length,
@@ -135,5 +131,9 @@ sl_status_t zb_sec_man_delete_transient_key_by_eui(sl_zb_sec_man_context_t* cont
 //Used by functions that are called by Zigbee Security Manager and also call an API within it
 //(so they can restore the state they were called from).
 void zb_sec_man_backup_key_context(bool direction);
+
+//Returns the value of a derived key.
+sl_status_t sli_zigbee_sec_man_export_derived_key(sl_zb_sec_man_context_t* context,
+                                                  sl_zb_sec_man_key_t* derived_key);
 
 #endif // _ZIGBEE_SECURITY_MANAGER_INTERNAL_H_

@@ -4,7 +4,7 @@ tag:
   - hardware:
       device:
         memory:
-          flash: 98
+          flash: 100
           ram: 10
       board:
         rf_bands:
@@ -13,6 +13,6 @@ tag:
           - vcom
           - pti
         io:
-          led: 2+
+          led: 1+
           si4468: false
   

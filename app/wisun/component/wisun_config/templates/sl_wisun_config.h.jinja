@@ -30,12 +30,18 @@
 #ifndef __SL_WISUN_CONFIG_H__
 #define __SL_WISUN_CONFIG_H__
 
+#include "sl_component_catalog.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if defined(SL_CATALOG_WISUN_STACK_PRESENT) ||   \
+    defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+
 #include <stddef.h>
-{% if only_radio is sameas false %}
-#include "sl_wisun_types.h"
-{% else -%}
 #include <stdint.h>
-{%- endif -%}
+#include "sl_wisun_types.h"
 {% if config.deviceType is not none %}
 
 //! Wi-SUN device type
@@ -43,6 +49,7 @@
 #define WISUN_CONFIG_DEVICE_TYPE                {{config.deviceType}}
 #endif
 {%- endif -%}
+
 {% if config.deviceProfile is not none %}
 
 //! Wi-SUN device profile (LFN)
@@ -70,17 +77,17 @@
 //! Wi-SUN DWELL Interval (15-255) default 255
 #define WISUN_CONFIG_DWELL_INTERVAL             {{config.dwellInterval}}U
 {%- endif -%}
-{% if config.allowedChannels is not none and only_radio is sameas false %}
+{% if config.allowedChannels is not none %}
 
 //! Wi-SUN allowed channels
-#define WISUN_CONFIG_ALLOWED_CHANNELS 
+#define WISUN_CONFIG_ALLOWED_CHANNELS           "{{config.allowedChannelsStr}}"
 extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
 {%- endif -%}
 {% if config.defaultPhy is not none %}
 
 {% if config.defaultPhy['profile'] == 'wisun_fan_1_0' -%}
 //! Wi-SUN default PHY - FAN1.0 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN10          0
+#define WISUN_CONFIG_DEFAULT_PHY_FAN10
 
 //! Wi-SUN default PHY - Regulatory Domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          {{config.defaultPhy['regulatoryDomain']}}
@@ -92,7 +99,7 @@ extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
 #define WISUN_CONFIG_OPERATING_MODE             {{config.defaultPhy['operatingMode']}}
 {%- else -%}
 //! Wi-SUN default PHY - FAN1.1 profile
-#define WISUN_CONFIG_DEFAULT_PHY_FAN11          1
+#define WISUN_CONFIG_DEFAULT_PHY_FAN11
 
 //! Wi-SUN default PHY - Regulatory domain
 #define WISUN_CONFIG_REGULATORY_DOMAIN          {{config.defaultPhy['regulatoryDomain']}}
@@ -110,7 +117,9 @@ extern const sl_wisun_channel_mask_t wisun_config_allowed_channels_mask;
 #define WISUN_CONFIG_BROADCAST_RETRIES          {{config.broadcastRetries}}
 {%- endif -%}
 {% if config.modeSwitchPhys is not none %}
-{% if (config.modeSwitchPhys|length > 0) and (config.modeSwitchPhys is not none) %}
+{% if config.modeSwitchPhys|length > 0 %}
+//! Wi-SUN Mode Switch PHYs
+#define WISUN_CONFIG_MODE_SWITCH_PHYS           { {{ config.modeSwitchPhyModeIds|join(', ') }} }
 
 //! Wi-SUN Mode Switch PHYs number
 #define WISUN_CONFIG_MODE_SWITCH_PHYS_NUMBER    {{config.modeSwitchPhys|length}}
@@ -168,5 +177,11 @@ extern const uint8_t wisun_config_device_certificate[];
 #define WISUN_CONFIG_CA_CERTIFICATE_PRESENT
 extern const uint8_t wisun_config_ca_certificate[];
 {%- endif %}
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SL_WISUN_CONFIG_H__ */

@@ -104,6 +104,11 @@ exporter:
         action: append
         value: "-x assembler-with-cpp"
 
+      - tool: makefile.arm.gcc.linker
+        option: misc
+        action: append
+        value: "-Wl,--no-warn-rwx-segments"
+
       - tool: linker
         option: generateMapFile
         value: true
@@ -139,6 +144,14 @@ exporter:
       - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.linker
         option: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.linker.circulardependency
         value: true
+      - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.linker.base
+        option: com.silabs.gnu.c.link.option.ldflags
+        action: append
+        value: "-Wl,--no-warn-rwx-segments"
+      - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.linker.base
+        option: com.silabs.gnu.cpp.link.option.flags
+        action: append
+        value: "-Wl,--no-warn-rwx-segments"
       - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
         option: com.silabs.gnu.c.compiler.option.misc.otherlist
         action: append
@@ -412,6 +425,10 @@ exporter:
           option: IlinkExtraOptions
           action: append
           value: "{{value}}"
+        - tool: iar.arm.toolchain.linker.v5.4.0
+          option: iar.arm.toolchain.linker.option.extraOptions.v5.4.0
+          action: append
+          value: "{{value}}"
       no_builtin_printf:
         enabled:
           - tool: makefile.arm.gcc.compiler
@@ -439,9 +456,9 @@ exporter:
           - tool: makefile.arm.gcc.compiler
             option: misc
             action: append
-            value: "-flto"
+            value: "-flto=auto"
           - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
             option: com.silabs.gnu.c.compiler.option.misc.otherlist
             action: append
-            value: "-flto"
+            value: "-flto=auto"
         disabled: []

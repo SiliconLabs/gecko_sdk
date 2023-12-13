@@ -181,10 +181,8 @@ ZW_WEAK void cc_supervision_get_received_handler(SUPERVISION_GET_RECEIVED_HANDLE
   }
 }
 
-ZW_WEAK void cc_supervision_report_recived_handler(cc_supervision_status_t status, uint8_t duration)
+ZW_WEAK void cc_supervision_report_recived_handler(__attribute__((unused)) cc_supervision_status_t status, __attribute__((unused)) uint8_t duration)
 {
-  UNUSED(status);
-  UNUSED(duration);
 }
 
 /**
@@ -209,14 +207,10 @@ static bool mustCommandBeHandled(MULTICHAN_DEST_NODE_ID nodeID, uint8_t sessionI
 static received_frame_status_t CC_Supervision_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  uint8_t cmdLength,
+  __attribute__((unused)) uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER * pFrameOut,
-  uint8_t * pLengthOut)
+  __attribute__((unused)) uint8_t * pLengthOut)
 {
-
-  UNUSED(cmdLength);
-  UNUSED(pLengthOut);
-
   switch (pCmd->ZW_Common.cmd)
   {
     case SUPERVISION_GET:
@@ -249,10 +243,7 @@ static received_frame_status_t CC_Supervision_handler(
        * Multi-cast get status Transport_ApplicationCommandHandlerEx() and sing-cast send Supervision report.
        */
       static cc_supervision_status_t status = CC_SUPERVISION_STATUS_NOT_SUPPORTED;
-      zaf_tx_options_t tx_options;
-      cc_handler_output_t output;
-      memset((uint8_t *)&output, 0, sizeof(cc_handler_output_t));
-
+      cc_handler_output_t output = { 0 };
       SetFlagSupervisionEncap(true);
 
       if(previously_receive_session_id != CC_SUPERVISION_EXTRACT_SESSION_ID(pCmd->ZW_SupervisionGetFrame.properties1))
@@ -280,11 +271,11 @@ static received_frame_status_t CC_Supervision_handler(
 #pragma GCC diagnostic ignored "-Wconversion"
           rxOpt->statusUpdate = CC_SUPERVISION_EXTRACT_STATUS_UPDATE(pCmd->ZW_SupervisionGetFrame.properties1);
 
-          cc_handler_input_t input;
-          memset((uint8_t *)&input, 0, sizeof(cc_handler_input_t));
-          input.rx_options = rxOpt;
-          input.frame = (ZW_APPLICATION_TX_BUFFER *)(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME));
-          input.length = pCmd->ZW_SupervisionGetFrame.encapsulatedCommandLength;
+          cc_handler_input_t input = {
+            .rx_options = rxOpt,
+            .frame = (ZW_APPLICATION_TX_BUFFER *)(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME)),
+            .length = pCmd->ZW_SupervisionGetFrame.encapsulatedCommandLength
+          };
 
           output.frame = pFrameOut;
           status = (cc_supervision_status_t)invoke_cc_handler(&input, &output);
@@ -360,14 +351,14 @@ static received_frame_status_t CC_Supervision_handler(
           (CC_SUPERVISION_STATUS_NOT_SUPPORTED != status))
       {
         // Call the assigned function.
-        SUPERVISION_GET_RECEIVED_HANDLER_ARGS args;
-
-        args.cmdClass = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME));
-        args.cmd      = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME) + 1);
-        args.properties1 = pCmd->ZW_SupervisionGetFrame.properties1;
-        args.rxOpt = rxOpt;
-        args.status = status;
-        args.duration = output.duration;
+        SUPERVISION_GET_RECEIVED_HANDLER_ARGS args = {
+          .cmdClass = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME)),
+          .cmd      = *(((uint8_t *)pCmd) + sizeof(ZW_SUPERVISION_GET_FRAME) + 1),
+          .properties1 = pCmd->ZW_SupervisionGetFrame.properties1,
+          .rxOpt = rxOpt,
+          .status = status,
+          .duration = output.duration
+        };
 
         cc_supervision_get_received_handler(&args);
 
@@ -381,6 +372,7 @@ static received_frame_status_t CC_Supervision_handler(
        * allowed to.
        */
       if (false == Check_not_legal_response_job(rxOpt)) {
+        zaf_tx_options_t tx_options = { 0 };
         zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
         (void) CmdClassSupervisionReportSend(&tx_options, properties1, status, 
                                              output.duration);
@@ -412,15 +404,13 @@ CmdClassSupervisionReportSend(
   cc_supervision_status_t status,
   uint8_t duration)
 {
-  ZW_APPLICATION_TX_BUFFER txBuf;
-  memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
-
-  txBuf.ZW_SupervisionReportFrame.cmdClass = COMMAND_CLASS_SUPERVISION;
-  txBuf.ZW_SupervisionReportFrame.cmd = SUPERVISION_REPORT;
-  txBuf.ZW_SupervisionReportFrame.properties1 = properties;
-  txBuf.ZW_SupervisionReportFrame.status = status;
-  txBuf.ZW_SupervisionReportFrame.duration = duration;
-
+  ZW_APPLICATION_TX_BUFFER txBuf = {
+    .ZW_SupervisionReportFrame.cmdClass = COMMAND_CLASS_SUPERVISION,
+    .ZW_SupervisionReportFrame.cmd = SUPERVISION_REPORT,
+    .ZW_SupervisionReportFrame.properties1 = properties,
+    .ZW_SupervisionReportFrame.status = status,
+    .ZW_SupervisionReportFrame.duration = duration
+  };
   return zaf_transport_tx((uint8_t *)&txBuf, sizeof(ZW_SUPERVISION_REPORT_FRAME), NULL, tx_options);
 }
 
@@ -435,7 +425,6 @@ void CommandClassSupervisionGetWrite(ZW_SUPERVISION_GET_FRAME* pbuf)
 {
   pbuf->cmdClass =  COMMAND_CLASS_SUPERVISION;
   pbuf->cmd = SUPERVISION_GET;
-
   pbuf->properties1 = CC_SUPERVISION_ADD_SESSION_ID(supervision_session_id);
   pbuf->properties1 |= (uint8_t)CC_SUPERVISION_ADD_STATUS_UPDATE(m_status_updates_enabled);
   pbuf->encapsulatedCommandLength = m_CommandLength;
