@@ -158,7 +158,7 @@ class XbmConverter():
         red_pixels = display_image.remap_palette([0,0,2]).convert('1')
         image_size = display_size
 
-        if len(display_image.getcolors()) == 3:
+        if not(bw):
             image_size = tuple(map(mul, display_size, (1,2)))
 
         image_out = Image.new('RGB', image_size, "white") # would be better to use the display color
