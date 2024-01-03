@@ -9,6 +9,10 @@ The Gecko SDK (GSDK) combines Silicon Labs wireless software development kits (S
 
 Silicon Labs also helps future-proof your devices with over-the-air software and security updates, helping to minimize maintenance cost and improve your end user product experience!
 
+## Announcements
+
+On December 13th, 2023, the git LFS server changed and enabled a bandwidth quota based on your IP address. Go [here](https://github.com/SiliconLabs/.github) for more information on how to resolve this issue.
+
 ## Licensing
 
 Gecko SDK is covered by one of several different licenses.
