@@ -46,8 +46,11 @@ void btl_debugInit(void)
   GPIO->ROUTELOC0 = (GPIO->ROUTELOC0 & ~(_GPIO_ROUTELOC0_SWVLOC_MASK))
                     | SL_DEBUG_SWV_LOC;
 
+#if ((__CORTEX_M == 4) || (__CORTEX_M == 33))
   // Set TPIU prescaler to 22 (19 MHz / 22 = 863.63 kHz SWO speed)
   tpiu_prescaler_val = 22 - 1;
+#endif
+
 #endif
   // Enable output on pin
 #if (SL_DEBUG_SWV_PIN > 7U)
