@@ -62,6 +62,12 @@ void Assert(const char* pFileName, int iLineNumber);
  */
 void Assert_SetCb(AssertCb_t cb);
 
+/**
+ *  @brief Handle null pointer exceptions before segfault (when not applicable or desired)
+ * @return input pointer to allow chaining operators (eg: AssertPtr(p)->funct)
+ */
+const void* AssertPtr(const void* ptr, const char* message);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
@@ -100,6 +106,9 @@ void Assert_SetCb(AssertCb_t cb);
 // Will generate compile error if bMustBeTrue cannot be evaluated compiletime.
 #define STATIC_ASSERT(bMustBeTrue, UniqueErrorMessage) \
   enum { UniqueErrorMessage = 1 / (bMustBeTrue) }
+
+#define ASSERT_PTR(p) \
+  AssertPtr((p), (#p))
 
 #endif	// _ASSERT_H_
 

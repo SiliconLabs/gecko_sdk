@@ -101,14 +101,14 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CLK),(CS),(RTS),(CTS)> IOT_UART_CFG_EXP
 // $[USART_IOT_UART_CFG_EXP]
-#define IOT_UART_CFG_EXP_PERIPHERAL              USART0
-#define IOT_UART_CFG_EXP_PERIPHERAL_NO           0
+#define IOT_UART_CFG_EXP_PERIPHERAL              USART1
+#define IOT_UART_CFG_EXP_PERIPHERAL_NO           1
 
-// USART0 TX on PA00
+// USART1 TX on PA00
 #define IOT_UART_CFG_EXP_TX_PORT                 gpioPortA
 #define IOT_UART_CFG_EXP_TX_PIN                  0
 
-// USART0 RX on PA04
+// USART1 RX on PA04
 #define IOT_UART_CFG_EXP_RX_PORT                 gpioPortA
 #define IOT_UART_CFG_EXP_RX_PIN                  4
 

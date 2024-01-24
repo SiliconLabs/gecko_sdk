@@ -81,6 +81,18 @@
   - condition:
     - brd4001a
     override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4331a_brd4001a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4001a
+    override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4331a_brd4001a/sl_device_init_lfxo_config.h
+  - condition:
+    - brd4001a
+    override:
       component: i2cspm
       file_id: i2cspm_config
       instance: mikroe
@@ -319,6 +331,18 @@
       file_id: cpc_drv_secondary_uart_usart_config
       instance: mikroe
     path: brd4331a_brd4002a/sl_cpc_drv_secondary_uart_usart_mikroe_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4331a_brd4002a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4331a_brd4002a/sl_device_init_lfxo_config.h
   - condition:
     - brd4002a
     override:

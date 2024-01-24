@@ -16,6 +16,8 @@
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_segment_lcd
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_868
@@ -44,6 +46,8 @@
     value: '"BRD2600A"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
   - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS
@@ -58,4 +62,4 @@
   - hardware:has:sensor:si7021
   - hardware:has:led:1
   - hardware:has:button:2
-  - hardware:has:lcd
+  - hardware:has:segment_lcd_driver

@@ -8,8 +8,8 @@
 #include "sl_hci_cpc.h"
 #include "sl_btctrl_hci_packet.h"
 
-static uint8_t *read_buf;
-static hci_packet_t *packet;
+static uint8_t *read_buf = NULL;
+static hci_packet_t *packet = NULL;
 static enum hci_packet_state state;
 static uint16_t bytes_remaining;
 
@@ -51,7 +51,6 @@ void sl_btctrl_hci_packet_step(void)
 
   bytes_read = sl_hci_cpc_read(&read_buf);
   if (bytes_read == 0) {
-    sl_hci_cpc_free(read_buf);
     sl_hci_cpc_rx_done();
     return; // CPC Secondary returned error
   } else {

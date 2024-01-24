@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4181c
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -48,6 +49,8 @@
     value: '"BRD4181C"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

@@ -84,7 +84,7 @@ void emberAfInitCallback(void)
   emberAfAllocateEvent(&state_machine_event, &state_machine_handler);
   emberEventControlSetDelayMS(*state_machine_event, 100);
   // CLI info message
-  app_log_info("Light DMP\n");
+  app_log_info("\nLight DMP\n");
 
   // set the default PAN ID, it can be changed with CLI
   sl_set_pan_id(DEFAULT_LIGHT_SWITCH_PAN_ID);

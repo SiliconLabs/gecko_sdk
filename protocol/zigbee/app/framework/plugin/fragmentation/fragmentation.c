@@ -22,7 +22,7 @@
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #include "sl_zigbee_debug_print.h"
 #else // ! SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
-#define sl_zigbee_legacy_af_debug_print(...)
+#define sl_zigbee_legacy_af_debug_println(...)
 #endif //SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #ifdef UC_BUILD
 #if (EMBER_AF_PLUGIN_FRAGMENTATION_FREE_OUTGOING_MESSAGE_PRIOR_TO_FINAL_ACK == 1)
@@ -78,7 +78,7 @@ static txFragmentedPacket txPacketAwaitingFinalAck = {
 uint8_t emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
   #define artificiallyDropBlock(block) (block == emAfPluginFragmentationArtificiallyDropBlockNumber)
   #define clearArtificiallyDropBlock() emAfPluginFragmentationArtificiallyDropBlockNumber = NO_BLOCK_TO_DROP;
-  #define artificiallyDropBlockPrintln(format, arg) sl_zigbee_legacy_af_debug_print((format), (arg))
+  #define artificiallyDropBlockPrintln(format, arg) sl_zigbee_legacy_af_debug_println((format), (arg))
 
 #else
   #define artificiallyDropBlock(block) false
@@ -185,9 +185,9 @@ static EmberStatus sendNextFragments(txFragmentedPacket* txPacket)
   uint8_t i;
   uint16_t offset;
 
-  sl_zigbee_legacy_af_debug_print("Sending fragment %d of %d",
-                                  txPacket->fragmentBase,
-                                  txPacket->fragmentCount);
+  sl_zigbee_legacy_af_debug_println("Sending fragment %d of %d",
+                                    txPacket->fragmentBase,
+                                    txPacket->fragmentCount);
 
   offset = txPacket->fragmentBase * txPacket->fragmentLen;
 
@@ -444,7 +444,7 @@ bool emAfFragmentationIncomingMessage(EmberIncomingMessageType type,
     }
   }
 
-  sl_zigbee_legacy_af_debug_print("Receiving fragment %d of %d", fragment, rxPacket->fragmentsExpected);
+  sl_zigbee_legacy_af_debug_println("Receiving fragment %d of %d", fragment, rxPacket->fragmentsExpected);
 
   // If it's a new fragment, try to buffer it
   // If the payload is too long, we wait to hear all fragments (and ack each

@@ -3,7 +3,7 @@
 - label: BRD2703A rev A00
 - package: platform
 - description: Board support for BRD2703A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: efr32mg24b020f1536im48
@@ -12,8 +12,9 @@
   - name: brd2703a_revision
   - name: brd2703a_a00
   - name: hardware_board
-  - name: hardware_board_stk
+  - name: hardware_board_tb
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -39,6 +40,8 @@
     value: '"BRD2703A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

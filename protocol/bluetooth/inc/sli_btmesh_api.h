@@ -124,6 +124,7 @@ enum sli_btmesh_command_id
     sli_btmesh_node_get_proxy_solicitation_rpl_status_command_id = 0x32,
     sli_btmesh_node_set_oob_uri_command_id = 0x33,
     sli_btmesh_node_get_oob_uri_command_id = 0x34,
+    sli_btmesh_node_set_proxy_service_uuid_command_id = 0x35,
     sli_btmesh_prov_init_command_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_command_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_command_id = 0x41,
@@ -633,6 +634,7 @@ enum sli_btmesh_response_id
     sli_btmesh_node_get_proxy_solicitation_rpl_status_response_id = 0x32,
     sli_btmesh_node_set_oob_uri_response_id = 0x33,
     sli_btmesh_node_get_oob_uri_response_id = 0x34,
+    sli_btmesh_node_set_proxy_service_uuid_response_id = 0x35,
     sli_btmesh_prov_init_response_id = 0x00,
     sli_btmesh_prov_scan_unprov_beacons_response_id = 0x01,
     sli_btmesh_prov_create_provisioning_session_response_id = 0x41,
@@ -1560,6 +1562,14 @@ PACKSTRUCT( struct sl_btmesh_cmd_node_set_oob_uri_s
 });
 
 typedef struct sl_btmesh_cmd_node_set_oob_uri_s sl_btmesh_cmd_node_set_oob_uri_t;
+
+
+PACKSTRUCT( struct sl_btmesh_cmd_node_set_proxy_service_uuid_s
+{
+    uint16_t uuid;
+});
+
+typedef struct sl_btmesh_cmd_node_set_proxy_service_uuid_s sl_btmesh_cmd_node_set_proxy_service_uuid_t;
 
 
 PACKSTRUCT( struct sl_btmesh_cmd_prov_create_provisioning_session_s
@@ -5823,6 +5833,14 @@ PACKSTRUCT( struct sl_btmesh_rsp_node_get_oob_uri_s
 typedef struct sl_btmesh_rsp_node_get_oob_uri_s sl_btmesh_rsp_node_get_oob_uri_t;
 
 
+PACKSTRUCT( struct sl_btmesh_rsp_node_set_proxy_service_uuid_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_btmesh_rsp_node_set_proxy_service_uuid_s sl_btmesh_rsp_node_set_proxy_service_uuid_t;
+
+
 PACKSTRUCT( struct sl_btmesh_rsp_prov_init_s
 {
     uint16_t result;
@@ -9754,6 +9772,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_node_set_provisioning_service_adv_interval_t   cmd_node_set_provisioning_service_adv_interval;
     sl_btmesh_cmd_node_get_local_model_metadata_page_t           cmd_node_get_local_model_metadata_page;
     sl_btmesh_cmd_node_set_oob_uri_t                             cmd_node_set_oob_uri;
+    sl_btmesh_cmd_node_set_proxy_service_uuid_t                  cmd_node_set_proxy_service_uuid;
     sl_btmesh_cmd_prov_create_provisioning_session_t             cmd_prov_create_provisioning_session;
     sl_btmesh_cmd_prov_set_provisioning_suspend_event_t          cmd_prov_set_provisioning_suspend_event;
     sl_btmesh_cmd_prov_provision_adv_device_t                    cmd_prov_provision_adv_device;
@@ -10176,6 +10195,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_node_get_proxy_solicitation_rpl_status_t       rsp_node_get_proxy_solicitation_rpl_status;
     sl_btmesh_rsp_node_set_oob_uri_t                             rsp_node_set_oob_uri;
     sl_btmesh_rsp_node_get_oob_uri_t                             rsp_node_get_oob_uri;
+    sl_btmesh_rsp_node_set_proxy_service_uuid_t                  rsp_node_set_proxy_service_uuid;
     sl_btmesh_rsp_prov_init_t                                    rsp_prov_init;
     sl_btmesh_rsp_prov_scan_unprov_beacons_t                     rsp_prov_scan_unprov_beacons;
     sl_btmesh_rsp_prov_create_provisioning_session_t             rsp_prov_create_provisioning_session;

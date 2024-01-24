@@ -74,6 +74,8 @@ void emberAfInitCallback(void)
   // set the default Tx power, it can be changed with CLI
   emberSetRadioPower(SL_CONNECT_ECDH_KEY_EXCHANGE_DEFAULT_TX_POWER, false);
 
+  app_log_error("\nECDH Key Exchange\n");
+
   psa_status_t psa_status;
   if ((psa_status = sl_connect_ecdh_key_exchange_init()) != PSA_SUCCESS) {
     app_log_info("PSA init failed (status: %ld)\n", psa_status);

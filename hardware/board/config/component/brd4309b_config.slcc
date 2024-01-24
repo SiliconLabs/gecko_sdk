@@ -60,6 +60,12 @@
   - condition:
     - brd4001a
     override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4309b_brd4001a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4001a
+    override:
       component: iostream_usart
       file_id: iostream_usart_config
       instance: vcom
@@ -214,6 +220,12 @@
       file_id: cpc_drv_secondary_uart_usart_config
       instance: exp
     path: brd4309b_brd4002a/sl_cpc_drv_secondary_uart_usart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4309b_brd4002a/sl_device_init_hfxo_config.h
   - condition:
     - brd4002a
     override:

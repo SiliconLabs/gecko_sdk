@@ -52,22 +52,22 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_SERIAL_EUART
 // $[EUSART_SL_SERIAL_EUART]
-#define SL_SERIAL_EUART_PERIPHERAL               EUSART1
-#define SL_SERIAL_EUART_PERIPHERAL_NO            1
+#define SL_SERIAL_EUART_PERIPHERAL               EUSART0
+#define SL_SERIAL_EUART_PERIPHERAL_NO            0
 
-// EUSART1 TX on PA05
+// EUSART0 TX on PA05
 #define SL_SERIAL_EUART_TX_PORT                  gpioPortA
 #define SL_SERIAL_EUART_TX_PIN                   5
 
-// EUSART1 RX on PA06
+// EUSART0 RX on PA06
 #define SL_SERIAL_EUART_RX_PORT                  gpioPortA
 #define SL_SERIAL_EUART_RX_PIN                   6
 
-// EUSART1 CTS on PA09
+// EUSART0 CTS on PA09
 #define SL_SERIAL_EUART_CTS_PORT                 gpioPortA
 #define SL_SERIAL_EUART_CTS_PIN                  9
 
-// EUSART1 RTS on PA08
+// EUSART0 RTS on PA08
 #define SL_SERIAL_EUART_RTS_PORT                 gpioPortA
 #define SL_SERIAL_EUART_RTS_PIN                  8
 

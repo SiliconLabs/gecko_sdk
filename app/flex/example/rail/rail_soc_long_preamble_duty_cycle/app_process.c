@@ -252,6 +252,7 @@ void app_process_action(RAIL_Handle_t rail_handle)
       state = S_IDLE;
       refresh_display = true;
       radio_interrupt = true;
+      duty_cycle_end = true;
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
       app_log_info("Packet has been sent\n");
 #endif
@@ -436,6 +437,9 @@ static RAIL_Status_t send_tx_packet(RAIL_Handle_t rail_handle)
   RAIL_Status_t rail_status;
 
   prepare_package(rail_handle, out_packet, sizeof(out_packet));
+#if DUTY_CYCLE_ALLOW_EM2 == 1
+  RAIL_Idle(rail_handle, RAIL_IDLE_ABORT, true);
+#endif
   rail_status = RAIL_StartTx(rail_handle, CHANNEL, RAIL_TX_OPTION_ALT_PREAMBLE_LEN, NULL);
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
   if (rail_status != RAIL_STATUS_NO_ERROR) {

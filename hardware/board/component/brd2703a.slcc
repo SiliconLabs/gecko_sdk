@@ -3,13 +3,13 @@
 - label: BRD2703A
 - package: platform
 - description: Board support for BRD2703A.
-- category: Platform|Board|Starter Kit
+- category: Platform|Board|Thunderboard
 - quality: production
 - requires:
   - name: brd2703a_revision
 - provides:
   - name: brd2703a
-  - name: hardware_board_from_stk
+  - name: hardware_board_from_tb
   - name: hardware_board_from_xg24-ek2703a
 - recommends:
   - id: brd2703a_a02

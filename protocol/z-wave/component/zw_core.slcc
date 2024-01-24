@@ -146,10 +146,10 @@ define:
   - name: EFR32ZG
     value: 1
   # TODO: Integration hooks needed in FreeRTOS wrapper to register functions for pre/post sleep hooks
-  - name: configPRE_SLEEP_PROCESSING(ms)
-    value: enterPowerDown(ms)
-  - name: configPOST_SLEEP_PROCESSING(ms)
-    value: exitPowerDown(ms)
+  - name: configPRE_SLEEP_PROCESSING
+    value: enterPowerDown
+  - name: configPOST_SLEEP_PROCESSING
+    value: exitPowerDown
   - name: SL_IOSTREAM_UART_FLUSH_TX_BUFFER
   - name: CONFIG_MBEDTLS_USE_FREERTOS_PVCALLOC
 

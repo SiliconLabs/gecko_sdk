@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_915
   - name: hardware_board_supports_1_rf_band
@@ -43,6 +44,8 @@
     value: '"BRD4208A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_915

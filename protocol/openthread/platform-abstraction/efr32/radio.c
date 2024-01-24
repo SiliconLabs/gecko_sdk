@@ -199,6 +199,34 @@ static energyScanMode            sEnergyScanMode;
 
 static bool              sIsSrcMatchEnabled = false;
 
+#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
+#define RADIO_INTERFACE_COUNT   4
+#define RADIO_EXT_ADDR_COUNT    (RADIO_INTERFACE_COUNT - 1)
+#else
+#define RADIO_INTERFACE_COUNT   1
+#define RADIO_EXT_ADDR_COUNT    (RADIO_INTERFACE_COUNT)
+#endif
+
+#if RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT
+    #define SL_CHANNEL_MAX              OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MAX
+    #define SL_CHANNEL_MIN              OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MIN
+    #define SL_MAX_CHANNELS_SUPPORTED   ((OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MAX  \
+                                           - OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MIN) + 1)
+#elif RADIO_CONFIG_SUBGHZ_SUPPORT
+    #define SL_CHANNEL_MAX              OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX
+    #define SL_CHANNEL_MIN              OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
+    #define SL_MAX_CHANNELS_SUPPORTED   ((OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX \
+                                           - OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN) + 1)
+
+#elif RADIO_CONFIG_915MHZ_OQPSK_SUPPORT // Not supported
+    #define SL_CHANNEL_MAX              OT_RADIO_915MHZ_OQPSK_CHANNEL_MAX
+    #define SL_CHANNEL_MIN              OT_RADIO_915MHZ_OQPSK_CHANNEL_MIN
+    #define SL_MAX_CHANNELS_SUPPORTED   ((OT_RADIO_915MHZ_OQPSK_CHANNEL_MAX \
+                                            - OT_RADIO_915MHZ_OQPSK_CHANNEL_MIN) + 1)
+#endif
+
+#define SL_INVALID_TX_POWER             (127)
+
 // Receive
 #if SL_ENABLE_MULTI_RX_BUFFER_SUPPORT
 static rxBuffer          sReceivePacket[SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT];
@@ -225,6 +253,10 @@ static otRadioFrame      *sTxFrame = NULL;
 static uint8_t           sLastLqi;
 static int8_t            sLastRssi;
 #endif
+
+static otExtAddress      sExtAddress[RADIO_EXT_ADDR_COUNT];
+static int8_t            sMaxChannelPower[RADIO_INTERFACE_COUNT][SL_MAX_CHANNELS_SUPPORTED];
+static int8_t            sDefaultTxPower[RADIO_INTERFACE_COUNT];
 
 #if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
 static otRadioIeInfo sTransmitIeInfo;
@@ -374,31 +406,79 @@ static uint32_t sCoexCounters[SL_RAIL_UTIL_COEX_EVENT_COUNT] = {0};
 
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-#define RADIO_INTERFACE_COUNT   4
-#define RADIO_EXT_ADDR_COUNT    (RADIO_INTERFACE_COUNT - 1)
-#else
-#define RADIO_INTERFACE_COUNT   1
-#define RADIO_EXT_ADDR_COUNT    (RADIO_INTERFACE_COUNT)
-#endif
-
-static otExtAddress  sExtAddress[RADIO_EXT_ADDR_COUNT];
-
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-#define UNINITIALIZED_POWER -128
-#define INITIAL_POWER 0
-static int8_t sTxPower[RADIO_INTERFACE_COUNT];
-static int8_t maxMultipanTxPower(void)
+/**
+ * This function gets the lowest value for the maxTxPower for a channel, from the maxTxPowerTable set 
+ * across all interfaces. It also gets the highest defaultTxPower set across all interfaces.
+ *
+ * @param[out]  defaultTxPower   A pointer to update the derived defaultTxPower across all IIDs.
+ * @param[out]  txPowerFromTable A pointer to update the Tx Power derived from the MaxChannelPowerTable.
+ *
+ */
+static void sli_get_default_and_max_powers_across_iids( int8_t   *defaultTxPower,
+                                                        int8_t   *txPowerFromTable,
+                                                        uint16_t channel)
 {
-    int8_t powerDbm = UNINITIALIZED_POWER;
-    for (uint8_t i = 1; i < RADIO_INTERFACE_COUNT; i++) {
-        if (sTxPower[i] > powerDbm) {
-            powerDbm = sTxPower[i];
+    assert(txPowerFromTable != NULL);
+    assert(defaultTxPower != NULL);
+
+    for (uint8_t iid = 0U; iid < RADIO_INTERFACE_COUNT; iid++)
+    {   
+        // Obtain the minimum Tx power set by different iids, for `channel`
+        // If there is an interface using lower Tx power than the one we have
+        // in txPowerFromTable..
+        // Update txPowerFromTable.
+        *txPowerFromTable = SL_MIN(*txPowerFromTable, sMaxChannelPower[iid][channel - SL_CHANNEL_MIN]);
+        
+        // If the default Tx Power set is not invalid..
+        if(sDefaultTxPower[iid] != SL_INVALID_TX_POWER)
+        {
+            // Obtain the Max value between local defaultTxPower and sDefaultTxPower.
+            // If selected default Tx Power is Invalid, initialise it to sDefaultTxPower.
+            // We have already validated that sDefaultTxPower holds a valid value.
+            *defaultTxPower = (*defaultTxPower == SL_INVALID_TX_POWER) ? sDefaultTxPower[iid] : SL_MAX(*defaultTxPower, sDefaultTxPower[iid]);;
+        }
+        
+    }
+}
+
+static int8_t sli_get_max_tx_power_across_iids(void)
+{
+    int8_t   maxChannelTxPower = SL_INVALID_TX_POWER;
+    int8_t   maxDefaultTxPower = SL_INVALID_TX_POWER;
+    int8_t   selectedTxPower   = SL_INVALID_TX_POWER;
+    uint16_t channel;
+
+#if FAST_CHANNEL_SWITCHING_SUPPORT
+    if (isMultiChannel()) 
+    {
+        // Find the maxChannelTxPower, to be minimum of Max channel power for the  
+        // channels infast channel config, accross all iids. This is because, if a iid_1  
+        // sets the max tx power of the channel to be less than the max tx power set by  
+        // iid_2, we will need to work with the lower tx power to be compliant on both 
+        // interfaces.
+
+        // Find the maxDefaultTxPower, to be maximum of the default Tx power accross all  
+        // the interfaces.
+
+        for (uint8_t i = 0U; i < RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS; i++) 
+        {
+            // Get the channel stored in sChannelSwitchingCfg
+            channel = sChannelSwitchingCfg.channels[i];
+
+            sli_get_default_and_max_powers_across_iids(&maxDefaultTxPower, &maxChannelTxPower, channel);
         }
     }
-    return (powerDbm == UNINITIALIZED_POWER) ? INITIAL_POWER : powerDbm;
-}
+    else
 #endif
+    {
+        RAIL_GetChannel(gRailHandle, &channel);
+        sli_get_default_and_max_powers_across_iids(&maxDefaultTxPower, &maxChannelTxPower, channel);
+    }
+
+    // Return the minimum of maxChannelTxPower and maxDefaultTxPower.
+    selectedTxPower = SL_MIN(maxChannelTxPower, maxDefaultTxPower);
+    return (selectedTxPower == SL_INVALID_TX_POWER)? OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER : selectedTxPower;
+}
 
 #if RADIO_CONFIG_ENABLE_CUSTOM_EUI_SUPPORT
 /*
@@ -919,11 +999,11 @@ exit:
 }
 #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
-static void configureTxPower(RAIL_TxPowerConfig_t *aTxPowerConfig)
+static void configureTxPower(RAIL_TxPowerConfig_t *aTxPowerConfig, int8_t aTxPower)
 {
     RAIL_Status_t  status;
     RAIL_TxPowerLevel_t tx_power_lvl;
-    RAIL_TxPower_t tx_power_dbm = OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER * 10;
+    RAIL_TxPower_t tx_power_dbm = aTxPower * 10;
 
     tx_power_lvl = RAIL_GetTxPower(gRailHandle);
 
@@ -985,17 +1065,13 @@ static RAIL_Handle_t efr32RailInit(efr32CommonConfig *aCommonConfig)
     uint16_t actualLength = RAIL_SetTxFifo(handle, aCommonConfig->mRailTxFifo.fifo, 0, sizeof(aCommonConfig->mRailTxFifo.fifo));
     assert(actualLength == sizeof(aCommonConfig->mRailTxFifo.fifo));
 
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-    memset(sTxPower, UNINITIALIZED_POWER, sizeof(sTxPower));
-#endif
-
     // Enable RAIL multi-timer
     RAIL_ConfigMultiTimer(true);
 
     return handle;
 }
 
-static void efr32RailConfigLoad(efr32BandConfig *aBandConfig)
+static void efr32RailConfigLoad(efr32BandConfig *aBandConfig, int8_t aTxPower)
 {
     RAIL_Status_t status;
     RAIL_TxPowerConfig_t txPowerConfig = {SL_RAIL_UTIL_PA_SELECTION_2P4GHZ, SL_RAIL_UTIL_PA_VOLTAGE_MV,
@@ -1018,9 +1094,7 @@ static void efr32RailConfigLoad(efr32BandConfig *aBandConfig)
     }
     else
     {
-#if FAST_CHANNEL_SWITCHING_SUPPORT
-        status = RAIL_IEEE802154_Config2p4GHzRadioAntDiv(gRailHandle);
-#elif defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT)
         status = sl_rail_util_ieee802154_config_radio(gRailHandle);
 #else
         status = RAIL_IEEE802154_Config2p4GHzRadio(gRailHandle);
@@ -1037,13 +1111,15 @@ static void efr32RailConfigLoad(efr32BandConfig *aBandConfig)
                                    (RAIL_IEEE802154_E_OPTION_GB868 | RAIL_IEEE802154_E_OPTION_ENH_ACK));
 #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
-    configureTxPower(&txPowerConfig);
+    if (aTxPower != SL_INVALID_TX_POWER)
+    {
+        configureTxPower(&txPowerConfig, aTxPower);
+    }
 }
 
 static void efr32RadioSetTxPower(int8_t aPowerDbm)
 {
     RAIL_Status_t status;
-    sl_rail_util_pa_init();
 
     status = RAIL_SetTxPowerDbm(gRailHandle, ((RAIL_TxPower_t)aPowerDbm) * 10);
     assert(status == RAIL_STATUS_NO_ERROR);
@@ -1073,23 +1149,18 @@ static void efr32ConfigInit(void (*aEventCallback)(RAIL_Handle_t railHandle, RAI
 
 #if RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT
     sBandConfig.mChannelConfig = NULL;
-    sBandConfig.mChannelMin    = OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MIN;
-    sBandConfig.mChannelMax    = OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MAX;
-
-#elif RADIO_CONFIG_SUBGHZ_SUPPORT
+#else
     sBandConfig.mChannelConfig = channelConfigs[0];
-    sBandConfig.mChannelMin    = OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN;
-    sBandConfig.mChannelMax    = OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX;
-
-#elif RADIO_CONFIG_915MHZ_OQPSK_SUPPORT // Not supported
-    sBandConfig.mChannelConfig = channelConfigs[0];
-    sBandConfig.mChannelMin    = OT_RADIO_915MHZ_OQPSK_CHANNEL_MIN;
-    sBandConfig.mChannelMax    = OT_RADIO_915MHZ_OQPSK_CHANNEL_MAX;
 #endif
+    sBandConfig.mChannelMin    = SL_CHANNEL_MIN;
+    sBandConfig.mChannelMax    = SL_CHANNEL_MAX;
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     memset(&sRailDebugCounters, 0x00, sizeof(efr32RadioCounters));
 #endif
+
+    memset(sMaxChannelPower, SL_INVALID_TX_POWER, sizeof(sMaxChannelPower));
+    memset(sDefaultTxPower, SL_INVALID_TX_POWER, sizeof(sDefaultTxPower));
 
     gRailHandle = efr32RailInit(&sCommonConfig);
     assert(gRailHandle != NULL);
@@ -1111,7 +1182,7 @@ static void efr32ConfigInit(void (*aEventCallback)(RAIL_Handle_t railHandle, RAI
 #endif
                   | RAIL_EVENT_CAL_NEEDED));
 
-    efr32RailConfigLoad(&(sBandConfig));
+    efr32RailConfigLoad(&(sBandConfig), OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER);
 }
 
 void efr32RadioInit(void)
@@ -1163,6 +1234,7 @@ void efr32RadioInit(void)
     sCurrentBandConfig = efr32RadioGetBandConfig(OPENTHREAD_CONFIG_DEFAULT_CHANNEL);
     assert(sCurrentBandConfig != NULL);
 
+    sl_rail_util_pa_init();
     efr32RadioSetTxPower(OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER);
 
     assert(RAIL_ConfigRxOptions(gRailHandle,
@@ -1225,7 +1297,7 @@ static otError efr32StartEnergyScan(energyScanMode aMode, uint16_t aChannel, RAI
 
     if (sCurrentBandConfig != config)
     {
-        efr32RailConfigLoad(config);
+        efr32RailConfigLoad(config, SL_INVALID_TX_POWER);
         sCurrentBandConfig = config;
     }
 
@@ -1360,13 +1432,6 @@ otError otPlatRadioEnable(otInstance *aInstance)
     otLogInfoPlat("State=OT_RADIO_STATE_SLEEP");
     sState = OT_RADIO_STATE_SLEEP;
 
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-    uint8_t iid = otNcpPlatGetCurCommandIid();
-    if (sTxPower[iid] == UNINITIALIZED_POWER) {
-        sTxPower[iid] = INITIAL_POWER;
-    }
-#endif
-
 exit:
     return OT_ERROR_NONE;
 }
@@ -1401,28 +1466,33 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
     otError          error = OT_ERROR_NONE;
     RAIL_Status_t    status;
     efr32BandConfig *config;
+    int8_t           txPower;
 
     OT_UNUSED_VARIABLE(aInstance);
     otEXPECT_ACTION((sState != OT_RADIO_STATE_DISABLED && 
                      sState != OT_RADIO_STATE_TRANSMIT &&
                      sEnergyScanStatus != ENERGY_SCAN_STATUS_IN_PROGRESS), error = OT_ERROR_INVALID_STATE);
 
+#if FAST_CHANNEL_SWITCHING_SUPPORT
+    uint8_t index = getPanIndexFromIid(otNcpPlatGetCurCommandIid());
+    assert(index < RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS);
+    sChannelSwitchingCfg.channels[index] = aChannel;
+#endif
+
+    txPower = sli_get_max_tx_power_across_iids();
     config = efr32RadioGetBandConfig(aChannel);
     otEXPECT_ACTION(config != NULL, error = OT_ERROR_INVALID_ARGS);
 
     if (sCurrentBandConfig != config)
     {
         RAIL_Idle(gRailHandle, RAIL_IDLE, true);
-        efr32RailConfigLoad(config);
+        efr32RailConfigLoad(config, txPower);
         sCurrentBandConfig = config;
     }
-
-#if FAST_CHANNEL_SWITCHING_SUPPORT
-    uint8_t index = getPanIndexFromIid(otNcpPlatGetCurCommandIid());
-    assert(index < RAIL_IEEE802154_RX_CHANNEL_SWITCHING_NUM_CHANNELS);
-    radioSetIdle();
-    sChannelSwitchingCfg.channels[index] = aChannel;
-#endif
+    else
+    {
+        efr32RadioSetTxPower(txPower);
+    }
 
     status = radioSetRx(aChannel);
     otEXPECT_ACTION(status == RAIL_STATUS_NO_ERROR, error = OT_ERROR_FAILED);
@@ -1444,6 +1514,7 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
     otError          error = OT_ERROR_NONE;
     RAIL_Status_t    status;
     efr32BandConfig *config;
+    int8_t           txPower = sli_get_max_tx_power_across_iids();
 
     OT_UNUSED_VARIABLE(aInstance);
     otEXPECT_ACTION(sState != OT_RADIO_STATE_DISABLED, error = OT_ERROR_INVALID_STATE);
@@ -1454,8 +1525,12 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
     if (sCurrentBandConfig != config)
     {
         RAIL_Idle(gRailHandle, RAIL_IDLE, true);
-        efr32RailConfigLoad(config);
+        efr32RailConfigLoad(config, txPower);
         sCurrentBandConfig = config;
+    }
+    else
+    {
+        efr32RadioSetTxPower(txPower);
     }
 
     status = radioScheduleRx(aChannel, aStart, aDuration);
@@ -1477,6 +1552,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 {
     otError error = OT_ERROR_NONE;
     efr32BandConfig * config;
+    int8_t  txPower = sli_get_max_tx_power_across_iids();
 
 #if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1 && (defined SL_CATALOG_OT_RCP_GP_INTERFACE_PRESENT)
     //Accept GP packets even if radio is not in required state.
@@ -1495,8 +1571,12 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
         if (sCurrentBandConfig != config)
         {
             RAIL_Idle(gRailHandle, RAIL_IDLE, true);
-            efr32RailConfigLoad(config);
+            efr32RailConfigLoad(config, txPower);
             sCurrentBandConfig = config;
+        }
+        else
+        {
+            efr32RadioSetTxPower(txPower);
         }
 
         assert(sTransmitBusy == false);
@@ -1849,15 +1929,14 @@ otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
     OT_UNUSED_VARIABLE(aInstance);
 
     RAIL_Status_t status;
+    int8_t        maxTxPower;
 
-#if OPENTHREAD_RADIO && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE == 1
-    sTxPower[otNcpPlatGetCurCommandIid()] = aPower;
-    aPower = maxMultipanTxPower();
-#endif
+    sDefaultTxPower[otNcpPlatGetCurCommandIid()] = aPower;
+    maxTxPower = sli_get_max_tx_power_across_iids();
     
     // RAIL_SetTxPowerDbm() takes power in units of deci-dBm (0.1dBm)
     // Divide by 10 because aPower is supposed be in units dBm
-    status = RAIL_SetTxPowerDbm(gRailHandle, ((RAIL_TxPower_t)aPower) * 10);
+    status = RAIL_SetTxPowerDbm(gRailHandle, ((RAIL_TxPower_t)maxTxPower) * 10);
     assert(status == RAIL_STATUS_NO_ERROR);
 
     return OT_ERROR_NONE;
@@ -1867,27 +1946,17 @@ otError otPlatRadioSetTransmitPower(otInstance *aInstance, int8_t aPower)
 // See src/lib/spinel/radio_spinel_impl.hpp::RestoreProperties()
 otError otPlatRadioSetChannelMaxTransmitPower(otInstance *aInstance, uint8_t aChannel, int8_t aMaxPower)
 {
-    uint16_t currentChannel;
     otError error = OT_ERROR_NONE;
+    uint8_t iid = otNcpPlatGetCurCommandIid();
+    int8_t  txPower;
 
-#if RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT
-    otEXPECT_ACTION(aChannel >= OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MIN && aChannel <= OT_RADIO_2P4GHZ_OQPSK_CHANNEL_MAX,
-                    error = OT_ERROR_INVALID_ARGS);
-#elif RADIO_CONFIG_SUBGHZ_SUPPORT
-    otEXPECT_ACTION(aChannel >= OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
-                    && aChannel <= OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX,
-                    error = OT_ERROR_INVALID_ARGS);
-#elif RADIO_CONFIG_915MHZ_OQPSK_SUPPORT // Not supported
-    otEXPECT_ACTION(aChannel >= OT_RADIO_915MHZ_OQPSK_CHANNEL_MIN && aChannel <= OT_RADIO_915MHZ_OQPSK_CHANNEL_MAX,
-                    error = OT_ERROR_INVALID_ARGS);
-#endif
+    OT_UNUSED_VARIABLE(aInstance);
 
-    RAIL_GetChannel(gRailHandle, &currentChannel);
+    otEXPECT_ACTION(aChannel >= SL_CHANNEL_MIN && aChannel <= SL_CHANNEL_MAX, error = OT_ERROR_INVALID_ARGS);
 
-    if (aChannel == currentChannel)
-    {
-        otPlatRadioSetTransmitPower(aInstance, aMaxPower);
-    }
+    sMaxChannelPower[iid][aChannel - SL_CHANNEL_MIN] = aMaxPower;
+    txPower = sli_get_max_tx_power_across_iids();
+    efr32RadioSetTxPower(txPower);
 
 exit:
     return error;
@@ -2501,6 +2570,8 @@ static void packetReceivedCallback(RAIL_RxPacketHandle_t packetHandle)
     }
 exit:
     if (rxCorrupted) {
+        // Release the corrupted packet that won't be processed further
+        (void) RAIL_ReleaseRxPacket(gRailHandle, packetHandle);
         (void) handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED,
                                    (uint32_t) isReceivingFrame());
     } else {

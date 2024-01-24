@@ -124,6 +124,12 @@
   - condition:
     - brd4001a
     override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4335a_brd4001a/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4001a
+    override:
       component: device_init_lfxo
       file_id: device_init_lfxo_config
     path: brd4335a_brd4001a/sl_device_init_lfxo_config.h
@@ -489,6 +495,12 @@
       component: device_init_dcdc
       file_id: device_init_dcdc_config
     path: brd4335a_brd4002a/sl_device_init_dcdc_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4335a_brd4002a/sl_device_init_hfxo_config.h
   - condition:
     - brd4002a
     override:

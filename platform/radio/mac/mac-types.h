@@ -30,10 +30,18 @@ typedef uint16_t EmberNodeId;
 typedef uint8_t EmberEUI64[EUI64_SIZE];
 
 typedef uint8_t EmberMessageLength;
-#define EMBER_NO_CHILD_DEFAULT   0x0000 // default value in tokens for child table
+
+// SL_EMPTY_CHILD_NODE_ID is used only when (re)initializing the child node ID (especially in NVM)
+// to a default/unused value as it corresponds to the token init default.
+// It is never returned from the child node ID lookup functions.
+// Only use this when setting/examining the raw data for the child table entry.
+#define SL_EMPTY_CHILD_NODE_ID   0x0000u
+
+// EMBER_NULL_NODE_ID is the node ID that higher layers expect to see for failed child table
+// lookups.  Use this instead of SL_EMPTY_CHILD_NODE_ID as a return value for this interface.
 #define EMBER_NULL_NODE_ID       0xFFFFu
-#define EMBER_USE_LONG_ADDRESS   0xFFFE
-#define EMBER_BROADCAST_PAN_ID   0xFFFF
+#define EMBER_USE_LONG_ADDRESS   0xFFFEu
+#define EMBER_BROADCAST_PAN_ID   0xFFFFu
 
 // -----------------------------------------------------------------------------
 // MAC Filters

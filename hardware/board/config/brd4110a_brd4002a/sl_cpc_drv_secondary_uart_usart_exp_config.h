@@ -59,22 +59,22 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_EXP
 // $[USART_SL_CPC_DRV_UART_EXP]
-#define SL_CPC_DRV_UART_EXP_PERIPHERAL           USART0
-#define SL_CPC_DRV_UART_EXP_PERIPHERAL_NO        0
+#define SL_CPC_DRV_UART_EXP_PERIPHERAL           USART1
+#define SL_CPC_DRV_UART_EXP_PERIPHERAL_NO        1
 
-// USART0 TX on PA05
+// USART1 TX on PA05
 #define SL_CPC_DRV_UART_EXP_TX_PORT              gpioPortA
 #define SL_CPC_DRV_UART_EXP_TX_PIN               5
 
-// USART0 RX on PA06
+// USART1 RX on PA06
 #define SL_CPC_DRV_UART_EXP_RX_PORT              gpioPortA
 #define SL_CPC_DRV_UART_EXP_RX_PIN               6
 
-// USART0 CTS on PA04
+// USART1 CTS on PA04
 #define SL_CPC_DRV_UART_EXP_CTS_PORT             gpioPortA
 #define SL_CPC_DRV_UART_EXP_CTS_PIN              4
 
-// USART0 RTS on PA00
+// USART1 RTS on PA00
 #define SL_CPC_DRV_UART_EXP_RTS_PORT             gpioPortA
 #define SL_CPC_DRV_UART_EXP_RTS_PIN              0
 

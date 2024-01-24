@@ -271,6 +271,13 @@ void sl_bt_ll_coex_request(bool request, bool scanPwmActive, uint8_t priority)
   ll_coex.scheduledPriority = priority;
   ll_coex.scanPwmActive = scanPwmActive;
 
+  if (!request && !scanPwmActive) {
+    //Disable sync detect request when link layer request is disabled.
+    //The link layer can idle the radio without generating RAIL events.
+    COEX_SetRequest(&ll_coex.syncDetectReqState,
+                    COEX_REQ_OFF,
+                    NULL);
+  }
   startRequest(request, priority);
 
   //Make sure scanPwm is disabled
@@ -306,6 +313,11 @@ static void coexUpdateGrant(bool abortTx)
   if (abortTx && !grant) {
     EFM_ASSERT(ll_coex.abortTx);
     ll_coex.abortTx();
+    //Clear ll_coex.syncDetectReqState in case
+    //ll_coex.abortTx doesn't generate an RX completion event.
+    COEX_SetRequest(&ll_coex.syncDetectReqState,
+                    COEX_REQ_OFF,
+                    NULL);
   }
 }
 

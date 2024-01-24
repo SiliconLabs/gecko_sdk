@@ -123,6 +123,13 @@ sl_status_t sl_btctrl_alloc_periodic_scan(uint8_t num_scan);
 sl_status_t sl_btctrl_alloc_periodic_adv(uint8_t num_adv);
 
 /**
+ * @brief Set maximum number of advertisement reports allowed to be queued
+ *
+ * @param num_adv Maximum number of advertisement reports allowed to be queued
+ */
+void sl_btctrl_configure_max_queued_adv_reports(uint8_t num_reports);
+
+/**
  * Call to enable the even connection scheduling algorithm.
  * This function should be called before link layer initialization.
  */

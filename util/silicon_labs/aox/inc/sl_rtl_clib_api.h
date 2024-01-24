@@ -1343,7 +1343,6 @@ enum sl_rtl_error_code sl_rtl_util_filter(sl_rtl_util_libitem* item, float value
 /**************************************************************************//**
  * Convert an RSSI-value to distance in meters.
  *
- * @param[in] item Pointer to the initialized Util libitem.
  * @param[in] tx_power Reference RSSI value of the TX-device at 1.0 m distance in dBm, for example -45.0f.
  * @param[in] rssi Measured RSSI from the receiver.
  * @param[out] distance_out Distance in meters.

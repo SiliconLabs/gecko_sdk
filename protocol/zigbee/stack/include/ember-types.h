@@ -1420,7 +1420,10 @@ typedef struct {
 
 /**
  * @brief Defines the events reported to the application
- * by the ::emberCounterHandler().
+ * by the ::emberCounterHandler().  Usage of the destinationNodeId
+ * or data fields found in the EmberCounterInfo or EmberExtraCounterInfo
+ * structs is denoted for counter types that use them. (See comments
+ * accompanying enum definitions in this source file for details.)
  */
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum EmberCounterType
@@ -1429,38 +1432,77 @@ typedef uint8_t EmberCounterType;
 enum
 #endif
 {
-  /** The MAC received a broadcast. */
+  /** The MAC received a broadcast Data frame, Command frame, or Beacon
+   * destinationNodeId: BROADCAST_ADDRESS or Data frames or
+   *                    sender node ID for Beacon frames
+   * data: not used
+   */
   EMBER_COUNTER_MAC_RX_BROADCAST = 0,
-  /** The MAC transmitted a broadcast. */
+  /** The MAC transmitted a broadcast Data frame, Command frame or Beacon.
+   * destinationNodeId: BROADCAST_ADDRESS
+   * data: not used
+   */
   EMBER_COUNTER_MAC_TX_BROADCAST = 1,
-  /** The MAC received a unicast. */
+  /** The MAC received a unicast Data or Command frame
+   * destinationNodeId: MAC layer source or EMBER_UNKNOWN_NODE_ID
+   *                    if no 16-bit source node ID is present in the frame
+   * data: not used
+   */
   EMBER_COUNTER_MAC_RX_UNICAST = 2,
-  /** The MAC successfully transmitted a unicast. */
+  /** The MAC successfully transmitted a unicast Data or Command frame
+   *   Note: Only frames with a 16-bit destination node ID are counted.
+   * destinationNodeId: MAC layer destination address
+   * data: not used
+   */
   EMBER_COUNTER_MAC_TX_UNICAST_SUCCESS = 3,
-  /** The MAC retried a unicast. This is a placeholder
-   * and is not used by the ::emberCounterHandler() callback.  Instead,
-   * the number of MAC retries are returned in the data parameter
-   * of the callback for the @c ::EMBER_COUNTER_MAC_TX_UNICAST_SUCCESS
-   * and @c ::EMBER_COUNTER_MAC_TX_UNICAST_FAILED types. */
+  /** The MAC retried a unicast Data or Command frame after initial Tx attempt.
+   *   Note: CSMA-related failures are tracked separately via
+   *   EMBER_COUNTER_PHY_CCA_FAIL_COUNT.
+   * destinationNodeId: MAC layer destination or EMBER_UNKNOWN_NODE_ID
+   *                    if no 16-bit destination node ID is present in the frame
+   * data: number of retries (after initial Tx attempt) accumulated so far
+   *       for this packet. (Should always be >0.)
+   */
   EMBER_COUNTER_MAC_TX_UNICAST_RETRY = 4,
-  /** The MAC unsuccessfully transmitted a unicast. */
+  /** The MAC unsuccessfully transmitted a unicast Data or Command frame.
+   *   Note: Only frames with a 16-bit destination node ID are counted.
+   * destinationNodeId: MAC layer destination address
+   * data: not used
+   */
   EMBER_COUNTER_MAC_TX_UNICAST_FAILED = 5,
 
-  /** The APS layer received a data broadcast. */
+  /** The APS layer received a data broadcast.
+   * destinationNodeId: sender's node ID
+   * data: not used
+   */
   EMBER_COUNTER_APS_DATA_RX_BROADCAST = 6,
   /** The APS layer transmitted a data broadcast. */
   EMBER_COUNTER_APS_DATA_TX_BROADCAST = 7,
-  /** The APS layer received a data unicast. */
+  /** The APS layer received a data unicast.
+   * destinationNodeId: sender's node ID
+   * data: not used
+   */
   EMBER_COUNTER_APS_DATA_RX_UNICAST = 8,
-  /** The APS layer successfully transmitted a data unicast. */
+  /** The APS layer successfully transmitted a data unicast.
+   * destinationNodeId: NWK destination address
+   * data: number of APS retries (>=0) consumed for this unicast.
+   */
   EMBER_COUNTER_APS_DATA_TX_UNICAST_SUCCESS = 9,
-  /** The APS layer retried a data unicast.  This is a placeholder
+  /** The APS layer retried a unicast Data frame.  This is a placeholder
    * and is not used by the @c ::emberCounterHandler() callback.  Instead,
    * the number of APS retries are returned in the data parameter
    * of the callback for the @c ::EMBER_COUNTER_APS_DATA_TX_UNICAST_SUCCESS
-   * and @c ::EMBER_COUNTER_APS_DATA_TX_UNICAST_FAILED types. */
+   * and @c ::EMBER_COUNTER_APS_DATA_TX_UNICAST_FAILED types.
+   * However, our supplied Counters component code will attempt to collect this
+   * information from the aforementioned counters and populate this counter.
+   * Note that this counter's behavior differs from that of
+   * @c ::EMBER_COUNTER_MAC_TX_UNICAST_RETRY .
+   */
   EMBER_COUNTER_APS_DATA_TX_UNICAST_RETRY = 10,
-  /** The APS layer unsuccessfully transmitted a data unicast. */
+  /* The APS layer unsuccessfully transmitted a data unicast.
+   * destinationNodeId: NWK destination address
+   * data: number of APS retries (>=0) consumed for this unicast.
+   */
   EMBER_COUNTER_APS_DATA_TX_UNICAST_FAILED = 11,
 
   /** The network layer successfully submitted a new route discovery
@@ -1474,9 +1516,15 @@ enum
   /** A neighbor table entry became stale because it had not been heard from. */
   EMBER_COUNTER_NEIGHBOR_STALE = 15,
 
-  /** A node joined or rejoined to the network via this node. */
+  /** A node joined or rejoined to the network via this node.
+   * destinationNodeId: node ID of child
+   * data: not used
+   */
   EMBER_COUNTER_JOIN_INDICATION = 16,
-  /** An entry was removed from the child table. */
+  /** An entry was removed from the child table.
+   * destinationNodeId: node ID of child
+   * data: not used
+   */
   EMBER_COUNTER_CHILD_REMOVED = 17,
 
   /** EZSP-UART only. An overflow error occurred in the UART. */
@@ -1491,23 +1539,35 @@ enum
   EMBER_COUNTER_NWK_FRAME_COUNTER_FAILURE = 21,
 
   /** A message was dropped at the APS layer because the APS frame counter
-      was not higher than the last message seen from that source. */
+      was not higher than the last message seen from that source.
+      destinationNodeId: node ID of MAC source that relayed the message
+      data: not used
+   */
   EMBER_COUNTER_APS_FRAME_COUNTER_FAILURE = 22,
 
   /** EZSP-UART only. An XOFF was transmitted by the UART. */
   EMBER_COUNTER_ASH_XOFF = 23,
 
   /** An encrypted message was dropped by the APS layer because
-      the sender's key has not been authenticated.
-      As a result, the key is not authorized for use in APS data messages. */
+   *  the sender's key has not been authenticated.
+   *  As a result, the key is not authorized for use in APS data messages.
+   *  destinationNodeId: EMBER_NULL_NODE_ID
+   *  data: APS key table index related to the sender
+   */
   EMBER_COUNTER_APS_LINK_KEY_NOT_AUTHORIZED = 24,
 
   /** A NWK encrypted message was received but dropped because decryption
-      failed. */
+   * failed.
+   * destinationNodeId: sender of the dropped packet
+   * data: not used
+   */
   EMBER_COUNTER_NWK_DECRYPTION_FAILURE = 25,
 
   /** An APS encrypted message was received but dropped because decryption
-      failed. */
+   * failed.
+   * destinationNodeId: sender of the dropped packet
+   * data: not used
+   */
   EMBER_COUNTER_APS_DECRYPTION_FAILURE = 26,
 
   /** The number of failures to allocate a set of linked packet buffers.
@@ -1516,35 +1576,50 @@ enum
       number free. */
   EMBER_COUNTER_ALLOCATE_PACKET_BUFFER_FAILURE = 27,
 
-  /** The number of relayed unicast packets. */
+  /** The number of relayed unicast packets.
+      destinationId: NWK layer destination address of relayed packet
+      data: not used
+   */
   EMBER_COUNTER_RELAYED_UNICAST = 28,
 
   /** The number of times a packet was dropped due to reaching the preset
-      PHY-to-MAC queue limit (emMaxPhyToMacQueueLength).  The limit will
-      determine how many messages are accepted by the PHY between calls to
-      emberTick(). After that limit is reached, packets will be dropped.
-      The number of dropped packets will be recorded in this counter.
-
-      NOTE: For each call to emberCounterHandler() there may be more
-      than 1 packet that was dropped due to the limit reached.  The
-      actual number of packets dropped will be returned in the 'data'
-      parameter passed to that function.
+   *  PHY-to-MAC queue limit (sli_mac_phy_to_mac_queue_length).  The limit will
+   *  determine how many messages are accepted by the PHY between calls to
+   *  emberTick(). After that limit is reached, packets will be dropped.
+   *  The counter records the number of dropped packets.
+   *
+   *  NOTE: For each call to emberCounterHandler() there may be more
+   *  than 1 packet that was dropped due to the limit reached.  The
+   *  actual number of packets dropped will be returned in the 'data'
+   *  parameter passed to that function.
+   *
+   *  destinationNodeId: not used
+   *  data: number of dropped packets represented by this counter event
+   *  phyIndex: present
    */
   EMBER_COUNTER_PHY_TO_MAC_QUEUE_LIMIT_REACHED = 29,
 
   /** The number of times a packet was dropped due to the packet-validate
       library checking a packet and rejecting it due to length or
       other formatting problems.
+      destinationNodeId: not used
+      data: type of validation condition that failed
    */
   EMBER_COUNTER_PACKET_VALIDATE_LIBRARY_DROPPED_COUNT = 30,
 
   /** The number of times the NWK retry queue is full and a new
       message failed to be added.
+      destinationNodeId; not used
+      data: NWK retry queue size that has been exceeded
    */
   EMBER_COUNTER_TYPE_NWK_RETRY_OVERFLOW = 31,
 
   /** The number of times the PHY layer was unable to transmit due to
-      a failed CCA.
+   * a failed CCA (Clear Channel Assessment) attempt.  See also:
+   * EMBER_COUNTER_MAC_TX_UNICAST_RETRY.
+   * destinationNodeId: MAC layer destination or EMBER_UNKNOWN_NODE_ID
+   *                    if no 16-bit destination node ID is present in the frame
+   * data: not used
    */
   EMBER_COUNTER_PHY_CCA_FAIL_COUNT = 32,
 

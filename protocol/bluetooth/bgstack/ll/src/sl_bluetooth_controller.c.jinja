@@ -79,6 +79,10 @@ void sl_bt_controller_init(void)
   sl_btctrl_configure_completed_packets_reporting(SL_BT_CONTROLLER_COMPLETED_PACKETS_THRESHOLD,
                                                   SL_BT_CONTROLLER_COMPLETED_PACKETS_EVENTS_TIMEOUT);
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT)
+  sl_btctrl_configure_max_queued_adv_reports(SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS);
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT
 }
 
 sl_status_t sl_bt_ll_deinit();

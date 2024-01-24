@@ -93,6 +93,11 @@
       instance: sensor
     path: brd2601b/sl_i2cspm_sensor_config.h
   - override:
+      component: i2cspm
+      file_id: i2cspm_config
+      instance: qwiic
+    path: brd2601b/sl_i2cspm_qwiic_config.h
+  - override:
       component: icm20689_driver
       file_id: icm20689_config
     path: brd2601b/sl_icm20689_config.h
@@ -146,6 +151,11 @@
       file_id: iot_i2c_cfg
       instance: test
     path: brd2601b/iot_i2c_cfg_test.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: qwiic
+    path: brd2601b/iot_i2c_cfg_qwiic.h
   - override:
       component: iot_pwm
       file_id: iot_pwm_cfg

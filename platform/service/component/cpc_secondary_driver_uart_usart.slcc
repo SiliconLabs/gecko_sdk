@@ -18,7 +18,7 @@ config_file:
     file_id: cpc_drv_secondary_uart_usart_config
     condition: [device_series_2]
 source:
-  - path: src/sl_cpc_drv_secondary_uart_usart.c
+  - path: src/sl_cpc_drv_secondary_uart.c
 provides:
   - name: cpc_driver
   - name: cpc_secondary_driver_uart_usart_interface

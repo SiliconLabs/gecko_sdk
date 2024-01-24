@@ -17,8 +17,8 @@
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
-  - name: hardware_board_has_spiflash
   - name: hardware_board_has_si446x_radio
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -37,7 +37,7 @@
     instance:
     - sensor
   - id: ls013b7dh03
-  - id: memlcd_eusart
+  - id: memlcd_usart
   - id: simple_led
     instance:
     - led0
@@ -47,8 +47,6 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
-  - id: bootloader_spi_controller_usart_driver
   - id: si446x_radio_eusart
   - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
@@ -59,6 +57,8 @@
     value: '"BRD4197A"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
@@ -76,7 +76,6 @@
   - hardware:has:led:2
   - hardware:has:joystick:skrhaae010
   - hardware:has:button:2
-  - hardware:has:memory:spi:mx25r8035f
   - hardware:has:radio:spi:si4468
   - hardware:has:exp_header:spi
   - hardware:has:exp_header:uart

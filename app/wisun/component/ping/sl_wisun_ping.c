@@ -255,6 +255,9 @@ sl_status_t sl_wisun_ping(const wisun_addr_t *const remote_addr,
   // Clear all event flags
   (void) osEventFlagsClear(_ping_evt, 0xFFFFFFFFUL);
 
+  // Clear response message queue
+  (void) osMessageQueueReset(_ping_resp_msg_queue);
+
   req = (sl_wisun_ping_info_t *) app_wisun_malloc(sizeof(sl_wisun_ping_info_t));
   resp = (sl_wisun_ping_info_t *) app_wisun_malloc(sizeof(sl_wisun_ping_info_t));
   stat = (sl_wisun_ping_stat_t *) app_wisun_malloc(sizeof(sl_wisun_ping_stat_t));

@@ -183,6 +183,16 @@
       instance: led1
     path: brd2204c/sl_simple_led_led1_config.h
   - override:
+      component: simple_rgb_pwm_led
+      file_id: simple_rgb_pwm_led_config
+      instance: rgb_led0
+    path: brd2204c/sl_simple_rgb_pwm_led_rgb_led0_config.h
+  - override:
+      component: simple_rgb_pwm_led
+      file_id: simple_rgb_pwm_led_config
+      instance: rgb_led1
+    path: brd2204c/sl_simple_rgb_pwm_led_rgb_led1_config.h
+  - override:
       component: spidrv
       file_id: spidrv_config
       instance: exp

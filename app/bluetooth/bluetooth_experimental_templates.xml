@@ -38,7 +38,7 @@
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_cbap.bt_soc_cbap.slcp"/>
     <properties key="projectFilePaths" value="example/bt_soc_cbap/bt_soc_cbap.slcp"/>
     <properties key="readmeFiles" value="example/bt_soc_cbap/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4401a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4400b brd4401a brd4401b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21b.* .*efr32[bm]g24b.* .*efr32[fz]g28b.* .*[bm]gm210pb.* .*[bm]gm240pb.* .*[bm]gm240sb.* .*[bm]gm241sd.* .*mgm240sd.* .*mgm240l0.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
@@ -68,7 +68,7 @@
     <properties key="solutionReferenceId" value="app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator.slcp"/>
     <properties key="projectFilePaths" value="example/bt_soc_csr_generator/bt_soc_csr_generator.slcp"/>
     <properties key="readmeFiles" value="example/bt_soc_csr_generator/readme.md"/>
-    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4401a com.silabs.board.none"/>
+    <properties key="boardCompatibility" value="brd2601a brd2601b brd2703a brd2704a brd4115a brd4181c brd4186b brd4186c brd4187b brd4187c brd4188a brd4188b brd4195a brd4195b brd4196a brd4196b brd4198a brd4308c brd4308d brd4316a brd4317a brd4318a brd4319a brd4335a brd4400a brd4400b brd4401a brd4401b com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32[bm]g21b.* .*efr32[bm]g24b.* .*efr32[fz]g28b.* .*[bm]gm210pb.* .*[bm]gm240pb.* .*[bm]gm240sb.* .*[bm]gm241sd.* .*mgm240sd.* .*mgm240l0.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>

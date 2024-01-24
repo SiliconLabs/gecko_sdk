@@ -18,6 +18,7 @@
   - name: hardware_board_has_si70xx
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_50mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band
@@ -54,6 +55,8 @@
     value: '"BRD4321A"'
   - name: SL_BOARD_REV
     value: '"A02"'
+  - name: HFXO_FREQ
+    value: 50000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

@@ -19,6 +19,8 @@
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_rfswitch
+  - name: hardware_board_has_rfswitch_to_ground
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -37,7 +39,7 @@
     instance:
     - sensor
   - id: ls013b7dh03
-  - id: memlcd_eusart
+  - id: memlcd_usart
   - id: simple_led
     instance:
     - led0
@@ -47,7 +49,7 @@
     instance:
     - btn0
     - btn1
-  - id: mx25_flash_shutdown_eusart
+  - id: mx25_flash_shutdown_usart
   - id: bootloader_spi_controller_usart_driver
   - id: bootloader_spi_peripheral_usart_driver
 - template_contribution: []
@@ -56,6 +58,8 @@
     value: '"BRD4401A"'
   - name: SL_BOARD_REV
     value: '"A02"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915

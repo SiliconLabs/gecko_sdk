@@ -76,22 +76,22 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CTS),(RTS)> SL_UARTDRV_USART_VCOM
 // $[USART_SL_UARTDRV_USART_VCOM]
-#define SL_UARTDRV_USART_VCOM_PERIPHERAL         USART0
-#define SL_UARTDRV_USART_VCOM_PERIPHERAL_NO      0
+#define SL_UARTDRV_USART_VCOM_PERIPHERAL         USART1
+#define SL_UARTDRV_USART_VCOM_PERIPHERAL_NO      1
 
-// USART0 TX on PA00
+// USART1 TX on PA00
 #define SL_UARTDRV_USART_VCOM_TX_PORT            gpioPortA
 #define SL_UARTDRV_USART_VCOM_TX_PIN             0
 
-// USART0 RX on PA07
+// USART1 RX on PA07
 #define SL_UARTDRV_USART_VCOM_RX_PORT            gpioPortA
 #define SL_UARTDRV_USART_VCOM_RX_PIN             7
 
-// USART0 CTS on PA05
+// USART1 CTS on PA05
 #define SL_UARTDRV_USART_VCOM_CTS_PORT           gpioPortA
 #define SL_UARTDRV_USART_VCOM_CTS_PIN            5
 
-// USART0 RTS on PA04
+// USART1 RTS on PA04
 #define SL_UARTDRV_USART_VCOM_RTS_PORT           gpioPortA
 #define SL_UARTDRV_USART_VCOM_RTS_PIN            4
 

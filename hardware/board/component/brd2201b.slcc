@@ -15,6 +15,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_efm32lg-stk3600
   - name: hardware_board_has_vcom
+  - name: hardware_board_has_hfxo_freq_48mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
 - recommends:
@@ -37,6 +38,8 @@
     value: '"BRD2201B"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 48000000
 - tag:
   - board:pn:BRD2201
   - board:variant:B

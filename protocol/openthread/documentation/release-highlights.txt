@@ -1,3 +1,2 @@
-Silicon Labs OpenThread SDK 2.2.4.0
-- OpenThread: Support for EFR32xG21, Revision C and later
-- Multiprotocol: Targeted quality improvements and bug fixes
+Silicon Labs OpenThread SDK 2.2.5.0
+- Targeted quality improvements and bug fixes

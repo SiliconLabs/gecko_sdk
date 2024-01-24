@@ -55,6 +55,14 @@
       instance: mikroe
     path: brd4314a/sl_cpc_drv_secondary_uart_usart_mikroe_config.h
   - override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4314a/sl_device_init_hfxo_config.h
+  - override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4314a/sl_device_init_lfxo_config.h
+  - override:
       component: i2cspm
       file_id: i2cspm_config
       instance: mikroe

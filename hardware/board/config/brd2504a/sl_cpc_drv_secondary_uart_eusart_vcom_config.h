@@ -59,14 +59,14 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_CPC_DRV_UART_VCOM
 // $[EUSART_SL_CPC_DRV_UART_VCOM]
-#define SL_CPC_DRV_UART_VCOM_PERIPHERAL          EUSART1
-#define SL_CPC_DRV_UART_VCOM_PERIPHERAL_NO       1
+#define SL_CPC_DRV_UART_VCOM_PERIPHERAL          EUSART0
+#define SL_CPC_DRV_UART_VCOM_PERIPHERAL_NO       0
 
-// EUSART1 TX on PB05
+// EUSART0 TX on PB05
 #define SL_CPC_DRV_UART_VCOM_TX_PORT             gpioPortB
 #define SL_CPC_DRV_UART_VCOM_TX_PIN              5
 
-// EUSART1 RX on PB06
+// EUSART0 RX on PB06
 #define SL_CPC_DRV_UART_VCOM_RX_PORT             gpioPortB
 #define SL_CPC_DRV_UART_VCOM_RX_PIN              6
 

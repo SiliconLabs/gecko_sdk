@@ -1,2 +1,2 @@
-32-Bit MCU SDK 6.4.4.0
-- Underlying platform changes only
+32-Bit MCU SDK 6.4.5.0
+- Underlying platforms changes only. 

@@ -1,3 +1,2 @@
-Gecko Platform 4.2.4.0
-- Boards and External Devices: Additional boards supported
-- Gecko Bootloader: Targeted quality improvements and bug fixes
+32-Bit MCU SDK 6.4.5.0
+- Underlying platforms c

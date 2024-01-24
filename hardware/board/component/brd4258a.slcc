@@ -20,6 +20,7 @@
   - name: hardware_board_has_tempsensor
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
+  - name: hardware_board_has_hfxo_freq_38.4mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -57,6 +58,8 @@
     value: '"BRD4258A"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_490
   - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS

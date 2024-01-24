@@ -18,6 +18,7 @@
   - name: hardware_board_has_rfswitch_zwave
   - name: hardware_board_has_vcom
   - name: hardware_board_has_rfswitch
+  - name: hardware_board_has_hfxo_freq_39mhz
   - name: hardware_board_has_hfxo
   - name: hardware_board_supports_rf_band_868
   - name: hardware_board_supports_rf_band_914
@@ -48,6 +49,8 @@
     value: '"BRD4201A"'
   - name: SL_BOARD_REV
     value: '"A06"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_914
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_924
