@@ -35,6 +35,10 @@
 #ifndef OPENTHREAD_CORE_EFR32_CONFIG_H_
 #define OPENTHREAD_CORE_EFR32_CONFIG_H_
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 #include "sl_device_init_hfxo.h"
 #include "sl_device_init_hfxo_config.h"
 
@@ -554,6 +558,20 @@
  */
 #ifndef SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
 #define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE 32
+#endif
+
+/**
+ * @def OPENTHREAD_CONFIG_RCP_LOG_CRASH_DUMP_ENABLE
+ *
+ * Enable logging a crash dump on RCPs
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_RCP_LOG_CRASH_DUMP_ENABLE
+#if defined(SL_CATALOG_OT_CRASH_HANDLER_PRESENT)
+#define OPENTHREAD_CONFIG_RCP_LOG_CRASH_DUMP_ENABLE 1
+#else
+#define OPENTHREAD_CONFIG_RCP_LOG_CRASH_DUMP_ENABLE 0
+#endif
 #endif
 
 #endif // OPENTHREAD_CORE_EFR32_CONFIG_H_

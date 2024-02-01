@@ -215,3 +215,9 @@ otError railStatusToOtError(RAIL_Status_t status)
         return OT_ERROR_FAILED;
     }
 }
+
+otError otPlatLogCrashDump()
+{
+    efr32PrintResetInfo();
+    return OT_ERROR_NONE;
+}
