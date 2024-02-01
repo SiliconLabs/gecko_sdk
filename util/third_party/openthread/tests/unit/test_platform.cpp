@@ -659,4 +659,6 @@ OT_TOOL_WEAK otPlatMcuPowerState otPlatGetMcuPowerState(otInstance *aInstance) {
 OT_TOOL_WEAK otError otPlatSetMcuPowerState(otInstance *aInstance, otPlatMcuPowerState aState) { return OT_ERROR_NONE; }
 #endif // OPENTHREAD_CONFIG_NCP_ENABLE_MCU_POWER_STATE_CONTROL
 
+OT_TOOL_WEAK otError otPlatLogCrashDump(void) { return OT_ERROR_NONE; }
+
 } // extern "C"

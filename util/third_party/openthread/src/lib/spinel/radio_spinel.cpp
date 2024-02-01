@@ -131,6 +131,11 @@ void RadioSpinel::Init(SpinelInterface &aSpinelInterface,
 
     VerifyOrDie(IsRcp(supportsRcpApiVersion, supportsRcpMinHostApiVersion), OT_EXIT_RADIO_SPINEL_INCOMPATIBLE);
 
+    if (mSupportsLogCrashDump)
+    {
+        SuccessOrDie(Set(SPINEL_PROP_RCP_LOG_CRASH_DUMP, nullptr));
+    }
+
     if (!aSkipRcpCompatibilityCheck)
     {
         SuccessOrDie(CheckRcpApiVersion(supportsRcpApiVersion, supportsRcpMinHostApiVersion));
@@ -251,6 +256,11 @@ bool RadioSpinel::IsRcp(bool &aSupportsRcpApiVersion, bool &aSupportsRcpMinHostA
         if (capability == SPINEL_CAP_RCP_RESET_TO_BOOTLOADER)
         {
             mSupportsResetToBootloader = true;
+        }
+
+        if (capability == SPINEL_CAP_RCP_LOG_CRASH_DUMP)
+        {
+            mSupportsLogCrashDump = true;
         }
 
         if (capability == SPINEL_PROP_RCP_MIN_HOST_API_VERSION)
@@ -2576,6 +2586,15 @@ void RadioSpinel::LogSpinelFrame(const uint8_t *aFrame, uint16_t aLength, bool a
         }
 
         start += Snprintf(start, static_cast<uint32_t>(end - start), ", %s:%u", name, value);
+    }
+    break;
+
+    case SPINEL_PROP_RCP_LOG_CRASH_DUMP:
+    {
+        const char  *name;
+        name = "log-crash-dump";
+
+        start += Snprintf(start, static_cast<uint32_t>(end - start), ", %s", name);
     }
     break;
 

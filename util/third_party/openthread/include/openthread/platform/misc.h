@@ -208,6 +208,14 @@ otError otPlatSetMcuPowerState(otInstance *aInstance, otPlatMcuPowerState aState
 otPlatMcuPowerState otPlatGetMcuPowerState(otInstance *aInstance);
 
 /**
+ * Logs a crash dump
+ *
+ * TODO: COMMENT
+ *
+ */
+otError otPlatLogCrashDump(void);
+
+/**
  * @}
  *
  */

@@ -1112,6 +1112,7 @@ private:
     bool  mIsReady : 1;                   ///< NCP ready.
     bool  mSupportsLogStream : 1;         ///< RCP supports `LOG_STREAM` property with OpenThread log meta-data format.
     bool  mSupportsResetToBootloader : 1; ///< RCP supports resetting into bootloader mode.
+    bool  mSupportsLogCrashDump : 1;      ///< RCP supports logging a crash dump.
     bool  mIsTimeSynced : 1;              ///< Host has calculated the time difference between host and RCP.
 
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
