@@ -72,4 +72,4 @@ template_contribution:
     # Without this `unless`, the device will be stuck in `otPlatUartFlush()`,
     # trying to print crash data. This is because `otPlatUartFlush()` will try
     # to use a timer before the kernel is started and before the timer task is created
-    unless: [freertos]
+    unless: [freertos, ot_rcp]
