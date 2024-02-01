@@ -65,6 +65,8 @@
 #include "sl_rail_util_ant_div.h"
 #endif
 
+#include PLATFORM_HEADER
+
 #define GPIO_PIN_BITMASK    0xFFFFUL
 #define GPIO_PORT_BITMASK   (0xFFFFUL << 16)
 #define GET_GPIO_PIN(x)     (x & GPIO_PIN_BITMASK)
@@ -147,12 +149,54 @@ exit:
     return error;
 }
 
+#if defined(SL_CATALOG_OT_CRASH_HANDLER_PRESENT)
+static otError processFault(otInstance *aInstance,
+                              uint8_t     aArgsLength,
+                              char       *aArgs[],
+                              char       *aOutput,
+                              size_t      aOutputMaxLen)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+    OT_UNUSED_VARIABLE(aArgs);
+
+    otError error = OT_ERROR_FAILED;
+
+    VerifyOrExit(otPlatDiagModeGet(), error = OT_ERROR_INVALID_STATE);
+    if (aArgsLength == 0)
+    {
+        // Trigger an invalid memory access
+        int x = 0;
+        x += *((uint32_t*)0xdeadc0de);
+        otCliOutputFormat("%d",x);
+    }
+    else if (strcmp(aArgs[0], "assert") == 0)
+    {
+        assert(0);
+    }
+    else if (strcmp(aArgs[0], "udf") == 0)
+    {
+        asm("udf");
+    }
+    else if (strcmp(aArgs[0], "bkpt") == 0)
+    {
+        asm("bkpt");
+    }
+
+exit:
+    // Should not be reached
+    appendErrorResult(error, aOutput, aOutputMaxLen);
+    return error;
+}
+
+#endif
+
 // *****************************************************************************
 // Add more platform specific diagnostic's CLI features here.
 // *****************************************************************************
 const struct PlatformDiagCommand sCommands[] = {
     {"addr-match", &processAddressMatch},
     {"auto-ack", &processAutoAck},
+    {"fault", &processFault},
 };
 
 otError otPlatDiagProcess(otInstance *aInstance,
