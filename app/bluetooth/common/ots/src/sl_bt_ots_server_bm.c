@@ -51,8 +51,9 @@ static app_queue_t indication_queue[SL_BT_CONFIG_MAX_CONNECTIONS];
 
 // -----------------------------------------------------------------------------
 // Forward declaration of private functions
-
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 static bool server_has_task(void);
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 
 // -----------------------------------------------------------------------------
 // Bare metal functions

@@ -56,7 +56,7 @@
   - name: SL_BOARD_NAME
     value: '"BRD4175A"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
   - name: HFXO_FREQ
     value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
@@ -66,7 +66,7 @@
 - tag:
   - board:pn:BRD4175
   - board:variant:A
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32mg13p733f512gm48
   - hardware:has:vcom
   - hardware:has:pti

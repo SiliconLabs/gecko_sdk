@@ -792,3 +792,59 @@ void setRetimeOption(sl_cli_command_arg_t *args)
     responsePrint(sl_cli_get_command_string(args, 0), "Status:%d", status);
   }
 }
+
+void getWhiteningInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  uint32_t whiteInit = RAIL_GetWhiteningInitVal(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "whiteInit:%u",
+                whiteInit);
+}
+
+void getCrcInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  uint32_t crcInit = RAIL_GetCrcInitVal(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "crcInit:%u",
+                crcInit);
+}
+
+void setWhiteningInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  uint32_t whiteInit = sl_cli_get_argument_uint32(args, 0);
+  RAIL_Status_t status = RAIL_SetWhiteningInitVal(railHandle, whiteInit);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "status:%s",
+                (status == RAIL_STATUS_NO_ERROR) ? "Success" : "Fail");
+}
+
+void setCrcInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  uint32_t crcInit = sl_cli_get_argument_uint32(args, 0);
+  RAIL_Status_t status = RAIL_SetCrcInitVal(railHandle, crcInit);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "status:%s",
+                (status == RAIL_STATUS_NO_ERROR) ? "Success" : "Fail");
+}
+
+void resetWhiteningInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  RAIL_Status_t status = RAIL_ResetWhiteningInitVal(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "status:%s",
+                (status == RAIL_STATUS_NO_ERROR) ? "Success" : "Fail");
+}
+
+void resetCrcInitVal(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  RAIL_Status_t status = RAIL_ResetCrcInitVal(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "status:%s",
+                (status == RAIL_STATUS_NO_ERROR) ? "Success" : "Fail");
+}

@@ -652,7 +652,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    0xff,
                                                                    0);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     }
     entryIndex = emberGpProxyTableLookup(&addr);
@@ -661,7 +661,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    0xff,
                                                                    0);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -675,7 +675,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
       appResponseLength
         += storeProxyTableEntry(&entry,
                                 appResponseData + appResponseLength);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     }
   } else if (requestType == EMBER_ZCL_GP_PROXY_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_BY_INDEX) {
@@ -685,7 +685,7 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
                                                                    validEntriesCount,
                                                                    cmd_data.index,
                                                                    0);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     } else {
       emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
@@ -724,14 +724,14 @@ bool emberAfGreenPowerClusterGpProxyTableRequestCallback(EmberAfClusterCommand *
       //Insert the number of entries actually included
       appResponseData[GP_PROXY_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
 
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = sli_zigbee_af_gp_send_response_unicast();
 
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpProxyTableResponseSmart(EMBER_ZCL_GP_PROXY_TABLE_RESPONSE_STATUS_SUCCESS,
                                                                      validEntriesCount,
                                                                      cmd_data.index,
                                                                      0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
       }
       goto kickout;
     }
@@ -813,7 +813,14 @@ bool sli_zigbee_af_green_power_client_retrieve_attribute_and_craft_response(uint
 
 static UNUSED uint8_t qualityBasedDelay(uint8_t gpdLink)
 {
-  uint8_t ourLqi = (gpdLink & 0xC0) >> 5;
+  // The top 2 bits of gpdlink is operated with the mask 0xC0 (b11000000), hence needs to be shifted by 6.
+  uint8_t ourLqi = (gpdLink & 0xC0) >> 6;
+  // A.3.6.3.1 : QualityBasedDelay is calculated as follows:
+  //  For Link quality = 0b11: 0 ms;
+  //  For Link quality = 0b10: 32ms;
+  //  For Link quality = 0b01: 64ms;
+  //  For Link quality = 0b00: 96ms;
+  // So, the return from this function is a delay expressed as b0XX00000 ms, where bXX is (3 - ourLqi) in binary
   return ((3 - ourLqi) << 5);
 }
 

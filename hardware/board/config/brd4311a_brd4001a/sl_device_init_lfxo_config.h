@@ -63,4 +63,16 @@
 #define SL_DEVICE_INIT_LFXO_TIMEOUT           cmuLfxoStartupDelay_4KCycles
 // <<< end of configuration section >>>
 
+// <<< sl:start pin_tool >>>
+// <lfxo signal=(LFXTAL_O),(LFXTAL_I),(LF_EXTCLK)> SL_DEVICE_INIT_LFXO
+// $[LFXO_SL_DEVICE_INIT_LFXO]
+
+// [LFXO_SL_DEVICE_INIT_LFXO]$
+
+// $[LFXO_EXTERNAL_DIGITAL_CLOCK]
+#define SL_DEVICE_INIT_LFXO_LF_EXTCLK_PORT         gpioPortD
+#define SL_DEVICE_INIT_LFXO_LF_EXTCLK_PIN          1
+// [LFXO_EXTERNAL_DIGITAL_CLOCK]$
+// <<< sl:end pin_tool >>>
+
 #endif // SL_DEVICE_INIT_LFXO_CONFIG_H

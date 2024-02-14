@@ -1,0 +1,50 @@
+id: zigbee_pro_router_stack_with_high_datarate_phy
+label: Pro Router Stack with high datarate phy
+package: Zigbee
+category: Zigbee|Stack|Pro Core
+quality: evaluation
+description: The main Zigbee PRO Stack component for routers only for parsing, processing, generating and managing the Zigbee PRO stack messages and functionality.  It includes stubs for code only needed on end devices or coordinators. This includes the high datarate phy feature.
+
+provides:
+  - name: zigbee_pro_router_stack_with_high_datarate_phy
+  - name: zigbee_pro_router_stack
+  - name: zigbee_pro_stack_support
+  - name: 802_15_4_stack
+
+requires:
+  - name: zigbee_pro_router_stack_with_high_datarate_phy_implementation
+  - name: zigbee_pro_router_stack_with_high_datarate_phy_library
+    condition:
+      - zigbee_use_release_libraries
+  - name: zigbee_stack_common
+  - name: lower_mac_spinel
+    condition:
+      - zigbee_stack_unix
+  - name: rail_util_ieee802154_high_speed_phy
+
+recommends:
+  # There is no special source_with_high_datarate_phy component.
+  # we just need to build with the HIGH_DATARATE_PHY define
+  - id: zigbee_pro_router_stack_with_high_datarate_phy_library_internal
+
+config_file:
+  - path: protocol/zigbee/stack/config/component_config/sl_zigbee_pro_stack_config.h
+
+define:
+  - name: SL_ZIGBEE_ROUTER_STACK
+  - name: HIGH_DATARATE_PHY
+
+validation_helper:
+  # NCP doesn't have DEVICE_TYPE before it connects to Host
+  # so we don't run the validation script for NCP
+  - path: protocol/zigbee/component/scripts/zigbee_pro_stack_validation.lua
+    unless:
+      - zigbee_ncp
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_pro_router_stack
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack

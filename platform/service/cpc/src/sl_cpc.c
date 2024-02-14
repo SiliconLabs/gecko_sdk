@@ -779,8 +779,16 @@ static sl_status_t terminate_endpoint(sl_cpc_endpoint_t *endpoint, bool queue_fr
   #endif
   (void) flags;
 
-  // Notify the host that we want to close an endpoint
-  if (is_endpoint_connection_active(endpoint)) {
+  // Notify the host that we want to close an endpoint. If the connection was
+  // active with the remote, it's obvious we must send the notification. Being
+  // in CONNECTING state means that primary and secondary started updating the
+  // state of this endpoint.
+  // For instance, on the secondary, being CONNECTING means we have received a
+  // connection requested, we replied to it and we're waiting for the HDLC ack
+  // to become CONNECTED. If a user terminates the endpoint, we must send a
+  // terminate notification to the primary to let it know of this state change.
+  if (is_endpoint_connection_active(endpoint)
+      || endpoint->state == SL_CPC_STATE_CONNECTING) {
     // Send terminate notification to remote
     if (endpoint->id == SL_CPC_ENDPOINT_SYSTEM) {
       // System endpoint sends no notification when it terminates, it only cleans up.
@@ -1820,17 +1828,9 @@ void sli_cpc_remote_terminated(uint8_t endpoint_id, sl_cpc_endpoint_state_t *rep
     ep->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
 
     // Stop sending, remote has left
-    clean_tx_queues(ep);
-    RELEASE_ENDPOINT(ep);
-
-    // Notify user
-    // CPC-1101:  Once notify_error will be dispatched, call before cleaning queues
-    //            and move RELEASE to function end.
     notify_error(ep);
-  } else {
-    // Don't release twice
-    RELEASE_ENDPOINT(ep);
   }
+  RELEASE_ENDPOINT(ep);
 }
 
 /***************************************************************************//**
@@ -2471,6 +2471,14 @@ static sl_status_t init_endpoint(sl_cpc_endpoint_handle_t *endpoint_handle,
   }
 
   SLI_CPC_DEBUG_ENDPOINT_INIT(ep);
+
+  // Initialize the re-transmit timer
+  status = sli_cpc_timer_init(&ep->re_transmit_timer);
+  if (status != SL_STATUS_OK) {
+    EFM_ASSERT(false);
+    goto release_ep_list;
+  }
+
   // Set default options
   ep->configured_tx_window_size = 1;
 
@@ -3034,7 +3042,6 @@ void sli_cpc_reset(void)
         ep->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
         // notify error
         notify_error(ep);
-        clean_tx_queues(ep);
         break;
 
       // If already in error, nothing to do
@@ -3893,7 +3900,6 @@ static void receive_sframe(sl_cpc_endpoint_t *endpoint,
 
     // Endpoint in error, should no longer transmit
     notify_error(endpoint);
-    clean_tx_queues(endpoint); // Endpoint locked by caller
   }
 }
 
@@ -3922,10 +3928,15 @@ static void receive_uframe(sl_cpc_endpoint_t *endpoint,
   type = sli_cpc_hdlc_get_unumbered_type(control);
   if ((type == SLI_CPC_HDLC_CONTROL_UNNUMBERED_TYPE_INFORMATION)
       && !(endpoint->flags & SL_CPC_ENDPOINT_FLAG_UFRAME_INFORMATION_DISABLE)) {
-    if (sli_cpc_push_back_rx_data_in_receive_queue(buffer_handle, &endpoint->uframe_receive_queue, data_length) != SL_STATUS_OK) {
+    if (buffer_handle->data_length > 0) {
+      if (sli_cpc_push_back_rx_data_in_receive_queue(buffer_handle, &endpoint->uframe_receive_queue, data_length) != SL_STATUS_OK) {
+        SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
+        sli_cpc_free_buffer_handle(buffer_handle);
+        return;
+      }
+    } else {
       SLI_CPC_DEBUG_TRACE_ENDPOINT_RXD_UNNUMBERED_DROPPED(endpoint);
       sli_cpc_free_buffer_handle(buffer_handle);
-      return;
     }
 
     // Notify the user if a callback is registered
@@ -4724,10 +4735,15 @@ static void process_expired_retransmit(void *data)
       sli_cpc_push_core_buffer_handle(&endpoint->re_transmit_queue, buffer_handle);
 
       if (endpoint->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
+        #if defined(SL_CATALOG_SECONDARY_PRESENT)
         if (endpoint->id != SL_CPC_ENDPOINT_SYSTEM) {
           endpoint->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
           notify_error(endpoint);
         }
+        #else
+        endpoint->state = SL_CPC_STATE_ERROR_DESTINATION_UNREACHABLE;
+        notify_error(endpoint);
+        #endif
       } else {
         endpoint->re_transmit_timeout *= 2;   // RTO(new) = RTO(before retransmission) *2 )
         // this is explained in Karn's Algorithm
@@ -4748,16 +4764,21 @@ static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *d
 {
   sl_cpc_buffer_handle_t *popped_buffer_handle;
   sl_cpc_buffer_handle_t *buffer_handle = (sl_cpc_buffer_handle_t *)data;
+  sl_cpc_endpoint_t *ep;
+
   (void)handle;
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
 
+  ep = buffer_handle->endpoint;
+  EFM_ASSERT(ep != NULL);
+
   SL_CPC_JOURNAL_RECORD_INFO("Retransmit timer expired", buffer_handle->endpoint->id);
-  popped_buffer_handle = sli_cpc_pop_core_buffer_handle(&buffer_handle->endpoint->re_transmit_queue);
+  popped_buffer_handle = sli_cpc_pop_core_buffer_handle(&ep->re_transmit_queue);
   EFM_ASSERT(buffer_handle == popped_buffer_handle);
-  sli_cpc_timer_stop_timer(&buffer_handle->endpoint->re_transmit_timer);
-#if defined(SLI_CPC_ENABLE_TEST_FEATURES)
+  sli_cpc_timer_stop_timer(&ep->re_transmit_timer);
+#if defined(SLI_CPC_DEVICE_UNDER_TEST)
   sli_cpc_on_retransmit_timer_expiration(buffer_handle);
 #endif
   sli_cpc_push_back_core_buffer_handle(&expired_retransmit_list, buffer_handle);
@@ -4767,12 +4788,10 @@ static void re_transmit_timeout_callback(sli_cpc_timer_handle_t *handle, void *d
 }
 
 /***************************************************************************//**
- * Notify app about endpoint error
+ * Notify app about endpoint error. Endpoint must be locked by caller.
  ******************************************************************************/
 static void notify_error(sl_cpc_endpoint_t * endpoint)
 {
-  // CPC-1101:  In dispatched function, clean the TX queues (should've already been)
-  //            done, except in the case of a re-transmit timeout.
   SL_CPC_JOURNAL_RECORD_INFO("Notify error on endpoint", endpoint->id);
   if (endpoint->on_error != NULL) {
     endpoint->on_error(endpoint->id, endpoint->on_error_arg);
@@ -4785,6 +4804,9 @@ static void notify_error(sl_cpc_endpoint_t * endpoint)
 #endif
   // Return state is irrelevant, simply want to unlock any blocking API.
   notify_state_change(endpoint);
+
+  // Return all pending write frames to the user
+  clean_tx_queues(endpoint);
 }
 
 /***************************************************************************//**

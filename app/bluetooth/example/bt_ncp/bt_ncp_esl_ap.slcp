@@ -78,13 +78,15 @@ configuration:
   - name: SL_HEAP_SIZE
     value: "12288"
   - name: SL_NCP_CMD_BUF_SIZE
-    value: "384"
+    value: "288"
   - name: SL_NCP_EVT_BUF_SIZE
-    value: "384"
+    value: "260"
   - name: SL_SIMPLE_COM_TX_BUF_SIZE
-    value: "384"
+    value: "260"
   - name: SL_SIMPLE_COM_RX_BUF_SIZE
-    value: "768"
+    value: "288"
+  - name: SL_NCP_CMD_TIMEOUT_MS
+    value: "50"
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
     value: "8"
   - name: SL_BT_CONFIG_USER_L2CAP_COC_CHANNELS

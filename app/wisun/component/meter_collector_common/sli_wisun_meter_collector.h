@@ -99,20 +99,17 @@ extern "C" {
 /// LED unknown
 #define SL_WISUN_METER_LED_UNKNOWN        (255U)
 
-/// Length of the request type section
-#define SL_WISUN_METER_REQUEST_TYPE_LENGTH          4
-
 /// Delimiter for the request message
 #define SL_WISUN_METER_REQUEST_DELIMITER            "\0"
 
 /// Register request type string
-#define SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER    "reqr"
+#define SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER    "register"
 
 /// Async request type string
-#define SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC       "reqa"
+#define SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC       "async"
 
 /// Remove request type string
-#define SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE      "reqd"
+#define SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE      "remove"
 
 /// Request type definition
 typedef enum sl_wisun_request_type {

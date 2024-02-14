@@ -131,6 +131,9 @@ class ModelVariable(object):
         # Used for register or field types, do explicitly tag registers that are "don't cares", or "not needed", when in a specific mode.
         self._value_do_not_care = False
 
+        # Used for exposing variables on studio output log based on calculation
+        self._in_public_log = None
+
     @property
     def name(self):
         return self._name
@@ -452,6 +455,15 @@ class ModelVariable(object):
             self._value_do_not_care = False
         else:
             self._value_do_not_care = value
+
+    @property
+    def in_public_log(self):
+        return self._in_public_log
+
+    @in_public_log.setter
+    def in_public_log(self, value):
+        assert isinstance(value, bool)
+        self._in_public_log = value
 
     def get_bit_width(self):
         # This is a helper function to get bit width. It does not automatically run. Does not impact var object contents.

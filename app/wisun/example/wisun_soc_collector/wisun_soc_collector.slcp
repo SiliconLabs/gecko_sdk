@@ -104,19 +104,19 @@ configuration:
   # LFN related peripheral and energy saver setup
   - name: SL_IOSTREAM_EUSART_INSTANCE_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
-    condition: [iostream_eusart,wisun_low_power]
+    condition: [iostream_eusart,power_manager]
   - name: SL_IOSTREAM_EUSART_VCOM_BAUDRATE
     value: 9600
-    condition: [iostream_eusart,wisun_low_power]
+    condition: [iostream_eusart,power_manager]
   - name: SL_IOSTREAM_EUSART_VCOM_ENABLE_HIGH_FREQUENCY
     value: 0
-    condition: [iostream_eusart,wisun_low_power]
+    condition: [iostream_eusart,power_manager]
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
-    condition: [iostream_eusart,wisun_low_power]
+    condition: [iostream_eusart,power_manager]
   - name: SL_IOSTREAM_LEUART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 0
-    condition: [iostream_leuart,wisun_low_power]
+    condition: [iostream_leuart,power_manager]
     
   # RFFPLL init
   - name: SL_DEVICE_INIT_RFFPLL_BAND

@@ -240,6 +240,17 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
         lib_critical_error = true;
       }
 
+      sc = sl_bt_connection_set_default_parameters(ESL_LIB_CONN_INTERVAL_MIN,
+                                                   ESL_LIB_CONN_INTERVAL_MIN,
+                                                   ESL_LIB_CONN_PERIPHERAL_LATENCY,
+                                                   ESL_LIB_CONN_DEFAULT_TIMEOUT,
+                                                   ESL_LIB_CONN_MIN_CE_LENGTH,
+                                                   ESL_LIB_CONN_MAX_CE_LENGTH);
+      if (sc != SL_STATUS_OK) {
+        esl_lib_log_core_critical("Failed to set connection parameters, sc = 0x%04x" APP_LOG_NL, sc);
+        lib_critical_error = true;
+      }
+
       // Allocate and add event to the event list
       sc = esl_lib_event_list_allocate(ESL_LIB_EVT_SYSTEM_BOOT, 0, &new_event);
       if (sc == SL_STATUS_OK) {

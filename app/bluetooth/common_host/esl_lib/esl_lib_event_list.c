@@ -126,6 +126,9 @@ sl_status_t esl_lib_event_list_allocate(esl_lib_evt_type_t event_type,
       size += sizeof(esl_lib_evt_control_point_notification_t);
       size += additional_size;
       break;
+    case ESL_LIB_EVT_CONNECTION_RETRY:
+      size += sizeof(esl_lib_evt_connection_retry_t);
+      break;
     case ESL_LIB_EVT_CONNECTION_CLOSED:
       size += sizeof(esl_lib_evt_connection_closed_t);
       break;
@@ -175,8 +178,9 @@ sl_status_t esl_lib_event_list_allocate(esl_lib_evt_type_t event_type,
   }
 
   memset(ptr, 0, size);
-
   *ptr_out = (esl_lib_evt_t *)ptr;
+  // Set event type
+  (*ptr_out)->evt_code = event_type;
 
   return sc;
 }

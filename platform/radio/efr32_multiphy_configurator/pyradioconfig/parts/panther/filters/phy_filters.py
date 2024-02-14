@@ -12,6 +12,7 @@ class PhyFilters(IPhyFilter):
                             'Phys_sim_tests',
                             'Phys_Utility',
                             'Phys_Internal',
+                            'Phys_Internal_Base_Customer_Signify',
                         ]
 
     sim_tests_phy_groups = ['Phys_sim_tests']

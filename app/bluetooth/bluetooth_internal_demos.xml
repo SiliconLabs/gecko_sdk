@@ -6,11 +6,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4161a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal/bootloader-storage-internal-brd4161a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal/bootloader-storage-internal-brd4161a-combined.s37"/>
   </demo>
   <demo name="brd4164a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -18,11 +18,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4164a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal/bootloader-storage-internal-brd4164a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal/bootloader-storage-internal-brd4164a-combined.s37"/>
   </demo>
   <demo name="brd4168a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -30,11 +30,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4168a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-ble/bootloader-storage-internal-ble-brd4168a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-ble/bootloader-storage-internal-ble-brd4168a-combined.s37"/>
   </demo>
   <demo name="brd4176a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -42,11 +42,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4176a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4176a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4176a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4176a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4176a.s37"/>
   </demo>
   <demo name="brd4181a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -54,11 +54,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181a.s37"/>
   </demo>
   <demo name="brd4181b.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -66,11 +66,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181b.s37"/>
   </demo>
   <demo name="brd4181c.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -78,11 +78,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg21b010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4181c.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4181c.s37"/>
   </demo>
   <demo name="brd4182a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -90,11 +90,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4182a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4182a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4182a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4182a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4182a.s37"/>
   </demo>
   <demo name="brd4186a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -102,11 +102,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24a010f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4186a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186a.s37"/>
   </demo>
   <demo name="brd4186b.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -114,11 +114,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b010f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186b.s37"/>
   </demo>
   <demo name="brd4186c.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -126,11 +126,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4186c.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4186c.s37"/>
   </demo>
   <demo name="brd4187a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -138,11 +138,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24a020f1536gm48.*"/>
     <property key="core.boardCompatibility" value="brd4187a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187a.s37"/>
   </demo>
   <demo name="brd4187b.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -150,11 +150,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b020f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187b.s37"/>
   </demo>
   <demo name="brd4187c.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -162,11 +162,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4187c.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4187c.s37"/>
   </demo>
   <demo name="brd4198a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -174,11 +174,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4198a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
   </demo>
   <demo name="brd4198b.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -186,11 +186,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4198b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4198b.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198b.s37"/>
   </demo>
   <demo name="brd4411a.demo.bt_soc_esl_tag_demo" label="Bluetooth - SoC ESL Tag Demo">
     <model:description>This example is an evaluation showcase for a Bluetooth Electronic Shelf Label (ESL) Tag application with the ESL Tag Demo component. The example includes image and display capabilities of an ESL Tag, utilizing the memory LCD display on the WSTK board while images are stored in RAM, only. Instead of the Silicon Labs logo, the Demo example will ask the user to run the QRCode generator on startup using the WSTK's display. After configuration the display will show ESL related information.
@@ -198,10 +198,10 @@
     <property key="demos.blurb" value="Bluetooth - SoC ESL Tag Demo"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4411a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4411a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/bluetooth/demos/bt_soc_esl_tag_demo/bt_soc_esl_tag_demo-brd4411a.s37"/>
     <property key="core.readmeFiles" value="example/bt_soc_esl_tag/readme.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4411a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4411a.s37"/>
   </demo>
 </demos>

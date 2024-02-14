@@ -20,6 +20,8 @@
 
 #include "sl_micrium_debug.h"
 #include "sl_wsrcp.h"
+#include "sl_wsrcp_api.h"
+#include "sl_wsrcp_hif.h"
 #include "sl_wsrcp_utils.h"
 #include "sl_wsrcp_mac.h"
 #include "sl_wsrcp_log.h"
@@ -57,7 +59,7 @@ void cpc_on_error(uint8_t cpc_ep, void *user_param)
 
 void wsmac_on_reset_req(struct sl_wsrcp_mac *rcp_mac)
 {
-    wsmac_send_reset_ind(rcp_mac);
+    rcp_ind_reset(rcp_mac);
 }
 
 static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
@@ -88,11 +90,10 @@ void uart_plt_rx_ready(struct sl_wsrcp_uart_plt *uart_ctxt)
     osEventFlagsSet(rcp_app->main_events, RX_UART);
 }
 
-void uart_plt_crc_error(struct sl_wsrcp_uart_plt *uart_ctxt, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter)
+void uart_plt_crc_error(struct sl_wsrcp_uart_plt *uart_ctxt, uint8_t irq_err_counter)
 {
-    struct sl_wsrcp_app *rcp_app = container_of(uart_ctxt, struct sl_wsrcp_app, uart_plt);
-
-    wsmac_report_rx_crc_error(rcp_app->rcp_mac, crc, frame_len, header, irq_err_counter);
+    (void)uart_ctxt;
+    FATAL(HIF_ECRC, "crc error irq-err-cnt=%u", irq_err_counter);
 }
 
 void wsmac_on_reset_req(struct sl_wsrcp_mac *rcp_mac)
@@ -107,7 +108,7 @@ static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
     uart_plt_init(&rcp_app->uart_plt);
     rcp_app->rcp_mac = wsmac_register(wisun_rcp_uart_plt_tx, wisun_rcp_uart_plt_rx, &rcp_app->uart_plt);
     wsmac_init_timers(rcp_app->rcp_mac, &rcp_app->rcp_timer_context);
-    wsmac_send_reset_ind(rcp_app->rcp_mac);
+    rcp_ind_reset(rcp_app->rcp_mac);
 }
 
 #else
@@ -131,11 +132,10 @@ void uart_rx_ready(struct sl_wsrcp_uart *uart_ctxt)
     osEventFlagsSet(rcp_app->main_events, RX_UART);
 }
 
-void uart_crc_error(struct sl_wsrcp_uart *uart_ctxt, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter)
+void uart_crc_error(struct sl_wsrcp_uart *uart_ctxt, uint8_t irq_err_counter)
 {
-    struct sl_wsrcp_app *rcp_app = container_of(uart_ctxt, struct sl_wsrcp_app, uart);
-
-    wsmac_report_rx_crc_error(rcp_app->rcp_mac, crc, frame_len, header, irq_err_counter);
+    (void)uart_ctxt;
+    FATAL(HIF_ECRC, "crc error irq-err-cnt=%u", irq_err_counter);
 }
 
 void wsmac_on_reset_req(struct sl_wsrcp_mac *rcp_mac)
@@ -147,10 +147,10 @@ void wsmac_on_reset_req(struct sl_wsrcp_mac *rcp_mac)
 
 static void wisun_rcp_init_bus(struct sl_wsrcp_app *rcp_app)
 {
-    uart_init(&rcp_app->uart);
+    uart_init(&rcp_app->uart, &rcp_app->rcp_timer_context);
     rcp_app->rcp_mac = wsmac_register(wisun_rcp_uart_tx, wisun_rcp_uart_rx, &rcp_app->uart);
     wsmac_init_timers(rcp_app->rcp_mac, &rcp_app->rcp_timer_context);
-    wsmac_send_reset_ind(rcp_app->rcp_mac);
+    rcp_ind_reset(rcp_app->rcp_mac);
 }
 
 #endif
@@ -173,7 +173,7 @@ void wisun_rcp_main(void *arg)
         if (flags & 0x10000000)
             WARN("Error: %08" PRIu32, flags);
         if (flags & RX_UART) {
-            while (wsmac_rx_host(rcp_app->rcp_mac))
+            while (rcp_rx(rcp_app->rcp_mac))
                 /* empty */;
         }
         if (flags & TIMER_EXPIRED) {

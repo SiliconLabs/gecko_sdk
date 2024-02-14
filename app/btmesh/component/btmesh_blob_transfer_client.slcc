@@ -29,12 +29,13 @@ requires:
   - name: app_btmesh_util
   - name: btmesh_blob_storage
   - name: btmesh_core
-  - name: btmesh_provisionee
+  - name: btmesh_role_init
   - name: btmesh_stack_mbt_client
   - name: btmesh_stack
   - name: app_timer
 recommends:
   - id: app_timer
+  - id: btmesh_provisionee
 
 template_contribution:
   - name: btmesh_on_event

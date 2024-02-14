@@ -104,6 +104,8 @@ class CALC_WiSUN_Sol(CALC_WiSUN_Ocelot):
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         sun_oqpsk_chiprate = model.vars.sun_oqpsk_chiprate.value
         sun_oqpsk_spreading_mode = model.vars.sun_oqpsk_spreading_mode.value
+        header_size = model.vars.header_size.value
+        fec_enabled = model.vars.fec_enabled.value
 
         if profile_name in ["wisun_fan_1_0","wisun_han"]:
             #Call method from Ocelot
@@ -154,6 +156,15 @@ class CALC_WiSUN_Sol(CALC_WiSUN_Ocelot):
 
                 #Write the variable
                 model.vars.wisun_phy_mode_id.value = wisun_phy_mode_id
+        elif profile_name == "connect":
+            # : Connect stack team requests Connect SUN FSK phys have a different phy_mode_id compared to Connect OQPSK,
+            # : Connect OFDM, and Legacy Connect PHYs. Thus, override stack_info if the PHY is Connect SUN-FSK
+            # : https://jira.silabs.com/browse/MCUW_RADIO_CFG-2375
+            if header_size == 2: # : Connect SUN-FSK is two byte header
+                if fec_enabled:
+                    model.vars.wisun_phy_mode_id.value = [1, 17]
+                else:
+                    model.vars.wisun_phy_mode_id.value = [1]
 
     def calc_conc_ofdm_option(self, model):
         #By default set this model variable to NONE

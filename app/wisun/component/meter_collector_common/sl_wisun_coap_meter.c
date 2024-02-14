@@ -40,6 +40,11 @@
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_coap_rhnd.h"
 #include "sli_wisun_coap_rd.h"
+#include "sl_wisun_trace_util.h"
+
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  #include "sl_wisun_led_driver.h"
+#endif
 
 #if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   #include "sl_wisun_rht_measurement.h"
@@ -151,6 +156,7 @@ static const char *_meter_packet2json(const sl_wisun_meter_packet_t * const pack
 static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_packet_t * const req_packet,
                                                          const measurement_type_t measurement);
 
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 /**************************************************************************//**
  * @brief Convert LED ID.
  * @details Helper function to convert uint8_t LED ID to sl_wisun_led_id_t
@@ -158,6 +164,7 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
  * @return sl_wisun_led_id_t converted LED ID
  *****************************************************************************/
 static sl_wisun_led_id_t _coap_meter_convert_led_id(const uint8_t led_id);
+#endif
 #endif
 
 // -----------------------------------------------------------------------------
@@ -190,6 +197,9 @@ static sl_wisun_coap_packet_t dummy_req_pkt = {
 // -----------------------------------------------------------------------------
 void sl_wisun_coap_meter_init(void)
 {
+  // init meter for having proper meter content
+  sl_wisun_meter_init();
+
   // Init meter-collector common component
 #if !defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
   sl_wisun_meter_set_initializer(&_coap_meter_hnd, NULL);
@@ -228,6 +238,7 @@ sl_wisun_coap_packet_t *sl_wisun_coap_meter_light_response_cb(const sl_wisun_coa
   return _prepare_measurement_resp(req_packet, COAP_METER_MEASUREMENT_LIGHT);
 }
 
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 sl_wisun_coap_packet_t *sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet)
 {
   sl_wisun_coap_packet_t *resp_packet = NULL;
@@ -255,6 +266,7 @@ sl_wisun_coap_packet_t *sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisu
 
   return resp_packet;
 }
+#endif
 #endif
 
 // -----------------------------------------------------------------------------
@@ -331,7 +343,7 @@ static sl_status_t _coap_meter_build_packets(const sl_wisun_request_type_t req,
                                              uint32_t * const len)
 {
   sl_wisun_coap_packet_t *packet                  = NULL;
-  static current_addr_t addresses                 = { 0 };
+  static sl_wisun_app_core_current_addr_t addresses                 = { 0 };
   const char *ip_str_global                       = NULL;
   uint16_t payload_len                            = 0U;
   static char payload[JSON_MEASUREMENT_DATA_SIZE] = { 0 };
@@ -374,7 +386,7 @@ static sl_status_t _coap_meter_build_packets(const sl_wisun_request_type_t req,
     packet->msg_id            = SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID;
     packet->msg_type          = COAP_MSG_TYPE_NON_CONFIRMABLE;
 
-    app_wisun_get_current_addresses(&addresses);
+    sl_wisun_app_core_get_current_addresses(&addresses);
     ip_str_global = app_wisun_trace_util_get_ip_str(&addresses.global);
 
     // Build payload
@@ -434,7 +446,7 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
   sl_wisun_coap_packet_t * resp_packet  = NULL;
   sn_coap_content_format_e ct_format    = COAP_CT_JSON;
   size_t max_content_size               = 0U;
-  static current_addr_t addresses       = { 0 };
+  static sl_wisun_app_core_current_addr_t addresses       = { 0 };
   const char *ip_str_global             = NULL;
   char *content                         = NULL;
   static sl_wisun_meter_packet_t packet = { 0 };
@@ -450,7 +462,7 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
     max_content_size = JSON_MEASUREMENT_DATA_SIZE;
 
     // Get IP address
-    app_wisun_get_current_addresses(&addresses);
+    sl_wisun_app_core_get_current_addresses(&addresses);
     ip_str_global = app_wisun_trace_util_get_ip_str(&addresses.global);
   } else {
     ct_format = COAP_CT_TEXT_PLAIN;

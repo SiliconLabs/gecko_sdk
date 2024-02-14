@@ -1,9 +1,2 @@
-Wi-SUN SDK 1.8.0
-- Wi-SUN Stack
-  - Added support for LFN multicast reception
-  - Added support for non-standard PHY configurations
-  - Added support for blocking sockets
-- Wi-SUN Applications Improvements
-  - Configurable LFN Support for all the applications
-  - Wi-SUN – SoC Network Measurement
-  - Wi-SUN – SoC (CoAP) Meter and Wi-SUN – SoC (CoAP) Collector
+Wi-SUN SDK 1.9.0
+- Targeted quality improvements and bug fixes

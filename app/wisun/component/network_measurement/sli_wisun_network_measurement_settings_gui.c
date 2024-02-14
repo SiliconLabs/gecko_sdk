@@ -182,6 +182,10 @@ void sli_wisun_nwm_phy_select_form(void *args)
 
 static void _phy_fan_form(void *args)
 {
+  if (args == NULL) {
+    return;
+  }
+
   uint8_t *profile               = NULL;
   app_wisun_phy_list_t *tmp_list = NULL;
   app_enum_t *iter               = NULL;
@@ -231,6 +235,10 @@ static void _phy_fan_form(void *args)
 
 static void _phy_domain_form(void *args)
 {
+  if (args == NULL) {
+    return;
+  }
+
   phy_domain_list_t *domain = NULL;
 
   domain = (phy_domain_list_t *)args;
@@ -286,7 +294,7 @@ static void _set_phy(void *args)
   sl_wisun_disconnect();
 
   // to connect to the network with the new settings
-  app_wisun_network_connect();
+  sl_wisun_app_core_network_connect();
 }
 
 __STATIC_INLINE bool filter_profile(sl_wisun_phy_config_t *phy_cfg)

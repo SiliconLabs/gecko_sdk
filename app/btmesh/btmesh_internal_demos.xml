@@ -6,11 +6,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Friend node"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4104a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
   </demo>
   <demo name="brd4181a.demo.btmesh_soc_iop_friend" label="Bluetooth Mesh - SoC IOP Test - Friend node">
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
@@ -18,11 +18,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Friend node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4181a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
   </demo>
   <demo name="brd4181b.demo.btmesh_soc_iop_friend" label="Bluetooth Mesh - SoC IOP Test - Friend node">
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
@@ -30,11 +30,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Friend node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4181b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
   </demo>
   <demo name="brd4187c.demo.btmesh_soc_iop_friend" label="Bluetooth Mesh - SoC IOP Test - Friend node">
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
@@ -42,11 +42,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Friend node"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4187c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
   </demo>
   <demo name="brd4194a.demo.btmesh_soc_iop_friend" label="Bluetooth Mesh - SoC IOP Test - Friend node">
     <model:description>Friend example for IOP test. This node acts as a friend for the low power node and caches messages sent to it when the low power node is sleeping.
@@ -54,11 +54,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Friend node"/>
     <property key="core.partCompatibility" value=".*efr32mg27c140f768im40.*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4194a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_friend/btmesh_soc_iop_friend-brd4194a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
   </demo>
   <demo name="brd4104a.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -66,11 +66,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4104a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
   </demo>
   <demo name="brd4181a.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -78,11 +78,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4181a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
   </demo>
   <demo name="brd4181b.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -90,11 +90,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4181b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
   </demo>
   <demo name="brd4182a.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -102,11 +102,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32mg22c224f512im40.*"/>
     <property key="core.boardCompatibility" value="brd4182a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4182a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4182a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4182a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4182a.s37"/>
   </demo>
   <demo name="brd4187c.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -114,11 +114,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4187c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
   </demo>
   <demo name="brd4194a.demo.btmesh_soc_iop_lpn" label="Bluetooth Mesh - SoC IOP Test - LPN node">
     <model:description>Low power node example for IOP test. This node acts as a typical low power device and sleeps most of the time. It needs a friend node to cache messages and forward them when polled.
@@ -126,11 +126,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - LPN node"/>
     <property key="core.partCompatibility" value=".*efr32mg27c140f768im40.*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4194a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_lpn/btmesh_soc_iop_lpn-brd4194a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
   </demo>
   <demo name="brd4104a.demo.btmesh_soc_iop_proxy" label="Bluetooth Mesh - SoC IOP Test - Proxy node">
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
@@ -138,11 +138,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Proxy node"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4104a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
   </demo>
   <demo name="brd4181a.demo.btmesh_soc_iop_proxy" label="Bluetooth Mesh - SoC IOP Test - Proxy node">
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
@@ -150,11 +150,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Proxy node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4181a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
   </demo>
   <demo name="brd4181b.demo.btmesh_soc_iop_proxy" label="Bluetooth Mesh - SoC IOP Test - Proxy node">
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
@@ -162,11 +162,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Proxy node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4181b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
   </demo>
   <demo name="brd4187c.demo.btmesh_soc_iop_proxy" label="Bluetooth Mesh - SoC IOP Test - Proxy node">
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
@@ -174,11 +174,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Proxy node"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4187c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
   </demo>
   <demo name="brd4194a.demo.btmesh_soc_iop_proxy" label="Bluetooth Mesh - SoC IOP Test - Proxy node">
     <model:description>Proxy example for IOP test. This node forwards/relays messages between GATT and advertising bearers in the network.
@@ -186,11 +186,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Proxy node"/>
     <property key="core.partCompatibility" value=".*efr32mg27c140f768im40.*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4194a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_proxy/btmesh_soc_iop_proxy-brd4194a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
   </demo>
   <demo name="brd4104a.demo.btmesh_soc_iop_relay" label="Bluetooth Mesh - SoC IOP Test - Relay node">
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
@@ -198,11 +198,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Relay node"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4104a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4104a-combined.s37"/>
   </demo>
   <demo name="brd4181a.demo.btmesh_soc_iop_relay" label="Bluetooth Mesh - SoC IOP Test - Relay node">
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
@@ -210,11 +210,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Relay node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4181a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181a.s37"/>
   </demo>
   <demo name="brd4181b.demo.btmesh_soc_iop_relay" label="Bluetooth Mesh - SoC IOP Test - Relay node">
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
@@ -222,11 +222,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Relay node"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4181b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single/bootloader-storage-internal-single-brd4181b.s37"/>
   </demo>
   <demo name="brd4187c.demo.btmesh_soc_iop_relay" label="Bluetooth Mesh - SoC IOP Test - Relay node">
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
@@ -234,11 +234,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Relay node"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4187c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k-brd4187c.s37"/>
   </demo>
   <demo name="brd4194a.demo.btmesh_soc_iop_relay" label="Bluetooth Mesh - SoC IOP Test - Relay node">
     <model:description>Relay example for IOP test. This node acts as a relay, i.e. if a node is out of range for another node, it relays messages between the two, provided the relay node is in range for both.
@@ -246,11 +246,11 @@
     <property key="demos.blurb" value="Bluetooth Mesh - SoC IOP Test - Relay node"/>
     <property key="core.partCompatibility" value=".*efr32mg27c140f768im40.*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4194a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_iop_relay/btmesh_soc_iop_relay-brd4194a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.0/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.4.1/platform/bootloader/demos/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k-brd4194a.s37"/>
   </demo>
   <demo name="brd2601b.demo.btmesh_soc_provisioner_light_lightness" label="Bluetooth Mesh - SoC Provisioner Light Lightness">
     <model:description>An out-of-the-box software demo which can provision and configure nearby switch devices.
@@ -259,7 +259,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b310f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2601b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd2601b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd2601b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -271,7 +271,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd2703a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd2703a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd2703a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -283,7 +283,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4103a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4103a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4103a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -295,7 +295,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4104a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4104a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4104a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -307,7 +307,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg27c320f768gj39.*"/>
     <property key="core.boardCompatibility" value="brd4110b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4110b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4110b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -319,7 +319,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg27c320f768gj39.*"/>
     <property key="core.boardCompatibility" value="brd4111b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4111b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4111b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -331,7 +331,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg24b410f1536ij42.*"/>
     <property key="core.boardCompatibility" value="brd4115a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4115a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4115a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -343,7 +343,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4158a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4158a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4158a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -355,7 +355,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p632f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4159a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4159a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4159a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -367,7 +367,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4161a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4161a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4161a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -379,7 +379,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4162a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4162a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4162a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -391,7 +391,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4163a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4163a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4163a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -403,7 +403,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4164a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4164a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4164a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -415,7 +415,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p832f512im48.*"/>
     <property key="core.boardCompatibility" value="brd4165b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4165b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4165b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -427,7 +427,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
     <property key="core.boardCompatibility" value="brd4166a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4166a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4166a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -439,7 +439,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4167a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4167a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4167a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -451,7 +451,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4168a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4168a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4168a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -463,7 +463,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm68.*"/>
     <property key="core.boardCompatibility" value="brd4170a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4170a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4170a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -475,7 +475,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4172a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4172a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4172a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -487,7 +487,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4172b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4172b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4172b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -499,7 +499,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p433f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4173a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4173a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4173a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -511,7 +511,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4174a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4174a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4174a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -523,7 +523,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4174b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4174b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4174b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -535,7 +535,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg13p733f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4175a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4175a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4175a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -547,7 +547,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4176a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4176a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4176a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -559,7 +559,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4179b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4179b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4179b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -571,7 +571,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4180a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4180a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -583,7 +583,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4180b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4180b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4180b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -595,7 +595,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -607,7 +607,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21a010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -619,7 +619,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21b010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4181c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4181c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -631,7 +631,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4186c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4186c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4186c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -643,7 +643,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4187c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4187c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4187c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -655,7 +655,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b220f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4188b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4188b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4188b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -667,7 +667,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg12p232f1024gm48.*"/>
     <property key="core.boardCompatibility" value="brd4190a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4190a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4190a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -679,7 +679,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg27c140f768im40.*"/>
     <property key="core.boardCompatibility" value="brd4194a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4194a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4194a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -691,7 +691,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21b010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4195a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4195a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4195a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -703,7 +703,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21b010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4195b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4195b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4195b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -715,7 +715,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21b020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4196a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4196a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4196a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -727,7 +727,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg21b020f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4196b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4196b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4196b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -739,7 +739,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4198a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -751,7 +751,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
     <property key="core.boardCompatibility" value="brd4304a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4304a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4304a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -763,7 +763,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*bgm13s32f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4305a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -775,7 +775,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*bgm13s22f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4305c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -787,7 +787,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm13s02f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4305d"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305d.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305d.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -799,7 +799,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm13s12f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4305e"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305e.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4305e.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -811,7 +811,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*bgm13p22f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4306a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -823,7 +823,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*bgm13p32f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4306b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -835,7 +835,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm13p02f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4306c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -847,7 +847,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm13p12f512ga.*"/>
     <property key="core.boardCompatibility" value="brd4306d"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306d.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4306d.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -859,7 +859,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210pa32jia.*"/>
     <property key="core.boardCompatibility" value="brd4308a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -871,7 +871,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210pa22jia.*"/>
     <property key="core.boardCompatibility" value="brd4308b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -883,7 +883,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210pb32jia.*"/>
     <property key="core.boardCompatibility" value="brd4308c"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308c.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308c.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -895,7 +895,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210pb22jia.*"/>
     <property key="core.boardCompatibility" value="brd4308d"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308d.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4308d.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -907,7 +907,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210l022jif.*"/>
     <property key="core.boardCompatibility" value="brd4309a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4309a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4309a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -919,7 +919,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210la22jif.*"/>
     <property key="core.boardCompatibility" value="brd4309b"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4309b.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4309b.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -931,7 +931,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm240pb22vna.*"/>
     <property key="core.boardCompatibility" value="brd4316a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4316a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4316a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -943,7 +943,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm240pb32vna.*"/>
     <property key="core.boardCompatibility" value="brd4317a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4317a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4317a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -955,7 +955,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm240sd22vna.*"/>
     <property key="core.boardCompatibility" value="brd4318a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4318a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4318a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -967,7 +967,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*mgm210la22jif.*"/>
     <property key="core.boardCompatibility" value="brd4329a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4329a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4329a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -979,7 +979,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*efr32bg21b010f1024im32.*"/>
     <property key="core.boardCompatibility" value="brd4332a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4332a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4332a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>
@@ -991,7 +991,7 @@ The LEDs of the mainboard can be switched on and off and their lighting intensit
     <property key="demos.blurb" value="Bluetooth Mesh - SoC Provisioner Light Lightness"/>
     <property key="core.partCompatibility" value=".*bgm241sd22vna.*"/>
     <property key="core.boardCompatibility" value="brd4335a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.0/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4335a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.4.1/app/btmesh/demos/btmesh_soc_provisioner_light_lightness/btmesh_soc_provisioner_light_lightness-brd4335a.s37"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
     <property key="core.quality" value="INTERNAL"/>

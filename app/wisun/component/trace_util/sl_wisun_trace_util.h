@@ -41,6 +41,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_component_catalog.h"
 #include "sl_status.h"
@@ -108,6 +109,16 @@ typedef struct sl_wisun_trace_util_time {
   /// Seconds
   uint8_t seconds;
 } sl_wisun_trace_util_time_t;
+
+/// Event notification
+typedef struct app_wisun_trace_util_evt_notify {
+  /// Event ID
+  osEventFlagsId_t evt_id;
+  /// Registered event channels
+  uint32_t evt_chs;
+  /// Wait options
+  uint32_t wait_opt;
+} app_wisun_trace_util_evt_notify_t;
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -343,10 +354,67 @@ __STATIC_INLINE void app_wisun_trace_util_destroy_time_str(const char *str)
 /**************************************************************************//**
  * @brief Get elapsed time in milliseconds
  * @details This function returns the ellapsed time in milliseconds.
- * @param ms[out] elapsed time in milliseconds
+ * @param[out] ms elapsed time in milliseconds
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
  *****************************************************************************/
 sl_status_t app_wisun_trace_util_timestamp_get_ms(uint64_t * const ms);
+
+/**************************************************************************//**
+ * @brief Init event notification
+ * @details Init osEventFlags and subscribed channel storage
+ * @param[in,out] evt_notify Event notification to initialise
+ * @param[in] wait_opt Option for event wait
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t app_wisun_trace_util_evt_notify_init(app_wisun_trace_util_evt_notify_t * const evt_notify, 
+                                                 const uint32_t wait_opt);
+
+/**************************************************************************//**
+ * @brief Clear notifications
+ * @details Clear subsrcibed channels (represented by bits) in osEventFlags
+ * @param[in,out] evt_notify Event notification
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t app_wisun_trace_util_evt_notify_clear(app_wisun_trace_util_evt_notify_t * const evt_notify);
+
+/**************************************************************************//**
+ * @brief Subscribe to notification
+ * @details Getting subscribed channel ID
+ * @param[in,out] evt_notify Event notification
+ * @param[out] evt_ch Subscribed event channel
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t app_wisun_trace_util_evt_notify_subscribe_ch(app_wisun_trace_util_evt_notify_t * const evt_notify, 
+                                                         uint8_t * const evt_ch);
+
+/**************************************************************************//**
+ * @brief Unsubscribe to notification
+ * @details Remove subscribed channel ID from osEventFlags
+ * @param[in,out] evt_notify Event notification
+ * @param[in] evt_ch Subscribed event channel
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/                                                         
+sl_status_t app_wisun_trace_util_evt_notify_unsubscribe_ch(app_wisun_trace_util_evt_notify_t * const evt_notify, 
+                                                           const uint8_t evt_ch);
+
+/**************************************************************************//**
+ * @brief Notify subscribed channels
+ * @details Set osEventFlags by subscribed channels
+ * @param[in] evt_notify Event notification
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/
+sl_status_t app_wisun_trace_util_evt_notfiy_chs(const app_wisun_trace_util_evt_notify_t * const evt_notify);
+
+/**************************************************************************//**
+ * @brief Waiting for notification
+ * @details Using osEventFlagsWait for waiting event flags described by ch_mask
+ * @param[in] ch_mask Channel mask for waiting
+ * @param[in] timeout Timeout
+ * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL on error
+ *****************************************************************************/  
+sl_status_t app_wisun_trace_util_evt_notify_wait(const app_wisun_trace_util_evt_notify_t * const evt_notify,
+                                                 const uint32_t ch_mask,
+                                                 const uint32_t timeout);
 
 #ifdef __cplusplus
 }

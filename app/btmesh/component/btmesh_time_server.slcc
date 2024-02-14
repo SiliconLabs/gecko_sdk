@@ -26,9 +26,11 @@ provides:
   - name: "btmesh_time_server"
 requires:
   - name: "app_btmesh_util"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_time_server"
   - name: "btmesh_stack"
+recommends:
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"

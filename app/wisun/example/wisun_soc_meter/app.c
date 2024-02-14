@@ -64,12 +64,12 @@ void app_task(void *args)
   (void) args;
 
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
   printf("[Port: %u]\n", SL_WISUN_METER_PORT);
 
   while (1) {
     sl_wisun_meter_process();
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

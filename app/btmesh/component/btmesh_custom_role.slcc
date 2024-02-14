@@ -1,0 +1,47 @@
+id: "btmesh_custom_role"
+label: "Btmesh Custom Role"
+package: "Btmesh"
+description: >
+  This component makes it possible to initialize a mesh device as a provisionee
+  or provisioner based on application logic.
+  For example an application could be implemented in a way that the device
+  becomes a provisioner permanently when button is pressed at power up,
+  otherwise it is just a provisionee.
+  The sl_btmesh_custom_role_init weak callback function is called on boot event
+  and the application is able to override this function to call one of the
+  following initializer BT Mesh stack APIs:
+  - sl_btmesh_node_init
+  - sl_btmesh_node_init_oob
+  - sl_btmesh_prov_init
+
+  This component is prepared for integration into SOC applications.
+category: "Bluetooth Mesh|Btmesh Roles"
+quality: "production"
+root_path: "app/btmesh/common/btmesh_custom_role"
+tag:
+  - No-Code
+
+source:
+  - path: "sl_btmesh_custom_role.c"
+include:
+  - path: ""
+    file_list:
+      - path: "sl_btmesh_custom_role.h"
+provides:
+  - name: "btmesh_provisionee"
+  - name: "btmesh_provisioner"
+  - name: "btmesh_role_init"
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_stack_node"
+  - name: "btmesh_stack_provisioner"
+validation_helper:
+  - path: "../../script/validation/soc_ncp_compatibility.lua"
+
+template_contribution:
+  - name: "bluetooth_on_event"
+    value:
+      include: "sl_btmesh_custom_role.h"
+      function: "sl_bt_custom_role_on_event"
+  - name: "component_catalog"
+    value: "btmesh_custom_role"

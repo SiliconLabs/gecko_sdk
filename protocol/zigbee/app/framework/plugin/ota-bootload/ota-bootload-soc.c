@@ -16,16 +16,32 @@
  ******************************************************************************/
 
 #include "app/framework/include/af.h"
-#include "../../platform/service/legacy_hal/inc/bootloader-interface-app.h"
+#include "app/framework/plugin/ota-storage-common/ota-storage.h"
+
+#ifndef EMBER_TEST
+#include "api/btl_interface.h"
+#include "api/btl_interface_storage.h"
+#endif // !EMBER_TEST
 //------------------------------------------------------------------------------
 // Globals
 
 //------------------------------------------------------------------------------
+EmberStatus bootloaderInstallNewImage(void)
+{
+#ifndef EMBER_TEST
+  int32_t storageSlot = DEFAULT_SLOT;
+  if (bootloader_setImagesToBootload(&storageSlot, 1) == BOOTLOADER_OK) {
+    // should not return
+    bootloader_rebootAndInstall();
+  }
+#endif // SL_CATALOG_SLOT_MANAGER_PRESENT
+  return EMBER_ERR_FATAL;
+}
 
 uint8_t emberAfOtaBootloadCallback(const EmberAfOtaImageId* id,
                                    uint16_t ncpUpgradeTagId)
 {
-  halAppBootloaderInstallNewImage();
+  bootloaderInstallNewImage();
 
   emberAfCorePrintln("Bootloading failed!");
 

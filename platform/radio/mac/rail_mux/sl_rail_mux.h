@@ -384,9 +384,9 @@ RAIL_Status_t sl_rail_mux_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHa
 
 RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle);
 
-#ifdef HIGH_SPEED_PHY
-void sl_rail_mux_set_high_bw_phy_index(RAIL_Handle_t railHandle);
-#endif //HIGH_SPEED_PHY
+#ifdef HIGH_DATARATE_PHY
+void sl_rail_mux_set_high_datarate_phy_index(RAIL_Handle_t railHandle);
+#endif //HIGH_DATARATE_PHY
 
 /**
  * In a MUX configuration, where a single radio is used concurrently

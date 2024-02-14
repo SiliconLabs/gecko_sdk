@@ -68,7 +68,7 @@ configuration:
   - name: SL_CPC_DRV_UART_VCOM_RX_QUEUE_SIZE
     value: 5
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlNone
+    value: uartdrvFlowControlHwUart
   - name: SL_DEVICE_INIT_LFXO_TIMEOUT
     value: _CMU_LFXOCTRL_TIMEOUT_4KCYCLES
     condition: ["device_sdid_80"]

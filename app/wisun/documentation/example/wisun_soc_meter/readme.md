@@ -25,12 +25,26 @@ See the associated sections in [QSG181: Wi-SUN SDK Quick Start Guide](https://ww
 ## Send Sensor Data to a Collector
 
 The three Wi-SUN devices (Border Router, Meter, Collector) are now part of the same Wi-SUN network. See the *Wi-SUN - SoC Collector* readme to configure the Collector.
-The Meter sends its schedule time of sending also. In LFN device mode, the schedule time is different based on the selected LFN profile.
+
+The connection between a Meter and the Collector starts with a registration request from the Collector.
+
+    [Registration request from fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45]
+
+After receiving a registration request, the Meter device sends groups of measurement data to the Collector periodically.
 When the Meter sends sensor data to the Collector, a message is output in the console, as follows.
 
-    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45: Measurement packet has been sent (16 bytes)]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45: Measurement packet has been sent (80 bytes)]
 
-A UDP packet containing the sensor data is sent to the Collector and is output in the Collector console on reception.
+The time between the cycles can be configured in FFN mode. In LFN device mode, the schedule time is different based on the selected LFN profile. Measurement and sending schedule can be further customized with callback functions.
+
+The Collector can stop monitoring a Meter with a remove request.
+
+    [Remove request from fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45]
+    [Collector has been removed: fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45]
+
+Meter devices can respond to async requests.
+
+    [Async request from fd2a:6e01:9bfc:990c:20d:6fff:fe20:bd45]
 
 ## Troubleshooting
 

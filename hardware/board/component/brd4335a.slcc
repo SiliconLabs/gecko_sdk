@@ -19,6 +19,7 @@
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_hadm
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band
   - name: hardware_board_default_rf_band
@@ -53,6 +54,10 @@
     value: '"BRD4335A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: SL_HADM_ANT_CAL
+    value: '{0}'
+  - name: SL_HADM_ANT_CAL_LEN
+    value: '{1}'
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

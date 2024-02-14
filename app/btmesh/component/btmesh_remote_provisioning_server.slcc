@@ -29,10 +29,12 @@ provides:
 requires:
   - name: "app_assert"
   - name: "app_btmesh_util"
-  - name: "btmesh_provisionee"
+  - name: "btmesh_role_init"
   - name: "btmesh_stack_node"
   - name: "btmesh_stack_remote_provisioning_server"
   - name: "btmesh_stack"
+recommends:
+  - id: "btmesh_provisionee"
 
 template_contribution:
   - name: "btmesh_on_event"

@@ -38,13 +38,13 @@
   - name: SL_BOARD_NAME
     value: '"BRD2001B"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
   - name: HFXO_FREQ
     value: 32000000
 - tag:
   - board:pn:BRD2001
   - board:variant:B
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efm32g890f128
   - hardware:has:vcom
   - hardware:has:led:4

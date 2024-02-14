@@ -502,7 +502,7 @@ static sl_wisun_coap_packet_t * _ota_dfu_coap_response_cb(const sl_wisun_coap_pa
   resp_packet->msg_code = COAP_MSG_CODE_RESPONSE_CREATED;
   resp_packet->content_format = COAP_CT_JSON;
 
-  // CoAP PUT request to start firmware updaet
+  // CoAP PUT request to start firmware update
   if (req_packet->msg_code == COAP_MSG_CODE_REQUEST_POST) {
     // Start fw update
     if (!memcmp(SL_WISUN_OTA_DFU_START_PAYLOAD_STR,
@@ -604,7 +604,7 @@ static void _ota_dfu_thr_fnc(void * args)
 
 #if SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED
   // Create socket
-  _notify_ch.sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  _notify_ch.sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   assert(_notify_ch.sockid != -1L);
 
   // Set address
@@ -630,7 +630,7 @@ static void _ota_dfu_thr_fnc(void * args)
   bootloader_getStorageInfo(&info);
   assert(info.numStorageSlots >= 1);
 
-  SL_WISUN_OTA_DFU_SERVICE_LOOP(){
+  SL_WISUN_OTA_DFU_SERVICE_LOOP() {
     osEventFlagsClear(_ota_dfu_evt, SL_WISUN_OTA_DFU_EVT_FLAG_ALL_MSK);
     flags = osEventFlagsWait(_ota_dfu_evt, SL_WISUN_OTA_DFU_EVT_FLAG_START_FW_UPDATE_MSK,
                              osFlagsWaitAny | osFlagsNoClear, osWaitForever);

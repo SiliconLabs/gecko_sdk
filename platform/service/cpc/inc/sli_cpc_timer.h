@@ -95,6 +95,14 @@ uint32_t cpc_timer_get_tick_count(void);
 uint64_t cpc_timer_get_tick_count64(void);
 
 /***************************************************************************//**
+ * Initialize a 32 bits timer
+ *
+ * @param handle Pointer to handle to timer.
+ * @return SL_STATUS_OK if successful.
+ ******************************************************************************/
+sl_status_t cpc_timer_init(sli_cpc_timer_handle_t *handle);
+
+/***************************************************************************//**
  * Starts a 32 bits timer.
  *
  * @param handle Pointer to handle to timer.
@@ -160,6 +168,23 @@ sl_status_t cpc_timer_stop_timer(sli_cpc_timer_handle_t *handle);
  ******************************************************************************/
 sl_status_t cpc_timer_delay_millisecond(uint32_t delay_ms);
 #endif
+
+/***************************************************************************//**
+ * Initialize the CPC timer
+ *
+ * @param Handle of the CPC timer
+ *
+ * @return SL_STATUS_OK if successful.
+ ******************************************************************************/
+static inline sl_status_t sli_cpc_timer_init(sli_cpc_timer_handle_t *handle)
+{
+#if (defined(SL_CATALOG_SLEEPTIMER_PRESENT))
+  (void)handle;
+  return SL_STATUS_OK;
+#else
+  return cpc_timer_init(handle);
+#endif
+}
 
 /***************************************************************************//**
  * Converts milliseconds into ticks.

@@ -33,6 +33,8 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         ber_force_sync = model.vars.ber_force_sync.value
         antdivmode = model.vars.antdivmode.value
         fast_detect_enable = (model.vars.fast_detect_enable.value == model.vars.fast_detect_enable.var_enum.ENABLED)
+        is_trecs = demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or \
+                   demod_select == model.vars.demod_select.var_enum.TRECS_SLICER
 
         if ber_force_sync:
             syncword_len = 32
@@ -92,6 +94,11 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
         model.vars.trecs_pre_bits_to_syncword.value = trecs_pre_bits_to_syncword
         model.vars.trecs_effective_preamble_len.value = preamble_detection_length - trecs_pre_bits_to_syncword
         model.vars.trecs_effective_syncword_len.value = syncword_len + trecs_pre_bits_to_syncword
+
+        # : display log output if trecs
+        model.vars.trecs_pre_bits_to_syncword.in_public_log = is_trecs
+        model.vars.trecs_effective_preamble_len.in_public_log = is_trecs
+        model.vars.trecs_effective_syncword_len.in_public_log = is_trecs
 
     def calc_demod_expect_patt_value(self, model):
 
@@ -736,5 +743,11 @@ class CALC_Viterbi_ocelot(CALC_Viterbi_lynx):
     def calc_trecs_syncword_timeout_us(self, model):
         frmschtime = model.vars.MODEM_FRMSCHTIME_FRMSCHTIME.value
         baudrate = model.vars.baudrate.value
+        demod_select = model.vars.demod_select.value
+        is_trecs = demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or \
+                   demod_select == model.vars.demod_select.var_enum.TRECS_SLICER
 
         model.vars.trecs_syncword_timeout_us.value = frmschtime / baudrate * 1e6
+
+        # : display log output if trecs demod
+        model.vars.trecs_syncword_timeout_us.in_public_log = is_trecs

@@ -202,8 +202,9 @@ psa_status_t sl_connect_ecdh_key_exchange_encrypt_message(
     cipher_text_length);
 
   if (psa_status == PSA_SUCCESS) {
-    memcpy(cipher_text, data, *cipher_text_length - iv_size);
-    memcpy(iv, data + *cipher_text_length - iv_size, iv_size);
+    memcpy(iv, data, iv_size);
+    memcpy(cipher_text, data + iv_size, *cipher_text_length - iv_size);
+
     *cipher_text_length -= iv_size;
     *iv_length = iv_size;
   }
@@ -279,8 +280,8 @@ psa_status_t sl_connect_ecdh_key_exchange_decrypt_message(
 #if SL_GSDK_VERSION >= 0x400
 
   // single part operation is only supported in GSDK 4.0+
-  memcpy(data, cipher_text, cipher_text_length);
-  memcpy(data + cipher_text_length, iv, iv_length);
+  memcpy(data, iv, iv_length);
+  memcpy(data + iv_length, cipher_text, cipher_text_length);
 
   psa_status = psa_cipher_decrypt(
     key_id,

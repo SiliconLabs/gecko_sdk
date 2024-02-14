@@ -102,6 +102,9 @@ class Tag():
         self.ots_image_type = {}
         self.pending_unassociate = False
         self._advertising_timer = threading.Timer(ADVERTISING_TIMEOUT, self.__advertising_timeout)
+        self._advertising_timer.daemon = True
+        self._connection_timer = threading.Timer(CONNECTING_TIMEOUT, self.__connecting_timeout)
+        self._connection_timer.daemon = True
         self.last_req_timestamp = dt.now().timestamp()
         self.last_resp_timestamp = dt.now().timestamp()
         self.unresp_command_number = 0
@@ -366,6 +369,8 @@ class Tag():
             self._advertising_timer.cancel()
         if self._past_timer.is_alive():
             self._past_timer.cancel()
+        if self._connection_timer.is_alive():
+            self._connection_timer.cancel()
         # Reset busy state
         self.busy = False
         self.connection_handle = None
@@ -522,9 +527,9 @@ class Tag():
                 bin_num = bin(b)[2:].zfill(8)
                 R, G, B = int(bin_num[2:4], 2), int(bin_num[4:6], 2), int(bin_num[6:8], 2)
                 if bin_num[0:2] == "00":
-                    items.append(f"[{i}] Colored, current color: RGB({R}{G}{B})")
+                    items.append(f"[{i}] Colored, last set color: RGB({R}{G}{B})")
                 elif bin_num[0:2] == "01":
-                    items.append(f"[{i}] Monochrome, current color: RGB({R}{G}{B})")
+                    items.append(f"[{i}] Monochrome, closest color: RGB({R}{G}{B})")
                 else:
                     items.append(f"[{i}] RFU")
             info += ("\n" + " " * justify_column).join(items)
@@ -557,6 +562,8 @@ class Tag():
         """ Handle event """
         if isinstance(evt, esl_lib.EventConnectionOpened):
             if evt.address == self.ble_address:
+                if self._connection_timer.is_alive():
+                    self._connection_timer.cancel()
                 self._past_timer.cancel()
                 self._past_initiated = False
                 self.connection_handle = evt.connection_handle
@@ -579,6 +586,21 @@ class Tag():
             if self.blocked:
                 self.unblock() # clear the blocked state if it has been connected and bonded - this happened certainly manually
                 self.block(elw.ESL_LIB_STATUS_CONN_CONFIG_FAILED) # change the reason until at least ESL Address is set
+        elif isinstance(evt, esl_lib.EventConnectionRetry):
+            self.state = TagState.CONNECTING
+            if self._connection_timer.is_alive():
+                self._connection_timer.cancel()
+            self._connection_timer = threading.Timer(CONNECTING_TIMEOUT, self.__connecting_timeout)
+            self._connection_timer.daemon = True
+            self._connection_timer.start()
+            self._advertising = True  # necessary step for any connect requests to undetected advertisers!
+            self.log.warning(
+                "Tag at BLE address: %s reconnecting, reason: %s, %s retries left: %d",
+                self.ble_address,
+                esl_lib.get_enum("ESL_LIB_CONNECTION_STATE_", evt.connection_state),
+                esl_lib.get_enum("SL_STATUS_", evt.reason),
+                evt.retries_left,
+            )
         elif isinstance(evt, esl_lib.EventConnectionClosed):
             if evt.connection_handle == self.connection_handle:
                 self._past_timer.cancel()
@@ -676,6 +698,8 @@ class Tag():
                     self._advertising_timer.start()
         elif isinstance(evt, esl_lib.EventError):
             self._advertising = False
+            if self._connection_timer.is_alive():
+                self._connection_timer.cancel()
             if evt.lib_status == elw.ESL_LIB_STATUS_BONDING_FAILED:
                 self.state = TagState.IDLE
             elif evt.lib_status == elw.ESL_LIB_STATUS_CONN_SUBSCRIBE_FAILED:
@@ -718,6 +742,12 @@ class Tag():
                     self.close_connection(force_close=True)
             elif evt.lib_status == elw.ESL_LIB_STATUS_OTS_INIT_FAILED:
                 self.auto_image_count = 0
+
+    def __connecting_timeout(self):
+        if self.state == TagState.CONNECTING:
+            self.log.warning("Connection request to address %s expired!", self.ble_address)
+            self._advertising = False # make the tag discoverable by advertising again
+            self.state = TagState.IDLE
 
     def __advertising_timeout(self):
         if self.advertising:

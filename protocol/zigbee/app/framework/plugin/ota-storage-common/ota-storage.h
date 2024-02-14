@@ -96,6 +96,9 @@
 
 #define INVALID_SLOT      (uint32_t)-1
 
+// Default to using storage slot 0
+#define DEFAULT_SLOT      0
+
 /**
  * @name API
  * @{

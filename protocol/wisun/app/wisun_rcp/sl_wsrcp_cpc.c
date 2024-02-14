@@ -13,9 +13,12 @@
  ******************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
 #include <cmsis_os2.h>
+#include <common/bits.h>
 #include <sl_cpc.h>
 #include <sli_cpc.h>
+#include "sl_wsrcp_version.h"
 
 #if __has_include("sl_cpc_drv_secondary_spi_config.h")
 #include "sl_cpc_drv_secondary_spi_config.h"
@@ -30,6 +33,17 @@
 // Used for debug to display the data sent/received on the bus
 static char trace_buffer[128];
 static osSemaphoreId_t g_tx_lock;
+
+const char *sl_cpc_secondary_app_version(void)
+{
+    static char version_api_str[15];
+
+    snprintf(version_api_str, sizeof(version_api_str), "%u.%u.%u",
+             (unsigned int)FIELD_GET(VERSION_MAJOR_MASK, version_api),
+             (unsigned int)FIELD_GET(VERSION_MINOR_MASK, version_api),
+             (unsigned int)FIELD_GET(VERSION_PATCH_MASK, version_api));
+    return version_api_str;
+}
 
 __WEAK void cpc_rx_ready(uint8_t cpc_ep, void *user_param)
 {

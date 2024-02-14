@@ -70,6 +70,10 @@
 #define GET_GPIO_PIN(x)     (x & GPIO_PIN_BITMASK)
 #define GET_GPIO_PORT(x)    ((x & GPIO_PORT_BITMASK) >> 16)
 
+// To cache the transmit power, so that we don't override it while loading the
+// channel config or setting the channel.
+static int8_t sTxPower = OPENTHREAD_CONFIG_DEFAULT_TRANSMIT_POWER;
+
 struct PlatformDiagCommand
 {
     const char *mName;
@@ -301,12 +305,30 @@ otError otPlatDiagRadioAutoAck(bool aAutoAckEnabled)
 
 void otPlatDiagChannelSet(uint8_t aChannel)
 {
-    OT_UNUSED_VARIABLE(aChannel);
+    otError       error = OT_ERROR_NONE;
+    RAIL_Status_t status;
+
+    RAIL_SchedulerInfo_t bgRxSchedulerInfo = {
+    .priority = RADIO_SCHEDULER_BACKGROUND_RX_PRIORITY,
+    // sliptime/transaction time is not used for bg rx
+    };
+
+    error = efr32RadioLoadChannelConfig(aChannel, sTxPower);
+    OT_ASSERT(error == OT_ERROR_NONE);
+
+    status = RAIL_StartRx(gRailHandle, aChannel, &bgRxSchedulerInfo);
+    OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
 }
 
 void otPlatDiagTxPowerSet(int8_t aTxPower)
 {
-    OT_UNUSED_VARIABLE(aTxPower);
+    RAIL_Status_t status;
+
+    // RAIL_SetTxPowerDbm() takes power in units of deci-dBm (0.1dBm)
+    // Multiply by 10 because aPower is supposed be in units dBm
+    status = RAIL_SetTxPowerDbm(gRailHandle, ((RAIL_TxPower_t)aTxPower) * 10);
+    OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+    sTxPower = aTxPower;
 }
 
 void otPlatDiagRadioReceived(otInstance *aInstance, otRadioFrame *aFrame, otError aError)

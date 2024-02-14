@@ -81,14 +81,14 @@ void app_task(void *args)
 
 #ifdef SL_CATALOG_WISUN_APP_CORE_PRESENT
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
 #endif
 
   while (1) {
     ///////////////////////////////////////////////////////////////////////////
     // Put your application code here!                                       //
     ///////////////////////////////////////////////////////////////////////////
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

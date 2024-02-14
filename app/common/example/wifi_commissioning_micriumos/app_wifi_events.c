@@ -455,7 +455,7 @@ static void wfx_events_task(void *p_arg)
             // Enable the WFX power save mode
             // Note: this mode is independent from the host power saving
             //       but has been linked to simplicfy the example.
-            sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_FAST_PS, 1);
+            sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_FAST_PS, 1, 0);
             sl_wfx_enable_device_power_save();
           }
 #endif
@@ -472,7 +472,7 @@ static void wfx_events_task(void *p_arg)
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
           // Power save always disabled when SoftAP mode enabled
-          sl_wfx_set_power_mode(WFM_PM_MODE_ACTIVE, WFM_PM_POLL_FAST_PS, 0);
+          sl_wfx_set_power_mode(WFM_PM_MODE_ACTIVE, WFM_PM_POLL_FAST_PS, 0, 0);
           sl_wfx_disable_device_power_save();
 #endif
           break;
@@ -486,7 +486,7 @@ static void wfx_events_task(void *p_arg)
             // Enable the WFX power save mode
             // Note: this mode is independent from the host power saving
             //       but has been linked to simplicfy the example.
-            sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_FAST_PS, 1);
+            sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_FAST_PS, 1, 0);
             sl_wfx_enable_device_power_save();
           }
 #endif

@@ -43,9 +43,11 @@
 #include "sl_wisun_ping_config.h"
 #include "cmsis_os2.h"
 #include "socket/socket.h"
+#include "sl_wisun_trace_util.h"
 
 #if defined(SL_CATALOG_GUI_PRESENT)
 #include "sl_wisun_network_measurement_gui.h"
+#include "sli_wisun_network_measurement_ping_gui.h"
 #include "sl_display.h"
 #include "sl_gui.h"
 #endif

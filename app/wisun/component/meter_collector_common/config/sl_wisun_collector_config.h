@@ -51,8 +51,8 @@
 
 // </h>
 // <o SL_WISUN_COLLECTOR_REQUEST_TIMEOUT> Maximum waiting time [ms] for requests
-// <i> Default: 30000
-#define SL_WISUN_COLLECTOR_REQUEST_TIMEOUT                              30000U
+// <i> Default: 360000
+#define SL_WISUN_COLLECTOR_REQUEST_TIMEOUT                              360000U
 
 // <<< end of configuration section >>>
 

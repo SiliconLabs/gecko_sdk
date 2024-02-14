@@ -5,44 +5,44 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_wall_controller.out  :
 section                                       size         addr
-.text                                      0x369c0    0x8006000
-_zaf_event_distributor_cc_event_handler       0x10    0x803c9c0
-_zaf_cc_config                                 0x8    0x803c9d0
-_cc_handlers_v3                              0x1d4    0x803c9d8
-_zw_protocol_cmd_handlers                     0x70    0x803cbac
-_zw_protocol_cmd_handlers_lr                  0x30    0x803cc1c
-.ARM.exidx                                     0x8    0x803cc4c
-.copy.table                                    0xc    0x803cc54
-.zero.table                                    0x0    0x803cc60
+.text                                      0x36b04    0x8006000
+_zaf_event_distributor_cc_event_handler       0x10    0x803cb04
+_zaf_cc_config                                 0x8    0x803cb14
+_cc_handlers_v3                              0x1d4    0x803cb1c
+_zw_protocol_cmd_handlers                     0x70    0x803ccf0
+_zw_protocol_cmd_handlers_lr                  0x30    0x803cd60
+.ARM.exidx                                     0x8    0x803cd90
+.copy.table                                    0xc    0x803cd98
+.zero.table                                    0x0    0x803cda4
 .stack                                      0x1000   0x20000000
-.data                                        0x59c   0x20001000
-.bss                                        0xb184   0x2000159c
-text_application_ram                           0x0   0x2000c720
-.heap                                        0x800   0x2000c720
-.internal_storage                          0x30000    0x803cc60
-.zwave_nvm                                     0x0    0x806cc60
-.nvm                                        0x8000    0x806cc60
+.data                                        0x5a0   0x20001000
+.bss                                        0xaf70   0x200015a0
+text_application_ram                           0x0   0x2000c510
+.heap                                        0x800   0x2000c510
+.internal_storage                          0x30000    0x803cda4
+.zwave_nvm                                     0x0    0x806cda4
+.nvm                                        0x8000    0x806cda4
 .ARM.attributes                               0x36          0x0
 .comment                                      0x45          0x0
 .debug_line_str                              0x29a          0x0
-.debug_frame                               0x11f70          0x0
-.debug_info                               0xc16278          0x0
-.debug_abbrev                              0x26b79          0x0
-.debug_loclists                            0x2b718          0x0
-.debug_aranges                              0x6670          0x0
-.debug_rnglists                             0x4b96          0x0
-.debug_line                                0x740f2          0x0
-.debug_str                                 0x8e89d          0x0
-.debug_loc                                 0x2c3be          0x0
-.debug_ranges                               0x4e20          0x0
-Total                                     0xe35081
+.debug_frame                               0x11fa0          0x0
+.debug_info                               0xc163a5          0x0
+.debug_abbrev                              0x26c4c          0x0
+.debug_loclists                            0x2b6f8          0x0
+.debug_aranges                              0x6678          0x0
+.debug_rnglists                             0x4b97          0x0
+.debug_line                                0x74342          0x0
+.debug_str                                 0x8e8d7          0x0
+.debug_loc                                 0x2c4a1          0x0
+.debug_ranges                               0x4e48          0x0
+Total                                     0xe35563
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   225788
+   226116
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    32768
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
-   53024
+   52496
 

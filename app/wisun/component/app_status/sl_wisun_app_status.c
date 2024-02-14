@@ -57,7 +57,7 @@
 // -----------------------------------------------------------------------------
 
 #if !defined(SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE) \
-    || !SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
+  || !SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
   #warning 'SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE' is not set. Value must be 1.
 #endif
 
@@ -162,6 +162,24 @@ static void _build_time_stat(uint8_t **buf, uint16_t *buf_len);
  *****************************************************************************/
 static uint16_t _build_payload(void);
 
+/**************************************************************************//**
+ * @brief Acquire application mutex
+ * @details Internal mutex lock
+ *****************************************************************************/
+__STATIC_INLINE void _app_wisun_mutex_acquire(void);
+
+/**************************************************************************//**
+ * @brief Release application mutex
+ * @details Internal mutex release
+ *****************************************************************************/
+__STATIC_INLINE void _app_wisun_mutex_release(void);
+
+/**************************************************************************//**
+ * @brief Updates the notify settings for CoAP app status notification
+ * @details Removes and add the new notification settings
+ *****************************************************************************/
+__STATIC_INLINE sl_status_t _update_notify_settings(void);
+
 // -----------------------------------------------------------------------------
 //                                Global Variables
 // -----------------------------------------------------------------------------
@@ -176,11 +194,26 @@ static sl_wisun_coap_notify_t _notify = { 0U };
 /// Notification payload buffer
 static uint8_t _notif_buff[SL_WISUN_APP_STATUS_NOTIF_PAYLOAD_SIZE] = { 0U };
 
+///  App status mutex
+static osMutexId_t _app_wisun_app_status_mtx = NULL;
+
+///  App status mutex attribute
+static const osMutexAttr_t _app_wisun_app_status_mtx_attr = {
+  .name      = "AppWisunAppStatusMutex",
+  .attr_bits = osMutexRecursive,
+  .cb_mem    = NULL,
+  .cb_size   = 0
+};
+
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 void sl_wisun_app_status_init(void)
 {
+  // init wisun network mutex
+  _app_wisun_app_status_mtx = osMutexNew(&_app_wisun_app_status_mtx_attr);
+  assert(_app_wisun_app_status_mtx != NULL);
+
   _notify.id = SL_WISUN_APP_STATUS_DEFAULT_NOTIFCATION_ID;
   (void) inet_pton(AF_INET6,
                    SL_WISUN_APP_STATUS_DEFAULT_REMOTE_ADDR,
@@ -192,7 +225,7 @@ void sl_wisun_app_status_init(void)
   _notify.condition_cb = sl_wisun_app_status_condition_cb;
   _notify.hnd_cb = _notify_hnd;
 
-  sl_wisun_coap_notify_add(&_notify);
+  _update_notify_settings();
 }
 
 SL_WEAK bool sl_wisun_app_status_condition_cb(const sl_wisun_coap_notify_t * notify)
@@ -201,10 +234,47 @@ SL_WEAK bool sl_wisun_app_status_condition_cb(const sl_wisun_coap_notify_t * not
   return true;
 }
 
+sockaddr_in6_t* sl_wisun_app_status_get_remote_address(void)
+{
+  return &(_notify.remote_addr);
+}
+
+uint32_t sl_wisun_app_status_get_schedule_time_ms(void)
+{
+  return _notify.schedule_time_ms;
+}
+
+sl_status_t sl_wisun_app_status_set_remote_address(const char *remote_address, const uint16_t port)
+{
+  sl_status_t result = SL_STATUS_OK;
+  int32_t ip_result = 0;
+  _app_wisun_mutex_acquire();
+
+  if (remote_address == NULL) {
+    result =  SL_STATUS_NULL_POINTER;
+  } else {
+    ip_result = inet_pton(AF_INET6, remote_address, &_notify.remote_addr.sin6_addr);
+    if (ip_result != 1) {
+      result = SL_STATUS_FAIL;
+    }
+    _notify.remote_addr.sin6_port = port;
+  }
+  _update_notify_settings();
+  _app_wisun_mutex_release();
+  return result;
+}
+
+void sl_wisun_app_status_set_schedule_time_ms(const uint32_t new_schedule_time_ms)
+{
+  _app_wisun_mutex_acquire();
+  _notify.schedule_time_ms = new_schedule_time_ms;
+  _update_notify_settings();
+  _app_wisun_mutex_release();
+}
+
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
-
 static void _build_neighbour_info(uint8_t **buf, uint16_t *buf_len)
 {
   int32_t r = 0L;
@@ -296,10 +366,10 @@ static void _build_device_info(uint8_t **buf, uint16_t *buf_len)
 
   if (!initialized) {
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-    dev_type = app_wisun_get_device_type();
+    dev_type = sl_wisun_app_core_get_device_type();
 #endif
 
-    pinf = app_wisun_project_info_get();
+    pinf = sl_wisun_app_core_util_project_info_get();
     ver_stack = app_project_info_get_version(APP_PROJECT_INFO_VERSION_ID_WISUN, pinf);
     ver_app = app_project_info_get_version(APP_PROJECT_INFO_VERSION_ID_APP, pinf);
 
@@ -356,7 +426,7 @@ static void _build_device_info(uint8_t **buf, uint16_t *buf_len)
 static void _build_time_stat(uint8_t **buf, uint16_t *buf_len)
 {
   int32_t r = 0L;
-  static app_core_time_stat_t stat = { 0U };
+  static sl_wisun_app_core_time_stat_t stat = { 0U };
   static sl_wisun_trace_util_time_t time = { 0U };
   const char *run_str = NULL;
   const char *conn_str = NULL;
@@ -367,29 +437,29 @@ static void _build_time_stat(uint8_t **buf, uint16_t *buf_len)
   uint8_t avail_i = 0U;
   uint8_t avail_f = 0U;
 
-  app_wisun_get_time_stat(&stat);
+  sl_wisun_app_core_get_time_stat(&stat);
   app_wisun_trace_util_timestamp_init(stat.curr_ms, &time);
   run_str = app_wisun_trace_util_time_to_str(&time);
 
-  app_wisun_get_time_stat(&stat);
+  sl_wisun_app_core_get_time_stat(&stat);
   app_wisun_trace_util_timestamp_init(stat.connected_ms, &time);
   conn_str = app_wisun_trace_util_time_to_str(&time);
 
-  app_wisun_get_time_stat(&stat);
+  sl_wisun_app_core_get_time_stat(&stat);
   app_wisun_trace_util_timestamp_init(stat.tot_connected_ms, &time);
   tot_conn_str = app_wisun_trace_util_time_to_str(&time);
 
-  app_wisun_get_time_stat(&stat);
+  sl_wisun_app_core_get_time_stat(&stat);
   app_wisun_trace_util_timestamp_init(stat.disconnected_ms, &time);
   disconn_str = app_wisun_trace_util_time_to_str(&time);
 
-  app_wisun_get_time_stat(&stat);
+  sl_wisun_app_core_get_time_stat(&stat);
   app_wisun_trace_util_timestamp_init(stat.tot_disconnected_ms, &time);
   tot_disconn_str = app_wisun_trace_util_time_to_str(&time);
 
   tmp = (uint16_t) ((stat.tot_connected_ms * 10000U) / (stat.tot_connected_ms + stat.tot_disconnected_ms));
   avail_i = (uint8_t) (tmp / 100U);
-  avail_f = (uint8_t) (tmp - avail_i * 100U); 
+  avail_f = (uint8_t) (tmp - avail_i * 100U);
 
   __print_to_buff(r, *buf, *buf_len,
                   SL_WISUN_APP_STATUS_TIME_STAT_JSON_STR,
@@ -399,7 +469,7 @@ static void _build_time_stat(uint8_t **buf, uint16_t *buf_len)
                   tot_conn_str,
                   disconn_str,
                   tot_disconn_str,
-                  avail_i, 
+                  avail_i,
                   avail_f);
 
   app_wisun_free((void *) run_str);
@@ -465,4 +535,23 @@ static sl_wisun_coap_packet_t * _notify_hnd(const struct sl_wisun_coap_notify *n
   pkt.payload_len = _build_payload();
 
   return &pkt;
+}
+
+/* Mutex acquire */
+__STATIC_INLINE void _app_wisun_mutex_acquire(void)
+{
+  assert(osMutexAcquire(_app_wisun_app_status_mtx, osWaitForever) == osOK);
+}
+
+/* Mutex release */
+__STATIC_INLINE void _app_wisun_mutex_release(void)
+{
+  assert(osMutexRelease(_app_wisun_app_status_mtx) == osOK);
+}
+
+/* update coap notify instance*/
+__STATIC_INLINE sl_status_t _update_notify_settings(void)
+{
+  sl_wisun_coap_notify_remove_by_id(SL_WISUN_APP_STATUS_DEFAULT_NOTIFCATION_ID);
+  return sl_wisun_coap_notify_add(&_notify);
 }

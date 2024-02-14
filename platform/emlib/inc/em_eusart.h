@@ -415,7 +415,7 @@ typedef enum {
   eusartDaliTxDataBits20 = EUSART_DALICFG_DALITXDATABITS_TWENTY,      ///< Each frame contains 20 data bits.
   eusartDaliTxDataBits21 = EUSART_DALICFG_DALITXDATABITS_TWENTYONE,   ///< Each frame contains 21 data bits.
   eusartDaliTxDataBits22 = EUSART_DALICFG_DALITXDATABITS_TWENTYTWO,   ///< Each frame contains 22 data bits.
-  eusartDaliTxDataBits23 = EUSART_DALICFG_DALITXDATABITS_TWENTYEIGHT, ///< Each frame contains 23 data bits.
+  eusartDaliTxDataBits23 = EUSART_DALICFG_DALITXDATABITS_TWENTYTHREE, ///< Each frame contains 23 data bits.
   eusartDaliTxDataBits24 = EUSART_DALICFG_DALITXDATABITS_TWENTYFOUR,  ///< Each frame contains 24 data bits.
   eusartDaliTxDataBits25 = EUSART_DALICFG_DALITXDATABITS_TWENTYFIVE,  ///< Each frame contains 25 data bits.
   eusartDaliTxDataBits26 = EUSART_DALICFG_DALITXDATABITS_TWENTYSIX,   ///< Each frame contains 26 data bits.
@@ -444,7 +444,7 @@ typedef enum {
   eusartDaliRxDataBits20 = EUSART_DALICFG_DALIRXDATABITS_TWENTY,      ///< Each frame contains 20 data bits.
   eusartDaliRxDataBits21 = EUSART_DALICFG_DALIRXDATABITS_TWENTYONE,   ///< Each frame contains 21 data bits.
   eusartDaliRxDataBits22 = EUSART_DALICFG_DALIRXDATABITS_TWENTYTWO,   ///< Each frame contains 22 data bits.
-  eusartDaliRxDataBits23 = EUSART_DALICFG_DALIRXDATABITS_TWENTYEIGHT, ///< Each frame contains 23 data bits.
+  eusartDaliRxDataBits23 = EUSART_DALICFG_DALITXDATABITS_TWENTYTHREE, ///< Each frame contains 23 data bits.
   eusartDaliRxDataBits24 = EUSART_DALICFG_DALIRXDATABITS_TWENTYFOUR,  ///< Each frame contains 24 data bits.
   eusartDaliRxDataBits25 = EUSART_DALICFG_DALIRXDATABITS_TWENTYFIVE,  ///< Each frame contains 25 data bits.
   eusartDaliRxDataBits26 = EUSART_DALICFG_DALIRXDATABITS_TWENTYSIX,   ///< Each frame contains 26 data bits.

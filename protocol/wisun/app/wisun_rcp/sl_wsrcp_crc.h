@@ -16,7 +16,10 @@
 
 #include <stdint.h>
 
-uint16_t crc16(const uint8_t *data, int len);
+#define CRC_INIT_HCS 0xffff
+#define CRC_INIT_FCS 0xc6c6
+
+uint16_t crc16(uint16_t crc, const uint8_t *data, int len);
 
 #endif
 

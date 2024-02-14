@@ -41,6 +41,7 @@
 #include "sl_wisun_meter_collector_config.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_sleeptimer.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

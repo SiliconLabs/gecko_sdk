@@ -24,6 +24,7 @@
 #include "mbedtls/ecp.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/sha1.h"
+#include "mbedtls/md.h"
 
 size_t sl_bt_get_mbedtls_aes_ctx_size();
 size_t sl_bt_get_mbedtls_cipher_ctx_size();
@@ -34,5 +35,6 @@ size_t sl_bt_get_mbedtls_ecp_group_size();
 size_t sl_bt_get_mbedtls_ecp_point_size();
 size_t sl_bt_get_mbedtls_mpi_size();
 size_t sl_bt_get_mbedtls_sha1_size();
+size_t sl_bt_get_mbedtls_md_size();
 
 #endif /* PROTOCOL_BLUETOOTH_BGCOMMON_INCLUDE_SL_BT_MBEDTLS_CONTEXT_H_ */

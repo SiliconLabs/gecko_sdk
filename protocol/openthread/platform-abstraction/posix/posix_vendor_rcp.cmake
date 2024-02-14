@@ -26,35 +26,42 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
+set(CPCD_SOURCE_DIR "" CACHE PATH "path to directory containing cpcd CMakeLists.txt")
+
 set(OT_POSIX_CONFIG_RCP_VENDOR_TARGET "cpc-interface")
 set(CPC_LIB_TARGET "cpc")
-
-set(CPCD_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../../platform/service/cpc/daemon" CACHE PATH 
-    "Location of cpc daemon project")
 
 if (NOT OT_PLATFORM_CONFIG)
     message(WARNING "OT_PLATFORM_CONFIG file which defines OT_VENDOR_RADIO_URL_HELP_BUS missing")
 endif()
 
-add_library(${OT_POSIX_CONFIG_RCP_VENDOR_TARGET} ${CMAKE_CURRENT_LIST_DIR}/cpc_interface.cpp )
+add_library(${OT_POSIX_CONFIG_RCP_VENDOR_TARGET} INTERFACE)
 
 # If cpc target isn't already defined, run find_package to build
 # library as subdirectory or locate pre-installed resources
 # and add imported targets to cpc interface target
 if (NOT TARGET cpc)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
-    find_package(cpc REQUIRED)
-    set(CPC_LIB_TARGET "cpc::cpc")
+    if (CPCD_SOURCE_DIR)
+        # Use cpc (lib) target directly and query header path from cpcd project
+        add_subdirectory(${CPCD_SOURCE_DIR} build)
+        get_target_property(CPC_HEADER cpc PUBLIC_HEADER)
+        get_filename_component(CPC_INC ${CPC_HEADER} DIRECTORY)
+        target_include_directories(${OT_POSIX_CONFIG_RCP_VENDOR_TARGET} INTERFACE ${CPC_INC})
+    else()
+        list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+        find_package(cpc REQUIRED)
+        set(CPC_LIB_TARGET "cpc::cpc")
+    endif()
 endif()
 
 target_link_libraries(${OT_POSIX_CONFIG_RCP_VENDOR_TARGET} 
-    PUBLIC
+    INTERFACE
         ${CPC_LIB_TARGET}
         ot-posix-config
 )
 
 target_include_directories(${OT_POSIX_CONFIG_RCP_VENDOR_TARGET}
-    PRIVATE
+    INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src

@@ -84,10 +84,10 @@ int32_t sl_iperf_socket_create(sl_iperf_protocol_t protocol)
 
   switch (protocol) {
     case SL_IPERF_IPROTOV6_UDP:
-      sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+      sockid = socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
       break;
     case SL_IPERF_IPROTOV6_TCP:
-      sockid = socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_TCP);
+      sockid = socket(AF_INET6, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP);
       break;
     // IPv4 is not supported on Wi-SUN
     default: return SL_IPERF_NW_API_ERROR;
@@ -195,7 +195,7 @@ void sl_iperf_get_socket_addr_ip(const sl_iperf_socket_addr_t * const addr, void
 
 bool sl_iperf_network_is_connected(void)
 {
-  return app_wisun_network_is_connected();
+  return sl_wisun_app_core_util_network_is_connected();
 }
 
 uint16_t sl_iperf_network_htons(uint16_t val)
@@ -233,14 +233,14 @@ const char *sl_iperf_inet_ntop(const  sl_iperf_socket_addr_t * const src_addr,
 int32_t sl_iperf_join_multicast_group(const int32_t sockid,
                                       const sl_iperf_socket_addr_t * const multicast_addr)
 {
-  return _set_multicast_sock_opt(sockid, multicast_addr, 
+  return _set_multicast_sock_opt(sockid, multicast_addr,
                                  (sl_wisun_multicast_group_action_t) IPV6_JOIN_GROUP);
 }
 
 int32_t sl_iperf_leave_multicast_group(const int32_t sockid,
                                        const sl_iperf_socket_addr_t * const multicast_addr)
 {
-  return _set_multicast_sock_opt(sockid, multicast_addr, 
+  return _set_multicast_sock_opt(sockid, multicast_addr,
                                  (sl_wisun_multicast_group_action_t) IPV6_LEAVE_GROUP);
 }
 

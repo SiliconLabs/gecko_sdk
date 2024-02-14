@@ -92,6 +92,7 @@ def event_factory(evt_code: elw.esl_lib_evt_type_t, evt_data: elw.esl_lib_evt_da
         EventTagFound,
         EventTagInfo,
         EventConfigureTagResponse,
+        EventConnectionRetry,
         EventConnectionClosed,
         EventConnectionOpened,
         EventBondingData,
@@ -298,6 +299,22 @@ class EventConnectionOpened():
     def __repr__(self) -> str:
         gattdb_str = f'[{self.gattdb_handles.services.esl}, {self.gattdb_handles.services.ots}, {self.gattdb_handles.services.dis}]'
         return f'{self.evt_code}, {self.connection_handle}, {self.address}, {gattdb_str}'
+
+class EventConnectionRetry():
+    '''Wrapper for esl_lib_evt_connection_retry_t'''
+    evt_code = EventType(elw.ESL_LIB_EVT_CONNECTION_RETRY)
+
+    def __init__(self, evt_data: elw.esl_lib_evt_data_t):
+        self.connection_handle = ConnectionHandle(evt_data.evt_connection_retry.connection_handle)
+        self.reason = evt_data.evt_connection_retry.reason
+        self.connection_state = evt_data.evt_connection_retry.connection_state
+        self.address = Address.from_ctype(evt_data.evt_connection_retry.address)
+        self.retries_left = evt_data.evt_connection_retry.retries_left
+
+    def __repr__(self) -> str:
+        reason_str = get_enum('SL_STATUS_', self.reason)
+        state_str = get_enum('ESL_LIB_CONNECTION_STATE_',self.connection_state)
+        return f'{self.evt_code}, {self.connection_handle}, {reason_str}, {state_str}, {self.address}, {self.retries_left}'
 
 class EventConnectionClosed():
     '''Wrapper for esl_lib_evt_connection_closed_t'''

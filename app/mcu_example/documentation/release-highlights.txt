@@ -1,3 +1,2 @@
-32-Bit MCU SDK 6.6.0.0
-- Added support for new OPNs
-- Upgrade compilers to GCC 12.2.1 and IAR 9.40.1
+32-Bit MCU SDK 6.6.1.0
+- Underlying platform changes only. 

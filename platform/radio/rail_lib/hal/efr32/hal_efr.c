@@ -677,6 +677,8 @@ void halEnablePrs(uint8_t channel,
 #if defined(_SILICON_LABS_32B_SERIES_2)
 bool halIsPrsChannelFree(uint8_t channel)
 {
+  // Make sure the PRS is on and clocked
+  CMU_ClockEnable(cmuClock_PRS, true);
   return ((PRS->ASYNC_CH[channel].CTRL
            & (_PRS_ASYNC_CH_CTRL_SOURCESEL_MASK | _PRS_ASYNC_CH_CTRL_SIGSEL_MASK))
           == (PRS_ASYNC_CH_CTRL_SOURCESEL_DEFAULT | PRS_ASYNC_CH_CTRL_SIGSEL_DEFAULT));

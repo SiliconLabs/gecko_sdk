@@ -43,13 +43,13 @@
   - name: SL_BOARD_NAME
     value: '"BRD2500B"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
   - name: HFXO_FREQ
     value: 40000000
 - tag:
   - board:pn:BRD2500
   - board:variant:B
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efm32pg1b200f256gm48
   - hardware:has:vcom
   - hardware:has:sensor:si7021

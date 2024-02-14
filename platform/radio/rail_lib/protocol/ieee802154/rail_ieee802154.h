@@ -388,6 +388,12 @@ extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /**
+ * Default PHY to use for 1Mbps 2.4 GHz 802.15.4 with forward error correction.
+ * Will be NULL if \ref RAIL_IEEE802154_SUPPORTS_2MBPS_PHY is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec;
+
+/**
  * Default PHY to use for 2Mbps 2.4 GHz 802.15.4. Will be NULL if
  * \ref RAIL_IEEE802154_SUPPORTS_2MBPS_PHY is 0.
  */
@@ -652,6 +658,27 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railH
  * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 for 250kbps/1Mbps forward error correction
+ * operation.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz high speed operation.
+ * It takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels 11-26 will be available, giving the frequencies of
+ * those channels on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2
+ * at 250kbps.
+ * Channels 11-26 will support transmitting and receiving using dual sync words.
+ * Channels 27-42 will transmit and receive on the frequency of [channel - 16] at 1Mbps.
+ * Auto-ack and address filtering are disabled when channels 27-42 are selected.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec(RAIL_Handle_t railHandle);
+
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**

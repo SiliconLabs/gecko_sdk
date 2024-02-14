@@ -288,15 +288,12 @@
 #endif // EMBER_SECURITY_SHORT_TO_LONG_MAPPING_TABLE_SIZE
 
 /**
- * @brief The size of the the receiving buffer in CSP Callbacks.
- * @attention This must be set high enough depending on the PHY to prevent buffer
- * overflow. In SUN PHYs (OFDM and FSK), the max message length is 2048.
- * Considering the impact of this parameter on the stack size, this needs to be
- * fine tuned according the need of the application
+ * @brief The default TX power that the radio should use. If no TX power
+ * has been specified by @ref emberSetRadioPower, the stack will use this value.
  */
-#ifndef EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE
-#define EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE 127
-#endif // EMBER_CSP_CALLBACK_MESSAGE_BUFFER_SIZE
+#ifndef EMBER_DEFAULT_TX_POWER_DECI_DBM
+#define EMBER_DEFAULT_TX_POWER_DECI_DBM   0
+#endif // EMBER_DEFAULT_TX_POWER_DECI_DBM
 
 /** @} END addtogroup */
 

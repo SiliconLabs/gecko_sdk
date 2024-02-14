@@ -73,7 +73,7 @@ void efr32AlarmInit(void);
  * This function provides the remaining time (in milliseconds) on an alarm service.
  *
  */
-uint32_t efr32AlarmPendingTime(void);
+uint64_t efr32AlarmPendingTime(void);
 
 /**
  * This function checks if the alarm service is running.
@@ -183,6 +183,18 @@ RAIL_Status_t efr32RadioSetCcaMode(uint8_t aMode);
  */
 
 bool efr32AllowSleepCallback(void);
+
+/**
+ * Load the channel configurations.
+ *
+ * @param[in]  aChannel   The radio channel.
+ * @param[in]  aTxPower   The radio transmit power in dBm.
+ *
+ * @retval OT_ERROR_NONE         Successfully enabled/disabled .
+ * @retval OT_ERROR_INVALID_ARGS Invalid channel.
+ *
+ */
+otError efr32RadioLoadChannelConfig(uint8_t aChannel, int8_t aTxPower);
 
 otError railStatusToOtError(RAIL_Status_t status);
 

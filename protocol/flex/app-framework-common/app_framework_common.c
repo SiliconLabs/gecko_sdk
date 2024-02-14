@@ -51,6 +51,7 @@ extern const EmberEventData emAppEvents[];
 extern void(*emAppEventsHandlerPtrTable[])(void);
 extern const uint8_t emAfEventTableOffset;
 extern uint8_t emAfEventTableHandleIndex;
+extern int16_t emberDefaultTxPowerDeciDbm;
 
 static uint32_t savedResetCause;
 
@@ -87,6 +88,7 @@ void connect_app_framework_init(void)
 {
   // Init and register the application events.
   emAppTask = emberTaskInit(emAppEvents);
+  emberSetRadioPower(emberDefaultTxPowerDeciDbm, false);
 
   // Call the init callback of plugins that subscribed to it.
   emberAfInit();

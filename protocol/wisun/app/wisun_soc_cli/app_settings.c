@@ -351,6 +351,7 @@ const app_enum_t app_settings_wisun_join_state_enum_ffn[] =
   { "Join state 4: Configure Routing - address registration", SL_WISUN_JOIN_STATE_EARO },
   { "Join state 4: Configure Routing - DAO registration", SL_WISUN_JOIN_STATE_DAO },
   { "Join state 5: Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
+  { "Disconnecting", SL_WISUN_JOIN_STATE_DISCONNECTING },
   { NULL, 0 }
 };
 
@@ -363,6 +364,7 @@ const app_enum_t app_settings_wisun_join_state_enum_lfn[] =
   { "Join state 4: Configure IP Layer - DHCP", SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING },
   { "Join state 4: Configure IP Layer - address registration", SL_WISUN_JOIN_STATE_EARO },
   { "Join state 5: Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
+  { "Disconnecting", SL_WISUN_JOIN_STATE_DISCONNECTING },
   { NULL, 0 }
 };
 
@@ -394,6 +396,7 @@ static const app_enum_t app_settings_wisun_regulation_enum[] =
 {
   { "none", SL_WISUN_REGULATION_NONE },
   { "arib", SL_WISUN_REGULATION_ARIB },
+  { "wpc", SL_WISUN_REGULATION_WPC },
   { NULL, 0 }
 };
 

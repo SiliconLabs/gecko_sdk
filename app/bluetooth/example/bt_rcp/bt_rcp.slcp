@@ -63,7 +63,7 @@ configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
   - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlNone
+    value: uartdrvFlowControlHwUart
   - name: SL_PSA_KEY_USER_SLOT_COUNT
     value: "0"
     condition:

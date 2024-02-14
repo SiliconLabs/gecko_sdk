@@ -13,14 +13,14 @@ include:
   - path: inc
     unless: [trustzone_nonsecure]
     file_list:
-      - path: sli_crypto_trng_driver.h
+      - path: sli_crypto_driver_trng.h
         condition: [device_has_trng]
       # Contains the declaration of mbedtls_psa_external_get_random().
       - path: sli_psa_driver_common.h
 source:
   - path: src/sli_psa_trng.c
     unless: [trustzone_nonsecure]
-  - path: src/sli_crypto_trng_driver.c
+  - path: src/sli_crypto_driver_trng.c
     condition: [device_has_trng]
     unless: [trustzone_nonsecure]
 provides:

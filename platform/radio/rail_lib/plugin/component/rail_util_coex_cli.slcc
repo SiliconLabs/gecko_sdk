@@ -54,24 +54,6 @@ template_contribution:
           help: "requestMode"
   - name: cli_command
     value:
-      name: coex_get_gpio_input_override
-      handler: cli_coex_get_gpio_input_override
-      help: " Get GPIO input override"
-      argument:
-        - type: uint8
-          help: "GPIO index"
-  - name: cli_command
-    value:
-      name: coex_set_gpio_input_override
-      handler: cli_coex_set_gpio_input_override
-      help: " Enable/disable GPIO input override"
-      argument:
-        - type: uint8
-          help: "GPIO index"
-        - type: uint8
-          help: "0=Disable 1=Enable"
-  - name: cli_command
-    value:
       name: coex_set_request_pwm
       handler: cli_coex_set_request_pwm
       help: " Configure BLE request PWM"

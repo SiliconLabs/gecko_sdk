@@ -1,11 +1,19 @@
 import math
 from pyradioconfig.parts.panther.calculators.calc_agc import CALC_AGC_panther
+from pycalcmodel.core.variable import ModelVariableFormat
 from py_2_and_3_compatibility import *
 from scipy import interpolate
 
 #This file contains calculations related to the configuring the AGC
 
 class CALC_AGC_ocelot(CALC_AGC_panther):
+
+    def buildVariables(self, model):
+        # Build variables from Panther
+        calc_agc_panther_obj = CALC_AGC_panther()
+        calc_agc_panther_obj.buildVariables(model)
+        self._addModelActual(model, 'rssi_access_time_us', float, ModelVariableFormat.DECIMAL,
+                             desc='Actual RSSI access time [us] after demod enable')
 
     def calc_agc_misc(self, model):
         self._reg_write(model.vars.AGC_AGCPERIOD0_SETTLETIMEIF,6)
@@ -718,3 +726,37 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
         self._reg_write(model.vars.AGC_CTRL1_RSSIPERIOD, period)
 
+    def calc_rssi_access_time(self, model):
+        adc_freq_actual = model.vars.adc_freq_actual.value
+        rssi_fast = model.vars.AGC_RSSISTEPTHR_RSSIFAST.value == 1
+        xtal_freq = model.vars.xtal_frequency.value
+        dec0_actual = model.vars.dec0_actual.value
+        dec0_rate = adc_freq_actual / 8 / dec0_actual
+        demod_rate_actual = model.vars.demod_rate_actual.value
+        cfloopdel_actual_us = model.vars.cfloopdel_us_actual.value
+        pwrperiod_actual = model.vars.agcperiod_actual.value
+        rx_baud_rate_actual = model.vars.rx_baud_rate_actual.value
+        rssi_period_sym_actual = model.vars.rssi_period_sym_actual.value
+
+        # : Demod startup delay from Michael Wu
+        T1_us = 20 / xtal_freq * 1e6
+        T2_us = 1 / dec0_rate
+        T3_us = 2 / demod_rate_actual * 1e6
+        demod_startup_time_us = T1_us + T2_us + T3_us
+
+        # : RSSI startup delay us
+        scalar = 0 if rssi_fast else 2
+        rssi_startup_time_us = scalar * pwrperiod_actual / rx_baud_rate_actual * 1e6
+
+        # : RSSI update period us
+        rssi_update_period_us = rssi_period_sym_actual / rx_baud_rate_actual * 1e6
+
+        # : Corrected RSSI access time based on Ferenc Plesznik's measurement
+        # : MCUW_RADIO_CFG-1950
+        correction_factor = 2 if rssi_fast else 3
+        correction_us = correction_factor / rx_baud_rate_actual * 1e6
+
+        # : RSSI access time
+        rssi_access_time_us = demod_startup_time_us + cfloopdel_actual_us + rssi_startup_time_us + \
+                              rssi_update_period_us + correction_factor
+        model.vars.rssi_access_time_us_actual.value = rssi_access_time_us

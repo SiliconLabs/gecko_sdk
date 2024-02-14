@@ -16,7 +16,7 @@
           <channel_number_end>1</channel_number_end>
           <physical_channel_offset>1</physical_channel_offset>
           <max_power>RAIL_TX_POWER_MAX</max_power>
-          <metadata>{"selectedPhy":""}</metadata>
+          <metadata>{"selectedPhy":"PHY_Datasheet_915M_2GFSK_500Kbps_175K_mi0p7"}</metadata>
           <phy_name_override>PHY_Datasheet_915M_2GFSK_500Kbps_175K_mi0p7</phy_name_override>
         </channel_config_entry>
       </channel_config_entries>

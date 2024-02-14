@@ -355,6 +355,8 @@ sl_status_t sl_wfx_send_join_command(const uint8_t  *ssid,
   connect_request->prevent_roaming       = prevent_roaming;
   if (security_mode == WFM_SECURITY_MODE_WPA3_SAE) {
     connect_request->mgmt_frame_protection = WFM_MGMT_FRAME_PROTECTION_MANDATORY;
+  } else if (security_mode == WFM_SECURITY_MODE_WPA3_SAE_WPA2_PSK) {
+    connect_request->mgmt_frame_protection = WFM_MGMT_FRAME_PROTECTION_OPTIONAL;
   } else {
     connect_request->mgmt_frame_protection = sl_wfx_htole16(management_frame_protection);
   }
@@ -753,20 +755,27 @@ sl_status_t sl_wfx_disconnect_ap_client_command(const sl_wfx_mac_address_t *clie
  *   @arg         WFM_PM_MODE_ACTIVE
  *   @arg         WFM_PM_MODE_BEACON
  *   @arg         WFM_PM_MODE_DTIM
+ * @param strategy is the device power save polling strategy
+ *   @arg         WFM_PM_POLL_UAPSD
+ *   @arg         WFM_PM_POLL_FAST_PS
  * @param interval is the number of beacons/DTIMs to skip while sleeping
+ * @param timeout is the time after which the device switches to power save after having been active in Fast Power Save mode
  * @returns SL_STATUS_OK if the command has been sent correctly,
  * SL_STATUS_FAIL otherwise
  *
  * @note the power mode has to be set once the connection with the AP is
  * established
  *****************************************************************************/
-sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, sl_wfx_pm_poll_t strategy, uint16_t interval)
+sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, sl_wfx_pm_poll_t strategy, uint16_t interval, uint8_t timeout)
 {
   sl_wfx_set_pm_mode_req_body_t payload;
 
-  payload.power_mode       = mode;
-  payload.polling_strategy = strategy;
-  payload.listen_interval  = sl_wfx_htole16(interval);
+  payload.power_mode           = mode;
+  payload.polling_strategy     = strategy;
+  payload.listen_interval      = sl_wfx_htole16(interval);
+  if (strategy == WFM_PM_POLL_FAST_PS) {
+    payload.fast_psm_idle_period = timeout;
+  }
 
   return sl_wfx_send_command(SL_WFX_SET_PM_MODE_REQ_ID, &payload, sizeof(payload), SL_WFX_STA_INTERFACE, NULL);
 }

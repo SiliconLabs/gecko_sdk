@@ -28,19 +28,48 @@ The three Wi-SUN devices (Border Router, Meter, Collector) are now part of the s
 
     wisun help
 
-The Collector application has two specific commands: `wisun register_meter [IPv6 address]` and `wisun remove_meter [IPv6 address]`. Use the first command to register the Meter.
+The Collector application has four specific commands: `wisun register_meter [IPv6 address]`, `wisun remove_meter [IPv6 address]`, `wisun async_request [IPv6 address]` and `wisun list_meters`. Use the first command to register the Meter.
 
     wisun register_meter [Meter Global IPv6 address]
 
-The Collector starts monitoring and retrieving sensor data from the Meter. The collector parses schedule time of the Meter and optimize the period time of request sending to LFN Meters. Each update is output in the console as shown below.
+An async response shows a successful connection between the Collector and the Meter.
 
-    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 1}{temp: 28.52}{hum: 36.01}{lx: 480}]
+    > [Async response]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 0}{temp: 29.36}{hum: 56.29}{lx: 512}]
+
+The Meter device sends groups of measurement data periodically after the registration. Each update is output in the console as shown below.
+
+    [Periodic response]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 1}{temp: 29.36}{hum: 56.28}{lx: 480}]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 2}{temp: 29.35}{hum: 56.23}{lx: 600}]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 3}{temp: 29.33}{hum: 56.19}{lx: 580}]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 4}{temp: 29.33}{hum: 56.18}{lx: 555}]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 5}{temp: 29.35}{hum: 56.19}{lx: 512}]
 
 A Collector can monitor several Meters simultaneously. To monitor an additional Meter, repeat the registration process with a Meter device connected to the same Wi-SUN network.
 
 To stop monitoring a device, enter:
 
     wisun remove_meter [Meter Global IPv6 address]
+
+A Collector can trigger an immediate measurement with an Async request.
+
+    wisun async_request [Meter Global IPv6 address]
+
+    > [Async response]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9: {id: 1}{temp: 29.65}{hum: 55.71}{lx: 480}]
+    [Response time: 212ms]
+
+To list all the monitored Meters, use the following command:
+
+    wisun list_meters
+
+The response shows the registered Meters and the ongoing async requests.
+
+    [Async meters:]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9 - time to live: 23505 ms]
+    [Registered meters:]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9 - registered 3 seconds ago]
 
 ## Troubleshooting
 

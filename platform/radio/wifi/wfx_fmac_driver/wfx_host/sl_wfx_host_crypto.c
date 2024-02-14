@@ -28,7 +28,6 @@
 
 #if SL_WFX_SLK_CURVE25519
 // Use ECDH legacy context format
-#define MBEDTLS_ECP_RESTARTABLE
 #define MBEDTLS_ALLOW_PRIVATE_ACCESS
 #endif
 
@@ -70,7 +69,34 @@ extern OS_TCB     wfx_securelink_task_tcb;
 /******************************************************
 *                    Structures
 ******************************************************/
-
+typedef struct sl_mbedtls_ecdh_context
+{
+#if SL_WFX_SLK_CURVE25519
+    mbedtls_ecp_group MBEDTLS_PRIVATE(grp);   /*!< The elliptic curve used. */
+    mbedtls_mpi MBEDTLS_PRIVATE(d);           /*!< The private key. */
+    mbedtls_ecp_point MBEDTLS_PRIVATE(Q);     /*!< The public key. */
+    mbedtls_ecp_point MBEDTLS_PRIVATE(Qp);    /*!< The value of the public key of the peer. */
+    mbedtls_mpi MBEDTLS_PRIVATE(z);           /*!< The shared secret. */
+    int MBEDTLS_PRIVATE(point_format);        /*!< The format of point export in TLS messages. */
+    mbedtls_ecp_point MBEDTLS_PRIVATE(Vi);    /*!< The blinding value. */
+    mbedtls_ecp_point MBEDTLS_PRIVATE(Vf);    /*!< The unblinding value. */
+    mbedtls_mpi MBEDTLS_PRIVATE(_d);          /*!< The previous \p d. */
+#else
+    uint8_t MBEDTLS_PRIVATE(point_format);       /*!< The format of point export in TLS messages
+                                                  as defined in RFC 4492. */
+    mbedtls_ecp_group_id MBEDTLS_PRIVATE(grp_id);/*!< The elliptic curve used. */
+    mbedtls_ecdh_variant MBEDTLS_PRIVATE(var);   /*!< The ECDH implementation/structure used. */
+    union
+    {
+        mbedtls_ecdh_context_mbed   MBEDTLS_PRIVATE(mbed_ecdh);
+#if defined(MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED)
+        mbedtls_ecdh_context_everest MBEDTLS_PRIVATE(everest_ecdh);
+#endif
+    } MBEDTLS_PRIVATE(ctx);                      /*!< Implementation-specific context. The
+                                                  context in use is specified by the \c var field. */
+#endif /* SL_WFX_SLK_CURVE25519 */
+}
+sl_mbedtls_ecdh_context;
 /******************************************************
 *               Function Declarations
 ******************************************************/
@@ -82,7 +108,7 @@ static inline void reverse_bytes(uint8_t *src, uint8_t length);
 ******************************************************/
 
 #if SL_WFX_SLK_CURVE25519
-static mbedtls_ecdh_context mbedtls_host_context;
+static sl_mbedtls_ecdh_context mbedtls_host_context;
 static mbedtls_ctr_drbg_context host_drbg_context;
 #endif
 static mbedtls_entropy_context entropy;

@@ -48,6 +48,7 @@
 #include "sl_wisun_network_measurement_config.h"
 #include "sl_display.h"
 #include "sl_gui.h"
+#include "sl_string.h"
 #include "socket/socket.h"
 #include "sl_wisun_ping.h"
 #include "silabs_wisun_logo.h"
@@ -55,6 +56,9 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+// LCD 1 line string length
+#define LCD_STRING_LINE_LEN             (21)
 
 /// Internal string buffer size
 #define STR_BUFF_SIZE                   (512U)
@@ -170,7 +174,7 @@ typedef struct sl_wisun_nwm_setting {
 /// Node info structure type definition
 typedef struct node_info {
   /// Addresses
-  current_addr_t addresses;
+  sl_wisun_app_core_current_addr_t addresses;
   /// Settings
   app_setting_wisun_t settings;
 } node_info_t;
@@ -222,15 +226,25 @@ static sl_wisun_nwm_node_stat_t _children_stat[SL_WISUN_MAX_CHILDREN_COUNT];
 void sli_wisun_nwm_logo_form(void *args)
 {
   sl_wisun_nwm_logo_form_args_t *logo_form_args = (sl_wisun_nwm_logo_form_args_t *)args;
-  static char buff[4U] = { 0 };
+  static char buff[LCD_STRING_LINE_LEN] = { 0 };
+  uint32_t str_len = 0UL;
 
   sl_display_draw_bitmap(0, 0,
                          SILABS_WISUN_LOGO_WIDTH,
                          SILABS_WISUN_LOGO_HEIGHT,
                          silabs_wisun_logo_bits);
-  sl_display_draw_string_on_line(logo_form_args->network_name, 2, GLIB_ALIGN_CENTER, 0, 0, false);
+
+  str_len = sl_strnlen((char *)logo_form_args->network_name, 32UL);
+  snprintf(buff, LCD_STRING_LINE_LEN,"%s", logo_form_args->network_name);
+  sl_display_draw_string_on_line(buff, 2, GLIB_ALIGN_CENTER, 0, 0, false);
+
+  if (str_len > LCD_STRING_LINE_LEN - 1) {
+    snprintf(buff, LCD_STRING_LINE_LEN,"%s", logo_form_args->network_name + LCD_STRING_LINE_LEN - 1);
+    sl_display_draw_string_on_line(buff, 3, GLIB_ALIGN_LEFT, 3, 0, false);
+  }
+
   sl_display_draw_string_on_line(logo_form_args->join_state_str, 10, GLIB_ALIGN_CENTER, 0, 0, false);
-  snprintf(buff, 4U, "(%ld)", logo_form_args->join_state);
+  snprintf(buff, LCD_STRING_LINE_LEN, "(%ld)", logo_form_args->join_state);
   sl_display_draw_string_on_line(buff, 11, GLIB_ALIGN_CENTER, 0, 0, false);
 }
 
@@ -360,8 +374,8 @@ static void _node_info_form(void *args)
   const char *ip_str_br        = NULL;
   const char *ip_str_pp        = NULL;
   const char *ip_str_sp        = NULL;
-  uint32_t tx_remaining_budget = 0UL; // Hold the remaning TX budget if applicable
-  bool valid                   = false; // Indicates if the remaining budget returned is a usable value.
+  uint32_t tx_remaining_budget = 0UL;            // Hold the remaning TX budget if applicable
+  sl_status_t valid            = SL_STATUS_FAIL; // Indicates if the remaining budget returned is a usable value.
 
   (void) args;
 
@@ -377,14 +391,14 @@ static void _node_info_form(void *args)
   sl_gui_button_update(SL_GUI_BUTTON0);
 
   // getting IP addresses
-  app_wisun_get_current_addresses(&node_info.addresses);
+  sl_wisun_app_core_get_current_addresses(&node_info.addresses);
 
   // getting settings
   app_wisun_setting_get(&node_info.settings);
 
   // get remanining transmission budget if applicable
-  if ( app_wisun_get_regulation_active() == true ) {
-    valid = app_wisun_get_remaining_tx_budget(&tx_remaining_budget);
+  if ( sl_wisun_app_core_get_regulation_active() == true ) {
+    valid = sl_wisun_app_core_get_remaining_tx_budget(&tx_remaining_budget);
   }
 
   ip_str_global = app_wisun_trace_util_get_ip_str(&node_info.addresses.global);
@@ -408,8 +422,8 @@ static void _node_info_form(void *args)
              ip_str_br,
              ip_str_pp,
              ip_str_sp,
-             (valid ? tx_remaining_budget : 0UL),
-             (valid ? _tx_remaining_budget(tx_remaining_budget) : TX_REMAINING_NOT_AVAILABLE_STR));
+             (valid == SL_STATUS_OK ? tx_remaining_budget : 0UL),
+             (valid == SL_STATUS_OK ? _tx_remaining_budget(tx_remaining_budget) : TX_REMAINING_NOT_AVAILABLE_STR));
   } else if (node_info.settings.phy.type == SL_WISUN_PHY_CONFIG_FAN11) {
     snprintf(_str_buff, STR_BUFF_SIZE,
              PRINT_FAN11_NODE_INFO_FORMAT_STR,
@@ -426,8 +440,8 @@ static void _node_info_form(void *args)
              ip_str_br,
              ip_str_pp,
              ip_str_sp,
-             (valid ? tx_remaining_budget : 0UL),
-             (valid ? _tx_remaining_budget(tx_remaining_budget) : TX_REMAINING_NOT_AVAILABLE_STR));
+             (valid == SL_STATUS_OK ? tx_remaining_budget : 0UL),
+             (valid == SL_STATUS_OK ? _tx_remaining_budget(tx_remaining_budget) : TX_REMAINING_NOT_AVAILABLE_STR));
   } else {
     snprintf(_str_buff, STR_BUFF_SIZE, "Wrong phy profile: %lu", node_info.settings.phy.type);
   }
@@ -443,6 +457,9 @@ static void _node_info_form(void *args)
 
 static void _set_nbinfo_txtbox(void *args)
 {
+  if (args == NULL) {
+    return;
+  }
   sl_wisun_nwm_node_stat_t *stat = (sl_wisun_nwm_node_stat_t *) args;
   const char *ip_str             = NULL;
 

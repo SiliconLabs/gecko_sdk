@@ -37,7 +37,7 @@
 #include "sl_wisun_meter.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
-#include "sl_wisun_app_core_util_config.h"
+#include "sl_wisun_app_core_config.h"
 #include "app.h"
 #include "app_custom_callback.h"
 
@@ -63,7 +63,7 @@
 void app_init(void)
 {
   /* Init project info */
-  app_wisun_project_info_init("Wi-SUN Meter Application");
+  sl_wisun_app_core_util_project_info_init("Wi-SUN Meter Application");
 
   /* Init meter collector */
   sl_wisun_meter_init();
@@ -83,7 +83,7 @@ void app_init(void)
     .cb_mem      = NULL,
     .cb_size     = 0,
     .stack_mem   = NULL,
-    .stack_size  = app_stack_size_word_to_byte(APP_MAIN_STACK_SIZE_WORD),
+    .stack_size  = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority    = osPriorityNormal,
     .tz_module   = 0
   };

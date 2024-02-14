@@ -190,7 +190,7 @@ void AppTimerDeepSleepPersistentSaveAll(void)
   uint32_t reg = TIMER_VALUES_BEGIN_RETENTION_REGISTER;
 
   // Don't touch the retention registers until they are loaded
-  if(!g_deepSleepTimersLoaded) {
+  if(false == g_deepSleepTimersLoaded) {
     return;
   }
 

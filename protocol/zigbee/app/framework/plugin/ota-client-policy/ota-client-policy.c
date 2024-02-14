@@ -27,9 +27,6 @@
 #endif
 #include "ota-client-policy.h"
 
- #if !defined(EMBER_TEST)
-  #include "bootloader-interface-app.h"
-  #endif
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
@@ -116,7 +113,6 @@ EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(bool newVerificati
   // Note that EBL verification is an SoC-only feature.
 
 #if !defined(EZSP_HOST) && defined(EBL_VERIFICATION)
-  uint16_t pages;
   EmberAfImageVerifyStatus status;
   uint32_t slot;
 
@@ -133,26 +129,16 @@ EmberAfImageVerifyStatus emberAfOtaClientCustomVerifyCallback(bool newVerificati
     if (INVALID_SLOT != slot) {
       slotManagerBeginImageValidation(slot);
     } else {
-      halAppBootloaderImageIsValidReset();
+      slotManagerBeginImageValidation(DEFAULT_SLOT);
     }
   }
 
-  if (INVALID_SLOT != slot) {
-    status = slotManagerContinueImageValidation();
-    if (status == EMBER_AF_IMAGE_VERIFY_IN_PROGRESS) {
-      return status;
-    } else if (status == EMBER_AF_IMAGE_BAD) {
-      otaPrintln("EBL failed verification.");
-      return status;
-    }
-  } else {
-    pages = halAppBootloaderImageIsValid();
-    if (pages == BL_IMAGE_IS_VALID_CONTINUE) {
-      return EMBER_AF_IMAGE_VERIFY_IN_PROGRESS;
-    } else if (pages == 0) {
-      otaPrintln("EBL failed verification.");
-      return EMBER_AF_IMAGE_BAD;
-    }
+  status = slotManagerContinueImageValidation();
+  if (status == EMBER_AF_IMAGE_VERIFY_IN_PROGRESS) {
+    return status;
+  } else if (status == EMBER_AF_IMAGE_BAD) {
+    otaPrintln("EBL failed verification.");
+    return status;
   }
   otaPrintln("EBL passed verification.");
 #endif

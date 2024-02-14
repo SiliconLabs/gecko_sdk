@@ -101,6 +101,8 @@ static void process_unsolicited(void);
 
 static sl_status_t write_command(sli_cpc_system_command_handle_t *command_handle);
 
+static void init_command_handle(sli_cpc_system_command_handle_t *command_handle);
+
 /***************************************************************************//**
  * Called when primary app version is requested.
  * The format is up to the user. The string should be null terminated.
@@ -174,6 +176,9 @@ sl_status_t sli_cpc_system_start(void)
 {
   sl_status_t status;
 
+  // Reset command sequence
+  next_command_seq = 0;
+
   status = sl_cpc_connect_endpoint(&system_ep, SL_CPC_FLAG_NO_BLOCK);
   if (status == SL_STATUS_OK) {
     system_ep_connected = true;
@@ -202,7 +207,7 @@ static void command_handle_set_in_error(sli_cpc_system_command_handle_t *command
 
   MCU_ENTER_ATOMIC();
 
-  if (!command_handle->is_first_try) {
+  if (!(command_handle->flags.is_first_try)) {
     // command_handle is in the `commands` list if it was pushed to CPC
     // core at least once, ie. is_first_try is false.
     sl_slist_remove(&commands, &command_handle->node_commands);
@@ -215,6 +220,9 @@ static void command_handle_set_in_error(sli_cpc_system_command_handle_t *command
   command_handle->error_status = status;
 
   MCU_EXIT_ATOMIC();
+
+  // Notify the core so the system endpoint can be processed
+  sli_cpc_signal_event(SL_CPC_SIGNAL_SYSTEM);
 }
 
 /***************************************************************************//**
@@ -227,16 +235,16 @@ static void on_timer_expired(sli_cpc_timer_handle_t *handle,
 
   (void)handle;
 
-  if (command_handle->retry_count > 0 || command_handle->is_first_try) {
+  if (command_handle->retry_count > 0 || (command_handle->flags.is_first_try)) {
     MCU_ATOMIC_SECTION(sl_slist_push_back(&retries, &command_handle->node_retries); );
 
-    if (!command_handle->is_first_try) {
+    if (!(command_handle->flags.is_first_try)) {
       // only decrement the retry count and update the status is the packet has been successfully sent over
-      // the wire at least once (!command_handle->is_first_try) as this means its the secondary which didn't respond
+      // the wire at least once (!is_first_try) as this means its the secondary which didn't respond
       command_handle->retry_count--;
       command_handle->error_status = SL_STATUS_IN_PROGRESS; // At least one retransmission occurred.
     } else {
-      // If the command has not been transfered on the wire (command_handle->is_first_try), it means
+      // If the command has not been transfered on the wire (is_first_try), it means
       // we landed here because there was not enough resources for the sl_cpc_write. Don't touch the retry
       // count nor the error status as this is misleading.
     }
@@ -260,7 +268,15 @@ static void on_write_completed(sl_cpc_user_endpoint_id_t endpoint_id,
   (void)endpoint_id;
   (void)buffer;
 
-  command_handle->being_transmitted = false;
+  command_handle->flags.being_transmitted = false;
+
+  if (command_handle->flags.received_reply) {
+    // Command was already replied, simply free it and return.
+    // Received a reply so ACK must be valid
+    EFM_ASSERT(status == SL_STATUS_OK);
+    sli_cpc_free_system_command_handle(command_handle);
+    return;
+  }
 
   if (status == SL_STATUS_OK) {
     // If the write successfully completed for an I-Frame, it means the packet was
@@ -363,12 +379,19 @@ static void on_final(uint8_t endpoint_id,
   }
 
   if (command != NULL) {
-    // We found the command; stop the timer, execute its callback and clean the command
+    // Received reply for active system command
+    command->flags.received_reply = true;
+
+    // Stop command reply timer
     sli_cpc_timer_stop_timer(&command->timer);
+
+    // Update command lists
     sl_slist_remove(&commands, &command->node_commands);
     sl_slist_remove(&retries, &command->node_retries);
     sl_slist_remove(&commands_in_error, &command->node_retries);
+
     MCU_EXIT_ATOMIC();
+    // Call the system command callback
     switch (reply->command_id) {
       case CMD_SYSTEM_NOOP:
         on_final_noop(command, SL_STATUS_OK);
@@ -397,7 +420,16 @@ static void on_final(uint8_t endpoint_id,
         break;
     }
 
-    sli_cpc_free_system_command_handle(command);
+    if (!(command->flags.being_transmitted)) {
+      // Command was completed, free the handle
+      sli_cpc_free_system_command_handle(command);
+    } else {
+      // Command still pending its on_write_complete callback. This means that
+      // on_final was called before on_write_complete which can happen when the
+      // ACK and the final are processed in the same iteration of the CPC loop.
+      // Since the on_write_complete uses the command handle, we can't free it now
+      // or we run the risk of having a use after free.
+    }
   } else {
     SL_CPC_JOURNAL_RECORD_WARNING("Reply with unknown seq", search_command->command.seq);
     MCU_EXIT_ATOMIC();
@@ -442,7 +474,7 @@ static void on_error(sl_cpc_user_endpoint_id_t endpoint_id)
     // if this is false, it means that on_write_completed was already call
     // for that element and that handle must marked in error here, else the
     // on_write_completed will handle setting the command in error
-    if (!handle->being_transmitted) {
+    if (!(handle->flags.being_transmitted)) {
       sli_cpc_timer_stop_timer(&handle->timer);
       sl_slist_remove(&commands, &handle->node_commands);
 
@@ -475,10 +507,11 @@ sl_status_t sli_cpc_system_cmd_noop(sli_cpc_system_noop_cmd_callback_t on_noop_r
     return status;
   }
 
+  // Initialize command handle
+  init_command_handle(command_handle);
+
   // Populate command handle
   command_handle->frame_type = SYSTEM_EP_UFRAME;
-  command_handle->is_first_try = true;
-  command_handle->error_status = SL_STATUS_OK;
   command_handle->on_final = (void *)on_noop_reply;
   command_handle->on_final_arg = (void *)on_noop_reply_arg;
   command_handle->retry_count = retry_count_max;
@@ -486,7 +519,6 @@ sl_status_t sli_cpc_system_cmd_noop(sli_cpc_system_noop_cmd_callback_t on_noop_r
 
   // Populate system command
   command_handle->command.command_id = CMD_SYSTEM_NOOP;
-  command_handle->command.seq = next_command_seq++;
   command_handle->command.length = 0;
 
   return write_command(command_handle);
@@ -511,10 +543,11 @@ sl_status_t sli_cpc_system_cmd_reboot(sli_cpc_system_reset_cmd_callback_t on_res
     return status;
   }
 
+  // Initialize command handle
+  init_command_handle(command_handle);
+
   // Populate command handle
   command_handle->frame_type = SYSTEM_EP_UFRAME;
-  command_handle->is_first_try = true;
-  command_handle->error_status = SL_STATUS_OK;
   command_handle->on_final = (void *)on_reset_reply;
   command_handle->on_final_arg = (void *)on_reset_reply_arg;
   command_handle->retry_count = retry_count_max;
@@ -522,7 +555,6 @@ sl_status_t sli_cpc_system_cmd_reboot(sli_cpc_system_reset_cmd_callback_t on_res
 
   // Populate system command
   command_handle->command.command_id = CMD_SYSTEM_RESET;
-  command_handle->command.seq = next_command_seq++;
   command_handle->command.length = 0;
 
   return write_command(command_handle);
@@ -556,18 +588,18 @@ sl_status_t sli_cpc_system_cmd_property_get(sli_cpc_system_property_get_set_cmd_
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  // Initialize command handle
+  init_command_handle(command_handle);
+
   // Populate command handle
-  command_handle->is_first_try = true;
-  command_handle->error_status = SL_STATUS_OK;
+  command_handle->frame_type = frame_type;
   command_handle->on_final = (void *)on_property_get_reply;
   command_handle->on_final_arg = (void *)on_property_get_reply_arg;
   command_handle->retry_count = retry_count_max;
-  command_handle->frame_type = frame_type;
   command_handle->retry_timeout_tick = sli_cpc_timer_ms_to_tick((uint16_t) retry_timeout_ms);
 
   // Populate system command
   command_handle->command.length = sizeof(sli_cpc_property_id_t);
-  command_handle->command.seq = next_command_seq++;
   command_handle->command.command_id = CMD_SYSTEM_PROP_VALUE_GET;
 
   // Populate payload
@@ -607,18 +639,18 @@ sl_status_t sli_cpc_system_cmd_property_set(sli_cpc_system_property_get_set_cmd_
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  // Initialize command handle
+  init_command_handle(command_handle);
+
   // Populate command handle
-  command_handle->is_first_try = true;
-  command_handle->error_status = SL_STATUS_OK;
+  command_handle->frame_type = frame_type;
   command_handle->on_final = (void *)on_property_set_reply;
   command_handle->on_final_arg = (void *)on_property_set_reply_arg;
   command_handle->retry_count = retry_count_max;
-  command_handle->frame_type = frame_type;
   command_handle->retry_timeout_tick = sli_cpc_timer_ms_to_tick((uint16_t) retry_timeout_ms);
 
   // Populate system command
   command_handle->command.command_id = CMD_SYSTEM_PROP_VALUE_SET;
-  command_handle->command.seq = next_command_seq++;
   command_handle->command.length = (uint16_t) (sizeof(sli_cpc_property_id_t) + value_length);
 
   // Populate command payload
@@ -858,7 +890,7 @@ static sl_status_t write_command(sli_cpc_system_command_handle_t *command_handle
     // Can't send iframe commands on the system endpoint until the sequence numbers are reset
 
     // I-Frame should only be sent once, the re-transmit mechanism is managed by the core
-    EFM_ASSERT(command_handle->is_first_try && command_handle->retry_count == 0);
+    EFM_ASSERT((command_handle->flags.is_first_try) && command_handle->retry_count == 0);
   }
 
   status = sl_cpc_write(&system_ep,
@@ -869,13 +901,13 @@ static sl_status_t write_command(sli_cpc_system_command_handle_t *command_handle
 
   switch (status) {
     case SL_STATUS_OK:
-      command_handle->being_transmitted = true;
+      command_handle->flags.being_transmitted = true;
 
-      if (command_handle->is_first_try) {
+      if (command_handle->flags.is_first_try) {
         // This is the initial write_command() for this command. Since it was successfully written,
         // add it to the list of pending commands and mark put the is_first_try marker to false for
         // subsequent retries
-        command_handle->is_first_try = false;
+        command_handle->flags.is_first_try = false;
         MCU_ATOMIC_SECTION(sl_slist_push_back(&commands, &command_handle->node_commands); );
       } else {
         // This is a retransmission, do nothing as we don't want a duplicate in the 'commands' list
@@ -903,6 +935,21 @@ static sl_status_t write_command(sli_cpc_system_command_handle_t *command_handle
   }
 
   return status;
+}
+
+/***************************************************************************//**
+ * Initialize a command handle.
+ ******************************************************************************/
+static void init_command_handle(sli_cpc_system_command_handle_t *command_handle)
+{
+  // Reset all handle variables
+  memset(command_handle, 0, sizeof(sli_cpc_system_command_handle_t));
+
+  // Set first try flag
+  command_handle->flags.is_first_try = true;
+
+  // Set command sequence
+  command_handle->command.seq = next_command_seq++;
 }
 
 /***************************************************************************//**

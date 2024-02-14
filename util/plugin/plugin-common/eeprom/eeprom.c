@@ -21,6 +21,9 @@
 #ifdef UC_BUILD
 #include "af.h"
 #include "eeprom-config.h"
+#ifndef EMBER_TEST
+#include "api/btl_interface.h"
+#endif // !EMBER_TEST
 #else // !UC_BUILD
 #ifdef EMBER_AF_API_AF_HEADER // AFV2
   #include EMBER_AF_API_AF_HEADER
@@ -161,6 +164,89 @@ void sli_util_af_plugin_eeprom_state_update(HalEepromState newState)
     eepromState = newState;
   }
 }
+
+#ifdef UC_BUILD
+#ifndef EMBER_TEST
+uint8_t halAppBootloaderInit(void)
+{
+  if (bootloader_init() == BOOTLOADER_OK) {
+    return EEPROM_SUCCESS;
+  } else {
+    return EEPROM_ERR_INVALID_CHIP;
+  }
+}
+
+uint8_t halAppBootloaderWriteRawStorage(uint32_t address,
+                                        const uint8_t *data,
+                                        uint16_t len)
+{
+  if (bootloader_writeRawStorage(address, (uint8_t *)data, len) == BOOTLOADER_OK) {
+    return EEPROM_SUCCESS;
+  }
+  return EEPROM_ERR;
+}
+
+uint8_t halAppBootloaderReadRawStorage(uint32_t address, uint8_t *data, uint16_t len)
+{
+  if (bootloader_readRawStorage(address, data, len) == BOOTLOADER_OK) {
+    return EEPROM_SUCCESS;
+  }
+  return EEPROM_ERR;
+}
+
+uint8_t halAppBootloaderEraseRawStorage(uint32_t address, uint32_t len)
+{
+  if (bootloader_eraseRawStorage(address, len) == BOOTLOADER_OK) {
+    return EEPROM_SUCCESS;
+  }
+  return EEPROM_ERR;
+}
+
+bool halAppBootloaderStorageBusy(void)
+{
+  return bootloader_storageIsBusy();
+}
+
+void halAppBootloaderShutdown(void)
+{
+  bootloader_deinit();
+}
+
+HalEepromInformationType fixedEepromInfo;
+const HalEepromInformationType *halAppBootloaderInfo(void)
+{
+  BootloaderStorageInformation_t info;
+  bootloader_getStorageInfo(&info);
+
+  if (info.info == NULL) {
+    return NULL;
+  }
+
+  // if partEraseMs fits into 16 bits don't change it
+  if (info.info->partEraseMs <= 65535) {
+    fixedEepromInfo.partEraseTime    = info.info->partEraseMs;
+    fixedEepromInfo.capabilitiesMask = info.info->capabilitiesMask;
+  }
+  // if partEraseMs is too big to fit into 16 bits, convert to seconds (using 1024 because the
+  // partEraseMs units are 1024Hz based) and set capabilities mask bit to indicate the value
+  // is in seconds instead of milliseconds
+  else {
+    fixedEepromInfo.partEraseTime    = ((info.info->partEraseMs) / 1024);
+    fixedEepromInfo.capabilitiesMask = info.info->capabilitiesMask | EEPROM_CAPABILITIES_PART_ERASE_SECONDS;
+  }
+  fixedEepromInfo.version           = info.info->version;
+  fixedEepromInfo.pageEraseMs       = info.info->pageEraseMs;
+  fixedEepromInfo.pageSize          = info.info->pageSize;
+  fixedEepromInfo.partSize          = info.info->partSize;
+  MEMCOPY((void*)&fixedEepromInfo.partDescription,
+          (void*)&info.info->partDescription,
+          sizeof(fixedEepromInfo.partDescription));
+  fixedEepromInfo.wordSizeBytes     = info.info->wordSizeBytes;
+
+  return &fixedEepromInfo;
+}
+#endif // !EMBER_TEST
+#endif // UC_BUILD
 
 uint8_t emberAfPluginEepromGetWordSize(void)
 {

@@ -142,7 +142,7 @@ typedef struct sl_wisun_nwm_setting {
 /// Node info structure type definition
 typedef struct node_info {
   /// Addresses
-  current_addr_t addresses;
+  sl_wisun_app_core_current_addr_t addresses;
   /// Settings
   app_setting_wisun_t settings;
 } node_info_t;

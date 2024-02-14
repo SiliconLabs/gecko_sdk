@@ -225,25 +225,44 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
 #endif
 
 typedef RAIL_Status_t (*RAIL_IEEE802154_2p4GHzRadioConfig_t)(RAIL_Handle_t railHandle);
-static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
-  &RAIL_IEEE802154_Config2p4GHzRadio,
-  &RAIL_IEEE802154_Config2p4GHzRadioAntDiv,
-  &RAIL_IEEE802154_Config2p4GHzRadioCoex,
-  &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex,
-  &RAIL_IEEE802154_Config2p4GHzRadioFem,
-  &RAIL_IEEE802154_Config2p4GHzRadioAntDivFem,
-  &RAIL_IEEE802154_Config2p4GHzRadioCoexFem,
-  &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem,
+
+typedef struct IEEE802154_2p4GHzConfig {
+  const char *name;
+  RAIL_IEEE802154_2p4GHzRadioConfig_t config;
+} IEEE802154_2p4GHzConfig_t;
+
+static IEEE802154_2p4GHzConfig_t ieee802154Configs[] = {
+  { "IEEE802154_2P4_MODE_DEFAULT", &RAIL_IEEE802154_Config2p4GHzRadio },
+  { "IEEE802154_2P4_MODE_ANT_DIV", &RAIL_IEEE802154_Config2p4GHzRadioAntDiv, },
+  { "IEEE802154_2P4_MODE_COEX", &RAIL_IEEE802154_Config2p4GHzRadioCoex },
+  { "IEEE802154_2P4_MODE_ANT_DIV_COEX", &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex },
+  { "IEEE802154_2P4_MODE_FEM", &RAIL_IEEE802154_Config2p4GHzRadioFem },
+  { "IEEE802154_2P4_MODE_ANT_DIV_FEM", &RAIL_IEEE802154_Config2p4GHzRadioAntDivFem },
+  { "IEEE802154_2P4_MODE_COEX_FEM", &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex },
+  { "IEEE802154_2P4_MODE_ANT_DIV_COEX_FEM", &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem },
 #if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
-  &RAIL_IEEE802154_Config2p4GHzRadioCustom1,
+  { "IEEE802154_2P4_MODE_CUSTOM1", &RAIL_IEEE802154_Config2p4GHzRadioCustom1 },
 #else
-  NULL,
+  { "UNSUPPORTED", &RAIL_IEEE802154_Config2p4GHzRadioCustom1 },
 #endif
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
-  &RAIL_IEEE802154_Config2p4GHzRadio2Mbps,
-  // &RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec, //TODO: [HighBW] will be taken care in conflict resolution
+  { "IEEE802154_2P4_MODE_2MBPS", &RAIL_IEEE802154_Config2p4GHzRadio2Mbps },
+  { "IEEE802154_2P4_MODE_1MBPS_FEC", &RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec }
 #endif
 };
+
+void list2p4Ghz802154Configs(sl_cli_command_arg_t *args)
+{
+  uint8_t i;
+  uint8_t numConfigs = COUNTOF(ieee802154Configs);
+  responsePrintStart(sl_cli_get_command_string(args, 0));
+  for (i = 0;
+       i < numConfigs;
+       ++i) {
+    responsePrintContinue("%i:%s", i, ieee802154Configs[i].name);
+  }
+  responsePrintEnd("%i:%s", i, ieee802154Configs[numConfigs].name);
+}
 
 void config2p4Ghz802154(sl_cli_command_arg_t *args)
 {
@@ -259,9 +278,13 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
     return;
   }
 
-  if ((sl_cli_get_argument_count(args) >= 1)
-      && (sl_cli_get_argument_uint8(args, 0) != 0U)) {
-    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV;
+  if (sl_cli_get_argument_count(args) >= 1) {
+    ieee802154Config = sl_cli_get_argument_uint8(args, 0);
+    if ((sl_cli_get_argument_count(args) >= 2) && (ieee802154Config > 1)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x22,
+                         "Only provide one parameter if the first parameter is greater than 1");
+      return;
+    }
   }
   if ((sl_cli_get_argument_count(args) >= 2)
       && (sl_cli_get_argument_uint8(args, 1) != 0U)) {
@@ -284,23 +307,25 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
   if ((sl_cli_get_argument_count(args) >= 5)
       && (sl_cli_get_argument_uint8(args, 4) != 0U)) {
-    RAIL_ConfigEvents(railHandle,
-                      RAIL_EVENT_RX_SYNC2_DETECT,
-                      RAIL_EVENT_RX_SYNC2_DETECT);
     if (ieee802154Config != 0U) {
       responsePrintError(sl_cli_get_command_string(args, 0), 1,
                          "Cannot set antdiv, coex, fem, or custom PHY options with 2Mbps PHY");
     } else if (sl_cli_get_argument_uint8(args, 4) == 1) {
       ieee802154Config = RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_2MBPS_PHY;
-    } else if (sl_cli_get_argument_uint8(args, 4) == 2) {
-      ieee802154Config =  RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_1MBPS_FEC_PHY;
     } else {
       responsePrintError(sl_cli_get_command_string(args, 0), 1,
                          "Unsupported high bandwidth PHY");
     }
   }
 #endif //RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
-  status = (*ieee802154Configs[ieee802154Config])(railHandle);
+  uint8_t numConfigs = COUNTOF(ieee802154Configs);
+
+  if ((ieee802154Config >= numConfigs) || (ieee802154Configs[ieee802154Config].config == NULL)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                       "Unsupported ieee802154 config");
+    return;
+  }
+  status = (*ieee802154Configs[ieee802154Config].config)(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;
     changeChannel(11);

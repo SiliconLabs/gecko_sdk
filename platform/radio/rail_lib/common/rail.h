@@ -806,6 +806,89 @@ RAIL_Status_t RAIL_GetSyncWords(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
                                    const RAIL_SyncWordConfig_t *syncWordConfig);
 
+/**
+ * Sets the whitening initialization value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return The whitening initialization value currently being used.
+ */
+uint16_t RAIL_GetWhiteningInitVal(RAIL_Handle_t railHandle);
+
+/**
+ * Returns the CRC initialization value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return The CRC initialization value currently being used.
+ */
+uint32_t RAIL_GetCrcInitVal(RAIL_Handle_t railHandle);
+
+/**
+ * Sets the whitening initialization value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] whiteInit A whitening initialization value.
+ * @return Status code indicating success of the function call.
+ *
+ * Use this function to override the whitening initialization value
+ * defined by the current PHY's radio configuration. The new value
+ * will persist until this function is called again, \ref
+ * RAIL_ResetWhiteningInitVal() is called, or the PHY is
+ * changed.
+ *
+ * @note Overriding a PHY's whitening initialization value
+ *   will break communication with peers unless they effect
+ *   a similar change.
+ *
+ * @warning This API must not be used when either 802.15.4
+ *   or BLE modes are enabled.
+ */
+RAIL_Status_t RAIL_SetWhiteningInitVal(RAIL_Handle_t railHandle,
+                                       uint16_t whiteInit);
+
+/**
+ * Sets the CRC initialization value.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] crcInit A CRC initialization value.
+ * @return Status code indicating success of the function call.
+ *
+ * Use this function to override the CRC initialization value
+ * defined by the current PHY's radio configuration. The new value
+ * will persist until this function is called again, \ref
+ * RAIL_ResetCrcInitVal() is called, or the PHY is changed.
+ *
+ * @note Overriding a PHY's CRC initialization value
+ *   will break communication with peers unless they effect
+ *   a similar change.
+ *
+ * @warning This API must not be used when either 802.15.4
+ *   or BLE modes are enabled.
+ */
+RAIL_Status_t RAIL_SetCrcInitVal(RAIL_Handle_t railHandle,
+                                 uint32_t crcInit);
+
+/**
+ * Restores the whitening initialization value to its initial setting
+ * from the Radio Configurator.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * Can use this function after using \ref RAIL_SetWhiteningInitVal().
+ */
+RAIL_Status_t RAIL_ResetWhiteningInitVal(RAIL_Handle_t railHandle);
+
+/**
+ * Restores the CRC initialization value to its initial setting from
+ * the Radio Configurator.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * Can use this function after using \ref RAIL_SetCrcInitVal().
+ */
+RAIL_Status_t RAIL_ResetCrcInitVal(RAIL_Handle_t railHandle);
+
 /** @} */ // end of group Radio_Configuration
 
 /******************************************************************************

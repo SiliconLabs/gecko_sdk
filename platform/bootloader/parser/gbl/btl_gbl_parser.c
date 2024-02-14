@@ -1369,7 +1369,7 @@ static int32_t parser_parseApplicationInfo(ParserContext_t   *parserContext,
 #endif // PARSER_HAS_APPLICATION_UPGRADE_VALIDATION_CALLBACK
 
 #if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) && (PARSER_REQUIRE_ANTI_ROLLBACK_PROTECTION == true)
-    if ((&imageProperties->application == NULL)
+    if ((imageProperties->application.type == 0)
         || (bootload_verifyApplicationVersion(imageProperties->application.version, false) == false)) {
       parserContext->internalState = GblParserStateError;
       return BOOTLOADER_ERROR_PARSER_REJECTED;
@@ -1652,7 +1652,7 @@ static int32_t parser_parseData(ParserContext_t                   *parserContext
         // Check for remaining application upgrades if rollback-protection is enabled.
         // Make sure that there are some remaining application upgrades left.
         if (callbacks->applicationCallback != NULL) {
-          if ((&imageProperties->application == NULL)
+          if ((imageProperties->application.type == 0)
               || (bootload_verifyApplicationVersion(imageProperties->application.version, true) == false)) {
             parserContext->internalState = GblParserStateError;
             return BOOTLOADER_ERROR_PARSER_REJECTED;
@@ -1749,7 +1749,7 @@ static int32_t parser_parseCustomTag(ParserContext_t                   *parserCo
   // Check for remaining application upgrades if rollback-protection is enabled.
   // Make sure that there are some remaining application upgrades left.
   if (callbacks->applicationCallback != NULL) {
-    if ((&imageProperties->application == NULL)
+    if ((imageProperties->application.type == 0)
         || (bootload_verifyApplicationVersion(imageProperties->application.version, true) == false)) {
       parserContext->internalState = GblParserStateError;
       return BOOTLOADER_ERROR_PARSER_REJECTED;

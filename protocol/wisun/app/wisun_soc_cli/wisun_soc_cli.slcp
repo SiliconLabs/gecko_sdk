@@ -416,15 +416,6 @@ template_contribution:
   - name: "cli_command"
     value:
       group: "wisun"
-      name: "set_unicast_tx_mode"
-      handler: "app_set_unicast_tx_mode"
-      help: "configure unicast tx mode:"
-      argument:
-        - type: uint8
-          help: "mode: 0=default, 1=slot"
-  - name: "cli_command"
-    value:
-      group: "wisun"
       name: "set_lfn_support"
       handler: "app_set_lfn_support"
       help: "configure LFN support"

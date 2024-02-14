@@ -37,6 +37,7 @@
 #include "sl_status.h"
 #include "sl_wisun_meter_collector_config.h"
 #include "sl_wisun_collector.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -134,7 +135,6 @@ sl_status_t sl_wisun_coap_collector_prepare_request(const sl_wisun_request_type_
   packet->uri_path_len     = strlen(SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH);
   packet->msg_code         = COAP_MSG_CODE_REQUEST_GET;
   packet->content_format   = COAP_CT_TEXT_PLAIN;
-  packet->payload_len      = SL_WISUN_METER_REQUEST_TYPE_LENGTH;
   packet->payload_ptr      = NULL;
   packet->options_list_ptr = NULL;
   packet->msg_id           = SL_WISUN_COAP_METER_COLLECTOR_DEFAULT_MESSAGE_ID;
@@ -142,12 +142,15 @@ sl_status_t sl_wisun_coap_collector_prepare_request(const sl_wisun_request_type_
   switch (req_type) {
     case SL_WISUN_MC_REQ_ASYNC:
       packet->payload_ptr = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC;
+      packet->payload_len = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC);
       break;
     case SL_WISUN_MC_REQ_REGISTER:
       packet->payload_ptr = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER;
+      packet->payload_len = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER);
       break;
     case SL_WISUN_MC_REQ_REMOVE:
       packet->payload_ptr = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE;
+      packet->payload_len = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE);
       break;
     default:
       break;

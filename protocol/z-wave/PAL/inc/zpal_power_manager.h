@@ -120,6 +120,12 @@ void zpal_pm_cancel(zpal_pm_handle_t handle);
 void zpal_pm_cancel_all(void);
 
 /**
+ * @brief Unallocate all power locks.
+ * @note Used only in unit tests to avoid valgrind to detect leakage
+*/
+void zpal_pm_unregister_all(void);
+
+/**
  * @} //zpal-power-manager
  * @} //zpal
  */

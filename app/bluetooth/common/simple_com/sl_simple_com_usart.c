@@ -83,14 +83,15 @@ static void receive_cb(UARTDRV_Handle_t handle,
                        uint8_t *data,
                        UARTDRV_Count_t transferCount);
 // Helper functions to ensure reception
-static Ecode_t abort_receive(UARTDRV_Handle_t handle);
+static Ecode_t cancel_receive(UARTDRV_Handle_t handle);
 static Ecode_t get_tail_buffer(UARTDRV_Buffer_FifoQueue_t *queue,
                                UARTDRV_Buffer_t **buffer);
 static Ecode_t dequeue_buffer(UARTDRV_Buffer_FifoQueue_t *queue,
                               UARTDRV_Buffer_t **buffer);
-static void disable_receiver(UARTDRV_Handle_t handle);
 
 static IRQn_Type irq_number_from_handle(UARTDRV_Handle_t handle);
+
+static Ecode_t uart_receive_start(UARTDRV_Handle_t handle);
 
 void sli_simple_com_isr(void);
 
@@ -197,8 +198,7 @@ void sl_simple_com_receive(void)
   // Clear any USART interrupt flags
   USART_IntClear(uartdrv_handle->peripheral.uart, _USART_IF_MASK);
   USART_IntEnable(uartdrv_handle->peripheral.uart, USART_IF_TXIDLE | USART_IF_TCMP1);
-  // Start reception with callback set
-  ec = UARTDRV_Receive(uartdrv_handle, rx_buf, sizeof(rx_buf), receive_cb);
+  ec = uart_receive_start(uartdrv_handle);
   app_assert(ECODE_EMDRV_UARTDRV_OK == ec,
              "[E: 0x%04x] Failed to start receiving\n",
              (int)ec);
@@ -250,6 +250,12 @@ static void timer_callback(sl_sleeptimer_timer_handle_t *handle,
 {
   (void)handle;
   (void)data;
+
+  // Assert nRTS
+  if (uartdrv_handle->fcType != uartdrvFlowControlHwUart) {
+    UARTDRV_FlowControlSet(uartdrv_handle, uartdrvFlowControlOff);
+  }
+
   // Get received bytes
   uint8_t* buffer = NULL;
   uint32_t received = 0;
@@ -262,9 +268,9 @@ static void timer_callback(sl_sleeptimer_timer_handle_t *handle,
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_ATOMIC();
 
-    // abort receive operation
-    (void)abort_receive(uartdrv_handle);
-    sl_simple_com_receive();
+    // cancel previous block receive operation
+    (void)cancel_receive(uartdrv_handle);
+    uart_receive_start(uartdrv_handle);
     CORE_EXIT_ATOMIC();
     received_count = 0;
   } else {
@@ -275,7 +281,7 @@ static void timer_callback(sl_sleeptimer_timer_handle_t *handle,
 
 #endif // EFR32BG1_USART_E202_WORKAROUND
 
-/**************************************************************************//**
+/******************************************************************************
  * UART interrupt handler
  *
  * Called when the set timer for tx idle states finished.
@@ -288,6 +294,12 @@ void sli_simple_com_isr(void)
   // RX timeout, stop transfer and handle what we got in buffer
   if (uartdrv_handle->peripheral.uart->IF & USART_IF_TCMP1) {
     CORE_DECLARE_IRQ_STATE;
+
+    // Assert nRTS
+    if (uartdrv_handle->fcType != uartdrvFlowControlHwUart) {
+      UARTDRV_FlowControlSet(uartdrv_handle, uartdrvFlowControlOff);
+    }
+
     CORE_ENTER_ATOMIC();
     // stop the timer
     uartdrv_handle->peripheral.uart->TIMECMP1 &= \
@@ -313,20 +325,20 @@ void sli_simple_com_isr(void)
     UARTDRV_GetReceiveStatus(uartdrv_handle, &buffer, &received, &remaining);
     received_count = received;
 #else
-    // abort receive operation
-    (void)abort_receive(uartdrv_handle);
-    sl_simple_com_receive();
+    // cancel previous block receive operation
+    (void)cancel_receive(uartdrv_handle);
+    uart_receive_start(uartdrv_handle);
 #endif // EFR32BG1_USART_E202_WORKAROUND
     CORE_EXIT_ATOMIC();
   }
 }
 
-/**************************************************************************//**
+/******************************************************************************
  * Internal UART transmit completed callback
  *
  * Called after UART transmit is finished.
  *
- * @param[in] handle Connection handle
+ * @param[in] handle UART driver handle
  * @param[in] transferStatus Status of the transfer
  * @param[in] data Transmitted data
  * @param[in] transferCount Number of sent bytes
@@ -351,12 +363,12 @@ static void transmit_cb(UARTDRV_Handle_t handle,
   sl_simple_com_os_task_proceed();
 }
 
-/**************************************************************************//**
+/******************************************************************************
  * Internal UART receive completed callback
  *
  * Called after UART receive is finished.
  *
- * @param[in] handle Connection handle
+ * @param[in] handle UART driver handle
  * @param[in] transferStatus Status of the transfer
  * @param[in] data Received data
  * @param[in] transferCount Number of received bytes
@@ -391,17 +403,15 @@ static void receive_cb(UARTDRV_Handle_t handle,
                              data);
   }
 
-  // Clear RX buffer
-  memset(rx_buf, 0, sizeof(rx_buf));
   sl_simple_com_os_task_proceed();
 }
 
-/**************************************************************************//**
- * Aborted reception handler
+/******************************************************************************
+ * Cancel previous block receive operation.
  *
- * @param[in] handle Connection handle
+ * @param[in] handle UART driver handle
  *****************************************************************************/
-static Ecode_t abort_receive(UARTDRV_Handle_t handle)
+static Ecode_t cancel_receive(UARTDRV_Handle_t handle)
 {
   UARTDRV_Buffer_t *rxBuffer;
   Ecode_t status;
@@ -418,12 +428,12 @@ static Ecode_t abort_receive(UARTDRV_Handle_t handle)
   }
 
   // -------------------------------
-  // Stop the current transfer
+  // Stop the current DMA transfer
   (void)DMADRV_StopTransfer(handle->rxDmaCh);
   handle->rxDmaActive = false;
   // Update the transfer status of the active transfer
   status = get_tail_buffer(handle->rxQueue, &rxBuffer);
-  // If an abort was in progress when DMA completed, the ISR could be deferred
+  // If aborting was in progress when DMA completed, the ISR could be deferred
   // until after the critical section. In this case, the buffers no longer
   // exist, even though the DMA complete callback was called.
   if (status == ECODE_EMDRV_UARTDRV_QUEUE_EMPTY) {
@@ -450,16 +460,12 @@ static Ecode_t abort_receive(UARTDRV_Handle_t handle)
   }
 
   // -------------------------------
-  // Disable the receiver
-  if (handle->fcType != uartdrvFlowControlHwUart) {
-    disable_receiver(handle);
-  }
   CORE_EXIT_ATOMIC();
 
   return ECODE_EMDRV_UARTDRV_OK;
 }
 
-/**************************************************************************//**
+/******************************************************************************
  * Gets the buffer tail.
  *
  * @param[in] queue Input buffer
@@ -482,7 +488,7 @@ static Ecode_t get_tail_buffer(UARTDRV_Buffer_FifoQueue_t *queue,
   return ECODE_EMDRV_UARTDRV_OK;
 }
 
-/**************************************************************************//**
+/******************************************************************************
  * Dequeues buffer
  *
  * Moves through the buffer.
@@ -509,61 +515,10 @@ static Ecode_t dequeue_buffer(UARTDRV_Buffer_FifoQueue_t *queue,
   return ECODE_EMDRV_UARTDRV_OK;
 }
 
-/**************************************************************************//**
- * Disables receiver.
- *
- * @param[in] handle Connection handle
- *****************************************************************************/
-static void disable_receiver(UARTDRV_Handle_t handle)
-{
-#if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) \
-  && !defined(_SILICON_LABS_32B_SERIES_2))       \
-  || (defined(EUART_COUNT) && (EUART_COUNT > 0) )
-  if (handle->type == uartdrvUartTypeUart)
-#endif
-  {
-    // Disable Rx route
-    #if defined(USART_ROUTEPEN_RXPEN)
-    handle->peripheral.uart->ROUTEPEN &= ~USART_ROUTEPEN_RXPEN;
-    #elif defined(USART_ROUTE_RXPEN)
-    handle->peripheral.uart->ROUTE &= ~USART_ROUTE_RXPEN;
-    #elif defined(GPIO_USART_ROUTEEN_RXPEN)
-    GPIO->USARTROUTE_CLR[handle->uartNum].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN;
-    #endif
-    // Disable Rx
-    handle->peripheral.uart->CMD = USART_CMD_RXDIS;
-  }
-#if defined(LEUART_COUNT) && (LEUART_COUNT > 0) \
-  && !defined(_SILICON_LABS_32B_SERIES_2)
-  else if (handle->type == uartdrvUartTypeLeuart) {
-    // Wait for prevous register writes to sync
-    while ((handle->peripheral.leuart->SYNCBUSY & LEUART_SYNCBUSY_CMD) != 0U) {
-    }
-
-    // Disable Rx route
-    #if defined(LEUART_ROUTEPEN_RXPEN)
-    handle->peripheral.leuart->ROUTEPEN &= ~LEUART_ROUTEPEN_RXPEN;
-    #else
-    handle->peripheral.leuart->ROUTE &= ~LEUART_ROUTE_RXPEN;
-    #endif
-    // Disable Rx
-    handle->peripheral.leuart->CMD = LEUART_CMD_RXDIS;
-  }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
-  else if (handle->type == uartdrvUartTypeEuart) {
-    if (EUSART_StatusGet(handle->peripheral.euart) &  EUSART_STATUS_TXENS) {
-      EUSART_Enable(handle->peripheral.euart, eusartEnableTx);
-    } else {
-      EUSART_Enable(handle->peripheral.euart, eusartDisable);
-    }
-  }
-#endif
-}
-
-/**************************************************************************//**
+/******************************************************************************
  * Get NVIC IRQ number from UARTDRV handle
  *
- * @param[in] handle Connection handle
+ * @param[in] handle UART driver handle
  * @return Interrupt number
  *****************************************************************************/
 static IRQn_Type irq_number_from_handle(UARTDRV_Handle_t handle)
@@ -599,7 +554,26 @@ static IRQn_Type irq_number_from_handle(UARTDRV_Handle_t handle)
   return irq_number;
 }
 
-/**************************************************************************//**
+/******************************************************************************
+ * Start / resume UARTDRV receiving
+ *
+ * @param[in] handle UART driver handle
+ * @return UARTDRV reported result of the operation
+ *****************************************************************************/
+static Ecode_t uart_receive_start(UARTDRV_Handle_t handle)
+{
+  Ecode_t ec = UARTDRV_Receive(handle, rx_buf, sizeof(rx_buf), receive_cb);
+
+  if (ec == ECODE_EMDRV_UARTDRV_OK) {
+    // De-assert nRTS or send XON
+    if (uartdrv_handle->fcType != uartdrvFlowControlHwUart) {
+      UARTDRV_FlowControlSet(uartdrv_handle, uartdrvFlowControlAuto);
+    }
+  }
+
+  return ec;
+}
+/******************************************************************************
  * Function to trigger the OS task to proceed
  *
  * @note Weak implementation.

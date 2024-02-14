@@ -3,12 +3,12 @@ label: "Application Core"
 package: "wisun"
 description: >
   The Application Core component aims at providing utilities common to most Wi-SUN applications. 
-  A Wi-SUN connection helper function app_wisun_network_connect() configures the network size setting, the TX output power, the certificates, and keys. 
+  A Wi-SUN connection helper function sl_wisun_app_core_network_connect() configures the network size setting, the TX output power, the certificates, and keys. 
   The last function action is to start the Wi-SUN connection process. 
   The app_wisun_network_is_connected() function provides a simple connection status getter too.
   Event handlers for basic Wi-SUN network events component includes the basic event handler implementations.
-  The app_wisun_get_current_addresses() function retrieves known IPv6 addresses.
-  Use app_wisun_core_get_error() function to get the status of the Stack API calls.
+  The sl_wisun_app_core_get_current_addresses() function retrieves known IPv6 addresses.
+  Use sl_wisun_app_core_get_state() function to get the status of the Stack API calls.
   To use the component in your application, add it to your project and initialize it with app_wisun_core_init().
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
@@ -35,7 +35,7 @@ requires:
   - name: "app_project_info"
 
 config_file:
-  - path: "config/sl_wisun_app_core_util_config.h"
+  - path: "config/sl_wisun_app_core_config.h"
 
 #-------------- Template Contribution ----------------
 template_contribution:
@@ -44,7 +44,7 @@ template_contribution:
     value:
       event: "internal_app_init"
       include: "sl_wisun_app_core.h"
-      handler: "app_wisun_core_init"
+      handler: "sl_wisun_app_core_init"
 
   - name: component_catalog
     value: wisun_app_core

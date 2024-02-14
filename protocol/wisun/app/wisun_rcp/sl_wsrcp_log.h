@@ -59,6 +59,8 @@
 
 extern unsigned int g_enabled_traces;
 extern bool g_enable_color_traces;
+extern void (*g_on_err)(int code, const char *fmt, ...);
+extern bool g_err_reentrancy;
 
 enum {
     TR_RF   = 0x01,
@@ -136,6 +138,14 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
             __PRINT(31, MSG, ##__VA_ARGS__);                         \
         else                                                         \
             __PRINT_WITH_LINE(31, "fatal error");                    \
+        if (!g_err_reentrancy && g_on_err) {                         \
+            g_err_reentrancy = true;                                 \
+            if (MSG[0] != '\0')                                      \
+                g_on_err(CODE, MSG, ##__VA_ARGS__);                  \
+            else                                                     \
+                g_on_err(CODE, "%s():%d: fatal error",               \
+                         __func__, __LINE__);                        \
+        }                                                            \
         exit(CODE);                                                  \
     } while (0)
 
@@ -143,10 +153,10 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
     do {                                                             \
         if (COND) {                                                  \
             if (MSG[0] != '\0')                                      \
-                __PRINT(31, MSG, ##__VA_ARGS__);                     \
+                __FATAL(CODE, MSG, ##__VA_ARGS__);                   \
             else                                                     \
-                __PRINT_WITH_LINE(31, "fatal error: \"%s\"", #COND); \
-            exit(CODE);                                              \
+                __FATAL(CODE, "%s():%d: fatal error: \"%s\"",        \
+                        __func__, __LINE__, #COND);                  \
         }                                                            \
     } while (0)
 
@@ -156,6 +166,14 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
             __PRINT_WITH_LINE(91, "bug: " MSG, ##__VA_ARGS__);       \
         else                                                         \
             __PRINT_WITH_LINE(91, "bug");                            \
+        if (!g_err_reentrancy && g_on_err) {                         \
+            g_err_reentrancy = true;                                 \
+            if (MSG[0] != '\0')                                      \
+                g_on_err(0, "%s():%d: bug: " MSG,                    \
+                         __func__, __LINE__, ##__VA_ARGS__);         \
+            else                                                     \
+                g_on_err(0, "%s():%d: bug", __func__, __LINE__);     \
+        }                                                            \
         __BKPT(0);                                                   \
         for (;;);                                                    \
     } while (0)
@@ -164,11 +182,9 @@ char *bytes_str(const void *in_start, size_t in_len, const void **in_done, char 
     do {                                                             \
         if (COND) {                                                  \
             if (MSG[0] != '\0')                                      \
-                __PRINT_WITH_LINE(91, "bug: " MSG, ##__VA_ARGS__);   \
+                __BUG(MSG, ##__VA_ARGS__);                           \
             else                                                     \
-                __PRINT_WITH_LINE(91, "bug: \"%s\"", #COND);         \
-            __BKPT(0);                                               \
-            for (;;);                                                \
+                __BUG("\"%s\"", #COND);                              \
         }                                                            \
     } while (0)
 

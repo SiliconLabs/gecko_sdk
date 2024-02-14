@@ -466,13 +466,13 @@ static void _rhnd_thr_fnc(void * args)
 
   SL_COAP_SERVICE_LOOP() {
     // wait for network connected state
-    if (!app_wisun_network_is_connected()) {
+    if (!sl_wisun_app_core_util_network_is_connected()) {
       osDelay(1000UL);
       continue;
     }
 
     // creating socket
-    sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+    sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     assert(sockid != SOCKET_INVALID_ID);
 
     // fill the server address structure
@@ -487,7 +487,7 @@ static void _rhnd_thr_fnc(void * args)
     assert(r != SOCKET_RETVAL_ERROR);
 
 #if SL_WISUN_COAP_RD_SOCKET_REQUIRED
-    sockid_rd = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+    sockid_rd = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
     assert(sockid_rd != SOCKET_INVALID_ID);
 
     srv_addr_rd.sin6_family = AF_INET6;
@@ -503,7 +503,7 @@ static void _rhnd_thr_fnc(void * args)
     // Receiver loop
     while (1) {
       // Dispatch
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
 
       // Receive UDP packets
       sockid_active = sockid;
@@ -609,7 +609,7 @@ static void _rhnd_thr_fnc(void * args)
         __cleanup_service();
 
         // Check network connection after a session
-      } else if (r == SOCKET_RETVAL_ERROR && !app_wisun_network_is_connected()) {
+      } else if (r == SOCKET_RETVAL_ERROR && !sl_wisun_app_core_util_network_is_connected()) {
         close(sockid);
 #if SL_WISUN_COAP_RD_SOCKET_REQUIRED
         close(sockid_rd);

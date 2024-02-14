@@ -1132,12 +1132,18 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: list2p4Ghz802154Configs
+      handler: list2p4Ghz802154Configs
+      help: "List supported 2.4 GHz 802.15.4 configs."
+
+  - name: cli_command
+    value:
       name: config2p4GHz802154
       handler: config2p4Ghz802154
       help: "Configure the radio for 2.4 GHz 802.15.4.\\n                    Use with enable802154."
       argument:
         - type: uint8opt
-          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable\\n                    [uint8opt] custom: [0=None] 1=Custom1\\n                    [uint8opt] 2mbps: [0=Disable] 1=Enable"
+          help: "[uint8opt] config: see list2p4Ghz802154Configs (ignores any remaining parameters if > 1)\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable\\n                    [uint8opt] custom: [0=None] 1=Custom1\\n                    [uint8opt] 2mbps: [0=Disable]  1=Enable"
 
   - name: cli_command
     value:
@@ -2659,3 +2665,45 @@ template_contribution:
       argument:
         - type: uint8
           help: 0=Disable 1=Enable
+
+  - name: cli_command
+    value:
+      name: getWhiteningInitVal
+      handler: getWhiteningInitVal
+      help: "Returns the whitening initialization value."
+
+  - name: cli_command
+    value:
+      name: getCrcInitVal
+      handler: getCrcInitVal
+      help: "Returns the CRC initialization value."
+
+  - name: cli_command
+    value:
+      name: setWhiteningInitVal
+      handler: setWhiteningInitVal
+      help: "Set the whitening initialization value."
+      argument:
+        - type: uint16
+          help: "Whitening initialization value."
+
+  - name: cli_command
+    value:
+      name: setCrcInitVal
+      handler: setCrcInitVal
+      help: "Set the CRC initialization value."
+      argument:
+        - type: uint32
+          help: "CRC initialization value."
+
+  - name: cli_command
+    value:
+      name: resetWhiteningInitVal
+      handler: resetWhiteningInitVal
+      help: "Reset the whitening initialization value to it's\\n                    original setting from the Radio Configurator."
+
+  - name: cli_command
+    value:
+      name: resetCrcInitVal
+      handler: resetCrcInitVal
+      help: "Reset the CRC initialization value to it's\\n                    original setting from the Radio Configurator."

@@ -65,6 +65,11 @@
 #endif // SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
 
 // -----------------------------------------------------------------------------
+// Macros
+
+#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 32767) / 65535)
+
+// -----------------------------------------------------------------------------
 // Event / callback definitions
 
 /*******************************************************************************
@@ -111,7 +116,7 @@ void sl_btmesh_friend_on_friendship_terminated(uint16_t netkey_index,
  ******************************************************************************/
 void sl_btmesh_lighting_server_on_ui_update(uint16_t lightness_level)
 {
-  uint16_t lightness_percent = (lightness_level * 100 + 99) / 65535;
+  uint16_t lightness_percent = LIGHTNESS_LEVEL_TO_PERCENTAGE(lightness_level);
   app_log("BT mesh Lightness: %5u%%" APP_LOG_NL, lightness_percent);
   #ifdef SL_CATALOG_BTMESH_WSTK_LCD_PRESENT
   // Temporary buffer to format the LCD output text

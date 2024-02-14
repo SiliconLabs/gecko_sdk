@@ -1053,7 +1053,7 @@ static void LDMA_IRQHandlerDefault(uint8_t chnum)
   pending = sl_hal_ldma_get_enabled_interrupts();
 
   /* Check for LDMA error. */
-  if ( pending & LDMA_IF_ERROR ) {
+  if ( pending & (LDMA_IF_ERROR0 << chnum) ) {
     /* Loop to enable debugger to see what has happened. */
     while (true) {
       /* Wait forever. */

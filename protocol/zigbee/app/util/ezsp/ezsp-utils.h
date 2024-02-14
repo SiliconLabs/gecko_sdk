@@ -212,7 +212,7 @@ EmberStatus emberChannelChangeRequest(uint8_t channel)
 EmberStatus emberSetOutgoingNwkFrameCounter(uint32_t* desiredValuePtr);
 #else
   #define emberSetOutgoingNwkFrameCounter(desiredValuePtr) \
-  ezspSetValue(EZSP_VALUE_NWK_FRAME_COUNTER, sizeof(desiredValuePtr), desiredValuePtr)
+  ezspSetValue(EZSP_VALUE_NWK_FRAME_COUNTER, sizeof(*desiredValuePtr), desiredValuePtr)
 #endif
 
 /** @brief Function to set APS layer outgoing frame counter for Trust Center
@@ -237,7 +237,7 @@ EmberStatus emberSetOutgoingNwkFrameCounter(uint32_t* desiredValuePtr);
 EmberStatus emberSetOutgoingApsFrameCounter(uint32_t* desiredValuePtr);
 #else
   #define emberSetOutgoingApsFrameCounter(desiredValuePtr) \
-  ezspSetValue(EZSP_VALUE_APS_FRAME_COUNTER, sizeof(desiredValuePtr), desiredValuePtr)
+  ezspSetValue(EZSP_VALUE_APS_FRAME_COUNTER, sizeof(*desiredValuePtr), desiredValuePtr)
 #endif
 
 #endif // __EZSP_UTILS_H__

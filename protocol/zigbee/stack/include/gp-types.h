@@ -28,11 +28,139 @@
 #ifndef SILABS_GP_TYPES_H
 #define SILABS_GP_TYPES_H
 
-// Mask used in the Gp Ep Incoming Message Handler to pass bidirectional information
-// Incoming GPDF has rxAfterTx bit set
+/**
+ * @brief Mask used in the green power endpoint incoming message handler to pass bidirectional information.
+ * Incoming GPDF has rxAfterTx bit set
+ */
 #define EMBER_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK        0x01
-// A tx queue is available at gp stub to hold an outgoing GPDF
+
+/**
+ * @brief Mask to test if transmit queue is available at green power stub layer to hold an outgoing GPDF.
+ */
 #define EMBER_GP_BIDIRECTION_INFO_TX_QUEUE_AVAILABLE_MASK 0x02
+
+/**
+ * @brief Number of GP sink list entries. Minimum is 2 sink list entries.
+ */
+#define GP_SINK_LIST_ENTRIES 2
+
+/**
+ * @brief The size of the SinkList entries in sink table in form of octet string that has a format of [<1 byte length>, <n bytes for sink groups>]
+ */
+#define GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING (1 + (GP_SINK_LIST_ENTRIES * (sizeof(EmberGpSinkGroup))))
+
+/**
+ * @brief GP parameters list represented as a macro for GP endpoint incoming message handler and callbacks prototypes.
+ */
+#define GP_PARAMS                         \
+  EmberStatus status,                     \
+  uint8_t gpdLink,                        \
+  uint8_t sequenceNumber,                 \
+  EmberGpAddress * addr,                  \
+  EmberGpSecurityLevel gpdfSecurityLevel, \
+  EmberGpKeyType gpdfSecurityKeyType,     \
+  bool autoCommissioning,                 \
+  uint8_t bidirectionalInfo,              \
+  uint32_t gpdSecurityFrameCounter,       \
+  uint8_t gpdCommandId,                   \
+  uint32_t mic,                           \
+  uint8_t proxyTableIndex,                \
+  uint8_t gpdCommandPayloadLength,        \
+  uint8_t * gpdCommandPayload
+
+/**
+ * @brief GP arguments list represented as a macro while calling GP endpoint incoming message handler and callbacks.
+ */
+#define GP_ARGS            \
+  status,                  \
+  gpdLink,                 \
+  sequenceNumber,          \
+  addr,                    \
+  gpdfSecurityLevel,       \
+  gpdfSecurityKeyType,     \
+  autoCommissioning,       \
+  bidirectionalInfo,       \
+  gpdSecurityFrameCounter, \
+  gpdCommandId,            \
+  mic,                     \
+  proxyTableIndex,         \
+  gpdCommandPayloadLength, \
+  gpdCommandPayload
+
+/**
+ * @brief GP arguments list with void type cast represented as a macro to be used in callback stubs.
+ */
+#define GP_UNUSED_ARGS           \
+  (void)status;                  \
+  (void)gpdLink;                 \
+  (void)sequenceNumber;          \
+  (void)addr;                    \
+  (void)gpdfSecurityLevel;       \
+  (void)gpdfSecurityKeyType;     \
+  (void)autoCommissioning;       \
+  (void)rxAfterTx;               \
+  (void)gpdSecurityFrameCounter; \
+  (void)gpdCommandId;            \
+  (void)mic;                     \
+  (void)proxyTableIndex;         \
+  (void)gpdCommandPayloadLength; \
+  (void)gpdCommandPayload;
+
+/**
+ * @brief Bit mask for the proxy table ebtry option bit representing in-range bit field.
+ */
+#define GP_PROXY_TABLE_OPTIONS_IN_RANGE (BIT(10))
+
+/**
+ * @brief Maximum number of bytes in a green power commissioning frame excluding 3 bytes for device ID, option and application information fields.
+ */
+#define GP_COMMISSIONING_MAX_BYTES (55 - 3)
+
+/**
+ * @brief GPD Source ID when requesting channel request.
+ */
+#define GP_GPD_SRC_ID_FOR_CAHNNEL_CONFIG 0x00000000
+
+/**
+ * @brief GPD wildcard Source ID.
+ */
+#define GP_GPD_SRC_ID_WILDCARD           0xFFFFFFFF
+
+/**
+ * @brief GPD Reserved Source ID. Used in maintenance frame.
+ */
+#define GP_GPD_SRC_ID_RESERVED_0 0x00000000
+
+/**
+ * @brief GPD Reserved Source ID. All addresses between 0xFFFFFFF9 and 0xFFFFFFFE are reserved.
+ */
+#define GP_GPD_SRC_ID_RESERVED_FFFFFF9 0xFFFFFFF9
+
+/**
+ * @brief GPD Reserved Source ID. All addresses between 0xFFFFFFF9 and 0xFFFFFFFE are reserved.
+ */
+#define GP_GPD_SRC_ID_RESERVED_FFFFFFE 0xFFFFFFFE
+
+/**
+ * @brief Default value for derived group ID when alias is not used.
+ */
+#define GP_DERIVED_GROUP_ALIAS_NOT_USED 0xffff
+
+/**
+ * @brief Tunneling delay constant Dmin_b in milliseconds. Ref green power specification for more information on this constant.
+ */
+#define GP_DMIN_B 32
+
+/**
+ * @brief Tunneling delay constant Dmin_u in milliseconds. Ref green power specification for more information on this constant.
+ */
+#define GP_DMIN_U 5
+
+/**
+ * @brief Tunneling delay constant Dmax in milliseconds. Ref green power specification for more information on this constant.
+ */
+#define GP_DMAX 100
+
 /**
  * @name GP Types
  */
@@ -87,7 +215,7 @@ enum
   EMBER_GP_SECURITY_KEY_GPD_DERIVED = 0x07,
 };
 /**
- * @brief Green Power Application Id
+ * @brief Green Power Application ID
  */
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum EmberGpApplicationId
@@ -102,7 +230,6 @@ enum
   EMBER_GP_APPLICATION_IEEE_ADDRESS = 0x02,
 };
 
-#define EMBER_GP_APPLICATION_ID_MASK 0x03
 /**
  * @brief GP proxy table entry status.
  */
@@ -218,14 +345,6 @@ typedef struct {
     EmberGpSinkGroup groupList;   // Entry for Sink Group List
   } target;
 } EmberGpSinkListEntry;
-
-/**
- * @brief Number of GP sink list entries. Minimum is 2 sink list entries.
- */
-#define GP_SINK_LIST_ENTRIES 2
-
-// The size of the SinkList entries in sink table in format of octet string that has a format of {<1 byte length>, <n bytes for sink groups>}
-#define GP_SIZE_OF_SINK_LIST_ENTRIES_OCTET_STRING (1 + (GP_SINK_LIST_ENTRIES * (sizeof(EmberGpSinkGroup))))
 
 /**
  * @brief The internal representation of a proxy table entry.
@@ -431,59 +550,6 @@ typedef struct {
   uint16_t queueEntryLifetimeMs;
 } EmberGpTxQueueEntry;
 
-#define GP_PARAMS                         \
-  EmberStatus status,                     \
-  uint8_t gpdLink,                        \
-  uint8_t sequenceNumber,                 \
-  EmberGpAddress * addr,                  \
-  EmberGpSecurityLevel gpdfSecurityLevel, \
-  EmberGpKeyType gpdfSecurityKeyType,     \
-  bool autoCommissioning,                 \
-  uint8_t bidirectionalInfo,              \
-  uint32_t gpdSecurityFrameCounter,       \
-  uint8_t gpdCommandId,                   \
-  uint32_t mic,                           \
-  uint8_t proxyTableIndex,                \
-  uint8_t gpdCommandPayloadLength,        \
-  uint8_t * gpdCommandPayload
-
-#define GP_ARGS            \
-  status,                  \
-  gpdLink,                 \
-  sequenceNumber,          \
-  addr,                    \
-  gpdfSecurityLevel,       \
-  gpdfSecurityKeyType,     \
-  autoCommissioning,       \
-  bidirectionalInfo,       \
-  gpdSecurityFrameCounter, \
-  gpdCommandId,            \
-  mic,                     \
-  proxyTableIndex,         \
-  gpdCommandPayloadLength, \
-  gpdCommandPayload
-
-#define GP_UNUSED_ARGS           \
-  (void)status;                  \
-  (void)gpdLink;                 \
-  (void)sequenceNumber;          \
-  (void)addr;                    \
-  (void)gpdfSecurityLevel;       \
-  (void)gpdfSecurityKeyType;     \
-  (void)autoCommissioning;       \
-  (void)rxAfterTx;               \
-  (void)gpdSecurityFrameCounter; \
-  (void)gpdCommandId;            \
-  (void)mic;                     \
-  (void)proxyTableIndex;         \
-  (void)gpdCommandPayloadLength; \
-  (void)gpdCommandPayload;
-
-#define GP_PROXY_TABLE_OPTIONS_IN_RANGE (BIT(10))
-
-//3 consumed by device id, options, and app info byte
-#define GP_COMMISSIONING_MAX_BYTES (55 - 3)
-
 /**
  * @brief Application information.
  * During the commissioning of GPD that supports generic switch, multi sensor extension and compact report attribute
@@ -604,10 +670,7 @@ typedef struct {
   /** Saved contacts */
   uint8_t savedContact;
 }EmberGpSwitchInformation;
-/**
- * @brief Number of maximum option record entries in translation table.
- */
-#define TT_NB_MAX_OPTION_RECORD                                         (8)
+
 /**
  * @brief Switch Information.
  */
@@ -655,24 +718,6 @@ typedef struct {
 } EmberGpTranslationTableAdditionalInfoBlockOptionRecordField;
 
 //@} \\END GP Types
-
-#define GP_GPD_SRC_ID_FOR_CAHNNEL_CONFIG 0x00000000
-#define GP_GPD_SRC_ID_WILDCARD           0xFFFFFFFF
-
-// GPD SrcID reserved values
-#define GP_GPD_SRC_ID_RESERVED_0 0x00000000
-#define GP_GPD_SRC_ID_RESERVED_FFFFFF9 0xFFFFFFF9
-#define GP_GPD_SRC_ID_RESERVED_FFFFFFA 0xFFFFFFFA
-#define GP_GPD_SRC_ID_RESERVED_FFFFFFB 0xFFFFFFFB
-#define GP_GPD_SRC_ID_RESERVED_FFFFFFC 0xFFFFFFFC
-#define GP_GPD_SRC_ID_RESERVED_FFFFFFD 0xFFFFFFFD
-#define GP_GPD_SRC_ID_RESERVED_FFFFFFE 0xFFFFFFFE
-
-#define GP_DERIVED_GROUP_ALIAS_NOT_USED 0xffff
-
-#define GP_DMIN_B 32
-#define GP_DMIN_U 5
-#define GP_DMAX 100
 
 /**
  * @name API

@@ -40,10 +40,14 @@ extern "C" {
 // -----------------------------------------------------------------------------
 #include "sl_status.h"
 #include <inttypes.h>
+#include "sl_component_catalog.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+
 /// LED ID enum typedef
 typedef enum sl_wisun_led_id {
   /// LED ID Unknown
@@ -77,12 +81,6 @@ typedef struct sl_wisun_led_signal {
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
-
-/**************************************************************************//**
- * @brief Init LED driver component.
- * @details init thread and message queue
- *****************************************************************************/
-void sl_wisun_led_driver_init(void);
 
 /**************************************************************************//**
  * @brief Set LED signal.
@@ -122,6 +120,14 @@ sl_status_t sl_wisun_led_toggle(const sl_wisun_led_id_t led_id);
  * @return SL_STATUS_OK on success, SL_STATUS_FAIL on failure
  *****************************************************************************/
 sl_status_t sl_wisun_led_terminate(void);
+
+#endif
+
+/**************************************************************************//**
+ * @brief Init LED driver component.
+ * @details init thread and message queue
+ *****************************************************************************/
+void sl_wisun_led_driver_init(void);
 
 #ifdef __cplusplus
 }

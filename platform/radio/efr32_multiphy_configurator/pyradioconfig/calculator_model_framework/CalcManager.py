@@ -705,6 +705,25 @@ class CalcManager(object):
             if value is not None:
                 variable.override = value
 
+    def set_public_log_flag(self, modem_model):
+        """
+        Hide model output display in studio log based on model variable in_public_log flag
+
+        Args:
+            modem_model:
+
+        Returns:
+
+        """
+
+        profile = modem_model.profile
+
+        for variable in modem_model.vars:
+            if hasattr(profile.outputs, variable.name):
+                output = getattr(profile.outputs, variable.name)
+
+                if variable.in_public_log is not None:
+                    output.in_public_log = variable.in_public_log
 
     def read_profile_into_variables(self, modem_model):
         """Load Profile values into variables in data model
@@ -989,6 +1008,9 @@ class CalcManager(object):
         input_error_list, input_errorstr = ModelChecking.check_all_profile_inputs_populated(model_instance)
 
         result_code, error_message = self.execute_calc_fuctions(model_instance)
+
+        ## Runtime post-calculation set of public log flag
+        self.set_public_log_flag(model_instance)
 
         ## Runtime post-calculation validation ##
         output_error_list, output_errorstr = ModelChecking.check_all_profile_outputs_calculated(model_instance)

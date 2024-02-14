@@ -74,6 +74,8 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz =
 #endif
 
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec =
+  &sl_rail_ieee802154_phy_2G4Hz_1Mbps_fec_38M4Hz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
   &sl_rail_ieee802154_phy_2G4Hz_2Mbps_38M4Hz_channelConfig;
 #endif
@@ -193,6 +195,8 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoex =
 #endif
 
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec =
+  &sl_rail_ieee802154_phy_2G4Hz_1Mbps_fec_39MHz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
   &sl_rail_ieee802154_phy_2G4Hz_2Mbps_39MHz_channelConfig;
 #endif
@@ -293,6 +297,8 @@ const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHzAntDivCoex =
 #endif
 
 #if RAIL_IEEE802154_SUPPORTS_2MBPS_PHY
+const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz1MbpsFec =
+  &sl_rail_ieee802154_phy_2G4Hz_1MbpsFec_40MHz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_IEEE802154_Phy2p4GHz2Mbps =
   &sl_rail_ieee802154_phy_2G4Hz_2Mbps_40MHz_channelConfig;
 #endif

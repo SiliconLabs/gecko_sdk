@@ -75,4 +75,4 @@ SL_WEAK void sl_btmesh_provisioner_on_init(sl_status_t result)
   (void)result;
 }
 
-/** @} (end addtogroup provisionee) */
+/** @} (end addtogroup provisioner) */

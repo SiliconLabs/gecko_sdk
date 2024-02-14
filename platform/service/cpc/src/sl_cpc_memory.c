@@ -508,6 +508,9 @@ sl_status_t sli_cpc_free_buffer_handle(sl_cpc_buffer_handle_t *handle)
 #endif
 
   switch (handle->type) {
+    case SL_CPC_RX_USER_BUFFER_HANDLE:
+      rx_buffer_handle_freed = true;
+      break;
     case SL_CPC_RX_INTERNAL_BUFFER_HANDLE:
       // Buffer was allocated but handle is freed before being passed to user
       // This means that we must free the rx buffer or it will be leaked
@@ -529,7 +532,6 @@ sl_status_t sli_cpc_free_buffer_handle(sl_cpc_buffer_handle_t *handle)
       SL_FALLTHROUGH
     case SL_CPC_TX_SFRAME_BUFFER_HANDLE:
     case SL_CPC_TX_DATA_BUFFER_HANDLE:
-    case SL_CPC_RX_USER_BUFFER_HANDLE:
     case SL_CPC_UNKNOWN_BUFFER_HANDLE:
       break;
     default:

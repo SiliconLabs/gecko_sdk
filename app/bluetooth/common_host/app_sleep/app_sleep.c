@@ -3,7 +3,7 @@
  * @brief OS dependent sleep functionality.
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,28 +30,50 @@
 
 #include "app_sleep.h"
 
-#if defined(POSIX) && POSIX == 1
-inline void app_sleep_us(uint64_t usec)
-{
-  usleep(usec);
-}
-#else
+#if defined(POSIX)
+#include <unistd.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/errno.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#endif
+
+#if defined(POSIX)
+// POSIX compliant
 void app_sleep_us(uint64_t usec)
 {
-  HANDLE timer;
-  LARGE_INTEGER due_time;
+  struct timeval tv;
+  int ret = -1;
 
-  if (usec == 0) {
-    SwitchToThread();
-    return;
+  tv.tv_sec = usec / 1000000;
+  tv.tv_usec = usec % 1000000;
+
+  do {
+    // using select() instead of usleep(usec) results in better precision and slightly lower overall CPU usage as well
+    ret = select(1, NULL, NULL, NULL, &tv);
+  } while ((ret == -1) && (errno == EINTR)); // select can be interruped by SIGALRM
+}
+#elif defined(_WIN32)
+static NTSTATUS(__stdcall * NtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval) = NULL;
+static NTSTATUS(__stdcall * ZwSetTimerResolution)(IN ULONG RequestedResolution, IN BOOLEAN Set, OUT PULONG ActualResolution) = NULL;
+
+void app_sleep_us(uint64_t usec)
+{
+  static BOOL lazy_init = TRUE; // need to get some function pointers and set timer resolution before the first use
+  LARGE_INTEGER interval;
+
+  if (lazy_init) {
+    ULONG actualResolution;
+    // import two ntdll functions which are needed
+    ZwSetTimerResolution = (NTSTATUS(__stdcall*)(ULONG, BOOLEAN, PULONG))GetProcAddress(GetModuleHandle("ntdll.dll"), "ZwSetTimerResolution");
+    NtDelayExecution = (NTSTATUS(__stdcall*)(BOOL, PLARGE_INTEGER))GetProcAddress(GetModuleHandle("ntdll.dll"), "NtDelayExecution");
+    // set high resolution
+    ZwSetTimerResolution(1, TRUE, &actualResolution);
+    lazy_init = FALSE;
   }
 
-  // Convert to 100 nanosec interval, negative value indicates relative time
-  due_time.QuadPart = -((10 * usec) - 1);
-
-  timer = CreateWaitableTimer(NULL, TRUE, NULL);
-  SetWaitableTimer(timer, &due_time, 0, NULL, NULL, 0);
-  WaitForSingleObject(timer, INFINITE);
-  CloseHandle(timer);
+  interval.QuadPart = -1 * (int)(usec * 10);
+  NtDelayExecution(FALSE, &interval);
 }
 #endif

@@ -238,6 +238,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   DPRINTF("\r\nIsWakeupCausedByRtccTimeout=%s", (IsWakeupCausedByRtccTimeout()) ? "true" : "false");
   DPRINTF("\r\nCompletedSleepDurationMs   =%u", GetCompletedSleepDurationMs());
 
+  // Change the zpal_pm_device_type here so that the device can reach the lowest level of power consumption
+  zpal_pm_set_device_type(ZPAL_PM_DEVICE_NOT_LISTENING);
+
   // Wait for and process events
   DPRINT("\r\nSensorPIR Event processor Started\n");
   for (;;)

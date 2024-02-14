@@ -454,7 +454,7 @@ void NetICMPv4_Rx(NET_BUF  *p_buf,
 
   NET_CTR_STAT_INC(Net_StatCtrs.ICMPv4.RxMsgCompCtr);
 
-exit:
+  exit:
   return;
 }
 
@@ -527,7 +527,7 @@ CPU_INT16U NetICMPv4_TxEchoReq(NET_IPv4_ADDR *p_addr_dest,
     goto exit_release;
   }
 
-exit_release:
+  exit_release:
   Net_GlobalLockRelease();
 
   return (id_seq.SeqNbr);
@@ -780,10 +780,10 @@ void NetICMPv4_TxMsgErr(NET_BUF    *p_buf,
 
   goto exit;
 
-exit_discard:
+  exit_discard:
   NetICMPv4_TxPktDiscard(p_msg_err);
 
-exit:
+  exit:
   return;
 }
 
@@ -853,7 +853,7 @@ static void NetICMPv4_RxReplyDemux(NET_BUF        *p_buf,
 
   PP_UNUSED_PARAM(p_buf);
 
-exit:
+  exit:
   return;
 }
 
@@ -1310,7 +1310,7 @@ static NET_ICMP_MSG_TYPE NetICMPv4_RxPktValidate(NET_BUF        *p_buf,
       goto exit;
   }
 
-exit:
+  exit:
   return (msg_type);
 }
 
@@ -1682,10 +1682,10 @@ static NET_ICMPv4_REQ_ID_SEQ NetICMPv4_TxMsgReqHandler(CPU_INT08U     type,
 
   goto exit;
 
-exit_discard:
+  exit_discard:
   NetICMPv4_TxPktDiscard(p_msg_req);
 
-exit:
+  exit:
   return (id_seq);
 }
 
@@ -1860,7 +1860,8 @@ static void NetICMPv4_TxMsgErrValidate(NET_BUF      *p_buf,
   }
 
   //                                                               ---------------- CHK ICMPv4 ERR MSG ----------------
-  if (p_ip_hdr->Protocol == NET_IP_HDR_PROTOCOL_ICMP) {         // If rx'd IP datagram is ICMP, ...
+  if ((p_ip_hdr->Protocol == NET_IP_HDR_PROTOCOL_ICMP)             // If rx'd IP datagram is ICMP, ...
+      && (p_buf_hdr->ICMP_MsgIx != NET_BUF_IX_NONE)) {             // ICMP_MsgIx can be NONE if called from other layer
     p_icmp_hdr = (NET_ICMPv4_HDR *)&p_buf->DataPtr[p_buf_hdr->ICMP_MsgIx];
 
     switch (p_icmp_hdr->Type) {                                 // ... chk ICMPv4 msg type & ...
@@ -1891,7 +1892,7 @@ static void NetICMPv4_TxMsgErrValidate(NET_BUF      *p_buf,
     }
   }
 
-exit:
+  exit:
   return;
 }
 
@@ -2297,10 +2298,10 @@ static void NetICMPv4_TxReqReply(NET_BUF        *p_buf,
 
   goto exit;
 
-exit_discard:
+  exit_discard:
   NetICMPv4_TxPktDiscard(p_msg_reply);
 
-exit:
+  exit:
   return;
 }
 

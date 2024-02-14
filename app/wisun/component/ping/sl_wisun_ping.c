@@ -424,10 +424,10 @@ static void _ping_task_fnc(void *args)
   _fill_payload(&icmp_req);
 
   SL_WISUN_THREAD_LOOP {
-    stat = osMessageQueueGet(_ping_req_msg_queue, &req, &msg_prio, 0U);
+    stat = osMessageQueueGet(_ping_req_msg_queue, &req, &msg_prio, osWaitForever);
     (void) msg_prio;
     if (stat != osOK) {
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
       continue;
     }
 
@@ -443,7 +443,7 @@ static void _ping_task_fnc(void *args)
     req.remote_addr.sin6_family = AF_INET6;
     req.remote_addr.sin6_port = htons(SL_WISUN_PING_ICMP_PORT);
 
-    sockid = socket(AF_INET6, (SOCK_RAW | SOCK_NONBLOCK), IPPROTO_ICMP);
+    sockid = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMP);
 
     if (sockid == SOCKET_INVALID_ID) {
       _prepare_and_push_failed_response(&resp, SL_WISUN_PING_STATUS_SOCKET_ERROR);
@@ -483,7 +483,7 @@ static void _ping_task_fnc(void *args)
         if (r > 0L) {
           break;
         }
-        app_wisun_dispatch_thread();
+        sl_wisun_app_core_util_dispatch_thread();
         time_cnt = _get_ms_val_from_start_time_stamp(&req);
       }
 
@@ -510,7 +510,7 @@ static void _ping_task_fnc(void *args)
       osMessageQueuePut(_ping_resp_msg_queue, &resp, 0U, 0U);
 
       // thread dispatch
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
     } while (multicast);
 
     osEventFlagsSet(_ping_evt, SL_WISUN_PING_STATUS_TRANSACTION_END);

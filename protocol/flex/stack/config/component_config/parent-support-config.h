@@ -37,8 +37,11 @@
 // <i> The maximum numbers of children the coordinator can manage. While the maximum size is 64, for range extenders the child table size can not exceed 32 entries.
 #define EMBER_CHILD_TABLE_SIZE                                      (16)
 
-// <o EMBER_CHILD_TIMEOUT_SEC> Child Timeout in seconds<1-0x20C400>
+// <o EMBER_CHILD_TIMEOUT_SEC> Child Timeout in seconds
 // <i> Default: 3600
+// <i> The max value possible depends on the sleeptimer clock frequency.
+// <i> A typical max value would be 131071 seconds for a default sleeptimer frequency of 32768 Hz.
+// <i> The stack checks at the initialization if the user configuration is compatible with the sleeptimer max value and asserts if it is not the case.
 // <i> The time in seconds after which the parent shall remove the child from its child table if it did not hear from it. Range extenders periodically exchange network-level commands with the coordinator. End devices and sleepy end devices can periodically poll as keep alive mechanism.
 #define EMBER_CHILD_TIMEOUT_SEC                                     (3600)
 

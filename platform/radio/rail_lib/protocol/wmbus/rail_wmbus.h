@@ -37,6 +37,11 @@
 extern "C" {
 #endif
 
+/// @addtogroup WMBUS Wireless M-Bus
+/// @ingroup Protocol_Specific
+/// @brief Wireless M-Bus (WMBUS) configuration
+/// @{
+
 /**
  * @enum RAIL_WMBUS_Phy_t
  * @brief The RX variant of the WMBUS T+C PHY.
@@ -52,25 +57,32 @@ RAIL_ENUM(RAIL_WMBUS_Phy_t) {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_WMBUS_ModeTFrameA        ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeTFrameA)
-#define RAIL_WMBUS_ModeCFrameA        ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeCFrameA)
-#define RAIL_WMBUS_ModeCFrameB        ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeCFrameB)
+#define RAIL_WMBUS_ModeTFrameA ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeTFrameA)
+#define RAIL_WMBUS_ModeCFrameA ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeCFrameA)
+#define RAIL_WMBUS_ModeCFrameB ((RAIL_WMBUS_Phy_t) RAIL_WMBUS_ModeCFrameB)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * Configure WMBUS simultaneous M2O RX of T and C modes feature.
  *
- * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] railHandle A RAIL instance handle.
  * @param[in] enableSimultaneousTCRx True to enable WMBUS simultaneous M2O RX of T and C modes.
- * @return A status code indicating success of the function call.
+ * @return Status code indicating success of the function call.
  *
  * If simultaneous M2O RX of T and C modes is enabled, when
  * PHY_wMbus_ModeTC_M2O_100k_frameA is loaded, mode T Frame A and mode C frame
  * A/B can be received. The mode and frame type of the last received packet is
  * available in \ref RAIL_RxPacketDetails_t::subPhyId.
+ *
+ * @note This WMBUS feature is supported only on some parts.
+ * The preprocessor symbol \ref RAIL_WMBUS_SUPPORTS_SIMULTANEOUS_T_C_RX and the
+ * runtime function \ref RAIL_WMBUS_SupportsSimultaneousTCRx() may be used to
+ * test for support.
  */
 RAIL_Status_t RAIL_WMBUS_Config(RAIL_Handle_t railHandle,
                                 bool enableSimultaneousTCRx);
+
+/// @} // End of group WMBUS
 
 #ifdef __cplusplus
 }

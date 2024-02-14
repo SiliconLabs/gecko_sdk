@@ -62,7 +62,7 @@ enum {
 #define EMBER_MAC_INFO_LONG_SOURCE_DATAGRAM_MASK ((uint16_t)(BIT(13)))             // 0x2000
 
 // This macInfo field is used to transmit messages using the high bandwidth PHY
-#define EMBER_MAC_INFO_HIGH_BANDWIDTH_PHY_TX      ((uint16_t)(BIT(14)))             // 0x4000
+#define EMBER_MAC_INFO_HIGH_DATARATE_PHY_TX      ((uint16_t)(BIT(14)))             // 0x4000
 
 // For messages which are being exchanged via a secure medium like for
 // example BLE (Zigbee Direct) there is no NWK encryption needed

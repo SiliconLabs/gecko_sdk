@@ -13,11 +13,14 @@
  ******************************************************************************/
 #include "sl_wsrcp_crc.h"
 
-// width=16 poly=0x1021 init=0xffff refin=true refout=true xorout=0xffff check=0x906e residue=0xf0b8 name="CRC-16/IBM-SDLC"
-// https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-ibm-sdlc
-uint16_t crc16(const uint8_t *data, int len)
+// width=16 poly=0x1021 refin=true refout=true
+// Can be used to compute:
+//   init=0xffff, xorout=0x0000 (CRC-16/MCRF4XX)
+//   init=0xc6c6, xorout=0x0000 (CRC-A)
+// https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-mcrf4xx
+// https://reveng.sourceforge.io/crc-catalogue/16.htm#crc.cat.crc-16-iso-iec-14443-3-a
+uint16_t crc16(uint16_t crc, const uint8_t *data, int len)
 {
-    uint16_t crc = 0xFFFF;
     // Generated from http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
     static const uint16_t crc_table[256] = {
         0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf, 0x8c48,
@@ -55,7 +58,7 @@ uint16_t crc16(const uint8_t *data, int len)
     // https://zlib.net/crc_v3.txt
     while (len--)
         crc = crc_table[(crc ^ *data++) & 0xff] ^ (crc >> 8);
-    return crc ^ 0xFFFF;
+    return crc;
 }
 
 

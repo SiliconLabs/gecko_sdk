@@ -98,12 +98,12 @@ extern "C" {
  *   or RAM.
  *
  * @note
- *   The configuration EM_MSC_RUN_FROM_RAM is used for allocating the flash
- *   write functions in FLASH and RAM respectively. By default, flash write
+ *   The configuration EM_MSC_RUN_FROM_RAM is used to allocate the flash
+ *   write functions in RAM. By default, flash write
  *   functions are placed in RAM on EFM32G and Series 2 devices
- *   automatically and that could not be changed. For other devices,
- *   flash write functions are placed in FLASH but that could be changed using
- *   EM_MSC_RUN_FROM_RAM.
+ *   unless SL_RAMFUNC_DISABLE is defined. For other devices,
+ *   flash write functions are placed in FLASH by default unless
+ *   EM_MSC_RUN_FROM_RAM is defined and SL_RAMFUNC_DISABLE is not defined.
  *
  * @deprecated
  *   The function called MSC_WriteWordFast() is deprecated.

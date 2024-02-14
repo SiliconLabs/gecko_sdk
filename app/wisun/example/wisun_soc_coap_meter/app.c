@@ -66,13 +66,13 @@ void app_task(void *args)
   (void) args;
 
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
 
   while (1) {
 #if !SL_WISUN_COAP_RESOURCE_HND_SERVICE_ENABLE
     sl_wisun_meter_process();
 #endif
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

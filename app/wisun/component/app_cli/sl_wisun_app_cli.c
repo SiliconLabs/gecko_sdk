@@ -44,7 +44,7 @@
 #include "sl_wisun_cli_core.h"
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
   #include "sl_wisun_app_core_util.h"
-  #include "sl_wisun_app_core_util_config.h"
+  #include "sl_wisun_app_core_config.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -435,7 +435,7 @@ static void _app_connect(const sl_wisun_phy_config_type_t config_type);
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 /// Wi-SUN application regulation
-static sl_wisun_regulation_t app_regulation = (sl_wisun_regulation_t)WISUN_APP_REGULATION;
+static sl_wisun_regulation_t app_regulation = (sl_wisun_regulation_t)SL_WISUN_APP_CORE_REGULATION;
 #endif
 
 /// Common PHY parameters for CLI setter/getter
@@ -851,7 +851,7 @@ const app_cli_entry_t app_settings_entries[] =
 #if defined(SL_CATALOG_APP_PROJECT_INFO_PRESENT)
 void app_about(void)
 {
-  app_wisun_project_info_print(false);
+  sl_wisun_app_core_util_project_info_print(false);
 }
 #endif
 
@@ -877,7 +877,7 @@ static void _app_connect(const sl_wisun_phy_config_type_t config_type)
     return;
   }
   // call connect API
-  app_wisun_network_connect();
+  sl_wisun_app_core_network_connect();
 }
 
 /* CLI app connect to FAN 1.0 handler */
@@ -1047,8 +1047,8 @@ static sl_status_t _app_cli_get_connection(char *value_str,
   sl_status_t res = SL_STATUS_FAIL;
   uint32_t value;
   const app_enum_t* value_enum;
-  (void)key_str;
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  (void)key_str;
 
   if ((value_str == NULL) || (entry == NULL)) {
     return SL_STATUS_FAIL;
@@ -1098,10 +1098,10 @@ static sl_status_t _app_cli_set_network_size(const char *value_str,
                                              const char *key_str,
                                              const app_cli_entry_t *entry)
 {
-  (void)key_str;
-  (void)entry;
   sl_status_t res = SL_STATUS_FAIL;
   uint32_t value = 0U;
+  (void)key_str;
+  (void)entry;
 
   res = app_util_get_integer(&value,
                              value_str,
@@ -1120,10 +1120,10 @@ static sl_status_t _app_cli_set_tx_power(const char *value_str,
                                          const char *key_str,
                                          const app_cli_entry_t *entry)
 {
-  (void)key_str;
-  (void)entry;
   sl_status_t res = SL_STATUS_FAIL;
   int32_t value = 0U;
+  (void)key_str;
+  (void)entry;
 
   res = app_util_get_integer((uint32_t *)&value,
                              value_str,
@@ -1143,9 +1143,9 @@ static sl_status_t _app_cli_get_network_name(char *value_str,
                                              const app_cli_entry_t *entry)
 {
   sl_status_t res = SL_STATUS_FAIL;
+  char name_buffer[MAX_SIZE_OF_NETWORK_NAME] = { 0 };
   (void)key_str;
   (void)entry;
-  char name_buffer[MAX_SIZE_OF_NETWORK_NAME] = { 0 };
 
   // gets the network name
   res = app_wisun_setting_get_network_name(name_buffer, sizeof(name_buffer));
@@ -1163,10 +1163,9 @@ static sl_status_t _app_cli_get_network_size(char *value_str,
                                              const app_cli_entry_t *entry)
 {
   sl_status_t res = SL_STATUS_FAIL;
-  (void)key_str;
-  (void)entry;
   const app_enum_t* value_enum;
   uint8_t value = 0U;
+  (void)key_str;
 
   res = app_wisun_setting_get_network_size(&value);
   // finds the proper string for the value
@@ -1196,9 +1195,9 @@ static sl_status_t _app_cli_get_tx_power(char *value_str,
                                          const app_cli_entry_t *entry)
 {
   sl_status_t res = SL_STATUS_FAIL;
+  int8_t value = 0U;
   (void)key_str;
   (void)entry;
-  int8_t value = 0U;
 
   res = app_wisun_setting_get_tx_power(&value);
   if (res == SL_STATUS_OK) {
@@ -1324,9 +1323,9 @@ static sl_status_t _app_cli_set_phy(const char *value_str,
                                     const char *key_str,
                                     const app_settings_entry_t *entry)
 {
-  (void)key_str;
   sl_status_t res = SL_STATUS_FAIL;
   int32_t value = 0U;
+  (void)key_str;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return res;
@@ -1396,8 +1395,8 @@ static sl_status_t _app_ms_get_counters(char *value_str,
                                         const app_cli_entry_t *entry)
 {
   sl_status_t res = SL_STATUS_FAIL;
-  (void)key_str;
   sl_wisun_statistics_t stat;
+  (void)key_str;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return res;
@@ -1430,12 +1429,12 @@ static sl_status_t _app_set_regulation(const char *value_str,
                                        const char *key_str,
                                        const app_settings_entry_t *entry)
 {
-  (void)key_str;
-  (void)entry;
   sl_status_t res = SL_STATUS_FAIL;
   uint32_t value = 0U;
-  regulation_thresholds_t thresholds;
+  sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  (void)key_str;
+  (void)entry;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return SL_STATUS_FAIL;
@@ -1464,7 +1463,7 @@ static sl_status_t _app_set_regulation(const char *value_str,
 
   if (strstr(entry->key, "regulation")) {
     // sets the thresholds
-    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
     res = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold,
                                                 thresholds.alert_threshold);
     if (res != SL_STATUS_OK) {
@@ -1482,10 +1481,10 @@ static sl_status_t _app_set_regulation(const char *value_str,
     }
 
     // sets status of regulation
-    if ((sl_wisun_regulation_t)value == SL_WISUN_REGULATION_NONE) {
-      app_wisun_set_regulation_active(false);
+    if ((sl_wisun_regulation_t)value == SL_WISUN_APP_CORE_REGULATION_NONE) {
+      sl_wisun_app_core_set_regulation_active(false);
     } else {
-      app_wisun_set_regulation_active(true);
+      sl_wisun_app_core_set_regulation_active(true);
     }
   }
 
@@ -1496,12 +1495,11 @@ static sl_status_t _app_set_regulation_warning_threshold(const char *value_str,
                                                          const char *key_str,
                                                          const app_settings_entry_t *entry)
 {
-  (void)key_str;
-  (void)entry;
   sl_status_t res = SL_STATUS_FAIL;
   uint32_t value = 0U;
-  regulation_thresholds_t thresholds;
+  sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  (void)key_str;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return SL_STATUS_FAIL;
@@ -1529,13 +1527,13 @@ static sl_status_t _app_set_regulation_warning_threshold(const char *value_str,
   }
 
   if (strstr(entry->key, "regulation_warning_threshold")) {
-    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
     res = sl_wisun_set_regulation_tx_thresholds((int8_t)value, thresholds.alert_threshold);
     if (res != SL_STATUS_OK) {
       printf("[Failed: unable to set regulation TX warning threshold: %lu]\n", res);
       return res;
     } else {
-      app_wisun_set_regulation_thresholds((int8_t)value, thresholds.alert_threshold);
+      sl_wisun_app_core_set_regulation_thresholds((int8_t)value, thresholds.alert_threshold);
     }
   }
 
@@ -1546,12 +1544,12 @@ static sl_status_t _app_set_regulation_alert_threshold(const char *value_str,
                                                        const char *key_str,
                                                        const app_settings_entry_t *entry)
 {
-  (void)key_str;
-  (void)entry;
   sl_status_t res = SL_STATUS_FAIL;
   uint32_t value = 0U;
-  regulation_thresholds_t thresholds;
+  sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  (void)key_str;
+  (void)entry;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
     return SL_STATUS_FAIL;
@@ -1579,13 +1577,13 @@ static sl_status_t _app_set_regulation_alert_threshold(const char *value_str,
   }
 
   if (strstr(entry->key, "regulation_alert_threshold")) {
-    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
     res = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold, (int8_t)value);
     if (res != SL_STATUS_OK) {
       printf("[Failed: unable to set regulation TX alert threshold: %lu]\n", res);
       return res;
     } else {
-      app_wisun_set_regulation_thresholds(thresholds.warning_threshold, (int8_t)value);
+      sl_wisun_app_core_set_regulation_thresholds(thresholds.warning_threshold, (int8_t)value);
     }
   }
 
@@ -1596,12 +1594,11 @@ static sl_status_t _app_get_regulation(char *value_str,
                                        const char *key_str,
                                        const app_cli_entry_t *entry)
 {
-  sl_status_t res = SL_STATUS_FAIL;
-  const app_enum_t* value_enum;
+  const app_enum_t *value_enum = NULL;
   (void)key_str;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
-    return res;
+    return SL_STATUS_FAIL;
   }
 
   if (!strstr(entry->key, "regulation")) {
@@ -1632,16 +1629,15 @@ static sl_status_t _app_get_regulation_warning_threshold(char *value_str,
                                                          const char *key_str,
                                                          const app_cli_entry_t *entry)
 {
-  sl_status_t res = SL_STATUS_FAIL;
+  sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   (void)key_str;
-  regulation_thresholds_t thresholds;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
-    return res;
+    return SL_STATUS_FAIL;
   }
 
   if (strstr(entry->key, "regulation_warning_threshold")) {
-    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
     snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%d",
              thresholds.warning_threshold);
   }
@@ -1653,16 +1649,15 @@ static sl_status_t _app_get_regulation_alert_threshold(char *value_str,
                                                        const char *key_str,
                                                        const app_cli_entry_t *entry)
 {
-  sl_status_t res = SL_STATUS_FAIL;
+  sl_wisun_app_core_reg_thresholds_t thresholds = { 0U };
   (void)key_str;
-  regulation_thresholds_t thresholds;
 
   if ((value_str == NULL) || (entry == NULL) || (entry->key == NULL)) {
-    return res;
+    return SL_STATUS_FAIL;
   }
 
   if (strstr(entry->key, "regulation_alert_threshold")) {
-    (void)app_wisun_get_regulation_thresholds(&thresholds);
+    (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
     snprintf(value_str, APP_CLI_STR_VALUE_LENGTH, "%d",
              thresholds.alert_threshold);
   }
@@ -1678,13 +1673,14 @@ static sl_status_t _app_get_device_type(char *value_str,
 {
   const char *dev_type_str = NULL;
   sl_wisun_device_type_t dev_type = SL_WISUN_ROUTER;
+  (void) entry;
   (void) key_str;
 
-  if (value_str == NULL || entry == NULL || entry->key == NULL) {
+  if (value_str == NULL) {
     return SL_STATUS_FAIL;
   }
 
-  dev_type =  app_wisun_get_device_type();
+  dev_type =  sl_wisun_app_core_get_device_type();
   dev_type_str = app_wisun_trace_util_device_type_to_str((uint32_t) dev_type);
 
   if (dev_type_str == NULL) {
@@ -1701,14 +1697,14 @@ static sl_status_t _app_get_lfn_profile(char *value_str,
 {
   const char *lfn_profile_str = NULL;
   sl_wisun_lfn_profile_t lfn_profile = SL_WISUN_LFN_PROFILE_TEST;
-
+  (void) entry;
   (void) key_str;
 
-  if (value_str == NULL || entry == NULL || entry->key == NULL) {
+  if (value_str == NULL) {
     return SL_STATUS_FAIL;
   }
 
-  lfn_profile =  app_wisun_get_lfn_profile();
+  lfn_profile =  sl_wisun_app_core_get_lfn_profile();
   lfn_profile_str = app_wisun_trace_util_lfn_profile_to_str((uint32_t) lfn_profile);
 
   if (lfn_profile_str == NULL) {

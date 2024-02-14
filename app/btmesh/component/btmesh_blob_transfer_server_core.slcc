@@ -27,7 +27,7 @@ include:
 requires:
   - name: app_assert
   - name: app_btmesh_util
-  - name: btmesh_provisionee
+  - name: btmesh_role_init
   - name: btmesh_stack
   - name: btmesh_core
   - name: btmesh_blob_storage
@@ -35,6 +35,8 @@ requires:
   - name: silabs_core_sl_malloc
 provides:
   - name: btmesh_blob_transfer_server_core
+recommends:
+  - id: btmesh_provisionee
 template_file:
   - path: sli_btmesh_blob_transfer_server_instances.c.jinja
   - path: sli_btmesh_blob_transfer_server_instances.h.jinja

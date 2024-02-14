@@ -260,6 +260,8 @@ typedef enum {
   SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING  = 4,
   /// Join state 5: Operational
   SL_WISUN_JOIN_STATE_OPERATIONAL        = 5,
+  /// Disconnecting
+  SL_WISUN_JOIN_STATE_DISCONNECTING      = 6,
   /// Join state 4: Preferred parent selection
   SL_WISUN_JOIN_STATE_PARENT_SELECT      = 41,
   /// Join state 4: DHCP address acquisition
@@ -892,7 +894,9 @@ typedef enum {
   /// No regulation
   SL_WISUN_REGULATION_NONE = 0,
   /// ARIB, can only be used with JP regulatory domain
-  SL_WISUN_REGULATION_ARIB = 1
+  SL_WISUN_REGULATION_ARIB = 1,
+  /// WPC, can only be used with IN regulatory domain
+  SL_WISUN_REGULATION_WPC = 2,
 } sl_wisun_regulation_t;
 
 /// Enumeration for Mode Switch mode
@@ -915,14 +919,6 @@ typedef enum {
   /// Transmission duration is above alert threshold
   SL_WISUN_REGULATION_TX_LEVEL_ALERT = 2
 } sl_wisun_regulation_tx_level_t;
-
-/// Enumeration for unicast transmission mode
-typedef enum {
-  /// Default unicast transmission
-  SL_WISUN_UNICAST_TX_MODE_DEFAULT = 0,
-  /// Allow unicast transmission only on a slot
-  SL_WISUN_UNICAST_TX_MODE_SLOT = 1
-} sl_wisun_unicast_tx_mode_t;
 
 /// Broadcast MAC address
 extern const sl_wisun_mac_address_t sl_wisun_broadcast_mac;

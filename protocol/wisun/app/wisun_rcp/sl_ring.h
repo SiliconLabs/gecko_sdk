@@ -68,6 +68,7 @@ int ring_push_buf(struct ring *ring, const uint8_t *data, size_t len);
 int ring_pop(struct ring *ring);
 int ring_pop_buf(struct ring *ring, uint8_t *data, size_t len);
 int ring_get(struct ring *ring, unsigned int index);
+int ring_get_buf(struct ring *ring, unsigned int offset, uint8_t *data, size_t len);
 bool ring_is_empty(struct ring *ring);
 unsigned int ring_data_len(struct ring *ring);
 unsigned int ring_buffer_size(struct ring *ring);

@@ -57,7 +57,10 @@
 #include "sl_btmesh_factory_reset.h"
 #endif // SL_CATALOG_BTMESH_FACTORY_RESET_PRESENT
 
-#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 99) / 65535)
+// -----------------------------------------------------------------------------
+// Macros
+
+#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 32767) / 65535)
 
 // -----------------------------------------------------------------------------
 // BT mesh Friend Node Callbacks

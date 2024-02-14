@@ -297,7 +297,7 @@ sl_status_t sl_wisun_coap_notify_send_notification(const sl_wisun_coap_notify_t 
   int32_t sockid = SOCKET_INVALID_ID;
 
   // create socket
-  sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   if (sockid == SOCKET_RETVAL_ERROR) {
     return SL_STATUS_FAIL;
   }
@@ -397,7 +397,7 @@ static void _notify_thr_fnc(void * args)
   (void) args;
 
   SL_COAP_SERVICE_LOOP() {
-    if (!app_wisun_network_is_connected()) {
+    if (!sl_wisun_app_core_util_network_is_connected()) {
       osDelay(1000UL);
       continue;
     }

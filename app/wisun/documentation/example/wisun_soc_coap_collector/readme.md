@@ -28,69 +28,98 @@ The three Wi-SUN devices (Border Router, CoAP Meter, CoAP Collector) are now par
 
     wisun help
 
-The CoAP Collector application has three specific commands: `wisun register_meter [IPv6 address]`, `wisun remove_meter [IPv6 address]` and `wisun led_toggle [Meter Global IPv6 address] [LED number]`. Use the first command to register the CoAP Meter.
+The CoAP Collector application has four specific commands: `wisun register_meter [IPv6 address]`, `wisun remove_meter [IPv6 address]`, `wisun async_request [IPv6 address]` and `wisun list_meters`. Use the first command to register the Meter.
 
     wisun register_meter [CoAP Meter Global IPv6 address]
 
-The CoAP Collector starts monitoring and retrieving sensor data from the CoAP Meter. The sensor data consists of actual temperature and relative humidity sensor measurements from the SI7021 I²C sensor and dummy lux values. 
-The IP address of the CoAP meter and its schedule time to send are included in the packet payload also. 
-The CoAP Collector uses schedule parameter of the LFN CoAP meter to optimize the period time of request sending.
-Each update is output in the console as shown below.
+An async response shows a successful connection between the CoAP Collector and the CoAP Meter.
+
+    [Registration request sent to fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
+    > [fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
+    {
+      "token_len": 0,
+      "coap_status": 0,
+      "msg_code": 69,
+      "msg_type": 16,
+      "content_format": 50,
+      "msg_id": 7,
+      "payload_len": 68,
+      "uri_path_len": 10,
+      "token": "n/a",
+      "uri_path": "sensor/all",
+      "payload":
+    {"fd00:7283:7e00:0:b6e3:f9ff:fec5:8486" :
+    [
+    "#0: 29.43C 56.60% 512lux"
+    ]}
+    }
+
+The CoAP Meter device sends groups of measurement data periodically after the registration. Each update is output in the console as shown below.
 
     [fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
     {
-    "token_len": 0,
-    "coap_status": 0,
-    "msg_code": 69,
-    "msg_type": 32,
-    "content_format": 50,
-    "msg_id": 7,
-    "payload_len": 74,
-    "uri_path_len": 0,
-    "token": "n/a",
-    "uri_path": "n/a",
-    "payload": 
-    { 
-      "fd12:3456::62a4:23ff:fe37:a757 - 5000" : {
-        "id": 145,
-        "temp": 32.50,
-        "hum": 40.50,
-        "lx": 512
-      }
+      "token_len": 0,
+      "coap_status": 0,
+      "msg_code": 69,
+      "msg_type": 16,
+      "content_format": 50,
+      "msg_id": 7,
+      "payload_len": 180,
+      "uri_path_len": 10,
+      "token": "n/a",
+      "uri_path": "sensor/all",
+      "payload": 
+    {"fd00:7283:7e00:0:b6e3:f9ff:fec5:8486" : 
+    [
+    "#1: 29.43C 56.61% 480lux",
+    "#2: 29.45C 56.57% 600lux",
+    "#3: 29.43C 56.56% 580lux",
+    "#4: 29.41C 56.72% 555lux",
+    "#5: 29.42C 56.85% 512lux"
+    ]}
     }
-
-    }
-    [Response time: 643ms]
-
-It is possible to toggle the LEDs of the CoAP Meter from the CoAP Collector. Use the following command to toggle a specific CoAP Meter LED:
-
-    wisun led_toggle [Meter Global IPv6 address] [LED number]
-
-This is an example of toggling the LED 1 of the CoAP Meter.
-
-    >wisun led_toggle fd00:7283:7e00:0:b6e3:f9ff:fec5:8486 1
-    [Building request message (20 bytes)]
-    [fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
-    {
-    "token_len": 0,
-    "coap_status": 0,
-    "msg_code": 68,
-    "msg_type": 32,
-    "content_format": 4294967295,
-    "msg_id": 7,
-    "payload_len": 0,
-    "uri_path_len": 0,
-    "token": "n/a",
-    "uri_path": "n/a",
-    "payload": "n/a",
-    }
-    [Response time: 4221ms]
 
 A CoAP Collector can monitor several CoAP Meters simultaneously. To monitor an additional CoAP Meter, repeat the registration process with a CoAP Meter device connected to the same Wi-SUN network.
 
 To stop monitoring a device, enter:
 
     wisun remove_meter [CoAP Meter Global IPv6 address]
+
+A Collector can trigger an immediate measurement with an Async request.
+
+    wisun async_request [CoAP Meter Global IPv6 address]
+
+    [Async request sent to fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
+    > [fd00:7283:7e00:0:b6e3:f9ff:fec5:8486]
+    {
+      "token_len": 0,
+      "coap_status": 0,
+      "msg_code": 69,
+      "msg_type": 16,
+      "content_format": 50,
+      "msg_id": 7,
+      "payload_len": 70,
+      "uri_path_len": 10,
+      "token": "n/a",
+      "uri_path": "sensor/all",
+      "payload": 
+    {"fd00:7283:7e00:0:b6e3:f9ff:fec5:8486" : 
+    [
+    "#1: 29.57C 57.79% 600lux"
+    ]}
+    }
+    [Response time: 660ms]
+
+To list all the monitored CoAP Meters, use the following command:
+
+    wisun list_meters
+
+The response shows the registered CoAP Meters and the ongoing async requests.
+
+    [Async meters:]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9 - time to live: 23505 ms]
+    [Registered meters:]
+    [fd2a:6e01:9bfc:990c:20d:6fff:fe20:b6f9 - registered 3 seconds ago]
 
 ## Troubleshooting
 

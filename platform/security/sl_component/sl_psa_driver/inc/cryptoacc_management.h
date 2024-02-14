@@ -47,15 +47,14 @@
  * \{
  ******************************************************************************/
 
-#include <mbedtls/build_info.h>
+#include "sli_psa_driver_features.h"
 
-#include <stdlib.h>
-
-#include "em_device.h"
-
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 
 #include "psa/crypto.h"
+
+//------------------------------------------------------------------------------
+// Function Declarations
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,14 +75,6 @@ psa_status_t cryptoacc_management_acquire(void);
 psa_status_t cryptoacc_management_release(void);
 
 /**
- * \brief TRNG initialization
- *
- * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
- */
-psa_status_t cryptoacc_trng_initialize(void);
-
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
-/**
  * \brief Set up hardware SCA countermeasures
  *
  * \return PSA_SUCCESS if successful, PSA_ERROR_HARDWARE_FAILURE on error
@@ -93,17 +84,16 @@ psa_status_t cryptoacc_trng_initialize(void);
  *       encountered, but only after CM has been set up.
  */
 psa_status_t cryptoacc_initialize_countermeasures(void);
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG > 2
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CRYPTOACC_PRESENT */
+#endif // SLI_MBEDTLS_DEVICE_VSE
 
 /** \} (end addtogroup sl_cryptoacc_management) */
 /** \} (end addtogroup sl_crypto_plugins) */
 
 /// @endcond
 
-#endif /* CRYPTOACC_MANAGEMENT_H */
+#endif // CRYPTOACC_MANAGEMENT_H

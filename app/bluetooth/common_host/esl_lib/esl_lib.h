@@ -82,6 +82,17 @@ extern "C" {
 #define ESL_LIB_PAWR_RESPONSE_SLOT_COUNT_DEFAULT   23
 
 // -------------------------------
+// Connection parameter limits definition from Bluetooth Core spec 5.4
+#define ESL_LIB_CONN_INTERVAL_MIN       0x0006 // given in 1.25ms units, 6 * 1.25 = 7.5ms, limited by Core specification
+#define ESL_LIB_CONN_INTERVAL_MAX       0x0c80 // limited by Core specification to 4 seconds
+#define ESL_LIB_CONN_PERIPHERAL_LATENCY 1      // allowed connection interval to skip if there's no data
+#define ESL_LIB_CONN_DEFAULT_TIMEOUT    100    // value * 10ms, this is 1 second
+#define ESL_LIB_CONN_MIN_TIMEOUT        0x000a // min 100ms according to Core specification
+#define ESL_LIB_CONN_MAX_TIMEOUT        0x0c80 // max 32 seconds according to Core specification
+#define ESL_LIB_CONN_MIN_CE_LENGTH      0
+#define ESL_LIB_CONN_MAX_CE_LENGTH      0xffff
+
+// -------------------------------
 // Periodic advertisement absolute limits definition from Bluetooth Core spec 5.4
 #define ESL_LIB_PAWR_MIN_PA_INTERVAL               0x6
 #define ESL_LIB_PAWR_MAX_PA_INTERVAL               0xffff
@@ -237,6 +248,7 @@ typedef enum esl_lib_evt_type_e {
   ESL_LIB_EVT_TAG_FOUND,
   ESL_LIB_EVT_TAG_INFO,
   ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE,
+  ESL_LIB_EVT_CONNECTION_RETRY,
   ESL_LIB_EVT_CONNECTION_CLOSED,
   ESL_LIB_EVT_CONNECTION_OPENED,
   ESL_LIB_EVT_BONDING_DATA,
@@ -423,6 +435,15 @@ typedef struct esl_lib_evt_control_point_notification_s {
   esl_lib_array_t             data;              ///< Data
 } esl_lib_evt_control_point_notification_t;
 
+/// Connection retry event
+typedef struct esl_lib_evt_connection_retry_s {
+  esl_lib_connection_handle_t connection_handle; ///< Connection handle
+  sl_status_t                 reason;            ///< Retry (close event) reason
+  esl_lib_connection_state_t  connection_state;  ///< Last connection state when the error occured
+  esl_lib_address_t           address;           ///< BLE address
+  uint8_t                     retries_left;      ///< How many retry count left
+} esl_lib_evt_connection_retry_t;
+
 /// Connection closed event
 typedef struct esl_lib_evt_connection_closed_s {
   esl_lib_connection_handle_t connection_handle; ///< Connection handle
@@ -518,6 +539,7 @@ typedef union esl_lib_evt_data_u {
   esl_lib_evt_configure_tag_response_t     evt_configure_tag_response;     ///< Tag configuration response
   esl_lib_evt_control_point_response_t     evt_control_point_response;     ///< ESL Control Point response
   esl_lib_evt_control_point_notification_t evt_control_point_notification; ///< ESL Control Point notification
+  esl_lib_evt_connection_retry_t           evt_connection_retry;           ///< Connection retry
   esl_lib_evt_connection_closed_t          evt_connection_closed;          ///< Connection closed
   esl_lib_evt_connection_opened_t          evt_connection_opened;          ///< Connection opened
   esl_lib_evt_bonding_data_t               evt_bonding_data;               ///< Bonding data

@@ -1,9 +1,2 @@
-Flex SDK 3.7.0.0
-- Connect
-  - Support of SUN-FSK and SUN-OFDM
-  - Hardware Abstraction Layer update
-  - Added Hardware Support: MG24 QFN40, EFRBG22-E, EFR32xG28 Explorer Kit
-- RAIL SDK
-  - Connect OFDM support for some Applications
-  - EFR32xG28 Proprietary 2.4 GHz 15.4 Standard PHY Support
-  - Added Hardware Support: MG24 QFN40, EFRBG22-E, EFR32xG28 Explorer Kit
+Flex SDK 3.7.1.0
+- Targeted quality improvements and bug fixes

@@ -2467,7 +2467,8 @@ static void NetICMPv6_TxMsgErrValidate(NET_BUF      *p_buf,
   }
 
   //                                                               ---------------- CHK ICMPv6 ERR MSG ----------------
-  if (p_ip_hdr->NextHdr == NET_IP_HDR_PROTOCOL_ICMPv6) {        // If rx'd IP datagram is ICMPv6, ...
+  if ((p_ip_hdr->NextHdr == NET_IP_HDR_PROTOCOL_ICMPv6) &&         // If rx'd IP datagram is ICMPv6, ...
+      (p_buf_hdr->ICMP_MsgIx != NET_BUF_IX_NONE)) {                // ICMP_MsgIx can be NONE if called from other layer
     p_icmp_hdr = (NET_ICMPv6_HDR *)&p_buf->DataPtr[p_buf_hdr->ICMP_MsgIx];
 
     switch (p_icmp_hdr->Type) {                                 // ... chk ICMPv6 msg type & ...

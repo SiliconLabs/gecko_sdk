@@ -2816,7 +2816,7 @@ PACKSTRUCT( struct sl_bt_cmd_connection_analyzer_start_s
     sl_bt_connection_channel_map_t channel_map;
     uint8_t channel;
     uint16_t event_counter;
-    uint32_t start_time_us;
+    int32_t start_time_us;
     uint32_t flags;
 });
 

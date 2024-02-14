@@ -3,7 +3,7 @@
  * @brief Core application logic.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -367,12 +367,15 @@ static void app_ota_dfu_on_status_change(sl_bt_app_ota_dfu_status_t curr_sts,
       app_log_info("Bootloader initialized." APP_LOG_NL);
       break;
 
+    case SL_BT_APP_OTA_DFU_READ_FLASH:
+      app_log_info("Read storage slot..." APP_LOG_NL);
+      break;
+
     case SL_BT_APP_OTA_DFU_ERASE:
-      app_log_info("Erase storage slot..." APP_LOG_NL);
+      app_log_info("Erasing..." APP_LOG_NL);
       break;
 
     case SL_BT_APP_OTA_DFU_READY:
-      app_log_info("Erase done." APP_LOG_NL);
       app_log_info("Application OTA DFU ready." APP_LOG_NL);
       break;
 

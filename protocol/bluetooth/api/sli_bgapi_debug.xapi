@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="6" device_name="bgapi_debug" version="7.0.0">
+<api device_id="6" device_name="bgapi_debug" version="7.0.1">
     <datatypes>
         <datatype base="int8" name="int8" length="1"/>
         <datatype base="uint8" name="uint8" length="1"/>

@@ -288,6 +288,10 @@ typedef enum {
   acmpInputVDACOUT0       = _ACMP_INPUTCTRL_POSSEL_VDACOUT0, /**< Select VDAC0 channel 0 output. */
   acmpInputVDACOUT1       = _ACMP_INPUTCTRL_POSSEL_VDACOUT1, /**< Select VDAC0 channel 1 output. */
 #endif
+#if defined(_ACMP_INPUTCTRL_POSSEL_VDAC0OUT1)
+  acmpInputVDAC0OUT1       = _ACMP_INPUTCTRL_POSSEL_VDAC0OUT1, /**< Select VDAC0 channel 1 output. */
+  acmpInputVDAC1OUT1       = _ACMP_INPUTCTRL_POSSEL_VDAC1OUT1, /**< Select VDAC1 channel 1 output. */
+#endif
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
   acmpInputEXTPA          = _ACMP_INPUTCTRL_POSSEL_EXTPA,  /**< Select external interface, base is PA0. */
   acmpInputEXTPB          = _ACMP_INPUTCTRL_POSSEL_EXTPB,  /**< Select external interface, base is PB0. */

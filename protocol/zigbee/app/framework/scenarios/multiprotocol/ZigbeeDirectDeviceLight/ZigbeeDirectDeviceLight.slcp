@@ -18,13 +18,6 @@ component:
   - id: bluetooth_stack
   - id: gatt_configuration
   - id: bluetooth_feature_system
-
-  # Use legacy scanner to only scan advertisements that use legacy advertising
-  # PDUs. Include bluetooth_feature_extended_scanner if scanning extended
-  # advertising PDUs is also required. That component is not included currently
-  # for minimizing the application size.
-  - id: bluetooth_feature_legacy_scanner
-
   - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_connection
   - id: bluetooth_feature_gatt
@@ -102,9 +95,9 @@ configuration:
   - name: SL_CLI_PROMPT_STRING
     value: "\"ZDDLight>\""
   - name: SL_BT_CONFIG_USER_ADVERTISERS
-    value: 3
+    value: 1
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
-    value: 4
+    value: 1
   - name: SL_HEAP_SIZE
     value: 16384
   - name: SL_STACK_SIZE

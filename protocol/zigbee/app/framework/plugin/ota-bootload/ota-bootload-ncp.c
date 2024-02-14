@@ -82,7 +82,7 @@ uint8_t emberAfOtaBootloadCallback(const EmberAfOtaImageId* id,
   bootloadPrintln("Launching standalone bootloader...");
 
   status =
-    ezspLaunchStandaloneBootloader(STANDALONE_BOOTLOADER_NORMAL_MODE);
+    ezspLaunchStandaloneBootloader(true);
   if (status != EMBER_SUCCESS) {
     bootloadPrintln("Launch failed: 0x%X", status);
     return 1;

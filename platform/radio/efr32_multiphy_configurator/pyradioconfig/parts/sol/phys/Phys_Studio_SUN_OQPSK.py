@@ -40,15 +40,15 @@ class Phys_Studio_SUN_OQPSK_Sol(IPhy):
         # Owner: Casey Weltzin
         # Jira Link: https://jira.silabs.com/browse/PGSOLVALTEST-62, 63, 64, 69
 
-    def PHY_IEEE802154_SUN_868MHz_OQPSK_100kcps_EU(self, model, phy_name=None):
-        phy = self._makePhy(model, model.profiles.SUN_OQPSK, readable_name='SUN EU-868MHz, OQPSK 100kcps',
+    def PHY_IEEE802154_SUN_863MHz_OQPSK_100kcps_EU(self, model, phy_name=None):
+        phy = self._makePhy(model, model.profiles.SUN_OQPSK, readable_name='SUN EU-863MHz, OQPSK 100kcps',
                             phy_name=phy_name)
 
         # Select the correct SUN OQPSK chiprate
         phy.profile_inputs.sun_oqpsk_chiprate.value = model.vars.sun_oqpsk_chiprate.var_enum._100_KCPS
 
         # Define WiSUN Profile / Region specific inputs
-        phy.profile_inputs.base_frequency_hz.value = 868300000
+        phy.profile_inputs.base_frequency_hz.value = 863100000
         phy.profile_inputs.channel_spacing_hz.value = 200000
         phy.profile_inputs.fcs_type_802154.value = model.vars.fcs_type_802154.var_enum.FOUR_BYTE
 

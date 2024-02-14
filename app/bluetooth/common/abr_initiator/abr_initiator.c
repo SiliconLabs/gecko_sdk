@@ -3,7 +3,7 @@
  * @brief ABR initiator
  *******************************************************************************
  * # License
- * <b>Copyright 2022-2023 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -174,33 +174,21 @@ void bt_on_event_initiator(sl_bt_msg_t *evt)
                                            initiator_config->max_ce_length);
 
       app_assert_status(sc);
+      app_log_info("Set connection parameters..." APP_LOG_NL);
       ras_control_point_characteristic_found = false;
       ras_procedure_enable_data_characteristic_found = false;
       ras_se_ranging_data_characteristic_found = false;
       ras_characteristics_discovered = false;
-      sc = sl_bt_cs_set_procedure_parameters(connection_handle,
-                                             initiator_config->config_id,
-                                             initiator_config->max_procedure_duration,
-                                             initiator_config->min_interval,
-                                             initiator_config->max_interval,
-                                             initiator_config->max_procedure_count,
-                                             initiator_config->min_subevent_len,
-                                             initiator_config->max_subevent_len,
-                                             initiator_config->antenna_config,
-                                             initiator_config->phy,
-                                             initiator_config->tx_pwr_delta,
-                                             initiator_config->preferred_peer_antenna);
-      app_log_status_warning_f(sc, "Set procedure parameters failed" APP_LOG_NL);
-
       break;
 
     case sl_bt_evt_connection_parameters_id:
       if (evt->data.evt_connection_parameters.security_mode == 1) {
-        app_log_info("Connection encrypted" APP_LOG_NL);
+        app_log_info("Connection parameters set. Connection encrypted" APP_LOG_NL);
         sc = sl_bt_gatt_discover_primary_services_by_uuid(connection_handle,
                                                           UUID_LEN,
                                                           ras_service_uuid);
         app_assert_status(sc);
+        abr_initiator_create_config();
       }
       break;
 
@@ -274,7 +262,21 @@ void bt_on_event_initiator(sl_bt_msg_t *evt)
       break;
 
     case sl_bt_evt_cs_config_complete_id:
-      app_log_info("Config created" APP_LOG_NL);
+      app_log_info("ABR config created. Set procedure parameters ..." APP_LOG_NL);
+      sc = sl_bt_cs_set_procedure_parameters(connection_handle,
+                                             initiator_config->config_id,
+                                             initiator_config->max_procedure_duration,
+                                             initiator_config->min_interval,
+                                             initiator_config->max_interval,
+                                             initiator_config->max_procedure_count,
+                                             initiator_config->min_subevent_len,
+                                             initiator_config->max_subevent_len,
+                                             initiator_config->antenna_config,
+                                             initiator_config->phy,
+                                             initiator_config->tx_pwr_delta,
+                                             initiator_config->preferred_peer_antenna);
+      app_assert_status(sc);
+      app_log_info("Procedure parameters set" APP_LOG_NL);
       sc = abr_file_log_config_complete_event(&evt->data.evt_cs_config_complete);
       app_assert_status(sc);
       abr_initiator_start_cs_procedure();
@@ -332,7 +334,7 @@ void abr_set_antenna_offset()
   if (sc != SL_STATUS_OK) {
     app_log_warning("User message to target failed: %u" APP_LOG_NL, sc);
   } else {
-    app_log_info("Received antenna offset parameters." APP_LOG_NL);
+    app_log_info("Received antenna offset parameters" APP_LOG_NL);
     // First data is the number of antennas
     initiator_config->antenna_offset.offset_count = response_data_offset[0];
     if (initiator_config->antenna_offset.offset_count > MAX_ANTENNA_NUMBER) {
@@ -799,7 +801,6 @@ static void process_procedure_complete_event(sl_bt_msg_t *evt)
 
     case act_subscribe_result_2:
       app_log_info("Subscribed to RAS Control Point indications" APP_LOG_NL);
-      abr_initiator_create_config();
       action = act_none;
       break;
 

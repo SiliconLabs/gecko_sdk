@@ -4,7 +4,6 @@
 
 PROJECTNAME = bt_abr_host_initiator
 SDK_DIR = ../../../..
-BGBUILD = $(SDK_DIR)/protocol/bluetooth/bin/gatt/bgbuild.py
 
 
 ################################################################################
@@ -37,8 +36,7 @@ include $(SDK_DIR)/app/bluetooth/component_host/abr_ans.mk
 override INCLUDEPATHS += . \
 $(SDK_DIR)/app/bluetooth/common_host/system \
 $(SDK_DIR)/platform/common/inc \
-$(SDK_DIR)/protocol/bluetooth/inc \
-autogen
+$(SDK_DIR)/protocol/bluetooth/inc
 
 
 ################################################################################
@@ -50,8 +48,6 @@ $(SDK_DIR)/app/bluetooth/common_host/system/system.c \
 app.c \
 main.c
 
-PROJ_FILES += $(wildcard $(SDK_DIR)/protocol/bluetooth/bin/gatt/*)
-PROJ_FILES += config/btconf/gatt_configuration.btconf
 
 ################################################################################
 # Target rules                                                                 #

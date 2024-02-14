@@ -2516,26 +2516,6 @@ cleanup:
   app_wisun_cli_mutex_unlock();
 }
 
-void app_set_unicast_tx_mode(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t ret;
-  uint8_t mode;
-
-  app_wisun_cli_mutex_lock();
-
-  mode = sl_cli_get_argument_uint8(arguments, 0);
-
-  ret = sl_wisun_set_unicast_tx_mode(mode);
-
-  if (ret == SL_STATUS_OK) {
-    printf("[Unicast Tx mode set to %hu suceeded]\r\n", mode);
-  } else {
-    printf("[Failed: unable to set unicast Tx mode: %lu]\r\n", ret);
-  }
-
-  app_wisun_cli_mutex_unlock();
-}
-
 /* CLI app mode switch */
 void app_mode_switch(sl_cli_command_arg_t *arguments)
 {

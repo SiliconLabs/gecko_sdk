@@ -109,7 +109,7 @@ EmberZdoStatus sli_zigbee_af_remote_set_binding_callback(EmberBindingTableEntry 
           && candidate.type == EMBER_UNUSED_BINDING) {
         setStatus = emberSetBinding(i, entry);
         status = setStatus == EMBER_SUCCESS ? EMBER_ZDP_SUCCESS // binding set
-                 : (setStatus == EMBER_BINDING_IS_ACTIVE ? EMBER_ZDP_NOT_PERMITTED // selected index is active
+                 : (setStatus == EMBER_BINDING_IS_ACTIVE ? EMBER_ZDP_NOT_AUTHORIZED // selected index is active
                     : EMBER_ZDP_TABLE_FULL); // report full for any other failure
         goto kickout;
       }
@@ -135,7 +135,7 @@ EmberZdoStatus sli_zigbee_af_remote_delete_binding_callback(uint8_t index)
   if (status == EMBER_SUCCESS) {
     deleteStatus = emberDeleteBinding(index);
     status = deleteStatus == EMBER_SUCCESS ? EMBER_ZDP_SUCCESS // binding deleted
-             : (deleteStatus == EMBER_BINDING_IS_ACTIVE ? EMBER_ZDP_NOT_PERMITTED //selected index is active
+             : (deleteStatus == EMBER_BINDING_IS_ACTIVE ? EMBER_ZDP_NOT_AUTHORIZED //selected index is active
                 : EMBER_ZDP_NO_ENTRY); // report no entry for any other failure
     emberAfZdoPrintln("delete binding: %x %x", index, status);
   }

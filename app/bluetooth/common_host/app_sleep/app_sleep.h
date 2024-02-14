@@ -28,11 +28,6 @@
  *
  ******************************************************************************/
 #include <stdint.h>
-#if defined(POSIX) && POSIX == 1
-#include <unistd.h>
-#else
-#include <windows.h>
-#endif
 
 /**************************************************************************//**
  * Platform independent microsec sleep

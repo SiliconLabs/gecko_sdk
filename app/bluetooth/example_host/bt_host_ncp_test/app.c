@@ -43,7 +43,7 @@
 #include "sl_bt_api.h"
 
 // Optstring argument for getopt.
-#define OPTSTRING   NCP_HOST_OPTSTRING "c:w:i:e:h"
+#define OPTSTRING   NCP_HOST_OPTSTRING APP_LOG_OPTSTRING "c:w:i:e:h"
 
 // Usage info.
 #define USAGE       APP_LOG_NL "%s " NCP_HOST_USAGE APP_LOG_USAGE " -c <command id> [-w <width>] [-i <interval>] [-e <end>] [-h]" APP_LOG_NL
@@ -144,6 +144,9 @@ void app_init(int argc, char *argv[])
       // Process options for other modules.
       default:
         sc = ncp_host_set_option((char)opt, optarg);
+        if (sc == SL_STATUS_NOT_FOUND) {
+          sc = app_log_set_option((char)opt, optarg);
+        }
         if (sc != SL_STATUS_OK) {
           app_log(USAGE, argv[0]);
           exit(EXIT_FAILURE);

@@ -30,7 +30,9 @@ class sw_profile_outputs_common_ocelot(object):
         'preamble_string': 'Preamble Binary Pattern',
         'syncword_string': 'Syncword Binary Pattern',
         'lo_injection_side': 'Injection Side',
-        'trecs_syncword_timeout_us': 'TRECS syncword timeout [us]'
+        'trecs_syncword_timeout_us': 'TRECS syncword timeout [us]',
+        'rssi_period_sym_actual': 'RSSI Update Period [symbol]',
+        'rssi_access_time_us_actual': 'RSSI Access Time After RX Start [us]'
     }
 
     """

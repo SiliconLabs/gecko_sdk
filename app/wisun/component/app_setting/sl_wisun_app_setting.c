@@ -434,7 +434,7 @@ sl_status_t app_wisun_setting_subscribe_notification(const app_setting_notificat
   app_setting_notif_dsc_t *notif = NULL;
   uint32_t mask = 0UL;
   notif = _get_notification_entry(type);
-  if (notif == NULL) {
+  if (notif == NULL || channel == NULL) {
     return stat;
   }
 

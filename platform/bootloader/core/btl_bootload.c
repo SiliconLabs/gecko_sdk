@@ -595,9 +595,11 @@ bool bootload_verifyApplicationVersion(uint32_t appVersion, bool checkRemainingA
   uint32_t highestVersionSeen = getHighestApplicationVersionSeen();
 
   // Check for the minimum application version that should be allowed.
+#if defined(BOOTLOADER_ROLLBACK_PROTECTION_MINIMUM_VERSION) && (BOOTLOADER_ROLLBACK_PROTECTION_MINIMUM_VERSION != 0)
   if (PARSER_APPLICATION_MINIMUM_VERSION_VALID > appVersion) {
     return false;
   }
+#endif
   if (highestVersionSeen > appVersion) {
     return false;
   }

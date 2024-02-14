@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -67,11 +68,11 @@ void app_task(void *args)
   (void) args;
 
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
   printf("[Port: %u]\n", SL_WISUN_UDP_SERVER_PORT);
 
   // creating socket
-  sockd_udp_srv = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  sockd_udp_srv = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   assert_res(sockd_udp_srv, "UDP server socket()");
 
   // fill the server address structure
@@ -100,7 +101,7 @@ void app_task(void *args)
       }
     }
     // dispatch thread
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

@@ -69,7 +69,7 @@ void sl_wisun_tcp_client_create(const char *ip_address, uint16_t port)
   }
 
   // create client socket
-  sockid = socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_IP);
+  sockid = socket(AF_INET6, SOCK_STREAM, IPPROTO_IP);
 
   if (sockid == SOCKET_RETVAL_ERROR) {
     printf("[Failed to create socket: %ld]\n", sockid);

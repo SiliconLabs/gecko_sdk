@@ -99,8 +99,7 @@ send_first_notification(void)
       (ERESETREASON_BROWNOUT == resetReason) ||
       (ERESETREASON_PIN == resetReason) ||
       (ERESETREASON_SOFTWARE == resetReason) ||
-      (ERESETREASON_WATCHDOG == resetReason) || 
-      (ERESETREASON_DEEP_SLEEP_WUT == resetReason)))
+      (ERESETREASON_WATCHDOG == resetReason)))
   {
     CC_WakeUp_notification_tx(NULL);
   }
@@ -141,9 +140,6 @@ init(void)
   if (NULL == wake_up_cc_power_lock) {
     wake_up_cc_power_lock = zpal_pm_register(ZPAL_PM_TYPE_USE_RADIO);
   }
-
-  // Change the zpal_pm_device_type here so that the device can reach the lowest level of power consumption
-  zpal_pm_set_device_type(ZPAL_PM_DEVICE_NOT_LISTENING);
 
   //Verify that a WAKEUPCCDATA file exists
   size_t   dataLen;

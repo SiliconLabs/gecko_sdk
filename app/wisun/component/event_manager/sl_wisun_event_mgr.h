@@ -40,33 +40,15 @@ extern "C" {
 // -----------------------------------------------------------------------------
 #include "sl_status.h"
 #include "sl_wisun_events.h"
-#include "sl_wisun_trace_util.h"
+
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/**************************************************************************//**
- * @brief Wi-SUN application callback type.
- *        It is always called, User cannot register or remove them.
- *        It contains the must have implementation of the event.
- *****************************************************************************/
-typedef void (*wisun_event_callback_t) (sl_wisun_evt_t *);
-
-/**************************************************************************//**
- * @brief Wi-SUN application custom callback type.
- *        User can implement own callbacks and register them (not mandatory)
- *****************************************************************************/
+/// Wi-SUN application custom callback type.
+/// User can implement own callbacks and register them (not mandatory)
 typedef void (*custom_wisun_event_callback_t) (sl_wisun_evt_t *);
-
-/**************************************************************************//**
- * @brief Event handler structure
- *****************************************************************************/
-typedef struct event_handler {
-  sl_wisun_msg_ind_id_t id;                        // id
-  wisun_event_callback_t callback;                 // callback for internal usage
-  custom_wisun_event_callback_t custom_callback;   // custom, registerable and removable callback for applications
-} event_handler_t;
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -100,6 +82,37 @@ sl_status_t app_wisun_em_custom_callback_register(sl_wisun_msg_ind_id_t id,
  * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
  *****************************************************************************/
 sl_status_t app_wisun_em_custom_callback_remove(sl_wisun_msg_ind_id_t id);
+
+/**************************************************************************//**
+ * @brief Subscribe to event notification.
+ * @details Getting a notification channel for waiting to event notifications
+ * @param[in] id event ID
+ * @param[out] evt_ch Destination event channel
+ * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
+ *****************************************************************************/
+sl_status_t app_wisun_em_subscribe_evt_notification(const sl_wisun_msg_ind_id_t id, 
+                                                    uint8_t * const evt_ch);
+
+/**************************************************************************//**
+ * @brief Unubscribe to event notification.
+ * @details Remove event channel from event notification
+ * @param[in] id event ID
+ * @param[in] evt_ch Destination event channel
+ * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
+ *****************************************************************************/
+sl_status_t app_wisun_em_unsubscribe_evt_notification(const sl_wisun_msg_ind_id_t id, 
+                                                      const uint8_t evt_ch);
+
+/**************************************************************************//**
+ * @brief Waiting for event notification
+ * @details Waiting for the particular event flag described by notification channel
+ * @param[in] id event ID
+ * @param[in] evt_ch Destination event channel
+ * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
+ *****************************************************************************/
+sl_status_t app_wisun_em_wait_evt_notification(const sl_wisun_msg_ind_id_t id, 
+                                               const uint8_t evt_ch);
+
 
 // ------------------------- event callbacks -----------------------------------
 
@@ -200,6 +213,13 @@ void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt);
  * @param[in] evt event ptr
  *****************************************************************************/
 void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Wi-SUN multicast group registration finishes event handler
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt);
 
 #ifdef __cplusplus
 }

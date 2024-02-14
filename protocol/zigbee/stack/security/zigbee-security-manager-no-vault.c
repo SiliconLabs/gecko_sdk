@@ -479,7 +479,7 @@ void sl_zb_sec_man_hmac_aes_mmo(const uint8_t* input,
   }
 }
 
-#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 sl_status_t sl_zb_sec_man_aes_ccm_extended(uint8_t* nonce,
                                            bool encrypt,
                                            const uint8_t* input,

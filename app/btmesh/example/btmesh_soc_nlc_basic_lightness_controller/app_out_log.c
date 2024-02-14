@@ -58,7 +58,7 @@
 // -----------------------------------------------------------------------------
 // Macros
 
-#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 99) / 65535)
+#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 32767) / 65535)
 
 // -----------------------------------------------------------------------------
 // Event / callback definitions

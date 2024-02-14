@@ -38,11 +38,12 @@
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_coap_meter.h"
 #include "sl_wisun_app_core_util.h"
-#include "sl_wisun_app_core_util_config.h"
+#include "sl_wisun_app_core_config.h"
 #include "sl_wisun_coap_rhnd.h"
 #include "sl_wisun_coap_meter_collector_config.h"
 #include "app.h"
 #include "app_custom_callback.h"
+#include "sl_component_catalog.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -89,7 +90,7 @@ void app_init(void)
   sl_wisun_coap_rhnd_resource_t coap_resource = { 0 };
 
   // Init project info
-  app_wisun_project_info_init("Wi-SUN CoAP Meter Application");
+  sl_wisun_app_core_util_project_info_init("Wi-SUN CoAP Meter Application");
 
   // Init meter collector
   sl_wisun_coap_meter_init();
@@ -126,7 +127,7 @@ void app_init(void)
   coap_resource.auto_response          = sl_wisun_coap_meter_light_response_cb;
   coap_resource.discoverable           = true;
   assert(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
-
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   // Init led resource
   coap_resource.data.uri_path          = SL_WISUN_COAP_METER_COLLECTOR_LED_TOGGLE_URI_PATH;
   coap_resource.data.resource_type     = SL_WISUN_COAP_METER_RESOURCE_RT_LED;
@@ -134,6 +135,7 @@ void app_init(void)
   coap_resource.auto_response          = sl_wisun_coap_meter_led_toggle_response_cb;
   coap_resource.discoverable           = true;
   assert(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
+#endif
 #else
   // Init sensor all
   coap_resource.data.uri_path          = SL_WISUN_COAP_METER_COLLECTOR_MEASUREMENT_URI_PATH;
@@ -159,7 +161,7 @@ void app_init(void)
     .cb_mem      = NULL,
     .cb_size     = 0,
     .stack_mem   = NULL,
-    .stack_size  = app_stack_size_word_to_byte(APP_MAIN_STACK_SIZE_WORD),
+    .stack_size  = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority    = osPriorityNormal,
     .tz_module   = 0
   };

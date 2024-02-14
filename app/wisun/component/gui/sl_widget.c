@@ -544,7 +544,7 @@ static void _optionlist_scroll(sl_widget_option_list_t * const optionlist)
   if (optionlist->current_item->idx == 0) {
     optionlist->top_item = optionlist->current_item;
   } else if (gap >= max_item_on_screen) {
-    optionlist->top_item = (optionlist->current_item - max_item_on_screen) +  1;
+    optionlist->top_item = (optionlist->current_item - max_item_on_screen) + 1;
   }
 }
 

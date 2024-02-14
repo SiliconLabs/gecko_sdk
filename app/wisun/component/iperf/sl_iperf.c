@@ -224,20 +224,26 @@ void sl_iperf_test_init(sl_iperf_test_t * const test, sl_iperf_mode_t mode, sl_i
 
 void sl_iperf_test_set_default_logger(sl_iperf_test_t * const test)
 {
-  test->log = &_def_log;
+  if (test != NULL) {
+    test->log = &_def_log;
+  }
 }
 
 void sl_iperf_test_set_default_buff(sl_iperf_test_t * const test)
 {
-  test->conn.buff = _iperf_buff;
-  test->conn.buff_size = SL_IPERF_BUFFER_SIZE;
+  if (test != NULL) {
+    test->conn.buff = _iperf_buff;
+    test->conn.buff_size = SL_IPERF_BUFFER_SIZE;
+  }
 }
 
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
 bool sl_iperf_test_add(sl_iperf_test_t * const test)
 {
   osStatus_t status = osError;
-  status = osMessageQueuePut(_iperf_test_req_msg_queue, test, 0U, osWaitForever);
+  if (test != NULL) {
+    status = osMessageQueuePut(_iperf_test_req_msg_queue, test, 0U, osWaitForever);
+  }
   return _os_status_to_bool(status);
 }
 

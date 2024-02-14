@@ -42,6 +42,8 @@ extern "C" {
 #include "sl_wisun_ping.h"
 #include "sl_wisun_types.h"
 #include "socket/socket.h"
+#include "sl_wisun_trace_util.h"
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------

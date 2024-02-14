@@ -35,11 +35,17 @@
 
 #define sl_rail_util_ieee802154_is_high_speed_phy_selected() SL_RAIL_UTIL_IEEE802154_2P4_2MBPS_PHY_ENABLED
 
+#define SL_RAIL_UTIL_IEEE802154_2P4_2MBPS_PHY_ENABLED   1
+
+#define SL_RAIL_UTIL_IEEE802154_ACTIVE_RADIO_CONFIG_2P4_2MBPS (SL_RAIL_UTIL_IEEE802154_2P4_1MBPS_FEC_PHY_ENABLED ? SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC : SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS)
+
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> IEEE802.15.4 High Speed PHY Configuration
-// <q SL_RAIL_UTIL_IEEE802154_2P4_2MBPS_PHY_ENABLED> Enable high speed PHY support
-// <i> Default: 1
-#define SL_RAIL_UTIL_IEEE802154_2P4_2MBPS_PHY_ENABLED   1
+// <q SL_RAIL_UTIL_IEEE802154_2P4_1MBPS_FEC_PHY_ENABLED> Enable 1Mbps FEC PHY
+// <i> (Enable)Use 1Mbps high speed PHY with forward error correction.
+// <i> (Disable)Use 2Mbps high speed PHY with out forward error correction.
+// <i> Default: 0
+#define SL_RAIL_UTIL_IEEE802154_2P4_1MBPS_FEC_PHY_ENABLED 0
 // </h>
 // <<< end of configuration section >>>
 #endif //SL_RAIL_UITL_IEEE802154_HIGH_SPEED_PHY_CONFIG_H

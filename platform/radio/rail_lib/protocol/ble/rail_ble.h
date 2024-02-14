@@ -302,6 +302,7 @@ typedef struct RAIL_BLE_State {
   uint32_t accessAddress; /**< The access address used for the connection. */
   uint16_t channel; /**< The logical channel used. */
   bool disableWhitening; /**< Indicates whether the whitening engine should be off. */
+  uint16_t whiteInit; /**< The value used to initialize the whitening algorithm */
 } RAIL_BLE_State_t;
 
 /**

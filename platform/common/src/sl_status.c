@@ -331,7 +331,9 @@ static const char *sli_status_group_bluetooth_ctrl[] =
   "UNKNOWN_ADVERTISING_IDENTIFIER",
   "LIMIT_REACHED",
   "OPERATION_CANCELLED_BY_HOST",
-  "PACKET_TOO_LONG"
+  "PACKET_TOO_LONG",
+  "TOO_LATE",
+  "TOO_EARLY"
 };
 #endif
 

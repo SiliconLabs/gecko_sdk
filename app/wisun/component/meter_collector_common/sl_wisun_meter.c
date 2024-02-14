@@ -59,25 +59,26 @@
 #define SL_WISUN_LFN_WAKE_UP_EVT_MSK                                    0x0001U
 
 /// Macro for dispatching the thread if the given result is not SL_STATUS_OK
-#define sl_wisun_check_result_and_dispatch_if_nok(__res, __socket, __storage) \
-  if (__res != SL_STATUS_OK) {                                                \
-    sl_wisun_meter_error_handler(__res, __socket, __storage);                 \
-    app_wisun_dispatch_thread();                                              \
-    continue;                                                                 \
-  }
+#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+#define sl_wisun_check_result_and_dispatch_if_nok(__res, __socket, __storage)   \
+  if (__res != SL_STATUS_OK) {                                                  \
+    sl_wisun_meter_error_handler(__res, __socket, __storage);                   \
+    continue;                                                                   \
+  }                                                                           
+#else
+#define sl_wisun_check_result_and_dispatch_if_nok(__res, __socket, __storage)   \
+  if (__res != SL_STATUS_OK) {                                                  \
+    sl_wisun_meter_error_handler(__res, __socket, __storage);                   \
+    sl_wisun_app_core_util_dispatch_thread();                                   \
+    continue;                                                                   \
+  }                                                                           
+#endif
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
 
 #if SL_WISUN_COAP_MC_OPTIMIZED_MODE_ENABLE
-/**************************************************************************//**
- * @brief LFN Wake up meter event handler
- * @details Custom callback implementation.
- *          It sets an OS status flag to notify meter task
- * @param[in] evt Event descriptor
- *****************************************************************************/
-static void _wisun_lfn_wake_up_meter_hnd(sl_wisun_evt_t *evt);
 
 /**************************************************************************//**
  * @brief Meter parse
@@ -269,16 +270,8 @@ static sl_wisun_meter_packet_storage_t _packet_storage  = {
   .stored = 0U
 };
 
-/// LFN wake up event flag
-static osEventFlagsId_t _lfn_wake_up_evt = NULL;
+static uint8_t _lfn_evt_notify_ch = 0UL;
 
-/// LFN wake up event flag attributes
-static const osEventFlagsAttr_t _evt_attr = {
-  .name      = "LfnWakeUpEvt",
-  .attr_bits = 0,
-  .cb_mem    = NULL,
-  .cb_size   = 0
-};
 #endif
 
 // -----------------------------------------------------------------------------
@@ -357,14 +350,10 @@ void sl_wisun_meter_init(void)
 #endif
   sl_wisun_meter_init_common_resources(_meter_parse_request,
                                        _meter_build_packets);
-
-  // Register LFN wake up event callback for meter
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
-                                        _wisun_lfn_wake_up_meter_hnd);
-  // Create lfn wake up event flag
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-  _lfn_wake_up_evt = osEventFlagsNew(&_evt_attr);
-  assert(_lfn_wake_up_evt != NULL);
+  assert( app_wisun_em_subscribe_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID, &_lfn_evt_notify_ch) 
+          != SL_STATUS_FAIL);
+
 #endif
 }
 
@@ -501,8 +490,8 @@ void sl_wisun_meter_process(void)
 
   // Get the device schedule
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-  device_type = app_wisun_get_device_type();
-  lfn_params = app_wisun_get_lfn_params();
+  device_type = sl_wisun_app_core_get_device_type();
+  lfn_params = sl_wisun_app_core_get_lfn_params();
   if (lfn_params != NULL) {
     schedule = lfn_params->data_layer.unicast_interval_ms;
   } else {
@@ -518,10 +507,7 @@ void sl_wisun_meter_process(void)
   SL_WISUN_THREAD_LOOP {
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
     if (device_type == SL_WISUN_LFN) {
-      osEventFlagsWait(_lfn_wake_up_evt,
-                       SL_WISUN_LFN_WAKE_UP_EVT_MSK,
-                       osFlagsWaitAny,
-                       osWaitForever);
+      app_wisun_em_wait_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID, _lfn_evt_notify_ch);
     }
 #endif
     // Read data from socket buffer
@@ -545,9 +531,9 @@ void sl_wisun_meter_process(void)
     res = _sl_wisun_meter_sending_cycle();
     sl_wisun_check_result_and_dispatch_if_nok(res, _common_socket, &_packet_storage);
 
-#if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
+#if !defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
     // dispatch thread
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
 #endif
   }
 }
@@ -558,11 +544,6 @@ void sl_wisun_meter_process(void)
 // -----------------------------------------------------------------------------
 
 #if SL_WISUN_COAP_MC_OPTIMIZED_MODE_ENABLE
-static void _wisun_lfn_wake_up_meter_hnd(sl_wisun_evt_t *evt)
-{
-  (void) evt;
-  (void) osEventFlagsSet(_lfn_wake_up_evt, SL_WISUN_LFN_WAKE_UP_EVT_MSK);
-}
 
 static sl_status_t _meter_parse_request(const void * const raw,
                                         int32_t packet_data_len,
@@ -692,7 +673,7 @@ static void _create_common_socket(void)
   static sockaddr_in6_t meter_addr  = { 0 };
   int32_t res                       = SOCKET_INVALID_ID;
 
-  _common_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  _common_socket = socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
   assert(_common_socket != SOCKET_INVALID_ID);
 
   meter_addr.sin6_family  = AF_INET6;

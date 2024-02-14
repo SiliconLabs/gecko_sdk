@@ -28,112 +28,36 @@
  *
  ******************************************************************************/
 
-#include "cryptoacc_management.h"
+#include "sli_psa_driver_features.h"
 
-#if defined(CRYPTOACC_PRESENT)
+#if defined(SLI_MBEDTLS_DEVICE_VSE)
 
-#include "sx_trng.h"
-#include "ba431_config.h"
-#include "sx_errors.h"
-#include "cryptolib_def.h"
-#include "sx_aes.h"
-#include "sx_trng.h"
-#include "sx_rng.h"
-#include "ba414ep_config.h"
+#include "psa/crypto.h"
+
 #include "sli_se_manager_internal.h"
-#include "mbedtls/threading.h"
 
-/// Perform the TRNG conditioning test on startup
-#define DO_TRNG_COND_TEST  (1)
+#include "sli_cryptoacc_driver_trng.h"
 
-/**
- * @brief Check if the TRNG needs to be initialized
- * @returns true if initialization is needed
- */
-static bool trng_needs_init(void)
-{
-  // If TRNG is not enabled, it most difinitely needs to be inited
-  if ((ba431_read_controlreg() & BA431_CTRL_NDRNG_ENABLE) == 0u) {
-    return true;
-  }
+#include "sx_aes.h"
+#include "ba414ep_config.h"
 
-  // If confitioning key is all zero, it needs to be reinitialized
-  uint32_t cond_key[4] = { 0 };
-  ba431_read_conditioning_key(cond_key);
-  if ((cond_key[0] == 0) && (cond_key[1] == 0)
-      && (cond_key[2] == 0) && (cond_key[3] == 0)) {
-    return true;
-  }
+//------------------------------------------------------------------------------
+// RTOS Synchronization and Clocking Functions
 
-  // No conditions were met -> it is running
-  return false;
-}
-
-/**
- * @brief Initialize the TRNG if it is not already enabled
- * @returns PSA_SUCCESS on successful init
- */
-static psa_status_t initialize_trng(void)
-{
-  psa_status_t status = PSA_SUCCESS;
-  if (trng_needs_init()) {
-    status = sx_trng_init(DO_TRNG_COND_TEST);
-    if (status != CRYPTOLIB_SUCCESS) {
-      status = PSA_ERROR_HARDWARE_FAILURE;
-    }
-  }
-  return status;
-}
-
-/**
- * @brief Check the state of the TRNG to see if it is ready to go to sleep
- *
- * @details The TRNG digital logic is gated when CRYPTOACCCLK is cleared. If the
- *          ring oscillators are still running when gating the clock, they will
- *          not be properly shut down, consuming hundreds of microamps in EM0/1.
- *
- *          If an error state is detected, the TRNG peripheral will be reset to
- *          try to get it back to a sane state.
- *
- * @returns true if ready for sleep
- */
-static bool trng_prepared_for_sleep(void)
-{
-  if ((ba431_read_controlreg() & BA431_CTRL_NDRNG_ENABLE) == 0u) {
-    // TRNG is not enabled. It is ready for sleep
-    return true;
-  }
-
-  switch (ba431_get_state()) {
-    case BA431_STATE_FIFOFULLOFF:
-      // The FIFO is full (enough) and oscillators are off.
-      return true;
-    case BA431_STATE_ERROR:
-      // This should not happen. If it does, it is cause for a reset to try and
-      // get the TRNG to a sane state again.
-      sx_trng_apply_soft_reset();
-      return false;
-    default:
-      // All the remaining states are indications that oscillators are running.
-      return false;
-  }
-}
-
-/* Get ownership of an available CRYPTOACC device */
+// Get ownership of an available CRYPTOACC device.
 psa_status_t cryptoacc_management_acquire(void)
 {
-#if defined(MBEDTLS_THREADING_C)
+  #if defined(MBEDTLS_THREADING_C)
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
   // Take SE lock - wait/block if taken by another thread.
   sl_status_t ret = sli_se_lock_acquire();
-
   if (ret != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
-#endif
+  #endif
 
   CMU->CLKEN1_SET = CMU_CLKEN1_CRYPTOACC;
   CMU->CRYPTOACCCLKCTRL_SET = (CMU_CRYPTOACCCLKCTRL_PKEN
@@ -142,86 +66,71 @@ psa_status_t cryptoacc_management_acquire(void)
   return PSA_SUCCESS;
 }
 
-/* Release ownership of an available CRYPTOACC device */
+// Release ownership of a reserved CRYPTOACC device.
 psa_status_t cryptoacc_management_release(void)
 {
-  // Inspect TRNG state before gating the crypto clock
-  while (!trng_prepared_for_sleep()) {
-    // Wait until ready.
-  }
-
   CMU->CLKEN1_CLR = CMU_CLKEN1_CRYPTOACC;
   CMU->CRYPTOACCCLKCTRL_CLR = (CMU_CRYPTOACCCLKCTRL_PKEN
                                | CMU_CRYPTOACCCLKCTRL_AESEN);
 
-#if defined(MBEDTLS_THREADING_C)
+  #if defined(MBEDTLS_THREADING_C)
   if (sli_se_lock_release() != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
-#endif
+  #endif
 
   return PSA_SUCCESS;
 }
 
-psa_status_t cryptoacc_trng_initialize(void)
-{
-  psa_status_t status = cryptoacc_management_acquire();
-  if (status != 0) {
-    return status;
-  }
-  status = initialize_trng();
-  if (cryptoacc_management_release() != PSA_SUCCESS) {
-    return PSA_ERROR_HARDWARE_FAILURE;
-  }
-  return status;
-}
+//------------------------------------------------------------------------------
+// Countermeasure Initialization Functions
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
-
-// Set to true when CM has been initialized
-static bool cm_inited = false;
+#if defined(SLI_MBEDTLS_DEVICE_VSE_V2)
 
 psa_status_t cryptoacc_initialize_countermeasures(void)
 {
-  // Set up SCA countermeasures in hardware
-  psa_status_t cm_status = PSA_SUCCESS;
+  // Set to true when CM has been initialized
+  static bool cm_inited = false;
+
+  // Note on the error handling: we want to try and set up the countermeasures
+  // even if some of the steps fail. Hence, the first error code is stored and
+  // returned in the end if something goes wrong.
+  psa_status_t final_status = PSA_SUCCESS;
   if (!cm_inited) {
-    // Note on the error handling:
-    // We want to try and set up the countermeasures even if some of the
-    // steps fail. Hence, the first error code is stored and returned in
-    // the end if something goes wrong.
+    // Set up the PK engine with a TRNG wrapper function to use for randomness
+    // generation. This will be used for future ECC operations as well, not only
+    // during the lifetime of this function.
+    ba414ep_set_rng(sli_cryptoacc_trng_wrapper);
 
-    // Set up TRNG for PK engine
-    struct sx_rng trng = {
-      .param = NULL,
-      .get_rand_blk = sx_trng_fill_blk,
-    };
-    ba414ep_set_rng(trng);
+    // Seed the AES engine with a random mask. The highest bit must be set due
+    // to hardware requirements.
+    uint32_t mask = 0;
+    psa_status_t temp_status = sli_cryptoacc_trng_get_random((uint8_t *)&mask,
+                                                             sizeof(mask));
+    if (temp_status != PSA_SUCCESS) {
+      final_status = temp_status;
+    }
+    mask |= (1U << 31);
 
-    // Set mask in AES engine
-    psa_status_t hw_status = cryptoacc_management_acquire();
-    if (hw_status != PSA_SUCCESS) {
-      cm_status = hw_status;
+    temp_status = cryptoacc_management_acquire();
+    if (temp_status != PSA_SUCCESS) {
+      final_status = temp_status;
     }
-    hw_status = initialize_trng();
-    if ((hw_status != PSA_SUCCESS) && (cm_status == PSA_SUCCESS)) {
-      cm_status = hw_status;
-    }
-    uint32_t mask = sx_trng_get_word() | (1U << 31);
     sx_aes_load_mask(mask);
-
-    hw_status = cryptoacc_management_release();
-    if ((hw_status != PSA_SUCCESS) && (cm_status == PSA_SUCCESS)) {
-      cm_status = hw_status;
+    temp_status = cryptoacc_management_release();
+    if ((temp_status != PSA_SUCCESS) && (final_status == PSA_SUCCESS)) {
+      final_status = temp_status;
     }
 
-    // Only track that init was successful if no error codes popped up
-    if (cm_status == PSA_SUCCESS) {
+    // Only track that init was successful if no error codes popped up.
+    if (final_status == PSA_SUCCESS) {
       cm_inited = true;
     }
   }
-  return cm_status;
-}
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG > 2
 
-#endif /* CRYPTOACC_PRESENT */
+  return final_status;
+}
+
+#endif // SLI_MBEDTLS_DEVICE_VSE_V2
+
+#endif // SLI_MBEDTLS_DEVICE_VSE

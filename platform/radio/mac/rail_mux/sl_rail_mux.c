@@ -585,6 +585,13 @@ RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle)
   return RAIL_IEEE802154_Config2p4GHzRadio(mux_rail_handle);
 }
 
+RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio1MbpsFec(RAIL_Handle_t railHandle)
+{
+  (void)railHandle;
+
+  return RAIL_IEEE802154_Config2p4GHzRadio1MbpsFec(mux_rail_handle);
+}
+
 RAIL_Status_t sl_rail_mux_IEEE802154_Config2p4GHzRadio2Mbps(RAIL_Handle_t railHandle)
 {
   (void)railHandle;
@@ -1635,18 +1642,18 @@ RAIL_Status_t sl_rail_mux_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
   (void) railHandle;
   return RAIL_IEEE802154_SetRxToEnhAckTx(mux_rail_handle, pRxToEnhAckTx);
 }
-#ifdef HIGH_SPEED_PHY
-#define not_high_bw_packet() (packet_details.channel <= 26)
-#define high_bw_packet() (packet_details.channel > 26)
-static uint8_t high_bw_phy_index = 0xFF;
-void sl_rail_mux_set_high_bw_phy_index(RAIL_Handle_t railHandle)
+#ifdef HIGH_DATARATE_PHY
+#define not_high_datarate_packet() (packet_details.channel <= 26)
+#define high_datarate_packet() (packet_details.channel > 26)
+static uint8_t high_datarate_phy_index = 0xFF;
+void sl_rail_mux_set_high_datarate_phy_index(RAIL_Handle_t railHandle)
 {
-  high_bw_phy_index = fn_get_context_index(railHandle);
+  high_datarate_phy_index = fn_get_context_index(railHandle);
 }
-#else // !HIGH_SPEED_PHY
-#define not_high_bw_packet() true
-#define high_bw_packet() false
-#endif //HIGH_SPEED_PHY
+#else // !HIGH_DATARATE_PHY
+#define not_high_datarate_packet() true
+#define high_datarate_packet() false
+#endif //HIGH_DATARATE_PHY
 
 HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
@@ -1667,7 +1674,7 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
                                       rx_packet_handle,
                                       &packet_details) == RAIL_STATUS_NO_ERROR);
     //need to read phy header (1 byte) + framecontrol (2 bytes)
-    if (not_high_bw_packet()) {
+    if (not_high_datarate_packet()) {
       uint8_t macHdr[EMBER_MAC_HEADER_SEQUENCE_NUMBER_OFFSET];
       uint8_t *rxPacket = macHdr;
       assert(RAIL_PeekRxPacket(mux_rail_handle,
@@ -1752,7 +1759,7 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
       // The protocol is currently on a different channel or idling or the
       // packet did not satisfy any of the protocol filtering: we mask out the
       // RAIL_EVENT_RX_PACKET_RECEIVED event.
-      if ( not_high_bw_packet() ) {
+      if ( not_high_datarate_packet() ) {
         if ( (rx_channel != protocol_context[i].channel && (!packet_details.isAck || rx_channel != protocol_context[i].csma_tx_info.channel))
              // MAC acks and beacons do not contain any addressing information
              // Do not check for filterMask on Rx packets that are acks or beacons
@@ -1766,14 +1773,14 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
           }
         }
       }
-      #ifdef HIGH_SPEED_PHY
-      else if (high_bw_phy_index != 0xFF) {
-        protocol_context[high_bw_phy_index].rail_config->eventsCallback(&protocol_context[high_bw_phy_index],
-                                                                        enabled_events);
+      #ifdef HIGH_DATARATE_PHY
+      else if (high_datarate_phy_index != 0xFF) {
+        protocol_context[high_datarate_phy_index].rail_config->eventsCallback(&protocol_context[high_datarate_phy_index],
+                                                                              enabled_events);
         enabled_events &= ~RAIL_EVENT_RX_PACKET_RECEIVED;
-        break; // Call the packet received callback for high_bw_phy packet only once
+        break; // Call the packet received callback for high_datarate_phy packet only once
       }
-      #endif //HIGH_SPEED_PHY
+      #endif //HIGH_DATARATE_PHY
     }
 
     // Deal with ACK timeout after possible RX completion in case RAIL

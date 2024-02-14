@@ -248,7 +248,8 @@ void sl_iperf_print_test_log_json(sl_iperf_test_t * const test)
   sl_iperf_log_print(test->log, "%*s\"bandwidth\":             %lu,\n", __indent(3U), test->statistic.bandwidth);
   sl_iperf_log_print(test->log, "%*s\"finack_tot_len\":        %lu,\n", __indent(3U), test->statistic.finack_tot_len);
   sl_iperf_log_print(test->log, "%*s\"finack_duration_ms\":    %lu,\n", __indent(3U), test->statistic.finack_duration_ms);
-  sl_iperf_log_print(test->log, "%*s\"finack_pkt\":            %lu\n", __indent(3U), test->statistic.finack_pkt);
+  sl_iperf_log_print(test->log, "%*s\"finack_pkt\":            %lu,\n", __indent(3U), test->statistic.finack_pkt);
+  sl_iperf_log_print(test->log, "%*s\"finack_bw\":             %lu\n", __indent(3U), test->statistic.finack_bw);
   sl_iperf_log_print(test->log, "%*s}\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s}\n", __indent(1U));
   sl_iperf_log_print(test->log, "}\n");

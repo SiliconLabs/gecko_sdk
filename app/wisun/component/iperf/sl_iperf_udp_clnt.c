@@ -353,6 +353,7 @@ static void _parse_srv_finack(sl_iperf_test_t * const test)
   t.usec = sl_iperf_network_ntohl(hdr->stop_usec);
   test->statistic.finack_duration_ms = sl_iperf_calc_ms_from_time(&t);
   test->statistic.finack_pkt = sl_iperf_network_ntohl(hdr->packet_cnt);
+  test->statistic.finack_bw = (uint32_t)(((uint64_t)test->statistic.finack_tot_len * SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_TIME_S_TO_MS_ML) / test->statistic.finack_duration_ms);
   test->statistic.udp_lost_pkt = sl_iperf_network_ntohl(hdr->lost_pkt_cnt);
   test->statistic.udp_out_of_order = sl_iperf_network_ntohl(hdr->out_of_order_cnt);
   t.sec = sl_iperf_network_ntohl(hdr->jitter_sec);

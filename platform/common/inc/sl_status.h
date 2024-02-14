@@ -259,7 +259,9 @@
 #define SL_STATUS_BT_CTRL_UNKNOWN_ADVERTISING_IDENTIFIER                                                 ((sl_status_t)0x1042)     ///< A command was sent from the Host that should identify an Advertising or Sync handle, but the Advertising or Sync handle does not exist.
 #define SL_STATUS_BT_CTRL_LIMIT_REACHED                                                                  ((sl_status_t)0x1043)     ///< Number of operations requested has been reached and has indicated the completion of the activity (e.g., advertising or scanning).
 #define SL_STATUS_BT_CTRL_OPERATION_CANCELLED_BY_HOST                                                    ((sl_status_t)0x1044)     ///< A request to the Controller issued by the Host and still pending was successfully canceled.
-#define SL_STATUS_BT_CTRL_PACKET_TOO_LONG                                                                ((sl_status_t)0x1045)     ///< An attempt was made to send or receive a packet that exceeds the maximum allowed packet l
+#define SL_STATUS_BT_CTRL_PACKET_TOO_LONG                                                                ((sl_status_t)0x1045)     ///< An attempt was made to send or receive a packet that exceeds the maximum allowed packet length.
+#define SL_STATUS_BT_CTRL_TOO_LATE                                                                       ((sl_status_t)0x1046)     ///< Information was provided too late to the controller.
+#define SL_STATUS_BT_CTRL_TOO_EARLY                                                                      ((sl_status_t)0x1047)     ///< Information was provided too early to the controller.
 
 // Bluetooth attribute status codes
 #define SL_STATUS_BT_ATT_INVALID_HANDLE                                                                  ((sl_status_t)0x1101)      ///< The attribute handle given was not valid on this server

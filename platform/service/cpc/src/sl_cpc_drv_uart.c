@@ -585,10 +585,7 @@ sl_status_t sli_cpc_drv_get_capabilities(sli_cpc_drv_capabilities_t *capabilitie
  ******************************************************************************/
 sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle)
 {
-  sl_status_t status;
   MCU_DECLARE_IRQ_STATE;
-
-  sl_cpc_buffer_handle_t *new_rx_buffer;
 
   MCU_ENTER_ATOMIC();
 
@@ -602,13 +599,6 @@ sl_status_t sli_cpc_drv_read_data(sl_cpc_buffer_handle_t **buffer_handle)
   if (*buffer_handle == NULL) {
     MCU_EXIT_ATOMIC();
     return SL_STATUS_EMPTY;
-  }
-
-  if (free_rx_buffer_handles < SL_CPC_DRV_UART_RX_QUEUE_SIZE) {
-    status = sli_cpc_get_buffer_handle_for_rx(&new_rx_buffer);
-    if (status == SL_STATUS_OK) {
-      push_free_rx_buffer_handle(new_rx_buffer);
-    }
   }
 
   MCU_EXIT_ATOMIC();
@@ -867,12 +857,14 @@ void sli_cpc_drv_on_rx_buffer_handle_free(void)
   sl_cpc_buffer_handle_t *buffer_handle;
 
   SL_CPC_JOURNAL_RECORD_TRACE("[TRACE] sli_cpc_drv_on_rx_buffer_handle_free", __LINE__);
-  while (free_rx_buffer_handles < SL_CPC_DRV_UART_RX_QUEUE_SIZE) {
+  if (free_rx_buffer_handles < SL_CPC_DRV_UART_RX_QUEUE_SIZE) {
     status = sli_cpc_get_buffer_handle_for_rx(&buffer_handle);
-    if (status != SL_STATUS_OK) {
-      break;
+    if (status == SL_STATUS_OK) {
+      push_free_rx_buffer_handle(buffer_handle);
     }
-    push_free_rx_buffer_handle(buffer_handle);
+  } else {
+    SL_CPC_JOURNAL_RECORD_ERROR("Possible memory leak, free_rx_buffer_handles >= SL_CPC_DRV_UART_RX_QUEUE_SIZE", __LINE__);
+    EFM_ASSERT(false);
   }
 
   MCU_EXIT_ATOMIC();
@@ -965,7 +957,11 @@ void SL_CPC_ISR_TX_HANDLER(SL_CPC_DRV_UART_PERIPHERAL_NO)(void)
 static void get_already_received_cnt(uint32_t *already_recvd_cnt)
 {
   *already_recvd_cnt = LDMA->CH[read_channel].DST - rx_descriptor_head->xfer.dstAddr;
-  EFM_ASSERT(*already_recvd_cnt <= SL_CPC_DRV_UART_RX_MAX_BUFFER_SIZE);
+
+  if (*already_recvd_cnt > SL_CPC_DRV_UART_RX_MAX_BUFFER_SIZE) {
+    EFM_ASSERT(false); // Should never happen
+    *already_recvd_cnt = SL_CPC_DRV_UART_RX_MAX_BUFFER_SIZE;
+  }
 }
 
 static void swap_descriptors(void)
@@ -1107,7 +1103,64 @@ static void recovery(void *data)
           break;
         }
 
-        // We are still out of sync, another 7 bytes
+        //===========================================================================
+        //
+        // Did we receive a bit more data since the ISR?
+        // If so, maybe that's our golden ticket to resync.
+        //
+        //  +-------------------+-------------------+--------------+
+        //  | Previous ISR data |  Current ISR data | Spill Buffer |
+        //  +-------------------+-------------------+--------------+
+        //                                    ^------------^
+        //                                    i ->
+        //===========================================================================
+
+        get_already_received_cnt(&already_recvd_cnt);
+        if (already_recvd_cnt > 0 ) {
+          uint8_t header_candidate[SLI_CPC_HDLC_HEADER_RAW_SIZE];
+          for (uint8_t i = 1; i < SLI_CPC_HDLC_HEADER_RAW_SIZE; ++i) {
+            if (i > already_recvd_cnt) {
+              // We did not receive enough bytes to proceed
+              break;
+            }
+            // Look if the byte at `i` is a HDLC header
+            if (recovery_context.hdlc_header_out_of_sync_sliding_window[(SLI_CPC_HDLC_HEADER_RAW_SIZE - 1) + i] == SLI_CPC_HDLC_FLAG_VAL) {
+              // Populate a temporary buffer and see if it's a valid HDLC header
+              memset(header_candidate, 0, sizeof(header_candidate));
+
+              // Copy part of the second half of the ISR data
+              memcpy(header_candidate,
+                     recovery_context.hdlc_header_out_of_sync_sliding_window + SLI_CPC_HDLC_HEADER_RAW_SIZE + i,
+                     SLI_CPC_HDLC_HEADER_RAW_SIZE - i);
+
+              // Copy part of the spill buffer
+              memcpy(header_candidate + (SLI_CPC_HDLC_HEADER_RAW_SIZE - i),
+                     recovery_context.spilled_buffer,
+                     i);
+
+              if (find_valid_header(header_candidate, sizeof(header_candidate), &header_flag_position)) {
+                // Copy the contents of the recovered header
+                memcpy(recovery_context.buffer_handle->hdlc_header, header_candidate + header_flag_position, SLI_CPC_HDLC_HEADER_RAW_SIZE);
+                recovery_context.buffer_handle->data_length = sli_cpc_hdlc_get_length(recovery_context.buffer_handle->hdlc_header);
+
+                // Remember the offset to skip bytes in the spill buffer
+                recovery_context.offset = i;
+
+                // Resync was a success, reset the sliding window
+                memset(recovery_context.hdlc_header_out_of_sync_sliding_window, 0x00, sizeof(recovery_context.hdlc_header_out_of_sync_sliding_window));
+
+                recovery_context.out_of_sync = false;
+                resynced = true; // We will be using this header
+                break;
+              }
+            }
+          }
+          if (resynced) {
+            break; // Break out of resync superloop
+          }
+        }
+
+        // We are still out of sync, 7 bytes is required
         if (resize_current_dma_descriptor(SLI_CPC_HDLC_HEADER_RAW_SIZE) == SL_STATUS_OK) {
           push_free_rx_buffer_handle(recovery_context.buffer_handle);
           recovery_context.spilled_buffer = NULL;
@@ -1754,7 +1807,7 @@ static bool rx_dma_complete_no_hwfc(unsigned int channel,
       recovery_context.spilled_buffer = NULL;
     } else {
       if (header_expected_next == false) {
-        sli_cpc_push_back_driver_buffer_handle(&rx_free_buffer_handle_list_head, active_dma_rx_buffer_handle);
+        push_free_rx_buffer_handle(active_dma_rx_buffer_handle);
         active_dma_rx_buffer_handle = NULL;
       }
     }

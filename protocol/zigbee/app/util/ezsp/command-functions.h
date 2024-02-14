@@ -2776,11 +2776,11 @@ int8_t mfglibGetPower(void)
 //------------------------------------------------------------------------------
 
 EmberStatus ezspLaunchStandaloneBootloader(
-  uint8_t mode)
+  bool enabled)
 {
   EmberStatus status;
   startCommand(EZSP_LAUNCH_STANDALONE_BOOTLOADER);
-  appendInt8u(mode);
+  appendInt8u(enabled);
   EzspStatus sendStatus = sendCommand();
   if (sendStatus == EZSP_SUCCESS) {
     status = fetchInt8u();

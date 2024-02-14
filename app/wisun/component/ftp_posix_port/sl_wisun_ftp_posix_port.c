@@ -82,7 +82,7 @@ void sl_ftp_delay_ms(const uint32_t delay_ms)
  ******************************************************************************/
 bool sl_ftp_is_network_connected(void)
 {
-  return app_wisun_network_is_connected();
+  return sl_wisun_app_core_util_network_is_connected();
 }
 
 /***************************************************************************//**
@@ -130,7 +130,7 @@ int32_t sl_ftp_socket_close(int32_t sockid)
  ******************************************************************************/
 int32_t sl_ftp_tcp_socket_create(void)
 {
-  return socket(AF_INET6, (SOCK_STREAM | SOCK_NONBLOCK), IPPROTO_TCP);
+  return socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 }
 
 /***************************************************************************//**
@@ -192,7 +192,7 @@ int32_t sl_ftp_tcp_socket_recv(int32_t sockid, void *buff, uint32_t len)
  ******************************************************************************/
 int32_t sl_tftp_udp_socket_create(void)
 {
-  return socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  return socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
 }
 
 /**************************************************************************//**

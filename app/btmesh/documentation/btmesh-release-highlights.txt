@@ -1,3 +1,2 @@
-Bluetooth Mesh SDK 6.0.0
-- Qualified implementation of Bluetooth Mesh 1.1
-- Added Network Lighting Control (NLC) profiles
+Bluetooth Mesh SDK 6.0.1
+- Targeted quality improvements and bugfixes

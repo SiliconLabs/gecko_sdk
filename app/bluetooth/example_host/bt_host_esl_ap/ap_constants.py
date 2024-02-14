@@ -235,3 +235,7 @@ CONTROLLER_COMMAND_FAIL = 1
 
 # Advertising timeout [s]
 ADVERTISING_TIMEOUT = 30
+
+# (Re)connecting timeout [s]
+# Allow enough time for the ESL C library for the re-connection attempts, which may be delayed by other queued connections
+CONNECTING_TIMEOUT = 60

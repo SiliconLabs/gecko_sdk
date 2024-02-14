@@ -53,7 +53,7 @@ configuration:
   - name: SL_HEAP_SIZE
     value: 8000
   - name: configTIMER_TASK_STACK_DEPTH
-    value: "500"
+    value: "600"
   - name: SL_BT_GATTDB_INCLUDE_STATIC_DATABASE
     value: "0"
   # FreeRTOS configs

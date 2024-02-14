@@ -342,6 +342,8 @@ void EMU_EM23PresleepHook(void)
 
     SystemCoreClockUpdate();
   }
+  // Clear HFXO IEN RDY before entering sleep to prevent HFXO HW requests from waking up the system
+  HFXO0->IEN_CLR = HFXO_IEN_RDY;
 }
 #endif
 
@@ -358,6 +360,9 @@ void EMU_EM23PresleepHook(void)
  ******************************************************************************/
 void EMU_EM23PostsleepHook(void)
 {
+  // Re enable HFXO IEN RDY since it was disabled in EMU_EM23PresleepHook
+  HFXO0->IEN_SET = HFXO_IEN_RDY;
+
   // Poke sleeptimer to determine if power manager's timer expired before the
   // ISR handler executes.
   // Also, check if HFXO is used.

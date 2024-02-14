@@ -1,0 +1,78 @@
+id: "sl_wisun_app_status_cli"
+label: "Application status over CoAP CLI module"
+package: "wisun"
+description: "CLI implementation for Wi-SUN Application status over CoAP."
+category: "Wi-SUN|Application"
+quality: "production"
+root_path: "app/wisun/component/app_status_cli"
+provides:
+  - name: sl_wisun_app_status_cli
+
+source:
+  - path: "sl_wisun_app_status_cli.c"
+
+requires:
+  - name: "sl_wisun_app_status"
+
+ui_hints:
+  visibility: never
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: "cli_group"
+    value:
+      name: "wisun"
+      help: "Wi-SUN commands"
+      shortcuts:
+        - name: "w"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_app_status_address"
+      handler: "sl_app_status_cli_set_address"
+      help: "App status address setting"
+      argument:
+        - type: string
+          help: "Remote address"
+        - type: uint16
+          help: "Remote port"
+      shortcuts:
+        - name: "sasa"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "set_app_status_schedule"
+      handler: "sl_app_status_cli_set_schedule"
+      help: "Set app status schedule time setting"
+      argument:
+        - type: uint32
+          help: "Schedule time in ms"
+      shortcuts:
+        - name: "sast"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "get_app_status_address"
+      handler: "sl_app_status_cli_get_address"
+      help: "Get app status address setting"
+      shortcuts:
+        - name: "gasa"
+
+  - name: "cli_command"
+    value:
+      group: "wisun"
+      name: "get_app_status_schedule"
+      handler: "sl_app_status_cli_get_schedule"
+      help: "Get app status schedule time setting"
+      shortcuts:
+        - name: "gast"
+  
+
+  
+
+#---------------- Component Catalog ------------------
+  - name: component_catalog
+    value: wisun_app_status_cli

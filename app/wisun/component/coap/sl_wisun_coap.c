@@ -192,7 +192,7 @@ sl_status_t sl_wisun_coap_init_srv(sl_wisun_coap_srv_t * const srv,
   }
 
   // Create socket
-  srv->sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  srv->sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   if (srv->sockid == SOCKET_INVALID_ID) {
     return SL_STATUS_FAIL;
   }
@@ -235,7 +235,7 @@ sl_status_t sl_wisun_coap_init_clnt(sl_wisun_coap_clnt_t * const clnt,
   }
 
   // Create socket
-  clnt->sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  clnt->sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
   if (clnt->sockid == SOCKET_INVALID_ID) {
     return SL_STATUS_FAIL;
   }

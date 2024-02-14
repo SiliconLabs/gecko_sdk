@@ -12,7 +12,7 @@ provides:
 
 requires:
   - name: zigbee_ncp
-  - name: legacy_bootloader_interface
+  - name: bootloader_interface
     condition:
       - device_cortexm
   - name: zigbee_zdo_cluster_filter

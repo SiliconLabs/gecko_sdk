@@ -17,7 +17,7 @@ for k, v in pairs(spidrv.instances) do
         if spi_mode == "spidrvMaster" then
             if spi_bitrate > 20000000 then
                 validation.warning(
-                "Bitrate of SPI master mode must equal or lower than 20Mbps",
+                "Bitrate of SPI master mode must be equal or lower than 20Mbps",
                 validation.target_for_defines({str_spi_bitrate}),
                 "Set bitrate equal or lower than 20Mbps",
                 nil)
@@ -25,7 +25,7 @@ for k, v in pairs(spidrv.instances) do
         else
             if spi_bitrate > 10000000 then
                 validation.warning(
-                "Bitrate of SPI slave mode must equal or lower than 10Mbps",
+                "Bitrate of SPI slave mode must be equal or lower than 10Mbps",
                 validation.target_for_defines({str_spi_bitrate}),
                 "Set bitrate equal or lower than 10Mbps",
                 nil)
@@ -34,24 +34,20 @@ for k, v in pairs(spidrv.instances) do
     end
     
     if slc.is_selected("device_init_dpll") and slc.is_provided("device_series_2") then
-        local ref_clock = slc.config("SL_DEVICE_INIT_DPLL_REFCLK")
-        if ref_clock.value == "cmuSelect_HFXO" then
-            if slc.is_provided("device_init_hfxo") then
-                local dpll_freq_expect = tonumber(slc.config("SL_DEVICE_INIT_DPLL_FREQ").value)
-                if dpll_freq_expect / spi_bitrate > max_clkdiv then
-                    validation.warning(
-                    "clkdiv is too high, need to be equal or smaller than 256",
-                    validation.target_for_defines({str_spi_bitrate}),
-                    "Set a higher bitrate or lower the reference clock dpll",
-                    nil)
-                elseif dpll_freq_expect / spi_bitrate < min_clkdiv then
-                    validation.warning(
-                    "clkdiv is too low, need to be equal or higher than 1",
-                    validation.target_for_defines({str_spi_bitrate}),
-                    "Set a lower bitrate or higher the reference clock dpll",
-                    nil)
-                else
-                end
+        if (slc.config("SL_DEVICE_INIT_DPLL_REFCLK")).value == "cmuSelect_HFXO" and slc.is_provided("device_init_hfxo") then
+            local dpll_freq_expect = tonumber(slc.config("SL_DEVICE_INIT_DPLL_FREQ").value)
+            if dpll_freq_expect / spi_bitrate > max_clkdiv then
+                validation.warning(
+                "clkdiv is too high, need to be equal or smaller than 256",
+                validation.target_for_defines({str_spi_bitrate}),
+                "Set a higher bitrate or lower the reference clock dpll",
+                nil)
+            elseif dpll_freq_expect / spi_bitrate < min_clkdiv then
+                validation.warning(
+                "clkdiv is too low, need to be equal or higher than 1",
+                validation.target_for_defines({str_spi_bitrate}),
+                "Set a lower bitrate or higher the reference clock dpll",
+                nil)
             end
         end
     else
@@ -68,15 +64,14 @@ for k, v in pairs(spidrv.instances) do
             validation.target_for_defines({str_spi_bitrate}),
             "Set a lower bitrate or higher the reference clock hfxo",
             nil)
-        else
         end
     end
-end
-
-if (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
-    local msg = instance .. " : SPIDRV is configured to control CS, but no CS pin is selected"
-    validation.error(msg,
-                    validation.target_for_defines({str_cs_port}),
-                    "CS must be controlled by the application, or a CS pin must be configured",
-                    nil)
+    
+    if (config_control.value == "spidrvCsControlAuto") and config_cs == nil then
+        local msg = instance .. " : SPIDRV is configured to control CS, but no CS pin is selected"
+        validation.error(msg,
+                        validation.target_for_defines({str_cs_port}),
+                        "CS must be controlled by the application, or a CS pin must be configured",
+                        nil)
+    end
 end

@@ -2,7 +2,7 @@ id: "gecko_sdk"
 label: "Gecko SDK Suite"
 description: |-
   Gecko SDK Suite for EM3xx, EFM32, EZR32 and EFR32 microcontrollers and radios.
-sdk_version: "4.4.0"
+sdk_version: "4.4.1"
 specification_version: 10
 component_path:
   - path: "app/amazon/component"
@@ -93,27 +93,27 @@ component_path:
 toolchain_mapping: "platform/common/toolchain/toolchains.slct"
 documentation:
   - docset: gecko-platform
-    version: "4.4.0"
+    version: "4.4.1"
   - docset: mbed-tls
     version: "3.5.0"
   - docset: connect-stack
-    version: "3.7.0"
+    version: "3.7.1"
   - docset: mcu-bootloader
-    version: "2.4.0"
+    version: "2.4.1"
   - docset: openthread
-    version: "2.4.0"
+    version: "2.4.1"
   - docset: rail
-    version: "2.16.0"
+    version: "2.16.1"
   - docset: wifi/wf200/rtos
-    version: "3.0.0"
+    version: "3.0.1"
   - docset: wisun
-    version: "1.8.0"
+    version: "1.9.0"
   - docset: zigbee
-    version: "7.4.0"
+    version: "7.4.1"
   - docset: rtl-lib
-    version: "7.0.0"
+    version: "7.0.1"
   - docset: bluetooth
-    version: "7.0.0"
+    version: "7.0.1"
   - docset: protocol-usb
     version: "1.2.0"
 upgrade_manifest:

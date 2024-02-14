@@ -37,7 +37,7 @@
 #ifndef SL_CATALOG_ZIGBEE_STACK_UNIX_PRESENT
 
 //taken from ccm-star so these function calls are defined
-#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+#if defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
 #include "em_device.h"
 
 //We're using some PSA APIs for all parts in zigbee-security-manager

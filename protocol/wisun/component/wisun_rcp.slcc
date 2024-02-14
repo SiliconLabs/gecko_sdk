@@ -43,6 +43,13 @@ include:
   - path: "stack/inc/socket/"
     file_list:
       - path: "socket.h"
+  - path: stack/src
+    file_list:
+      - path: common/bits.h
+      - path: common/endian.h
+      - path: common/int24.h
+      - path: common/iobuf.h
+      - path: common/string_extra.h
 
 template_contribution:
   - name: component_catalog

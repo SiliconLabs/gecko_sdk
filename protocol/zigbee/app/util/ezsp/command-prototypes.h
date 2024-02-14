@@ -2407,15 +2407,8 @@ void ezspMfglibRxHandler(
 // present
 // Return: An EmberStatus value indicating success or the reason for failure.
 EmberStatus ezspLaunchStandaloneBootloader(
-  // Controls the mode in which the standalone bootloader will run. See the
-  // app. note for full details. Options are:
-  // STANDALONE_BOOTLOADER_NORMAL_MODE: Will listen for an over-the-air
-  // image transfer on the current channel with current power settings.
-  // STANDALONE_BOOTLOADER_RECOVERY_MODE: Will listen for an over-the-air
-  // image transfer on the default channel with default power settings. Both
-  // modes also allow an image transfer to begin with XMODEM over the serial
-  // protocol's Bootloader Frame.
-  uint8_t mode);
+  // If true, launch the standalone bootloader. If false, do nothing.
+  bool enabled);
 
 // Transmits the given bootload message to a neighboring node using a specific
 // 802.15.4 header that allows the EmberZNet stack as well as the bootloader to

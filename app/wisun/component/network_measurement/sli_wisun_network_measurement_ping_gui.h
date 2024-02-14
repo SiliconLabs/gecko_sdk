@@ -54,6 +54,12 @@ extern "C" {
  * @param[in] args Arguments
  *****************************************************************************/
 void sli_wisun_nwm_ping_form(void *args);
+
+/**************************************************************************//**
+ * @brief Network Measurement Test result form
+ * @details Renderer Test result form
+ * @param[in] args Arguments
+ *****************************************************************************/
 void sli_wisun_nwm_test_result_form(void *args);
 
 #ifdef __cplusplus

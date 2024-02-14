@@ -21,10 +21,19 @@ component:
   - id: cpc_secondary_recommended_interface
   - id: iostream_cpc
   - id: iostream_retarget_stdio
+  - id: bootloader_interface
 
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
+  - name: SL_HEAP_SIZE
+    value: 8192
+    condition:
+      - device_family_efr32fg25
+  - name: SL_CPC_RX_PAYLOAD_MAX_LENGTH
+    value: 2048
+    condition:
+      - device_family_efr32fg25
 
 include:
   - path: "./"

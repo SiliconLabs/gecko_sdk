@@ -45,7 +45,7 @@ extern "C" {
 #include "sl_wisun_app_core.h"
 #include "cmsis_os2.h"
 #include "sl_wisun_config.h"
-#include "sl_wisun_app_core_util_config.h"
+#include "sl_wisun_app_core_config.h"
 #include "app_project_info.h"
 
 // -----------------------------------------------------------------------------
@@ -91,37 +91,37 @@ extern "C" {
  * @details Init internal instance
  * @param[in] app_name Application name
  *****************************************************************************/
-void app_wisun_project_info_init(const char * app_name);
+void sl_wisun_app_core_util_project_info_init(const char * app_name);
 
 /**************************************************************************//**
  * @brief Print Wi-SUN project information.
  * @details Print project info in pretty or json format.
  * @param[in] json_format Json format required indicator
  *****************************************************************************/
-void app_wisun_project_info_print(const bool json_format);
+void sl_wisun_app_core_util_project_info_print(const bool json_format);
 
 /**************************************************************************//**
  * @brief Get Wi-SUN Project info
  * @details Get a constant instance of internal Wi-SUN project info
  * @return app_project_info_t * Project info
  *****************************************************************************/
-const app_project_info_t * app_wisun_project_info_get(void);
+const app_project_info_t * sl_wisun_app_core_util_project_info_get(void);
 
 /**************************************************************************//**
  * @brief Wait for the connection.
- * @details This function doesn't call the app_wisun_network_connect() function.
+ * @details This function doesn't call the sl_wisun_app_core_network_connect() function.
  *          The function provides a delay loop with optional heart beat printing
  *          till the connection state has not been changed.
  *****************************************************************************/
-void app_wisun_wait_for_connection(void);
+void sl_wisun_app_core_util_wait_for_connection(void);
 
 /**************************************************************************//**
  * @brief Connect and wait for connection.
- * @details The function calls app_wisun_network_connect() function and
- *          app_wisun_wait_for_connection() function.
+ * @details The function calls sl_wisun_app_core_network_connect() function and
+ *          sl_wisun_app_core_util_wait_for_connection() function.
  *          It can be useful at the beginning of application thread.
  *****************************************************************************/
-void app_wisun_connect_and_wait(void);
+void sl_wisun_app_core_util_connect_and_wait(void);
 
 /**************************************************************************//**
  * @brief The network is connected.
@@ -129,14 +129,14 @@ void app_wisun_connect_and_wait(void);
  * @return true Connected
  * @return false Not connected
  *****************************************************************************/
-bool app_wisun_network_is_connected(void);
+bool sl_wisun_app_core_util_network_is_connected(void);
 
 /**************************************************************************//**
  * @brief Thread dispatch function
- * @details For low power LFN mode, the delay value is 'APP_THREAD_LP_DISPATCH_MS',
+ * @details For low power LFN mode, the delay value is 'SL_WISUN_APP_CORE_THREAD_LP_DISPATCH_MS',
  *          for FFN mode, the delay is 1ms
  *****************************************************************************/
-void app_wisun_dispatch_thread(void);
+void sl_wisun_app_core_util_dispatch_thread(void);
 
 /** @}*/
 

@@ -66,7 +66,7 @@ void sl_wisun_udp_client_create(void)
   int32_t sockid = SOCKET_INVALID_ID; // client socket id
 
   // create client socket
-  sockid = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_IP);
+  sockid = socket(AF_INET6, SOCK_DGRAM, IPPROTO_IP);
 
   if (sockid == SOCKET_INVALID_ID) {
     printf("[Failed to create socket: %ld]\n", sockid);

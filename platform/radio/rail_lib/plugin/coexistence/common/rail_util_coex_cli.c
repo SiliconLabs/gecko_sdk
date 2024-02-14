@@ -185,14 +185,16 @@ static void initCoexTest(void)
 
 static COEX_CLI_config_t *get_gpio_config(uint8_t index)
 {
+#ifdef COEX_CONFIGURED
   uint8_t i;
-  #ifdef COEX_CONFIGURED
   for (i = 0U; i < NUMOF_ARRAY_ELEMENTS(coex_gpios); ++i) {
     if (coex_gpios[i].index == index) {
       return &coex_gpios[i];
     }
   }
-  #endif //COEX_CONFIGURED
+#else
+  (void)index;
+#endif //COEX_CONFIGURED
   return NULL;
 }
 
@@ -294,24 +296,4 @@ void cli_coex_get_dp_pulse_width(sl_cli_command_arg_t *args)
 {
   uint8_t pulseWidthUs = COEX_HAL_GetDpPulseWidth();
   responsePrint(sl_cli_get_command_string(args, 0), "pulseWidthUs:%u", pulseWidthUs);
-}
-
-void cli_coex_get_gpio_input_override(sl_cli_command_arg_t *args)
-{
-  sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(args, 0);
-  if (gpioIndex < COEX_GPIO_INDEX_COUNT) {
-    bool enabled = COEX_GetGpioInputOverride(gpioIndex);
-    responsePrint(sl_cli_get_command_string(args, 0), "gpioOverride:0x%x", enabled);
-  } else {
-    responsePrint(sl_cli_get_command_string(args, 0), "COEX GPIO index out of bounds!");
-  }
-}
-
-void cli_coex_set_gpio_input_override(sl_cli_command_arg_t *args)
-{
-  sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(args, 0);
-  bool enabled = (bool)sl_cli_get_argument_uint8(args, 1);
-  sl_status_t status = sl_rail_util_coex_set_gpio_input_override(gpioIndex, enabled);
-  responsePrint(sl_cli_get_command_string(args, 0), "Status:0x%x", status);
-  cli_coex_get_gpio_input_override(args);
 }

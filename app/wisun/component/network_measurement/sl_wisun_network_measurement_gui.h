@@ -89,13 +89,6 @@ void sli_wisun_settings_form(void *args);
 void sli_wisun_nwm_logo_form(void *args);
 
 /**************************************************************************//**
- * @brief Network Measurement Test result form
- * @details Renderer Test result form
- * @param[in] args Arguments
- *****************************************************************************/
-void sli_wisun_nwm_test_result_form(void *args);
-
-/**************************************************************************//**
  * @brief Neighbor select form
  * @details Form renderer
  * @param[in] args Arguments

@@ -20,6 +20,7 @@
 #include <em_device.h>
 #include <em_ldma.h>
 #include <dmadrv.h>
+#include <sli_wisun_timer_service.h>
 
 #if defined(EUSART_PRESENT)
 #include <em_eusart.h>
@@ -59,16 +60,18 @@ struct sl_wsrcp_uart {
     // not easy and is error prone.
     struct ring rx_ring;
     uint8_t rx_ring_data[4096];
+
+    struct sli_wisun_timer timer;
 };
 
-void uart_init(struct sl_wsrcp_uart *uart);
+void uart_init(struct sl_wsrcp_uart *uart, struct sli_wisun_timer_context *timer_ctxt);
 int uart_tx(struct sl_wsrcp_uart *uart, const void *buf, int buf_len);
 int uart_rx(struct sl_wsrcp_uart *uart, void *buf, int buf_len);
 
 // Called when a CRC error is detected in receveided frames before the frame is
 // discarded. This funtion is declared "weak". So, the user can overload it and
 // choose to increment a counter or report the error to the host.
-void uart_crc_error(struct sl_wsrcp_uart *uart, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter);
+void uart_crc_error(struct sl_wsrcp_uart *uart, uint8_t irq_err_counter);
 
 // Called from IRQ when new data are available. This funtion is declared "weak".
 // So, the user can overload it. The user can post de necessary events from this

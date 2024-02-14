@@ -120,7 +120,13 @@ RAIL_ENUM(sl_rail_util_ieee802154_radio_config_t) {
  * @def SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS
  * @brief IEEE802.15.4 2.4Ghz radio configuration for high speed communication
  */
-  SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS
+  SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS,
+/**
+ * @def SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for high speed communication
+ * with forward error correction
+ */
+  SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC
 };
 
 /**

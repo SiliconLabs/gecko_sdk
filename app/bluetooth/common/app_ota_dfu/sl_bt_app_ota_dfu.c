@@ -3,7 +3,7 @@
  * @brief Application Over-the-Air Device Firmware Update
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -49,8 +49,9 @@
 #define ATT_ERR_STORAGE_FULL                   0x82u
 #define ATT_ERR_PACKAGE_LOST                   0x83u
 
+// Resizing to fit the 32 bit target architecture.
 #define SL_BT_APP_OTA_DFU_FLASH_VERIFICATION_CONTEXT_SIZE \
-  (uint16_t)(BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE >> 2)
+  (uint16_t)(BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE / sizeof(uint32_t))
 
 #ifndef SL_BT_INVALID_CONNECTION_HANDLE
 #define SL_BT_INVALID_CONNECTION_HANDLE ((uint8_t) 0xFF)
@@ -309,7 +310,7 @@ bool sl_bt_app_ota_dfu_is_ok_to_sleep(void)
   // - no verification is in progress
   // - no storage checking for erase is in progress
   if ((ota_sts == SL_BT_APP_OTA_DFU_VERIFY) \
-      || (ota_sts == SL_BT_APP_OTA_DFU_ERASE)) {
+      || (ota_sts == SL_BT_APP_OTA_DFU_READ_FLASH)) {
     ret_val = false;
   }
   return ret_val;
@@ -325,7 +326,7 @@ sl_power_manager_on_isr_exit_t sl_bt_app_ota_dfu_sleep_on_isr_exit(void)
   // - verification is in progress
   // - storage checking for erase is in progress
   if ((ota_sts == SL_BT_APP_OTA_DFU_VERIFY) \
-      || (ota_sts == SL_BT_APP_OTA_DFU_ERASE)) {
+      || (ota_sts == SL_BT_APP_OTA_DFU_READ_FLASH)) {
     ret_val = SL_POWER_MANAGER_WAKEUP;
   }
   return ret_val;
@@ -351,9 +352,11 @@ void sli_bt_app_ota_dfu_step(void)
   int32_t btl_ret_val = BOOTLOADER_OK;
   sl_bt_app_ota_dfu_error_t ota_error = SL_BT_APP_OTA_DFU_NO_ERROR;
   sl_bt_app_ota_dfu_status_t req_sts = SL_BT_APP_OTA_DFU_UNINIT;
-
-  uint32_t offset = 0, num_blocks = 0, i = 0;
   bool dirty = false;
+  uint32_t offset = 0, num_blocks = 0, i = 0;
+  // Resizing to fit the 32 bit target architecture.
+  uint16_t data_fragments = \
+    (uint16_t)(SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE / sizeof(uint32_t));
 
   switch (ota_sts) {
     ///////////////////////////////////////////////////////////////////////////
@@ -383,8 +386,8 @@ void sli_bt_app_ota_dfu_step(void)
         ota_event.evt_info.btl_storage.storage_size_bytes = slot_info.length;
         ota_event.evt_info.btl_storage.storage_start_addr = slot_info.address;
         sl_bt_app_ota_dfu_on_status_event(&ota_event);
-        // Proceed to erase state to erase the storage.
-        req_sts = SL_BT_APP_OTA_DFU_ERASE;
+        // Proceed to read flash state to determine if erase is necessary or not.
+        req_sts = SL_BT_APP_OTA_DFU_READ_FLASH;
       } else {
         // Getting bootloader and storage information failed.
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
@@ -403,10 +406,10 @@ void sli_bt_app_ota_dfu_step(void)
       sli_bt_app_ota_dfu_proceed();
       break;
     ///////////////////////////////////////////////////////////////////////////
-    // Erase storage slot if neccessary.                                     //
+    // Check flash storage slot.                                             //
     ///////////////////////////////////////////////////////////////////////////
-    case SL_BT_APP_OTA_DFU_ERASE:
-      // Check the download area content by reading it in byte blocks.
+    case SL_BT_APP_OTA_DFU_READ_FLASH:
+      // Check the download area content by reading it in blocks.
       num_blocks = slot_info.length / SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE;
       // Run through the full storage and read the context in chunks.
       while ((dirty == false) && (offset < SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE * num_blocks) && (btl_ret_val == BOOTLOADER_OK)) {
@@ -418,8 +421,8 @@ void sli_bt_app_ota_dfu_step(void)
                                  SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE);
 
         if (btl_ret_val == BOOTLOADER_OK) {
-          // Run through the chunk byte-by-byte and check if its empty or not.
-          for (i = 0; i < SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE && !dirty; i++) {
+          // Run through the chunk in 32 bit fragments and check if its empty or not.
+          for (i = 0; i < data_fragments && !dirty; i++) {
             if (ota_buff[i] != SL_BT_APP_OTA_DFU_EMPTY_FLASH_CONTENT) {
               dirty = true;
             }
@@ -435,18 +438,35 @@ void sli_bt_app_ota_dfu_step(void)
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
       } else if (dirty) {
         // Storage space is not empty proceed to erase.
-        btl_ret_val = bootloader_eraseStorageSlot(SL_BT_APP_OTA_DFU_USED_SLOT);
-        if (btl_ret_val != BOOTLOADER_OK) {
-          // Failed to erase storage slot.
-          ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
-          req_sts = SL_BT_APP_OTA_DFU_ERROR;
-        } else {
-          // Storage slot erased successfully.
-          // Application OTA DFU component is ready for an OTA process.
-          req_sts = SL_BT_APP_OTA_DFU_READY;
-        }
+        req_sts = SL_BT_APP_OTA_DFU_ERASE;
       } else {
         // Storage space was originally empty, proceed to next
+        req_sts = SL_BT_APP_OTA_DFU_READY;
+      }
+      // Change to next state.
+      sli_bt_app_ota_dfu_set_main_status(req_sts);
+      // Forward state change information to application.
+      ota_event.event_id = SL_BT_APP_OTA_DFU_EVT_STATE_CHANGE_ID;
+      ota_event.ota_error_code = ota_error;
+      ota_event.btl_api_retval = btl_ret_val;
+      ota_event.evt_info.sts.status = ota_sts;
+      ota_event.evt_info.sts.prev_status = ota_prev_sts;
+      sl_bt_app_ota_dfu_on_status_event(&ota_event);
+      // Continue execution.
+      sli_bt_app_ota_dfu_proceed();
+      break;
+    ///////////////////////////////////////////////////////////////////////////
+    // Erase storage slot.                                                   //
+    ///////////////////////////////////////////////////////////////////////////
+    case SL_BT_APP_OTA_DFU_ERASE:
+      btl_ret_val = bootloader_eraseStorageSlot(SL_BT_APP_OTA_DFU_USED_SLOT);
+      if (btl_ret_val != BOOTLOADER_OK) {
+        // Failed to erase storage slot.
+        ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
+        req_sts = SL_BT_APP_OTA_DFU_ERROR;
+      } else {
+        // Storage slot erased successfully.
+        // Application OTA DFU component is ready for an OTA process.
         req_sts = SL_BT_APP_OTA_DFU_READY;
       }
       // Change to next state.

@@ -38,8 +38,9 @@
 //<i> - CC_NOTIFICATION_MAX_NOTIFICATIONS
 //<i> - 3 * CC_ASSOCIATION_MAX_NODES_IN_GROUP * (1+ZAF_CONFIG_NUMBER_OF_END_POINTS) + CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT
 //<i> - 204 (minimum required by nvm3 library)
-//<i> Default: 204
-#define ZPAL_ZW_NVM_MAX_OBJECT_SIZE 204
+//<i> - 512 (minimum required for controller)
+//<i> Default: 512
+#define ZPAL_ZW_NVM_MAX_OBJECT_SIZE 512
 #endif
 
 #ifndef ZPAL_ZW_NVM_INSTANCE_REPACK_HEADROOM

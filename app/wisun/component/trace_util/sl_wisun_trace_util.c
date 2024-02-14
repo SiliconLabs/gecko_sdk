@@ -38,6 +38,7 @@
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_types.h"
 #include "rail_config.h"
+#include "cmsis_os2.h"
 
 #if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 // FreeRTOS
@@ -117,6 +118,15 @@
 
 /// Secs in Minute
 #define SEC_IN_MINUTE     60U
+
+/// Trace util event notify max channel count
+#define APP_WISUN_TRACE_UTIL_EVT_NOTIFY_MAX_CHS         31U
+
+/// Trace util event notify error mask
+#define APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ERROR_MSK       (1UL << 31U)
+
+/// Trace util event notify all flags mask
+#define APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ALL_FLAGS_MSK   0x7FFFFFFFUL
 
 /// PHY type enumeration
 typedef enum phy_type {
@@ -649,6 +659,109 @@ const char *app_wisun_trace_util_time_to_str(const sl_wisun_trace_util_time_t * 
 
   return (const char *) str;
 }
+
+
+sl_status_t app_wisun_trace_util_evt_notify_init(app_wisun_trace_util_evt_notify_t * const evt_notify,
+                                                 const uint32_t wait_opt)
+{
+  static const osEventFlagsAttr_t evt_attr = {
+    .name = "EvtNotify",
+    .cb_mem = NULL,
+    .cb_size = 0,
+    .attr_bits = 0
+  };
+
+  if (evt_notify == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  evt_notify->evt_chs = 0UL;
+  evt_notify->wait_opt = wait_opt;
+  evt_notify->evt_id = osEventFlagsNew(&evt_attr);
+  
+  if (evt_notify->evt_id == NULL) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t app_wisun_trace_util_evt_notify_clear(app_wisun_trace_util_evt_notify_t * const evt_notify)
+{
+  uint32_t flags = 0UL;
+
+  flags = osEventFlagsClear(evt_notify->evt_id, APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ALL_FLAGS_MSK);
+
+  if (flags & APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ERROR_MSK) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+
+sl_status_t app_wisun_trace_util_evt_notify_subscribe_ch(app_wisun_trace_util_evt_notify_t * const evt_notify, 
+                                                         uint8_t * const evt_ch)
+{
+  for (uint8_t ch_idx = 0; ch_idx < APP_WISUN_TRACE_UTIL_EVT_NOTIFY_MAX_CHS; ch_idx++) {
+    if (!(evt_notify->evt_chs & (1UL << ch_idx))) {
+      *evt_ch = ch_idx;
+      evt_notify->evt_chs |= (1UL << ch_idx);
+      return SL_STATUS_OK;
+    }
+  }
+  return SL_STATUS_FAIL;
+}
+
+sl_status_t app_wisun_trace_util_evt_notify_unsubscribe_ch(app_wisun_trace_util_evt_notify_t * const evt_notify, 
+                                                           const uint8_t evt_ch)
+{
+
+  if (!(evt_notify->evt_chs & (1UL << evt_ch))) {
+    return SL_STATUS_FAIL;
+  }
+
+  (void) osEventFlagsClear(evt_notify->evt_id, 1UL << evt_ch);
+  evt_notify->evt_chs &= ~(1UL << evt_ch);
+
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t app_wisun_trace_util_evt_notfiy_chs(const app_wisun_trace_util_evt_notify_t * const evt_notify)
+{
+  uint32_t flags = 0UL;
+
+  flags = osEventFlagsSet(evt_notify->evt_id, evt_notify->evt_chs);
+
+  if (flags & APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ERROR_MSK) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+
+sl_status_t app_wisun_trace_util_evt_notify_wait(const app_wisun_trace_util_evt_notify_t * const evt_notify,
+                                                 const uint32_t ch_mask,
+                                                 const uint32_t timeout)
+{
+  uint32_t flags = 0UL;
+
+  if (!(evt_notify->evt_chs & ch_mask)) {
+    return SL_STATUS_FAIL;
+  }
+
+  flags = osEventFlagsWait(evt_notify->evt_id, ch_mask, evt_notify->wait_opt, timeout);
+
+  if (flags & APP_WISUN_TRACE_UTIL_EVT_NOTIFY_ERROR_MSK) {
+    return SL_STATUS_FAIL;
+  }
+
+  return SL_STATUS_OK;
+}
+
+
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions

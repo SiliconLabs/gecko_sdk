@@ -114,6 +114,7 @@ void app_remove_meter(sl_cli_command_arg_t *arguments)
   }
   if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\r\n");
+    app_wisun_release_cli_mutex_and_return();
   }
 
   stat = sl_wisun_collector_remove_meter(&meter_addr);
@@ -147,6 +148,7 @@ void app_async_request(sl_cli_command_arg_t *arguments)
   }
   if (inet_pton(AF_INET6, meter_ip, &meter_addr.sin6_addr) == SOCKET_RETVAL_ERROR ) {
     printf("[Failed: invalid remote address parameter]\r\n");
+    app_wisun_release_cli_mutex_and_return();
   }
 
   stat = sl_wisun_send_async_request(&meter_addr);

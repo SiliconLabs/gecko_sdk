@@ -218,6 +218,9 @@ uint16_t formatResponseCommandFromArgList(uint8_t *buffer,
                                           const char *format,
                                           va_list argumentList)
 {
+  if (buffer == NULL) {
+    return 0;
+  }
   uint8_t *finger = buffer;
   const char *formatFinger;
 

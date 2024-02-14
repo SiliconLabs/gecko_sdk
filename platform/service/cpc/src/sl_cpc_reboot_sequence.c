@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_gsdk_version.h"
 #include "sl_cpc_weak_prototypes.h"
 #include "sli_cpc_fwu.h"
 #include "sli_cpc_reboot_sequence.h"
@@ -44,6 +45,13 @@
 #include <string.h>
 #include <inttypes.h>
 
+static const sli_cpc_system_primary_version_t primary_version = {
+  .major = SL_GSDK_MAJOR_VERSION,
+  .minor = SL_GSDK_MINOR_VERSION,
+  .patch = SL_GSDK_PATCH_VERSION,
+  .tweak = 0
+};
+
 static bool ignore_reset_reason = true;
 static bool set_reset_mode_ack = false;
 static bool reset_ack = false;
@@ -53,6 +61,7 @@ static bool tx_capability_transmited = false;
 static bool protocol_version_received = false;
 static bool capabilities_received = false;
 static bool secondary_cpc_version_received = false;
+static bool set_primary_version_reply_received = false;
 static bool bootloader_info_received_or_not_available = false;
 static bool secondary_bus_max_bitrate_received = false;
 static bool failed_to_receive_secondary_bus_max_bitrate = false;
@@ -76,6 +85,7 @@ static enum {
   WAIT_FOR_SECONDARY_CPC_VERSION,
   WAIT_FOR_SECONDARY_APP_VERSION,
   WAIT_FOR_PROTOCOL_VERSION,
+  WAIT_FOR_SET_PRIMARY_VERSION_REPLY,
   WAIT_FOR_SECONDARY_BUS_MAX_BITRATE,
   RESET_SEQUENCE_DONE,
   RESET_SEQUENCE_NOT_OK_TO_RUN
@@ -133,6 +143,12 @@ static void property_get_secondary_cpc_version_callback(sli_cpc_property_id_t pr
                                                         void *property_value,
                                                         size_t property_length,
                                                         void *on_reply_arg,
+                                                        sl_status_t status);
+
+static void property_set_primary_version_reply_callback(sli_cpc_property_id_t property_id,
+                                                        void *property_value,
+                                                        size_t property_length,
+                                                        void *reply_arg,
                                                         sl_status_t status);
 
 static void property_get_secondary_bootloader_info_callback(sli_cpc_property_id_t property_id,
@@ -264,7 +280,12 @@ bool sli_cpc_is_gecko_bootloader_present(void)
  ******************************************************************************/
 void sli_cpc_reboot_sequence_start(void)
 {
+  #if defined(SLI_CPC_DEVICE_UNDER_TEST)
+  // Skip reset sequence in Unit tests
+  reset_sequence_state = RESET_SEQUENCE_DONE;
+  #else
   reset_sequence_state = SET_NORMAL_REBOOT_MODE;
+  #endif
 
   ignore_reset_reason = true;
   set_reset_mode_ack = false;
@@ -464,6 +485,24 @@ void sli_cpc_reboot_sequence_process(void)
     case WAIT_FOR_SECONDARY_CPC_VERSION:
       if (secondary_cpc_version_received) {
         TRACE_RESET("Obtained Secondary CPC version");
+
+        status = sli_cpc_system_cmd_property_set(property_set_primary_version_reply_callback,
+                                                 NULL,
+                                                 PROP_PRIMARY_VERSION_VALUE,
+                                                 5,       // 5 retries
+                                                 100000,  // 1s between retries
+                                                 &primary_version,
+                                                 sizeof(primary_version),
+                                                 SYSTEM_EP_UFRAME);
+        if (status == SL_STATUS_OK) {
+          reset_sequence_state = WAIT_FOR_SET_PRIMARY_VERSION_REPLY;
+        }
+      }
+      break;
+
+    case WAIT_FOR_SET_PRIMARY_VERSION_REPLY:
+      if (set_primary_version_reply_received) {
+        TRACE_RESET("Obtained Set Primary Version Reply");
 
         status = sli_cpc_system_cmd_property_get(property_get_secondary_bus_max_bitrate_callback,
                                                  NULL,
@@ -762,6 +801,26 @@ static void property_get_secondary_cpc_version_callback(sli_cpc_property_id_t pr
 
   PRINT_INFO("Secondary CPC v%lu.%lu.%lu", version[0], version[1], version[2]);
   secondary_cpc_version_received = true;
+}
+
+/***************************************************************************/ /**
+ * The callback when a reply to a property set primary version is received
+ ******************************************************************************/
+static void property_set_primary_version_reply_callback(sli_cpc_property_id_t property_id,
+                                                        void *property_value,
+                                                        size_t property_length,
+                                                        void *reply_arg,
+                                                        sl_status_t status)
+{
+  (void) property_value;
+  (void) property_length;
+  (void) reply_arg;
+
+  set_primary_version_reply_received = true;
+
+  if ((status != SL_STATUS_OK && status != SL_STATUS_IN_PROGRESS) || property_id != PROP_PRIMARY_VERSION_VALUE) {
+    TRACE_RESET("Could not set Primary version on the Secondary");
+  }
 }
 
 #if defined(SL_CPC_DEBUG_TRACES)

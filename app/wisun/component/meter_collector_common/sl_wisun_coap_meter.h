@@ -43,7 +43,7 @@ extern "C" {
 #include "sli_wisun_meter_collector.h"
 #include "sl_wisun_meter.h"
 #include "sl_wisun_coap_meter_collector_config.h"
-#include "sl_wisun_led_driver.h"
+
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -96,6 +96,7 @@ sl_wisun_coap_packet_t *sl_wisun_coap_meter_humidity_response_cb(const sl_wisun_
  *****************************************************************************/
 sl_wisun_coap_packet_t *sl_wisun_coap_meter_light_response_cb(const sl_wisun_coap_packet_t * const req_packet);
 
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 /**************************************************************************//**
  * @brief Prepare measurement response packet
  * @details Callback for CoAP Resource Handler Service. It should be registered.
@@ -103,6 +104,7 @@ sl_wisun_coap_packet_t *sl_wisun_coap_meter_light_response_cb(const sl_wisun_coa
  * @return sl_wisun_coap_packet_t * Response packet ptr
  *****************************************************************************/
 sl_wisun_coap_packet_t *sl_wisun_coap_meter_led_toggle_response_cb(const sl_wisun_coap_packet_t * const req_packet);
+#endif
 #endif
 
 #ifdef __cplusplus

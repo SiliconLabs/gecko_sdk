@@ -35,11 +35,11 @@
 #define MAX_MAC_INDEX 1
 #endif
 //#define MAX_MAC_INDEX 2
-#ifdef HIGH_SPEED_PHY
-#define MAX_FLAT_PACKET_SIZE 2049
+#ifdef HIGH_DATARATE_PHY
+#define MAX_FLAT_PACKET_SIZE 255 // CHANGE THIS FOR 2049 size packet when supported
 #else
 #define MAX_FLAT_PACKET_SIZE 127
-#endif //HIGH_SPEED_PHY
+#endif //HIGH_DATARATE_PHY
 // When this callback is called, the higher layer shall perform any final adjustments to the packet necessary just before TX (such as NWK encryption)
 // It shall place the packet to send in the flat buffer, with the payload at mac_payload_offset.
 // This callback is able to drop a packet by setting the length byte to 0 (flat_packet_buffer[0]) to zero
@@ -157,7 +157,11 @@ sl_status_t sl_mac_submit(uint8_t mac_index,
                           sl_mac_transmit_priority_t priority,
                           sl_mac_transmit_complete_callback_t callback,
                           uint8_t tag);
-
+#ifdef HIGH_DATARATE_PHY
+#include "rail_types.h"
+#include "rail.h"
+RAIL_Status_t sl_mac_lower_mac_set_mode_switch_sync_detect(bool enable_f);
+#endif  //HIGH_DATARATE_PHY
 // Triggers the Mac to send a data request when available
 // The prior Connect API simply sent the poll immediately.
 // However, in Zigbee/Thread, the transmit state machine attempts to
@@ -182,9 +186,9 @@ sl_status_t sl_mac_send_raw_message(uint8_t mac_index,
                                     bool useCca,
                                     sl_mac_transmit_complete_callback_t callback);
 
-#ifdef HIGH_SPEED_PHY
-sl_status_t sl_mac_send_raw_high_bandwidth_phy_message(uint8_t nwk_index, uint8_t *payload);
-#endif //HIGH_SPEED_PHY
+#ifdef HIGH_DATARATE_PHY
+sl_status_t sl_mac_send_raw_high_datarate_phy_message(uint8_t nwk_index, uint8_t *payload);
+#endif //HIGH_DATARATE_PHY
 
 typedef struct {
   Buffer packet;

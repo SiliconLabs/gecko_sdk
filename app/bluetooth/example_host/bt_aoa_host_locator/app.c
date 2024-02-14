@@ -181,7 +181,6 @@ void app_init(int argc, char *argv[])
     app_log_info("Selected CTE mode: %s" APP_LOG_NL, cte_mode_string);
   }
   app_log_info("Press Crtl+C to quit" APP_LOG_NL APP_LOG_NL);
-  ncp_reset();
 }
 
 /**************************************************************************//**

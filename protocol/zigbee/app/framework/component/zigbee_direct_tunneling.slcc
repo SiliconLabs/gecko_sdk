@@ -33,6 +33,10 @@ template_contribution:
     value:
       callback_type: redirect_outgoing_message
       function_name: sli_zigbee_af_plugin_zdd_tunneling_redirect_outgoing_message_callback
+  - name: zigbee_af_callback
+    value:
+      callback_type: event_init
+      function_name: sli_zigbee_af_zdd_tunneling_init
 
 documentation:
   docset: zigbee

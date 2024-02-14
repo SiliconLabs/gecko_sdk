@@ -189,6 +189,9 @@ typedef struct sl_iperf_stats {
   sl_iperf_ts_ms_t finack_duration_ms;
   /// Packet count in Final ACK
   uint32_t finack_pkt;
+  /// Bandwidth in Final ACK in bits/s
+  /// (calculated from FinACK tot length and FinACK duration ms)
+  uint32_t finack_bw;
 } sl_iperf_stats_t;
 
 /// iPerf connection descriptor type definition

@@ -32,21 +32,15 @@
 
 #if defined(SLI_MBEDTLS_DEVICE_VSE)
 
-#include "sli_cryptoacc_transparent_types.h"
-#include "sli_cryptoacc_transparent_functions.h"
-#include "cryptoacc_management.h"
-// Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
-// interface header file when it becomes available.
-#include "psa/crypto_platform.h"
-#include "psa/crypto_sizes.h"
-#include "psa/crypto_struct.h"
+#include "psa/crypto.h"
 
+#include "cryptoacc_management.h"
+
+#include "sli_cryptoacc_driver_trng.h"
+
+#include "sx_errors.h"
 #include "sx_ecdsa_alg.h"
 #include "sx_ecc_keygen_alg.h"
-#include "sx_trng.h"
-#include "sx_errors.h"
-#include "cryptolib_types.h"
-#include <string.h>
 
 // -----------------------------------------------------------------------------
 // Driver entry points
@@ -147,12 +141,12 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(
   if (status != PSA_SUCCESS) {
     return status;
   }
-  struct sx_rng trng = { NULL, sx_trng_fill_blk };
+
   uint32_t sx_ret = ecdsa_generate_signature_digest(curve,
                                                     data_in,
                                                     priv,
                                                     data_out,
-                                                    trng);
+                                                    sli_cryptoacc_trng_wrapper);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {

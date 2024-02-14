@@ -12,9 +12,12 @@ The ESL specification includes both mandatory and optional functionalities. In t
 ![](image/components.png)
 
 ### ESL Tag Core
-The *ESL Tag Core* component implements the mandatory functionality of the specification. This is a key component and hence, a dependency for every other ESL component. Configuration options include advertising minimum and maximum intervals, scanning intervals for periodic advertising with response trains, and general settings for the built-in battery level sensor. In general, these settings primarily affect the power consumption of the ESL Tag while it's in *unassociated*, *synchronized* (only the battery related options) or *unsynchronized* states.
+The *ESL Tag Core* component implements the mandatory functionality of the specification. This is a key component and hence, a dependency for every other ESL component. Configuration options include advertising minimum and maximum intervals, power saving options, and general settings for the built-in battery level sensor. In general, these settings primarily affect the power consumption of the ESL Tag while it's in *unassociated*, *synchronized* (only the battery related options) or *unsynchronized* states.
 
 ![](image/core-config.png)
+
+_Please note that the ESL Core component enables power saving by default after 60 minutes of idle time in Unassociated ESL state. This may impact the deployment of your entire ESL network if the overall deployment process would exceed the deep sleep timeout for individual ESLs.
+For this reason, when configuring larger networks, it is recommended that you either choose the parameter carefully or disable the power saving option. Alternatively, batch deployment may be a solution, i.e. power up and deploy only as many ESLs to the network at one time as can be done within the configured timeout._
 
 ### Displays
 The handling of the displays is split into two layers of abstraction in ESL Tag's design. The higher layer in this concept is represented by the *ESL Tag Display*, while the low-level driver for the actual display in use remains in a separate component. The latter must be written in a way that is interface compatible with the higher layer abstract display component and uses a non-blocking coding approach.

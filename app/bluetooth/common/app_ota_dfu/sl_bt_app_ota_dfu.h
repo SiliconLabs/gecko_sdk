@@ -3,7 +3,7 @@
  * @brief Application Over-the-Air Device Firmware Update
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -44,13 +44,14 @@
 
 // Bootloader internal storage check.
 #define SL_BT_APP_OTA_DFU_READ_STORAGE_CONTEXT_SIZE    256u
-#define SL_BT_APP_OTA_DFU_EMPTY_FLASH_CONTENT          0xFFu
+#define SL_BT_APP_OTA_DFU_EMPTY_FLASH_CONTENT          0xFFFFFFFFu
 #define SL_BT_APP_OTA_DFU_VERIFICATION_BLOCK_SIZE      128u
 
 // Application OTA DFU state enumerator.
 typedef enum {
   SL_BT_APP_OTA_DFU_UNINIT = 0,
   SL_BT_APP_OTA_DFU_INIT,
+  SL_BT_APP_OTA_DFU_READ_FLASH,
   SL_BT_APP_OTA_DFU_ERASE,
   SL_BT_APP_OTA_DFU_READY,
   SL_BT_APP_OTA_DFU_DISCONNECT,

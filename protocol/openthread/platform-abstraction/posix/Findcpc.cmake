@@ -57,40 +57,28 @@ This will define the following variables:
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may also be set:
+The following cache variables may also be used by the module if set:
 
 ``Cpc_INCLUDE_DIR``
   The directory containing ``sl_cpc.h``.
 ``Cpc_LIBRARY``
   The path to the cpc library.
 
-Non-Module Cache Variables
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The following cache variables are not set by the module but can be
-used by the module if set:
-
-``CPCD_SOURCE_DIR``
-  The path to the root of the CPCD project.
-
 #]=======================================================================]
 
 include(FindPackageHandleStandardArgs)
 
-set(CPCD_SOURCE_DIR "" CACHE STRING "Location of cpc daemon project")
-
-if(CPCD_SOURCE_DIR AND NOT TARGET cpc)
-    add_subdirectory(${CPCD_SOURCE_DIR} ${CPCD_SOURCE_DIR}/build)
-endif()
+find_package(PkgConfig)
+pkg_check_modules(Libcpc QUIET IMPORTED_TARGET libcpc)
 
 find_library(Cpc_LIBRARY
     NAMES cpc
-    HINTS ${CPCD_SOURCE_DIR}/build
+    PATHS ${Libcpc_LIBRARY_DIRS}
 )
 
 find_path(Cpc_INCLUDE_DIR
     NAMES sl_cpc.h
-    HINTS ${CPCD_SOURCE_DIR}/lib
+    PATHS ${Libcpc_INCLUDE_DIRS}
 )
 
 find_package_handle_standard_args(cpc

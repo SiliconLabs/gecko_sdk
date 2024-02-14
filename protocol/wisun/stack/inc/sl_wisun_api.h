@@ -215,6 +215,7 @@ sl_status_t sl_wisun_get_statistics(sl_wisun_statistics_type_t statistics_type,
  * This function sets the maximum TX power. The device may use
  * a lower value based on internal decision making or hardware limitations but
  * will never exceed the given value.
+ * The function must be called before initiating a connection.
  *****************************************************************************/
 sl_status_t sl_wisun_set_tx_power(int8_t tx_power);
 
@@ -450,21 +451,6 @@ sl_status_t sl_wisun_set_regulation_tx_thresholds(int8_t warning_threshold,
  * By default, the maximum fragment duration is set to 500 ms.
  *****************************************************************************/
 sl_status_t sl_wisun_set_advert_fragment_duration(uint32_t fragment_duration_ms);
-
-/**************************************************************************//**
- * Enable an algorithm that trades off unicast communication reliability
- * for latency.
- *
- * @param[in] mode Transmission mode to use
- *   - #SL_WISUN_UNICAST_TX_MODE_DEFAULT: Default transmission mode.
- *   - #SL_WISUN_UNICAST_TX_MODE_SLOT: High reliability, high latency.
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * Enable an algorithm that trades off unicast communication reliability
- * for latency. The mechanism is only effective when all the neighbors are enabled.
- * Enabling this option is detrimental when used with unaware Wi-SUN devices.
- *****************************************************************************/
-sl_status_t sl_wisun_set_unicast_tx_mode(uint8_t mode);
 
 /**************************************************************************//**
  * Set the device type.

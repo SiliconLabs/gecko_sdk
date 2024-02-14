@@ -41,13 +41,13 @@
   - name: SL_BOARD_NAME
     value: '"BRD2102B"'
   - name: SL_BOARD_REV
-    value: '"A00"'
+    value: '"A01"'
   - name: HFXO_FREQ
     value: 48000000
 - tag:
   - board:pn:BRD2102
   - board:variant:B
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efm32tg11b520f128gm80
   - hardware:has:vcom
   - hardware:has:sensor:si7021

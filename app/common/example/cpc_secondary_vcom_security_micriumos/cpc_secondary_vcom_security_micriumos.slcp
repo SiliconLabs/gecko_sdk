@@ -2,7 +2,7 @@ project_name: cpc_secondary_vcom_security_micriumos
 package: platform
 quality: production
 label: Platform - CPC Secondary with Micrium OS and Security Enabled
-description: > 
+description: >
   This simple example project shows how to open user endpoints in a Micrium OS task with
   security enabled. By connecting a host running a CPCd instance to the secondary's VCOM port,
   the user can send data to the user endpoints, and verify that it is echoed back.
@@ -43,6 +43,8 @@ configuration:
     value: 1
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
+  - name: SL_CPC_USER_ENDPOINT_MAX_COUNT
+    value: 2
 readme:
   - path: readme.md
 ui_hints:

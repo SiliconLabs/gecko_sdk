@@ -32,22 +32,18 @@
 
 #if defined(SLI_MBEDTLS_DEVICE_VSE)
 
-#include "sli_cryptoacc_transparent_types.h"
-#include "sli_cryptoacc_transparent_functions.h"
-#include "sli_psa_driver_common.h"
+#include "psa/crypto.h"
+
 #include "cryptoacc_management.h"
-// Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
-// interface header file when it becomes available.
-#include "psa/crypto_platform.h"
-#include "psa/crypto_sizes.h"
-#include "psa/crypto_struct.h"
-#include "ba414ep_config.h"
-#include "sx_ecc_keygen_alg.h"
-#include "sx_ecc_curves.h"
-#include "sx_primitives.h"
-#include "sx_trng.h"
+
+#include "sli_psa_driver_common.h"
+#include "sli_cryptoacc_driver_trng.h"
+
 #include "sx_errors.h"
-#include "cryptolib_types.h"
+#include "sx_ecc_curves.h"
+#include "sx_ecc_keygen_alg.h"
+#include "sx_primitives.h"
+
 #include <string.h>
 
 // -----------------------------------------------------------------------------
@@ -137,19 +133,15 @@ psa_status_t sli_cryptoacc_transparent_generate_key(
 
   block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
 
-  psa_status_t status = cryptoacc_trng_initialize();
-  if (status != PSA_SUCCESS) {
-    return status;
-  }
-
   // Get random number < n -> private key.
-  status = cryptoacc_management_acquire();
+  psa_status_t status = cryptoacc_management_acquire();
   if (status != PSA_SUCCESS) {
     return status;
   }
 
-  struct sx_rng trng = { NULL, sx_trng_fill_blk };
-  uint32_t sx_ret = ecc_generate_private_key(n, priv, trng);
+  uint32_t sx_ret = ecc_generate_private_key(n,
+                                             priv,
+                                             sli_cryptoacc_trng_wrapper);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {

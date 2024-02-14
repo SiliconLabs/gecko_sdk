@@ -24,6 +24,7 @@ class PhyFilters(IPhyFilter):
                             'Phys_Velux',
                             'Phys_ZWave',
                             'Phys_Internal',
+                            'Phys_Internal_Base_Customer_Signify',
                         ]
 
     sim_tests_phy_groups = ['Phys_sim_tests']

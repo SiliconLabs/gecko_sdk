@@ -37,14 +37,18 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <inttypes.h>
+
+#include "sl_wisun_led_driver.h"
+
+#if !defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "cmsis_os2.h"
 #include "sl_status.h"
 #include "sl_cmsis_os2_common.h"
-#include "sl_wisun_led_driver.h"
 #include "sl_simple_led.h"
 #include "sl_simple_led_instances.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_led_driver_config.h"
+
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -397,3 +401,11 @@ __STATIC_INLINE sl_wisun_led_signal_t *_get_led_signal_ptr(const sl_wisun_led_id
     default:               return NULL;
   }
 }
+#else
+
+void sl_wisun_led_driver_init(void)
+{
+  (void) 0UL;
+}
+
+#endif

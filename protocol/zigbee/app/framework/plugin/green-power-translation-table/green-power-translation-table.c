@@ -1952,6 +1952,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
     emberAfGreenPowerClusterPrintln("Drop frame due to unknown endpoint: %X", emberAfCurrentEndpoint());
     return false;
   }
+
   if ((sli_zigbee_gp_translation_table->totalNoOfEntries == 0)
       || (cmd_data.startIndex >= EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE)) {
     // "index" is already 0xFF if search by ID
@@ -1963,7 +1964,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                        0x00, //entryCount
                                                                        NULL,
                                                                        0);
-    emberAfSendResponse();
+    sli_zigbee_af_gp_send_response_unicast();
     goto kickout;
   } else {
     for (entryIndex = cmd_data.startIndex; entryIndex < EMBER_AF_PLUGIN_GREEN_POWER_TRANSLATION_TABLE_TRANSLATION_TABLE_SIZE; entryIndex++) {
@@ -1981,7 +1982,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     }
     uint16_t entriesCount = 0;
@@ -2034,12 +2035,12 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                          0x00, //entryCount
                                                                          NULL,
                                                                          0);
-      emberAfSendResponse();
+      sli_zigbee_af_gp_send_response_unicast();
       goto kickout;
     } else {
       //Insert the number of entries actually included @ entryCountOffset
       appResponseData[entryCountOffset] = entriesCount;
-      EmberStatus status = emberAfSendResponse();
+      EmberStatus status = sli_zigbee_af_gp_send_response_unicast();
       if (status == EMBER_MESSAGE_TOO_LONG) {
         emberAfFillCommandGreenPowerClusterGpTranslationTableResponseSmart(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE,
                                                                            0x00, //options
@@ -2048,7 +2049,7 @@ bool emberAfGreenPowerClusterGpTranslationTableRequestCallback(EmberAfClusterCom
                                                                            0x00, //entryCount
                                                                            NULL,
                                                                            0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
       }
     }
   }           //end of else

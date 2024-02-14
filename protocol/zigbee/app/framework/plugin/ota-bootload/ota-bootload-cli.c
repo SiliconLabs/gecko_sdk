@@ -19,20 +19,19 @@
 #include "app/util/serial/sl_zigbee_command_interpreter.h"
 #include "app/framework/plugin/ota-common/ota.h"
 
-#include "bootloader-interface.h"
+#if !defined(EZSP_HOST) && !defined(EMBER_TEST)
+#include "api/btl_interface.h"
+#endif
+
 void printBootloaderInfoCommand(sl_cli_command_arg_t *arguments)
 {
-#if !defined(EZSP_HOST)
-  UNUSED BlExtendedType blExtendedType = halBootloaderGetInstalledType();
-  uint32_t getEmberVersion;
-  uint32_t customVersion;
+#if !defined(EZSP_HOST) && !defined(EMBER_TEST)
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
+  bootloader_getInfo(&info);
   uint8_t keyData[EMBER_ENCRYPTION_KEY_SIZE];
-  halGetExtendedBootloaderVersion(&getEmberVersion, &customVersion);
-  otaPrintln("Installed Type (Base):      0x%X", halBootloaderGetType());
-  otaPrintln("Installed Type (Extended):  0x%2X", blExtendedType);
-  otaPrintln("Bootloader Version:         0x%2X", halGetBootloaderVersion());
-  otaPrintln("Bootloader Version, Ember:  0x%4X", getEmberVersion);
-  otaPrintln("Bootloader Version, Custom: 0x%4X", customVersion);
+  otaPrintln("Installed Type (Base):  0x%X", info.type);
+  otaPrintln("Capabilities:           0x%2X", info.capabilities);
+  otaPrintln("Bootloader Version:     0x%2X", info.version);
 
 #if defined(EMBER_TEST)
   MEMSET(keyData, 0xFF, EMBER_ENCRYPTION_KEY_SIZE);

@@ -720,8 +720,7 @@ static void on_session_init_cmd(sli_cpc_security_protocol_cmd_t *cmd)
  ******************************************************************************/
 static void on_unbind_cmd(sli_cpc_security_protocol_cmd_t *cmd)
 {
-  sl_status_t status;
-  bool allow_unbind;
+  sl_status_t status = SL_STATUS_PERMISSION;
   uint64_t ret;
 
   // According to the spec:
@@ -730,15 +729,7 @@ static void on_unbind_cmd(sli_cpc_security_protocol_cmd_t *cmd)
   volatile uint64_t ok_to_unbind_magic = 0xAAAAAAAAAAAAAAAA;
   ret = sl_cpc_security_on_unbind_request(sl_cpc_security_get_state() == SL_CPC_SECURITY_STATE_INITIALIZED);
   if (ret == SL_CPC_SECURITY_OK_TO_UNBIND && ret == ok_to_unbind_magic) {
-    allow_unbind = true;
-  } else {
-    allow_unbind = false;
-  }
-
-  if (allow_unbind) {
     status = sl_cpc_security_unbind();
-  } else {
-    status = SL_STATUS_PERMISSION;
   }
 
   security_protocol_response.len = sli_cpc_security_command[cmd->command_id].response_len;

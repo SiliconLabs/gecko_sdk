@@ -9,6 +9,9 @@ provides:
 requires:
   - name: zigbee_ota_common
   - name: zigbee_ota_storage_common
+  - name: slot_manager
+    condition:
+      - device_has_radio
 config_file:
   - path: protocol/zigbee/app/framework/plugin/ota-bootload/config/ota-bootload-config.h
 source:

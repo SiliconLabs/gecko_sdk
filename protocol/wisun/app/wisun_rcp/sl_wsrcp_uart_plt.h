@@ -37,7 +37,7 @@ int uart_plt_rx(struct sl_wsrcp_uart_plt *uart_ctxt, void *buf, int buf_len);
 // Called when a CRC error is detected in receveided frames before the frame is
 // discarded. This funtion is declared "weak". So, the user can overload it and
 // choose to increment a counter or report the error to the host.
-void uart_plt_crc_error(struct sl_wsrcp_uart_plt *uart, uint16_t crc, int frame_len, uint8_t header, uint8_t irq_err_counter);
+void uart_plt_crc_error(struct sl_wsrcp_uart_plt *uart, uint8_t irq_err_counter);
 
 // Called from IRQ when new data are available. This funtion is declared "weak".
 // So, the user can overload it. The user can post de necessary events from this

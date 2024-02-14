@@ -55,15 +55,15 @@ template_contribution:
   - name: zigbee_af_callback
     value:
       callback_type: event_init
-      function_name: sli_zdd_application_init
+      function_name: sli_zigbee_af_zdd_application_init
   - name: zigbee_af_callback
     value:
       callback_type: local_data_init
-      function_name: sli_zdd_application_init
+      function_name: sli_zigbee_af_zdd_application_init
   - name: zigbee_af_callback
     value:
       callback_type: init_done
-      function_name: sli_zdd_application_init
+      function_name: sli_zigbee_af_zdd_application_init
   - name: zigbee_stack_callback
     value:
       callback_type: stack_status

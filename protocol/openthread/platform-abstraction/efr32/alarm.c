@@ -50,31 +50,89 @@
 #include "rail.h"
 #include "sl_sleeptimer.h"
 
+// timer data for handling wrapping
+typedef struct wrap_timer_data wrap_timer_data_t;
+struct wrap_timer_data {
+  uint16_t overflow_counter;
+  uint16_t overflow_max;
+};
+
 // millisecond timer (sleeptimer)
 static sl_sleeptimer_timer_handle_t sl_handle;
-static uint32_t                     sMsAlarm     = 0;
+static uint64_t                     sMsAlarm     = 0;
 static bool                         sIsMsRunning = false;
+static wrap_timer_data_t            milli_timer_data = {0};
 
 // microsecond timer (RAIL timer)
-static uint32_t sUsAlarm     = 0;
-static bool     sIsUsRunning = false;
-
 static RAIL_MultiTimer_t rail_timer;
+static uint64_t          sUsAlarm     = 0;
+static bool              sIsUsRunning = false;
+static wrap_timer_data_t micro_timer_data = {0};
 
+// millisecond-alarm callback
 static void AlarmCallback(sl_sleeptimer_timer_handle_t *aHandle, void *aData)
 {
-    OT_UNUSED_VARIABLE(aHandle);
-    OT_UNUSED_VARIABLE(aData);
-    otSysEventSignalPending();
+    if (aData == NULL)
+    {
+        OT_UNUSED_VARIABLE(aHandle);
+        otSysEventSignalPending();
+    }
+    else
+    {
+        sl_status_t status;
+        wrap_timer_data_t *timer_data = (wrap_timer_data_t *) aData;
+
+        if (timer_data->overflow_counter < timer_data->overflow_max)
+        {
+            status = sl_sleeptimer_start_timer_ms(aHandle,
+                                                  sl_sleeptimer_get_max_ms32_conversion(),
+                                                  AlarmCallback,
+                                                  (void *) timer_data,
+                                                  0,
+                                                  SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+            OT_ASSERT(status == SL_STATUS_OK);
+            timer_data->overflow_counter++;
+        }
+        else
+        {
+            if (timer_data->overflow_max != 0)
+            {
+                sIsMsRunning = false;
+                sl_sleeptimer_stop_timer(aHandle);
+            }
+        }
+    }
 }
 
+// microsecond-alarm callback
 static void radioTimerExpired(struct RAIL_MultiTimer *tmr, RAIL_Time_t expectedTimeOfEvent, void *cbArg)
 {
-    OT_UNUSED_VARIABLE(tmr);
-    OT_UNUSED_VARIABLE(expectedTimeOfEvent);
-    OT_UNUSED_VARIABLE(cbArg);
+    if (cbArg == NULL)
+    {
+        OT_UNUSED_VARIABLE(tmr);
+        OT_UNUSED_VARIABLE(expectedTimeOfEvent);
+        otSysEventSignalPending();
+    }
+    else
+    {
+        RAIL_Status_t status;
+        wrap_timer_data_t *timer_data = (wrap_timer_data_t *) cbArg;
 
-    otSysEventSignalPending();
+        if (timer_data->overflow_counter < timer_data->overflow_max)
+        {
+            status = RAIL_SetMultiTimer(tmr, UINT32_MAX, RAIL_TIME_DELAY, radioTimerExpired, NULL);
+            OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+            timer_data->overflow_counter++;
+        }
+        else
+        {
+            if (timer_data->overflow_max != 0)
+            {
+                sIsUsRunning = false;
+                RAIL_CancelMultiTimer(tmr);
+            }
+        }
+    }
 }
 
 void efr32AlarmInit(void)
@@ -111,13 +169,15 @@ uint32_t otPlatTimeGetXtalAccuracy(void)
 void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
 {
     OT_UNUSED_VARIABLE(aInstance);
-    sl_status_t status;
-    int32_t     remaining;
+
+    sl_status_t       status;
+    int64_t           remaining;
+    uint32_t          initial_wrap_time;
 
     sl_sleeptimer_stop_timer(&sl_handle);
 
     sMsAlarm     = aT0 + aDt;
-    remaining    = (int32_t)(sMsAlarm - otPlatAlarmMilliGetNow());
+    remaining    = (int64_t)(sMsAlarm - otPlatAlarmMilliGetNow());
     sIsMsRunning = true;
 
     if (remaining <= 0)
@@ -126,19 +186,42 @@ void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
     }
     else
     {
-        status = sl_sleeptimer_start_timer(&sl_handle,
-                                           sl_sleeptimer_ms_to_tick(remaining),
-                                           AlarmCallback,
-                                           NULL,
-                                           0,
-                                           SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
-        OT_ASSERT(status == SL_STATUS_OK);
+        // The maximum value accepted by sleep timer ms32 APIs can be retrieved
+        // using sl_sleeptimer_get_max_ms32_conversion().
+        //
+        // (See platform/service/sleeptimer/inc/sl_sleeptimer.h)
+        //
+        if (remaining > sl_sleeptimer_get_max_ms32_conversion())
+        {
+            initial_wrap_time = (uint32_t)(remaining % sl_sleeptimer_get_max_ms32_conversion());
+            milli_timer_data.overflow_max = (uint16_t)(remaining / sl_sleeptimer_get_max_ms32_conversion());
+            milli_timer_data.overflow_counter = 0;
+
+            // Start a timer with the initial time
+            status = sl_sleeptimer_start_timer_ms(&sl_handle,
+                                                  initial_wrap_time,
+                                                  AlarmCallback,
+                                                  (void *) &milli_timer_data,
+                                                  0,
+                                                  SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+            OT_ASSERT(status == SL_STATUS_OK);
+        }
+        else
+        {
+            status = sl_sleeptimer_start_timer_ms(&sl_handle,
+                                                  (uint32_t) remaining,
+                                                  AlarmCallback,
+                                                  NULL,
+                                                  0,
+                                                  SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+            OT_ASSERT(status == SL_STATUS_OK);
+        }
     }
 }
 
-uint32_t efr32AlarmPendingTime(void)
+uint64_t efr32AlarmPendingTime(void)
 {
-    uint32_t remaining = 0;
+    uint64_t remaining = 0;
     uint32_t now       = otPlatAlarmMilliGetNow();
     if (sIsMsRunning && (sMsAlarm > now))
     {
@@ -162,7 +245,7 @@ void otPlatAlarmMilliStop(otInstance *aInstance)
 
 void efr32AlarmProcess(otInstance *aInstance)
 {
-    int32_t remaining;
+    int64_t remaining;
     bool    alarmMilliFired = false;
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     bool alarmMicroFired = false;
@@ -173,7 +256,7 @@ void efr32AlarmProcess(otInstance *aInstance)
 
     if (sIsMsRunning)
     {
-        remaining = (int32_t)(sMsAlarm - otPlatAlarmMilliGetNow());
+        remaining = (int64_t)(sMsAlarm - otPlatAlarmMilliGetNow());
         if (remaining <= 0)
         {
             otPlatAlarmMilliStop(aInstance);
@@ -184,7 +267,7 @@ void efr32AlarmProcess(otInstance *aInstance)
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
     if (sIsUsRunning)
     {
-        remaining = (int32_t)(sUsAlarm - otPlatAlarmMicroGetNow());
+        remaining = (int64_t)(sUsAlarm - otPlatAlarmMicroGetNow());
         if (remaining <= 0)
         {
             otPlatAlarmMicroStop(aInstance);
@@ -246,13 +329,14 @@ uint64_t otPlatTimeGet(void)
 void otPlatAlarmMicroStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
 {
     OT_UNUSED_VARIABLE(aInstance);
-    RAIL_Status_t status;
-    int32_t       remaining;
+    RAIL_Status_t     status;
+    int64_t           remaining;
+    uint32_t          initial_wrap_time;
 
     RAIL_CancelMultiTimer(&rail_timer);
 
     sUsAlarm     = aT0 + aDt;
-    remaining    = (int32_t)(sUsAlarm - otPlatAlarmMicroGetNow());
+    remaining    = (int64_t)(sUsAlarm - otPlatAlarmMicroGetNow());
     sIsUsRunning = true;
 
     if (remaining <= 0)
@@ -261,8 +345,25 @@ void otPlatAlarmMicroStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
     }
     else
     {
-        status = RAIL_SetMultiTimer(&rail_timer, remaining, RAIL_TIME_DELAY, radioTimerExpired, NULL);
-        OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+        if (remaining > UINT32_MAX)
+        {
+            initial_wrap_time = (uint32_t)(remaining % UINT32_MAX);
+            micro_timer_data.overflow_max = (uint16_t)(remaining / UINT32_MAX);
+            micro_timer_data.overflow_counter = 0;
+
+            // Start a timer with the initial time
+            status = RAIL_SetMultiTimer(&rail_timer,
+                                        initial_wrap_time,
+                                        RAIL_TIME_DELAY,
+                                        radioTimerExpired,
+                                        (void *) &micro_timer_data);
+            OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+        }
+        else
+        {
+            status = RAIL_SetMultiTimer(&rail_timer, remaining, RAIL_TIME_DELAY, radioTimerExpired, NULL);
+            OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+        }
     }
 }
 

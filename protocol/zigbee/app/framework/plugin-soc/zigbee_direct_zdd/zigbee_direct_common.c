@@ -185,7 +185,7 @@ sl_zigbee_tlv_tag_min_length_t zigbee_direct_tlv_env[] =
   { .tag_id = SL_ZIGBEE_DIRECT_TLV_EXTENDED_STATUS_CODE_KEY_MIN_LEN,
     .min_length = SL_ZIGBEE_DIRECT_TLV_STATUS_CODE_KEY_MIN_LEN, },
   { .tag_id = SL_ZIGBEE_DIRECT_TUNNELING_TLV_NPDU_MESSAGE_TAG_ID,
-    .min_length = SL_ZIGBEE_DIRECT_TUNNELING_TLV_NPDU_REQUEST_MIN_LEN, },
+    .min_length = SL_ZIGBEE_DIRECT_TUNNELING_TLV_NPDU_MESSAGE_MIN_LEN, },
   { .tag_id = SL_ZIGBEE_DIRECT_SECURITY_TLV_SELECTED_KEY_NEGOTIATION_METHOD_TAG_ID,
     .min_length = SL_ZIGBEE_DIRECT_SECURITY_TLV_SELECTED_KEY_NEGOTIATION_METHOD_MIN_LEN, },
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
@@ -514,13 +514,6 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
       sl_zigbee_core_debug_println("BLE hello: %s",
                                    (status == SL_STATUS_OK) ? "success" : "error");
 
-      #define SCAN_WINDOW 5
-      #define SCAN_INTERVAL 10
-
-      status = sl_bt_scanner_set_parameters(sl_bt_scanner_scan_mode_active,
-                                            (uint16_t)SCAN_INTERVAL,
-                                            (uint16_t)SCAN_WINDOW);
-
       status = sl_bt_system_get_identity_address(&ble_address, &type);
       zb_ble_dmp_print_ble_address(ble_address.addr);
 
@@ -552,6 +545,14 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
         //preferred phy 1: 1M phy, 2: 2M phy, 4: 125k coded phy, 8: 500k coded phy
         //accepted phy 1: 1M phy, 2: 2M phy, 4: coded phy, ff: any
         sl_bt_connection_set_preferred_phy(conn_evt->connection, sl_bt_gap_phy_1m, 0xff);
+        sl_bt_connection_set_parameters(
+          conn_evt->connection,
+          12,            // min. con. interval (milliseconds * 1.25)
+          30,            // max. con. interval (milliseconds * 1.25)
+          4,             // latency
+          250,           // timeout (milliseconds * 10)
+          0x0,           // min. connection event length (milliseconds * 0.625)
+          0xffff);       // max. connection event length (milliseconds * 0.625)
         enableBleAdvertisements();
         sl_zigbee_core_debug_println("BLE connection opened");
         bleConnectionInfoTablePrintEntry(index);
@@ -587,18 +588,12 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
                                    conn_evt->connection, conn_evt->reason, activeBleConnections);
     }
     break;
-    case sl_bt_evt_scanner_legacy_advertisement_report_id: {
-      sl_zigbee_core_debug_print("Scan response, address type=0x%x, address: ",
-                                 evt->data.evt_scanner_legacy_advertisement_report.address_type);
-      zb_ble_dmp_print_ble_address(evt->data.evt_scanner_legacy_advertisement_report.address.addr);
-      sl_zigbee_core_debug_println("");
-    }
-    break;
+
     case sl_bt_evt_connection_parameters_id: {
       sl_bt_evt_connection_parameters_t* param_evt =
         (sl_bt_evt_connection_parameters_t*) &(evt->data);
       sl_zigbee_core_debug_println(
-        "BLE connection parameters are updated, handle=0x%x, interval=0x%2x, latency=0x%2x, timeout=0x%2x, security=0x%x, txsize=0x%2x",
+        "BLE connection parameters are updated, handle=0x%02x, interval=0x%04x, latency=0x%04x, timeout=0x%04x, security=0x%02x, txsize=0x%04x",
         param_evt->connection,
         param_evt->interval,
         param_evt->latency,
@@ -804,70 +799,50 @@ static void sli_zigbee_zdd_join_network_write(void)
 
 void zdd_state_machine()
 {
-  uint8_t sl_leave_options = 0;
   uint8_t ble_status = ES_WRITE_OK;
-  EmberNodeType NodeType;
   sl_status_t status = 0xFF;
   EmberNetworkStatus state = emberAfNetworkState();
   uint8_t zd_status = SL_ZIGBEE_DIRECT_STATUS_CODE_SUCCESS;
-
   sl_zigbee_tlv_tag_list sl_tlv_chain1 = { current_writeValue->len, current_writeValue->data };
+  uint8_t options = 0;
+  bool temp_bool;
 
   switch (current_state) {
     case LEAVE_WRITE:
-      sl_zigbee_app_debug_println("Requeste to leave the PAN with payload: %X %X", current_writeValue->data[0], current_writeValue->data[1]);
-      status = emberGetNodeType(&NodeType);
-
-      if (status == SL_STATUS_OK) {
-        if (EMBER_COORDINATOR == NodeType) {
-          status = emberLeaveNetwork();
-        } else { //router or (sleepy) end device
-          if (current_writeValue->data[0] != 0) {
-            sl_leave_options |= LEAVE_REQUEST_REMOVE_CHILDREN_FLAG;
-          }
-          if (current_writeValue->data[1] != 0) {
-            sl_leave_options |= LEAVE_REQUEST_REJOIN_FLAG;
-          }
-          status = emberLeaveNetwork();
-          // TODO: EMZIGBEE-11153: Handle leave request properly
-          // EmberEUI64 eui = { 0, 0, 0, 0, 0, 0, 0, 0 };
-          // status = emberLeaveRequest(emberGetNodeId(),
-          //                            eui,
-          //                            sl_leave_options,
-          //                            0);
-        }
+      //ignoring current_writeValue->data[0] as we deprecated handling LEAVE_REQUEST_REMOVE_CHILDREN_FLAG
+      if (current_writeValue->data[1] != 0) {
+        options |= LEAVE_REQUEST_REJOIN_FLAG;
       }
-      sl_zigbee_app_debug_println("Left with status: %X", status);
+      status = emberZigbeeLeave(options);
+      sl_zigbee_app_debug_println("I was requested to leave the PAN with payload: %X %X. Executed with status %X", current_writeValue->data[0], current_writeValue->data[1], status);
 
-      sl_bt_gatt_server_send_user_write_response(current_connection, gattdb_leave_network, ble_status);
-      if ((ble_status == ES_WRITE_OK) && (status != SL_STATUS_OK)) {
+      if (status != SL_STATUS_OK) {
         sli_zigbee_direct_send_status_via_commissioning_status_notification(current_connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_LEAVE, SL_ZIGBEE_DIRECT_STATUS_CODE_ERROR);
       }
-
-      current_state = START_STATE;
       break;
 
     case PERMIT_JOIN_WRITE:
       if (emberAfNetworkState() != EMBER_NO_NETWORK) {
+        temp_bool = emberGetPermitJoining();
         status = emberAfBroadcastPermitJoin(current_writeValue->data[0]);
-        sl_zigbee_app_debug_println("Received nwk open/close %X", current_writeValue->data[0]);
         if (status == SL_STATUS_OK) {
-          //send status in case we are modifying join time without opening/closing
-          if (emberGetPermitJoining()) {
+          //send status in case we are modifying join time without opening
+          if (emberGetPermitJoining() && temp_bool) {
             if (current_writeValue->data[0] != 0x00) {
-              send_network_status_notification(0xFF); //send to all connected devices?
+              send_network_status_notification(0xFF); //send to all connected devices
             }
-          } else {
+          } else if (!(temp_bool)) {
             if (current_writeValue->data[0] == 0x00) {
-              send_network_status_notification(0xFF); //send to all connected devices?
+              send_network_status_notification(0xFF); //send to all connected devices
             }
           }
         }
+      } else {
+        status = 0xFF;   // no network to open
       }
+      sl_zigbee_app_debug_println("I was requested to open/close with payload %X. executed with status %X", current_writeValue->data[0], status);
 
-      sl_bt_gatt_server_send_user_write_response(current_connection, gattdb_permit_joining, ble_status);
-
-      if ((ble_status == ES_WRITE_OK) && (status != SL_STATUS_OK)) {
+      if (status != SL_STATUS_OK) {
         sli_zigbee_direct_send_status_via_commissioning_status_notification(current_connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_PJOIN, SL_ZIGBEE_DIRECT_STATUS_CODE_ERROR);
       }
       break;
@@ -967,7 +942,7 @@ static void zb_stack_event_handler(sl_zigbee_event_t *event)
 }
 
 // Initialization of all application code
-void sli_zdd_application_init(uint8_t init_level)
+void sli_zigbee_af_zdd_application_init(uint8_t init_level)
 {
   switch (init_level) {
     case SL_ZIGBEE_INIT_LEVEL_EVENT:
@@ -1248,11 +1223,10 @@ static void sli_zigbee_direct_send_status_via_commissioning_status_notification(
 
 static void sli_zigbee_direct_permit_joining_write(uint8_t connection, uint8array *writeValue)
 {
-  sl_status_t status = 0xFF;
   uint8_t ble_status = ES_WRITE_OK;
 
   if ((sl_zvd_connection_status != COMMISSIONED_ADMIN)  && (sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION)) {
-    sl_zigbee_core_debug_println("Error, no rights %X Line %d", sl_zvd_connection_status, __LINE__);
+    sl_zigbee_core_debug_println("Error, no rights to execute pjoin from ZVD %X", sl_zvd_connection_status);
     ble_status = ES_ERR_APPLICATION_SPECIFIC;
     goto EXIT;
   }
@@ -1265,47 +1239,36 @@ static void sli_zigbee_direct_permit_joining_write(uint8_t connection, uint8arra
   current_state = PERMIT_JOIN_WRITE;
   current_connection = connection;
   current_writeValue = writeValue;
-  ATOMIC(sl_zigbee_event_set_delay_ms(&zb_stack_event, 10); );
+  sl_zigbee_event_set_active(&zb_stack_event);
   sl_zigbee_common_rtos_wakeup_stack_task();
-  return;
 
   EXIT:
   sl_bt_gatt_server_send_user_write_response(connection, gattdb_permit_joining, ble_status);
-
-  if ((ble_status == ES_WRITE_OK) && (status != SL_STATUS_OK)) {
-    sli_zigbee_direct_send_status_via_commissioning_status_notification(connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_PJOIN, SL_ZIGBEE_DIRECT_STATUS_CODE_ERROR);
-  }
 }
 
 static void sli_zigbee_direct_leave_network_write(uint8_t connection, uint8array *writeValue)
 {
-  sl_status_t status = SL_STATUS_OK;
   uint8_t ble_status = ES_WRITE_OK;
 
   if ((sl_zvd_connection_status != COMMISSIONED_ADMIN)  && (sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION)) {
-    sl_zigbee_core_debug_println("Error, no rights %X Line %d", sl_zvd_connection_status, __LINE__);
+    sl_zigbee_core_debug_println("Error, no rights to execute leave from ZVD %X", sl_zvd_connection_status);
     ble_status = ES_ERR_APPLICATION_SPECIFIC;
     goto EXIT;
   }
 
   if (!(sl_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_leave_network))) {
     ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    sl_zigbee_core_debug_println("Issue decrypting leave payload");
     goto EXIT;
   }
 
   current_state = LEAVE_WRITE;
   current_connection = connection;
   current_writeValue = writeValue;
-  ATOMIC(sl_zigbee_event_set_delay_ms(&zb_stack_event, 10); );
+  sl_zigbee_event_set_active(&zb_stack_event);
   sl_zigbee_common_rtos_wakeup_stack_task();
-  return;
 
   EXIT:
   sl_bt_gatt_server_send_user_write_response(connection, gattdb_leave_network, ble_status);
-  if ((ble_status == ES_WRITE_OK) && (status != SL_STATUS_OK)) {
-    sli_zigbee_direct_send_status_via_commissioning_status_notification(connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_LEAVE, SL_ZIGBEE_DIRECT_STATUS_CODE_ERROR);
-  }
 }
 
 static uint8_t sli_channel_masks_first_channel(uint32_t sl_channel_mask)

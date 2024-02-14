@@ -55,7 +55,7 @@ static app_timer_t *app_timer_head = NULL;
 // -----------------------------------------------------------------------------
 // Private function declarations
 
-/***************************************************************************//**
+/*******************************************************************************
  * Common callback for the sleeptimers.
  *
  * @param[in] handle Pointer to the sleeptimer handle.
@@ -66,7 +66,7 @@ static app_timer_t *app_timer_head = NULL;
 static void app_timer_callback(sl_sleeptimer_timer_handle_t *handle,
                                void *data);
 
-/***************************************************************************//**
+/*******************************************************************************
  * Append a timer to the end of the linked list.
  *
  * @param[in] timer Pointer to the timer handle.
@@ -75,7 +75,7 @@ static void app_timer_callback(sl_sleeptimer_timer_handle_t *handle,
  ******************************************************************************/
 static void append_app_timer(app_timer_t *timer);
 
-/***************************************************************************//**
+/*******************************************************************************
  * Remove a timer from the linked list.
  *
  * @param[in] timer Pointer to the timer handle.
@@ -85,6 +85,16 @@ static void append_app_timer(app_timer_t *timer);
  * @retval false Timer was not found in the list.
  ******************************************************************************/
 static bool remove_app_timer(app_timer_t *timer);
+
+/*******************************************************************************
+ * Find and return the first triggered timer from the linked list.
+ *
+ * @return The first triggered timer from the linked list.
+ *
+ * @note The trigger state is also reset, and it is removed from the list if
+ * the timer is non-periodic.
+ ******************************************************************************/
+static app_timer_t *get_triggered_app_timer(void);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
@@ -190,21 +200,14 @@ sl_status_t app_timer_stop(app_timer_t *timer)
 void sli_app_timer_step(void)
 {
   if (trigger_count > 0) {
-    app_timer_t *timer = app_timer_head;
     // Find triggered timers in list and call their callbacks.
-    while (timer != NULL) {
-      if (timer->triggered) {
-        CORE_ATOMIC_SECTION(
-          timer->triggered = false;
-          --trigger_count;
-          )
-        if (!timer->periodic) {
-          (void)remove_app_timer(timer);
-        }
+    app_timer_t *timer;
+    do {
+      timer = get_triggered_app_timer();
+      if (timer != NULL) {
         timer->callback(timer, timer->callback_data);
       }
-      timer = timer->next;
-    }
+    } while (timer != NULL);
   }
 }
 
@@ -277,6 +280,9 @@ static void app_timer_callback(sl_sleeptimer_timer_handle_t *handle,
 
 static void append_app_timer(app_timer_t *timer)
 {
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
   if (app_timer_head != NULL) {
     app_timer_t *current = app_timer_head;
     // Find end of list.
@@ -288,10 +294,15 @@ static void append_app_timer(app_timer_t *timer)
     app_timer_head = timer;
   }
   timer->next = NULL;
+
+  CORE_EXIT_ATOMIC();
 }
 
 static bool remove_app_timer(app_timer_t *timer)
 {
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
   app_timer_t *prev = NULL;
   app_timer_t *current = app_timer_head;
 
@@ -303,6 +314,7 @@ static bool remove_app_timer(app_timer_t *timer)
 
   if (current != timer) {
     // Not found.
+    CORE_EXIT_ATOMIC();
     return false;
   }
 
@@ -311,5 +323,32 @@ static bool remove_app_timer(app_timer_t *timer)
   } else {
     app_timer_head = timer->next;
   }
+  CORE_EXIT_ATOMIC();
   return true;
+}
+
+static app_timer_t *get_triggered_app_timer(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  // Find the first triggered timer in list
+  app_timer_t *timer = app_timer_head;
+  while (timer != NULL) {
+    if (timer->triggered) {
+      // Timer found
+      timer->triggered = false;
+      --trigger_count;
+      if (!timer->periodic) {
+        (void)remove_app_timer(timer);
+      }
+
+      CORE_EXIT_ATOMIC();
+      return timer;
+    }
+    timer = timer->next;
+  }
+
+  CORE_EXIT_ATOMIC();
+  return NULL;
 }

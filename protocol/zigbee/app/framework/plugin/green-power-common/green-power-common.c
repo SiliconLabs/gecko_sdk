@@ -33,7 +33,7 @@ extern void sli_zigbee_spoof_device_announcement(uint16_t shortId,
                                                  uint8_t *sourceEUI64,
                                                  EmberEUI64 deviceAnnounceEui,
                                                  uint8_t capabilities);
-
+extern EmberNodeId emberAfResponseDestination;
 uint16_t sli_zigbee_af_copy_additional_info_block_structure_to_array(uint8_t commandId,
                                                                      EmberGpTranslationTableAdditionalInfoBlockOptionRecordField *additionalInfoBlockIn,
                                                                      uint8_t *additionalInfoBlockOut)
@@ -883,4 +883,12 @@ void sli_zigbee_af_gp_spoof_device_annce(uint16_t nodeId,
                                        eui64,
                                        capabilities);
 #endif // EZSP_HOST
+}
+
+EmberStatus sli_zigbee_af_gp_send_response_unicast(void)
+{
+  if (emberAfCurrentCommand()->interPanHeader == NULL) {
+    emberAfResponseDestination = emberAfCurrentCommand()->source;
+  }
+  return emberAfSendResponse();
 }

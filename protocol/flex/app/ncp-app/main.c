@@ -14,6 +14,7 @@
  *
  ******************************************************************************/
 
+#include <assert.h>
 #include "sl_component_catalog.h"
 #include "sl_system_init.h"
 #include "app_framework_common.h"
@@ -27,6 +28,27 @@
 #endif // SL_CATALOG_KERNEL_PRESENT
 #include "sl_cpc.h"
 #include "sl_gsdk_version.h"
+#include "rail.h"
+
+#define RAIL_RX_FIFO_SIZE 2048
+
+static bool rail_rx_fifo_is_initialized = false;
+static uint8_t *phy_rx_fifo = NULL;
+
+RAIL_Status_t RAILCb_SetupRxFifo(RAIL_Handle_t railHandle)
+{
+  if (!rail_rx_fifo_is_initialized) {
+    uint16_t rxFifoSize = RAIL_RX_FIFO_SIZE;
+    phy_rx_fifo = (uint8_t *)malloc(rxFifoSize);
+    assert(phy_rx_fifo != NULL);
+    assert(RAIL_SetRxFifo(railHandle, &phy_rx_fifo[0], &rxFifoSize)
+           == RAIL_STATUS_NO_ERROR);
+    // Check that the allocated memory size in RAIL corresponds to what we want
+    assert(rxFifoSize == RAIL_RX_FIFO_SIZE);
+    rail_rx_fifo_is_initialized = true;
+  }
+  return RAIL_STATUS_NO_ERROR;
+}
 
 void app_init(void)
 {
@@ -68,11 +90,6 @@ int main(void)
 
     // Application process.
     app_process_action();
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-    // Let the CPU go to sleep if the system allows it.
-    sl_power_manager_sleep();
-#endif // SL_CATALOG_POWER_MANAGER_PRESENT
   }
 #endif // SL_CATALOG_KERNEL_PRESENT
 }

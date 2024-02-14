@@ -600,4 +600,6 @@ uint16_t sli_zigbee_af_copy_additional_info_block_structure_to_array(uint8_t com
 void sli_zigbee_af_gp_spoof_device_annce(uint16_t nodeId,
                                          EmberEUI64 eui64,
                                          uint8_t capabilities);
+
+EmberStatus sli_zigbee_af_gp_send_response_unicast(void);
 #endif //_GREEN_POWER_COMMON_H_

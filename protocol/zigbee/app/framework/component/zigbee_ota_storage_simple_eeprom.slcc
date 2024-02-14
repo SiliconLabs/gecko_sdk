@@ -13,7 +13,9 @@ requires:
   - name: zigbee_ota_storage_simple
    # TODO: EMZIGBEE-7084 - update/confirm this require once the "eeprom" plugin is ported
   - name: util_eeprom
-  - name: legacy_bootloader_interface
+  - name: bootloader_interface
+    condition:
+      - device_has_radio
 config_file:
   - path: protocol/zigbee/app/framework/plugin/ota-storage-simple-eeprom/config/ota-storage-simple-eeprom-config.h
 validation_helper:

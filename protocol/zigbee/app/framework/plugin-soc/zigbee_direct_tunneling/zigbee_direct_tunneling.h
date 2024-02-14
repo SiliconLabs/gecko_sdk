@@ -20,7 +20,6 @@
 
 #include "sl_bluetooth.h"
 
-void sl_zigbee_direct_tunnel_indicate(uint8_t *packet, uint8_t length);
 void sl_zigbee_direct_tunnel_write(uint8_t connection, uint8array *writeValue);
 
 #endif // SILABS_ZIGBEE_DIRECT_TUNNELING_H

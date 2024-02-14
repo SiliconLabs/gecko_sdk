@@ -61,6 +61,8 @@ class Calc_Misc_Sol(CALC_Misc_ocelot):
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         wisun_channel_plan_id = getattr(model.profile.inputs, "wisun_channel_plan_id", None)
         wisun_reg_domain = getattr(model.profile.inputs, "wisun_reg_domain", None)
+        header_size = model.vars.header_size.value
+        fec_tx_enable = model.vars.fec_tx_enable.value
 
         # Other parameters are stored in this list
         specific_parameters = []
@@ -84,6 +86,12 @@ class Calc_Misc_Sol(CALC_Misc_ocelot):
             softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             # : Connect OFDM case
             phy_id = model.vars.wisun_phy_mode_id.value[0]
+            model.vars.stack_info.value = [int(protocol_id), int(phy_id)]
+        elif protocol_id == model.vars.protocol_id.var_enum.Connect and header_size == 2: # : Connect SUN-FSK is two byte header
+            if fec_tx_enable == model.vars.fec_tx_enable.var_enum.ENABLED:
+                phy_id = model.vars.wisun_phy_mode_id.value[1]
+            else:
+                phy_id = model.vars.wisun_phy_mode_id.value[0]
             model.vars.stack_info.value = [int(protocol_id), int(phy_id)]
         else:
             super().calc_stack_info(model)

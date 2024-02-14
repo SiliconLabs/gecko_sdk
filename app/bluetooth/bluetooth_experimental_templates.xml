@@ -39,7 +39,7 @@
     <properties key="projectFilePaths" value="example/bt_abr_ncp_initiator/bt_abr_ncp_initiator.slcp"/>
     <properties key="readmeFiles" value="example/bt_abr_ncp_initiator/readme.md"/>
     <properties key="boardCompatibility" value="brd4198a brd4198b brd4406a brd4411a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="partCompatibility" value=".*efr32mg24.* .*efr32bg24.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
@@ -54,7 +54,7 @@
     <properties key="projectFilePaths" value="example/bt_abr_soc_initiator/bt_abr_soc_initiator.slcp"/>
     <properties key="readmeFiles" value="example/bt_abr_soc_initiator/readme.md"/>
     <properties key="boardCompatibility" value="brd4198a brd4198b brd4411a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="partCompatibility" value=".*efr32mg24.* .*efr32bg24.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
@@ -69,7 +69,7 @@
     <properties key="projectFilePaths" value="example/bt_abr_soc_reflector/bt_abr_soc_reflector.slcp"/>
     <properties key="readmeFiles" value="example/bt_abr_soc_reflector/readme.md"/>
     <properties key="boardCompatibility" value="brd4198a brd4198b brd4411a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32mg24.*"/>
+    <properties key="partCompatibility" value=".*efr32mg24.* .*efr32bg24.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>

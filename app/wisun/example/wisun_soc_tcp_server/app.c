@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "app.h"
+#include "sl_wisun_trace_util.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -69,7 +70,7 @@ void app_task(void *args)
   (void) args;
 
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
   printf("[Port: %u]\n", SL_WISUN_TCP_SERVER_PORT);
 
   // creating socket
@@ -110,7 +111,7 @@ void app_task(void *args)
       r = recv(sockd_tcp_clnt, buff, SL_WISUN_TCP_SERVER_BUFF_SIZE - 1, 0);
       switch (r) {
         case -1:
-          app_wisun_dispatch_thread();
+          sl_wisun_app_core_util_dispatch_thread();
           continue;
         case 0: // scoket closed, EOF
           printf("[Socket closing: %ld]\n", sockd_tcp_clnt);
@@ -131,7 +132,7 @@ void app_task(void *args)
           break;
       }
       // dispatch thread
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
     }
   }
 }

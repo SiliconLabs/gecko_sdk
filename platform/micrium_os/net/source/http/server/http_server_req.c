@@ -1359,8 +1359,8 @@ static void HTTPsReq_ProtocolVerParse(HTTPs_INSTANCE *p_instance,
       return;
   }
   //                                                               Update the RxBuf ptr.
-  p_conn->RxBufLenRem -= (p_protocol_ver_end - p_conn->RxBufPtr) + 2;
-  p_conn->RxBufPtr = p_protocol_ver_end + 2;
+  p_conn->RxBufLenRem -= len + STR_CR_LF_LEN;
+  p_conn->RxBufPtr     = p_protocol_ver_end + STR_CR_LF_LEN;
 
   *p_err = HTTPs_ERR_NONE;
 }

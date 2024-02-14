@@ -69,7 +69,7 @@ void app_task(void *args)
   (void) args;
 
   // connect to the wisun network
-  app_wisun_connect_and_wait();
+  sl_wisun_app_core_util_connect_and_wait();
 
 #if defined(SL_CATALOG_GUI_PRESENT)
   sl_display_renderer(sl_wisun_nwm_main_form, NULL, 0);
@@ -77,7 +77,7 @@ void app_task(void *args)
 
   while (1) {
     // User code here
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

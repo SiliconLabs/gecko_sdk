@@ -16,15 +16,27 @@ provides:
 
 requires:
   # AES hardware implementation (by calling internal PSA calls)
+  - name: mbedtls_aes
+    condition:
+      - device_series_0
+  - name: mbedtls_aes
+    condition:
+      - device_series_1
   - name: psa_crypto_aes
     condition:
-      - device_cortexm
-  - name: psa_crypto_ccm
-    condition:
-      - device_cortexm
+      - device_series_2
   - name: psa_crypto_cipher_ecb
     condition:
-      - device_cortexm
+      - device_series_2
+  - name: mbedtls_ccm
+    condition:
+      - device_series_0
+  - name: mbedtls_ccm
+    condition:
+      - device_series_1
+  - name: psa_crypto_ccm
+    condition:
+      - device_series_2
   # AES software implementation
   - name: zigbee_aes_software
     condition:

@@ -195,23 +195,28 @@ void sl_wisun_collector_init(void)
   // init collector-meter token
   sl_wisun_mc_init_token(SL_WISUN_METER_COLLECTOR_TOKEN);
 
-  req.length = SL_WISUN_METER_REQUEST_TYPE_LENGTH
-               + 1U
-               + sl_wisun_mc_get_token_size();
-
-  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC \
-             SL_WISUN_METER_REQUEST_DELIMITER                  \
-             SL_WISUN_METER_COLLECTOR_TOKEN;
+  req.length  = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC)
+                + 1U
+                + sl_wisun_mc_get_token_size();
+  req.buff    = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_ASYNC \
+                SL_WISUN_METER_REQUEST_DELIMITER                  \
+                SL_WISUN_METER_COLLECTOR_TOKEN;
   sl_wisun_collector_set_async_measurement_request(&req);
 
-  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER \
-             SL_WISUN_METER_REQUEST_DELIMITER                     \
-             SL_WISUN_METER_COLLECTOR_TOKEN;
+  req.length  = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER)
+                + 1U
+                + sl_wisun_mc_get_token_size();
+  req.buff    = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REGISTER \
+                SL_WISUN_METER_REQUEST_DELIMITER                     \
+                SL_WISUN_METER_COLLECTOR_TOKEN;
   sl_wisun_collector_set_registration_request(&req);
 
-  req.buff = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE \
-             SL_WISUN_METER_REQUEST_DELIMITER                   \
-             SL_WISUN_METER_COLLECTOR_TOKEN;
+  req.length  = strlen(SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE)
+                + 1U
+                + sl_wisun_mc_get_token_size();
+  req.buff    = (uint8_t *) SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE \
+                SL_WISUN_METER_REQUEST_DELIMITER                   \
+                SL_WISUN_METER_COLLECTOR_TOKEN;
   sl_wisun_collector_set_removal_request(&req);
 }
 
@@ -485,7 +490,7 @@ static void _create_common_socket(void)
   static sockaddr_in6_t collector_addr  = { 0 };
   int32_t res                         = SOCKET_INVALID_ID;
 
-  _common_socket = socket(AF_INET6, (SOCK_DGRAM | SOCK_NONBLOCK), IPPROTO_UDP);
+  _common_socket = socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
   assert(_common_socket != SOCKET_INVALID_ID);
 
   collector_addr.sin6_family = AF_INET6;
@@ -631,7 +636,7 @@ static void _collector_recv_thread_fnc(void *args)
   _create_common_socket();
 
   SL_WISUN_THREAD_LOOP {
-    if (!app_wisun_network_is_connected()) {
+    if (!sl_wisun_app_core_util_network_is_connected()) {
       osDelay(1000);
       continue;
     }
@@ -646,7 +651,7 @@ static void _collector_recv_thread_fnc(void *args)
                                    &packet_data_len);
 
     if (res != SL_STATUS_OK) {
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
       continue;
     }
 
@@ -655,7 +660,7 @@ static void _collector_recv_thread_fnc(void *args)
                                  &remote_addr);
 
     if (meter == NULL) {
-      app_wisun_dispatch_thread();
+      sl_wisun_app_core_util_dispatch_thread();
       continue;
     }
 
@@ -666,7 +671,7 @@ static void _collector_recv_thread_fnc(void *args)
       printf("[Response time: %ldms]\n", response_time_ms);
       sl_mempool_free(&_async_meters_mempool, meter);
     }
-    app_wisun_dispatch_thread();
+    sl_wisun_app_core_util_dispatch_thread();
   }
 }
 

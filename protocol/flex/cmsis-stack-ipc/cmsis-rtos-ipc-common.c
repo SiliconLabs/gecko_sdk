@@ -132,31 +132,25 @@ void emAfPluginCmsisRtosProcessIncomingApiCommand(void)
 
 void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
 {
-  uint8_t i;
-  EmberBufferDesc callbackBufferDescriptorPut = { NULL, 0 };
-
   // This API must be called from the stack task.
   assert(isCurrentTaskStackTask());
 
-  // Enqueing the callback in the app framework task queue.
-  emberAfPluginCmsisRtosAcquireBufferSystemMutex();
-  for (i = 0; i < EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE; i++) {
-    if (callbackBuffer[i] == EMBER_NULL_BUFFER) {
-      callbackBuffer[i] = emberAllocateBuffer(commandLength);
-      break;
-    }
-  }
-  emberAfPluginCmsisRtosReleaseBufferSystemMutex();
-
   // Queue is full or no memory available: either way just return.
-  if (i >= EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE
-      || callbackBuffer[i] == EMBER_NULL_BUFFER) {
+  if (callbackCommandBuffer == NULL) {
     return;
   }
 
-  // Write the callback command to the callback buffer.
-  memcpy(emberGetBufferPointer(callbackBuffer[i]), callbackCommandBuffer, commandLength);
-  free(callbackCommandBuffer);
+  // Get the last added callback.
+  uint8_t i;
+  for (i = 0; i < EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE; i++) {
+    if (callbackBuffer[i] == EMBER_NULL_BUFFER) {
+      break;
+    }
+  }
+  i--;
+
+  EmberBufferDesc callbackBufferDescriptorPut = { NULL, 0 };
+
   callbackBufferDescriptorPut.buffer_addr = &callbackBuffer[i];
   callbackBufferDescriptorPut.buffer_length = commandLength;
 
@@ -175,7 +169,6 @@ void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength)
 
 bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 {
-  uint16_t messageLength;
   EmberBuffer *callbackBufferPtr = NULL;
   EmberBufferDesc callbackBufferDescriptorGet = { NULL, 0 };
   uint8_t msgPrio;
@@ -190,21 +183,11 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
                     0);
 
   callbackBufferPtr = callbackBufferDescriptorGet.buffer_addr;
-  messageLength = callbackBufferDescriptorGet.buffer_length;
 
   if (callbackBufferPtr) {
-    uint8_t *callbackData = (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
-    if (callbackData == NULL) {
-      return false;
-    }
     uint16_t commandId;
-
-    // Lock the buffer system to prevent defragmentation while we access the
-    // buffer.
     emberAfPluginCmsisRtosAcquireBufferSystemMutex();
-    memcpy(callbackData,
-           emberGetBufferPointer(*callbackBufferPtr),
-           messageLength);
+    uint8_t *callbackData = emberGetBufferPointer(*callbackBufferPtr);
     // This assignment is safe because the vNCP acquires the buffer system mutex
     // before manipulating any entry in callbackBuffer[].
     *callbackBufferPtr = EMBER_NULL_BUFFER;
@@ -214,7 +197,6 @@ bool emAfPluginCmsisRtosProcessIncomingCallbackCommand(void)
 
     handleIncomingCallbackCommand(commandId,
                                   callbackData + 2);
-    free(callbackData);
     return true;
   }
 
@@ -247,7 +229,21 @@ uint8_t *getApiCommandPointer()
 
 uint8_t *allocateCallbackCommandPointer()
 {
-  return (uint8_t *)malloc(MAX_STACK_CALLBACK_COMMAND_SIZE);
+  uint8_t i;
+  // Enqueing the callback in the app framework task queue.
+  emberAfPluginCmsisRtosAcquireBufferSystemMutex();
+  for (i = 0; i < EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE; i++) {
+    if (callbackBuffer[i] == EMBER_NULL_BUFFER) {
+      callbackBuffer[i] = emberAllocateBuffer(MAX_STACK_CALLBACK_COMMAND_SIZE);
+      break;
+    }
+  }
+  emberAfPluginCmsisRtosReleaseBufferSystemMutex();
+  if (i >= EMBER_AF_PLUGIN_CMSIS_RTOS_MAX_CALLBACK_QUEUE_SIZE
+      || callbackBuffer[i] == EMBER_NULL_BUFFER) {
+    return NULL;
+  }
+  return emberGetBufferPointer(callbackBuffer[i]);
 }
 
 void unknownCommandIdHandler(uint16_t commandId)

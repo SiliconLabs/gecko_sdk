@@ -23,8 +23,8 @@
 #include "ota-storage.h"
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
-#endif // SL_COMPONENT_CATALOG_PRESEN
-#ifdef SL_CATALOG_ZIGBEE_OTAA_STORAGE_COMMON_PRESENT
+#endif // SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_CATALOG_ZIGBEE_OTA_STORAGE_COMMON_PRESENT
 #include "ota-storage-common-config.h"
 #endif
 #if defined (IMAGE_BUILDER)

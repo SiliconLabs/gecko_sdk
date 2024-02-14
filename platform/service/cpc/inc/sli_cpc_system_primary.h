@@ -47,6 +47,16 @@ SL_ENUM_GENERIC(sli_cpc_system_ep_frame_type_t, uint8_t) {
   SYSTEM_EP_IFRAME
 };
 
+#define SLI_CPC_SYSTEM_COMMAND_FLAG_IS_FIRST_TRY        (0x01 << 0)
+#define SLI_CPC_SYSTEM_COMMAND_FLAG_BEING_TRANSMITTED   (0x01 << 1)
+#define SLI_CPC_SYSTEM_COMMAND_FLAG_RECEIVED_REPLY      (0x01 << 2)
+
+typedef struct {
+  bool is_first_try : 1;
+  bool being_transmitted : 1;
+  bool received_reply : 1;
+} sli_cpc_system_command_flag_t;
+
 typedef struct  {
   sl_slist_node_t node_commands;
   sl_slist_node_t node_retries;
@@ -58,8 +68,7 @@ typedef struct  {
   uint32_t retry_timeout_tick;
   sl_status_t error_status;
   sli_cpc_timer_handle_t timer;
-  bool is_first_try;
-  bool being_transmitted;
+  sli_cpc_system_command_flag_t flags;
 } sli_cpc_system_command_handle_t;
 
 /***************************************************************************//**

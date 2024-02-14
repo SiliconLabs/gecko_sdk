@@ -55,14 +55,14 @@
 #define GATT_TIMEOUT_MS       10000
 
 // connection parameters for PAST
-#define PAST_CONN_INTERVAL_MIN       0x0006 // given in 1.25ms units, 6 * 1.25 = 7.5ms, limited by Core specification
-#define PAST_CONN_INTERVAL_MAX       0x0c80 // limited by Core specification to 4 seconds
+#define PAST_CONN_INTERVAL_MIN       ESL_LIB_CONN_INTERVAL_MIN
+#define PAST_CONN_INTERVAL_MAX       ESL_LIB_CONN_INTERVAL_MAX
 #define PAST_CONN_PERIPHERAL_LATENCY 1      // allow to skip one connection interval during PAST if there's no data
 #define PAST_CONN_DEFAULT_TIMEOUT    1000   // value * 10ms, this is 10 seconds
-#define PAST_CONN_MIN_TIMEOUT        0x000a // min 100ms according to COre specification
-#define PAST_CONN_MAX_TIMEOUT        0x0c80 // max 32 seconds according to COre specification
-#define PAST_CONN_MIN_CE_LENGTH      0
-#define PAST_CONN_MAX_CE_LENGTH      0xffff
+#define PAST_CONN_MIN_TIMEOUT        ESL_LIB_CONN_MIN_TIMEOUT
+#define PAST_CONN_MAX_TIMEOUT        ESL_LIB_CONN_MAX_TIMEOUT
+#define PAST_CONN_MIN_CE_LENGTH      ESL_LIB_CONN_MIN_CE_LENGTH
+#define PAST_CONN_MAX_CE_LENGTH      ESL_LIB_CONN_MAX_CE_LENGTH // can be tuned to fits specific radio timing needs
 #define PAST_GRACE_INTERVAL_COUNT    6
 
 #define PAWR_SERVICE_DATA            42
@@ -86,6 +86,8 @@ typedef struct {
 static void esl_lib_connection_safe_remove_ptr(esl_lib_connection_t *ptr);
 static void run_command(esl_lib_command_list_cmd_t *cmd);
 static sl_status_t close_connection(esl_lib_connection_t *conn);
+static sl_status_t send_retry_event(esl_lib_connection_t *conn,
+                                    sl_status_t          reason);
 static sl_status_t send_connection_status(esl_lib_connection_t *conn,
                                           esl_lib_bool_t       status,
                                           sl_status_t          reason);
@@ -703,6 +705,8 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                                            conn->connection_handle);
               conn->command_complete = true;
             } else {
+              // Let the AP know that the connection is now closed but will retry
+              send_retry_event(conn, reason);
               break;
             }
           } else {
@@ -896,6 +900,9 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
       if (sc == SL_STATUS_OK) {
         lib_status = ESL_LIB_STATUS_NO_ERROR;
       } else {
+        // Set library status accordingly.
+        lib_status = ESL_LIB_STATUS_BONDING_FAILED;
+        conn->state = ESL_LIB_CONNECTION_STATE_BONDING_FAIL_RECONNECT;
         // Defer forced close on error - normally the close event should come, this is just a watchdog
         (void)app_timer_stop(&conn->timer);
         (void)app_timer_start(&conn->timer,
@@ -1036,7 +1043,7 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
         // Check size for UUID if in proper state - send error otherwise
         if (conn->state != ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY) {
           sc = SL_STATUS_INVALID_STATE;
-          lib_status = conn->state;
+          lib_status = ESL_LIB_STATUS_CONN_DISCOVERY_FAILED;
           esl_lib_log_connection_error(CONN_FMT "Service discovery failed, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
                                        conn,
                                        conn->connection_handle,
@@ -1735,7 +1742,6 @@ static sl_status_t send_cp_notification_event(esl_lib_connection_t *conn,
                                    len,
                                    &lib_evt);
   if (sc == SL_STATUS_OK) {
-    lib_evt->evt_code = ESL_LIB_EVT_CONTROL_POINT_NOTIFICATION;
     lib_evt->data.evt_control_point_notification.connection_handle
       = (esl_lib_connection_handle_t)conn;
     lib_evt->data.evt_control_point_notification.data.len = len;
@@ -1761,7 +1767,6 @@ static sl_status_t send_bonding_finished(esl_lib_connection_t *conn)
                                    0,
                                    &lib_evt);
   if (sc == SL_STATUS_OK) {
-    lib_evt->evt_code = ESL_LIB_EVT_BONDING_FINISHED;
     lib_evt->data.evt_bonding_finished.connection_handle
       = (esl_lib_connection_handle_t)conn;
     // Copy address
@@ -1789,7 +1794,6 @@ static sl_status_t send_bonding_data(esl_lib_connection_t *conn,
                                    0,
                                    &lib_evt);
   if (sc == SL_STATUS_OK) {
-    lib_evt->evt_code = ESL_LIB_EVT_BONDING_DATA;
     lib_evt->data.evt_bonding_data.connection_handle
       = (esl_lib_connection_handle_t)conn;
     // Copy address
@@ -1810,6 +1814,40 @@ static sl_status_t send_bonding_data(esl_lib_connection_t *conn,
   return sc;
 }
 
+static sl_status_t send_retry_event(esl_lib_connection_t *conn,
+                                    sl_status_t          reason)
+{
+  esl_lib_evt_t *lib_evt;
+  sl_status_t sc = esl_lib_event_list_allocate(ESL_LIB_EVT_CONNECTION_RETRY,
+                                               0,
+                                               &lib_evt);
+  if (sc == SL_STATUS_OK) {
+    lib_evt->data.evt_connection_retry.connection_handle = (esl_lib_connection_handle_t)conn;
+    // Set last known connection state for the event
+    lib_evt->data.evt_connection_retry.connection_state = conn->state;
+    // Update the connection state
+    conn->state = ESL_LIB_CONNECTION_STATE_RECONNECTING;
+    // Set reason for disconnection event
+    lib_evt->data.evt_connection_retry.reason = reason;
+    // Copy address and set its type
+    lib_evt->data.evt_connection_retry.address.address_type = conn->address_type;
+    // Copy remaining retry count, if known
+    if ((conn->command != NULL) && (conn->command->cmd_code == ESL_LIB_CMD_CONNECT)) {
+      lib_evt->data.evt_connection_retry.retries_left = conn->command->data.cmd_connect.retries_left;
+    }
+    memcpy(lib_evt->data.evt_connection_retry.address.addr,
+           conn->address.addr,
+           sizeof(conn->address.addr));
+    sc = esl_lib_event_list_push_back(lib_evt);
+
+    if (sc != SL_STATUS_OK) {
+      // Free up memory on failure
+      esl_lib_memory_free(lib_evt);
+    }
+  }
+
+  return sc;
+}
 static sl_status_t send_connection_status(esl_lib_connection_t *conn,
                                           esl_lib_bool_t       status,
                                           sl_status_t          reason)
@@ -1827,8 +1865,6 @@ static sl_status_t send_connection_status(esl_lib_connection_t *conn,
                                    0,
                                    &lib_evt);
   if (sc == SL_STATUS_OK) {
-    // Set event type
-    lib_evt->evt_code = type;
     // Get pointer to status data in general
     if (status == ESL_LIB_TRUE) {
       // Set handle
@@ -1890,7 +1926,6 @@ static sl_status_t send_att_response(esl_lib_connection_t *conn,
   if (type == ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE) {
     sc = esl_lib_event_list_allocate(type, 0, &lib_evt);
     if (sc == SL_STATUS_OK) {
-      lib_evt->evt_code = type;
       // Tag config response
       lib_evt->data.evt_configure_tag_response.connection_handle
         = (esl_lib_connection_handle_t)conn;
@@ -1903,7 +1938,6 @@ static sl_status_t send_att_response(esl_lib_connection_t *conn,
                                      conn->command->data.cmd_write_control_point.data.len,
                                      &lib_evt);
     if (sc == SL_STATUS_OK) {
-      lib_evt->evt_code = type;
       // Control Point response
       lib_evt->data.evt_control_point_response.connection_handle
         = (esl_lib_connection_handle_t)conn;
@@ -2085,7 +2119,6 @@ static void on_image_transfer_finished(esl_lib_image_transfer_handle_t handle,
     if (result == SL_STATUS_OK) {
       sc = esl_lib_event_list_allocate(ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED, 0, &lib_evt);
       if (sc == SL_STATUS_OK) {
-        lib_evt->evt_code = ESL_LIB_EVT_IMAGE_TRANSFER_FINISHED;
         lib_evt->data.evt_image_transfer_finished.connection_handle = conn;
         lib_evt->data.evt_image_type.img_index = image_index;
         lib_evt->data.evt_image_transfer_finished.status = result;
@@ -2142,7 +2175,6 @@ static void on_image_transfer_type_arrived(esl_lib_image_transfer_handle_t handl
     if (result == SL_STATUS_OK) {
       sc = esl_lib_event_list_allocate(ESL_LIB_EVT_IMAGE_TYPE, len, &lib_evt);
       if (sc == SL_STATUS_OK) {
-        lib_evt->evt_code = ESL_LIB_EVT_IMAGE_TYPE;
         lib_evt->data.evt_image_type.connection_handle = conn;
         lib_evt->data.evt_image_type.img_index = image_index;
         lib_evt->data.evt_image_type.type_data.len = len;

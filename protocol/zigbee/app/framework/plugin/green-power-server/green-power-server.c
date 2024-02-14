@@ -3241,7 +3241,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                 0,
                                                                 cmd_data.index,
                                                                 0);
-    emberAfSendResponse();
+    sli_zigbee_af_gp_send_response_unicast();
     return true;
   } else {
     // Valid Entries are present!
@@ -3256,7 +3256,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                     validEntriesCount,
                                                                     0xFF,
                                                                     0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
         return true;
       }
       // Check for gpd addr = 0
@@ -3265,7 +3265,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                     validEntriesCount,
                                                                     0xFF,
                                                                     0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
         return true;
       }
       entryIndex = emberGpSinkTableLookup(&gpdAddr);
@@ -3275,7 +3275,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                     validEntriesCount,
                                                                     entryIndex,
                                                                     0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
         goto kickout;
       } else {
         // A valid entry with the ID is present
@@ -3291,7 +3291,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                       0xff,
                                                                       1);
           appResponseLength += storeSinkTableEntryInBuffer(&entry, (appResponseData + appResponseLength));
-          emberAfSendResponse();
+          sli_zigbee_af_gp_send_response_unicast();
         } else {
           // Not found status to go out.
         }
@@ -3303,7 +3303,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
                                                                     validEntriesCount,
                                                                     cmd_data.index,
                                                                     0);
-        emberAfSendResponse();
+        sli_zigbee_af_gp_send_response_unicast();
         return true;
       } else {
         // return the sink table entry content into the reponse payload from indicated
@@ -3342,13 +3342,13 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
         }
         //Insert the number of entries actually included
         appResponseData[GP_SINK_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
-        EmberStatus status = emberAfSendResponse();
+        EmberStatus status = sli_zigbee_af_gp_send_response_unicast();
         if (status == EMBER_MESSAGE_TOO_LONG) {
           emberAfFillCommandGreenPowerClusterGpSinkTableResponseSmart(EMBER_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
                                                                       validEntriesCount,
                                                                       cmd_data.index,
                                                                       0);
-          emberAfSendResponse();
+          sli_zigbee_af_gp_send_response_unicast();
         }
         goto kickout;
       }

@@ -1,5 +1,5 @@
 id: btmesh_blob_transfer_server_recommended_instance_target
-label: BLOB Transfer Server Recommended Instance
+label: BLOB Transfer Server Recommended Instance for Target Role
 package: Btmesh
 description: >
   Provides recommended instance of BT Mesh BLOB (Binary Large OBject) Transfer
@@ -10,10 +10,13 @@ description: >
   This is a utility component which is used to improve No-Code experience by
   providing default BLOB Transfer Server instances for upper layer components.
   The same component instances can be created manually to achieve same behavior.
-  If BLOB Transfer Server instance is added to the project directly then it
+  If BLOB Transfer Server instance is added to the project file directly then it
   overrides the recommended component instances, and consequently component
   instances shall be added to the project manually when this default SLC
   behavior is not desirable.
+  If BLOB Transfer Server instance is added to the project in Project Configuration
+  Tools Editor (Simplicity Studio) then the editor preserves the recommended
+  instances by adding them to the project explicitly.
 
   This is not a standalone component.
 

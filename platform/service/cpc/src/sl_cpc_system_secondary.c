@@ -141,7 +141,9 @@ static void on_poll(uint8_t endpoint_id,
 static void enter_irq_timer_callback(sli_cpc_timer_handle_t *handle,
                                      void *data);
 
+#if defined(SLI_CPC_ENABLE_TEST_FEATURES)
 SL_WEAK void system_on_information_received(uint8_t endpoint_id, void *arg);
+#endif
 SL_WEAK const char* sl_cpc_secondary_app_version(void);
 
 /***************************************************************************//**
@@ -173,6 +175,7 @@ static sl_status_t open_endpoint(void)
     return status;
   }
 
+#if defined(SLI_CPC_ENABLE_TEST_FEATURES)
   if (system_on_information_received) {
     status = sl_cpc_set_endpoint_option(&system_ep, SL_CPC_ENDPOINT_ON_UFRAME_RECEIVE, (void *)system_on_information_received);
     if (status != SL_STATUS_OK) {
@@ -180,6 +183,7 @@ static sl_status_t open_endpoint(void)
       return status;
     }
   }
+#endif
 
   status = sl_cpc_set_endpoint_option(&system_ep, SL_CPC_ENDPOINT_ON_UFRAME_WRITE_COMPLETED, (void *)on_write_completed);
   if (status != SL_STATUS_OK) {

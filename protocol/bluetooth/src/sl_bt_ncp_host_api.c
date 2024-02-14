@@ -5171,7 +5171,7 @@ sl_status_t sl_bt_connection_analyzer_start(uint32_t access_address,
                                             const sl_bt_connection_channel_map_t *channel_map,
                                             uint8_t channel,
                                             uint16_t event_counter,
-                                            uint32_t start_time_us,
+                                            int32_t start_time_us,
                                             uint32_t flags,
                                             uint8_t *analyzer) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;

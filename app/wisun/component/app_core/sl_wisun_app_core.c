@@ -36,7 +36,7 @@
 #include <string.h>
 #include "sl_status.h"
 #include "sl_wisun_app_core.h"
-#include "sl_wisun_app_core_util_config.h"
+#include "sl_wisun_app_core_config.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "sl_status.h"
@@ -51,12 +51,19 @@
   #include "sl_wisun_app_setting.h"
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  #warning Power Manager component is presented. Features/peripherals are constrained.
+#endif
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
 /// MDR capability
 #define APP_WISUN_MDR_COMMAND_CAPABILITY                  0U
+
+/// Eventflag error mask
+#define APP_WISUN_EVTFLAG_ERROR_MSK                       (0x00000001UL << 31UL)
 
 ///  Release mutex and return
 #define _return_and_mtx_release() \
@@ -103,7 +110,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
  *****************************************************************************/
 sl_status_t _app_wisun_security_setting(void);
 
-#if (WISUN_APP_REGULATION != REGULATION_NONE)
+#if (SL_WISUN_APP_CORE_REGULATION != SL_WISUN_APP_CORE_REGULATION_NONE)
 /**************************************************************************//**
  * @brief Regulation setting
  * @details It setup Wi-SUN with regulation related parameters.
@@ -136,11 +143,18 @@ static void _store_address(const char *addr_name,
                            in6_addr_t *addr);
 
 /**************************************************************************//**
- * @brief Setting error flag
- * @details It sets the error by a flag
+ * @brief Setting state flag
+ * @details It sets the state by a flag
  * @param[in] flag is a flag bit
  *****************************************************************************/
-__STATIC_INLINE void _app_wisun_core_set_error(app_core_error_state_flag_t flag);
+__STATIC_INLINE void _app_wisun_core_set_state(const sl_wisun_app_core_state_t flag);
+
+/**************************************************************************//**
+ * @brief Clear state flag
+ * @details It clears the state by a flag
+ * @param[in] flag is a flag bit
+ *****************************************************************************/
+__STATIC_INLINE void _app_wisun_core_clear_state(const sl_wisun_app_core_state_t flag);
 
 /**************************************************************************//**
  * @brief Storing the current address
@@ -213,27 +227,35 @@ static const app_setting_wisun_t _app_default_settings = {
 /// Here we track if regional regulation is active or not
 static bool _regional_regulation_active = false;
 
-static regulation_thresholds_t _tresholds = {
-  .warning_threshold = WISUN_DEFAULT_REGULATION_WARNING_THRESHOLD,
-  .alert_threshold = WISUN_DEFAULT_REGULATION_ALERT_THRESHOLD,
+static sl_wisun_app_core_reg_thresholds_t _tresholds = {
+  .warning_threshold = SL_WISUN_APP_CORE_DEFAULT_REGULATION_WARNING_THRESHOLD,
+  .alert_threshold = SL_WISUN_APP_CORE_DEFAULT_REGULATION_ALERT_THRESHOLD,
 };
 
 /// App framework mutex
-static osMutexId_t _app_wisun_network_mtx = NULL;
+static osMutexId_t _app_core_mtx = NULL;
 
 ///  App framework mutex attribute
-static const osMutexAttr_t _app_wisun_network_mtx_attr = {
-  .name      = "AppWisunNetworkMutex",
+static const osMutexAttr_t _app_wisun_mtx_attr = {
+  .name      = "AppWisunkMutex",
   .attr_bits = osMutexRecursive,
   .cb_mem    = NULL,
   .cb_size   = 0
 };
 
 /// Current address storage
-static current_addr_t _current_addr = { 0U };
+static sl_wisun_app_core_current_addr_t _current_addr = { 0U };
 
 /// error flag for errors
-static app_core_error_state_flag_t _error_flag = CONNECTION_FAILED_ERROR_FLAG_BIT;
+static osEventFlagsId_t _app_core_state = NULL;
+
+/// Sate event flags attributes
+static const osEventFlagsAttr_t _app_wisun_evt_attr = {
+  .name      = "AppWisunEvtFlags",
+  .attr_bits = 0,
+  .cb_mem    = NULL,
+  .cb_size   = 0
+};
 
 /// Internal join state
 static sl_wisun_join_state_t _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
@@ -242,7 +264,7 @@ static sl_wisun_join_state_t _join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
 static app_setting_wisun_t _setting = { 0U };
 
 /// Time statistic storage
-static app_core_time_stat_t _time_stat = { 0U };
+static sl_wisun_app_core_time_stat_t _time_stat = { 0U };
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -294,6 +316,8 @@ void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
 
   if (evt->evt.connected.status != SL_STATUS_OK) {
     printf("[Connection failed. Status: %lu]\n", evt->evt.connected.status);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
+    _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
     return;
   }
   // store the current addresses
@@ -309,7 +333,8 @@ void sl_wisun_connected_event_hnd(sl_wisun_evt_t *evt)
   time_ms = time_ms - _time_stat.disconnected_ms;
 
   printf("[%lu s]\n", (uint32_t)time_ms / 1000U);
-
+  _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
+  _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
@@ -327,6 +352,7 @@ void sl_wisun_disconnected_event_hnd(sl_wisun_evt_t *evt)
   _time_stat.disconnected_ms = time_ms;
 
   __CHECK_FOR_STATUS(evt->evt.error.status);
+  _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
 }
 
 /* Socket connection lost event handler*/
@@ -340,6 +366,9 @@ void sl_wisun_connection_lost_event_hnd(sl_wisun_evt_t *evt)
   if (stat == SL_STATUS_OK) {
     printf("[Connection lost, connecting to \"%s\"]\n", _setting.network_name);
   }
+  _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTION_LOST);
+  _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_NETWORK_DISCONNECTED);
+  _app_wisun_core_clear_state(SL_WISUN_APP_CORE_STATE_NETWORK_CONNECTED);
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
@@ -372,22 +401,43 @@ void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
   __CHECK_FOR_STATUS(evt->evt.error.status);
 }
 
+void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
+{
+  __CHECK_FOR_STATUS(evt->evt.error.status);
+}
+
 /* Wisun app core init */
-void app_wisun_core_init(void)
+void sl_wisun_app_core_init(void)
 {
   // init wisun network mutex
-  _app_wisun_network_mtx = osMutexNew(&_app_wisun_network_mtx_attr);
-  assert(_app_wisun_network_mtx != NULL);
+  _app_core_mtx = osMutexNew(&_app_wisun_mtx_attr);
+  assert(_app_core_mtx != NULL);
+
+  _app_core_state = osEventFlagsNew(&_app_wisun_evt_attr);
+  assert(_app_core_state != NULL);
 }
 
 /* App core get error */
-bool app_wisun_core_get_error(app_core_error_state_flag_t flag)
+sl_status_t sl_wisun_app_core_get_state(uint32_t * const state)
 {
-  return (bool)(_error_flag & (1 << flag));
+  *state = osEventFlagsGet(_app_core_state);
+  // Check error flag
+  if (*state & APP_WISUN_EVTFLAG_ERROR_MSK) {
+    return SL_STATUS_FAIL;
+  }
+  return SL_STATUS_OK;
+}
+
+
+sl_status_t sl_wisun_app_core_wait_state(const uint32_t state, const uint32_t timeout)
+{
+  uint32_t ret = 0UL;
+  ret = osEventFlagsWait(_app_core_state, state, osFlagsWaitAll | osFlagsNoClear, timeout);
+  return (ret & APP_WISUN_EVTFLAG_ERROR_MSK) ? SL_STATUS_FAIL : SL_STATUS_OK;
 }
 
 /*Connecting to the wisun network*/
-void app_wisun_network_connect(void)
+void sl_wisun_app_core_network_connect(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
@@ -403,7 +453,7 @@ void app_wisun_network_connect(void)
   ret = app_wisun_setting_get(&_setting);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to get settings\n");
-    _app_wisun_core_set_error(SETTING_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SETTING_ERROR);
     _return_and_mtx_release();
   }
 #else
@@ -430,7 +480,7 @@ void app_wisun_network_connect(void)
     _return_and_mtx_release();
   }
 
-#if (WISUN_APP_REGULATION != REGULATION_NONE)
+#if (SL_WISUN_APP_CORE_REGULATION != SL_WISUN_APP_CORE_REGULATION_NONE)
   ret = _app_wisun_regulation_setting();
   if (ret != SL_STATUS_OK) {
     _return_and_mtx_release();
@@ -448,7 +498,7 @@ void app_wisun_network_connect(void)
 
     printf("\n[Connecting to \"%s\"]\n", _setting.network_name);
   } else {
-    _app_wisun_core_set_error(CONNECTION_FAILED_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_CONNECTION_ERROR);
     printf("\n[Connection failed: %lu]\n", ret);
   }
   _app_wisun_mutex_release();
@@ -459,7 +509,7 @@ void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
   (void)*evt;
 }
 
-void app_wisun_get_current_addresses(current_addr_t * const dest_addresses)
+void sl_wisun_app_core_get_current_addresses(sl_wisun_app_core_current_addr_t * const dest_addresses)
 {
   _app_wisun_mutex_acquire();
   memcpy(&dest_addresses->global, &_current_addr.global, sizeof(in6_addr_t));
@@ -470,14 +520,14 @@ void app_wisun_get_current_addresses(current_addr_t * const dest_addresses)
   _app_wisun_mutex_release();
 }
 
-void app_wisun_set_regulation_active(bool enabled)
+void sl_wisun_app_core_set_regulation_active(bool enabled)
 {
   _app_wisun_mutex_acquire();
   _regional_regulation_active = enabled;
   _app_wisun_mutex_release();
 }
 
-bool app_wisun_get_regulation_active(void)
+bool sl_wisun_app_core_get_regulation_active(void)
 {
   bool retval;
   _app_wisun_mutex_acquire();
@@ -486,7 +536,7 @@ bool app_wisun_get_regulation_active(void)
   return retval;
 }
 
-void app_wisun_set_regulation_thresholds(const int8_t warning_level, const  int8_t alert_level)
+void sl_wisun_app_core_set_regulation_thresholds(const int8_t warning_level, const  int8_t alert_level)
 {
   _app_wisun_mutex_acquire();
   _tresholds.warning_threshold = warning_level;
@@ -494,41 +544,44 @@ void app_wisun_set_regulation_thresholds(const int8_t warning_level, const  int8
   _app_wisun_mutex_release();
 }
 
-bool app_wisun_get_regulation_thresholds(regulation_thresholds_t* thresholds_out)
+sl_status_t sl_wisun_app_core_get_regulation_thresholds(sl_wisun_app_core_reg_thresholds_t* thresholds_out)
 {
   if (thresholds_out == NULL) {
-    return false;
+    return SL_STATUS_FAIL;
   }
 
   _app_wisun_mutex_acquire();
   thresholds_out->warning_threshold = _tresholds.warning_threshold;
   thresholds_out->alert_threshold = _tresholds.alert_threshold;
   _app_wisun_mutex_release();
-  return true;
+  return SL_STATUS_OK;
 }
 
-bool app_wisun_get_remaining_tx_budget(uint32_t* const budget_out)
+sl_status_t sl_wisun_app_core_get_remaining_tx_budget(uint32_t* const budget_out)
 {
   sl_wisun_statistics_t stat;
+  sl_status_t ret = SL_STATUS_FAIL;
+
   if (!_regional_regulation_active || budget_out == NULL) {
-    return false;
+    return ret;
   }
 
   _app_wisun_mutex_acquire();
 
   if (sl_wisun_get_statistics(SL_WISUN_STATISTICS_TYPE_REGULATION, &stat) == SL_STATUS_OK) {
     // return a meaningful value (budget remaning) or zero (exceeded)
-    *budget_out = (stat.regulation.arib.tx_duration_ms < WISUN_APP_TX_BUDGET)
-                  ? (WISUN_APP_TX_BUDGET - stat.regulation.arib.tx_duration_ms) : 0UL;
+    *budget_out = (stat.regulation.arib.tx_duration_ms < SL_WISUN_APP_CORE_TX_BUDGET)
+                  ? (SL_WISUN_APP_CORE_TX_BUDGET - stat.regulation.arib.tx_duration_ms) : 0UL;
+    ret = SL_STATUS_OK;
   } else {
-    return false;
+    ret = SL_STATUS_FAIL;
   }
   _app_wisun_mutex_release();
 
-  return true;
+  return ret;
 }
 
-sl_wisun_join_state_t app_wisun_get_join_state(void)
+sl_wisun_join_state_t sl_wisun_app_core_get_join_state(void)
 {
   sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
   _app_wisun_mutex_acquire();
@@ -537,7 +590,7 @@ sl_wisun_join_state_t app_wisun_get_join_state(void)
   return join_state;
 }
 
-void app_wisun_get_time_stat(app_core_time_stat_t * const tstat)
+void sl_wisun_app_core_get_time_stat(sl_wisun_app_core_time_stat_t * const tstat)
 {
   uint64_t time_ms = 0ULL;
 
@@ -546,7 +599,7 @@ void app_wisun_get_time_stat(app_core_time_stat_t * const tstat)
   // update current time
   sl_sleeptimer_tick64_to_ms(sl_sleeptimer_get_tick_count64(), &time_ms);
 
-  memcpy(tstat, &_time_stat, sizeof(app_core_time_stat_t));
+  memcpy(tstat, &_time_stat, sizeof(sl_wisun_app_core_time_stat_t));
 
   // add diff beetween current time and last update time to the actual state
   tstat->curr_ms = time_ms;
@@ -561,17 +614,17 @@ void app_wisun_get_time_stat(app_core_time_stat_t * const tstat)
 }
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
 
-sl_wisun_device_type_t app_wisun_get_device_type(void)
+sl_wisun_device_type_t sl_wisun_app_core_get_device_type(void)
 {
   return (sl_wisun_device_type_t)_setting.device_type;
 }
 
-sl_wisun_lfn_profile_t app_wisun_get_lfn_profile(void)
+sl_wisun_lfn_profile_t sl_wisun_app_core_get_lfn_profile(void)
 {
   return (sl_wisun_lfn_profile_t)_setting.lfn_profile;
 }
 
-const sl_wisun_lfn_params_t *app_wisun_get_lfn_params(void)
+const sl_wisun_lfn_params_t *sl_wisun_app_core_get_lfn_params(void)
 {
   // Not lfn device
   if (_setting.device_type != SL_WISUN_LFN) {
@@ -613,7 +666,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
   if (setting->device_type == SL_WISUN_LFN) {
     // Store LFN profile based on wisun config
-    ret = sl_wisun_set_lfn_parameters(app_wisun_get_lfn_params());
+    ret = sl_wisun_set_lfn_parameters(sl_wisun_app_core_get_lfn_params());
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set device type: %lu]\n", ret);
       return ret;
@@ -631,7 +684,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   ret = sl_wisun_set_connection_parameters(conn_param);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set network size: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_NETWORK_SIZE_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_NETWORK_SIZE_ERROR);
     return ret;
   }
 
@@ -639,7 +692,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   ret = sl_wisun_set_tx_power(setting->tx_power);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set TX power: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_TX_POWER_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TX_POWER_ERROR);
     return ret;
   }
 #if defined(WISUN_CONFIG_ALLOWED_CHANNELS)
@@ -665,7 +718,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
 
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set dwell interval: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_DWELL_INTERVAL_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DWELL_INTERVAL_ERROR);
     return ret;
   }
 #endif
@@ -675,7 +728,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   ret = sl_wisun_set_mac_address(&wisun_config_mac_address);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set MAC address: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_MAC_ADDR_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_MAC_ADDR_ERROR);
     return ret;
   }
 #endif
@@ -686,7 +739,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
     ret = sl_wisun_allow_mac_address(&wisun_config_mac_allow_list.mac_list[index]);
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set allow address: %lu]\n", ret);
-      _app_wisun_core_set_error(SET_ALLOW_MAC_ADDR_ERROR_FLAG_BIT);
+      _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_ALLOW_MAC_ADDR_ERROR);
       return ret;
     }
   }
@@ -697,7 +750,7 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
     ret = sl_wisun_deny_mac_address(&wisun_config_mac_deny_list.mac_list[index]);
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set allow address: %lu]\n", ret);
-      _app_wisun_core_set_error(SET_DENY_MAC_ADDR_ERROR_FLAG_BIT);
+      _app_wisun_core_set_state(SL_WISUN_APP_CORE_SET_DENY_MAC_ADDR_ERROR);
       return ret;
     }
   }
@@ -717,7 +770,7 @@ sl_status_t _app_wisun_security_setting(void)
                                          wisun_config_ca_certificate);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set the trusted certificate: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_TRUSTED_CERTIFICATE_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_TRUSTED_CERTIFICATE_ERROR);
     return ret;
   }
 
@@ -727,7 +780,7 @@ sl_status_t _app_wisun_security_setting(void)
                                         wisun_config_device_certificate);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set the device certificate: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_DEVICE_CERTIFICATE_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DEVICE_CERTIFICATE_ERROR);
     return ret;
   }
 
@@ -739,32 +792,32 @@ sl_status_t _app_wisun_security_setting(void)
                                         wisun_config_device_private_key);
   if (ret != SL_STATUS_OK) {
     printf("[Failed: unable to set the device private key: %lu]\n", ret);
-    _app_wisun_core_set_error(SET_DEVICE_PRIVATE_KEY_ERROR_FLAG_BIT);
+    _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_DEVICE_PRIVATE_KEY_ERROR);
     return ret;
   }
 
   return ret;
 }
 
-#if (WISUN_APP_REGULATION != REGULATION_NONE)
+#if (SL_WISUN_APP_CORE_REGULATION != SL_WISUN_APP_CORE_REGULATION_NONE)
 __STATIC_INLINE sl_status_t _app_wisun_regulation_setting(void)
 {
   sl_status_t ret = SL_STATUS_FAIL;
 
   // regulation thresholds
-  regulation_thresholds_t thresholds;
+  sl_wisun_app_core_reg_thresholds_t thresholds;
   // name of the regulation type to print upon connection
   char* regulation_name;
 
-  (void)app_wisun_get_regulation_thresholds(&thresholds);
+  (void)sl_wisun_app_core_get_regulation_thresholds(&thresholds);
   ret = sl_wisun_set_regulation_tx_thresholds(thresholds.warning_threshold,
                                               thresholds.alert_threshold);
   if (ret == SL_STATUS_OK) {
-    ret = sl_wisun_set_regulation(WISUN_APP_REGULATION);
+    ret = sl_wisun_set_regulation(SL_WISUN_APP_CORE_REGULATION);
     if (ret != SL_STATUS_OK) {
       printf("[Failed: unable to set regulation: %lu]\n", ret);
     } else {
-      switch (WISUN_APP_REGULATION) {
+      switch (SL_WISUN_APP_CORE_REGULATION) {
         case SL_WISUN_REGULATION_ARIB: regulation_name = "ARIB"; break;
         default:
           regulation_name = "UNKNOWN";
@@ -783,13 +836,13 @@ __STATIC_INLINE sl_status_t _app_wisun_regulation_setting(void)
 /* Mutex acquire */
 __STATIC_INLINE void _app_wisun_mutex_acquire(void)
 {
-  assert(osMutexAcquire(_app_wisun_network_mtx, osWaitForever) == osOK);
+  assert(osMutexAcquire(_app_core_mtx, osWaitForever) == osOK);
 }
 
 /* Mutex release */
 __STATIC_INLINE void _app_wisun_mutex_release(void)
 {
-  assert(osMutexRelease(_app_wisun_network_mtx) == osOK);
+  assert(osMutexRelease(_app_core_mtx) == osOK);
 }
 
 /* Storing address */
@@ -822,15 +875,20 @@ static void _store_address(const char *addr_name,
 }
 
 /* Setting error */
-__STATIC_INLINE void _app_wisun_core_set_error(app_core_error_state_flag_t flag)
+__STATIC_INLINE void _app_wisun_core_set_state(const sl_wisun_app_core_state_t flag)
 {
-  _error_flag |= (1 << flag);
+  (void) osEventFlagsSet(_app_core_state, 1UL << flag);
+}
+
+__STATIC_INLINE void _app_wisun_core_clear_state(const sl_wisun_app_core_state_t flag)
+{
+  (void) osEventFlagsClear(_app_core_state, 1UL << flag);
 }
 
 /* Storing current addresses */
 static void _store_current_addresses(void)
 {
-  memset(&_current_addr, 0, sizeof(current_addr_t));
+  memset(&_current_addr, 0, sizeof(sl_wisun_app_core_current_addr_t));
   printf("\nAddresses:\n");
   _store_address("GLOBAL", SL_WISUN_IP_ADDRESS_TYPE_GLOBAL, &_current_addr.global);
   _store_address("LINK_LOCAL", SL_WISUN_IP_ADDRESS_TYPE_LINK_LOCAL, &_current_addr.link_local);

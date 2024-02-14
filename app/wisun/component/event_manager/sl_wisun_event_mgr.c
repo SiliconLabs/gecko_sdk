@@ -38,13 +38,14 @@
 #include "sl_cmsis_os2_common.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_event_mgr.h"
+#include "sl_wisun_trace_util.h"
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/**************************************************************************//**
- * @brief Event index for lookup
- *****************************************************************************/
+
+/// Event index for lookup
 typedef enum {
   EVENT_IDX_NOTVALID = -1,
   EVENT_IDX_NETWORK_UPDATE,
@@ -60,8 +61,27 @@ typedef enum {
   EVENT_IDX_ERROR,
   EVENT_IDX_JOIN_STATE,
   EVENT_IDX_REGULATION_TX_LEVEL,
-  EVENT_IDX_LFN_WAKE_UP
+  EVENT_IDX_LFN_WAKE_UP,
+  EVENT_IDX_MULTICAST_REG_FINISH
 } app_wisun_event_id_t;
+
+/// Wi-SUN application callback type.
+/// It is always called, User cannot register or remove them.
+/// It contains the must have implementation of the event.
+typedef void (*wisun_event_callback_t) (sl_wisun_evt_t *);
+
+
+/// Event handler structure
+typedef struct event_handler {
+  /// ID
+  sl_wisun_msg_ind_id_t id;
+  /// Callback for internal usage
+  wisun_event_callback_t callback;
+  /// Custom, registerable and removable callback for applications
+  custom_wisun_event_callback_t custom_callback;
+  /// Event notification
+  app_wisun_trace_util_evt_notify_t evt_notify;
+} event_handler_t;
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -94,14 +114,10 @@ __STATIC_INLINE app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind
 //                                Static Variables
 // -----------------------------------------------------------------------------
 
-/**************************************************************************//**
- * @brief App framework mutex
- *****************************************************************************/
-static osMutexId_t _app_wisun_event_mgr_mtx;
+/// App framework mutex
+static osMutexId_t _app_wisun_event_mgr_mtx = NULL;
 
-/**************************************************************************//**
- * @brief App framework mutex attribute
- *****************************************************************************/
+/// App framework mutex attribute
 static const osMutexAttr_t _app_wisun_event_mgr_mtx_attr = {
   .name      = "AppWisunEventMgrMutex",
   .attr_bits = osMutexRecursive,
@@ -109,10 +125,8 @@ static const osMutexAttr_t _app_wisun_event_mgr_mtx_attr = {
   .cb_size   = 0
 };
 
-/**************************************************************************//**
- * @brief Event Lookup table
- *        Lookup table indexes must be matched with app_wisun_event_id_t!
- *****************************************************************************/
+/// Event Lookup table
+/// Lookup table indexes must be matched with app_wisun_event_id_t!
 static event_handler_t _wisun_events[] = {
   {
     .id = SL_WISUN_MSG_NETWORK_UPDATE_IND_ID,
@@ -183,12 +197,15 @@ static event_handler_t _wisun_events[] = {
     .id = SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
     .callback = sl_wisun_lfn_wake_up_hnd,
     .custom_callback = NULL
+  },
+  {
+    .id = SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID,
+    .callback = sl_wisun_multicast_reg_finish_hnd,
+    .custom_callback = NULL
   }
 };
 
-/**************************************************************************//**
- * @brief Handled event count
- *****************************************************************************/
+/// Handled event count
 static const uint16_t _wisun_event_size = sizeof(_wisun_events) / sizeof(event_handler_t);
 
 // -----------------------------------------------------------------------------
@@ -198,8 +215,14 @@ static const uint16_t _wisun_event_size = sizeof(_wisun_events) / sizeof(event_h
 /* Event Manager initialization */
 void app_wisun_event_mgr_init(void)
 {
+  // Init mutex
   _app_wisun_event_mgr_mtx = osMutexNew(&_app_wisun_event_mgr_mtx_attr);
   assert(_app_wisun_event_mgr_mtx != NULL);
+
+  // Init event flags
+  for (uint16_t i = 0; i < _wisun_event_size; ++i) {
+    app_wisun_trace_util_evt_notify_init(&_wisun_events[i].evt_notify, osFlagsWaitAll);
+  }
 }
 
 /* Event Manager custom callback register */
@@ -238,6 +261,8 @@ sl_status_t app_wisun_em_custom_callback_remove(sl_wisun_msg_ind_id_t id)
 {
   osKernelState_t kernel_state = osKernelLocked;
 
+  kernel_state = osKernelGetState();
+
   // check kernel state to avoid mutex acquire issue
   if (kernel_state == osKernelRunning) {
     app_wisun_event_mgr_mutex_lock();
@@ -271,9 +296,79 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     if (_wisun_events[idx].custom_callback != NULL) {
       _wisun_events[idx].custom_callback(evt);
     }
+
+    if (_wisun_events[idx].evt_notify.evt_chs) {
+      app_wisun_trace_util_evt_notfiy_chs(&_wisun_events[idx].evt_notify);
+    }
   }
 
   app_wisun_event_mgr_mutex_unlock();
+}
+
+sl_status_t app_wisun_em_subscribe_evt_notification(const sl_wisun_msg_ind_id_t id, uint8_t * const evt_ch)
+{
+  app_wisun_event_id_t idx = _decode_ind(id);
+  sl_status_t ret = SL_STATUS_FAIL;
+  osKernelState_t kernel_state = osKernelLocked;
+
+  kernel_state = osKernelGetState();
+
+  if (EVENT_IDX_NOTVALID == idx) {
+    return ret;
+  }
+
+  if (kernel_state == osKernelRunning) {
+    app_wisun_event_mgr_mutex_lock();
+  }
+
+  ret = app_wisun_trace_util_evt_notify_subscribe_ch(&_wisun_events[idx].evt_notify, evt_ch);
+
+  if (kernel_state == osKernelRunning) {
+    app_wisun_event_mgr_mutex_unlock();
+  }
+
+  return ret;
+}
+
+sl_status_t app_wisun_em_unsubscribe_evt_notification(const sl_wisun_msg_ind_id_t id, const uint8_t evt_ch)
+{
+  app_wisun_event_id_t idx = _decode_ind(id);
+  sl_status_t ret = SL_STATUS_FAIL;
+  osKernelState_t kernel_state = osKernelLocked;
+
+  kernel_state = osKernelGetState();
+
+  if (EVENT_IDX_NOTVALID == idx) {
+    return ret;
+  }
+
+  if (kernel_state == osKernelRunning) {
+    app_wisun_event_mgr_mutex_lock();
+  }
+
+  ret = app_wisun_trace_util_evt_notify_unsubscribe_ch(&_wisun_events[idx].evt_notify, evt_ch);
+
+  if (kernel_state == osKernelRunning) {
+    app_wisun_event_mgr_mutex_unlock();
+  }
+
+  return ret;
+}
+
+sl_status_t app_wisun_em_wait_evt_notification(const sl_wisun_msg_ind_id_t id, const uint8_t evt_ch)
+{
+  app_wisun_event_id_t idx = _decode_ind(id);
+  sl_status_t ret = SL_STATUS_FAIL;
+
+  if (EVENT_IDX_NOTVALID == idx) {
+    return ret;
+  }
+  
+  ret = app_wisun_trace_util_evt_notify_wait(&_wisun_events[idx].evt_notify, 
+                                             1U << evt_ch, 
+                                             osWaitForever);
+
+  return ret;
 }
 
 // -----------------------------------------------------------------------------
@@ -310,6 +405,7 @@ __STATIC_INLINE app_wisun_event_id_t _decode_ind(const sl_wisun_msg_ind_id_t ind
     case SL_WISUN_MSG_JOIN_STATE_IND_ID:                    return EVENT_IDX_JOIN_STATE;
     case SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID:           return EVENT_IDX_REGULATION_TX_LEVEL;
     case SL_WISUN_MSG_LFN_WAKE_UP_IND_ID:                   return EVENT_IDX_LFN_WAKE_UP;
+    case SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID:             return EVENT_IDX_MULTICAST_REG_FINISH;
     default:                                                return EVENT_IDX_NOTVALID;
   }
 }
@@ -459,6 +555,17 @@ SL_WEAK void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
  * @param[in] evt event ptr
  *****************************************************************************/
 SL_WEAK void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+  assert(false);
+}
+
+/**************************************************************************//**
+ * @brief Wi-SUN multicast group registration finishes event handler
+ * @details
+ * @param[in] evt event ptr
+ *****************************************************************************/
+SL_WEAK void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
   assert(false);

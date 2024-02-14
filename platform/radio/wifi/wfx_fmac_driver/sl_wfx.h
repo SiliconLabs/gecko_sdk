@@ -109,7 +109,7 @@ sl_status_t sl_wfx_set_access_mode_message(void);
 
 sl_status_t sl_wfx_set_mac_address(const sl_wfx_mac_address_t *mac, sl_wfx_interface_t interface);
 
-sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, sl_wfx_pm_poll_t strategy, uint16_t interval);
+sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, sl_wfx_pm_poll_t strategy, uint16_t interval, uint8_t timeout);
 
 sl_status_t sl_wfx_set_wake_up_bit(uint8_t state);
 

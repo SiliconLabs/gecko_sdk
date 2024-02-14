@@ -148,4 +148,12 @@ int64_t divide_integer(int64_t dividend, int32_t divisor);
 /// Get the number of elements in an array (must not be used with pointers)
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
+// 32bit addition with saturation
+static inline uint32_t add32sat(uint32_t a, uint32_t b)
+{
+    uint32_t sum = a + b;
+
+    return sum < a ? UINT32_MAX : sum;
+}
+
 #endif

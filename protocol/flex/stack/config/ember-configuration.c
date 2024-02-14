@@ -46,6 +46,7 @@ EmberTaskControl emTasks[EMBER_TASK_COUNT];
 // Configurable stack parameters.
 uint8_t emberMacAckTimeoutMS = EMBER_MAC_ACK_TIMEOUT_MS;
 int8_t emRadioCcaThreshold = EMBER_RADIO_CCA_THRESHOLD;
+int16_t emberDefaultTxPowerDeciDbm = EMBER_DEFAULT_TX_POWER_DECI_DBM;
 
 #ifdef SL_CATALOG_CONNECT_FREQUENCY_HOPPING_PRESENT
 

@@ -77,7 +77,7 @@ extern "C" {
  * @brief The EFR32XG1 series size needed for
  *   \ref RAIL_StateBufferEntry_t::bufferBytes.
  */
-#define RAIL_EFR32XG1_STATE_BUFFER_BYTES 472
+#define RAIL_EFR32XG1_STATE_BUFFER_BYTES 480
 
 /**
  * @def RAIL_EFR32XG12_STATE_BUFFER_BYTES

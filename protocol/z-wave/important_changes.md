@@ -3,6 +3,20 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.1 {#section-7-21-1}
+
+## Support
+Footprint (heap, stack, ROM) has been optimized to support low-end devices (ZG14).
+
+## Fix saving host data in controller
+Fixed an issue on 700 series controllers, where the host was no longer able to save data in the controller's NVM.
+Increased largest NVM object size to match host's limitation (from 204 to 512 bytes currently used by ZPC or ZGW)
+This is to satisfy the design of the 700 series and allow the host to store data on the controller's NVM.
+
+## ZPAL Power Manager
+Relocated zpal_pm_set_device_type to apps (e.g. sensor is non-listening).
+Reworked notifications (deep sleep, power down) related to EM4, EM3, EM2 states.
+
 # 7.21.0 {#section-7-21-0}
 
 ## SPAN synchronization
@@ -51,7 +65,7 @@ Add periodic repacks for Z-Wave NVM instance on series 700 in zpal. Avoid to rep
 NVM default instance already has a periodic repack.
 
 ## Controller's NVM data update
-Controller's datas in NVM have been updated in order to save the nodeId length (Classic Z-Wave or Long Range Z-Wave). A migration script is required to update data in NVM.
+Controller's data in NVM have been updated in order to save the nodeId length (Classic Z-Wave or Long Range Z-Wave). A migration script is required to update data in NVM.
 This script is enable by installing slc component "Migration from V7.20 (to V7.21)" in the controller project.
 
 # 7.20.2 {#section-7-20-2}
@@ -125,7 +139,7 @@ of the files have been merged into CC_AssociationGroupInfo. This should reduce s
 since data does not have to be passed between the different modules, and should reduce flash and ram consumption.
 
 ## ZAF Event Helper module removed
-This modules was only used by the event distributor soc to enqueue events into
+This module was only used by the event distributor soc to enqueue events into
 the application event queue therefore this functionality was moved into the
 event distributor soc.
 

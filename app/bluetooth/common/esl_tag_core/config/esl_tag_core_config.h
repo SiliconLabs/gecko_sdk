@@ -84,6 +84,19 @@
 
 // </e>
 
+// <e ESL_TAG_POWER_DOWN_ENABLE> Power saving after timeout in Unassociated state
+// <i> Allows the ESL Core to enter EM4 after a specified amount of time in the Unassociated state.
+// <i> Note: ESL Core will emit 'esl_core_shutdown_hook()' event only if this feature is enabled.
+// <i> Default: On
+#define ESL_TAG_POWER_DOWN_ENABLE                 1
+
+// <o ESL_TAG_POWER_DOWN_TIMEOUT_MIN> EM4 timeout [minutes]<2-1440>
+// <i> Up to 24 hours timeout to enter EM4 from Unassociated state.
+// <i> Default: 60 minutes
+#define ESL_TAG_POWER_DOWN_TIMEOUT_MIN            60
+
+// </e>
+
 // </h>
 
 // <<< end of configuration section >>>
@@ -91,6 +104,10 @@
 // convert ESL_TAG_BATTERY_MEASUREMENT_INTERVAL_MIN given in [min] to [ms] unit
 #define ESL_TAG_BATTERY_MEASUREMENT_INTERVAL_MS \
   (ESL_TAG_BATTERY_MEASUREMENT_INTERVAL_MIN * 60 * 1000)
+
+// convert ESL_TAG_POWER_DOWN_TIMEOUT_MIN given in [min] to [ms] unit
+#define ESL_TAG_POWER_DOWN_TIMEOUT_MS \
+  (ESL_TAG_POWER_DOWN_TIMEOUT_MIN * 60 * 1000)
 
 /** @} (end addtogroup esl_tag_core) */
 #endif // ESL_TAG_CORE_CONFIG_H

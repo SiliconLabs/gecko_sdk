@@ -43,6 +43,7 @@ extern "C" {
 #include <stdint.h>
 #include "sl_status.h"
 #include "sl_wisun_coap_notify.h"
+#include "socket.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -60,13 +61,48 @@ void sl_wisun_app_status_init(void);
 
 /**************************************************************************//**
  * @brief Application Status notification callback
- * @details The finction provides an implementable callback to create custom
+ * @details The function provides an implementable callback to create custom
  *          condition check to send notification. It's a weak implementation,
  *          by default it returns true always.
  * @param notify Notification context.
  * @return bool The result of the condition check.
  *****************************************************************************/
 bool sl_wisun_app_status_condition_cb(const sl_wisun_coap_notify_t * notify);
+
+/**************************************************************************//**
+ * @brief Application Status notification remote address and port getter
+ * @details The function provides a getter function for the address and port
+ *          parameters that are static for the file
+ * @return sockaddr_in6_t The pointer to the address setting structure
+ *****************************************************************************/
+sockaddr_in6_t* sl_wisun_app_status_get_remote_address(void);
+
+/**************************************************************************//**
+ * @brief Application Status notification schedule time getter
+ * @details The function provides a getter function for the schedule time
+ *          parameters that are static for the file
+ * @return uint32_t The schedule time in ms
+ *****************************************************************************/
+uint32_t sl_wisun_app_status_get_schedule_time_ms(void);
+
+/**************************************************************************//**
+ * @brief Application Status notification remote address and port setter
+ * @details The function provides a setter function for the address and port
+ *          parameters that are static for the file
+ * @param remote_address remote address to be selected
+ * @param port remote port to be selected
+ * @return sl_status_t SL_STATUS_OK if setting was success or the proper
+ *                     sl_status enum of the error
+ *****************************************************************************/
+sl_status_t sl_wisun_app_status_set_remote_address(const char *remote_address, const uint16_t port);
+
+/**************************************************************************//**
+ * @brief Application Status notification schedule time setter
+ * @details The function provides a setter function for the schedule time
+ *          parameters that are static for the file
+ * @param new_schedule_time_ms The schedule time in ms
+ *****************************************************************************/
+void sl_wisun_app_status_set_schedule_time_ms(const uint32_t new_schedule_time_ms);
 
 #ifdef __cplusplus
 }

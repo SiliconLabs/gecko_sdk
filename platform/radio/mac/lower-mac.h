@@ -59,10 +59,10 @@ enum
 };
 
 extern LowerMacState sli_802154mac_lower_mac_state;
-#ifdef HIGH_SPEED_PHY
+#ifdef HIGH_DATARATE_PHY
 #define PHY_HEADER_SIZE_ADJUST_2MBPS    3u
-#define HIGH_BW_PHY_PACKET_START_INDEX  1u
-#endif //HIGH_SPEED_PHY
+#define HIGH_DATARATE_PHY_PACKET_START_INDEX  1u
+#endif //HIGH_DATARATE_PHY
 // MAC TX Options Bitmask
 #ifdef DOXYGEN_SHOULD_SKIP_THIS
 enum sl_mac_tx_options_bitmask_t
@@ -74,7 +74,7 @@ enum
   EMBER_MAC_USE_NO_TX_OPTION        = 0x00, // 00000000
   EMBER_MAC_USE_CSMA                = 0x01, // 00000001
   EMBER_MAC_USE_WAKEUP_FRAMES       = 0x02, // 00000010
-  EMBER_MAC_USE_HIGH_BANDWIDTH_PHY  = 0x04, // 00000100
+  EMBER_MAC_USE_HIGH_DATARATE_PHY   = 0x04, // 00000100
 };
 
 bool sl_mac_lower_mac_is_idle(uint8_t mac_index);

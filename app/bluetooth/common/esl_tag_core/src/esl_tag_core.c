@@ -285,8 +285,11 @@ void esl_core_step(void)
       sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
                     ESL_LOG_LEVEL_INFO,
                     "Unassociated by watchdog timeout.");
-    } else if (esl_state_unassociated == esl_tag.status) {
-      // shutdown after one or two hours of advertising in vain
+      if (!ESL_TAG_POWER_DOWN_ENABLE) {
+        (void)sl_sleeptimer_stop_timer(&esl_tag_persistent.watchdog_handle);
+      }
+    } else if (ESL_TAG_POWER_DOWN_ENABLE && esl_state_unassociated == esl_tag.status) {
+      // if power saving is enabled, shut down after the specified idle time
       sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
                     ESL_LOG_LEVEL_INFO,
                     "Shutdown by watchdog timeout.");
@@ -1229,13 +1232,31 @@ sl_status_t esl_core_start_advertising(void)
       // change internal status
       esl_tag.status = new_esl_status;
     }
-    // start / restart watchdog timer whenever ESL starts advertising
-    (void)sl_sleeptimer_restart_periodic_timer_ms(&esl_tag_persistent.watchdog_handle,
-                                                  ESL_CORE_SECURITY_TIMEOUT_MS,
-                                                  &esl_security_timeout,
-                                                  NULL,
-                                                  ESL_CORE_SECURITY_TIMER_PRIORITY,
-                                                  SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+
+    if (esl_tag.status != esl_state_unassociated || ESL_TAG_POWER_DOWN_ENABLE) {
+      uint32_t timeout_ms = ESL_CORE_SECURITY_TIMEOUT_MS;
+
+      if (ESL_TAG_POWER_DOWN_ENABLE && esl_tag.status == esl_state_unassociated) {
+        // override default timeout value only if the current ESL state is Unassociated AND energy saving is enabled
+        timeout_ms = ESL_TAG_POWER_DOWN_TIMEOUT_MS;
+        sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
+                      ESL_LOG_LEVEL_INFO,
+                      "Enter power save mode after %d minutes of ineffective advertising.",
+                      ESL_TAG_POWER_DOWN_TIMEOUT_MIN);
+      }
+      // start / restart watchdog timer whenever ESL starts advertising
+      // except in Unassociated state IF the energy saving is disabled!
+      (void)sl_sleeptimer_restart_periodic_timer_ms(&esl_tag_persistent.watchdog_handle,
+                                                    timeout_ms,
+                                                    &esl_security_timeout,
+                                                    NULL,
+                                                    ESL_CORE_SECURITY_TIMER_PRIORITY,
+                                                    SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+    } else {
+      sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,
+                    ESL_LOG_LEVEL_INFO,
+                    "Power saving disabled by ESL_TAG_POWER_DOWN_ENABLE config!");
+    }
   }
 
   return result;

@@ -182,7 +182,7 @@ sl_status_t host_comm_set_option(char option, char *value)
       break;
     // UART flow control disable.
     case 'f':
-      uart_flow_control = 1;
+      uart_flow_control = 0;
       break;
     // AF socket descriptor
     case 'n':

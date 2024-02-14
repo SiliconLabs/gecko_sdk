@@ -1,5 +1,5 @@
 id: "btmesh_provisioner"
-label: "Btmesh Provisioner Initializer"
+label: "Btmesh Provisioner"
 package: "Btmesh"
 description: >
   This component automatically initializes the device as a provisioner on boot event.
@@ -7,7 +7,7 @@ description: >
   This component is prepared for integration into SOC applications.
 
   This is a No-Code component.
-category: "Bluetooth Mesh"
+category: "Bluetooth Mesh|Btmesh Roles"
 quality: "production"
 root_path: "app/btmesh/common/btmesh_provisioner"
 tag:

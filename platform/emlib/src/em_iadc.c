@@ -366,25 +366,19 @@ void IADC_init(IADC_TypeDef *iadc,
       case iadcCfgModeHighSpeed:
 #endif
         offset = 0.0f;
-        uiAnaGain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK) >> _IADC_CFG_ANALOGGAIN_SHIFT;
-        if ((uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN0P5) || (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN1)) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0 & _DEVINFO_IADC0GAIN0_GAINCANA1_MASK);
-        } else if (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN2) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0 >> _DEVINFO_IADC0GAIN0_GAINCANA2_SHIFT);
+        if (uiAnaGain == iadcCfgAnalogGain2x) {
           if (adcMode == iadcCfgModeNormal) {
             offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT);
           } else {
             offset = (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 >> _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA2HISPD_SHIFT);
           }
-        } else if (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN3) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1 & _DEVINFO_IADC0GAIN1_GAINCANA3_MASK);
+        } else if (uiAnaGain == iadcCfgAnalogGain3x) {
           if (adcMode == iadcCfgModeNormal) {
             offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT) * 2;
           } else {
             offset = (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 >> _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA2HISPD_SHIFT) * 2;
           }
-        } else {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1 >> _DEVINFO_IADC0GAIN1_GAINCANA4_SHIFT);
+        } else if (uiAnaGain == iadcCfgAnalogGain4x) {
           if (adcMode == iadcCfgModeNormal) {
             offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT) * 3;
           } else {

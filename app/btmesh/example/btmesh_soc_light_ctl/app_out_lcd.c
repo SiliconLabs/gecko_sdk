@@ -61,6 +61,11 @@
 #include "sl_btmesh_wstk_lcd.h"
 
 // -----------------------------------------------------------------------------
+// Macros
+
+#define LIGHTNESS_LEVEL_TO_PERCENTAGE(lev) ((((lev) * 100) + 32767) / 65535)
+
+// -----------------------------------------------------------------------------
 // BT mesh Friend Node Callbacks
 
 /*******************************************************************************
@@ -156,7 +161,7 @@ void sl_btmesh_lighting_server_on_ui_update(uint16_t lightness_level)
 {
   // Temporary buffer to format the LCD output text
   char tmp_str[LCD_ROW_LEN];
-  uint16_t lightness_percent = (lightness_level * 100 + 99) / 65535;
+  uint16_t lightness_percent = LIGHTNESS_LEVEL_TO_PERCENTAGE(lightness_level);
 
   app_log("BT mesh Lightness: %5u%%" APP_LOG_NL, lightness_percent);
   snprintf(tmp_str, LCD_ROW_LEN, "Lightness: %5u%%", lightness_percent);

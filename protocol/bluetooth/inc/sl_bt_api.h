@@ -15212,6 +15212,7 @@ typedef struct sl_bt_evt_connection_analyzer_completed_s sl_bt_evt_connection_an
  *   microseconds. The semantics depend on whether the configuration flag
  *   SL_BT_CONNECTION_ANALYZER_RELATIVE_TIME is set in parameter @p flags:
  *     - When the flag is set, the value is a time relative to the current time.
+ *       A negative value means that the start time was in the past.
  *     - When the flag is not set, the value is an absolute time converted from
  *       the PROTIMER tick.
  * @param[in] flags Configuration flags. This value is a bitmask of @ref
@@ -15241,7 +15242,7 @@ sl_status_t sl_bt_connection_analyzer_start(uint32_t access_address,
                                             const sl_bt_connection_channel_map_t *channel_map,
                                             uint8_t channel,
                                             uint16_t event_counter,
-                                            uint32_t start_time_us,
+                                            int32_t start_time_us,
                                             uint32_t flags,
                                             uint8_t *analyzer);
 

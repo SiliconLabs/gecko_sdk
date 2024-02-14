@@ -49,6 +49,7 @@ include:
       - path: "config/config.h"
       - path: "config/token-stack.h"
       - path: "config/ember-configuration-defaults.h"
+      - path: "config/ember-configuration.h"
   - path: "stack/include/"
     file_list:
       - path: "byte-utilities.h"
