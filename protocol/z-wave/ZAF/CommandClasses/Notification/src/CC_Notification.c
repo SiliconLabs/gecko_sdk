@@ -633,6 +633,7 @@ CC_Notification_report_stx(zaf_tx_options_t *tx_options, void* pData)
   {
     dataLength -= sizeof(uint8_t);
   }
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           dataLength,

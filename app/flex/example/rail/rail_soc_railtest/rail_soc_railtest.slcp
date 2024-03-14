@@ -37,7 +37,6 @@ component:
   - id: rail_util_pa
   - id: rail_util_pti
   - id: rail_util_rf_path
-  - id: rail_util_rf_path_switch
   - id: rail_util_rssi
   - id: rail_util_built_in_phys
 

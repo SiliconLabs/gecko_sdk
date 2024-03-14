@@ -422,6 +422,8 @@ CC_ColorSwitch_report_stx(zaf_tx_options_t *tx_options, void* pData)
   txBuf.ZW_SwitchColorReportV3Frame.targetValue = ZAF_Actuator_GetTargetValue(&color->obj);
   txBuf.ZW_SwitchColorReportV3Frame.duration = ZAF_Actuator_GetDurationRemaining(&color->obj);
 
+  tx_options->use_supervision = true;
+
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_SWITCH_COLOR_REPORT_V3_FRAME),
                           ZAF_TSE_TXCallback,

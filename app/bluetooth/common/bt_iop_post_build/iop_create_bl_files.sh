@@ -35,14 +35,11 @@ DEVICE_NAME_2="IOP_Test_2"
 ################################################################################
 # Checks the presence of a string in a binary.
 function search_str_in_bin () {
-  echo "Searching for $1 in $2"
-  result="$(grep -a $1 $2 | tr -d '\0')"
-  if [[ -z $result ]]; then
+  grep -aq $1 $2
+  if [[ $? -ne 0 ]]; then
     echo "Error: $1 cannot be found in $2"
     read -rsp $'Press enter to continue...\n'
     exit
-  else
-    echo "Found: $result"
   fi
 }
 

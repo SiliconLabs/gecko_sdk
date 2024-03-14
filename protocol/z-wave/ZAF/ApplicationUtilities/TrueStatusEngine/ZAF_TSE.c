@@ -200,6 +200,18 @@ static void InvokeRegisteredCallback(void)
   DPRINTF("\tTSE transmit call back for dest node %d endpoint %d\r\n",
           pCurrentTrigger->pCurrentNode->node.nodeId, pCurrentTrigger->pCurrentNode->node.endpoint);
 
+  /**
+   * CC:008E.02.00.21.008, CC:008E.03.00.11.001, CC:008E.03.00.21.002:
+   * A Root Device must not use Multi Channel encapsulation when
+   * communicating to another Root Device.
+   *
+   * Set the Source Endpoint only if the Association is Multi Channel, to avoid
+   * incorrectly applying encapsulation for "plain" Associations later.
+   */
+  const uint8_t source_endpoint =
+    pCurrentTrigger->pCurrentNode->nodeInfo.BitMultiChannelEncap == 1
+    ? RxOptions.destNode.endpoint : 0;
+
   /* Build a txOptionEx */
   zaf_tx_options_t tx_options;
 
@@ -207,7 +219,7 @@ static void InvokeRegisteredCallback(void)
   tx_options.dest_endpoint = pCurrentTrigger->pCurrentNode->node.endpoint;
   tx_options.bit_addressing = pCurrentTrigger->pCurrentNode->node.BitAddress;
   tx_options.security_key = pCurrentTrigger->pCurrentNode->nodeInfo.security;
-  tx_options.source_endpoint = RxOptions.destNode.endpoint;
+  tx_options.source_endpoint = source_endpoint;
   tx_options.tx_options = TRANSMIT_OPTION_ACK | TRANSMIT_OPTION_EXPLORE | ZWAVE_PLUS_TX_OPTIONS;
   if (RxOptions.rxStatus & RECEIVE_STATUS_LOW_POWER)
   {

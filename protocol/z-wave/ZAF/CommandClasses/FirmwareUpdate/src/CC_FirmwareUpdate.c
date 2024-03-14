@@ -143,6 +143,7 @@ CC_FirmwareUpdate_handler(
         pTxBuf->ZW_FirmwareUpdateMdRequestReportV5Frame.status = status;
 
         zaf_transport_rx_to_tx_options(rxOpt, &tx_options);
+        tx_options.use_supervision = true;
         if(!zaf_transport_tx((uint8_t *)pTxBuf,
                 sizeof(ZW_FIRMWARE_UPDATE_MD_REQUEST_REPORT_V5_FRAME),
                 ZCB_CmdClassFwUpdateMdReqReport, &tx_options))

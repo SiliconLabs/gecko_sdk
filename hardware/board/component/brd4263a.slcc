@@ -56,6 +56,8 @@
     value: '"BRD4263A"'
   - name: SL_BOARD_REV
     value: '"A03"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915
   - name: HARDWARE_BOARD_SUPPORTS_2_RF_BANDS

@@ -536,6 +536,7 @@ CC_DoorLock_operation_report_stx(zaf_tx_options_t *tx_options, void* pData)
   /* Prepare payload for report */
   ZW_APPLICATION_TX_BUFFER txBuf;
   prepare_operation_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_DOOR_LOCK_OPERATION_REPORT_V4_FRAME),
@@ -555,6 +556,7 @@ CC_DoorLock_configuration_report_stx(zaf_tx_options_t *tx_options, void* pData)
   /* Prepare payload for report */
   ZW_APPLICATION_TX_BUFFER txBuf;
   prepare_configuration_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_DOOR_LOCK_CONFIGURATION_REPORT_V4_FRAME),

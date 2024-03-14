@@ -44,6 +44,8 @@
     value: '"BRD2504A"'
   - name: SL_BOARD_REV
     value: '"A04"'
+  - name: HFXO_FREQ
+    value: 39000000
 - tag:
   - board:pn:BRD2504
   - board:variant:A
@@ -53,6 +55,6 @@
   - hardware:has:sensor:si7021
   - hardware:has:led:2
   - hardware:has:button:2
-  - hardware:has:lcd
+  - hardware:has:segment_lcd_driver
   - hardware:has:exp_header:uart
   - hardware:has:exp_header:i2c

@@ -260,8 +260,10 @@ class CliProcessor(cmd.Cmd):
 
     def arg_demo(self):
         parser_demo = self.subparsers.add_parser('demo',
-                                                 description=self.do_demo.__doc__)
-        parser_demo.add_argument('choice', choices=['on', 'off'], help='Turn AP advertising on or off for ESL Demo in EFR Connect mobile app')
+                                                 description=self.do_demo.__doc__,
+                                                epilog='''
+        Note: You can obtain the current status of the demo mode by omitting the choice.''')
+        parser_demo.add_argument('choice', nargs='?', choices=['on', 'off'], help='Turn AP advertising on or off for ESL Demo in EFR Connect mobile app')
 
     def do_demo(self, arg):
         """
@@ -271,6 +273,8 @@ class CliProcessor(cmd.Cmd):
             self.ap.ap_adv_start()
         elif arg.choice == 'off':
             self.ap.ap_adv_stop()
+        else:
+            self.ap.ap_demo_status()
 
     def arg_scan(self):
         parser_scan = self.subparsers.add_parser('scan',
@@ -917,8 +921,8 @@ class CliProcessor(cmd.Cmd):
                   vendor_opcode 1 --data 12233 - 3 bytes payload, the resulting ESL TLV is 3F01012233
                   vendor_opcode 5 -d 0012233 - 4 bytes payload, the resulting ESL TLV is 4F0500012233
 
-        Please note that if the payload string has odd number of ASCII hex bytes, then a single leading zero will
-        be added.''')
+        Please note that the payload is always interpreted as an ASCII hex string, regardless of the presence or absence
+        of the '0x' prefix, and if an odd number of bytes is entered, a leading zero will be added.''')
         parser_vendor_opcode.add_argument('esl_id', type=esl_id_type, help='ESL ID or all')
         parser_vendor_opcode.add_argument('--group_id', '-g', metavar='<u7>', type=int, help="ESL group ID (optional, default is group 0)")
         parser_vendor_opcode.add_argument('--data', '-d', metavar='<hex>', type=data_type, help="ASCII hexadecimal data stream up to 16 bytes overall - an appropriate TLV to the given length will be built automatically.")
@@ -932,12 +936,13 @@ class CliProcessor(cmd.Cmd):
         esl_id = arg.esl_id
         if arg.data is not None:
             prefix_pos = arg.data.casefold().find('x')
-            if prefix_pos == -1: prefix_pos = 0
+            if prefix_pos == -1:
+                prefix_pos = 0
             else:
                 prefix_pos += 1
-                payload = int(arg.data, base=16)
-                length = (len(arg.data[prefix_pos:]) + 1) // 2
-                data = payload.to_bytes(length, byteorder='big')
+            payload = int(arg.data, base=16)
+            length = (len(arg.data[prefix_pos:]) + 1) // 2
+            data = payload.to_bytes(length, byteorder='big')
         self.ap.ap_vendor_opcode(esl_id, group_id, data)
 
     def arg_service_reset(self):

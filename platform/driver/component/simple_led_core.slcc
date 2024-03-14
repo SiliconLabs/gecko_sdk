@@ -7,7 +7,7 @@ description: >
 
 
   This component includes only the Simple LED driver core. To configure and create
-  instances of this driver, the Simple LED component should be included in the 
+  instances of this driver, the Simple LED component should be included in the
   project.
 category: Platform|Driver|LED
 quality: production
@@ -40,4 +40,4 @@ template_contribution:
       handler: sl_simple_led_init_instances
 documentation:
     docset: gecko-platform
-    document: driver/api/group-simple-led
+    document: platform-driver/simple-led

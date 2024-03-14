@@ -40,9 +40,7 @@
   #include "sl_se_manager.h"
   #include "sl_se_manager_entropy.h"
 #elif defined(SLI_MBEDTLS_DEVICE_VSE)
-  #include "sx_trng.h"
-  #include "cryptolib_types.h"
-  #include "cryptoacc_management.h"
+  #include "sli_cryptoacc_driver_trng.h"
 #elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
   #include "sli_crypto_trng_driver.h"
 #elif defined(SLI_TRNG_DEVICE_SI91X)
@@ -93,37 +91,7 @@ static psa_status_t se_get_random(unsigned char *output,
   return PSA_ERROR_HARDWARE_FAILURE;
 }
 
-#elif defined(SLI_MBEDTLS_DEVICE_VSE)
-
-static psa_status_t cryptoacc_get_random(unsigned char *output,
-                                         size_t len,
-                                         size_t *out_len)
-{
-  psa_status_t trng_status = cryptoacc_trng_initialize();
-  if (trng_status != PSA_SUCCESS) {
-    return trng_status;
-  }
-
-  if (len > 0) {
-    trng_status = cryptoacc_management_acquire();
-    if (trng_status != PSA_SUCCESS) {
-      return trng_status;
-    }
-    block_t data_out = block_t_convert(output, len);;
-    sx_trng_get_rand_blk(data_out);
-    trng_status = cryptoacc_management_release();
-  }
-
-  if (trng_status == PSA_SUCCESS) {
-    *out_len = len;
-  } else {
-    *out_len = 0;
-  }
-
-  return trng_status;
-}
-
-#endif // SLI_MBEDTLS_DEVICE_HSE / SLI_MBEDTLS_DEVICE_VSE
+#endif // SLI_MBEDTLS_DEVICE_HSE
 
 // -----------------------------------------------------------------------------
 // Global entry points
@@ -139,23 +107,29 @@ psa_status_t mbedtls_psa_external_get_random(
   #if defined(SLI_PSA_DRIVER_FEATURE_TRNG)
 
   psa_status_t entropy_status = PSA_ERROR_CORRUPTION_DETECTED;
-  size_t entropy_max_retries = 5;
   *output_length = 0;
 
-  // Implement chunking support here, as the PSA core doesn't implement it (yet).
+  #if defined(SLI_MBEDTLS_DEVICE_HSE)
 
+  entropy_status = se_get_random(output,
+                                 output_size,
+                                 output_length);
+
+  #elif defined(SLI_MBEDTLS_DEVICE_VSE)
+
+  entropy_status = sli_cryptoacc_trng_get_random(output, output_size);
+  if (entropy_status == PSA_SUCCESS) {
+    *output_length = output_size;
+  }
+
+  #else
+
+  size_t entropy_max_retries = 5;
   while (entropy_max_retries > 0 && entropy_status != PSA_SUCCESS) {
     size_t offset = *output_length;
 
-    #if defined(SLI_MBEDTLS_DEVICE_HSE)
-    entropy_status = se_get_random(&output[offset],
-                                   output_size - offset,
-                                   output_length);
-    #elif defined(SLI_MBEDTLS_DEVICE_VSE)
-    entropy_status = cryptoacc_get_random(&output[offset],
-                                          output_size - offset,
-                                          output_length);
-    #elif defined(SLI_MBEDTLS_DEVICE_S1) && defined(SLI_PSA_DRIVER_FEATURE_TRNG)
+    // Read random bytes
+    #if defined(SLI_MBEDTLS_DEVICE_S1)
     entropy_status = sli_crypto_trng_get_random(&output[offset],
                                                 output_size - offset,
                                                 output_length);
@@ -174,6 +148,8 @@ psa_status_t mbedtls_psa_external_get_random(
     // Consume a retry before going through another loop
     entropy_max_retries--;
   }
+
+  #endif
 
   return entropy_status;
 

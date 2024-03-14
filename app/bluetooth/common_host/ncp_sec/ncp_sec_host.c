@@ -43,6 +43,8 @@
 #include "sl_common.h"
 #include "ncp_sec_host.h"
 
+#define NCP_SEC_PAYLOAD_OVERHEAD  9
+
 typedef struct conn_nonce{
   uint32_t counter;
   uint8_t counter_hi;
@@ -556,11 +558,12 @@ void security_decrypt(char *src, char *dst, unsigned *len)
 
 void security_decrypt_packet(char *src, char *dst, unsigned *len)
 {
-  *dst++ = src[0] & ~(1 << 6);//clr encrypted bit
-  *dst++ = src[1] - 9;
+  uint16_t new_length = (((uint16_t)(src[0] & 0x07) << 8) | (uint8_t)src[1]) - NCP_SEC_PAYLOAD_OVERHEAD;
+  *dst++ = ((src[0] & ~(1 << 6)) & 0xf8) | (uint8_t)(new_length >> 8);//clr encrypted and length high bits
+  *dst++ = (uint8_t)(new_length & 0xff);
 
   // remove tag and counter value
-  *len = *len - 9;
+  *len = *len - NCP_SEC_PAYLOAD_OVERHEAD;
 
   //verify counter to prevent replay attacks
   conn_nonce_t nonce;
@@ -613,8 +616,9 @@ void security_encrypt(char *src, char *dst, unsigned *len)
 
 void security_encrypt_packet(char *src, char *dst, unsigned *len)
 {
-  *dst++ = src[0] | (1 << 6);//set encrypted bit
-  *dst++ = src[1] + 9;
+  uint16_t new_length = (((uint16_t)(src[0] & 0x07) << 8) | (uint8_t)src[1]) + NCP_SEC_PAYLOAD_OVERHEAD;
+  *dst++ = ((src[0] | (1 << 6)) & 0xf8) | (uint8_t)(new_length >> 8);//set encrypted and length high bits
+  *dst++ = (uint8_t)(new_length & 0xff);
 
   uint8_t auth_data[7];
   memcpy(auth_data, dst - 2, 2);
@@ -637,7 +641,7 @@ void security_encrypt_packet(char *src, char *dst, unsigned *len)
   // add counter to end
   memcpy(dst, auth_data + 2, 5);
 
-  *len = *len + 9;
+  *len = *len + NCP_SEC_PAYLOAD_OVERHEAD;
 
   increase_counter(&sec_counter_out);
 }

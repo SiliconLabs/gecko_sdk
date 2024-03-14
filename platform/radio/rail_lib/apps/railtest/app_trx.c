@@ -447,7 +447,12 @@ void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
         sendPacketIfPending(); // txCount is decremented in this function
         txCountAfterModeSwitchId++;
       } else {
-        endModeSwitchSequence();
+        modeSwitchSequenceId++;
+        if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
+          restartModeSwitchSequence(true);
+        } else {
+          endModeSwitchSequence();
+        }
       }
     } else {
       if (txCountAfterModeSwitchId < txCountAfterModeSwitch) { // Sent packet was not the last data packet to be tx
@@ -461,17 +466,7 @@ void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
       } else {
         modeSwitchSequenceId++;
         if (modeSwitchSequenceId < modeSwitchSequenceIterations) {
-          txCountAfterModeSwitchId = 0;
-          // Start timer if needed
-          if (modeSwitchDelayUs > 0) {
-            RAIL_SetMultiTimer(&modeSwitchMultiTimer,
-                               modeSwitchDelayUs,
-                               RAIL_TIME_DELAY,
-                               &RAILCb_ModeSwitchMultiTimerExpired,
-                               NULL);
-          } else {
-            restartModeSwitchSequence();
-          }
+          restartModeSwitchSequence(true);
         } else {
           endModeSwitchSequence();
           internalTransmitCounter++;

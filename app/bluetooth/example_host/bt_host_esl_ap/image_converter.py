@@ -66,7 +66,7 @@ class XbmConverter():
     def open(self, img_path):
         """ Open image file """
         try:
-            self.image = Image.open(img_path, "r").convert(mode='RGB')
+            self.image = Image.open(img_path, "r").convert(mode='RGBA')
         except:
             self.log.error("Cannot open image file: %s!", img_path)
             self.image = None
@@ -74,7 +74,7 @@ class XbmConverter():
     def open_frombytes(self, img_bytes):
         """ Open image file """
         try:
-            self.image = Image.open(io.BytesIO(img_bytes)).convert(mode='RGB')
+            self.image = Image.open(io.BytesIO(img_bytes)).convert(mode='RGBA')
         except:
             self.log.error("Cannot open image file: %s!", img_bytes)
             self.image = None
@@ -136,7 +136,9 @@ class XbmConverter():
             self.image = self.image.transpose(rotation)
 
         # do some auto adjustment for normalized results
-        display_image = ImageOps.autocontrast(self.image, preserve_tone=True)
+        display_image = Image.new('RGBA', self.image.size, self.xbm_white)
+        display_image = Image.alpha_composite(display_image, self.image)
+        display_image = ImageOps.autocontrast(display_image.convert('RGB'), preserve_tone=True)
 
         if cropfit:
             display_image = ImageOps.fit(display_image, display_size, method=Image.LANCZOS, centering=fit_centering)
@@ -158,7 +160,7 @@ class XbmConverter():
         red_pixels = display_image.remap_palette([0,0,2]).convert('1')
         image_size = display_size
 
-        if len(display_image.getcolors()) == 3:
+        if not bw:
             image_size = tuple(map(mul, display_size, (1,2)))
 
         image_out = Image.new('RGB', image_size, "white") # would be better to use the display color

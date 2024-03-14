@@ -37,32 +37,16 @@
 #include "tfm_hal_platform.h"
 #include "tfm_hal_defs.h"
 
-#include "cryptoacc_management.h"
+#include "sli_cryptoacc_driver_trng.h"
 
 int32_t tfm_hal_random_init(void)
 {
-  psa_status_t status;
-  int32_t ret = TFM_HAL_ERROR_GENERIC;
-  status = cryptoacc_trng_initialize();
-  if (status == PSA_SUCCESS) {
-    ret = TFM_HAL_SUCCESS;
-  }
-  return ret;
+  return TFM_HAL_SUCCESS;
 }
 
 int32_t tfm_hal_random_generate(uint8_t *rand, size_t size)
 {
-  // Enable cryptoacc accelerator
-  CMU->CLKEN1 |= CMU_CLKEN1_CRYPTOACC;
-  CMU->CRYPTOACCCLKCTRL |= CMU_CRYPTOACCCLKCTRL_PKEN;
-  CMU->CRYPTOACCCLKCTRL |= CMU_CRYPTOACCCLKCTRL_AESEN;
+  psa_status_t status = sli_cryptoacc_trng_get_random(rand, size);
 
-  sx_trng_get_rand_blk(block_t_convert(rand, size));
-
-  // Disable cryptoacc accelerator
-  CMU->CLKEN1 = (CMU->CLKEN1 & ~CMU_CLKEN1_CRYPTOACC);
-  CMU->CRYPTOACCCLKCTRL = (CMU->CRYPTOACCCLKCTRL & ~CMU_CRYPTOACCCLKCTRL_PKEN);
-  CMU->CRYPTOACCCLKCTRL = (CMU->CRYPTOACCCLKCTRL & ~CMU_CRYPTOACCCLKCTRL_AESEN);
-
-  return TFM_HAL_SUCCESS;
+  return status == PSA_SUCCESS ? TFM_HAL_SUCCESS : TFM_HAL_ERROR_GENERIC;
 }

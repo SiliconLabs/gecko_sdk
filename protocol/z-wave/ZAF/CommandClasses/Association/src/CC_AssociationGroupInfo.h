@@ -7,8 +7,12 @@
  * @addtogroup cc_agi Association Group Information
  * @{
  *
+ * ## General information
+ * 
  * CC Association Group Information (CC AGI) reports which commands a device can control and which
  * commands are reported to the Lifeline.
+ * 
+ * ## CC AGI configuration
  *
  * The Lifeline group is automatically configured, but other groups may be manually configured if
  * desired. For instance, a wall switch might control a bulb using CC Binary Switch. In such case,

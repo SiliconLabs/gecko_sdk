@@ -1692,7 +1692,7 @@ static void send_chunk_request_response(app_timer_t *timer, void *data)
       sc = app_timer_start(timer,
                            self->retry_time_ms,
                            send_chunk_request_response,
-                           &data,
+                           data,
                            false);
       app_assert_status_f(sc,
                           "Failed to start chunk request response retry timer (elem=%d)",

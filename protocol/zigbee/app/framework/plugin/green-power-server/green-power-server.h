@@ -131,6 +131,18 @@ enum
   SINK_PAIRING_STATUS_FAIL_ENTRY_CORRUPTED = 6,
 }; // The pairing status.
 
+typedef uint8_t EmberPreSinkPairingCallbackSource;
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum PreSinkPairingCallbackSource
+#else
+enum
+#endif
+{
+  GP_PRE_SINK_PAIRING_CALLBACK_SOURCE_UNKNOWN = 0,
+  GP_PRE_SINK_PAIRING_CALLBACK_COMMISSONING_FINALIZE = 1,
+  GP_PRE_SINK_PAIRING_CALLBACK_PAIRING_CONFIGURATION = 2,
+}; // The source of presink callback.
+
 typedef struct {
   bool sendGpPairingInUnicastMode;
   bool unicastCommunication;
@@ -191,6 +203,7 @@ typedef struct {
   EmberSinkCommissionState      commissionState;
   // Send GP Pairing bit for current commissioning
   bool                          doNotSendGpPairing;
+  EmberPreSinkPairingCallbackSource preSinkCbSource;
 } GpCommDataSaved;
 
 typedef GpCommDataSaved EmberCommissioningGpd;

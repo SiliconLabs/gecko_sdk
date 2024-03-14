@@ -204,7 +204,7 @@ void networkMultiPhyStartCommand(sl_cli_command_arg_t *arguments)
   int8_t power = sl_cli_get_argument_int8(arguments, 2);
   uint8_t optionsMask = 0;
 
-  if (sl_cli_get_command_count(arguments) > 3) {
+  if (sl_cli_get_argument_count(arguments) > 3) {
     optionsMask = sl_cli_get_argument_uint8(arguments, 3);
   }
 

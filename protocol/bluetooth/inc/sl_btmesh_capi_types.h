@@ -578,6 +578,9 @@ typedef enum {
     and should be sent out with TTL=0 */
 #define MESH_MESSAGE_FLAG_TTL0  0x04
 
+/** Message is a result of unsolicited periodic publishing */
+#define MESH_MESSAGE_FLAG_PERIODIC 0x08
+
 /** Message is segmented in transport layer,
  *  can be used to force the use of transport layer segmentation */
 #define MESH_MESSAGE_FLAG_SEGTRANS 0x10

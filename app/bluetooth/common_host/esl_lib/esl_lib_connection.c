@@ -55,11 +55,12 @@
 #define GATT_TIMEOUT_MS       10000
 
 // connection parameters for PAST
-#define PAST_CONN_INTERVAL_MIN       6
-#define PAST_CONN_INTERVAL_MAX       (100 * PAST_CONN_INTERVAL_MIN)
-#define PAST_CONN_INTERVAL_BASE      (PAST_CONN_INTERVAL_MAX / 2)
-#define PAST_CONN_PERIPHERAL_LATENCY 0
-#define PAST_CONN_TIMEOUT            1000
+#define PAST_CONN_INTERVAL_MIN       0x0006 // given in 1.25ms units, 6 * 1.25 = 7.5ms, limited by Core specification
+#define PAST_CONN_INTERVAL_MAX       0x0c80 // limited by Core specification to 4 seconds
+#define PAST_CONN_PERIPHERAL_LATENCY 1      // allow to skip one connection interval during PAST if there's no data
+#define PAST_CONN_DEFAULT_TIMEOUT    1000   // value * 10ms, this is 10 seconds
+#define PAST_CONN_MIN_TIMEOUT        0x000a // min 100ms according to COre specification
+#define PAST_CONN_MAX_TIMEOUT        0x0c80 // max 32 seconds according to COre specification
 #define PAST_CONN_MIN_CE_LENGTH      0
 #define PAST_CONN_MAX_CE_LENGTH      0xffff
 #define PAST_GRACE_INTERVAL_COUNT    6
@@ -771,7 +772,13 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                 sc = SL_STATUS_INVALID_HANDLE;
               }
               if (sc == SL_STATUS_OK) {
+                (void)app_timer_stop(&conn->gatt_timer);
                 conn->state = ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE;
+                sc = app_timer_start(&conn->gatt_timer,
+                                     GATT_TIMEOUT_MS,
+                                     gatt_timeout,
+                                     conn,
+                                     false);
               } else {
                 esl_lib_log_connection_error(CONN_FMT "ESL CP subscribe failed, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
                                              conn,
@@ -807,6 +814,7 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
               }
             }
           } else if (conn->state == ESL_LIB_CONNECTION_STATE_PAST_INIT) {
+            (void)app_timer_stop(&conn->timer);
             esl_lib_log_connection_debug(CONN_FMT "PAST init, handle = %u" APP_LOG_NL,
                                          conn,
                                          conn->connection_handle);
@@ -820,7 +828,6 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                 // calculate timeout as follows: tmeout_value_ms = 6 * (pawr->config.adv_interval.max * 1.25f) [ms]
                 uint32_t past_timeout = PAST_GRACE_INTERVAL_COUNT \
                                         * ((pawr->config.adv_interval.max) + (pawr->config.adv_interval.max >> 2));
-                (void)app_timer_stop(&conn->timer);
                 conn->state = ESL_LIB_CONNECTION_STATE_PAST_CLOSE_CONNECTION;
                 sc = app_timer_start(&conn->timer,
                                      past_timeout,
@@ -982,7 +989,7 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
       sc = esl_lib_connection_find(evt->data.evt_sm_bonding_failed.connection,
                                    &conn);
       if (sc == SL_STATUS_OK) {
-        if ((conn->command->data.cmd_connect.retries_left)
+        if ((conn->command != NULL && conn->command->data.cmd_connect.retries_left)
             && ((evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)
                 || (evt->data.evt_sm_bonding_failed.reason == SL_STATUS_BT_SMP_PAIRING_NOT_SUPPORTED))) {
           esl_lib_log_connection_warning(CONN_FMT "Bonding failed, reconnecting, connection handle = %u, reason = 0x%04x" APP_LOG_NL,
@@ -1025,9 +1032,17 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
     case sl_bt_evt_gatt_service_id:
       sc = esl_lib_connection_find(evt->data.evt_gatt_service.connection,
                                    &conn);
-      if (sc == SL_STATUS_OK && conn->state == ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY) {
-        // Check size for UUID
-        if (evt->data.evt_gatt_service.uuid.len == sizeof(sl_bt_uuid_16_t)) {
+      if (sc == SL_STATUS_OK) {
+        // Check size for UUID if in proper state - send error otherwise
+        if (conn->state != ESL_LIB_CONNECTION_STATE_SERVICE_DISCOVERY) {
+          sc = SL_STATUS_INVALID_STATE;
+          lib_status = conn->state;
+          esl_lib_log_connection_error(CONN_FMT "Service discovery failed, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
+                                       conn,
+                                       conn->connection_handle,
+                                       sc);
+          (void)sl_bt_connection_close(conn->connection_handle);
+        } else if (evt->data.evt_gatt_service.uuid.len == sizeof(sl_bt_uuid_16_t)) {
           // Check for service UUIDs
           if (uuid_16_match(evt->data.evt_gatt_service.uuid.data, (uint8_t *)uuid_map.services.dis.data)) {
             esl_lib_log_connection_debug(CONN_FMT "DIS service found, connection handle = %u" APP_LOG_NL,
@@ -1205,7 +1220,7 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                                                  conn->connection_handle,
                                                  sc);
                   }
-                } else {
+                } else if (conn->gattdb_handles.services.esl != ESL_LIB_INVALID_SERVICE_HANDLE) {
                   esl_lib_log_connection_debug(CONN_FMT "Service discovery finished, start ESL discovery, connection handle = %u" APP_LOG_NL,
                                                conn,
                                                conn->connection_handle);
@@ -1220,6 +1235,8 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                                          conn,
                                          false);
                   }
+                } else {
+                  sc = SL_STATUS_BT_ATT_INVALID_HANDLE;
                 }
                 if (sc != SL_STATUS_OK) {
                   // Close connection
@@ -1278,16 +1295,23 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                   esl_lib_log_connection_debug(CONN_FMT "Feature discovery complete, subscribe to ESL CP notifications, connection handle = %u" APP_LOG_NL,
                                                conn,
                                                conn->connection_handle);
-                  sc = sl_bt_gatt_set_characteristic_notification(conn->connection_handle,
-                                                                  conn->gattdb_handles.esl_characteristics[ESL_LIB_CHARACTERISTIC_INDEX_ESL_CONTROL_POINT],
-                                                                  sl_bt_gatt_notification);
+                  // Check validity of the handles.
+                  sc = esl_lib_connection_check_gattdb_handles(&(conn->gattdb_handles));
                   if (sc == SL_STATUS_OK) {
-                    conn->state = ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE;
-                    sc = app_timer_start(&conn->gatt_timer,
-                                         GATT_TIMEOUT_MS,
-                                         gatt_timeout,
-                                         conn,
-                                         false);
+                    conn->gattdb_known = ESL_LIB_TRUE;
+                    sc = sl_bt_gatt_set_characteristic_notification(conn->connection_handle,
+                                                                    conn->gattdb_handles.esl_characteristics[ESL_LIB_CHARACTERISTIC_INDEX_ESL_CONTROL_POINT],
+                                                                    sl_bt_gatt_notification);
+                    if (sc == SL_STATUS_OK) {
+                      conn->state = ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE;
+                      sc = app_timer_start(&conn->gatt_timer,
+                                           GATT_TIMEOUT_MS,
+                                           gatt_timeout,
+                                           conn,
+                                           false);
+                    }
+                  } else {
+                    sc = SL_STATUS_BT_ATT_CLIENT_CHARACTERISTIC_CONFIGURATION_DESCRIPTOR_IMPROPERLY_CONFIGURED; // ESL does not meet Profile / Service specification!
                   }
                   if (sc != SL_STATUS_OK) {
                     // Close connection
@@ -1311,6 +1335,7 @@ void esl_lib_connection_on_bt_event(sl_bt_msg_t *evt)
                 }
                 break;
               case ESL_LIB_CONNECTION_STATE_ESL_SUBSCRIBE:
+                (void)app_timer_stop(&conn->gatt_timer);
                 // Check presense of OTS service
                 if (conn->gattdb_handles.services.ots != ESL_LIB_INVALID_SERVICE_HANDLE) {
                   esl_lib_log_connection_debug(CONN_FMT "Initializing Image Transfer - OTS, connection handle = %u" APP_LOG_NL,
@@ -1522,7 +1547,7 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
                                    conn,
                                    conn->connection_handle);
       lib_status = ESL_LIB_STATUS_CONN_WRITE_CP_FAILED;
-      if (esl_lib_connection_contains(conn)) {
+      if (esl_lib_connection_contains(conn) && conn->command != NULL) {
         // Write characteristic value (with or without response)
         sc = write_value(conn,
                          conn->command->data.cmd_write_control_point.att_response,
@@ -1610,17 +1635,49 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
         conn->command_complete = true;
       }
       break;
-    case ESL_LIB_CMD_INITIATE_PAST:
+    case ESL_LIB_CMD_INITIATE_PAST: {
+      uint32_t supervison_timeout = PAST_CONN_DEFAULT_TIMEOUT;
+      uint16_t min_interval = 2 * PAST_CONN_INTERVAL_MIN;
+      uint16_t max_interval = PAST_CONN_INTERVAL_MAX;
+
       conn = (esl_lib_connection_t *)cmd->data.cmd_init_past.connection_handle;
+      esl_lib_pawr_t *pawr = NULL;
       esl_lib_log_connection_debug(CONN_FMT "Initiate PAST command, connection handle = %u" APP_LOG_NL,
                                    conn,
                                    conn->connection_handle);
-      if (esl_lib_connection_contains(conn)) {
+      if (conn->command != NULL) {
+        pawr = (esl_lib_pawr_t *)conn->command->data.cmd_init_past.pawr_handle;
+      }
+
+      if (esl_lib_connection_contains(conn) && esl_lib_pawr_contains(pawr)) {
+        supervison_timeout = pawr->config.adv_interval.max + pawr->config.adv_interval.max / 4; // * 1.25ms
+        min_interval = pawr->config.adv_interval.min / 8;
+        max_interval = pawr->config.adv_interval.max / 4;
+
+        if (max_interval > PAST_CONN_INTERVAL_MAX) {
+          max_interval = PAST_CONN_INTERVAL_MAX;
+        }
+
+        supervison_timeout *= (PAST_CONN_PERIPHERAL_LATENCY + 1); // Core spec. 5.4 Vol 4, Part E, 7.8.31.
+        supervison_timeout = (supervison_timeout / 10) + 1;
+
+        if (supervison_timeout > PAST_CONN_MAX_TIMEOUT) {
+          supervison_timeout = PAST_CONN_MAX_TIMEOUT;
+        } else if (supervison_timeout < PAST_CONN_MIN_TIMEOUT) {
+          supervison_timeout = PAST_CONN_MIN_TIMEOUT;
+        }
+
+        if (min_interval < PAST_CONN_INTERVAL_MIN) {
+          min_interval = PAST_CONN_INTERVAL_MIN;
+        } else if (min_interval > max_interval / 2) {
+          min_interval = max_interval / 2;
+        }
+
         sc = sl_bt_connection_set_parameters(conn->connection_handle,
-                                             PAST_CONN_INTERVAL_BASE,
-                                             PAST_CONN_INTERVAL_MAX,
+                                             min_interval,
+                                             max_interval,
                                              PAST_CONN_PERIPHERAL_LATENCY,
-                                             PAST_CONN_TIMEOUT,
+                                             (uint16_t)supervison_timeout,
                                              PAST_CONN_MIN_CE_LENGTH,
                                              PAST_CONN_MAX_CE_LENGTH);
         if (sc == SL_STATUS_OK) {
@@ -1628,10 +1685,20 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
         } else {
           lib_status = ESL_LIB_STATUS_PAST_INIT_FAILED;
           conn->command_complete = true;
+          // Ignore the warning if the connection is already closed by a remote node still in sync
+          if (sc != SL_STATUS_BT_CTRL_COMMAND_DISALLOWED) {
+            esl_lib_log_connection_warning(CONN_FMT "PAST init fail with connection interval[%u - %u] and timeout: %u, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
+                                           conn,
+                                           min_interval,
+                                           max_interval,
+                                           supervison_timeout,
+                                           conn->connection_handle,
+                                           sc);
+          }
         }
         // Start timeout anyway: the ESL may close/closing/closed the connection because it can be already in sync
         sc = app_timer_start(&conn->timer,
-                             PAST_CONN_TIMEOUT,
+                             10 * supervison_timeout,
                              connection_timeout,
                              conn,
                              false);
@@ -1640,7 +1707,7 @@ static void run_command(esl_lib_command_list_cmd_t *cmd)
         lib_status = ESL_LIB_STATUS_PAST_INIT_FAILED;
         conn->command_complete = true;
       }
-      break;
+    } break;
     default:
       break;
   }
@@ -1814,7 +1881,7 @@ static sl_status_t send_att_response(esl_lib_connection_t *conn,
                                      esl_lib_evt_type_t   type,
                                      sl_status_t          status)
 {
-  sl_status_t sc;
+  sl_status_t sc = SL_STATUS_NULL_POINTER;
   esl_lib_evt_t *lib_evt;
 
   // Stop timer
@@ -1831,7 +1898,7 @@ static sl_status_t send_att_response(esl_lib_connection_t *conn,
       // Set current config type
       lib_evt->data.evt_configure_tag_response.type = conn->config_type;
     }
-  } else {
+  } else if (conn->command != NULL) {
     sc = esl_lib_event_list_allocate(type,
                                      conn->command->data.cmd_write_control_point.data.len,
                                      &lib_evt);
@@ -1848,6 +1915,11 @@ static sl_status_t send_att_response(esl_lib_connection_t *conn,
              conn->command->data.cmd_write_control_point.data.data,
              conn->command->data.cmd_write_control_point.data.len);
     }
+  } else {
+    (void)send_connection_error(conn,
+                                ESL_LIB_STATUS_CONN_WRITE_CP_FAILED,
+                                sc,
+                                conn->state);
   }
 
   // Push event
@@ -2038,7 +2110,7 @@ static void on_image_transfer_finished(esl_lib_image_transfer_handle_t handle,
       }
     }
 
-    if (conn != NULL) {
+    if (conn != NULL && conn->command != NULL) {
       // Note that conn might have been deleted already due an error case!
       // Free up image data if still there
       if (conn->command->data.cmd_write_image.img_data_copied != NULL) {
@@ -2112,7 +2184,9 @@ static void gatt_timeout(app_timer_t *timer,
     esl_lib_log_connection_error(CONN_FMT "GATT timeout, connection handle = %u" APP_LOG_NL,
                                  conn,
                                  conn->connection_handle);
-    if (conn->command->cmd_code == ESL_LIB_CMD_WRITE_CONTROL_POINT) {
+    if (conn->command == NULL) {
+      esl_lib_log_connection_debug(CONN_FMT "Close connection due GATT timout during discovery phase!" APP_LOG_NL, conn);
+    } else if (conn->command->cmd_code == ESL_LIB_CMD_WRITE_CONTROL_POINT) {
       // Send event
       (void)send_att_response(conn,
                               ESL_LIB_EVT_CONTROL_POINT_RESPONSE,
@@ -2475,80 +2549,82 @@ static sl_status_t save_tag_info(esl_lib_connection_t *conn)
 
 static sl_status_t write_next_config_value(esl_lib_connection_t *conn)
 {
-  sl_status_t sc = SL_STATUS_OK;
-  esl_lib_tlv_t *tlv
-    = (esl_lib_tlv_t *)&conn->command->data.cmd_configure_tag.tlv_data.data[conn->config_index];
+  sl_status_t sc = SL_STATUS_NULL_POINTER;
 
-  bool move_to_next = true;
+  if (conn != NULL && conn->command != NULL) {
+    esl_lib_tlv_t *tlv
+      = (esl_lib_tlv_t *)&conn->command->data.cmd_configure_tag.tlv_data.data[conn->config_index];
 
-  while (move_to_next) {
-    esl_lib_log_connection_debug(CONN_FMT "Next configure tag TLV data %u / %u, connection handle = %u" APP_LOG_NL,
-                                 conn,
-                                 conn->config_index,
-                                 conn->command->data.cmd_configure_tag.tlv_data.len,
-                                 conn->connection_handle);
+    bool move_to_next = true;
 
-    // Check if it was the last TLV
-    if (conn->config_index >= conn->command->data.cmd_configure_tag.tlv_data.len) {
-      // This was the last TLV
-      move_to_next = false;
-      // Consider command completed
-      conn->command_complete = true;
-      // Reset the state
-      conn->state = ESL_LIB_CONNECTION_STATE_CONNECTED;
-      sc = SL_STATUS_OK;
-      esl_lib_log_connection_debug(CONN_FMT "Finished configure tag, connection handle = %u" APP_LOG_NL,
-                                   conn,
-                                   conn->connection_handle);
-    } else {
-      // Set TLV
-      tlv = (esl_lib_tlv_t *)&(conn->command->data.cmd_configure_tag.tlv_data.data[conn->config_index]);
-
-      // Set current type for the connection
-      conn->config_type = tlv->type;
-
-      esl_lib_log_connection_debug(CONN_FMT "Write next value from index %u, type %u, connection handle = %u" APP_LOG_NL,
+    while (move_to_next) {
+      esl_lib_log_connection_debug(CONN_FMT "Next configure tag TLV data %u / %u, connection handle = %u" APP_LOG_NL,
                                    conn,
                                    conn->config_index,
-                                   (uint8_t)conn->config_type,
+                                   conn->command->data.cmd_configure_tag.tlv_data.len,
                                    conn->connection_handle);
 
-      // Try to write the current value
-      sc = write_value(conn,
-                       conn->command->data.cmd_configure_tag.att_response,
-                       tlv->type,
-                       tlv->data.len,
-                       tlv->data.data);
-      if (sc == SL_STATUS_OK) {
-        // Set state or send response
-        if (conn->command->data.cmd_configure_tag.att_response == ESL_LIB_TRUE) {
-          // Set state, check for this later in procedure completed event
-          conn->state = ESL_LIB_CONNECTION_STATE_CONFIGURE_TAG;
-          // Return and wait for procedure completed event
-          move_to_next = false;
-          esl_lib_log_connection_debug(CONN_FMT "Wait for response to index %u, type %u, connection handle = %u" APP_LOG_NL,
-                                       conn,
-                                       conn->config_index,
-                                       (uint8_t)conn->config_type,
-                                       conn->connection_handle);
+      // Check if it was the last TLV
+      if (conn->config_index >= conn->command->data.cmd_configure_tag.tlv_data.len) {
+        // This was the last TLV
+        move_to_next = false;
+        // Consider command completed
+        conn->command_complete = true;
+        // Reset the state
+        conn->state = ESL_LIB_CONNECTION_STATE_CONNECTED;
+        sc = SL_STATUS_OK;
+        esl_lib_log_connection_debug(CONN_FMT "Finished configure tag, connection handle = %u" APP_LOG_NL,
+                                     conn,
+                                     conn->connection_handle);
+      } else {
+        // Set TLV
+        tlv = (esl_lib_tlv_t *)&(conn->command->data.cmd_configure_tag.tlv_data.data[conn->config_index]);
+
+        // Set current type for the connection
+        conn->config_type = tlv->type;
+
+        esl_lib_log_connection_debug(CONN_FMT "Write next value from index %u, type %u, connection handle = %u" APP_LOG_NL,
+                                     conn,
+                                     conn->config_index,
+                                     (uint8_t)conn->config_type,
+                                     conn->connection_handle);
+
+        // Try to write the current value
+        sc = write_value(conn,
+                         conn->command->data.cmd_configure_tag.att_response,
+                         tlv->type,
+                         tlv->data.len,
+                         tlv->data.data);
+        if (sc == SL_STATUS_OK) {
+          // Set state or send response
+          if (conn->command->data.cmd_configure_tag.att_response == ESL_LIB_TRUE) {
+            // Set state, check for this later in procedure completed event
+            conn->state = ESL_LIB_CONNECTION_STATE_CONFIGURE_TAG;
+            // Return and wait for procedure completed event
+            move_to_next = false;
+            esl_lib_log_connection_debug(CONN_FMT "Wait for response to index %u, type %u, connection handle = %u" APP_LOG_NL,
+                                         conn,
+                                         conn->config_index,
+                                         (uint8_t)conn->config_type,
+                                         conn->connection_handle);
+          } else {
+            // Send response if written without response
+            (void)send_att_response(conn,
+                                    ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE,
+                                    sc);
+          }
         } else {
-          // Send response if written without response
+          // Send back the response in case of error
           (void)send_att_response(conn,
                                   ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE,
                                   sc);
         }
-      } else {
-        // Send back the response in case of error
-        (void)send_att_response(conn,
-                                ESL_LIB_EVT_CONFIGURE_TAG_RESPONSE,
-                                sc);
       }
+
+      // Move to next TLV
+      conn->config_index += (sizeof(esl_lib_tlv_t) + tlv->data.len);
     }
-
-    // Move to next TLV
-    conn->config_index += (sizeof(esl_lib_tlv_t) + tlv->data.len);
   }
-
   return sc;
 }
 
@@ -2639,6 +2715,10 @@ static bool find_tlv(esl_lib_command_list_cmd_t  *cmd,
 {
   int data_index = 0;
   esl_lib_connect_tlv_t *tlv;
+
+  if (cmd == NULL || tlv_out == NULL) {
+    return false;
+  }
 
   while (data_index < cmd->data.cmd_connect.tlv_data.len) {
     // Get TLV at data index

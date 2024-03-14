@@ -73,7 +73,7 @@ void efr32AlarmInit(void);
  * This function provides the remaining time (in milliseconds) on an alarm service.
  *
  */
-uint32_t efr32AlarmPendingTime(void);
+uint64_t efr32AlarmPendingTime(void);
 
 /**
  * This function checks if the alarm service is running.

@@ -39,6 +39,10 @@ config_file:
     condition:
       - hardware_board_supports_ot_subghz
 toolchain_settings:
+  - option: gcc_compiler_option
+    value: "-Werror=unused-variable"
+  - option: gcc_compiler_option
+    value: "-Werror=unused-function"
   - option: preinclude
     value: sl_openthread_rtos_config.h
     condition:

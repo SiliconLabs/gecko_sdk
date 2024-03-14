@@ -8,7 +8,7 @@
     <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -24,7 +24,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -40,7 +40,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -56,7 +56,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_key_fob/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -72,7 +72,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -88,7 +88,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -104,7 +104,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -120,7 +120,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -136,7 +136,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -152,7 +152,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -168,7 +168,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -184,7 +184,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <properties key="boardCompatibility" value="brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -200,7 +200,7 @@
     <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -215,7 +215,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -230,7 +230,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -245,7 +245,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -260,7 +260,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -275,7 +275,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -290,7 +290,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -305,7 +305,7 @@
     <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -320,7 +320,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_key_fob/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4210a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -335,7 +335,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -350,7 +350,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -365,7 +365,7 @@
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide"/>
+    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -380,7 +380,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>
@@ -395,7 +395,7 @@
     <properties key="readmeFiles" value=""/>
     <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
     <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake"/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>

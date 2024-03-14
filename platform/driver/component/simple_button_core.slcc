@@ -4,11 +4,11 @@ package: platform
 description: >
   The Simple Button Driver provides an implementation of the Generic Button API.
   This driver supports both active high and low buttons and configurable
-  debouncing. 
+  debouncing.
 
 
   This component includes only the Simple Button driver. To configure and create
-  instances of this driver, the Simple Button component should be included in the 
+  instances of this driver, the Simple Button component should be included in the
   project.
 category: Platform|Driver|Button
 quality: production
@@ -40,4 +40,4 @@ template_contribution:
       handler: sl_simple_button_init_instances
 documentation:
     docset: gecko-platform
-    document: driver/api/group-simple-button
+    document: platform-driver/simple-button

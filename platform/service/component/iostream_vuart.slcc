@@ -6,7 +6,7 @@ description: >
   pseudo-peripheral. VUART is a special interface where RTT is used as 
   input channel and the Single Wire Output(SWO) is used as output channel.
 category: Services|IO Stream|Driver
-quality: experimental
+quality: production
 root_path: platform/service/iostream
 provides:
   - name: iostream_vuart

@@ -183,6 +183,7 @@ cc_multilevel_sensor_operation_report_stx(zaf_tx_options_t *tx_options, void* pD
                                        (uint8_t)read_result.size_bytes;
       memcpy(&pTxBufRaw[raw_buffer_offset], read_result.raw_result, read_result.size_bytes);
       raw_buffer_offset += read_result.size_bytes;
+      tx_options->use_supervision = true;
 
       (void) zaf_transport_tx((uint8_t *)&txBuf,
                               raw_buffer_offset,

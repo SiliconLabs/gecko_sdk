@@ -67,7 +67,8 @@ static sl_status_t send_pawr_error(esl_lib_pawr_t       *pawr,
                                    sl_status_t          status,
                                    esl_lib_pawr_state_t data);
 static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd);
-static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr);
+static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr, esl_lib_evt_type_t event_code);
+static sl_status_t validate_pawr_config(uint8_t pawr_handle, esl_lib_pawr_config_t new_config);
 
 // -----------------------------------------------------------------------------
 // Private variables
@@ -100,11 +101,11 @@ sl_status_t esl_lib_pawr_add(esl_lib_pawr_t **ptr_out)
       ptr->command_list                 = NULL;
       // Set states
       ptr->enabled                      = ESL_LIB_FALSE;
-      ptr->configured                   = ESL_LIB_FALSE;
+      ptr->configured                   = ESL_LIB_TRUE;
       ptr->state                        = ESL_LIB_PAWR_STATE_IDLE;
       // Config default values
-      ptr->config.adv_interval.min      = ESL_LIB_PERIODIC_ADV_MIN_INTERVAL_DEFAULT;
-      ptr->config.adv_interval.max      = ESL_LIB_PERIODIC_ADV_MAX_INTERVAL_DEFAULT;
+      ptr->config.adv_interval.min      = ESL_LIB_PAWR_MIN_INTERVAL_DEFAULT;
+      ptr->config.adv_interval.max      = ESL_LIB_PAWR_MAX_INTERVAL_DEFAULT;
       ptr->config.subevent.count        = ESL_LIB_PAWR_SUBEVENT_COUNT_DEFAULT;
       ptr->config.subevent.interval     = ESL_LIB_PAWR_SUBEVENT_INTERVAL_DEFAULT;
       ptr->config.response_slot.delay   = ESL_LIB_PAWR_RESPONSE_SLOT_DELAY_DEFAULT;
@@ -184,11 +185,13 @@ sl_status_t esl_lib_pawr_remove_handle(uint8_t        pawr,
 bool esl_lib_pawr_contains(esl_lib_pawr_t *ptr)
 {
   bool ret = false;
-  esl_lib_pawr_t *iterator;
 
-  SL_SLIST_FOR_EACH_ENTRY(pawr_list, iterator, esl_lib_pawr_t, node) {
-    if (iterator == ptr) {
-      return true;
+  if (ptr != NULL) {
+    esl_lib_pawr_t *iterator;
+    SL_SLIST_FOR_EACH_ENTRY(pawr_list, iterator, esl_lib_pawr_t, node) {
+      if (iterator == ptr) {
+        return true;
+      }
     }
   }
 
@@ -397,7 +400,7 @@ static sl_status_t send_pawr_response_event(esl_lib_pawr_t *pawr_ptr,
   return sc;
 }
 
-static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr)
+static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr, esl_lib_evt_type_t event_code)
 {
   sl_status_t   sc;
   esl_lib_evt_t *lib_evt;
@@ -409,7 +412,7 @@ static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr)
 
   sc = esl_lib_event_list_allocate(ESL_LIB_EVT_PAWR_STATUS, 0, &lib_evt);
   if (sc == SL_STATUS_OK) {
-    lib_evt->evt_code = ESL_LIB_EVT_PAWR_STATUS;
+    lib_evt->evt_code = event_code;
     lib_evt->data.evt_pawr_status.pawr_handle  = (esl_lib_pawr_handle_t *)pawr_ptr;
     // Set state
     lib_evt->data.evt_pawr_status.enabled      = pawr_ptr->enabled;
@@ -425,6 +428,69 @@ static sl_status_t send_pawr_status(esl_lib_pawr_t *pawr_ptr)
       esl_lib_memory_free(lib_evt);
     }
   }
+  return sc;
+}
+
+static sl_status_t validate_pawr_config(uint8_t pawr_handle, esl_lib_pawr_config_t new_config)
+{
+  esl_lib_pawr_t *unused;
+  sl_status_t sc = esl_lib_pawr_find(pawr_handle, &unused);
+
+  (void)unused; // Mandatory parameter for esl_lib_pawr_find() but we don't use it here
+
+  if (sc == SL_STATUS_OK) {
+    // --- Basic check against absolute limits ---
+    // Check advertising interval limits
+    if (new_config.adv_interval.min < ESL_LIB_PAWR_MIN_PA_INTERVAL
+        || new_config.adv_interval.max < new_config.adv_interval.min) {
+      sc = SL_STATUS_INVALID_RANGE;
+    }
+
+    // Check subevent count limits
+    if (new_config.subevent.count < ESL_LIB_PAWR_MIN_NUM_SUBEVENTS
+        || new_config.subevent.count > ESL_LIB_PAWR_MAX_NUM_SUBEVENTS) {
+      sc = SL_STATUS_INVALID_COUNT;
+    }
+
+    // Check subevent interval limit
+    if (new_config.subevent.interval < ESL_LIB_PAWR_MIN_SUBEVENT_INTERVAL) {
+      sc = SL_STATUS_INVALID_RANGE;
+    }
+
+    // Check response slot delay limits
+    if (new_config.response_slot.delay < ESL_LIB_PAWR_MIN_RESPONSE_SLOT_DELAY
+        || new_config.response_slot.delay > ESL_LIB_PAWR_MAX_RESPONSE_SLOT_DELAY) {
+      sc = SL_STATUS_INVALID_PARAMETER;
+    }
+
+    // Check response slot spacing limit
+    if (new_config.response_slot.spacing < ESL_LIB_PAWR_MIN_RESPONSE_SLOT_SPACING) {
+      sc = SL_STATUS_INVALID_PARAMETER;
+    }
+
+    // Check response slot count limit
+    if (new_config.response_slot.count < ESL_LIB_PAWR_MIN_NUM_RESPONSE_SLOTS) {
+      sc = SL_STATUS_INVALID_COUNT;
+    }
+
+    // --- Advanced check against misconfiguration ---
+    // The product of subevent count and subevent interval can't be greather than the minimum advertising interval
+    if (new_config.subevent.count * new_config.subevent.interval > new_config.adv_interval.min) {
+      sc = SL_STATUS_INVALID_CONFIGURATION;
+    }
+
+    // The slot delay shall be smaller than the subevent interval
+    if (new_config.response_slot.delay >= new_config.subevent.interval) {
+      sc = SL_STATUS_INVALID_CONFIGURATION;
+    }
+
+    // The response slot spacing shall be smaller than or equal to (subevent interval - response slot delay) / response slots count
+    // Note: Response slot spacing is given in 0.125msec units, while the other parameters are given in 1.25msec units.
+    if (new_config.response_slot.count * new_config.response_slot.spacing > (new_config.subevent.interval - new_config.response_slot.delay) * 10) {
+      sc = SL_STATUS_INVALID_CONFIGURATION;
+    }
+  }
+
   return sc;
 }
 
@@ -467,22 +533,27 @@ static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd)
         }
 
         if (sc == SL_STATUS_OK) {
-          lib_status = ESL_LIB_STATUS_PAWR_START_FAILED;
-          // Start advertising with the stored configuration
-          sc = sl_bt_pawr_advertiser_start(pawr->pawr_handle,
-                                           pawr->config.adv_interval.min,
-                                           pawr->config.adv_interval.max,
-                                           PERIODIC_ADVERTISER_FLAG_NONE,
-                                           pawr->config.subevent.count,
-                                           pawr->config.subevent.interval,
-                                           pawr->config.response_slot.delay,
-                                           pawr->config.response_slot.spacing,
-                                           pawr->config.response_slot.count);
-          if (sc == SL_STATUS_OK) {
-            lib_status = ESL_LIB_STATUS_NO_ERROR;
-            pawr->state = ESL_LIB_PAWR_STATE_RUNNING;
-            pawr->enabled = ESL_LIB_TRUE;
-            send_pawr_status(pawr);
+          if (pawr->configured == ESL_LIB_TRUE) {
+            // Start advertising with the stored configuration
+            sc = sl_bt_pawr_advertiser_start(pawr->pawr_handle,
+                                             pawr->config.adv_interval.min,
+                                             pawr->config.adv_interval.max,
+                                             PERIODIC_ADVERTISER_FLAG_NONE,
+                                             pawr->config.subevent.count,
+                                             pawr->config.subevent.interval,
+                                             pawr->config.response_slot.delay,
+                                             pawr->config.response_slot.spacing,
+                                             pawr->config.response_slot.count);
+            if (sc == SL_STATUS_OK) {
+              lib_status = ESL_LIB_STATUS_NO_ERROR;
+              pawr->state = ESL_LIB_PAWR_STATE_RUNNING;
+              pawr->enabled = ESL_LIB_TRUE;
+              send_pawr_status(pawr, ESL_LIB_EVT_PAWR_STATUS);
+            } else {
+              lib_status = ESL_LIB_STATUS_PAWR_START_FAILED;
+            }
+          } else {
+            lib_status = ESL_LIB_STATUS_PAWR_CONFIG_FAILED;
           }
         }
       } else {
@@ -494,7 +565,7 @@ static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd)
           pawr->enabled = ESL_LIB_FALSE;
           (void)sl_bt_advertiser_delete_set(pawr->pawr_handle);
           pawr->pawr_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
-          send_pawr_status(pawr);
+          send_pawr_status(pawr, ESL_LIB_EVT_PAWR_STATUS);
         }
       }
       break;
@@ -535,17 +606,25 @@ static sl_status_t run_command(esl_lib_command_list_cmd_t *cmd)
       esl_lib_log_pawr_debug(PAWR_FMT "Configure command, PAwR handle = %u" APP_LOG_NL,
                              pawr,
                              pawr->pawr_handle);
-      // Copy data
-      memcpy(&pawr->config,
-             &cmd->data.cmd_pawr_config.pawr_config,
-             sizeof(esl_lib_pawr_config_t));
-      lib_status = ESL_LIB_STATUS_NO_ERROR;
-      // Set configured
-      pawr->configured = ESL_LIB_TRUE;
+      sc = validate_pawr_config(pawr->pawr_handle, cmd->data.cmd_pawr_config.pawr_config);
+      if (sc == SL_STATUS_OK) {
+        // Copy data on succesful validation
+        memcpy(&pawr->config,
+               &cmd->data.cmd_pawr_config.pawr_config,
+               sizeof(esl_lib_pawr_config_t));
+        lib_status = ESL_LIB_STATUS_NO_ERROR;
+        // Set configured
+        pawr->configured = ESL_LIB_TRUE;
+      } else {
+        lib_status = ESL_LIB_STATUS_PAWR_CONFIG_FAILED;
+        // An attempt to set a wrong configuration will invalidate the configuration for the next start request!
+        pawr->configured = ESL_LIB_FALSE;
+      }
+      send_pawr_status(pawr, ESL_LIB_EVT_PAWR_CONFIG);
       break;
     case ESL_LIB_CMD_GET_PAWR_STATUS:
       pawr = (esl_lib_pawr_t *)cmd->data.cmd_get_pawr_status;
-      send_pawr_status(pawr);
+      send_pawr_status(pawr, ESL_LIB_EVT_PAWR_STATUS);
       sc = SL_STATUS_OK;
       lib_status = ESL_LIB_STATUS_NO_ERROR;
       break;

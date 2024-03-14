@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<api device_id="4" device_name="bt" version="6.2.0">
+<api device_id="4" device_name="bt" version="6.3.0">
     <datatypes>
         <datatype base="uint16" name="errorcode" length="2"/>
         <datatype base="int16" name="int16" length="2"/>
@@ -242,6 +242,7 @@
                 <param datatype="uint8" name="num_buffers_discarded" type="uint8"/>
                 <param datatype="uint8" name="num_buffer_allocation_failures" type="uint8"/>
                 <param datatype="uint8" name="num_heap_allocation_failures" type="uint8"/>
+                <param datatype="uint8" name="num_message_allocation_failures" type="uint8"/>
             </params>
         </event>
         <event index="3" name="external_signal">

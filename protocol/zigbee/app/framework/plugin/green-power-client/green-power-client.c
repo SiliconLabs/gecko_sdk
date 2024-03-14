@@ -889,7 +889,14 @@ static bool autoCommissioningCallback(GP_PARAMS)
 
 static UNUSED uint8_t qualityBasedDelay(uint8_t gpdLink)
 {
-  uint8_t ourLqi = (gpdLink & 0xC0) >> 5;
+  // The top 2 bits of gpdlink is operated with the mask 0xC0 (b11000000), hence needs to be shifted by 6.
+  uint8_t ourLqi = (gpdLink & 0xC0) >> 6;
+  // A.3.6.3.1 : QualityBasedDelay is calculated as follows:
+  //  For Link quality = 0b11: 0 ms;
+  //  For Link quality = 0b10: 32ms;
+  //  For Link quality = 0b01: 64ms;
+  //  For Link quality = 0b00: 96ms;
+  // So, the return from this function is a delay expressed as b0XX00000 ms, where bXX is (3 - ourLqi) in binary
   return ((3 - ourLqi) << 5);
 }
 

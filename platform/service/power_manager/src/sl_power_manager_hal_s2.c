@@ -329,14 +329,13 @@ void EMU_EM23PresleepHook(void)
 #if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
     CMU->EM01GRPCCLKCTRL = (CMU->EM01GRPCCLKCTRL  & ~_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK) | _CMU_EM01GRPCCLKCTRL_CLKSEL_FSRCO;
 #endif
-    // Disable DPLLREFCLK before deepsleep
+    // Disable DPLL before deepsleep
 #if (_DPLL_IPVERSION_IPVERSION_DEFAULT >= 1)
 #if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
     if (is_dpll_used) {
       DPLL0->EN_CLR = DPLL_EN_EN;
       while ((DPLL0->EN & _DPLL_EN_DISABLING_MASK) != 0) {
       }
-      CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK) | CMU_DPLLREFCLKCTRL_CLKSEL_DISABLED;
     }
 #endif
 #endif
@@ -497,14 +496,16 @@ bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait)
  ******************************************************************************/
 void sli_power_manager_restore_states(void)
 {
+  // Restore specific EMU saved contexts
   EMU_Restore();
 
-  // Restore DPLLREFCLK to what it was before the deepsleep
+  // Restore DPLL after deepsleep
 #if (_DPLL_IPVERSION_IPVERSION_DEFAULT >= 1)
 #if defined(_CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
   if (is_dpll_used) {
-    CMU->DPLLREFCLKCTRL = (CMU->DPLLREFCLKCTRL & ~_CMU_DPLLREFCLKCTRL_CLKSEL_MASK) | cmu_dpll_ref_clock_register;
     DPLL0->EN_SET = DPLL_EN_EN;
+    while ((DPLL0->STATUS & _DPLL_STATUS_RDY_MASK) == 0U) {
+    }
   }
 #endif
 #endif
@@ -528,8 +529,8 @@ void sli_power_manager_restore_states(void)
 
   SystemCoreClockUpdate();
 
+#if 0 // TODO PLATFORM_MTL-8499
   // Wait for DPLL to lock
-#if 0 // TODO This seems to cause issues in some cases. That has to be fixed.
   if (is_dpll_used) {
     while (!(DPLL0->STATUS && _DPLL_STATUS_RDY_MASK)) {
     }

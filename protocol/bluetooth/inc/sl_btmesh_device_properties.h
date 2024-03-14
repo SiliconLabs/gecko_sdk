@@ -573,7 +573,7 @@ typedef struct event_statistics {
 /**
  * Time Since Motion Sensed
  */
-typedef time_second_16_t time_since_motion_sensed_t;
+typedef time_millisecond_24_t time_since_motion_sensed_t;
 
 /** Time Since Presence Detected */
 typedef time_second_16_t time_since_presence_detected_t;
@@ -1356,7 +1356,7 @@ typedef enum mesh_device_properties_e {
    * Type: Event Statistics */
   SHORT_CIRCUIT_EVENT_STATISTICS                  = 0x0067,
   /** Time Since Motion Sensed
-   * Type: Time Second 16 */
+   * Type: Time Millisecond 24 */
   TIME_SINCE_MOTION_SENSED                        = 0x0068,
   /** Time Since Presence Detected
    * Type: Time Second 16 */

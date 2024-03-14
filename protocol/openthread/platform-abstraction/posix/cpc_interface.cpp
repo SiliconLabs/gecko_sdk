@@ -68,6 +68,7 @@ namespace Posix {
 // ----------------------------------------------------------------------------
 
 volatile sig_atomic_t CpcInterfaceImpl::sCpcResetReq = false;
+bool CpcInterfaceImpl::sIsCpcInitialized = false;
 
 CpcInterfaceImpl::CpcInterfaceImpl(SpinelInterface::ReceiveFrameCallback aCallback,
                            void *                                aCallbackContext,
@@ -90,18 +91,27 @@ otError CpcInterfaceImpl::Init(const Url::Url &aRadioUrl)
 
     VerifyOrExit(mSockFd == -1, error = OT_ERROR_ALREADY);
 
-    if (cpc_init(&mHandle, aRadioUrl.GetPath(), false, HandleSecondaryReset) != 0)
+    if (!sIsCpcInitialized)
     {
-        otLogCritPlat("CPC init failed. Ensure radio-url argument has the form 'spinel+cpc://cpcd_0?iid=<1..3>'");
-        DieNow(OT_EXIT_FAILURE);
+        if (cpc_init(&mHandle, aRadioUrl.GetPath(), false, HandleSecondaryReset) != 0)
+        {
+            otLogCritPlat("CPC init failed. Ensure radio-url argument has the form 'spinel+cpc://cpcd_0?iid=<1..3>'");
+            DieNow(OT_EXIT_FAILURE);
+        }
+
+        mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
+
+        if (mSockFd < 0)
+        {
+            otLogCritPlat("CPC endpoint open failed");
+            error = OT_ERROR_FAILED;
+        }
     }
-
-    mSockFd = cpc_open_endpoint(mHandle, &mEndpoint, mId, 1);
-
-    if (mSockFd < 0)
+    else
     {
-        otLogCritPlat("CPC endpoint open failed");
-        error = OT_ERROR_FAILED;
+        // Re-initialize the CPC interface.
+        SetCpcResetReq(true);
+        CheckAndReInitCpc();
     }
 
     if ((value = aRadioUrl.GetValue("cpc-bus-speed")))
@@ -110,6 +120,7 @@ otError CpcInterfaceImpl::Init(const Url::Url &aRadioUrl)
     }
 
     otLogCritPlat("mCpcBusSpeed = %d", mCpcBusSpeed);
+    sIsCpcInitialized = true;
 
 exit:
     return error;

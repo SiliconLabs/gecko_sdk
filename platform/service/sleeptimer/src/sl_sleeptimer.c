@@ -704,7 +704,7 @@ sl_sleeptimer_timestamp_64_t sl_sleeptimer_get_time_64(void)
 sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time)
 {
   // convert 32 bit time to 64 bit time
-  uint64_t temp_time = time + TIME_64_TO_32_EPOCH_OFFSET_SEC;
+  uint64_t temp_time = time + (uint64_t)TIME_64_TO_32_EPOCH_OFFSET_SEC;
   sl_status_t err_code = sl_sleeptimer_set_time_64(temp_time);
   return err_code;
 }

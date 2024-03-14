@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include <common/debug.hpp>
 
 uint16_t sl_fetch_low_high_int16u(const uint8_t *contents)
 {
@@ -142,7 +143,7 @@ uint16_t sl_strlen(const uint8_t *const string)
         {
             i++;
         }
-        assert(i != 0xFFFF);
+        OT_ASSERT(i != 0xFFFF);
     }
 
     return i;
@@ -218,7 +219,7 @@ uint8_t sl_bit_count_int32u(uint32_t num)
 // If you change the above function, run this to test it.
 void sl_test_bit_count(void)
 {
-    assert(sl_bit_count_int32u(0) == 0);
+    OT_ASSERT(sl_bit_count_int32u(0) == 0);
     uint32_t i;
     for (i = 1; i; i++)
     {
@@ -228,7 +229,7 @@ void sl_test_bit_count(void)
         {
             count += num & 1;
         }
-        assert(sl_bit_count_int32u(i) == count);
+        OT_ASSERT(sl_bit_count_int32u(i) == count);
     }
 }
 

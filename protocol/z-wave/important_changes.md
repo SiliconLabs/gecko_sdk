@@ -3,6 +3,32 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.20.3 {#section-7-20-3}
+
+## OTW Update of Serial API controller
+
+In version 7.20.0 - 7.20.2 of the Z-Wave SDK, The Serial API Controller application's
+Product ID, used for validation during OTW updates had been changed to include
+a Generic and Specific Device Type.\
+This prevented updating devices running version 7.19 or lower of the Serial
+API Controller to more recent versions.
+
+To address this incompatibility, the Specific and Generic Device Type bytes of
+the Product ID, defined in `application_properties_config.h`
+(used by the struct `sl_app_properties` of the bootloader)
+have been reverted to their previous values of 0.\
+This only affects the Product ID; the application still reports the new Device
+Type values in its Node Information Frame.\
+Note that these values can be changed on the fly using the Serial API command `SERIAL_API_APPL_NODE_INFORMATION`.
+
+The following update paths for this application are not possible using the
+pre-built binaries:
+
+- 7.19 or lower to 7.20.0 - 7.20.2
+- 7.20.0 - 7.20.2 to 7.20.3 or higher
+
+However, firmwares that are not affected by this incompatibility can be created manually, as described in the README of the application.
+
 # 7.20.2 {#section-7-20-2}
 
 ## zwave_soc_led_bulb Moved to NonCertifiableApps

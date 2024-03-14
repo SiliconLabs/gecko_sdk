@@ -597,7 +597,7 @@ void RAILCb_TimerExpired(RAIL_Handle_t railHandle);
 void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
                                         RAIL_Time_t expectedTimeOfEvent,
                                         void *cbArg);
-void restartModeSwitchSequence(void);
+void restartModeSwitchSequence(bool applyDelay);
 void endModeSwitchSequence(void);
 #endif
 void RAILCb_SwTimerExpired(RAIL_Handle_t railHandle);

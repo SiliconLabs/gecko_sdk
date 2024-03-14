@@ -116,7 +116,7 @@ bool sl_ot_is_ok_to_sleep(void)
     return false;
   }
 
-  uint32_t duration_ms = 0;
+  uint64_t duration_ms = 0;
 
   CORE_ATOMIC_IRQ_DISABLE();
 

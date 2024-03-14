@@ -49,7 +49,7 @@ const GblTagParsingInfo_t gblTagParsingInfoStructs[] = {
     .parserState = GblParserStateVersionDependency,
     .tagOrder    = GBL_TAG_ORDER_VERSION_DEPENDENCY,
     .reserved    = 0U,
-    .flags       = 0U
+    .flags       = GBL_TAG_FLAG_ALWAYS_UNENCRYPTED
   },
 #endif
 

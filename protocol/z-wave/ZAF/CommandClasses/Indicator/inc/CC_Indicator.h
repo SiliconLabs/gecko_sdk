@@ -1,6 +1,18 @@
 /**
- * Indicator command class version 3
- *
+ * @file
+ * Handler for Command Class Indicator V3
+ * 
+ * @addtogroup CC
+ * @{
+ * @addtogroup Indicator
+ * @{
+ * 
+ * Indicator CC is mandatory since Z-Wave+ V2. It can be used to identify a device in the network, by 
+ * sending command that will, for example, set the LED indicator to ON over a certain period.
+ * 
+ * @}
+ * @}
+ * 
  * @copyright 2019 Silicon Laboratories Inc.
  */
 

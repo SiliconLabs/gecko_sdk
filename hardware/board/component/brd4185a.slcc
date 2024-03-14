@@ -53,6 +53,8 @@
     value: '"BRD4185A"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

@@ -134,8 +134,8 @@ EmberStatus emberClearBindingTable(void);
  * @param entry   A pointer to a new binding table entry.
  *
  * @return ::EMBER_ZDP_SUCCESS if the binding was added to the table
- * ::EMBER_ZDP_NOT_AUTHORIZED if permission was denied
- * ::EMBER_ZDP_NOT_PERMITTED if the binding is active
+ * ::EMBER_ZDP_NOT_AUTHORIZED if permission was denied or binding is active
+ * ::EMBER_ZDP_INVALID_ENDPOINT if the endpoint is 0 or in the reserved range
  * ::EMBER_ZDP_TABLE_FULL if there is no more space in the binding table
  */
 EmberZdoStatus emberRemoteSetBindingHandler(EmberBindingTableEntry *entry);
@@ -155,8 +155,8 @@ EmberZdoStatus emberRemoteSetBindingHandler(EmberBindingTableEntry *entry);
  * @param index  The index of the binding entry to be removed.
  *
  * @return ::EMBER_ZDP_SUCCESS if the binding was removed from the table
- * ::EMBER_ZDP_NOT_AUTHORIZED if permission was denied
- * ::EMBER_ZDP_NOT_PERMITTED if the binding is active
+ * ::EMBER_ZDP_NOT_AUTHORIZED if permission was denied or binding is active
+ * ::EMBER_INVALID_ENDPOINT if the endpoint is 0 or in the reserved range
  * ::EMBER_ZDP_NO_ENTRY if the binding doesn't exist
  */
 EmberZdoStatus emberRemoteDeleteBindingHandler(uint8_t index);

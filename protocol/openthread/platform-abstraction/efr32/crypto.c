@@ -36,6 +36,7 @@
 #include <openthread/error.h>
 #include <openthread/platform/crypto.h>
 #include "utils/code_utils.h"
+#include "common/debug.hpp"
 
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/md.h>

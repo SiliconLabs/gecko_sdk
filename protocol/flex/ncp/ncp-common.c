@@ -58,3 +58,9 @@ bool isCurrentTaskStackTask(void)
 {
   return true;
 }
+
+void unknownCommandIdHandler(uint16_t commandId)
+{
+  //The host can timeout if the response is not correct, nothing to do here
+  (void)commandId;
+}

@@ -45,6 +45,8 @@
     value: '"BRD2501A"'
   - name: SL_BOARD_REV
     value: '"A02"'
+  - name: HFXO_FREQ
+    value: 40000000
 - tag:
   - board:pn:BRD2501
   - board:variant:A

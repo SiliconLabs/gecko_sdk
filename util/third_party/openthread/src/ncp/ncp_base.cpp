@@ -898,7 +898,7 @@ otError NcpBase::HandlePendingTransmit(PendingCommandEntry *aEntry)
     *frame   = aEntry->mTransmitFrame;
     VerifyOrExit(frame->mLength <= OT_RADIO_FRAME_MAX_SIZE, error = OT_ERROR_PARSE);
     frame->mPsdu = savePsdu;
-    memcpy(frame->mPsdu, &aEntry->mTransmitFrame.mPsdu, frame->mLength);
+    memcpy(frame->mPsdu, aEntry->mTransmitFrame.mPsdu, frame->mLength);
     frame->mIid = aEntry->mIid;
     SuccessOrExit(error = otLinkRawTransmit(mInstance, &NcpBase::LinkRawTransmitDone));
 

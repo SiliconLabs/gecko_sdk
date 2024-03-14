@@ -6,11 +6,11 @@
     <property key="demos.blurb" value="Bluetooth - ABR NCP"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.2/app/bluetooth/demos/bt_abr_ncp_initiator/bt_abr_ncp_initiator-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.3/app/bluetooth/demos/bt_abr_ncp_initiator/bt_abr_ncp_initiator-brd4198a.s37"/>
     <property key="core.readmeFiles" value="example/bt_abr_ncp_initiator/readme.md"/>
     <property key="filters" value=""/>
     <property key="core.quality" value="EXPERIMENTAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.2/platform/bootloader/demos/bootloader-uart-bgapi/bootloader-uart-bgapi-brd4198a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.3/platform/bootloader/demos/bootloader-uart-bgapi/bootloader-uart-bgapi-brd4198a.s37"/>
   </demo>
   <demo name="brd4198a.demo.bt_abr_soc_initiator" label="Bluetooth - SoC ABR initiator">
     <model:description>ABR initiator for Bluetooth. The example connects to an ABR reflector and starts distance measurement. Results are printed on the display of the WSTK.
@@ -18,11 +18,11 @@
     <property key="demos.blurb" value="Bluetooth - SoC ABR initiator"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.2/app/bluetooth/demos/bt_abr_soc_initiator/bt_abr_soc_initiator-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.3/app/bluetooth/demos/bt_abr_soc_initiator/bt_abr_soc_initiator-brd4198a.s37"/>
     <property key="core.readmeFiles" value="example/bt_abr_soc_initiator/readme.md"/>
     <property key="filters" value=""/>
     <property key="core.quality" value="EXPERIMENTAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.2/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.3/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
   </demo>
   <demo name="brd4198a.demo.bt_abr_soc_reflector" label="Bluetooth - SoC ABR reflector">
     <model:description>ABR reflector for Bluetooth. The example sends measurement results to the initiator via GATT. The application starts advertising after boot and restarts advertising after a connection is closed. It also supports Over-the-Air Device Firmware Upgrade (OTA DFU).
@@ -30,10 +30,10 @@
     <property key="demos.blurb" value="Bluetooth - SoC ABR reflector"/>
     <property key="core.partCompatibility" value=".*efr32mg24b210f1536im48.*"/>
     <property key="core.boardCompatibility" value="brd4198a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.2/app/bluetooth/demos/bt_abr_soc_reflector/bt_abr_soc_reflector-brd4198a.s37"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.3.3/app/bluetooth/demos/bt_abr_soc_reflector/bt_abr_soc_reflector-brd4198a.s37"/>
     <property key="core.readmeFiles" value="example/bt_abr_soc_reflector/readme.md"/>
     <property key="filters" value=""/>
     <property key="core.quality" value="EXPERIMENTAL"/>
-    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.2/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
+    <property key="demos.bootloaderFile" value="asset://com.silabs.sdk.stack.super_4.3.3/platform/bootloader/demos/bootloader-apploader/bootloader-apploader-brd4198a.s37"/>
   </demo>
 </demos>

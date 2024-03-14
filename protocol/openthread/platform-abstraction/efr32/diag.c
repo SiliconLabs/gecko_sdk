@@ -37,6 +37,7 @@
 #include <sys/time.h>
 
 #include "common/code_utils.hpp"
+#include "common/debug.hpp"
 #include "common/logging.hpp"
 #include <openthread/cli.h>
 #include <openthread-core-config.h>
@@ -190,18 +191,19 @@ static RAIL_Status_t startTxStream(RAIL_StreamMode_t aMode)
     SuccessOrExit(status = RAIL_GetChannel(gRailHandle, &txChannel));
 
 #ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-  RAIL_TxOptions_t txOptions = RAIL_TX_OPTIONS_DEFAULT;
-  // Translate Tx antenna diversity mode into RAIL Tx Antenna options:
-  // If enabled, use the currently-selected antenna, otherwise leave
-  // both options 0 so Tx antenna tracks Rx antenna.
-  if (sl_rail_util_ant_div_get_tx_antenna_mode() != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED) {
-    txOptions |= ((sl_rail_util_ant_div_get_tx_antenna_selected() == SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1)
-                  ? RAIL_TX_OPTION_ANTENNA0 : RAIL_TX_OPTION_ANTENNA1);
-  }
+    RAIL_TxOptions_t txOptions = RAIL_TX_OPTIONS_DEFAULT;
+    // Translate Tx antenna diversity mode into RAIL Tx Antenna options:
+    // If enabled, use the currently-selected antenna, otherwise leave
+    // both options 0 so Tx antenna tracks Rx antenna.
+    if (sl_rail_util_ant_div_get_tx_antenna_mode() != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
+    {
+        txOptions |= ((sl_rail_util_ant_div_get_tx_antenna_selected() == SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1)
+                      ? RAIL_TX_OPTION_ANTENNA0 : RAIL_TX_OPTION_ANTENNA1);
+    }
 
-  status =  RAIL_StartTxStreamAlt(gRailHandle, txChannel, aMode, txOptions);
+    status =  RAIL_StartTxStreamAlt(gRailHandle, txChannel, aMode, txOptions);
 #else // !SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
-  status =  RAIL_StartTxStream(gRailHandle, txChannel, aMode);
+    status =  RAIL_StartTxStream(gRailHandle, txChannel, aMode);
 #endif  // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
 exit:
@@ -210,18 +212,19 @@ exit:
 
 static RAIL_Status_t stopTxStream(void)
 {
-  RAIL_Status_t status;
-  uint16_t currentChannel;
-  RAIL_SchedulerInfo_t rxSchedulerInfo = {
-    .priority = RADIO_SCHEDULER_BACKGROUND_RX_PRIORITY,
-  };
+    RAIL_Status_t status;
+    uint16_t currentChannel;
+    RAIL_SchedulerInfo_t rxSchedulerInfo = {
+      .priority = RADIO_SCHEDULER_BACKGROUND_RX_PRIORITY,
+    };
 
-  SuccessOrExit(status = RAIL_StopTxStream(gRailHandle));
-  // Since start transmit stream turn off the radio state,
-  // call the RAIL_StartRx to turn on radio
-  IgnoreError(RAIL_GetChannel(gRailHandle, &currentChannel));
-  assert(RAIL_StartRx(gRailHandle, currentChannel, &rxSchedulerInfo)
-                      == RAIL_STATUS_NO_ERROR);
+    SuccessOrExit(status = RAIL_StopTxStream(gRailHandle));
+    // Since start transmit stream turn off the radio state,
+    // call the RAIL_StartRx to turn on radio
+    IgnoreError(RAIL_GetChannel(gRailHandle, &currentChannel));
+
+    status = RAIL_StartRx(gRailHandle, currentChannel, &rxSchedulerInfo);
+    OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
 
 exit:
   return status;

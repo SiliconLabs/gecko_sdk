@@ -151,7 +151,7 @@ sl_status_t host_comm_set_option(char option, char *value)
       break;
     // UART flow control disable.
     case 'f':
-      uart_flow_control = 1;
+      uart_flow_control = 0;
       break;
     // Unknown option.
     default:
@@ -229,25 +229,29 @@ void *msg_recv_func(void *ptr)
     int32_t len;
     len = host_comm_pk(handle_ptr);
 
-    if (len > sizeof(buf_in.buf)) {
-      // If readable data exceeds the buffer size then
-      // read it one by one to avoid overflow
-      len = 1;
-      app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
-    } else if (len < 0) {
+    if (len < 0) {
       // Peek is not supported, read data one by one
       len = 1;
+    } else if ((size_t)len > sizeof(buf_tmp.buf)) {
+      // If readable data exceeds the buffer size then read it one by one to avoid overflow
+      len = 1;
+      app_log_warning("Input buffer size too low, please increase it." APP_LOG_NL);
     }
 
     if (len > 0) {
       ret = host_comm_input(handle_ptr, len, buf_tmp.buf);
+      pthread_mutex_lock(&mutex);
+
       if (ret <= (sizeof(buf_in.buf) - buf_in.len)) {
-        pthread_mutex_lock(&mutex);
         memcpy(&buf_in.buf[buf_in.len], &buf_tmp.buf[0], ret);
         buf_in.len += ret;
         pthread_mutex_unlock(&mutex);
+      } else {
+        pthread_mutex_unlock(&mutex);
+        app_log_error("Received data lost." APP_LOG_NL);
       }
-    } else if (len != 1) {
+    } else {
+      // No data available
       app_sleep_us(RECV_FUNC_US_SLEEP);
     }
   }

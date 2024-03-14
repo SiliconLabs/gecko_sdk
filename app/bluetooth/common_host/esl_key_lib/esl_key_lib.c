@@ -341,14 +341,14 @@ sl_status_t esl_key_lib_delete_record(const db_handle_p db_hnd, const db_record_
         if (rc == SQLITE_BUSY) {
           app_log_error("Sqlite is busy: %d" APP_LOG_NL, rc);
         }
+      }
+
+      rc = sqlite3_finalize(stmt);
+      if (rc != SQLITE_OK) {
+        app_log_error("Failed to execute finalize: %s" APP_LOG_NL, sqlite3_errmsg(*db));
+        status = SL_STATUS_ABORT;
       } else {
-        rc = sqlite3_finalize(stmt);
-        if (rc != SQLITE_OK) {
-          app_log_error("Failed to execute finalize: %s" APP_LOG_NL, sqlite3_errmsg(*db));
-          status = SL_STATUS_ABORT;
-        } else {
-          status = SL_STATUS_OK;
-        }
+        status = SL_STATUS_OK;
       }
     }
 
@@ -431,8 +431,9 @@ sl_status_t esl_key_lib_get_record_by_ble_address(const db_handle_p db_hnd, cons
       memcpy(&((*record_hnd_out)->identity_key), sqlite3_column_blob(stmt, ESL_KEY_LIB_AES_128_KEY_COLUMN_INDEX), sqlite3_column_bytes(stmt, ESL_KEY_LIB_AES_128_KEY_COLUMN_INDEX));
       memcpy(&((*record_hnd_out)->ap_key_material), sqlite3_column_blob(stmt, ESL_KEY_LIB_EAD_KEY_MATERIAL_COLUMN_INDEX), sqlite3_column_bytes(stmt, ESL_KEY_LIB_EAD_KEY_MATERIAL_COLUMN_INDEX));
     } else {
-      // Reset the statement, searching in the tag table
-      sqlite3_reset(stmt);
+      // Destroy the previous statement, searching in the tag table instead
+      sqlite3_finalize(stmt);
+      stmt = NULL;
       rc = sqlite3_prepare_v2(*db, "SELECT * FROM tag_table WHERE tag_ble_address = ?;", -1, &stmt, NULL);
 
       if (rc != SQLITE_OK) {
@@ -1063,7 +1064,10 @@ static sl_status_t internal_store_record(const db_handle_p db_hnd,
       }
     }
 
-    sqlite3_reset(stmt);
+    if (stmt != NULL) {
+      (void)sqlite3_finalize(stmt);
+      stmt = NULL;
+    }
 
     if (status == SL_STATUS_OK) {
       // BLE address is not in the other table, we can put the new record in
@@ -1090,12 +1094,12 @@ static sl_status_t internal_store_record(const db_handle_p db_hnd,
       if (rc != SQLITE_DONE) {
         app_log_error("Failed to execute step: %s, %d" APP_LOG_NL, sqlite3_errmsg(*db), rc);
         status = SL_STATUS_OBJECT_WRITE;
-      } else {
-        rc = sqlite3_finalize(stmt);
-        if (rc != SQLITE_OK) {
-          app_log_error("Failed to execute finalize: %s" APP_LOG_NL, sqlite3_errmsg(*db));
-          status = SL_STATUS_ABORT;
-        }
+      }
+
+      rc = sqlite3_finalize(stmt);
+      if (rc != SQLITE_OK) {
+        app_log_error("Failed to execute finalize: %s" APP_LOG_NL, sqlite3_errmsg(*db));
+        status = SL_STATUS_ABORT;
       }
     }
 

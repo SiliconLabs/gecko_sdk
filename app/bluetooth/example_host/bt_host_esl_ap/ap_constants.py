@@ -25,7 +25,7 @@ ESL AP constants.
 # Common constants used both by the BLE and ESL threads
 
 # Parameters for periodic advertisement
-PA_INTERVAL_ABS_MIN = 7.5
+PA_INTERVAL_ABS_MIN = 15 # not PAwR but ESL (reasonable) limit!
 PA_INTERVAL_ABS_MAX = 81918.75
 PA_SUBEVENT_MIN = 1
 PA_SUBEVENT_MAX = 128

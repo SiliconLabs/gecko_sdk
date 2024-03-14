@@ -156,6 +156,9 @@ ApplicationTask(SApplicationHandles* pAppHandles)
   DPRINTF("IsWakeupCausedByRtccTimeout=%s\n", (IsWakeupCausedByRtccTimeout()) ? "true" : "false");
   DPRINTF("CompletedSleepDurationMs   =%u\n", GetCompletedSleepDurationMs());
 
+  // Change the zpal_pm_device_type here so that the device can reach the lowest level of power consumption
+  zpal_pm_set_device_type(ZPAL_PM_DEVICE_NOT_LISTENING);
+
   // Wait for and process events
   DPRINT("Multilevel Sensor Event Distributor Started\n");
   for (;;)

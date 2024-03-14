@@ -21,7 +21,7 @@
 // <o EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE> ESI table size <1-32>
 // <i> Default: 3
 // <i> Maximum number of ESIs that the plugin will discover and communicate with.
-#define EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE   3
+#define EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE   6
 
 // </h>
 

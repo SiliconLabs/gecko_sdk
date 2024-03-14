@@ -154,6 +154,10 @@ void OSTimeDly(OS_TICK  dly,
 
       OSTCBCurPtr->TickCtrPrev += dly;
 
+      if (OSDelayMaxTick != 0 && OSTCBCurPtr->TickCtrPrev >= OSDelayMaxTick) {
+        OSTCBCurPtr->TickCtrPrev -= OSDelayMaxTick;               // Adjust in case of sleep timer overflow
+      }
+
       diff        = OSTCBCurPtr->TickCtrPrev - tick_os_temp;
       delay_ticks = (diff > 0) ? (CPU_INT32U)diff : 0u;
     } else {
@@ -162,9 +166,6 @@ void OSTimeDly(OS_TICK  dly,
       OSTCBCurPtr->IsTickCtrPrevValid = DEF_YES;
     }
 
-    if (OSDelayMaxTick != 0 && OSTCBCurPtr->TickCtrPrev >= OSDelayMaxTick) {
-      OSTCBCurPtr->TickCtrPrev -= OSDelayMaxTick;               // Adjust in case of sleep timer overflow
-    }
   }
 
   if (delay_ticks > 0u) {

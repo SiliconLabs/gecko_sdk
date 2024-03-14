@@ -6,12 +6,60 @@
 - category: Platform|Board|Thunderboard
 - quality: production
 - requires:
-  - name: brd2705a_revision
+  - name: efr32zg28b312f1024im48
+  - name: brd2705a_config
 - provides:
   - name: brd2705a
+  - name: hardware_board
+  - name: hardware_board_tb
   - name: hardware_board_from_tb
   - name: hardware_board_from_xg28-ek2705a
+  - name: hardware_board_has_vcom
+  - name: hardware_board_has_rfswitch
+  - name: hardware_board_has_rfswitch_to_ground
+  - name: hardware_board_has_hfxo_freq_39mhz
+  - name: hardware_board_has_hfxo
+  - name: hardware_board_has_lfxo
+  - name: hardware_board_supports_rf_band_2400
+  - name: hardware_board_supports_rf_band_868
+  - name: hardware_board_supports_rf_band_914
+  - name: hardware_board_supports_rf_band_924
+  - name: hardware_board_supports_4_rf_bands
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_868
 - recommends:
-  - id: brd2705a_a02
-- ui_hints:
-    visibility: never
+  - id: iostream_eusart
+    instance:
+    - vcom
+  - id: bootloader_uart_driver
+  - id: simple_led
+    instance:
+    - led0
+    - led1
+  - id: simple_button
+    instance:
+    - btn0
+    - btn1
+- template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2705A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
+  - name: HFXO_FREQ
+    value: 39000000
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_914
+  - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_924
+  - name: HARDWARE_BOARD_SUPPORTS_4_RF_BANDS
+  - name: HARDWARE_BOARD_DEFAULT_RF_BAND_868
+- tag:
+  - board:pn:BRD2705
+  - board:variant:A
+  - board:revision:A02
+  - board:device:efr32zg28b312f1024im48
+  - hardware:has:vcom
+  - hardware:has:pti
+  - hardware:has:led:2
+  - hardware:has:button:2

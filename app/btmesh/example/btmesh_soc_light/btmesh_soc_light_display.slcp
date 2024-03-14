@@ -130,7 +130,7 @@ configuration:
   - name: SL_GLIB_FONTNORMAL_8X8
     value: 0
   - name: SL_HEAP_SIZE
-    value: "0x5600"
+    value: "0x5700"
     condition:
       - "device_sdid_89"
   - name: SL_HEAP_SIZE

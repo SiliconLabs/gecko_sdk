@@ -1,0 +1,26 @@
+id: "bluetooth_utility_bgapi_trace"
+label: "BGAPI Trace utility"
+package: "Bluetooth"
+description: >
+  Bluetooth debugging utility for tracing BGAPI commands and events. Use
+  this component to record a BGAPI trace if instructed by Silicon Labs.
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
+quality: "experimental"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bgapi_trace_config.h"
+include:
+  - path: "inc/"
+    file_list:
+      - path: "sli_bgapi_trace.h"
+      - path: "sli_bgapi_debug_api.h"
+source:
+  - path: "src/sli_bgapi_trace.c"
+other_file:
+  - path: "api/sli_bgapi_debug.xapi"
+requires:
+  - name: segger_rtt
+  - name: emlib_core
+  - name: sleeptimer
+provides:
+  - name: "bluetooth_utility_bgapi_trace"

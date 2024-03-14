@@ -1351,14 +1351,15 @@ static uint8_t handle_oacp_write(sl_bt_ots_server_t *server,
         response_code = SL_BT_OTS_OACP_RESPONSE_CODE_PROCEDURE_NOT_PERMITTED;
         break;
       }
-      if (client->operation_in_progress != SL_BT_OTS_OACP_OPCODE_READ) {
-        response_code = SL_BT_OTS_OACP_RESPONSE_CODE_OPERATION_FAILED;
-        break;
-      }
 
       // Parameter length is incorrect
       if (write_request->value.len != OACP_MESSAGE_LENGTH_ABORT) {
         sc = ATT_ERR_INVALID_ATTRIBUTE_LEN;
+        return sc;
+      }
+
+      if (client->operation_in_progress != SL_BT_OTS_OACP_OPCODE_READ) {
+        response_code = SL_BT_OTS_OACP_RESPONSE_CODE_OPERATION_FAILED;
         break;
       }
 
@@ -1369,18 +1370,14 @@ static uint8_t handle_oacp_write(sl_bt_ots_server_t *server,
       break;
   }
 
-  // Send response in ATT error cases
+  // Guard
   if (sc != ATT_ERR_SUCCESS) {
-    (void)sl_bt_gatt_server_send_user_write_response(write_request->connection,
-                                                     write_request->characteristic,
-                                                     sc);
-    return SL_STATUS_FAIL;
+    return sc;
   }
 
   // Execute OP code
   if (server->callbacks->on_oacp_event != NULL
-      && response_code == SL_BT_OTS_OACP_RESPONSE_CODE_SUCCESS
-      && sc == ATT_ERR_SUCCESS) {
+      && response_code == SL_BT_OTS_OACP_RESPONSE_CODE_SUCCESS) {
     uint32_t  max_pdu_suggested = 0;
     uint32_t  max_sdu_suggested = 0;
 
@@ -1493,40 +1490,38 @@ static uint8_t handle_oacp_write(sl_bt_ots_server_t *server,
   (void)sl_bt_gatt_server_send_user_write_response(write_request->connection,
                                                    write_request->characteristic,
                                                    sc);
-  if (sc == ATT_ERR_SUCCESS) {
-    send_indication(client->connection_handle,
-                    server->gattdb_handles->characteristics.handles.object_action_control_point,
-                    sizeof(oacp_response_msg->opcode)
-                    + sizeof(oacp_response_msg->opcode)
-                    + sizeof(oacp_response_msg->response)
-                    + oacp_response_data_len,
-                    (uint8_t *)oacp_response_msg);
+  send_indication(client->connection_handle,
+                  server->gattdb_handles->characteristics.handles.object_action_control_point,
+                  sizeof(oacp_response_msg->opcode)
+                  + sizeof(oacp_response_msg->opcode)
+                  + sizeof(oacp_response_msg->response)
+                  + oacp_response_data_len,
+                  (uint8_t *)oacp_response_msg);
 
 #if SL_BT_OTS_SERVER_CONFIG_GLOBAL_OBJECT_CHANGED_SUPPORT
-    if (oacp_response_msg->response == SL_BT_OTS_OACP_RESPONSE_CODE_SUCCESS
-        && server->capabilities.capability_object_changed) {
-      // Send indications to clients
-      switch (oacp_response_msg->opcode) {
-        case SL_BT_OTS_OACP_OPCODE_CREATE:
-          (void)send_object_changed(server,
-                                    &client->current_object,
-                                    SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
-                                    | SL_BT_OTS_OBJECT_CHANGE_CREATION_MASK,
-                                    client->connection_handle);
-          break;
-        case SL_BT_OTS_OACP_OPCODE_DELETE:
-          (void)send_object_changed(server,
-                                    &client->current_object,
-                                    SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
-                                    | SL_BT_OTS_OBJECT_CHANGE_DELETION_MASK,
-                                    client->connection_handle);
-          break;
-        default:
-          break;
-      }
+  if (oacp_response_msg->response == SL_BT_OTS_OACP_RESPONSE_CODE_SUCCESS
+      && server->capabilities.capability_object_changed) {
+    // Send indications to clients
+    switch (oacp_response_msg->opcode) {
+      case SL_BT_OTS_OACP_OPCODE_CREATE:
+        (void)send_object_changed(server,
+                                  &client->current_object,
+                                  SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
+                                  | SL_BT_OTS_OBJECT_CHANGE_CREATION_MASK,
+                                  client->connection_handle);
+        break;
+      case SL_BT_OTS_OACP_OPCODE_DELETE:
+        (void)send_object_changed(server,
+                                  &client->current_object,
+                                  SL_BT_OTS_OBJECT_CHANGE_SOURCE_MASK
+                                  | SL_BT_OTS_OBJECT_CHANGE_DELETION_MASK,
+                                  client->connection_handle);
+        break;
+      default:
+        break;
     }
-#endif // SL_BT_OTS_SERVER_CONFIG_GLOBAL_OBJECT_CHANGED_SUPPORT
   }
+#endif // SL_BT_OTS_SERVER_CONFIG_GLOBAL_OBJECT_CHANGED_SUPPORT
 
   return sc;
 }
@@ -1539,6 +1534,7 @@ static sl_status_t send_indication(uint8_t       connection,
   sl_status_t sc;
 
   sli_bt_ots_indication_queue_item_t item;
+  memset(&item, 0x00, sizeof(item));
   item.connection = connection;
   item.gattdb_handle = characteristic;
   item.data_length = value_len;
@@ -1708,11 +1704,15 @@ static uint8_t handle_olcp_write(sl_bt_ots_server_t *server,
       response_code = SL_BT_OTS_OLCP_RESPONSE_CODE_OP_CODE_NOT_SUPPORTED;
   }
 
+  // Guard
+  if (sc != ATT_ERR_SUCCESS) {
+    return sc;
+  }
+
   uint32_t number_of_objects = 0;
   // Execute OP code
   if (server->callbacks->on_olcp_event != NULL
-      && response_code == SL_BT_OTS_OLCP_RESPONSE_CODE_SUCCESS
-      && sc == ATT_ERR_SUCCESS) {
+      && response_code == SL_BT_OTS_OLCP_RESPONSE_CODE_SUCCESS) {
     response_code = server->callbacks->on_olcp_event(server,
                                                      client->connection_handle,
                                                      &client->current_object,
@@ -1730,12 +1730,10 @@ static uint8_t handle_olcp_write(sl_bt_ots_server_t *server,
                                                    write_request->characteristic,
                                                    sc);
 
-  if (sc == ATT_ERR_SUCCESS) {
-    send_indication(client->connection_handle,
-                    server->gattdb_handles->characteristics.handles.object_list_control_point,
-                    response_code_len,
-                    (uint8_t *)olcp_response_msg);
-  }
+  send_indication(client->connection_handle,
+                  server->gattdb_handles->characteristics.handles.object_list_control_point,
+                  response_code_len,
+                  (uint8_t *)olcp_response_msg);
 
   return sc;
 }
@@ -2138,7 +2136,7 @@ static bool object_is_locked(sl_bt_ots_server_handle_t        server,
                              sl_bt_ots_object_id_t            *object)
 {
   for (uint8_t index = 0; index < server->concurrency; index++) {
-    sl_bt_ots_server_client_db_entry_t  *client = &server->client_db[index];
+    sl_bt_ots_server_client_db_entry_t *client = &server->client_db[index];
     if (client->operation_in_progress == SL_BT_OTS_OACP_OPCODE_WRITE) {
       if (object_id_compare(&client->object_in_use, object)) {
         return true;

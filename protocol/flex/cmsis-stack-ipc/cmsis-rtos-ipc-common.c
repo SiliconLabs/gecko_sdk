@@ -35,6 +35,7 @@
 #include "cmsis-rtos-support.h"
 #include "csp-command-utils.h"
 #include "csp-format.h"
+#include "csp-api-enum-gen.h"
 
 // TODO: This is for IAR, for GCC it should be "unsigned long"
 typedef unsigned int PointerType;
@@ -239,6 +240,15 @@ uint8_t *getApiCommandPointer()
 uint8_t *allocateCallbackCommandPointer()
 {
   return (uint8_t *)malloc(MAX_STACK_API_COMMAND_SIZE);
+}
+
+void unknownCommandIdHandler(uint16_t commandId)
+{
+  uint16_t command_type = commandId & 0xFF00;
+  if (command_type == VNCP_CMD_ID) {
+    //The OS needs a response to unlock the blocking command
+    sendResponse(apiCommandData, 0);
+  }
 }
 
 //------------------------------------------------------------------------------

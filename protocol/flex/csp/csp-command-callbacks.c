@@ -511,7 +511,7 @@ void handleIncomingCallbackCommand(uint16_t commandId,
       frequencyHoppingStartClientCompleteCommandHandler(callbackParams);
       break;
     default: {
-      assert(0);
+      unknownCommandIdHandler(commandId);
     }
   }
 }

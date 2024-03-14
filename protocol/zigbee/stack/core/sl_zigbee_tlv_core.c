@@ -212,6 +212,9 @@ sl_status_t sl_zigbee_tlv_concat_to_buffer(Buffer *buffer_handle,
                                            sl_zigbee_tlv_t *tlv)
 {
   Buffer buff = *buffer_handle;
+  if (buff == NULL_BUFFER) {
+    return SL_STATUS_FAIL;
+  }
   uint16_t buffer_len = sli_legacy_buffer_manager_get_buffer_length(buff);
   if (buffer_len < index) {
     return SL_STATUS_WOULD_OVERFLOW;

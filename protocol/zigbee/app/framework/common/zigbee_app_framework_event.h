@@ -49,6 +49,18 @@
  * @code
  * // Declare event as global
  * sl_zigbee_event_t my_event;
+ * sl_zigbee_event_t my_isr_event;
+ *
+ * void SOME_IRQHandler(void)
+ * {
+ *    // Activates the ISR type event from IRQ Handler.
+ *    sl_zigbee_event_set_active(&my_isr_event);
+ * }
+ *
+ * void my_isr_event_handler(sl_zigbee_event_t *event)
+ * {
+ *    // Event expired, do something
+ * }
  *
  * void my_event_hendler(sl_zigbee_event_t *event)
  * {
@@ -62,6 +74,9 @@
  * {
  *    // Initialize event
  *    sl_zigbee_event_init(&my_event, my_event_handler);
+ *
+ *    // Initialise an event type that can be activated from the ISR.
+ *    sl_zigbee_af_isr_event_init(&my_isr_event, my_isr_event_handler);
  *
  *    // Set the event to expire immediately (that is, in the next iteration of the main loop)
  *    sl_zigbee_event_set_active(&my_event);
@@ -78,6 +93,17 @@ typedef EmberEvent sl_zigbee_event_t;
 
 /** @name API */
 // @{
+
+/** @brief Application event initialization routine for ISR event. Every ISR event
+ * event must be initialized by calling this function.
+ *
+ * @param[in] event  A pointer to the \ref sl_zigbee_event_t object to be
+ *                   initalized. Event objects must be global.
+ *
+ * @param[in] handler Handler function that shall be called when the event runs.
+ */
+void sl_zigbee_af_isr_event_init(sl_zigbee_event_t *event,
+                                 void (*handler)(sl_zigbee_event_t *));
 
 #if defined(DOXYGEN_SHOULD_SKIP_THIS)
 /** @brief Application event initialization routine. Every application event

@@ -1,0 +1,22 @@
+!!omap
+- id: bg27_rb4110b
+- label: BG27-RB4110B
+- package: platform
+- description: Kit BSP support for the BG27 2.4 GHZ 4 dBm DCDC Buck CSP Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_bg27-rb4110b
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"BG27-RB4110B"'
+  - name: SL_KIT_REV
+    value: '"A01"'
+- tag:
+  - kit:opn:BG27-RB4110B
+  - kit:pn:RB4110
+  - kit:variant:B
+  - kit:revision:A01

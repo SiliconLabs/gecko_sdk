@@ -19,3 +19,41 @@ The host-based sample applications are described in the respective SDK overview 
 
 The Serial API leverages the Z-Wave Protocol API. The Serial API introduces additional messages related
 to inter-host communications.
+
+## Known Issues
+
+### OTW Update
+
+The following update paths for Serial API Controller are not possible using the
+pre-built binaries because the defines `ZAF_CONFIG_GENERIC_TYPE` and
+`ZAF_CONFIG_SPECIFIC_TYPE` differ across these versions:
+
+- 7.19 or lower to 7.20.0 - 7.20.2
+- 7.20.0 - 7.20.2 to 7.20.3 or higher
+
+However, it is possible to create a custom firmware that is compatible with
+earlier versions of the application by building the application manually after
+editing `application_properties_config.h`.
+
+If you want to update a device running the pre-built 7.19 or lower version
+firmware to 7.20.0 - 7.20.2,
+change both `PRODUCT_ID_GENERIC_TYPE` and `PRODUCT_ID_SPECIFIC_TYPE` to
+`0`.
+
+If you want to update a device running the pre-built 7.20.0 - 7.20.2 version firmware
+to 7.20.3 or higher,
+remove the following conditional block from the file:
+
+```c
+#if (ZAF_CONFIG_GENERIC_TYPE == GENERIC_TYPE_STATIC_CONTROLLER && \
+     ZAF_CONFIG_SPECIFIC_TYPE == SPECIFIC_TYPE_PC_CONTROLLER)
+(...)
+#endif
+```
+
+Changing these values will only affect the Product ID, stored in the struct
+`sl_app_properties`.
+The application will still report the values specified in the defines
+`ZAF_CONFIG_GENERIC_TYPE` and `ZAF_CONFIG_SPECIFIC_TYPE` in its
+Node Information Frame.\
+Note that these values can  be changed on the fly using the Serial API command `SERIAL_API_APPL_NODE_INFORMATION`.

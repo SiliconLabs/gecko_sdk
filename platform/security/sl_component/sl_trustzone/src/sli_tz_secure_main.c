@@ -249,9 +249,6 @@ int main(void)
 
   #if defined(TFM_FIH_PROFILE_ON) && defined(FIH_ENABLE_DELAY)
   configure_sau_smu_for_fih_delay();
-    #if defined(CRYPTOACC_PRESENT)
-  cryptoacc_trng_initialize();
-    #endif
   #endif
 
   FIH_CALL(enable_fault_exceptions, fih_rc);

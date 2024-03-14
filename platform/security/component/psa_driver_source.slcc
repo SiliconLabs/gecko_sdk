@@ -20,6 +20,8 @@ requires:
     condition: [device_has_cryptoacc]
   - name: enum
     condition: [device_has_cryptoacc]
+  - name: sl_assert
+    condition: [device_has_cryptoacc]
   - name: se_manager
     condition: [device_series_2]
 
@@ -55,6 +57,8 @@ source:
 
   - path: src/sli_cryptoacc_driver_key_derivation.c
     condition: [device_has_cryptoacc, device_has_sepuf]
+  - path: src/sli_cryptoacc_driver_trng.c
+    condition: [device_has_cryptoacc]
 
   # Transparent drivers
   - path: src/sli_crypto_transparent_driver_cipher.c
@@ -121,6 +125,8 @@ include:
         condition: [device_has_crypto]
 
       - path: cryptoacc_management.h
+        condition: [device_has_cryptoacc]
+      - path: sli_cryptoacc_driver_trng.h
         condition: [device_has_cryptoacc]
       - path: sli_cryptoacc_transparent_functions.h
         condition: [device_has_cryptoacc]

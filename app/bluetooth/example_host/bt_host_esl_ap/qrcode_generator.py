@@ -120,7 +120,7 @@ def generate_qrcode(data, height, width):
     # Adding border
     top_border = round((height - qr_height) / 2)
     left_border = round((width - qr_width) / 2)
-    result = Image.new('RGB', (width, height), XbmConverter.xbm_white)
+    result = Image.new('RGBA', (width, height), XbmConverter.xbm_white)
     result.paste(img, (left_border, top_border))
     # Create bytes from image
     img_xbm = XbmConverter(result)

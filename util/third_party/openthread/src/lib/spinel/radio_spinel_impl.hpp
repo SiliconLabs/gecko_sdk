@@ -1797,8 +1797,21 @@ void RadioSpinel<InterfaceType>::HandleTransmitDone(uint32_t          aCommand,
     }
 
 exit:
-    mState   = kStateTransmitDone;
-    mTxError = error;
+    // Recover the RCP immediately if the error is not one of the expected transmit done errors.
+    mState = kStateTransmitDone;
+    if (error == OT_ERROR_NONE ||
+        error == OT_ERROR_ABORT ||
+        error == OT_ERROR_NO_ACK ||
+        error == OT_ERROR_CHANNEL_ACCESS_FAILURE)
+    {
+        mTxError = error;
+    }
+    else
+    {
+        mTxError = kErrorAbort;
+        HandleRcpTimeout();
+        RecoverFromRcpFailure();
+    }
     UpdateParseErrorCount(error);
     LogIfFail("Handle transmit done failed", error);
 }

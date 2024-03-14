@@ -288,6 +288,10 @@ typedef enum {
   acmpInputVDACOUT0       = _ACMP_INPUTCTRL_POSSEL_VDACOUT0, /**< Select VDAC0 channel 0 output. */
   acmpInputVDACOUT1       = _ACMP_INPUTCTRL_POSSEL_VDACOUT1, /**< Select VDAC0 channel 1 output. */
 #endif
+#if defined(_ACMP_INPUTCTRL_POSSEL_VDAC0OUT1)
+  acmpInputVDAC0OUT1       = _ACMP_INPUTCTRL_POSSEL_VDAC0OUT1, /**< Select VDAC0 channel 1 output. */
+  acmpInputVDAC1OUT1       = _ACMP_INPUTCTRL_POSSEL_VDAC1OUT1, /**< Select VDAC1 channel 1 output. */
+#endif
   acmpInputPA0            = _ACMP_INPUTCTRL_POSSEL_PA0,  /**< Select Port A Pin0. */
   acmpInputPA1            = _ACMP_INPUTCTRL_POSSEL_PA1,  /**< Select Port A Pin1. */
   acmpInputPA2            = _ACMP_INPUTCTRL_POSSEL_PA2,  /**< Select Port A Pin2. */

@@ -1209,7 +1209,7 @@
       <channel_config_entries>
         <channel_config_entry name="WiSunConf Channel Group 87">
           <channel_number_start>0</channel_number_start>
-          <channel_number_end>18</channel_number_end>
+          <channel_number_end>28</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
           <max_power>RAIL_TX_POWER_MAX</max_power>
           <metadata>{}</metadata>
@@ -1223,7 +1223,7 @@
       <channel_config_entries>
         <channel_config_entry name="WiSunConf Channel Group 88">
           <channel_number_start>0</channel_number_start>
-          <channel_number_end>9</channel_number_end>
+          <channel_number_end>14</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
           <max_power>RAIL_TX_POWER_MAX</max_power>
           <metadata>{}</metadata>
@@ -1237,7 +1237,7 @@
       <channel_config_entries>
         <channel_config_entry name="WiSunConf Channel Group 89">
           <channel_number_start>0</channel_number_start>
-          <channel_number_end>9</channel_number_end>
+          <channel_number_end>14</channel_number_end>
           <physical_channel_offset>SAME_AS_FIRST_CHANNEL</physical_channel_offset>
           <max_power>RAIL_TX_POWER_MAX</max_power>
           <metadata>{}</metadata>

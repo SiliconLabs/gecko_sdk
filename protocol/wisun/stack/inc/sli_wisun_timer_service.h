@@ -55,6 +55,7 @@ struct sli_wisun_timer {
     uint64_t expire_time_us;               // Next expiration absolute time in microseconds
     const char *name;                      // Name used in debug traces (can be NULL)
     ns_list_link_t link;                   // Reserved for ns_list
+    uint32_t is_valid;                     // Valid value is set when the timer is inititialized
 };
 
 /**

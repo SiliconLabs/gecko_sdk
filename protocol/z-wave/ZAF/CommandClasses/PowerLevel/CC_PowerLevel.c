@@ -87,6 +87,7 @@ SendTestReport(void)
   txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount1 =
       (uint8_t)(testFrameSuccessCount >> 8);
   txBuf.ZW_PowerlevelTestNodeReportFrame.testFrameCount2 = (uint8_t)testFrameSuccessCount;
+  tx_options.use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t*)&txBuf,
                           sizeof(txBuf.ZW_PowerlevelTestNodeReportFrame),

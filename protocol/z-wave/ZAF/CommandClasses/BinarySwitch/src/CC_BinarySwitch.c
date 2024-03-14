@@ -262,6 +262,7 @@ CC_BinarySwitch_report_stx(zaf_tx_options_t *tx_options, void* p_switch)
   uint8_t target_value = ZAF_Actuator_GetTargetValue(&p_switch_data->actuator);
   // Encode target value in accordance with CC:0025.02.03.11.004.
   target_value = encode_value(target_value);
+  tx_options->use_supervision = true;
   txBuf.ZW_SwitchBinaryReportV2Frame.targetValue  = target_value;
   txBuf.ZW_SwitchBinaryReportV2Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator);
 

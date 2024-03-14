@@ -230,6 +230,13 @@ sl_zigbee_event_t* sli_zigbee_get_event_ptr(sl_zigbee_event_t *event,
   return event;
 }
 
+// Event initialisation routine for the event that gets activated from ISRs.
+void sl_zigbee_af_isr_event_init(sl_zigbee_event_t *event,
+                                 void (*handler)(sl_zigbee_event_t *))
+{
+  sl_zigbee_event_init(event, handler);
+  event->actions.marker = sli_zigbee_isr_event_marker;
+}
 //------------------------------------------------------------------------------
 // Callbacks stubs
 

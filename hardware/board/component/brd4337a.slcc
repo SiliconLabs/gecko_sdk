@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_xgm240-rb4337a
   - name: hardware_board_has_vcom
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band

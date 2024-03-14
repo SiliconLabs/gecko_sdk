@@ -203,7 +203,6 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     case LIGHT_CONTROL_LIGHTNESS_PROLONG:
     case LIGHT_CONTROL_LIGHTNESS_STANDBY:
     case PRESENT_DEVICE_OPERATING_TEMPERATURE:
-    case TIME_SINCE_MOTION_SENSED:
     case TIME_SINCE_PRESENCE_DETECTED:
     case PRESENT_INPUT_VOLTAGE:
     case PRESENT_OUTPUT_VOLTAGE:
@@ -240,6 +239,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     case LIGHT_CONTROL_TIME_RUN_ON:
     case PRESENT_AMBIENT_LIGHT_LEVEL:
     case PRESENT_ILLUMINANCE:
+    case TIME_SINCE_MOTION_SENSED:
     {
       uint8_to_buf(ptr++, 3);
       uint24_to_buf(ptr, *(uint32_t*)value);
@@ -468,7 +468,6 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     case LIGHT_CONTROL_LIGHTNESS_PROLONG:
     case LIGHT_CONTROL_LIGHTNESS_STANDBY:
     case PRESENT_DEVICE_OPERATING_TEMPERATURE:
-    case TIME_SINCE_MOTION_SENSED:
     case TIME_SINCE_PRESENCE_DETECTED:
     case PRESENT_INPUT_VOLTAGE:
     case PRESENT_OUTPUT_VOLTAGE:
@@ -503,6 +502,7 @@ mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uin
     case LIGHT_CONTROL_TIME_RUN_ON:
     case PRESENT_AMBIENT_LIGHT_LEVEL:
     case PRESENT_ILLUMINANCE:
+    case TIME_SINCE_MOTION_SENSED:
     {
       property.uint32 = uint24_from_buf(ptr);
     } break;

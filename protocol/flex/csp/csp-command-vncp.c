@@ -1566,7 +1566,7 @@ void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData)
       getDefaultChannelCommandHandler(apiCommandData);
       break;
     default: {
-      assert(0);
+      unknownCommandIdHandler(commandId);
     }
   }
 }

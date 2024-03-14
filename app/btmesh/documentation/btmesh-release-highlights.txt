@@ -1,4 +1,4 @@
-Bluetooth Mesh SDK 5.0.2.0
+Bluetooth Mesh SDK 5.0.3.0
 - Targeted quality improvements and bug fixes
 
 

@@ -37,6 +37,10 @@
 // <i> Default: 0
 #define SL_BOARD_ENABLE_VCOM                    0
 
+// <q SL_BOARD_ENABLE_SENSOR_RHT> Enable Relative Humidity and Temperature sensor
+// <i> Default: 0
+#define SL_BOARD_ENABLE_SENSOR_RHT              0
+
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
@@ -46,6 +50,12 @@
 #define SL_BOARD_ENABLE_VCOM_PORT               gpioPortD
 #define SL_BOARD_ENABLE_VCOM_PIN                6
 // [GPIO_SL_BOARD_ENABLE_VCOM]$
+
+// <gpio> SL_BOARD_ENABLE_SENSOR_RHT
+// $[GPIO_SL_BOARD_ENABLE_SENSOR_RHT]
+#define SL_BOARD_ENABLE_SENSOR_RHT_PORT         gpioPortA
+#define SL_BOARD_ENABLE_SENSOR_RHT_PIN          12
+// [GPIO_SL_BOARD_ENABLE_SENSOR_RHT]$
 
 // <<< sl:end pin_tool >>>
 

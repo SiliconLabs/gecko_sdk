@@ -815,6 +815,20 @@ sl_status_t sl_wisun_get_pom_ie(uint8_t *phy_mode_id_count,
                                 uint8_t *is_mdr_command_capable);
 
 /**************************************************************************//**
+ * Get the Wi-SUN stack version.
+ *
+ * @param[out] major Wi-SUN stack version major
+ * @param[out] minor Wi-SUN stack version minor
+ * @param[out] patch Wi-SUN stack version patch
+ * @param[out] patch Build number, set to 0 in public versions
+ * @return SL_STATUS_OK if successful, an error code otherwise
+ *****************************************************************************/
+sl_status_t sl_wisun_get_stack_version(uint8_t *major, 
+                                       uint8_t *minor,
+                                       uint8_t *patch,
+                                       uint16_t *build);
+
+/**************************************************************************//**
  * Configure the LFN parameter set.
  *
  * @param[in] params Parameter set to use

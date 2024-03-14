@@ -135,7 +135,7 @@ static uint8_t networkCount;    // The number of NetworkInfo records.
 
    #define SCAN_DEBUG_XPAN_PRINT(xpan)                              \
   do {                                                              \
-    sl_zigbee_core_debug_print("%x%x%x%x%x%x%x%x",                  \
+    sl_zigbee_core_debug_print("%02X%02X%02X%02X%02X%02X%02X%02X",  \
                                xpan[0], xpan[1], xpan[2], xpan[3],  \
                                xpan[4], xpan[5], xpan[6], xpan[7]); \
     (void) emberSerialWaitSend(1);                                  \
@@ -149,7 +149,7 @@ bool isTestFrameworkDebugOn(void);
   #define SCAN_DEBUG(x) debug(x)
   #define SCAN_DEBUG_XPAN_PRINT(xpan)          \
   do {                                         \
-    debug("%x%x%x%x%x%x%x%x",                  \
+    debug("%02X%02X%02X%02X%02X%02X%02X%02X",  \
           xpan[0], xpan[1], xpan[2], xpan[3],  \
           xpan[4], xpan[5], xpan[6], xpan[7]); \
   } while (false)
@@ -257,7 +257,7 @@ static void energyScanComplete(void)
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_SUB_GHZ_PRESENT
   uint8_t currentPage = channelMaskCache >> EMBER_MAX_CHANNELS_PER_PAGE;
   SCAN_DEBUG_MSG("Scan complete on channel %d,", currentPage);
-  SCAN_DEBUG_MSG(" mask 0x%4x\n", channelMaskCache & 0x07FFFFFFUL);
+  SCAN_DEBUG_MSG(" mask 0x%04x\n", channelMaskCache & 0x07FFFFFFUL);
 
   // Decide whether we need to proceed to the next channel page.
   // This can be a bit tricky. We have the flexibility of the search mode,
@@ -324,7 +324,7 @@ static void energyScanComplete(void)
       candidateCount++;
       SCAN_DEBUG_MSG("Candidate %d: ", candidateCount);         // 1-based index
       SCAN_DEBUG_MSG("%d ", channelCandidates[i].chanPg);       // 8-bit endoced channel + page
-      SCAN_DEBUG_MSG("(0x%x), ", channelCandidates[i].chanPg);  // same in hex
+      SCAN_DEBUG_MSG("(0x%02X), ", channelCandidates[i].chanPg);  // same in hex
       SCAN_DEBUG_MSG("%d dBm\n", channelCandidates[i].rssi);    // RSSI
     }
   }
@@ -391,7 +391,7 @@ static void startPanIdScan(void)
   while (i < NUM_PAN_ID_CANDIDATES) {
     uint16_t panId = emberGetPseudoRandomNumber() & 0xFFFF;
     if (panId != 0xFFFF) {
-      SCAN_DEBUG_MSG("panIdCandidate: 0x%2X\n", panId);
+      SCAN_DEBUG_MSG("panIdCandidate: 0x%02X\n", panId);
       panIdCandidates[i] = panId;
       i++;
     }
@@ -437,7 +437,7 @@ static EmberStatus startSecondInterface(void)
   const uint8_t page = emberAfGetPageFrom8bitEncodedChanPg(channelCache);
   const uint8_t channel = emberAfGetChannelFrom8bitEncodedChanPg(channelCache);
 
-  emberAfAppPrint("Starting 2nd interface on page %x, channel %x ",
+  emberAfAppPrint("Starting 2nd interface on page %0X, channel %0X ",
                   page,
                   channel);
 
@@ -455,7 +455,7 @@ static EmberStatus startSecondInterface(void)
   if (status == EMBER_SUCCESS) {
     emberAfAppPrintln("Success!");
   } else {
-    emberAfAppPrintln("Error 0x%x", status);
+    emberAfAppPrintln("Error 0x%0X", status);
   }
 
   sli_zigbee_af_secondary_interface_formed_callback(status);
@@ -630,7 +630,7 @@ void sli_zigbee_af_form_and_join_energy_scan_result_callback(uint8_t channel, in
   }
 
   SCAN_DEBUG_MSG("SCAN: found energy %d dBm on ", maxRssiValue);
-  SCAN_DEBUG_MSG("channel 0x%x", channel);
+  SCAN_DEBUG_MSG("channel 0x%02X", channel);
 
 #ifdef SL_CATALOG_ZIGBEE_NETWORK_FIND_PRESENT
   if (emberAfPluginNetworkFindGetEnableScanningAllChannelsCallback()
@@ -731,7 +731,7 @@ void emberFormAndJoinCleanup(EmberStatus status)
 static EmberStatus startScan(EmberNetworkScanType type, uint32_t mask, uint8_t duration)
 {
   EmberStatus status = emberStartScan(type, mask, duration);
-  SCAN_DEBUG_MSG("SCAN: start scan, status 0x%x\r\n", status);
+  SCAN_DEBUG_MSG("SCAN: start scan, status 0x%02X\r\n", status);
   if (status != EMBER_SUCCESS) {
     emberFormAndJoinCleanup(status);
   }

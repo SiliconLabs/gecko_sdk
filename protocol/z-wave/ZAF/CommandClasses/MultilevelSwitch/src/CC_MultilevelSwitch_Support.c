@@ -349,6 +349,7 @@ CC_MultilevelSwitch_report_stx(zaf_tx_options_t *tx_options, void* p_switch)
   txBuf.ZW_SwitchMultilevelReportV4Frame.currentValue = ZAF_Actuator_GetCurrentValue(&p_switch_data->actuator);
   txBuf.ZW_SwitchMultilevelReportV4Frame.targetValue  = ZAF_Actuator_GetTargetValue(&p_switch_data->actuator);
   txBuf.ZW_SwitchMultilevelReportV4Frame.duration     = ZAF_Actuator_GetDurationRemaining(&p_switch_data->actuator);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_SWITCH_MULTILEVEL_REPORT_V4_FRAME),

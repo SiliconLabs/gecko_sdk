@@ -685,13 +685,28 @@ static void vScaleAfterWakeup(void)
 }
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
 typedef enum {
   dpllState_Save,         /* Save DPLL state. */
   dpllState_Restore,      /* Restore DPLL.    */
 } dpllState_TypeDef;
 
-/* Save or restore and relock DPLL. */
+/***************************************************************************//**
+ * @brief
+ *   Save or restore DPLL state.
+ *
+ * @param[in] action
+ *    Value to indicate saving DPLL state or restoring its state.
+ *
+ * @note
+ *   The function is used in EMU_Save() and EMU_Restore() to handle the
+ *   DPLL state before entering EM2 or EM3 and after exiting EM2 or EM3.
+ *   The function is required for the EFR32xG22 and EFR32xG27 families.
+ *   On those families devices, the DPLL is disabled automatically when
+ *   entering EM2, EM3. But exiting EM2, EM3 won't re-enable automatically
+ *   the DPLL. Hence, the software needs to re-enable the DPLL upon EM2/3
+ *   exit.
+ ******************************************************************************/
 static void dpllState(dpllState_TypeDef action)
 {
   CMU_ClkDiv_TypeDef div;
@@ -941,7 +956,7 @@ void EMU_EnterEM2(bool restore)
   bool errataFixEmuE110En;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   if (restore) {
     dpllState(dpllState_Save);
   }
@@ -1040,7 +1055,7 @@ void EMU_EnterEM2(bool restore)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   if (restore) {
     dpllState(dpllState_Restore);
   }
@@ -1123,7 +1138,7 @@ void EMU_EnterEM3(bool restore)
   bool errataFixEmuE110En;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   if (restore) {
     dpllState(dpllState_Save);
   }
@@ -1234,7 +1249,7 @@ void EMU_EnterEM3(bool restore)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   if (restore) {
     dpllState(dpllState_Restore);
   }
@@ -1263,7 +1278,7 @@ void EMU_Save(void)
 #if (_SILICON_LABS_32B_SERIES < 2)
   emState(emState_Save);
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   dpllState(dpllState_Save);
 #endif
 }
@@ -1282,7 +1297,7 @@ void EMU_Restore(void)
 #if (_SILICON_LABS_32B_SERIES < 2)
   emState(emState_Restore);
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)
   dpllState(dpllState_Restore);
 #endif
 }

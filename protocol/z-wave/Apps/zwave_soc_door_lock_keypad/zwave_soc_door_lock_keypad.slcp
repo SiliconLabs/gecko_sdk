@@ -56,7 +56,7 @@ configuration:
   - name: APP_REVISION
     value: 20
   - name: APP_PATCH
-    value: 2
+    value: 3
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_ACCESS

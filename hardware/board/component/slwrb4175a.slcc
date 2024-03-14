@@ -15,9 +15,9 @@
   - name: SL_KIT_NAME
     value: '"SLWRB4175A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:SLWRB4175A
   - kit:pn:WRB4175
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A01

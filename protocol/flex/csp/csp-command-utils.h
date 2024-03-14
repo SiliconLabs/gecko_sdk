@@ -36,6 +36,8 @@ bool isCurrentTaskStackTask(void);
 
 void sendCallbackCommand(uint8_t *callbackCommandBuffer, uint16_t commandLength);
 
+void unknownCommandIdHandler(uint16_t commandId);
+
 //------------------------------------------------------------------------------
 // Internal APIs defined in csp-command-vncp.c or csp-command-app.c
 void handleIncomingApiCommand(uint16_t commandId, uint8_t *apiCommandData);

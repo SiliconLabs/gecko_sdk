@@ -49,6 +49,8 @@
     value: '"BRD4401A"'
   - name: SL_BOARD_REV
     value: '"A00"'
+  - name: HFXO_FREQ
+    value: 39000000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_868
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_915

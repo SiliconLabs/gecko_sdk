@@ -37,6 +37,8 @@
     value: '"BRD2100A"'
   - name: SL_BOARD_REV
     value: '"B02"'
+  - name: HFXO_FREQ
+    value: 32000000
 - tag:
   - board:pn:BRD2100
   - board:variant:A

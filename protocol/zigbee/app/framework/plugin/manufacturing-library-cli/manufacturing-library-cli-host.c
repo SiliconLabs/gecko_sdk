@@ -38,6 +38,7 @@ static uint8_t savedPkt[MAX_BUFFER_SIZE];
 static uint16_t mfgCurrentPacketCounter = 0;
 
 static bool inReceivedStream = false;
+
 static bool mfgLibRunning = false;
 static bool mfgToneTestRunning = false;
 static bool mfgStreamTestRunning = false;
@@ -56,6 +57,8 @@ static uint8_t   sendBuff[MAX_BUFFER_SIZE + 1];
 sl_zigbee_event_t emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent;
 #define checkReceiveCompleteEventControl (&emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEvent)
 void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event);
+
+static uint16_t savedPacketCount = 0;
 
 #define CHECK_RECEIVE_COMPLETE_DELAY_QS 2
 
@@ -112,22 +115,26 @@ void sli_zigbee_af_manufacturing_library_cli_init_callback(uint8_t init_level)
 
 void emberAfPluginManufacturingLibraryCliCheckReceiveCompleteEventHandler(sl_zigbee_event_t * event)
 {
-  if (!inReceivedStream || !mfgLibRunning) {
+  sl_zigbee_event_set_inactive(checkReceiveCompleteEventControl);
+  if (!inReceivedStream) {
     return;
   }
 
-  emberAfCorePrintln("%p RXed %d packets in the last %d ms",
-                     PLUGIN_NAME,
-                     mfgCurrentPacketCounter,
-                     CHECK_RECEIVE_COMPLETE_DELAY_QS * 250);
-  emberAfCorePrintln("First packet: lqi %d, rssi %d, len %d",
-                     savedLinkQuality,
-                     savedRssi,
-                     savedPktLength);
-  mfgCurrentPacketCounter = 0;
-
-  sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
-                               CHECK_RECEIVE_COMPLETE_DELAY_QS);
+  if (savedPacketCount == mfgTotalPacketCounter) {
+    inReceivedStream = false;
+    emberAfCorePrintln("%p Receive Complete %d packets",
+                       PLUGIN_NAME,
+                       mfgCurrentPacketCounter);
+    emberAfCorePrintln("First packet: lqi %d, rssi %d, len %d",
+                       savedLinkQuality,
+                       savedRssi,
+                       savedPktLength);
+    mfgCurrentPacketCounter = 0;
+  } else {
+    savedPacketCount = mfgTotalPacketCounter;
+    sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
+                                 CHECK_RECEIVE_COMPLETE_DELAY_QS);
+  }
 }
 
 static void fillBuffer(uint8_t* buff, uint8_t length, bool random)
@@ -164,17 +171,17 @@ void ezspMfglibRxHandler(uint8_t linkQuality,
   mfgTotalPacketCounter++;
 
   mfgCurrentPacketCounter++;
+
   // If this is the first packet of a transmit group then save the information
   // of the current packet. Don't do this for every packet, just the first one.
-  if (!inReceivedStream && mfgLibRunning) {
+  if (!inReceivedStream) {
     inReceivedStream = true;
     mfgCurrentPacketCounter = 1;
     savedRssi = rssi;
     savedLinkQuality = linkQuality;
     savedPktLength = packetLength;
     MEMMOVE(savedPkt, packetContents, savedPktLength);
-    sl_zigbee_event_set_delay_qs(checkReceiveCompleteEventControl,
-                                 CHECK_RECEIVE_COMPLETE_DELAY_QS);
+    sl_zigbee_event_set_active(checkReceiveCompleteEventControl);
   }
 }
 
@@ -213,10 +220,8 @@ void emberAfMfglibStop(void)
                      PLUGIN_NAME,
                      status);
   emberAfCorePrintln("rx %d packets while in mfg mode", mfgTotalPacketCounter);
-
   if (status == EMBER_SUCCESS) {
     mfgLibRunning = false;
-    inReceivedStream = false;
   }
 }
 

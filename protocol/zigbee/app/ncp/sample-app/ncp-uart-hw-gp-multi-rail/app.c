@@ -27,6 +27,27 @@
 #include "app/xncp/xncp-sample-custom-ezsp-protocol.h"
 #include "zigbee_app_framework_common.h"
 
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+#include "green-power-server.h"
+#include "green-power-common.h"
+#include "app/framework/include/af.h"
+
+void emberAfGreenPowerClusterCommissioningMessageStatusNotificationCallback(EmberAfGreenPowerServerCommissioningState *commissioningState,
+                                                                            EmberApsFrame *apsFrame,
+                                                                            EmberOutgoingMessageType messageType,
+                                                                            uint16_t destination,
+                                                                            EmberStatus status)
+{
+  UNUSED_VAR(apsFrame);
+  UNUSED_VAR(messageType);
+  UNUSED_VAR(destination);
+  UNUSED_VAR(status);
+  sl_zigbee_app_debug_println("CommissioningMessageStatusNotificationCallback. Endpoint: %d, Proxies Involved: %d",
+                              commissioningState->endpoint, commissioningState->proxiesInvolved);
+}
+
+#endif //SL_CATALOG_ZIGBEE_GREEN_POWER_SERVER_PRESENT
+
 #if defined(SL_CATALOG_ZIGBEE_MULTIRAIL_DEMO_PRESENT)
 #include "multirail-demo.h"
 

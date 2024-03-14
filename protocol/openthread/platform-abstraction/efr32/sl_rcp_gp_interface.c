@@ -24,6 +24,7 @@
 #include "sl_rcp_gp_interface.h"
 #include "sl_rcp_gp_interface_config.h"
 #include "sl_packet_utils.h"
+#include "utils/code_utils.h"
 #include <string.h>
 
 // This implements mechanism to buffer outgoing Channel Configuration (0xF3) and
@@ -142,6 +143,7 @@ bool sl_gp_intf_is_gp_pkt(otRadioFrame *aFrame, bool isRxFrame)
 
     uint8_t fc = *gpFrameStartIndex;
 
+    otEXPECT_ACTION(gp_state == SL_GP_STATE_WAITING_FOR_PKT, isGpPkt = false);
     otLogDebgPlat("GP RCP INTF : (%s) PL Index = %d Channel = %d Length = %d FC = %0X", isRxFrame? "Rx":"Tx",(gpFrameStartIndex - aFrame->mPsdu), aFrame->mChannel, aFrame->mLength,fc);
 
     // The basic Identification of a GPDF Frame : The minimum GPDF length need to be 10 in this case for any direction
@@ -243,5 +245,6 @@ bool sl_gp_intf_is_gp_pkt(otRadioFrame *aFrame, bool isRxFrame)
         otLogDebgPlat("GP RCP INTF: GP filter passed!!");
     }
 
+exit:
     return isGpPkt;
 }

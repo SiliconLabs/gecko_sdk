@@ -16,8 +16,6 @@
 //#define DEBUGPRINT
 #include "DebugPrint.h"
 
-extern node_id_t g_nodeID;
-
 /// Header size of ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME, before encapFrame field
 #define CC_MULTICHAN_ENCAP_HEADER_SIZE   4
 
@@ -94,7 +92,7 @@ static received_frame_status_t CC_MultiChannel_handler(
          * - Security 0 CC is not applicable in Long Range networks
          */
         const uint8_t* cc_list = pCmdClassList->cc_list;
-        const bool curr_region_is_lr = (LOWEST_LONG_RANGE_NODE_ID <= g_nodeID);
+        const bool curr_region_is_lr = (LOWEST_LONG_RANGE_NODE_ID <= ZAF_GetNodeID());
 
         for (uint8_t i = 0; i < pCmdClassList->list_size; ++i) {
           if (

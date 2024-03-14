@@ -254,7 +254,7 @@ static MultiChannelTXResult_t TransmitMultiChannel(transmission_result_t * pTxRe
     {
       TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions = {
                                                    .txOptions = p_nodelist_hold->txOptions,
-                                                   .txSecOptions = fSupervisionEnableHold ? S2_TXOPTION_VERIFY_DELIVERY : 0,
+                                                   .txSecOptions = S2_TXOPTION_VERIFY_DELIVERY,
                                                    .sourceEndpoint = p_nodelist_hold->sourceEndpoint,
                                                    .pDestNode = &node
       };
@@ -500,7 +500,7 @@ ZCB_multicast_callback(TRANSMISSION_RESULT * pTransmissionResult)
     TRANSMIT_OPTIONS_TYPE_SINGLE_EX txOptions;
 
     txOptions.txOptions = p_nodelist_hold->txOptions;
-    txOptions.txSecOptions = txSecOptions;
+    txOptions.txSecOptions = txSecOptions | S2_TXOPTION_VERIFY_DELIVERY;
 
     if(0 == singlecast_node_count && (txSecOptions & S2_TXOPTION_SINGLECAST_FOLLOWUP) )
     {

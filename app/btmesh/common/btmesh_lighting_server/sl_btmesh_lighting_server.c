@@ -83,6 +83,8 @@
 #define HIGH_PRIORITY         0
 /// Values greater than max 37200000 are treated as unknown remaining time
 #define UNKNOWN_REMAINING_TIME      40000000
+/// Difference between Generic Level and Lightness Level to convert the ranges
+#define GENERIC_TO_LIGHTNESS_LEVEL_SHIFT    32768
 
 /**
  * @brief Default value of Lightness Last
@@ -165,6 +167,10 @@ static void generic_server_register_handler(uint16_t model_id,
                                             mesh_lib_generic_server_client_request_cb cb,
                                             mesh_lib_generic_server_change_cb ch,
                                             mesh_lib_generic_server_recall_cb recall);
+
+static sl_status_t lightness_update(uint16_t element_index,
+                                    uint32_t remaining_ms,
+                                    mesh_generic_state_t kind);
 
 #ifdef SL_CATALOG_BTMESH_SCENE_SERVER_PRESENT
 static void scene_server_reset_register_impl(uint16_t elem_index);
@@ -309,6 +315,18 @@ static void server_state_changed(sl_btmesh_evt_generic_server_state_changed_t *e
   log_append_info(NL);
 }
 #endif // LOG_ENABLE
+
+/***************************************************************************//**
+ * Update the lightness level in the mesh stack during a transition
+ *
+ * @param[in] lightness     Current lightness level within the transition
+ * @param[in] remaining_ms  Remaining transition time in milliseconds
+ ******************************************************************************/
+void sl_btmesh_update_lightness(uint16_t lightness, uint32_t remaining_ms)
+{
+  lightbulb_state.lightness_current = lightness;
+  lightness_update(BTMESH_LIGHTING_SERVER_MAIN, remaining_ms, lightness_kind);
+}
 
 /*******************************************************************************
  * Handle ligthing server events.
@@ -1927,22 +1945,25 @@ static void pri_level_request(uint16_t model_id,
                request->level, transition_ms, delay_ms);
 
       pri_level_move_stop();
+
       if (lightbulb_state.pri_level_current == request->level) {
         log_info("Request for current state received; no op" NL);
         lightbulb_state.pri_level_target = request->level;
       } else {
         log_info("Setting pri_level to <%d>" NL, request->level);
 
-        lightness = request->level + 32768;
-
+        lightness = request->level + GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
+        if (!lightness) {
+          lightness = SL_BTMESH_LIGHTING_SERVER_LIGHTNESS_MIN_CFG_VAL;
+        }
         if (transition_ms == 0 && delay_ms == 0) { // Immediate change
-          lightbulb_state.pri_level_current = request->level;
-          lightbulb_state.pri_level_target = request->level;
+          lightbulb_state.pri_level_current = lightness - GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
+          lightbulb_state.pri_level_target = lightbulb_state.pri_level_current;
           lightbulb_state.lightness_current = lightness;
           lightbulb_state.lightness_target = lightness;
 
           // update LED Level
-          sl_btmesh_lighting_set_level(lightness, IMMEDIATE);
+          sl_btmesh_lighting_set_level(lightbulb_state.lightness_target, IMMEDIATE);
         } else if (delay_ms > 0) {
           // a delay has been specified for the change. Start a soft timer
           // that will trigger the change after the given delay
@@ -1961,9 +1982,9 @@ static void pri_level_request(uint16_t model_id,
           delayed_pri_level_trans = transition_ms;
         } else {
           // no delay but transition time has been set.
-          lightbulb_state.pri_level_target = request->level;
+          lightbulb_state.pri_level_target = lightness - GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
           lightbulb_state.lightness_target = lightness;
-          sl_btmesh_lighting_set_level(lightness, transition_ms);
+          sl_btmesh_lighting_set_level(lightbulb_state.lightness_target, transition_ms);
 
           // lightbulb current state will be updated when transition is complete
           sl_status_t sc = app_timer_start(&lighting_level_transition_complete_timer,
@@ -2002,7 +2023,7 @@ static void pri_level_request(uint16_t model_id,
       } else {
         log_info("Setting pri_level to <%d>" NL, requested_level);
 
-        lightness = requested_level + 32768;
+        lightness = requested_level + GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
 
         if (delay_ms > 0) {
           // a delay has been specified for the move. Start a soft timer
@@ -2041,7 +2062,7 @@ static void pri_level_request(uint16_t model_id,
       lightbulb_state.lightness_current = sl_btmesh_get_level();
       lightbulb_state.lightness_target = lightbulb_state.lightness_current;
       lightbulb_state.pri_level_current = lightbulb_state.lightness_current
-                                          - 32768;
+                                          - GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
       lightbulb_state.pri_level_target = lightbulb_state.pri_level_current;
       if (delay_ms > 0) {
         // a delay has been specified for the move halt. Start a soft timer
@@ -2226,7 +2247,7 @@ static void delayed_pri_level_request(void)
       lightbulb_state.lightness_current = sl_btmesh_get_level();
       lightbulb_state.lightness_target = lightbulb_state.lightness_current;
       lightbulb_state.pri_level_current = lightbulb_state.lightness_current
-                                          - 32768;
+                                          - GENERIC_TO_LIGHTNESS_LEVEL_SHIFT;
       lightbulb_state.pri_level_target = lightbulb_state.pri_level_current;
       pri_level_move_stop();
       sl_btmesh_lighting_set_level(lightbulb_state.lightness_current,

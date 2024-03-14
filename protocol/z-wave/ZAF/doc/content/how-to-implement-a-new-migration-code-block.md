@@ -7,7 +7,7 @@ to the newer format. Such changes are introduced only on the minor GSDK releases
 These migration code blocks are relevant only when the user is on an older GSDK version and would like to port 
 or migrate an existing code base to the newer GSDK version.
 
-### Migration Code 
+## Migration Code 
 
 This is the code that actually does the transformation or migration from the older file version to the newer 
 file version. This is usually implemented in a file by name `<module_name>_nvm.c` . This file has a function 

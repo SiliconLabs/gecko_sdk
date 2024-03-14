@@ -142,6 +142,7 @@ typedef enum sl_bgapi_msg_types {
 enum sl_bgapi_dev_types {
   sl_bgapi_dev_type_bt = 0x20,
   sl_bgapi_dev_type_btmesh = 0x28,
+  sl_bgapi_dev_type_bgapi_debug = 0x30,
 };
 
 /***************************************************************************//**

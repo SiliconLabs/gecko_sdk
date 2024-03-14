@@ -103,7 +103,7 @@ static Buffer constructKeyNegotiationTlvPayload(Buffer payload,
 
   //tlvindex has no meaning, we are just appending
   sl_zigbee_app_debug_println("Old size %X plus %X", emberMessageBufferLength(payload), sl_zigbee_tlv_get_length(&ourPointTlv));
-  if (sl_zigbee_tlv_concat_to_buffer(&payload, tlvIndex, (sl_zigbee_tlv_t *) &ourPointTlv) == EMBER_SUCCESS) {
+  if (sl_zigbee_tlv_concat_to_buffer(&payload, tlvIndex, (sl_zigbee_tlv_t *) &ourPointTlv) == SL_STATUS_OK) {
     // if is key negotiation request, we need to include the selected key negotiation method
     // NOTE the latest revision of the spec mandates that both the request and response include
     // the selected key negotiation method

@@ -19,6 +19,10 @@ requires:
   - name: psa_driver_source
     condition: [trustzone_secure]
 
+  # Can be used to check whether or not certain platform components are included
+  # in the end-project.
+  - name: component_catalog
+
 include:
   - path: sl_mbedtls_support/inc
     file_list:

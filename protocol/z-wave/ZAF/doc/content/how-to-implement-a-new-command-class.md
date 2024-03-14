@@ -1,5 +1,11 @@
 # How to implement a new command class
 
+## General informations
+
+An essential feature of the ZAF is the communication through Command Classes. For this purpose, each 
+of the Command Classes has a C module where incoming commands are handled, and outgoing 
+commands are transmitted.
+
 Command classes can have a controlling role and a supporting role. An application typically
 uses one of the roles. For instance, an LED bulb supports Color Switch CC, but it doesn't control
 Color Switch CC. The controlling role of Color Switch CC would be suited for a Z-Wave gateway as
@@ -89,6 +95,11 @@ REGISTER_CC_V5(..., basic_get_mapper, ...);
 ```
 
 ### Parsing incoming frames
+
+Each CC implementation defines a handler, e.g. `CC_MultilevelSwitch_handler()`. This function 
+extracts the received frame for a given Command Class. The function must be registered using a 
+REGISTER_CC_V5 macro. Normally, the frame is carrying a “Set” or “Get” Command 
+that results in a function call for reading or writing data. All commands are handled by the command class itself.
 
 Example:
 ```c

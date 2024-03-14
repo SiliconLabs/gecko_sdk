@@ -93,7 +93,7 @@ configuration:
   - name: NVM3_DEFAULT_NVM_SIZE
     value: "0x6000"
   - name: NVM3_DEFAULT_CACHE_SIZE
-    value: 100
+    value: 90
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
   - name: SL_BTMESH_BLOB_TRANSFER_SERVER_DFU_TARGET_MAX_BLOCK_SIZE_LOG_CFG_VAL

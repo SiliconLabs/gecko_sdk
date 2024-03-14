@@ -1,2 +1,7 @@
-Silicon Labs OpenThread SDK 2.3.2.0
+Silicon Labs OpenThread SDK 2.3.3.0
+Thread:
 - Targeted quality improvements and bug fixes
+Multi-Protocol
+- Zigbee/OpenThread Concurrent Multiprotocol SoC sample app
+- CPC GPIO expander module
+- Zigbeed enhancements

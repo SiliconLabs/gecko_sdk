@@ -307,6 +307,7 @@ CC_UserCode_report_stx(zaf_tx_options_t *tx_options, void* pData)
     DPRINTF("%s(): CC_UserCode_Report_handler() failed. \n", __func__);
     return;
   }
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf, 
                           sizeof(ZW_USER_CODE_REPORT_1BYTE_FRAME) + len - 1, 

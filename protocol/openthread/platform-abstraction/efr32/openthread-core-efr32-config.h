@@ -183,6 +183,24 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT
+ *
+ * The default supervision check timeout interval (in seconds) used by a device in child state. Set to zero to disable
+ * the supervision check process on the child.
+ *
+ * The check timeout interval can be changed using `otChildSupervisionSetCheckTimeout()`.
+ *
+ * If the sleepy child does not hear from its parent within the specified timeout interval, it initiates the re-attach
+ * process (MLE Child Update Request/Response exchange with its parent).
+ *
+ * Setting to zero by default as this is an optional feature that can lead to unexpected detach behavior.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT
+#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT 0
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.

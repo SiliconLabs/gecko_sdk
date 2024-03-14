@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_bg27-rb4111b
   - name: hardware_board_from_xg27-pk6019a
   - name: hardware_board_has_vcom
   - name: hardware_board_has_spiflash
@@ -49,6 +50,8 @@
     value: '"BRD4111B"'
   - name: SL_BOARD_REV
     value: '"A01"'
+  - name: HFXO_FREQ
+    value: 38400000
   - name: HARDWARE_BOARD_SUPPORTS_RF_BAND_2400
   - name: HARDWARE_BOARD_SUPPORTS_1_RF_BAND
   - name: HARDWARE_BOARD_DEFAULT_RF_BAND_2400

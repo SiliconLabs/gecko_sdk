@@ -12,4 +12,4 @@ provides:
   - name: "ecode"
 documentation:
     docset: gecko-platform
-    document: driver/api/group-ecode
+    document: platform-driver/ecode

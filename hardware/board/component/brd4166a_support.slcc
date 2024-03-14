@@ -21,4 +21,4 @@ include:
       - path: brd4166a_support.h
 documentation:
     docset: gecko-platform
-    document: hardware-board/api/group-brd4166a-support
+    document: platform-hardware-board/brd4166a-support

@@ -529,7 +529,7 @@ void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
   (void)cbArg;
 
   if (modeSwitchState == TX_ON_NEW_PHY) {
-    restartModeSwitchSequence();
+    restartModeSwitchSequence(false);
   }
   if (modeSwitchState == RX_ON_NEW_PHY) {
     if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
@@ -541,20 +541,30 @@ void RAILCb_ModeSwitchMultiTimerExpired(RAIL_MultiTimer_t *tmr,
   }
 }
 
-void restartModeSwitchSequence(void)
+void restartModeSwitchSequence(bool applyDelay)
 {
-  // Re-start sequence: switch back on base channel
-  if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
-      == RAIL_STATUS_NO_ERROR) {
-    changeChannel(modeSwitchBaseChannel);
-    // Write MS PHR in txData
-    txData[0] = MSphr[0];
-    txData[1] = MSphr[1];
-    modeSwitchState = TX_MS_PACKET;
-    // Send MS packet
-    txCount = 1;
-    pendPacketTx();
-    sendPacketIfPending(); // txCount is decremented in this function
+  txCountAfterModeSwitchId = 0;
+  // Start timer if needed
+  if ((modeSwitchDelayUs > 0) && applyDelay) {
+    RAIL_SetMultiTimer(&modeSwitchMultiTimer,
+                       modeSwitchDelayUs,
+                       RAIL_TIME_DELAY,
+                       &RAILCb_ModeSwitchMultiTimerExpired,
+                       NULL);
+  } else {
+    // Re-start sequence: switch back on base channel
+    if (RAIL_IsValidChannel(railHandle, modeSwitchBaseChannel)
+        == RAIL_STATUS_NO_ERROR) {
+      changeChannel(modeSwitchBaseChannel);
+      // Write MS PHR in txData
+      txData[0] = MSphr[0];
+      txData[1] = MSphr[1];
+      modeSwitchState = TX_MS_PACKET;
+      // Send MS packet
+      txCount = 1;
+      pendPacketTx();
+      sendPacketIfPending(); // txCount is decremented in this function
+    }
   }
 }
 

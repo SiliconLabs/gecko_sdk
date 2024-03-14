@@ -145,6 +145,7 @@ CC_CentralScene_configuration_report_stx(zaf_tx_options_t *tx_options, void* pDa
   memset((uint8_t*)&txBuf, 0, sizeof(ZW_APPLICATION_TX_BUFFER) );
 
   prepare_configuration_report(&txBuf);
+  tx_options->use_supervision = true;
 
   (void) zaf_transport_tx((uint8_t *)&txBuf,
                           sizeof(ZW_CENTRAL_SCENE_CONFIGURATION_REPORT_V3_FRAME),

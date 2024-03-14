@@ -251,6 +251,7 @@ private:
     const uint8_t       mId = SL_CPC_ENDPOINT_15_4;
     typedef uint8_t     cpcError;
     static volatile sig_atomic_t sCpcResetReq;
+    static bool sIsCpcInitialized;
 
     otRcpInterfaceMetrics mInterfaceMetrics;
 

@@ -3,12 +3,12 @@ label: PWM Core
 package: platform
 description: >
   The PWM driver uses a high frequency hardware timer to generate Pulse Width
-  Modulated (PWM) waveforms with configurable frequency, polarity and duty 
-  cycle. 
+  Modulated (PWM) waveforms with configurable frequency, polarity and duty
+  cycle.
 
 
   This component includes only the PWM driver core. To configure and create
-  instances of this driver, the PWM component should be included in the 
+  instances of this driver, the PWM component should be included in the
   project.
 category: Platform|Driver|PWM
 quality: production
@@ -44,4 +44,4 @@ template_contribution:
       handler: sl_pwm_init_instances
 documentation:
     docset: gecko-platform
-    document: driver/api/group-pwm
+    document: platform-driver/pwm

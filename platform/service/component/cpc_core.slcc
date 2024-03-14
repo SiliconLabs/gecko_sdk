@@ -38,7 +38,7 @@ requires:
   - name: sl_assert
 documentation:
     docset: gecko-platform
-    document: service/api/group-cpc
+    document: platform-cpc/cpc
 template_contribution:
   - name: component_catalog
     value: cpc
