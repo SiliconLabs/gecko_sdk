@@ -107,7 +107,7 @@
 #define SI7210_REG_CTRL4_IIR_SHIFT           0     /**< IIR filter enable bit shift value, Control register 4                       */
 #define SI7210_REG_CTRL4_DF_BW_MASK          0x1E  /**< Number of samples to average mask, Control register 4                       */
 #define SI7210_REG_CTRL4_DF_BW_SHIFT         1     /**< Number of samples to average shift value, Control register 4                */
-#define SI7210_REG_CTRL4_DF_BURSTSIZE_MASK   0x0E  /**< Measurement burst size mask, Control register 4                             */
+#define SI7210_REG_CTRL4_DF_BURSTSIZE_MASK   0xE0  /**< Measurement burst size mask, Control register 4                             */
 #define SI7210_REG_CTRL4_DF_BURSTSIZE_SHIFT  5     /**< Measurement burst size shift value, Control register 4                      */
 
 #define SI7210_REG_OTP_CTRL_BUSY_MASK        0x01  /**< OTP busy indicator bit mask, OTP read control register                      */
