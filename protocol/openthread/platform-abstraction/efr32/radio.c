@@ -292,6 +292,7 @@ static int8_t sMaxChannelPower[RADIO_INTERFACE_COUNT][SL_MAX_CHANNELS_SUPPORTED]
 static int8_t sDefaultTxPower[RADIO_INTERFACE_COUNT];
 
 // CSMA config: Should be globally scoped
+#define CSL_CSMA_BACKOFF_TIME_IN_US 150
 RAIL_CsmaConfig_t csmaConfig = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
 RAIL_CsmaConfig_t cslCsmaConfig = RAIL_CSMA_CONFIG_SINGLE_CCA;
 
@@ -1903,6 +1904,10 @@ void txCurrentPacket(void)
             .mode = RAIL_TIME_ABSOLUTE,
             .txDuringRx = RAIL_SCHEDULED_TX_DURING_RX_POSTPONE_TX
         };
+
+        // Set ccaBackoff to some constant value, so we have predictable radio warmup time for schedule tx.
+        cslCsmaConfig.ccaBackoff = CSL_CSMA_BACKOFF_TIME_IN_US;
+        scheduleTxOptions.when -= cslCsmaConfig.ccaBackoff;
 
         // CSL transmissions don't use CSMA but MAC accounts for single CCA time.
         // cslCsmaConfig is set to RAIL_CSMA_CONFIG_SINGLE_CCA above.
