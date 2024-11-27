@@ -865,7 +865,8 @@ static uint8_t readInitialPacketData(RAIL_RxPacketInfo_t *packetInfo,
                                      uint8_t             *buffer,
                                      uint8_t              buffer_len)
 {
-    uint8_t packetBytesRead = 0;
+    uint8_t             packetBytesRead = 0;
+    RAIL_RxPacketInfo_t adjustedPacketInfo;
 
     // Check if we have enough buffer
     OT_ASSERT((buffer_len >= expected_data_bytes_max) || (packetInfo != NULL));
@@ -878,22 +879,25 @@ static uint8_t readInitialPacketData(RAIL_RxPacketInfo_t *packetInfo,
     // Check to see if we have received atleast minimum number of bytes requested.
     otEXPECT_ACTION(packetInfo->packetBytes >= expected_data_bytes_min, packetBytesRead = 0);
 
+    adjustedPacketInfo = *packetInfo;
+
     // Only extract what we care about
     if (packetInfo->packetBytes > expected_data_bytes_max)
     {
-        packetInfo->packetBytes = expected_data_bytes_max;
+        adjustedPacketInfo.packetBytes = expected_data_bytes_max;
         // Check if the initial portion of the packet received so far exceeds the max value requested.
         if (packetInfo->firstPortionBytes >= expected_data_bytes_max)
         {
             // If we have received more, make sure to copy only the required bytes into the buffer.
-            packetInfo->firstPortionBytes = expected_data_bytes_max;
-            packetInfo->lastPortionData   = NULL;
+            adjustedPacketInfo.firstPortionBytes = expected_data_bytes_max;
+            adjustedPacketInfo.lastPortionData   = NULL;
         }
     }
 
     // Copy number of bytes as indicated in `packetInfo->firstPortionBytes` into the buffer.
-    RAIL_CopyRxPacket(buffer, packetInfo);
-    packetBytesRead = packetInfo->packetBytes;
+    RAIL_CopyRxPacket(buffer, &adjustedPacketInfo);
+    // Put it back to packetBytes.
+    packetBytesRead = (uint8_t)adjustedPacketInfo.packetBytes;
 
 exit:
     return packetBytesRead;
@@ -2288,6 +2292,7 @@ exit:
 // Return true otherwise
 static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
                                        RAIL_RxPacketInfo_t *packetInfoForEnhAck,
+                                       uint32_t             rxTimestamp,
                                        uint8_t             *initialPktReadBytes,
                                        uint8_t             *receivedPsdu)
 {
@@ -2323,8 +2328,10 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
         return true; // Nothing to read, which means generating an immediate ACK is also pointless
     }
 
-    receivedFrame.mPsdu     = receivedPsdu + PHY_HEADER_SIZE;
-    receivedFrame.mLength   = *initialPktReadBytes - PHY_HEADER_SIZE;
+    receivedFrame.mPsdu = receivedPsdu + PHY_HEADER_SIZE;
+    // This should be set to the expected length of the packet is being received.
+    // We consider this while calculating the phase value below.
+    receivedFrame.mLength = packetInfoForEnhAck->firstPortionData[0];
     enhAckFrame.mPsdu       = enhAckPsdu + PHY_HEADER_SIZE;
 
     if (! otMacFrameIsVersion2015(&receivedFrame))
@@ -2397,7 +2404,7 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
     {
         // Calculate time in the future where the SHR is done being sent out
         uint32_t ackShrDoneTime = // Currently partially received packet's SHR time
-                                  (otPlatAlarmMicroGetNow() - (packetInfoForEnhAck->packetBytes * OT_RADIO_SYMBOL_TIME * 2)
+                                  (rxTimestamp - (packetInfoForEnhAck->packetBytes * OT_RADIO_SYMBOL_TIME * 2)
                                   // PHR of this packet
                                   + (PHY_HEADER_SIZE * OT_RADIO_SYMBOL_TIME * 2)
                                   // Received frame's expected time in the PHR
@@ -2412,6 +2419,8 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
         // Update IE data in the 802.15.4 header with the newest CSL period / phase
         otMacFrameSetCslIe(&enhAckFrame, (uint16_t)sCslPeriod, getCslPhase(ackShrDoneTime));
     }
+#else
+    OT_UNUSED_VARIABLE(rxTimestamp);
 #endif
 
     if (otMacFrameIsSecurityEnabled(&enhAckFrame))
@@ -2472,6 +2481,7 @@ static void dataRequestCommandCallback(RAIL_Handle_t aRailHandle)
     uint8_t             pktOffset = PHY_HEADER_SIZE;
     uint8_t             initialPktReadBytes;
     RAIL_RxPacketInfo_t packetInfo;
+    uint32_t            rxCallbackTimestamp = otPlatAlarmMicroGetNow();
 
     // This callback occurs after the address fields of an incoming
     // ACK-requesting CMD or DATA frame have been received and we
@@ -2479,13 +2489,14 @@ static void dataRequestCommandCallback(RAIL_Handle_t aRailHandle)
     // kind of ACK is being requested -- Immediate or Enhanced.
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-    if (writeIeee802154EnhancedAck(aRailHandle, &packetInfo, &initialPktReadBytes, receivedPsdu))
+    if (writeIeee802154EnhancedAck(aRailHandle, &packetInfo, rxCallbackTimestamp, &initialPktReadBytes, receivedPsdu))
     {
         // We also return true above if there were failures in
         // generating an enhanced ACK.
         return;
     }
 #else
+    OT_UNUSED_VARIABLE(rxCallbackTimestamp);
     initialPktReadBytes =
         readInitialPacketData(&packetInfo, MAX_EXPECTED_BYTES, pktOffset + 2, receivedPsdu, MAX_EXPECTED_BYTES);
 #endif
