@@ -140,6 +140,7 @@
 #define EVENT_ACK_SENT_WITH_FP_SET 0x00002000
 #define EVENT_SECURED_ACK_SENT 0x00004000
 #define EVENT_SCHEDULED_RX_STARTED 0x00008000
+#define EVENT_SCHEDULED_TX_STARTED 0x00010000
 
 #define TX_WAITING_FOR_ACK 0x00
 #define TX_NO_ACK 0x01
@@ -1002,7 +1003,7 @@ static void updateEvents(RAIL_Events_t mask, RAIL_Events_t values)
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
 // Set or clear the passed flag.
-static inline void setInternalFlag(uint16_t flag, bool val)
+static inline void setInternalFlag(uint32_t flag, bool val)
 {
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_ATOMIC();
@@ -1010,7 +1011,7 @@ static inline void setInternalFlag(uint16_t flag, bool val)
     CORE_EXIT_ATOMIC();
 }
 // Returns true if the passed flag is set, false otherwise.
-static inline bool getInternalFlag(uint16_t flag)
+static inline bool getInternalFlag(uint32_t flag)
 {
     bool isFlagSet;
     CORE_DECLARE_IRQ_STATE;
@@ -1659,6 +1660,10 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
 
     OT_UNUSED_VARIABLE(aInstance);
 
+    // We can only have one schedule request i.e. either Rx or Tx as they use the
+    // same RAIL resources.
+    otEXPECT_ACTION(!getInternalFlag(EVENT_SCHEDULED_TX_STARTED), error = OT_ERROR_FAILED);
+
     error = efr32RadioLoadChannelConfig(aChannel, txPower);
     otEXPECT(error == OT_ERROR_NONE);
 
@@ -1720,7 +1725,6 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 
         CORE_DECLARE_IRQ_STATE;
         CORE_ENTER_ATOMIC();
-        setInternalFlag(FLAG_SCHEDULED_RX_PENDING, false);
         setInternalFlag(FLAG_ONGOING_TX_DATA, true);
         tryTxCurrentPacket();
         CORE_EXIT_ATOMIC();
@@ -1858,6 +1862,10 @@ void txCurrentPacket(void)
     }
 #endif
 
+    // We can only have one schedule request i.e. either Rx or Tx as they use the same RAIL resources.
+    // Reject the transmit request if there is scheduled Rx.
+    otEXPECT_ACTION(!getInternalFlag(FLAG_SCHEDULED_RX_PENDING), status = RAIL_STATUS_INVALID_STATE);
+
     if (sTxFrame->mInfo.mTxInfo.mTxDelay == 0)
     {
         if (getInternalFlag(FLAG_CURRENT_TX_USE_CSMA))
@@ -1926,6 +1934,8 @@ void txCurrentPacket(void)
         }
 #endif
     }
+
+exit:
     if (status == RAIL_STATUS_NO_ERROR)
     {
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -2649,7 +2659,7 @@ static void packetReceivedCallback(RAIL_RxPacketHandle_t packetHandle)
             // Processing the ACK frame in ISR context avoids the Tx state to be messed up,
             // in case the Rx FIFO queue gets wiped out in a DMP situation.
             setInternalFlag(EVENT_TX_SUCCESS, true);
-            setInternalFlag(FLAG_WAITING_FOR_ACK | FLAG_ONGOING_TX_DATA, false);
+            setInternalFlag(FLAG_WAITING_FOR_ACK | FLAG_ONGOING_TX_DATA | EVENT_SCHEDULED_TX_STARTED, false);
 
             framePendingInAck = ((macFcf & IEEE802154_FRAME_FLAG_FRAME_PENDING) != 0);
             (void)handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_RECEIVED, (uint32_t)framePendingInAck);
@@ -2748,6 +2758,7 @@ static void packetSentCallback(bool isAck)
             setInternalFlag(EVENT_TX_SUCCESS, true);
             //Broadcast packet clear the ONGOING flag here.
             setInternalFlag(FLAG_ONGOING_TX_DATA, false);
+            setInternalFlag(EVENT_SCHEDULED_TX_STARTED, false);
         }
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
         railDebugCounters.mRailEventPacketSent++;
@@ -2778,7 +2789,7 @@ static void txFailedCallback(bool isAck, uint32_t status)
             railDebugCounters.mRailEventTxAbort++;
 #endif
         }
-        setInternalFlag((FLAG_ONGOING_TX_DATA | FLAG_WAITING_FOR_ACK), false);
+        setInternalFlag((FLAG_ONGOING_TX_DATA | FLAG_WAITING_FOR_ACK | EVENT_SCHEDULED_TX_STARTED), false);
         RAIL_YieldRadio(gRailHandle);
     }
 }
@@ -2790,6 +2801,7 @@ static void ackTimeoutCallback(void)
 
     setInternalFlag(EVENT_TX_NO_ACK, true);
     setInternalFlag(FLAG_ONGOING_TX_DATA, false);
+    setInternalFlag(EVENT_SCHEDULED_TX_STARTED, false);
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     railDebugCounters.mRailEventNoAck++;
@@ -2961,6 +2973,7 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
     {
         if (aEvents & RAIL_EVENT_SCHEDULED_TX_STARTED)
         {
+            setInternalFlag(EVENT_SCHEDULED_TX_STARTED, true);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
             railDebugCounters.mRailEventsScheduledTxStartedCount++;
 #endif
