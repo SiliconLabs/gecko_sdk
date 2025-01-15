@@ -1,6 +1,9 @@
 # Gecko SDK Licensing terms
 
-Source code in this SDK is covered by one of several different licenses.
+Source code in this SDK is licensed to you under the terms of a default license
+from Silicon Laboratories Inc. This default license and exceptions to this 
+default licensing are set forth below.
+
 The default license is the Master Software License Agreement (MSLA) 
 (https://www.silabs.com/about-us/legal/master-software-license-agreement),
 which applies unless otherwise noted.

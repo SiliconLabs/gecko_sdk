@@ -10,6 +10,7 @@
 
 #include <ota_util.h>
 #include <ZW_TransportLayer.h>
+#include "ZW_classcmd.h"
 
 #include <CRC.h>
 
@@ -922,7 +923,7 @@ static void ZCB_FinishFwUpdate(TRANSMISSION_RESULT * pTransmissionResult)
   {
     // Device unable to receive new frames.
     // Reboot to avoid situation where device gets stuck for any unpredicted reason.
-    zpal_reboot();
+    zpal_reboot_with_info(MFG_ID_ZWAVE_ALLIANCE, ZPAL_RESET_INFO_DEFAULT);
   }
 
   /*

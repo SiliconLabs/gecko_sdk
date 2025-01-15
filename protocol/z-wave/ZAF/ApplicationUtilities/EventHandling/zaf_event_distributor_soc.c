@@ -261,7 +261,7 @@ event_manager(const uint8_t event)
       if (resetInProgress) {
         resetInProgress = false;
         /* Soft reset */
-        zpal_reboot();
+        zpal_reboot_with_info(MFG_ID_ZWAVE_ALLIANCE, ZPAL_RESET_INFO_DEFAULT);
       } else {
         zafi_nvm_app_load_configuration();
       }

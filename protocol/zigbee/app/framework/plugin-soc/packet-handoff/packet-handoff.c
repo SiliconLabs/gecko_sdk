@@ -191,11 +191,12 @@ EmberPacketAction emberPacketHandoffIncomingHandler(EmberZigbeePacketType packet
       // Proceed only if the index is with in the length of the packet.
       // This check is important to calculate the length before a buffer copy function.
       // is called.
-      if (emberMessageBufferLength(packetBuffer) < index) {
-        // Return deafault action
-        return EMBER_ACCEPT_PACKET;
+      uint16_t bufferLength = emberMessageBufferLength(packetBuffer);
+      if (bufferLength < index) {
+        // Something is malformed in the constructed packet; don't receive it
+        return EMBER_DROP_PACKET;
       }
-      uint8_t packetLength = emberMessageBufferLength(packetBuffer) - index;
+      uint8_t packetLength = bufferLength - index;
       EmberPacketAction act;
       emberCopyFromLinkedBuffers(packetBuffer,
                                  index,
@@ -284,7 +285,15 @@ EmberPacketAction emberPacketHandoffOutgoingHandler(EmberZigbeePacketType packet
     #endif // !ALLOW_ALL_PACKETS
     default:
     {
-      uint8_t packetLength = emberMessageBufferLength(packetBuffer) - index;
+      // Proceed only if the index is with in the length of the packet.
+      // This check is important to calculate the length before a buffer copy function.
+      // is called.
+      uint16_t bufferLength = emberMessageBufferLength(packetBuffer);
+      if (bufferLength < index) {
+        // Something is malformed in the constructed packet; don't send it
+        return EMBER_DROP_PACKET;
+      }
+      uint8_t packetLength = bufferLength - index;
       EmberPacketAction act;
       emberCopyFromLinkedBuffers(packetBuffer,
                                  index,

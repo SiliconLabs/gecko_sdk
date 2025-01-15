@@ -86,10 +86,10 @@ void finding_and_binding_event_handler(sl_zigbee_event_t *event)
   }
 }
 
-extern bool emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
-                                                                            uint16_t gpmAddrForSecurity,
-                                                                            uint16_t gpmAddrForPairing,
-                                                                            uint8_t sinkEndpoint);
+extern EmberAfStatus emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
+                                                                                     uint16_t gpmAddrForSecurity,
+                                                                                     uint16_t gpmAddrForPairing,
+                                                                                     uint8_t sinkEndpoint);
 
 // Enter or exit sink commissioning mode
 void sink_commissioning_mode_event_handler(sl_zigbee_event_t *event)

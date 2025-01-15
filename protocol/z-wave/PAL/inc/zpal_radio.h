@@ -413,6 +413,7 @@ typedef enum
   ZPAL_RADIO_EVENT_FLAG_PACKET = 0x20,          ///< The frmae was a normal package
   ZPAL_RADIO_EVENT_FLAG_BEAM = 0x40,            ///< The frame was a wakeup beam
   ZPAL_RADIO_EVENT_FLAG_SUCCESS = 0x80,         ///< Indicates a successful event
+  ZPAL_RADIO_EVENT_TX_TIMEOUT = 254,
   ZPAL_RADIO_EVENT_RX_TIMEOUT = 255             ///< Indicates Rx event started but never completed after 10 secs
 } zpal_radio_event_t;
 

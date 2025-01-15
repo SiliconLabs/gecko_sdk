@@ -255,7 +255,7 @@ void emberAfPluginGreenPowerServerCliSetTranslationTable(SL_CLI_COMMAND_ARG)
         emberAfCorePrintln("Replace Ststus  = %d ", retval);
       } else if (retval == GP_TRANSLATION_TABLE_STATUS_PARAM_DOES_NOT_MATCH) {
         emberAfCorePrintln("Parameter does not match @Index [%d]", index);
-        emAfGreenPowerSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
+        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE); //send failure notification immediately
       }
     }
   } else {

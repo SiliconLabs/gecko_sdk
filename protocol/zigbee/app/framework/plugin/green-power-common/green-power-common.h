@@ -18,13 +18,6 @@
 #ifndef _SILABS_GREEN_POWER_COMMON_H_
 #define _SILABS_GREEN_POWER_COMMON_H_
 
-// A boolean flag to indicate if Green Power cluser command handler
-// should skip sending Default Response for received command message
-extern bool emGpSilentDrop;
-// A boolean flag to indicate if a command response or default response created and submitted during
-// a message handling by Green Power cluster command handler.
-extern bool emGpCommandOrDefaultResponseSubmitted;
-
 /**
  * @defgroup green-power-common Green Power Common
  * @ingroup component
@@ -597,6 +590,4 @@ uint16_t emCopyAdditionalInfoBlockStructureToArray(uint8_t commandId,
 void emGpSpoofDeviceAnnce(uint16_t nodeId,
                           EmberEUI64 eui64,
                           uint8_t capabilities);
-EmberStatus emAfGreenPowerSendImmediateDefaultResponse(EmberStatus status);
-EmberStatus emAfGreenPowerSendResponse();
 #endif //_GREEN_POWER_COMMON_H_

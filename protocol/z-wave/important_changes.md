@@ -3,6 +3,14 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# Important Changes in 7.19.8 {#section-7-19-8}
+
+Minor changes without impact for developer.
+
+# Important Changes in 7.19.7 {#section-7-19-7}
+
+Adding additional information on the reset reason in the FUNC_ID_SERIAL_API_STARTED payload.
+
 # Important Changes in 7.19.1 {#section-7-19-1}
 
 ## Command Classes

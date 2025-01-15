@@ -32,9 +32,6 @@
 
 #include "green-power-common.h"
 
-bool emGpSilentDrop = false;
-bool emGpCommandOrDefaultResponseSubmitted = false;
-
 extern bool emGpAddressMatch(const EmberGpAddress *a1, const EmberGpAddress *a2);
 extern void emSpoofDeviceAnnouncement(uint16_t shortId,
                                       uint8_t *sourceEUI64,
@@ -888,16 +885,4 @@ void emGpSpoofDeviceAnnce(uint16_t nodeId,
                             eui64,
                             capabilities);
 #endif // EZSP_HOST
-}
-
-EmberStatus emAfGreenPowerSendImmediateDefaultResponse(EmberStatus status)
-{
-  emGpCommandOrDefaultResponseSubmitted = true;
-  return emberAfSendImmediateDefaultResponse(status);
-}
-
-EmberStatus emAfGreenPowerSendResponse()
-{
-  emGpCommandOrDefaultResponseSubmitted = true;
-  return emberAfSendResponse();
 }

@@ -1,5 +1,5 @@
-Zigbee EmberZNet SDK 7.2.6.0
+Zigbee EmberZNet SDK 7.2.7.0
 - Zigbee
-  - Targeted quality improvements and bug fixes
+  - Targeted quality improvements and bug fixes.
 - Multiprotocol
-  - Targeted quality improvements and bug fixes
+  - No change from previous release. 

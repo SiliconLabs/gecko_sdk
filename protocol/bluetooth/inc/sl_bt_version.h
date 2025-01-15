@@ -35,24 +35,24 @@
  *
  * An increment indicates new backwards compatible functionalities.
  */
-#define SL_BT_VERSION_MINOR 1
+#define SL_BT_VERSION_MINOR 2
 
 /**
  * @brief The patch number of Bluetooth SDK version
  *
  * An increment indicates backwards compatible bug fixes.
  */
-#define SL_BT_VERSION_PATCH 4
+#define SL_BT_VERSION_PATCH 0
 
 /**
  * @brief The build number which the Bluetooth SDK was created from
  */
-#define SL_BT_VERSION_BUILD 1589
+#define SL_BT_VERSION_BUILD 1609
 
 /**
  * @brief The hash value of the build the Bluetooth SDK was created from
  */
-#define SL_BT_VERSION_HASH {0xd3,0x24,0xff,0x82,0x0c,0xce,0x2e,0x36,0xc0,0x31,0x75,0x4e,0xbc,0x45,0xe2,0x88,0x5e,0xf6,0x99,0xf9}
+#define SL_BT_VERSION_HASH {0xf7,0x55,0x26,0x2d,0x7c,0xdd,0x6a,0x54,0xd9,0x01,0xf4,0xb0,0xe8,0x8b,0x23,0x2a,0x24,0x1f,0x27,0x5a}
 
 /**
  * Deprecated and replaced by SL_BT_VERSION_MAJOR

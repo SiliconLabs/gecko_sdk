@@ -3155,11 +3155,13 @@ sl_status_t sl_bt_periodic_advertiser_stop(uint8_t advertising_set);
 
 /* Command and Response IDs */
 #define sl_bt_cmd_scanner_set_parameters_id                          0x06050020
+#define sl_bt_cmd_scanner_set_parameters_and_filter_id               0x07050020
 #define sl_bt_cmd_scanner_stop_id                                    0x05050020
 #define sl_bt_cmd_scanner_set_timing_id                              0x01050020
 #define sl_bt_cmd_scanner_set_mode_id                                0x02050020
 #define sl_bt_cmd_scanner_start_id                                   0x03050020
 #define sl_bt_rsp_scanner_set_parameters_id                          0x06050020
+#define sl_bt_rsp_scanner_set_parameters_and_filter_id               0x07050020
 #define sl_bt_rsp_scanner_stop_id                                    0x05050020
 #define sl_bt_rsp_scanner_set_timing_id                              0x01050020
 #define sl_bt_rsp_scanner_set_mode_id                                0x02050020
@@ -3238,6 +3240,30 @@ typedef enum
 } sl_bt_scanner_data_status_t;
 
 /**
+ * @brief This enumeration is defined as a placeholder for extension in later
+ * SDK versions. This Bluetooth SDK version supports only basic unfiltered
+ * scanning filter policy.
+ */
+typedef enum
+{
+  sl_bt_scanner_filter_policy_basic_unfiltered = 0x0  /**< (0x0) Advertising and
+                                                           scan response PDUs
+                                                           are processed from
+                                                           all devices. For
+                                                           directed advertising,
+                                                           the target address
+                                                           must additionally
+                                                           match the identity
+                                                           address of the local
+                                                           device or be a
+                                                           Resolvable Private
+                                                           Address that is
+                                                           resolved to the local
+                                                           device by the
+                                                           Bluetooth controller. */
+} sl_bt_scanner_filter_policy_t;
+
+/**
  * @addtogroup sl_bt_scanner_event_flag Event Type Flags of Advertisement Reports
  * @{
  *
@@ -3258,6 +3284,34 @@ typedef enum
 #define SL_BT_SCANNER_EVENT_FLAG_SCAN_RESPONSE 0x8       
 
 /** @} */ // end Event Type Flags of Advertisement Reports
+
+/**
+ * @addtogroup sl_bt_scanner_option_flags Option Flags to Specify Scanning Options
+ * @{
+ *
+ * Defines the scanning option flags that can be set with the command @ref
+ * sl_bt_scanner_set_parameters_and_filter.
+ */
+
+/**
+ *
+ * If the built-in bonding database is used (the component
+ * bluetooth_feature_builtin_bonding_database is included in the application),
+ * the scanner component by default tries to search for or resolve the
+ * advertiser addresses to find if a bonding has been created with the
+ * advertiser device. The bonding handle is then reported in the @p bonding
+ * field of @ref sl_bt_evt_scanner_legacy_advertisement_report and @ref
+ * sl_bt_evt_scanner_extended_advertisement_report events.
+ *
+ * If the application does not need the bonding information in advertisement
+ * reports, set this scanner option to disable the search for the bonding. When
+ * this option is set the @p bonding field in advertisement reports will always
+ * be set to SL_BT_INVALID_BONDING_HANDLE (0xff).
+ *
+ * */
+#define SL_BT_SCANNER_IGNORE_BONDING 0x1       
+
+/** @} */ // end Option Flags to Specify Scanning Options
 
 /**
  * @addtogroup sl_bt_evt_scanner_legacy_advertisement_report sl_bt_evt_scanner_legacy_advertisement_report
@@ -3587,6 +3641,80 @@ typedef struct sl_bt_evt_scanner_scan_report_s sl_bt_evt_scanner_scan_report_t;
 sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
                                          uint16_t interval,
                                          uint16_t window);
+
+/***************************************************************************//**
+ *
+ * Set scan parameters and the scanning filter policy for subsequent scanning
+ * operations. If the device is currently scanning, new parameters will take
+ * effect when scanning is restarted.
+ *
+ * @param[in] mode @parblock
+ *   Enum @ref sl_bt_scanner_scan_mode_t.
+ *
+ *   Passive or active scan. Values:
+ *     - <b>sl_bt_scanner_scan_mode_passive (0x0):</b> Passive scanning mode
+ *       where the device only listens to advertising packets and does not
+ *       transmit packets
+ *     - <b>sl_bt_scanner_scan_mode_active (0x1):</b> Active scanning mode where
+ *       the device sends out a scan request packet upon receiving a scannable
+ *       advertising packet from a remote device and listens to the scan
+ *       response packet from the remote device
+ *
+ *   Default value: @ref sl_bt_scanner_scan_mode_passive.
+ *   @endparblock
+ * @param[in] interval @parblock
+ *   The time interval when the device starts its last scan until it begins the
+ *   subsequent scan. In other words, how often to scan
+ *     - Time = Value x 0.625 ms
+ *     - Range: 0x0004 to 0xFFFF
+ *     - Time Range: 2.5 ms to 40.96 s
+ *
+ *   Default value: 10 ms
+ *
+ *   A variable delay occurs when switching channels at the end of each scanning
+ *   interval, which is included in the scanning interval time. During the
+ *   switch time, advertising packets are not received by the device. The switch
+ *   time variation is use case dependent. For example, if scanning while
+ *   keeping active connections, the channel switch time might be longer than
+ *   when scanning without any active connections. Increasing the scanning
+ *   interval reduces the amount of time in which the device can't receive
+ *   advertising packets because it switches channels less often.
+ *
+ *   After every scan interval, the scanner changes the frequency at which it
+ *   operates. It cycles through all three advertising channels in a round robin
+ *   fashion. According to the specification, all three channels must be used by
+ *   a scanner.
+ *   @endparblock
+ * @param[in] window @parblock
+ *   The scan window, i.e., the duration of the scan, which must be less than or
+ *   equal to the @p interval
+ *     - Time = Value x 0.625 ms
+ *     - Range: 0x0004 to 0xFFFF
+ *     - Time Range: 2.5 ms to 40.96 s
+ *
+ *   Default value: 10 ms
+ *
+ *   Note that the packet reception is aborted if it's started just before the
+ *   scan window ends.
+ *   @endparblock
+ * @param[in] flags Additional scanner options. Value: 0 or bitmask of @ref
+ *   sl_bt_scanner_option_flags.
+ * @param[in] filter_policy @parblock
+ *   Enum @ref sl_bt_scanner_filter_policy_t.
+ *
+ *   This parameter is a placeholder for extension in later SDK versions. This
+ *   Bluetooth SDK version supports only the basic unfiltered scanning policy.
+ *   Set this parameter to @ref sl_bt_scanner_filter_policy_basic_unfiltered.
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_scanner_set_parameters_and_filter(uint8_t mode,
+                                                    uint16_t interval,
+                                                    uint16_t window,
+                                                    uint32_t flags,
+                                                    uint8_t filter_policy);
 
 /***************************************************************************//**
  *

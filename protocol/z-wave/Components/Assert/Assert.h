@@ -46,6 +46,7 @@
 #define _ASSERT_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 // Allow linking with C++ implementation (for unit tests)
 #ifdef __cplusplus
@@ -66,7 +67,7 @@ void Assert_SetCb(AssertCb_t cb);
  *  @brief Handle null pointer exceptions before segfault (when not applicable or desired)
  * @return input pointer to allow chaining operators (eg: AssertPtr(p)->funct)
  */
-const void* AssertPtr(const void* ptr, const char* message);
+const void* AssertPtr(const void* ptr, const char* message, const uint8_t assert_no);
 
 #ifdef __cplusplus
 }
@@ -107,8 +108,8 @@ const void* AssertPtr(const void* ptr, const char* message);
 #define STATIC_ASSERT(bMustBeTrue, UniqueErrorMessage) \
   enum { UniqueErrorMessage = 1 / (bMustBeTrue) }
 
-#define ASSERT_PTR(p) \
-  AssertPtr((p), (#p))
+#define ASSERT_PTR(p, v) \
+  AssertPtr((p), (#p), (v))
 
 #endif	// _ASSERT_H_
 

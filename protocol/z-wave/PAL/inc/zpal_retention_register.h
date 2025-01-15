@@ -41,12 +41,13 @@ extern "C" {
  * @{
  */
 
-#define ZPAL_RETENTION_REGISTER_SMARTSTART            0
-#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_1       1
-#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_2       2
-#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_3       3
-#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_4       4
-#define ZPAL_RETENTION_REGISTER_TXPOWER_RSSI_LR       5
+#define ZPAL_RETENTION_REGISTER_SMARTSTART            0 ///< Reserved for Smart Start.
+#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_1       1 ///< Reserved for response route 1.
+#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_2       2 ///< Reserved for response route 2.
+#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_3       3 ///< Reserved for response route 3.
+#define ZPAL_RETENTION_REGISTER_RESPONSEROUTE_4       4 ///< Reserved for response route 4.
+#define ZPAL_RETENTION_REGISTER_TXPOWER_RSSI_LR       5 ///< Reserved for Long Range transmit power and RSSI.
+#define ZPAL_RETENTION_REGISTER_RESET_INFO            6 ///< Reserved for reset information
 
 /**
  * @brief Reads a 32-bit value from the specified retention register.

@@ -53,9 +53,36 @@ typedef enum {
 } zpal_chip_se_type_t;
 
 /**
+ * @brief Manufacturer's reset information
+ */
+typedef uint16_t zpal_soft_reset_info_t;
+
+
+/**
+ * @brief Manufacturer ID used by zpal_reboot.
+ */
+typedef uint16_t zpal_soft_reset_mfid_t;
+
+static const zpal_soft_reset_info_t ZPAL_RESET_REQUESTED_BY_SAPI     = 0x0000;
+static const zpal_soft_reset_info_t ZPAL_RESET_UNHANDLED_RADIO_EVENT = 0x0001;
+static const zpal_soft_reset_info_t ZPAL_RESET_RADIO_ASSERT          = 0x0002;
+static const zpal_soft_reset_info_t ZPAL_RESET_ASSERT_PTR            = 0x0003;
+static const zpal_soft_reset_info_t ZPAL_RESET_INFO_DEFAULT          = 0xFFFF;
+
+/**
  * @brief Perform a system reboot.
  */
 void zpal_reboot(void);
+
+/**
+ * @deprecated
+ * @brief Perform a system reboot and provide information about the context.
+ *
+ * @param[in] manufacturer_id manufacturer ID identifier.
+ * @param[in] reset_info the information to pass to boot.
+ */
+void zpal_reboot_with_info(const zpal_soft_reset_mfid_t manufacturer_id,
+                           const zpal_soft_reset_info_t reset_info);
 
 /**
  * @brief Prepare for shutdown handler.

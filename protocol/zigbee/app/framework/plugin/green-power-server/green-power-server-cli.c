@@ -34,10 +34,10 @@
 
 #endif // UC_BUILD
 
-bool emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
-                                                                     uint16_t gpmAddrForSecurity,
-                                                                     uint16_t gpmAddrForPairing,
-                                                                     uint8_t sinkEndpoint);
+EmberAfStatus emAfPluginGreenPowerServerGpSinkCommissioningModeCommandHandler(uint8_t options,
+                                                                              uint16_t gpmAddrForSecurity,
+                                                                              uint16_t gpmAddrForPairing,
+                                                                              uint8_t sinkEndpoint);
 
 // Sink Commissioning Mode Enter
 void emberAfPluginGreenPowerServerCommissioningMode(SL_CLI_COMMAND_ARG)

@@ -1090,6 +1090,29 @@ sl_status_t sl_bt_scanner_set_parameters(uint8_t mode,
 
 }
 
+sl_status_t sl_bt_scanner_set_parameters_and_filter(uint8_t mode,
+                                                    uint16_t interval,
+                                                    uint16_t window,
+                                                    uint32_t flags,
+                                                    uint8_t filter_policy) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_scanner_set_parameters_and_filter.mode=mode;
+    cmd->data.cmd_scanner_set_parameters_and_filter.interval=interval;
+    cmd->data.cmd_scanner_set_parameters_and_filter.window=window;
+    cmd->data.cmd_scanner_set_parameters_and_filter.flags=flags;
+    cmd->data.cmd_scanner_set_parameters_and_filter.filter_policy=filter_policy;
+
+    cmd->header=sl_bt_cmd_scanner_set_parameters_and_filter_id+(((10)&0xff)<<8)+(((10)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_scanner_set_parameters_and_filter.result;
+
+}
+
 sl_status_t sl_bt_scanner_stop() {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 

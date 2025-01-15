@@ -197,12 +197,22 @@ typedef enum
 } scanner_data_status_t;
 
 /*
+ * Deprecated and replaced by sl_bt_scanner_filter_policy_t.
+ */
+typedef enum
+{
+  scanner_filter_policy_basic_unfiltered = 0x0
+} scanner_filter_policy_t;
+
+/*
  * Deprecated SCANNER_* defines replaced by SL_BT_SCANNER_*.
  */
 #define SCANNER_EVENT_FLAG_CONNECTABLE   0x1       
 #define SCANNER_EVENT_FLAG_SCANNABLE     0x2       
 #define SCANNER_EVENT_FLAG_DIRECTED      0x4       
 #define SCANNER_EVENT_FLAG_SCAN_RESPONSE 0x8       
+
+#define SCANNER_IGNORE_BONDING           0x1       
 
 
 /*

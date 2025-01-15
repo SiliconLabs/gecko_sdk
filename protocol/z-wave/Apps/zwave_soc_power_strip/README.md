@@ -206,6 +206,8 @@ Y: For Z-Wave node count is equal to 5 and for Z-Wave Long Range it is 0.
 
 ## Usage of Buttons and LED Status
 
+To use the sample app, the BRD8029A Button and LEDs Expansion Board must be used. BTN0-BTN3 and LED0-LED3 refer to the buttons and LEDs on the Expansion Board.
+
 The following LEDs and buttons shown in the next table below are used.
 
 <table>

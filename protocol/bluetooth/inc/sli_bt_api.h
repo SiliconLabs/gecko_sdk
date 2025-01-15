@@ -112,6 +112,7 @@ enum sli_bt_command_id
     sli_bt_periodic_advertiser_start_command_id = 0x02,
     sli_bt_periodic_advertiser_stop_command_id = 0x03,
     sli_bt_scanner_set_parameters_command_id = 0x06,
+    sli_bt_scanner_set_parameters_and_filter_command_id = 0x07,
     sli_bt_scanner_stop_command_id = 0x05,
     sli_bt_scanner_set_timing_command_id = 0x01,
     sli_bt_scanner_set_mode_command_id = 0x02,
@@ -321,6 +322,7 @@ enum sli_bt_response_id
     sli_bt_periodic_advertiser_start_response_id = 0x02,
     sli_bt_periodic_advertiser_stop_response_id = 0x03,
     sli_bt_scanner_set_parameters_response_id = 0x06,
+    sli_bt_scanner_set_parameters_and_filter_response_id = 0x07,
     sli_bt_scanner_stop_response_id = 0x05,
     sli_bt_scanner_set_timing_response_id = 0x01,
     sli_bt_scanner_set_mode_response_id = 0x02,
@@ -972,6 +974,18 @@ PACKSTRUCT( struct sl_bt_cmd_scanner_set_parameters_s
 });
 
 typedef struct sl_bt_cmd_scanner_set_parameters_s sl_bt_cmd_scanner_set_parameters_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_scanner_set_parameters_and_filter_s
+{
+    uint8_t mode;
+    uint16_t interval;
+    uint16_t window;
+    uint32_t flags;
+    uint8_t filter_policy;
+});
+
+typedef struct sl_bt_cmd_scanner_set_parameters_and_filter_s sl_bt_cmd_scanner_set_parameters_and_filter_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_scanner_set_timing_s
@@ -2746,6 +2760,14 @@ PACKSTRUCT( struct sl_bt_rsp_scanner_set_parameters_s
 typedef struct sl_bt_rsp_scanner_set_parameters_s sl_bt_rsp_scanner_set_parameters_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_scanner_set_parameters_and_filter_s
+{
+    uint16_t result;
+});
+
+typedef struct sl_bt_rsp_scanner_set_parameters_and_filter_s sl_bt_rsp_scanner_set_parameters_and_filter_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_scanner_stop_s
 {
     uint16_t result;
@@ -4030,6 +4052,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_periodic_advertiser_start_t                        cmd_periodic_advertiser_start;
     sl_bt_cmd_periodic_advertiser_stop_t                         cmd_periodic_advertiser_stop;
     sl_bt_cmd_scanner_set_parameters_t                           cmd_scanner_set_parameters;
+    sl_bt_cmd_scanner_set_parameters_and_filter_t                cmd_scanner_set_parameters_and_filter;
     sl_bt_cmd_scanner_set_timing_t                               cmd_scanner_set_timing;
     sl_bt_cmd_scanner_set_mode_t                                 cmd_scanner_set_mode;
     sl_bt_cmd_scanner_start_t                                    cmd_scanner_start;
@@ -4222,6 +4245,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_periodic_advertiser_start_t                        rsp_periodic_advertiser_start;
     sl_bt_rsp_periodic_advertiser_stop_t                         rsp_periodic_advertiser_stop;
     sl_bt_rsp_scanner_set_parameters_t                           rsp_scanner_set_parameters;
+    sl_bt_rsp_scanner_set_parameters_and_filter_t                rsp_scanner_set_parameters_and_filter;
     sl_bt_rsp_scanner_stop_t                                     rsp_scanner_stop;
     sl_bt_rsp_scanner_set_timing_t                               rsp_scanner_set_timing;
     sl_bt_rsp_scanner_set_mode_t                                 rsp_scanner_set_mode;

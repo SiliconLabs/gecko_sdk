@@ -63,6 +63,8 @@
 #include "zw_build_no.h"
 #include <zaf_event_distributor_ncp.h>
 
+#include "zpal_retention_register.h"
+
 /* Basic level definitions */
 #define BASIC_ON 0xFF
 #define BASIC_OFF 0x00
@@ -941,6 +943,22 @@ ApplicationInitSW(void)
   }
   eSerialAPIStartedCapabilities capabilities = (RadioConfig.eRegion == REGION_US_LR) ? SERIAL_API_STARTED_CAPABILITIES_L0NG_RANGE : 0;
   compl_workbuf[6 + i] = capabilities;
+
+  uint32_t zpal_reset_info = 0;
+  if (ZPAL_STATUS_OK != zpal_retention_register_read(ZPAL_RETENTION_REGISTER_RESET_INFO, &zpal_reset_info))
+  {
+    DPRINT("ERROR while reading the reset information\n");
+    Request(FUNC_ID_SERIAL_API_STARTED, compl_workbuf, 7 + i);
+  }
+  else
+  {
+    compl_workbuf[7 + i] = (uint8_t)(zpal_reset_info >> 24);
+    compl_workbuf[8 + i] = (uint8_t)(zpal_reset_info >> 16);
+    compl_workbuf[9 + i] = (uint8_t)(zpal_reset_info >> 8);
+    compl_workbuf[10 + i] = (uint8_t)zpal_reset_info;
+    DPRINTF("zpal_reset_reason: %u\n", zpal_reset_info);
+    Request(FUNC_ID_SERIAL_API_STARTED, compl_workbuf, 11 + i);
+  }
 
   Request(FUNC_ID_SERIAL_API_STARTED, compl_workbuf, 7 + i);
 
