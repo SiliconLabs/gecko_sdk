@@ -500,12 +500,13 @@ bool emberAfGreenPowerClusterGpResponseCallback(EmberAfClusterCommand *cmd)
     return false;
   }
 
+  EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID);
+
   if (emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
     goto kickout;
   }
   emberAfGreenPowerClusterPrintln("GpResponse cmd: %1x", cmd_data.gpdCommandId);
 
-  EmberGpApplicationId appId = (cmd_data.options & EMBER_AF_GP_RESPONSE_OPTION_APPLICATION_ID);
   EmberGpAddress addr;
   if (!sli_zigbee_af_gp_make_addr(&addr,
                                   appId,

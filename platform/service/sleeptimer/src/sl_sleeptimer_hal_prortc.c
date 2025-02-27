@@ -160,13 +160,13 @@ void sleeptimer_hal_init_timer(void)
     while ((PRORTC->SYNCBUSY & _RTCC_SYNCBUSY_MASK) != 0U) ;
   } while ((PRORTC->STATUS & _RTCC_STATUS_RUNNING_MASK) != RTCC_STATUS_RUNNING);
 
-  // Disable ALL PRORTC interrupts
-  PRORTC->IEN &= ~_RTCC_IEN_MASK;
-
-  // Clear any pending interrupts
 #if defined (RTCC_HAS_SET_CLEAR)
+  // Disable ALL PRORTC interrupts
+  PRORTC->IEN_CLR = _RTCC_IEN_MASK;
+  // Clear any pending interrupts
   PRORTC->IF_CLR = _RTCC_IF_MASK;
 #else
+  PRORTC->IEN &= ~_RTCC_IEN_MASK;
   PRORTC->IFC = _RTCC_IF_MASK;
 #endif
 #endif

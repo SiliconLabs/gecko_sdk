@@ -454,11 +454,13 @@ static bool findNextNodeForDiscoveryOrPartnerKeyExchange(State *state,
                                                          bool skipCurrent)
 {
 #ifdef EMBER_AF_PLUGIN_SMART_ENERGY_REGISTRATION_ESI_DISCOVERY_REQUIRED
+  EmberEUI64 nullEui64 = EMBER_NULL_EUI64;
   while (state->esiEntry != NULL) {
     assert(state->esiEntry->nodeId != EMBER_NULL_NODE_ID);
     if (skipCurrent
-        || state->esiEntry->nodeId == EMBER_TRUST_CENTER_NODE_ID) {
-      // Skip the Trust Center: we have already done KE with it
+        || ((state->esiEntry->nodeId == EMBER_TRUST_CENTER_NODE_ID)
+            && (memcmp(state->esiEntry->eui64, nullEui64, EUI64_SIZE) != 0))) {
+      // Skip the Trust Center: we have already done KE with it) {
       state->esiEntry = emberAfPluginEsiManagementGetNextEntry(state->esiEntry, 0);
       skipCurrent = false;
       continue;

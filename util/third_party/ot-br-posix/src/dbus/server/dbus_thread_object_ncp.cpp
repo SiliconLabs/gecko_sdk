@@ -41,9 +41,9 @@ using std::placeholders::_2;
 namespace otbr {
 namespace DBus {
 
-DBusThreadObjectNcp::DBusThreadObjectNcp(DBusConnection     &aConnection,
-                                         const std::string  &aInterfaceName,
-                                         otbr::Ncp::NcpHost &aHost)
+DBusThreadObjectNcp::DBusThreadObjectNcp(DBusConnection      &aConnection,
+                                         const std::string   &aInterfaceName,
+                                         otbr::Host::NcpHost &aHost)
     : DBusObject(&aConnection, OTBR_DBUS_OBJECT_PREFIX + aInterfaceName)
     , mHost(aHost)
 {
@@ -125,7 +125,7 @@ exit:
 
 void DBusThreadObjectNcp::LeaveHandler(DBusRequest &aRequest)
 {
-    mHost.Leave([aRequest](otError aError, const std::string &aErrorInfo) mutable {
+    mHost.Leave(true /* aEraseDataset */, [aRequest](otError aError, const std::string &aErrorInfo) mutable {
         OT_UNUSED_VARIABLE(aErrorInfo);
         aRequest.ReplyOtResult(aError);
     });

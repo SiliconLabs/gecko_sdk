@@ -407,7 +407,11 @@ static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 
   if ((initData->type == spidrvMaster)
       && (initData->csControl == spidrvCsControlAuto)) {
+    #if defined(USART_HAS_SET_CLEAR)
+    handle->peripheral.usartPort->CTRL_SET = USART_CTRL_AUTOCS;
+    #else
     handle->peripheral.usartPort->CTRL |= USART_CTRL_AUTOCS;
+    #endif
   }
 
   if (initData->csControl == spidrvCsControlAuto) {

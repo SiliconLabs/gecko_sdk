@@ -92,6 +92,17 @@ constexpr uint8_t kMaxRouteCost = 16; ///< Maximum path cost
 
 constexpr uint8_t kMeshLocalPrefixContextId = 0; ///< Reserved 6lowpan context ID for Mesh Local Prefix
 
+constexpr uint8_t kLinkRequestAttempts = 3; ///< Number of Link Request attempts when re-establishing link.
+constexpr uint8_t kLinkAcceptTimeout   = 3; ///< Timeout in seconds to rx Link Accept after Link Request tx.
+
+/**
+ * Specifies parent reselect timeout duration in seconds used on FTD child devices.
+ *
+ * When an attach attempt to a neighboring router selected as a potential new parent fails, the same router
+ * cannot be selected again until this timeout expires.
+ */
+constexpr uint16_t kParentReselectTimeout = OPENTHREAD_CONFIG_PARENT_SEARCH_RESELECT_TIMEOUT;
+
 /**
  * Number of consecutive tx failures to child (with no-ack error) to consider child-parent link broken.
  */
@@ -113,6 +124,35 @@ enum DeviceRole : uint8_t
     kRoleChild    = OT_DEVICE_ROLE_CHILD,    ///< The Thread Child role.
     kRoleRouter   = OT_DEVICE_ROLE_ROUTER,   ///< The Thread Router role.
     kRoleLeader   = OT_DEVICE_ROLE_LEADER,   ///< The Thread Leader role.
+};
+
+/**
+ * Represents MLE commands.
+ */
+enum Command : uint8_t
+{
+    kCommandLinkRequest                   = 0,  ///< Link Request command
+    kCommandLinkAccept                    = 1,  ///< Link Accept command
+    kCommandLinkAcceptAndRequest          = 2,  ///< Link Accept And Request command
+    kCommandLinkReject                    = 3,  ///< Link Reject command
+    kCommandAdvertisement                 = 4,  ///< Advertisement command
+    kCommandUpdate                        = 5,  ///< Update command
+    kCommandUpdateRequest                 = 6,  ///< Update Request command
+    kCommandDataRequest                   = 7,  ///< Data Request command
+    kCommandDataResponse                  = 8,  ///< Data Response command
+    kCommandParentRequest                 = 9,  ///< Parent Request command
+    kCommandParentResponse                = 10, ///< Parent Response command
+    kCommandChildIdRequest                = 11, ///< Child ID Request command
+    kCommandChildIdResponse               = 12, ///< Child ID Response command
+    kCommandChildUpdateRequest            = 13, ///< Child Update Request command
+    kCommandChildUpdateResponse           = 14, ///< Child Update Response command
+    kCommandAnnounce                      = 15, ///< Announce command
+    kCommandDiscoveryRequest              = 16, ///< Discovery Request command
+    kCommandDiscoveryResponse             = 17, ///< Discovery Response command
+    kCommandLinkMetricsManagementRequest  = 18, ///< Link Metrics Management Request command
+    kCommandLinkMetricsManagementResponse = 19, ///< Link Metrics Management Response command
+    kCommandLinkProbe                     = 20, ///< Link Probe command
+    kCommandTimeSync                      = 99, ///< Time Sync command
 };
 
 constexpr uint16_t kAloc16Leader                      = 0xfc00;

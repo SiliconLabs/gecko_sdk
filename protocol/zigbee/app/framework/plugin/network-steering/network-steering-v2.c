@@ -120,7 +120,6 @@ static const EmberKeyData distributedTestKey = {
 // key to use
 static bool gFilterByExtendedPanId = false;
 static uint8_t gExtendedPanIdToFilterOn[8];
-static uint32_t scheduleScanChannelMask = 0;
 
 bool emberStackIsUp(void);
 
@@ -370,7 +369,6 @@ static EmberStatus scheduleScan(uint32_t channelMask)
   EmberNodeType nodeType;
   EmberAfPluginScanDispatchScanData scanData;
 
-  scheduleScanChannelMask = channelMask;
   // Kick off a scan and record beacons
   setMaxBeaconsToStore(EMBER_MAX_BEACONS_TO_STORE);
 

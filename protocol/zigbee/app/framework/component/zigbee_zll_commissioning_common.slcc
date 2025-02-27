@@ -203,7 +203,7 @@ template_contribution:
     value:
       group: zll-commissioning
       name: reset
-      handler: emberAfZllResetToFactoryNew
+      handler: emberAfZllResetToFactoryNewCommand
       help: Resets the local device to factory new.
   - name: cli_command
     value:

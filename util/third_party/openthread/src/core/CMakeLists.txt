@@ -101,7 +101,7 @@ set(COMMON_SOURCES
     coap/coap_secure.cpp
     common/appender.cpp
     common/binary_search.cpp
-    common/crc16.cpp
+    common/crc.cpp
     common/data.cpp
     common/error.cpp
     common/frame_builder.cpp
@@ -146,6 +146,8 @@ set(COMMON_SOURCES
     mac/sub_mac.cpp
     mac/sub_mac_callbacks.cpp
     mac/sub_mac_csl_receiver.cpp
+    mac/sub_mac_wed.cpp
+    mac/wakeup_tx_scheduler.cpp
     meshcop/announce_begin_client.cpp
     meshcop/border_agent.cpp
     meshcop/commissioner.cpp
@@ -295,6 +297,7 @@ set(RADIO_COMMON_SOURCES
     mac/sub_mac.cpp
     mac/sub_mac_callbacks.cpp
     mac/sub_mac_csl_receiver.cpp
+    mac/sub_mac_wed.cpp
     radio/radio.cpp
     radio/radio_callbacks.cpp
     radio/radio_platform.cpp

@@ -419,3 +419,9 @@ void disable(sl_cli_command_arg_t *arguments)
   emberAfZllDisable();
   emberAfAppPrintln("Touchlinking disabled");
 }
+
+void emberAfZllResetToFactoryNewCommand(sl_cli_command_arg_t *arguments)
+{
+  (void) arguments;
+  emberAfZllResetToFactoryNew();
+}

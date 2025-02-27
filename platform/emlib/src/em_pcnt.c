@@ -921,9 +921,9 @@ void PCNT_FilterConfiguration(PCNT_TypeDef *pcnt, const PCNT_Filter_TypeDef *con
 
   /* Set new state of the filter. */
   if (enable) {
-    pcnt->CFG |= PCNT_CFG_FILTEN;
+    pcnt->CFG_SET = PCNT_CFG_FILTEN;
   } else {
-    pcnt->CFG &= ~PCNT_CFG_FILTEN;
+    pcnt->CFG_CLR = PCNT_CFG_FILTEN;
   }
 
   /* Re-Enable module if necessary after change. */

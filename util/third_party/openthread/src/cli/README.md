@@ -21,6 +21,7 @@ Done
 
 ## OpenThread Command List
 
+- [attachtime](#attachtime)
 - [ba](#ba)
 - [bbr](#bbr)
 - [br](README_BR.md)
@@ -70,7 +71,7 @@ Done
 - [linkmetricsmgr](#linkmetricsmgr-disable)
 - [locate](#locate)
 - [log](#log-filename-filename)
-- [mac](#mac-retries-direct)
+- [mac](#mac-altshortaddr)
 - [macfilter](#macfilter)
 - [meshdiag](#meshdiag-topology-ip6-addrs-children)
 - [mliid](#mliid-iid)
@@ -133,9 +134,23 @@ Done
 - [vendor](#vendor-name)
 - [verhoeff](#verhoeff-calculate)
 - [version](#version)
-- [wakeupchannel](#wakeupchannel)
+- [wakeup](#wakeup-channel)
 
 ## OpenThread Command Details
+
+### attachtime
+
+Prints the attach time (duration since device was last attached).
+
+Requires `OPENTHREAD_CONFIG_UPTIME_ENABLE`.
+
+Duration is formatted as `{hh}:{mm}:{ss}` for hours, minutes, and seconds if it is less than one day. If the duration is longer than one day, the format is `{dd}d.{hh}:{mm}:{ss}`.
+
+```bash
+> attachtime
+01:38:25
+Done
+```
 
 ### bbr
 
@@ -349,7 +364,7 @@ Show current Border Agent information.
 
 ### ba port
 
-Print border agent service port.
+Print Border Agent's service port.
 
 ```bash
 > ba port
@@ -359,104 +374,153 @@ Done
 
 ### ba state
 
-Print border agent state.
+Print Border Agent's state.
 
 Possible states are
 
-- `Stopped` : Border Agent is stopped.
-- `Started` : Border Agent is running with no active connection with external commissioner.
-- `Active` : Border Agent is running and is connected with an external commissioner.
+- `Active`: Border Agent is active.
+- `Inactive`: Border Agent is not active.
 
 ```bash
 > ba state
-Started
-Done
-```
-
-### ba disconnect
-
-Disconnects border agent from any active secure sessions.
-
-```bash
-> ba disconnect
+Active
 Done
 ```
 
 ### ba ephemeralkey
 
-Indicates if an ephemeral key is active.
+Print the Border Agent's Ephemeral Key Manager state.
+
+Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
+
+Possible states are
+
+- `Disabled`: Ephemeral Key Manager is disabled.
+- `Stopped`: Enabled but no key is in use (not yet set or started).
+- `Started`: Ephemeral key is set. Listening to accept secure connections from commissioner candidates.
+- `Connected`: Secure session is established with an external commissioner candidate. Not yet accepted as full commissioner.
+- `Accepted`: Secure session is established and external candidate is accepted as full commissioner.
+
+```bash
+> ba ephemeralkey
+Stopped
+Done
+
+> ba ephemeralkey start Z10X20g3J15w1000P60m16 1000
+Done
+
+> ba ephemeralkey
+Started
+Done
+```
+
+### ba ephemeralkey enable
+
+Enables the Border agent's Ephemeral Key Manager.
 
 Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
 
 ```bash
-> ba ephemeralkey
-inactive
-Done
-
-> ba ephemeralkey set Z10X20g3J15w1000P60m16 1000
-Done
-
-> ba ephemeralkey
-active
+> ba ephemeralkey enable
 Done
 ```
 
-### ba ephemeralkey set \<keystring\> \[timeout\] \[port\]
+### ba ephemeralkey disable
 
-Sets the ephemeral key for a given timeout duration.
+Disables the Border Agent's Ephemeral Key Manager.
 
 Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
 
-The ephemeral key can be set when Border Agent is already running and is not currently connected to any external commissioner (i.e., `ba state` gives `Started`).
+```bash
+> ba ephemeralkey disable
+Done
+
+> ba ephemeralkey
+Disabled
+Done
+```
+
+### ba ephemeralkey start \<keystring\> \[timeout\] \[port\]
+
+Starts using an ephemeral key for a given timeout duration.
+
+Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
+
+An ephemeral key can only be set when current state is `Stopped`, i.e., it is enabled but not yet started. This means that setting the ephemeral key again while a previously set key is still in use will fail. Callers can stop the previous key using `ba ephemeralkey stop` before starting with a new key.
+
+The Ephemeral Key Manager and the Border Agent service (which uses PSKc) can be enabled and used in parallel, as they use independent and separate DTLS transport and sessions.
 
 The `keystring` string is directly used as the ephemeral PSK (excluding the trailing null `\0` character). Its length MUST be between 6 and 32, inclusive.
 
 The `timeout` is in milliseconds. If not provided or set to zero, the default value of 2 minutes will be used. If the timeout value is larger than 10 minutes, the 10 minutes timeout value will be used instead.
 
-The `port` specifies the UDP port to use with the ephemeral key. If UDP port is zero or is not provided, an ephemeral port will be used. `ba port` will give the current UDP port in use by the Border Agent.
+The `port` specifies the UDP port to use with the ephemeral key. If UDP port is zero or is not provided, an ephemeral port will be used. `ba ephemeralkey port` will give the current UDP port in use.
 
-Setting the ephemeral key again before a previously set one is timed out, will replace the previous one.
+When successfully set, the ephemeral key can be used only once by an external commissioner candidate to establish a secure session. After the commissioner candidate disconnects, the use of the ephemeral key is stopped. If the timeout expires, the use of the ephemeral key is stopped, and any connected session using the key is immediately disconnected.
 
-During the timeout interval, the ephemeral key can be used only once by an external commissioner to establish a connection. After the commissioner disconnects, the ephemeral key is cleared, and the Border Agent reverts to using PSKc. If the timeout expires while a commissioner is still connected, the session will be terminated, and the Border Agent will cease using the ephemeral key and revert to PSKc.
+The Ephemeral Key Manager limits the number of failed DTLS connections to 10 attempts. After the 10th failed attempt, the use of the ephemeral key is automatically stopped (even if the timeout has not yet expired).
 
 ```bash
-> ba ephemeralkey set Z10X20g3J15w1000P60m16 5000 1234
+> ba ephemeralkey start Z10X20g3J15w1000P60m16 5000 1234
+Done
+
+> ba ephemeralkey
+Started
+Done
+
+> ba ephemeralkey port
+1234
 Done
 ```
 
-### ba ephemeralkey clear
+### ba ephemeralkey stop
 
-Cancels the ephemeral key in use if any.
+Stops the ephemeral key use and disconnects any session using it.
 
 Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
 
-Can be used to cancel a previously set ephemeral key before it is used or times out. If the Border Agent is not running or there is no ephemeral key in use, calling this function has no effect.
-
-If a commissioner is connected using the ephemeral key and is currently active, calling this method does not change its state. In this case the `ba ephemeralkey` will continue to return `active` until the commissioner disconnects.
+If there is no ephemeral key in use, calling this function has no effect.
 
 ```bash
-> ba ephemeralkey clear
+> ba ephemeralkey stop
+Done
+```
+
+### ba ephemeralkey port
+
+Print the port number in use by Ephemeral Key Manager.
+
+Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
+
+```bash
+> ba ephemeralkey port
+1234
 Done
 ```
 
 ### ba ephemeralkey callback enable
 
-Enables callback from Border Agent for ephemeral key state changes.
+Enables callback from Border Agent to be notified of state changes of Border Agent's Ephemeral Key Manager.
+
+Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
 
 ```bash
 > ba ephemeralkey callback enable
 Done
 
-> ba ephemeralkey set W10X12 5000 49155
+> ba ephemeralkey start W10X120 5000 49155
 Done
 
-BorderAgent callback: Ephemeral key active, port:49155
-BorderAgent callback: Ephemeral key inactive
+BorderAgentEphemeralKey callback - state:Started
+BorderAgentEphemeralKey callback - state:Connected
+BorderAgentEphemeralKey callback - state:Stopped
 ```
 
 ### ba ephemeralkey callback disable
 
-Disables callback from Border Agent for ephemeral key state changes.
+Disables callback from Border Agent to be notified of state changes of Border Agent's Ephemeral Key Manager.
+
+Requires `OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE`.
 
 ```bash
 > ba ephemeralkey callback disable
@@ -1069,6 +1133,7 @@ Role Leader: 1
 Attach Attempts: 1
 Partition Id Changes: 1
 Better Partition Attach Attempts: 0
+Better Parent Attach Attempts: 0
 Parent Changes: 0
 Time Disabled Milli: 10026
 Time Detached Milli: 6852
@@ -4196,6 +4261,16 @@ Print API version number.
 Done
 ```
 
+### mac altshortaddr
+
+Get the alternate short address used by MAC layer. Can be `0xfffe` if not set.
+
+```bash
+> mac altshortaddr
+0x4801
+Done
+```
+
 ### mac retries direct
 
 Get the number of direct TX retries on the MAC layer.
@@ -4402,25 +4477,83 @@ Factory Diagnostics module is enabled only when building OpenThread with `OPENTH
 
 [diag]: ../../src/core/diags/README.md
 
-### wakeupchannel
+### wakeup channel
 
 Get the wake-up channel.
 
 Requires `OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE` or `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
 
 ```bash
-> wakeupchannel
+> wakeup channel
 12
 Done
 ```
 
-### wakeupchannel \<channel\>
+### wakeup channel \<channel\>
 
 Set the wake-up channel.
 
 Requires `OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE` or `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
 
 ```bash
-> wakeupchannel 12
+> wakeup channel 12
+Done
+```
+
+### wakeup parameters
+
+Get the wake-up listen interval and duration.
+
+Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+
+```bash
+> wakeup parameters
+interval: 1000000us
+duration: 8000us
+Done
+```
+
+### wakeup parameters \<interval\> \<duration\>
+
+Set the wake-up listen interval and duration.
+
+Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+
+```bash
+> wakeup parameters 1000000 8000
+Done
+```
+
+### wakeup listen
+
+Show the state of wake-up listening feature.
+
+`OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE` is required.
+
+```bash
+> wakeup listen
+Enabled
+Done
+```
+
+### wakeup listen \[enable|disable\]
+
+Enable/disable listening for wake-up frames.
+
+`OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE` is required.
+
+```bash
+> wakeup listen enable
+Done
+```
+
+### wakeup wake \<extaddr\> \<wakeup-interval\> \<wakeup-duration\>
+
+Wakes a Wake-up End Device.
+
+`OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE` is required.
+
+```bash
+> wakeup wake 1ece0a6c4653a7c1 7500 1090
 Done
 ```

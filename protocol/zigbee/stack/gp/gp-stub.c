@@ -18,6 +18,7 @@
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
 #include "stack/include/library.h"
+#include "event_queue/event-queue.h"
 
 EmberStatus sli_zigbee_gp_init(void)
 {
@@ -100,8 +101,9 @@ void sli_zigbee_update_gp_proxy_table(uint8_t *longId, EmberNodeId shortId)
   (void)shortId;
 }
 
-void sli_zigbee_gp_tx_event_handler(void)
+void sli_zigbee_gp_tx_event_handler(EmberEvent *event)
 {
+  (void)event;
 }
 
 bool emberGpProxyTableProcessGpPairing(uint32_t options,

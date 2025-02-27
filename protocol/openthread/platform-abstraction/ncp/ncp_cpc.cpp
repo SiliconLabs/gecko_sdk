@@ -238,8 +238,8 @@ void NcpCPC::HandleCPCSendDone(sl_cpc_user_endpoint_id_t endpoint_id, void *buff
 
 void NcpCPC::HandleSendDone(void)
 {
-    mIsWriting = false;
     memset(mCpcTxBuffer, 0, sizeof(mCpcTxBuffer));
+    mIsWriting = false;
 }
 
 void NcpCPC::HandleCPCReceive(sl_cpc_user_endpoint_id_t endpoint_id, void *arg)

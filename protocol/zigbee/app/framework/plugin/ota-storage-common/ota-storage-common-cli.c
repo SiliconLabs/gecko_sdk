@@ -172,3 +172,9 @@ void sli_zigbee_af_ota_storage_data_print(sl_cli_command_arg_t *arguments)
                      true);  // with whitespace?
   emberAfPrintTextLine("");
 }
+
+void sli_zigbee_af_ota_storage_info_print_command(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  sli_zigbee_af_ota_storage_info_print();
+}

@@ -954,7 +954,7 @@ template_contribution:
     value:
       name: attr
       group: print
-      handler: emberAfPrintAttributeTable
+      handler: printAttributeTableCommand
       help: Prints attribute.
   - name: cli_command
     value:

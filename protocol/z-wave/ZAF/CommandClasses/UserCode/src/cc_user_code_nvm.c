@@ -53,19 +53,17 @@ void
 CC_UserCode_Migrate(void)
 {
   #ifdef ZW_MIGRATION_TO_7_19
-  uint8_t i;
   zpal_status_t status;
-  SUserCode userCodeData[CC_USER_CODE_MAX_IDS];
+  SUserCode userCodeData;
 
   // Migration needed for all apps before 7.19.0
-  status = ZAF_nvm_read(ZAF_FILE_ID_USERCODE, userCodeData, sizeof(userCodeData));
-  // If the file is not present, we don't have anything to migrate
-  if (status != ZPAL_STATUS_OK) {
-    return;
-  }
-
-  for (i = 0; i < CC_USER_CODE_MAX_IDS; i++) {
-    ZAF_nvm_write(CC_USER_CODE_FILE_OFFSET(i), &userCodeData[i], sizeof(userCodeData[i]));
+  for (uint8_t i = 0; i < CC_USER_CODE_MAX_IDS; i++) {
+    status = ZAF_nvm_read_object_part(ZAF_FILE_ID_USERCODE, &userCodeData, i * sizeof(userCodeData), sizeof(userCodeData));
+    // If the file is not present, we don't have anything to migrate
+    if (status != ZPAL_STATUS_OK) {
+      return;
+    }
+    ZAF_nvm_write(CC_USER_CODE_FILE_OFFSET(i), &userCodeData, sizeof(userCodeData));
   }
 
   ZAF_nvm_erase_object(ZAF_FILE_ID_USERCODE);

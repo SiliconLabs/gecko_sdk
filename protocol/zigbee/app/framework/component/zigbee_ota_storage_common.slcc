@@ -54,7 +54,7 @@ template_contribution:
     value:
       group: ota-storage-common
       name: storage-info
-      handler: sli_zigbee_af_ota_storage_info_print
+      handler: sli_zigbee_af_ota_storage_info_print_command
       help: Prints information about the storage device.
   - name: cli_command
     value:

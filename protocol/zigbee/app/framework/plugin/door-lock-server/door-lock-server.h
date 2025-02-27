@@ -190,7 +190,7 @@ bool emberAfPluginDoorLockServerGetLogEntry(uint16_t *entryId,
 void sli_zigbee_af_door_lock_server_init_user(void);
 
 // Initialize events.
-void sli_zigbee_af_door_lock_server_init_events(void);
+void sli_zigbee_af_door_lock_server_init_events(uint8_t init_level);
 
 // Set the user type associated with the provided user ID (userId) and return
 // true if successful.

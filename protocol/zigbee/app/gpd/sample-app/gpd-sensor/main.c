@@ -33,6 +33,9 @@
 #include "sl_system_process_action.h"
 #endif // SL_CATALOG_KERNEL_PRESENT
 
+#if defined(__ICCARM__)
+#pragma diag_suppress=Pe111
+#endif // defined(__ICCARM__)
 int main(void)
 {
   // Initialize Silicon Labs device, system, service(s) and protocol stack(s).

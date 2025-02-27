@@ -87,7 +87,16 @@ constexpr uint8_t kMaxFrameRetriesCsl             = 0;
 
 constexpr uint8_t kTxNumBcast = OPENTHREAD_CONFIG_MAC_TX_NUM_BCAST; ///< Num of times broadcast frame is tx.
 
+/**
+ * Specifies the number of microseconds ahead of time that the MAC layer should deliver a CSL frame to the sub-MAC
+ * layer.
+ */
+constexpr uint16_t kCslRequestAhead = OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US;
+
 constexpr uint16_t kMinCslIePeriod = OPENTHREAD_CONFIG_MAC_CSL_MIN_PERIOD;
+
+constexpr uint32_t kDefaultWedListenInterval = OPENTHREAD_CONFIG_WED_LISTEN_INTERVAL;
+constexpr uint32_t kDefaultWedListenDuration = OPENTHREAD_CONFIG_WED_LISTEN_DURATION;
 
 /**
  * Defines the function pointer called on receiving an IEEE 802.15.4 Beacon during an Active Scan.
@@ -200,6 +209,7 @@ public:
      * Requests an indirect data frame transmission.
      */
     void RequestIndirectFrameTransmission(void);
+#endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     /**
@@ -210,6 +220,11 @@ public:
     void RequestCslFrameTransmission(uint32_t aDelay);
 #endif
 
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    /**
+     * Requests `Mac` to start a wake-up frame transmission.
+     */
+    void RequestWakeupFrameTransmission(void);
 #endif
 
     /**
@@ -247,6 +262,20 @@ public:
      * @param[in]  aShortAddress  The IEEE 802.15.4 Short Address.
      */
     void SetShortAddress(ShortAddress aShortAddress) { mLinks.SetShortAddress(aShortAddress); }
+
+    /**
+     * Gets the alternate short address.
+     *
+     * @returns The alternate short address, or `kShortAddrInvalid` if there is no alternate address.
+     */
+    ShortAddress GetAlternateShortAddress(void) const { return mLinks.GetAlternateShortAddress(); }
+
+    /**
+     * Sets the alternate short address.
+     *
+     * @param[in] aShortAddress   The alternate short address. Use `kShortAddrInvalid` to clear the alternate address.
+     */
+    void SetAlternateShortAddress(ShortAddress aShortAddress) { mLinks.SetAlternateShortAddress(aShortAddress); }
 
     /**
      * Returns the IEEE 802.15.4 PAN Channel.
@@ -681,23 +710,76 @@ public:
     Error GetRegion(uint16_t &aRegionCode) const;
 
     /**
-     * Gets the Wake-up channel.
+     * Gets the wake-up channel.
      *
-     * @returns Wake-up channel.
+     * @returns wake-up channel.
      */
     uint8_t GetWakeupChannel(void) const { return mWakeupChannel; }
 
 #if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
     /**
-     * Sets the Wake-up channel.
+     * Sets the wake-up channel.
      *
-     * @param[in]  aChannel  The Wake-up channel.
+     * @param[in]  aChannel  The wake-up channel.
      *
      * @retval kErrorNone          Successfully set the wake-up channel.
      * @retval kErrorInvalidArgs   The @p aChannel is not in the supported channel mask.
      */
     Error SetWakeupChannel(uint8_t aChannel);
 #endif
+
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    /**
+     * Gets the wake-up listen parameters.
+     *
+     * @param[out]  aInterval  A reference to return the wake-up listen interval in microseconds.
+     * @param[out]  aDuration  A reference to return the wake-up listen duration in microseconds.
+     */
+    void GetWakeupListenParameters(uint32_t &aInterval, uint32_t &aDuration) const;
+
+    /**
+     * Sets the wake-up listen parameters.
+     *
+     * The listen interval must be greater than the listen duration.
+     * The listen duration must be greater or equal than `kMinWakeupListenDuration`.
+     *
+     * @param[in]  aInterval  The wake-up listen interval in microseconds.
+     * @param[in]  aDuration  The wake-up listen duration in microseconds.
+     *
+     * @retval kErrorNone          Successfully set the wake-up listen parameters.
+     * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
+     */
+    Error SetWakeupListenParameters(uint32_t aInterval, uint32_t aDuration);
+
+    /**
+     * Enables/disables listening for wake-up frames.
+     *
+     * @param[in]  aEnable  TRUE to enable listening for wake-up frames, FALSE otherwise
+     *
+     * @retval kErrorNone          Successfully enabled/disabled listening for wake-up frames.
+     * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
+     * @retval kErrorInvalidState  Could not enable/disable listening for wake-up frames.
+     */
+    Error SetWakeupListenEnabled(bool aEnable);
+
+    /**
+     * Returns whether listening for wake-up frames is enabled.
+     *
+     * @retval TRUE   If listening for wake-up frames is enabled.
+     * @retval FALSE  If listening for wake-up frames is not enabled.
+     */
+    bool IsWakeupListenEnabled(void) const { return mWakeupListenEnabled; }
+#endif // OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+
+    /**
+     * Calculates the radio bus transfer time (in microseconds) for a given frame size based on `Radio::GetBusSpeed()`
+     * and `Radio::GetBusLatency()`.
+     *
+     * @param[in] aFrameSize   The frame size to calculate for, in bytes.
+     *
+     * @returns The calculated radio bus transfer time in microseconds.
+     */
+    uint32_t CalculateRadioBusTransferTime(uint16_t aFrameSize) const;
 
 private:
     static constexpr uint16_t kMaxCcaSampleCount = OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW;
@@ -713,9 +795,12 @@ private:
         kOperationWaitingForData,
 #if OPENTHREAD_FTD
         kOperationTransmitDataIndirect,
+#endif
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
         kOperationTransmitDataCsl,
 #endif
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+        kOperationTransmitWakeup,
 #endif
     };
 
@@ -761,6 +846,7 @@ private:
     bool     ShouldSendBeacon(void) const;
     bool     IsJoinable(void) const;
     void     BeginTransmit(void);
+    Error    FilterDestShortAddress(ShortAddress aDestAddress) const;
     void     UpdateNeighborLinkInfo(Neighbor &aNeighbor, const RxFrame &aRxFrame);
     bool     HandleMacCommand(RxFrame &aFrame);
     void     HandleTimer(void);
@@ -781,11 +867,15 @@ private:
     uint8_t GetTimeIeOffset(const Frame &aFrame);
 #endif
 
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     void ProcessCsl(const RxFrame &aFrame, const Address &aSrcAddr);
 #endif
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
     void ProcessEnhAckProbing(const RxFrame &aFrame, const Neighbor &aNeighbor);
+#endif
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    Error HandleWakeupFrame(const RxFrame &aFrame);
+    void  UpdateWakeupListening(void);
 #endif
     static const char *OperationToString(Operation aOperation);
 
@@ -804,6 +894,9 @@ private:
     bool mShouldDelaySleep : 1;
     bool mDelayingSleep : 1;
 #endif
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    bool mWakeupListenEnabled : 1;
+#endif
     Operation   mOperation;
     uint16_t    mPendingOperations;
     uint8_t     mBeaconSequence;
@@ -819,9 +912,9 @@ private:
     uint8_t     mMaxFrameRetriesDirect;
 #if OPENTHREAD_FTD
     uint8_t mMaxFrameRetriesIndirect;
+#endif
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     TimeMilli mCslTxFireTime;
-#endif
 #endif
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     // When Mac::mCslChannel is 0, it indicates that CSL channel has not been specified by the upper layer.
@@ -829,7 +922,10 @@ private:
     uint16_t mCslPeriod;
 #endif
     uint8_t mWakeupChannel;
-
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    uint32_t mWakeupListenInterval;
+    uint32_t mWakeupListenDuration;
+#endif
     union
     {
         ActiveScanHandler mActiveScanHandler;

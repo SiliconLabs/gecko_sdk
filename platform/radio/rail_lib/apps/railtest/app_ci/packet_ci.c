@@ -34,6 +34,9 @@
 #include "response_print.h"
 #include "circular_queue.h"
 #include "buffer_pool_allocator.h"
+#ifdef BUFFER_POOL_ALLOCATOR_USE_LOCAL_CONFIG_HEADER
+  #include "buffer_pool_allocator_config.h" // component-level config file (new config method)
+#endif
 
 #include "rail.h"
 #include "rail_types.h"
@@ -410,6 +413,16 @@ void rxFifoManualRead(sl_cli_command_arg_t *args)
     if (packetData == NULL) {
       RAIL_ReleaseRxPacket(railHandle, RAIL_RX_PACKET_HANDLE_OLDEST);
       memoryFree(rxPacketHandle);
+      responsePrintError(sl_cli_get_command_string(args, 0),
+                         RAIL_STATUS_INVALID_PARAMETER,
+                         "Unable to allocate memory to read up to %u bytes, try "
+#if BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX
+                         "<= %d bytes.", bytesToRead,
+                         BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX - sizeof(RailAppEvent_t)
+#else
+                         "fewer bytes.", bytesToRead
+#endif
+                         );
       return;
     }
     RAIL_RxPacketDetails_t *appendedInfo = &packetData->rxPacket.appendedInfo;

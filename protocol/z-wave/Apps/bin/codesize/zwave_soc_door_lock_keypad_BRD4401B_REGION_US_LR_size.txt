@@ -25,17 +25,17 @@ text_application_ram                           0x0   0x2000c100
 .ARM.attributes                               0x36          0x0
 .comment                                      0x45          0x0
 .debug_line_str                              0x29a          0x0
-.debug_frame                               0x12808          0x0
-.debug_info                               0xd4c3da          0x0
-.debug_abbrev                              0x28e75          0x0
-.debug_loclists                            0x2d52d          0x0
+.debug_frame                               0x12820          0x0
+.debug_info                               0xd4c3c7          0x0
+.debug_abbrev                              0x28e6f          0x0
+.debug_loclists                            0x2d55b          0x0
 .debug_aranges                              0x6a00          0x0
-.debug_rnglists                             0x4f8a          0x0
-.debug_line                                0x77cbb          0x0
-.debug_str                                 0x92318          0x0
-.debug_loc                                 0x2b780          0x0
-.debug_ranges                               0x4a50          0x0
-Total                                     0xf7796a
+.debug_rnglists                             0x4fa3          0x0
+.debug_line                                0x77c83          0x0
+.debug_str                                 0x92312          0x0
+.debug_loc                                 0x2b7f9          0x0
+.debug_ranges                               0x4a00          0x0
+Total                                     0xf7799b
 
 The calculated FLASH and SRAM usage summary:
 ============================================

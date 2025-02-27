@@ -144,7 +144,8 @@ uint8_t serialGetCommandLength(void)
 
 void serialSetResponseLength(uint8_t data)
 {
-  emberSetMessageBufferLength(ezspBuffer, data);
+  // Not safe to proceed if we can't realign the buffer
+  assert(emberSetMessageBufferLength(ezspBuffer, data) == SL_STATUS_OK);
 
   // emberSetMessageBufferLength has the potential effect of setting ezspBuffer
   // to a brand new buffer. This can happen if ezspBuffer is being extended.

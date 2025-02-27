@@ -120,8 +120,9 @@ static void scheduleMoveEvent(void)
   }
 }
 
-void sli_zigbee_af_end_device_support_move_init(void)
+void sli_zigbee_af_end_device_support_move_init(uint8_t init_level)
 {
+  (void) init_level;
   sl_zigbee_network_event_init(emberAfPluginEndDeviceSupportMoveNetworkEvents,
                                emberAfPluginEndDeviceSupportMoveNetworkEventHandler);
 }

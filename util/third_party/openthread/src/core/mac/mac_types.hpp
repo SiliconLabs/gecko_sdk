@@ -70,8 +70,8 @@ constexpr PanId kPanIdBroadcast = 0xffff; ///< Broadcast PAN ID.
  */
 typedef otShortAddress ShortAddress;
 
-constexpr ShortAddress kShortAddrBroadcast = 0xffff; ///< Broadcast Short Address.
-constexpr ShortAddress kShortAddrInvalid   = 0xfffe; ///< Invalid Short Address.
+constexpr ShortAddress kShortAddrBroadcast = OT_RADIO_BROADCAST_SHORT_ADDR; ///< Broadcast Short Address.
+constexpr ShortAddress kShortAddrInvalid   = OT_RADIO_INVALID_SHORT_ADDR;   ///< Invalid Short Address.
 
 /**
  * Generates a random IEEE 802.15.4 PAN ID.
@@ -110,10 +110,12 @@ public:
      */
     void Fill(uint8_t aByte) { memset(this, aByte, sizeof(*this)); }
 
+#if OPENTHREAD_FTD || OPENTHREAD_MTD
     /**
      * Generates a random IEEE 802.15.4 Extended Address.
      */
     void GenerateRandom(void);
+#endif
 
     /**
      * Sets the Extended Address from a given byte array.
@@ -197,6 +199,16 @@ public:
     {
         CopyAddress(aBuffer, m8, aByteOrder);
     }
+
+    /**
+     * Overloads operator `==` to evaluate whether or not two `ExtAddress` instances are equal.
+     *
+     * @param[in]  aOther  The other `ExtAddress` instance to compare with.
+     *
+     * @retval TRUE   If the two `ExtAddress` instances are equal.
+     * @retval FALSE  If the two `ExtAddress` instances are not equal.
+     */
+    bool operator==(const ExtAddress &aOther) const;
 
     /**
      * Converts an address to a string.
@@ -357,6 +369,16 @@ public:
      * @returns TRUE if address is Short Invalid Address, FALSE otherwise.
      */
     bool IsShortAddrInvalid(void) const { return ((mType == kTypeShort) && (GetShort() == kShortAddrInvalid)); }
+
+    /**
+     * Overloads operator `==` to evaluate whether or not two `Address` instances are equal.
+     *
+     * @param[in]  aOther  The other `Address` instance to compare with.
+     *
+     * @retval TRUE   If the two `Address` instances are equal.
+     * @retval FALSE  If the two `Address` instances are not equal.
+     */
+    bool operator==(const Address &aOther) const;
 
     /**
      * Converts an address to a null-terminated string

@@ -235,6 +235,7 @@ ot_option(OT_OPERATIONAL_DATASET_AUTO_INIT OPENTHREAD_CONFIG_OPERATIONAL_DATASET
 ot_option(OT_OTNS OPENTHREAD_CONFIG_OTNS_ENABLE "OTNS")
 ot_option(OT_PING_SENDER OPENTHREAD_CONFIG_PING_SENDER_ENABLE "ping sender" ${OT_APP_CLI})
 ot_option(OT_PLATFORM_BOOTLOADER_MODE OPENTHREAD_CONFIG_PLATFORM_BOOTLOADER_MODE_ENABLE "platform bootloader mode")
+ot_option(OT_PLATFORM_DNSSD OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE "platform dnssd")
 ot_option(OT_PLATFORM_KEY_REF OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE "platform key reference secure storage")
 ot_option(OT_PLATFORM_LOG_CRASH_DUMP OPENTHREAD_CONFIG_PLATFORM_LOG_CRASH_DUMP_ENABLE "platform log crash dump")
 ot_option(OT_PLATFORM_NETIF OPENTHREAD_CONFIG_PLATFORM_NETIF_ENABLE "platform netif")
@@ -265,7 +266,7 @@ message(STATUS "- - - - - - - - - - - - - - - - ")
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Get a list of the available platforms and output as a list to the 'arg_platforms' argument
 function(ot_get_platforms arg_platforms)
-    list(APPEND result "NO" "posix" "external")
+    list(APPEND result "NO" "posix" "external" "nexus")
     set(platforms_dir "${PROJECT_SOURCE_DIR}/examples/platforms")
     file(GLOB platforms RELATIVE "${platforms_dir}" "${platforms_dir}/*")
     foreach(platform IN LISTS platforms)
@@ -332,6 +333,7 @@ ot_string_option(OT_VENDOR_SW_VERSION OPENTHREAD_CONFIG_NET_DIAG_VENDOR_SW_VERSI
 set(OT_POWER_SUPPLY_VALUES "BATTERY" "EXTERNAL" "EXTERNAL_STABLE" "EXTERNAL_UNSTABLE")
 ot_multi_option(OT_POWER_SUPPLY OT_POWER_SUPPLY_VALUES OPENTHREAD_CONFIG_DEVICE_POWER_SUPPLY OT_POWER_SUPPLY_ "set the device power supply config")
 
+ot_int_option(OT_LOG_MAX_SIZE OPENTHREAD_CONFIG_LOG_MAX_SIZE "set maximum log string size")
 ot_int_option(OT_MAC_CSL_REQUEST_AHEAD_US OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US "set time ahead to deliver CSL frame from MAC to SubMac in microseconds")
 ot_int_option(OT_MLE_MAX_CHILDREN OPENTHREAD_CONFIG_MLE_MAX_CHILDREN "set maximum number of children")
 ot_int_option(OT_RCP_RESTORATION_MAX_COUNT OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT "set max RCP restoration count")

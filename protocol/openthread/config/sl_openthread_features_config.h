@@ -81,7 +81,7 @@
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         0
 #endif
-// <q>  TCPlp (Low power TCP over OpenThread)
+// <q>  TCP API
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE
 #define OPENTHREAD_CONFIG_TCP_ENABLE                0
 #endif

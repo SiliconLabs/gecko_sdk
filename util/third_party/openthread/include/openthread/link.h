@@ -588,9 +588,18 @@ otError otLinkSetPollPeriod(otInstance *aInstance, uint32_t aPollPeriod);
  *
  * @param[in]  aInstance A pointer to an OpenThread instance.
  *
- * @returns A pointer to the IEEE 802.15.4 Short Address.
+ * @returns The IEEE 802.15.4 Short Address.
  */
 otShortAddress otLinkGetShortAddress(otInstance *aInstance);
+
+/**
+ * Get the IEEE 802.15.4 alternate short address.
+ *
+ * @param[in]  aInstance A pointer to an OpenThread instance.
+ *
+ * @returns The alternate short address, or `OT_RADIO_INVALID_SHORT_ADDR` (0xfffe) if there is no alternate address.
+ */
+otShortAddress otLinkGetAlternateShortAddress(otInstance *aInstance);
 
 /**
  * Returns the maximum number of frame retries during direct transmission.
@@ -1125,6 +1134,71 @@ uint8_t otLinkGetWakeupChannel(otInstance *aInstance);
  * @retval OT_ERROR_INVALID_ARGS   Invalid @p aChannel.
  */
 otError otLinkSetWakeupChannel(otInstance *aInstance, uint8_t aChannel);
+
+/**
+ * Enables or disables listening for wake-up frames.
+ *
+ * Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+ *
+ * @param[in]  aInstance     A pointer to an OpenThread instance.
+ * @param[in]  aEnable       true to enable listening for wake-up frames, or false otherwise.
+ *
+ * @retval OT_ERROR_NONE          Successfully enabled / disabled the listening for wake-up frames.
+ * @retval OT_ERROR_INVALID_ARGS  The listen duration is greater than the listen interval.
+ * @retval OT_ERROR_INVALID_STATE Could not enable listening for wake-up frames due to bad configuration.
+ */
+otError otLinkSetWakeUpListenEnabled(otInstance *aInstance, bool aEnable);
+
+/**
+ * Returns whether listening for wake-up frames is enabled.
+ *
+ * Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+ *
+ * @param[in]  aInstance     A pointer to an OpenThread instance.
+ *
+ * @retval TRUE   If listening for wake-up frames is enabled.
+ * @retval FALSE  If listening for wake-up frames is not enabled.
+ */
+bool otLinkIsWakeupListenEnabled(otInstance *aInstance);
+
+/**
+ * Get the wake-up listen parameters.
+ *
+ * Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+ *
+ * @param[in]  aInstance   A pointer to an OpenThread instance.
+ * @param[out] aInterval   A pointer to return the wake-up listen interval in microseconds.
+ * @param[out] aDuration   A pointer to return the wake-up listen duration in microseconds.
+ */
+void otLinkGetWakeupListenParameters(otInstance *aInstance, uint32_t *aInterval, uint32_t *aDuration);
+
+/**
+ * Set the wake-up listen parameters.
+ *
+ * The listen interval must be greater than the listen duration.
+ * The listen duration must be greater or equal than the minimum supported.
+ *
+ * Requires `OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE`.
+ *
+ * @param[in]  aInstance   A pointer to an OpenThread instance.
+ * @param[in]  aInterval   The wake-up listen interval in microseconds.
+ * @param[in]  aDuration   The wake-up listen duration in microseconds.
+ *
+ * @retval OT_ERROR_NONE           Successfully set the wake-up listen parameters.
+ * @retval OT_ERROR_INVALID_ARGS   Invalid wake-up listen parameters.
+ */
+otError otLinkSetWakeupListenParameters(otInstance *aInstance, uint32_t aInterval, uint32_t aDuration);
+
+/**
+ * Sets the rx-on-when-idle state.
+ *
+ * @param[in]  aInstance      A pointer to an OpenThread instance.
+ * @param[in]  aRxOnWhenIdle  TRUE to keep radio in Receive state, FALSE to put to Sleep state during idle periods.
+ *
+ * @retval OT_ERROR_NONE             If successful.
+ * @retval OT_ERROR_INVALID_STATE    If the raw link-layer isn't enabled.
+ */
+otError otLinkSetRxOnWhenIdle(otInstance *aInstance, bool aRxOnWhenIdle);
 
 /**
  * @}

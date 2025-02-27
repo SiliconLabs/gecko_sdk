@@ -175,7 +175,7 @@ static void printResult(void)
     var = testParams.varSendTimeMs * 10 / testParams.messageSuccessCount;
     if (var > (mean * mean) ) {
       var -= (mean * mean);
-      std = sqrt(fabs(var));
+      std = (uint32_t)sqrt((double)var);
     } else {
       std = 0;
     }

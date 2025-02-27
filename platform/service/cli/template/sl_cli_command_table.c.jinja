@@ -160,7 +160,7 @@ void {{ command.handler }}(sl_cli_command_arg_t *arguments);
 
 // Command structs. Names are in the format : cli_cmd_{command group name}_{command name}
 // In order to support hyphen in command and group name, every occurence of it while
-// building struct names will be replaced by "_hyphen_" 
+// building struct names will be replaced by "_hyphen_"
 {%- for command in cli_command %}
 static const sl_cli_command_info_t cli_cmd_{{command.group|replace("-","_hyphen_")}}_{{ command.name|replace("-","_hyphen_") }} = \
   SL_CLI_COMMAND({{ command.handler }},
@@ -258,7 +258,9 @@ const sl_cli_command_entry_t sl_cli_default_command_table[] = {{ '{' }}
  * No template contributions supplied to project. Provide external definition
  * of command table or regenerate project with template contributions.
  ******************************************************************************/
-const sl_cli_command_entry_t *sl_cli_default_command_table = NULL;
+const sl_cli_command_entry_t sl_cli_default_command_table[] = {
+{ NULL, NULL, false }
+};
 {% endif %}
 
 #ifdef __cplusplus

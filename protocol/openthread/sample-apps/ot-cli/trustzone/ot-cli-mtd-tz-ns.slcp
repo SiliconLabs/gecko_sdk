@@ -57,7 +57,17 @@ configuration:
     value: 16384
     condition: [freertos]
   - name: SL_STACK_SIZE
+    value: 5120
+    unless: [freertos]
+  - name: SL_STACK_SIZE
     value: 4608
+    condition: [freertos]
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_usart]
+  - name: SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_eusart]
 
 template_contribution:
   - name: memory_flash_start

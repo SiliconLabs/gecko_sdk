@@ -331,6 +331,35 @@ public:
     }
 
     /**
+     * Gets the alternate MAC short address.
+     *
+     * @returns The alternate MAC short address, or `kShortAddrInvalid` if there is no alternate address.
+     */
+    ShortAddress GetAlternateShortAddress(void) const
+    {
+        return
+#if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
+            mSubMac.GetAlternateShortAddress();
+#else
+            mAlternateShortAddress;
+#endif
+    }
+
+    /**
+     * Sets the alternate MAC short address.
+     *
+     * @param[in] aShortAddress   The alternate short address. Use `kShortAddrInvalid` to clear it.
+     */
+    void SetAlternateShortAddress(ShortAddress aShortAddress)
+    {
+#if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
+        mSubMac.SetAlternateShortAddress(aShortAddress);
+#else
+        mAlternateShortAddress = aShortAddress;
+#endif
+    }
+
+    /**
      * Gets the MAC Extended Address.
      *
      * @returns The MAC Extended Address.
@@ -472,6 +501,27 @@ public:
 #endif
     }
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    /**
+     * Configures wake-up listening parameters in all radios.
+     *
+     * @param[in]  aEnable    Whether to enable or disable wake-up listening.
+     * @param[in]  aInterval  The wake-up listen interval in microseconds.
+     * @param[in]  aDuration  The wake-up listen duration in microseconds.
+     * @param[in]  aChannel   The wake-up channel.
+     */
+    void UpdateWakeupListening(bool aEnable, uint32_t aInterval, uint32_t aDuration, uint8_t aChannel)
+    {
+        OT_UNUSED_VARIABLE(aEnable);
+        OT_UNUSED_VARIABLE(aInterval);
+        OT_UNUSED_VARIABLE(aDuration);
+        OT_UNUSED_VARIABLE(aChannel);
+#if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
+        mSubMac.UpdateWakeupListening(aEnable, aInterval, aDuration, aChannel);
+#endif
+    }
+#endif
 
     /**
      * Transitions all radio links to Receive.
@@ -656,6 +706,7 @@ private:
 
 #if !OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
     ShortAddress mShortAddress;
+    ShortAddress mAlternateShortAddress;
     ExtAddress   mExtAddress;
 #endif
 };

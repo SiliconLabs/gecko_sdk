@@ -37,11 +37,11 @@ include:
       - path: lib/spinel/spinel_encoder.hpp
       - path: lib/spinel/spinel_helper.hpp
       - path: lib/spinel/spinel_platform.h
+      - path: lib/spinel/spinel_prop_codec.hpp
       - path: lib/spinel/openthread-spinel-config.h
       - path: lib/url/url.hpp
       - path: lib/utils/endian.hpp
       - path: lib/utils/math.hpp
-      - path: lib/utils/utils.hpp
       - path: ncp/ncp_config.h
   - path: "util/third_party/openthread/src/posix/platform/include"
     file_list:
@@ -63,10 +63,12 @@ include:
       - path: radio_url.hpp
       - path: rcp_caps_diag.hpp
       - path: resolver.hpp
+      - path: settings_file.hpp
       - path: spi_interface.hpp
       - path: spinel_driver_getter.hpp
       - path: spinel_manager.hpp
       - path: system.hpp
+      - path: tmp_storage.hpp
       - path: udp.hpp
       - path: vendor_interface.hpp
 
@@ -83,6 +85,7 @@ source:
   - path: "util/third_party/openthread/src/lib/spinel/spinel_driver.cpp"
   - path: "util/third_party/openthread/src/lib/spinel/spinel_encoder.cpp"
   - path: "util/third_party/openthread/src/lib/spinel/spinel_helper.cpp"
+  - path: "util/third_party/openthread/src/lib/spinel/spinel_prop_codec.cpp"
   - path: "util/third_party/openthread/src/lib/url/url.cpp"
   
 
@@ -99,8 +102,10 @@ source:
   - path: "util/third_party/openthread/src/posix/platform/radio_url.cpp"
   - path: "util/third_party/openthread/src/posix/platform/rcp_caps_diag.cpp"
   - path: "util/third_party/openthread/src/posix/platform/resolver.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/settings_file.cpp"
   - path: "util/third_party/openthread/src/posix/platform/spinel_manager.cpp"
   - path: "util/third_party/openthread/src/posix/platform/system.cpp"
+  - path: "util/third_party/openthread/src/posix/platform/tmp_storage.cpp"
   
 # OT Core files
   - path: "util/third_party/openthread/src/core/api/error_api.cpp"

@@ -25,7 +25,7 @@ extern "C" {
 //#include "gp-proxy-table.h"
 
 extern uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_table_size;
-extern uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout;
+extern uint32_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout;
 
 //these are declared in the config/ember-configuration.c
 extern uint8_t sli_zigbee_gp_sink_table_size;

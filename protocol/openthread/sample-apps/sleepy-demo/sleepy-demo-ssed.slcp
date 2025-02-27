@@ -50,7 +50,11 @@ configuration:
   - name: SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
     value: 1
   - name: SL_STACK_SIZE
+    value: 5120
+    unless: [freertos]
+  - name: SL_STACK_SIZE
     value: 4608
+    condition: [freertos]
   - name: OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     value: 1
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT
@@ -65,6 +69,12 @@ configuration:
   - name: BUFFER_SIZE_DOWN
     value: 0
     condition: [ot_rtt_log]
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_usart]
+  - name: SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_eusart]
 
 tag:
   - prebuilt_demo

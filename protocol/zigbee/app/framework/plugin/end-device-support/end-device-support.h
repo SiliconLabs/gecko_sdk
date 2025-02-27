@@ -131,7 +131,7 @@ bool emberAfPluginEndDeviceSupportPreNetworkMoveCallback(void);
 /** @} */ // end of end-device-support
 
 void sli_zigbee_af_poll_complete_handler(EmberStatus status, uint8_t limit);
-void sli_zigbee_af_end_device_support_move_init(void);
-void sli_zigbee_af_end_device_support_polling_init(void);
+void sli_zigbee_af_end_device_support_move_init(uint8_t init_level);
+void sli_zigbee_af_end_device_support_polling_init(uint8_t init_level);
 
 #endif // SL_ZIGBEE_END_DEVICE_SUPPORT_H

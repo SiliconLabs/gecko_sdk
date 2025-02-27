@@ -2,7 +2,14 @@ id: "bluetooth_feature_connection"
 label:  "Connection"
 package: "Bluetooth"
 description: >
-  Bluetooth connection feature
+  This component provides the functionality and configuration common to
+  Bluetooth connections in both Central and Peripheral role. The application
+  must also include <bluetooth_feature_connection_role_central> and/or
+  <bluetooth_feature_connection_role_peripheral> component to specify which
+  connection roles are needed by the application. If neither
+  <bluetooth_feature_connection_role_central> or
+  <bluetooth_feature_connection_role_peripheral> is included, both roles are
+  supported for backwards compatibility.
 category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
 quality: "production"
 root_path: "protocol/bluetooth"
@@ -25,6 +32,19 @@ template_contribution:
       include: "sl_bluetooth_connection_config.h"
       function: sl_btctrl_init_conn()
     priority: 5
+  # For backwards compatibility, the connection component includes support for
+  # both Central and Peripheral roles if neither role feature is explicitly
+  # included
+  - name: component_catalog
+    value: bluetooth_feature_connection_role_central
+    unless:
+      - bluetooth_feature_connection_role_central
+      - bluetooth_feature_connection_role_peripheral
+  - name: component_catalog
+    value: bluetooth_feature_connection_role_peripheral
+    unless:
+      - bluetooth_feature_connection_role_central
+      - bluetooth_feature_connection_role_peripheral
 documentation:
   docset: bluetooth
   document: bluetooth-stack-api/sl-bt-connection

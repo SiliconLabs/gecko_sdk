@@ -45,6 +45,7 @@
 #include "common/timer.hpp"
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac.hpp"
+#include "mac/wakeup_tx_scheduler.hpp"
 #include "meshcop/dataset.hpp"
 #include "meshcop/joiner_router.hpp"
 #include "meshcop/meshcop.hpp"
@@ -118,6 +119,10 @@ class Mle : public InstanceLocator, private NonCopyable
     friend class ot::UnitTester;
 
 public:
+    typedef otDetachGracefullyCallback DetachCallback; ///< Callback to signal end of graceful detach.
+
+    typedef otWakeupCallback WakeupCallback; ///< Callback to communicate the result of waking a Wake-up End Device
+
     /**
      * Initializes the MLE object.
      *
@@ -201,7 +206,7 @@ public:
      * @retval kErrorNone   Successfully started detaching.
      * @retval kErrorBusy   Detaching is already in progress.
      */
-    Error DetachGracefully(otDetachGracefullyCallback aCallback, void *aContext);
+    Error DetachGracefully(DetachCallback aCallback, void *aContext);
 
     /**
      * Indicates whether or not the Thread device is attached to a Thread network.
@@ -593,18 +598,21 @@ public:
      *
      * @returns A reference to the MLE counters.
      */
-    const Counters &GetCounters(void)
-    {
-#if OPENTHREAD_CONFIG_UPTIME_ENABLE
-        UpdateRoleTimeCounters(mRole);
-#endif
-        return mCounters;
-    }
+    const Counters &GetCounters(void);
 
     /**
      * Resets the MLE counters.
      */
     void ResetCounters(void);
+
+#if OPENTHREAD_CONFIG_UPTIME_ENABLE
+    /**
+     * Determines the current attach duration (number of seconds since the device last attached).
+     *
+     * @returns Current attach duration in seconds.
+     */
+    uint32_t GetCurrentAttachDuration(void) const;
+#endif
 
 #if OPENTHREAD_CONFIG_MLE_PARENT_RESPONSE_CALLBACK_API_ENABLE
     /**
@@ -638,6 +646,14 @@ public:
      * Schedules a Child Update Request.
      */
     void ScheduleChildUpdateRequest(void);
+
+    /**
+     * Sends a Child Update Request to the parent.
+     *
+     * @retval kErrorNone     Successfully prepared and sent an MLE Child Update Request message.
+     * @retval kErrorNoBufs   Insufficient buffers to construct the MLE Child Update Request message.
+     */
+    Error SendChildUpdateRequestToParent(void);
 
     /*
      * Indicates whether or not the device has restored the network information from
@@ -716,30 +732,54 @@ public:
 
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    /**
+     * Attempts to wake a Wake-up End Device.
+     *
+     * @param[in] aWedAddress The extended address of the Wake-up End Device.
+     * @param[in] aIntervalUs An interval between consecutive wake-up frames (in microseconds).
+     * @param[in] aDurationMs Duration of the wake-up sequence (in milliseconds).
+     * @param[in] aCallback   A pointer to function that is called when the wake-up succeeds or fails.
+     * @param[in] aContext    A pointer to callback application-specific context.
+     *
+     * @retval kErrorNone         Successfully started the wake-up.
+     * @retval kErrorInvalidState Another wake-up request is still in progress.
+     * @retval kErrorInvalidArgs  The wake-up interval or duration are invalid.
+     */
+    Error Wakeup(const Mac::ExtAddress &aWedAddress,
+                 uint16_t               aIntervalUs,
+                 uint16_t               aDurationMs,
+                 WakeupCallback         aCallback,
+                 void                  *aCallbackContext);
+#endif // OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+
 private:
     //------------------------------------------------------------------------------------------------------------------
     // Constants
 
     // All time intervals are in milliseconds
-    static constexpr uint32_t kParentRequestRouterTimeout     = 750;  // Wait time after tx of Parent Req to routers
-    static constexpr uint32_t kParentRequestReedTimeout       = 1250; // Wait timer after tx of Parent Req to REEDs
-    static constexpr uint32_t kParentRequestDuplicateMargin   = 50;   // Margin to detect duplicate received Parent Req
-    static constexpr uint32_t kChildIdResponseTimeout         = 1250; // Wait time to receive Child ID Response
-    static constexpr uint32_t kAttachStartJitter              = 50;   // Max jitter time added to start of attach
-    static constexpr uint32_t kAnnounceProcessTimeout         = 250;  // Delay after Announce rx before processing
-    static constexpr uint32_t kAnnounceTimeout                = 1400; // Total timeout for sending Announce messages
-    static constexpr uint16_t kMinAnnounceDelay               = 80;   // Min delay between Announcement messages
-    static constexpr uint32_t kParentResponseMaxDelayRouters  = 500;  // Max response delay for Parent Req to routers
-    static constexpr uint32_t kParentResponseMaxDelayAll      = 1000; // Max response delay for Parent Req to all
-    static constexpr uint32_t kChildUpdateRequestPendingDelay = 100;  // Delay for aggregating Child Update Req
-    static constexpr uint32_t kMaxLinkAcceptDelay             = 1000; // Max delay to tx Link Accept for multicast Req
-    static constexpr uint32_t kChildIdRequestTimeout          = 5000; // Max delay to rx a Child ID Req after Parent Res
-    static constexpr uint32_t kLinkRequestTimeout             = 2000; // Max delay to rx a Link Accept
-    static constexpr uint32_t kDetachGracefullyTimeout        = 1000; // Timeout for graceful detach
-    static constexpr uint32_t kUnicastRetxDelay               = 1000; // Base delay for MLE unicast retx
-    static constexpr uint32_t kMulticastRetxDelay             = 5000; // Base delay for MLE multicast retx
-    static constexpr uint32_t kMulticastRetxDelayMin          = kMulticastRetxDelay * 9 / 10;  // 0.9 * base delay
-    static constexpr uint32_t kMulticastRetxDelayMax          = kMulticastRetxDelay * 11 / 10; // 1.1 * base delay
+    static constexpr uint32_t kParentRequestRouterTimeout    = 750;  // Wait time after tx of Parent Req to routers
+    static constexpr uint32_t kParentRequestReedTimeout      = 1250; // Wait timer after tx of Parent Req to REEDs
+    static constexpr uint32_t kParentRequestDuplicateMargin  = 50;   // Margin to detect duplicate received Parent Req
+    static constexpr uint32_t kChildIdResponseTimeout        = 1250; // Wait time to receive Child ID Response
+    static constexpr uint32_t kAttachStartJitter             = 50;   // Max jitter time added to start of attach
+    static constexpr uint32_t kAnnounceProcessTimeout        = 250;  // Delay after Announce rx before processing
+    static constexpr uint32_t kAnnounceTimeout               = 1400; // Total timeout for sending Announce messages
+    static constexpr uint16_t kMinAnnounceDelay              = 80;   // Min delay between Announcement messages
+    static constexpr uint32_t kParentResponseMaxDelayRouters = 500;  // Max response delay for Parent Req to routers
+    static constexpr uint32_t kParentResponseMaxDelayAll     = 1000; // Max response delay for Parent Req to all
+    static constexpr uint32_t kChildUpdateRequestDelay       = 100;  // Delay for aggregating Child Update Req
+    static constexpr uint32_t kMaxLinkRequestDelayOnRouter   = 1000; // Max delay to tx Link Request on Adv rx
+    static constexpr uint32_t kMinLinkRequestDelayOnChild    = 1500; // Min delay to tx Link Request on Adv rx (child)
+    static constexpr uint32_t kMaxLinkRequestDelayOnChild    = 3000; // Max delay to tx Link Request on Adv rx (child)
+    static constexpr uint32_t kMaxLinkAcceptDelay            = 1000; // Max delay to tx Link Accept for multicast Req
+    static constexpr uint32_t kChildIdRequestTimeout         = 5000; // Max delay to rx a Child ID Req after Parent Res
+    static constexpr uint32_t kLinkRequestTimeout            = 2000; // Max delay to rx a Link Accept
+    static constexpr uint32_t kDetachGracefullyTimeout       = 1000; // Timeout for graceful detach
+    static constexpr uint32_t kUnicastRetxDelay              = 1000; // Base delay for MLE unicast retx
+    static constexpr uint32_t kMulticastRetxDelay            = 5000; // Base delay for MLE multicast retx
+    static constexpr uint32_t kMulticastRetxDelayMin         = kMulticastRetxDelay * 9 / 10;  // 0.9 * base delay
+    static constexpr uint32_t kMulticastRetxDelayMax         = kMulticastRetxDelay * 11 / 10; // 1.1 * base delay
     static constexpr uint32_t kAnnounceBackoffForPendingDataset = 60000; // Max delay left to block Announce processing.
 
     static constexpr uint8_t kMaxTxCount                = 3; // Max tx count for MLE message
@@ -790,32 +830,6 @@ private:
     //------------------------------------------------------------------------------------------------------------------
     // Enumerations
 
-    enum Command : uint8_t
-    {
-        kCommandLinkRequest                   = 0,
-        kCommandLinkAccept                    = 1,
-        kCommandLinkAcceptAndRequest          = 2,
-        kCommandLinkReject                    = 3,
-        kCommandAdvertisement                 = 4,
-        kCommandUpdate                        = 5,
-        kCommandUpdateRequest                 = 6,
-        kCommandDataRequest                   = 7,
-        kCommandDataResponse                  = 8,
-        kCommandParentRequest                 = 9,
-        kCommandParentResponse                = 10,
-        kCommandChildIdRequest                = 11,
-        kCommandChildIdResponse               = 12,
-        kCommandChildUpdateRequest            = 13,
-        kCommandChildUpdateResponse           = 14,
-        kCommandAnnounce                      = 15,
-        kCommandDiscoveryRequest              = 16,
-        kCommandDiscoveryResponse             = 17,
-        kCommandLinkMetricsManagementRequest  = 18,
-        kCommandLinkMetricsManagementResponse = 19,
-        kCommandLinkProbe                     = 20,
-        kCommandTimeSync                      = 99,
-    };
-
     enum AttachMode : uint8_t
     {
         kAnyPartition,    // Attach to any Thread partition.
@@ -823,6 +837,7 @@ private:
         kBetterPartition, // Attach to a better (i.e. higher weight/partition id) Thread partition.
         kDowngradeToReed, // Attach to the same Thread partition during downgrade process.
         kBetterParent,    // Attach to a better parent.
+        kSelectedParent,  // Attach to a selected parent.
     };
 
     enum AttachState : uint8_t
@@ -873,13 +888,7 @@ private:
     {
         kToRouters,         // Parent Request to routers only.
         kToRoutersAndReeds, // Parent Request to all routers and REEDs.
-    };
-
-    enum ChildUpdateRequestState : uint8_t
-    {
-        kChildUpdateRequestNone,    // No pending or active Child Update Request.
-        kChildUpdateRequestPending, // Pending Child Update Request due to relative OT_CHANGED event.
-        kChildUpdateRequestActive,  // Child Update Request has been sent and Child Update Response is expected.
+        kToSelectedRouter,  // Parent Request to a selected router (e.g., by `ParentSearch` module).
     };
 
     enum ChildUpdateRequestMode : uint8_t // Used in `SendChildUpdateRequest()`
@@ -887,12 +896,6 @@ private:
         kNormalChildUpdateRequest, // Normal Child Update Request.
         kAppendChallengeTlv,       // Append Challenge TLV to Child Update Request even if currently attached.
         kAppendZeroTimeout,        // Use zero timeout when appending Timeout TLV (used for graceful detach).
-    };
-
-    enum DataRequestState : uint8_t
-    {
-        kDataRequestNone,   // Not waiting for a Data Response.
-        kDataRequestActive, // Data Request has been sent, Data Response is expected.
     };
 
     enum SecuritySuite : uint8_t
@@ -950,6 +953,15 @@ private:
         kTypeTimeSync,
 #endif
     };
+
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    enum WedAttachState : uint8_t{
+        kWedDetached,
+        kWedAttaching,
+        kWedAttached,
+        kWedDetaching,
+    };
+#endif
 
     //------------------------------------------------------------------------------------------------------------------
     // Nested types
@@ -1018,11 +1030,9 @@ private:
         }
 
         Error SendTo(const Ip6::Address &aDestination);
-        Error SendAfterDelay(const Ip6::Address &aDestination, uint16_t aDelay);
 
     private:
-        Error AppendCompressedAddressEntry(uint8_t aContextId, const Ip6::Address &aAddress);
-        Error AppendAddressEntry(const Ip6::Address &aAddress);
+        Error AppendAddressRegistrationEntry(const Ip6::Address &aAddress);
         Error AppendDatasetTlv(MeshCoP::Dataset::Type aDatasetType);
     };
 
@@ -1088,6 +1098,33 @@ private:
 
     //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#if OPENTHREAD_FTD
+    struct ParentResponseInfo
+    {
+        Mac::ExtAddress mChildExtAddress; // The child extended address.
+        RxChallenge     mRxChallenge;     // The challenge from the Parent Request.
+    };
+
+    struct LinkAcceptInfo
+    {
+        Mac::ExtAddress mExtAddress;       // The neighbor/router extended address.
+        TlvList         mRequestedTlvList; // The requested TLVs in Link Request.
+        RxChallenge     mRxChallenge;      // The challenge in Link Request.
+        uint8_t         mLinkMargin;       // Link margin of the received Link Request.
+    };
+
+    struct DiscoveryResponseInfo
+    {
+        Mac::PanId mPanId;
+#if OPENTHREAD_CONFIG_MULTI_RADIO
+        Mac::RadioType mRadioType;
+#endif
+    };
+
+#endif // OPENTHREAD_FTD
+
+    //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     void HandleDelayedSenderTimer(void) { mDelayedSender.HandleTimer(); }
 
     class DelayedSender : public InstanceLocator
@@ -1095,26 +1132,53 @@ private:
     public:
         explicit DelayedSender(Instance &aInstance);
 
-        Error SendMessage(TxMessage &aMessage, const Ip6::Address &aDestination, uint16_t aDelay);
-        void  RemoveDataRequestMessage(const Ip6::Address &aDestination);
-        void  RemoveDataResponseMessage(void);
-        void  HandleTimer(void);
+        void Stop(void);
 
-        const MessageQueue &GetQueue(void) const { return mQueue; }
+        void ScheduleDataRequest(const Ip6::Address &aDestination, uint16_t aDelay);
+        void ScheduleChildUpdateRequestToParent(uint16_t aDelay);
+#if OPENTHREAD_FTD
+        void ScheduleParentResponse(const ParentResponseInfo &aInfo, uint16_t aDelay);
+        void ScheduleAdvertisement(const Ip6::Address &aDestination, uint16_t aDelay);
+        void ScheduleMulticastDataResponse(uint16_t aDelay);
+        void ScheduleLinkRequest(const Router &aRouter, uint16_t aDelay);
+        void RemoveScheduledLinkRequest(const Router &aRouter);
+        bool HasAnyScheduledLinkRequest(const Router &aRouter) const;
+        void ScheduleLinkAccept(const LinkAcceptInfo &aInfo, uint16_t aDelay);
+        void ScheduleDiscoveryResponse(const Ip6::Address          &aDestination,
+                                       const DiscoveryResponseInfo &aInfo,
+                                       uint16_t                     aDelay);
+#endif
+        void RemoveScheduledChildUpdateRequestToParent(void);
+
+        void                HandleTimer(void);
+        const MessageQueue &GetQueue(void) const { return mSchedules; }
 
     private:
-        struct Metadata : public Message::FooterData<Metadata>
+        typedef Message Schedule;
+
+        struct Header
         {
-            Ip6::Address mDestination;
+            void ReadFrom(const Schedule &aSchedule) { IgnoreError(aSchedule.Read(/* aOffset */ 0, *this)); }
+
             TimeMilli    mSendTime;
+            Ip6::Address mDestination;
+            MessageType  mMessageType;
         };
 
-        void Send(TxMessage &aMessage, const Metadata &aMetadata);
-        void RemoveMessage(Message::SubType aSubType, MessageType aMessageType, const Ip6::Address *aDestination);
+        void AddSchedule(MessageType         aMessageType,
+                         const Ip6::Address &aDestination,
+                         uint16_t            aDelay,
+                         const void         *aInfo,
+                         uint16_t            aInfoSize);
+        void Execute(const Schedule &aSchedule);
+        bool HasMatchingSchedule(MessageType aMessageType, const Ip6::Address &aDestination) const;
+        void RemoveMatchingSchedules(MessageType aMessageType, const Ip6::Address &aDestination);
+
+        static bool Match(const Schedule &aSchedule, MessageType aMessageType, const Ip6::Address &aDestination);
 
         using DelayTimer = TimerMilliIn<Mle, &Mle::HandleDelayedSenderTimer>;
 
-        MessageQueue mQueue;
+        MessageQueue mSchedules;
         DelayTimer   mTimer;
     };
 
@@ -1195,6 +1259,7 @@ private:
     public:
         explicit ParentSearch(Instance &aInstance)
             : InstanceLocator(aInstance)
+            , mEnabled(false)
             , mIsInBackoff(false)
             , mBackoffWasCanceled(false)
             , mRecentlyDetached(false)
@@ -1203,10 +1268,14 @@ private:
         {
         }
 
-        void StartTimer(void);
+        void SetEnabled(bool aEnabled);
+        bool IsEnabled(void) const { return mEnabled; }
         void UpdateState(void);
         void SetRecentlyDetached(void) { mRecentlyDetached = true; }
         void HandleTimer(void);
+#if OPENTHREAD_FTD
+        const Neighbor &GetSelectedParent(void) const { return *mSelectedParent; }
+#endif
 
     private:
         // All timer intervals are converted to milliseconds.
@@ -1215,13 +1284,25 @@ private:
         static constexpr uint32_t kJitterInterval  = (15 * 1000u);
         static constexpr int8_t   kRssThreshold    = OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_THRESHOLD;
 
+#if OPENTHREAD_FTD
+        static constexpr int8_t kRssMarginOverParent = OPENTHREAD_CONFIG_PARENT_SEARCH_RSS_MARGIN;
+
+        Error SelectBetterParent(void);
+        void  CompareAndUpdateSelectedParent(Router &aRouter);
+#endif
+        void StartTimer(void);
+
         using SearchTimer = TimerMilliIn<Mle, &Mle::HandleParentSearchTimer>;
 
+        bool        mEnabled : 1;
         bool        mIsInBackoff : 1;
         bool        mBackoffWasCanceled : 1;
         bool        mRecentlyDetached : 1;
         TimeMilli   mBackoffCancelTime;
         SearchTimer mTimer;
+#if OPENTHREAD_FTD
+        Router *mSelectedParent;
+#endif
     };
 #endif // OPENTHREAD_CONFIG_PARENT_SEARCH_ENABLE
 
@@ -1240,11 +1321,7 @@ private:
     void       HandleNotifierEvents(Events aEvents);
     void       HandleUdpReceive(Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
     void       ReestablishLinkWithNeighbor(Neighbor &aNeighbor);
-    void       HandleDetachGracefullyTimer(void);
-    bool       IsDetachingGracefully(void) { return mDetachGracefullyTimer.IsRunning(); }
-    Error      SendChildUpdateRequest(ChildUpdateRequestMode aMode);
-    Error      SendDataRequestAfterDelay(const Ip6::Address &aDestination, uint16_t aDelay);
-    Error      SendChildUpdateRequest(void);
+    Error      SendChildUpdateRequestToParent(ChildUpdateRequestMode aMode);
     Error      SendChildUpdateResponse(const TlvList      &aTlvList,
                                        const RxChallenge  &aChallenge,
                                        const Ip6::Address &aDestination);
@@ -1307,6 +1384,10 @@ private:
     void         UpdateServiceAlocs(void);
 #endif
 
+#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+    void CheckTrelPeerAddrOnSecureMleRx(const Message &aMessage);
+#endif
+
 #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
     void HandleTimeSync(RxInfo &aRxInfo);
 #endif
@@ -1326,10 +1407,9 @@ private:
     Error SendDataRequest(const Ip6::Address                      &aDestination,
                           const uint8_t                           *aTlvs,
                           uint8_t                                  aTlvsLength,
-                          uint16_t                                 aDelay,
                           const LinkMetrics::Initiator::QueryInfo *aQueryInfo = nullptr);
 #else
-    Error SendDataRequest(const Ip6::Address &aDestination, const uint8_t *aTlvs, uint8_t aTlvsLength, uint16_t aDelay);
+    Error       SendDataRequest(const Ip6::Address &aDestination, const uint8_t *aTlvs, uint8_t aTlvsLength);
 #endif
 
 #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
@@ -1338,6 +1418,10 @@ private:
 #else
     static void Log(MessageAction, MessageType, const Ip6::Address &) {}
     static void Log(MessageAction, MessageType, const Ip6::Address &, uint16_t) {}
+#endif
+
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    void HandleWedAttachTimer(void);
 #endif
 
 #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_NOTE)
@@ -1361,10 +1445,12 @@ private:
     //------------------------------------------------------------------------------------------------------------------
     // Variables
 
-    using DetachGracefullyTimer = TimerMilliIn<Mle, &Mle::HandleDetachGracefullyTimer>;
-    using AttachTimer           = TimerMilliIn<Mle, &Mle::HandleAttachTimer>;
-    using MsgTxTimer            = TimerMilliIn<Mle, &Mle::HandleMessageTransmissionTimer>;
-    using MleSocket             = Ip6::Udp::SocketIn<Mle, &Mle::HandleUdpReceive>;
+    using AttachTimer = TimerMilliIn<Mle, &Mle::HandleAttachTimer>;
+    using MsgTxTimer  = TimerMilliIn<Mle, &Mle::HandleMessageTransmissionTimer>;
+    using MleSocket   = Ip6::Udp::SocketIn<Mle, &Mle::HandleUdpReceive>;
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    using WedAttachTimer = TimerMicroIn<Mle, &Mle::HandleWedAttachTimer>;
+#endif
 
     static const otMeshLocalPrefix kMeshLocalPrefixInit;
 
@@ -1372,28 +1458,24 @@ private:
     bool mRequestRouteTlv : 1;
     bool mHasRestored : 1;
     bool mReceivedResponseFromParent : 1;
+    bool mDetachingGracefully : 1;
     bool mInitiallyAttachedAsSleepy : 1;
-#if OPENTHREAD_FTD
-    bool mWasLeader : 1;
-#endif
+    bool mWaitingForChildUpdateResponse : 1;
+    bool mWaitingForDataResponse : 1;
 
     DeviceRole              mRole;
+    DeviceRole              mLastSavedRole;
     DeviceMode              mDeviceMode;
     AttachState             mAttachState;
     ReattachState           mReattachState;
     AttachMode              mAttachMode;
-    DataRequestState        mDataRequestState;
     AddressRegistrationMode mAddressRegistrationMode;
-    ChildUpdateRequestState mChildUpdateRequestState;
 
-    uint8_t mParentRequestCounter;
-    uint8_t mChildUpdateAttempts;
-    uint8_t mDataRequestAttempts;
-    uint8_t mAnnounceChannel;
-    uint8_t mAlternateChannel;
-#if OPENTHREAD_FTD
-    uint8_t mLinkRequestAttempts;
-#endif
+    uint8_t  mParentRequestCounter;
+    uint8_t  mChildUpdateAttempts;
+    uint8_t  mDataRequestAttempts;
+    uint8_t  mAnnounceChannel;
+    uint8_t  mAlternateChannel;
     uint16_t mRloc16;
     uint16_t mPreviousParentRloc;
     uint16_t mAttachCounter;
@@ -1404,10 +1486,11 @@ private:
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     uint32_t mCslTimeout;
 #endif
-    uint64_t mAlternateTimestamp;
 #if OPENTHREAD_CONFIG_UPTIME_ENABLE
+    uint32_t mLastAttachTime;
     uint64_t mLastUpdatedTimestamp;
 #endif
+    uint64_t mAlternateTimestamp;
 
     LeaderData      mLeaderData;
     Parent          mParent;
@@ -1423,19 +1506,25 @@ private:
 #if OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
     ServiceAloc mServiceAlocs[kMaxServiceAlocs];
 #endif
-    Callback<otDetachGracefullyCallback> mDetachGracefullyCallback;
+    Callback<DetachCallback> mDetachGracefullyCallback;
 #if OPENTHREAD_CONFIG_MLE_PARENT_RESPONSE_CALLBACK_API_ENABLE
     Callback<otThreadParentResponseCallback> mParentResponseCallback;
 #endif
     AttachTimer                  mAttachTimer;
     MsgTxTimer                   mMessageTransmissionTimer;
-    DetachGracefullyTimer        mDetachGracefullyTimer;
     Ip6::NetworkPrefix           mMeshLocalPrefix;
     Ip6::Netif::UnicastAddress   mLinkLocalAddress;
     Ip6::Netif::UnicastAddress   mMeshLocalEid;
     Ip6::Netif::UnicastAddress   mMeshLocalRloc;
     Ip6::Netif::MulticastAddress mLinkLocalAllThreadNodes;
     Ip6::Netif::MulticastAddress mRealmLocalAllThreadNodes;
+
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+    WakeupTxScheduler        mWakeupTxScheduler;
+    WedAttachState           mWedAttachState;
+    WedAttachTimer           mWedAttachTimer;
+    Callback<WakeupCallback> mWakeupCallback;
+#endif
 };
 
 } // namespace Mle

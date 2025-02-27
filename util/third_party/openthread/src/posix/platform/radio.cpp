@@ -67,6 +67,9 @@ Radio::Radio(void)
 #if OPENTHREAD_POSIX_CONFIG_RCP_CAPS_DIAG_ENABLE
     , mRcpCapsDiag(mRadioSpinel)
 #endif
+#if OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
+    , mTmpStorage()
+#endif
 {
 }
 
@@ -94,14 +97,30 @@ void Radio::Init(const char *aUrl)
     callbacks.mReceiveDone       = otPlatRadioReceiveDone;
     callbacks.mTransmitDone      = otPlatRadioTxDone;
     callbacks.mTxStarted         = otPlatRadioTxStarted;
+#if OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
+    callbacks.mSaveRadioSpinelMetrics    = SaveRadioSpinelMetrics;
+    callbacks.mRestoreRadioSpinelMetrics = RestoreRadioSpinelMetrics;
+    callbacks.mRadioSpinelMetricsContext = this;
+    mTmpStorage.Init();
+#endif
 
     resetRadio             = !mRadioUrl.HasParam("no-reset");
     skipCompatibilityCheck = mRadioUrl.HasParam("skip-rcp-compatibility-check");
 
     mRadioSpinel.SetCallbacks(callbacks);
-    mRadioSpinel.Init(skipCompatibilityCheck, resetRadio, &GetSpinelDriver(), kRequiredRadioCaps, aEnableRcpTimeSync);
+    mRadioSpinel.Init(skipCompatibilityCheck, resetRadio, &GetSpinelDriver(),
+                      (skipCompatibilityCheck ? 0 : kRequiredRadioCaps), aEnableRcpTimeSync);
 
     ProcessRadioUrl(mRadioUrl);
+}
+
+void Radio::Deinit(void)
+{
+    mRadioSpinel.Deinit();
+
+#if OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
+    mTmpStorage.Deinit();
+#endif
 }
 
 void Radio::ProcessRadioUrl(const RadioUrl &aRadioUrl)
@@ -214,7 +233,7 @@ ot::Spinel::RadioSpinel &GetRadioSpinel(void) { return sRadio.GetRadioSpinel(); 
 ot::Posix::RcpCapsDiag &GetRcpCapsDiag(void) { return sRadio.GetRcpCapsDiag(); }
 #endif
 
-void platformRadioDeinit(void) { GetRadioSpinel().Deinit(); }
+void platformRadioDeinit(void) { sRadio.Deinit(); }
 
 void platformRadioHandleStateChange(otInstance *aInstance, otChangedFlags aFlags)
 {
@@ -253,6 +272,12 @@ void otPlatRadioSetShortAddress(otInstance *aInstance, uint16_t aAddress)
 {
     OT_UNUSED_VARIABLE(aInstance);
     SuccessOrDie(GetRadioSpinel().SetShortAddress(aAddress));
+}
+
+void otPlatRadioSetAlternateShortAddress(otInstance *aInstance, uint16_t aAddress)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+    SuccessOrDie(GetRadioSpinel().SetAlternateShortAddress(aAddress));
 }
 
 void otPlatRadioSetPromiscuous(otInstance *aInstance, bool aEnable)
@@ -1057,9 +1082,13 @@ otError otPlatResetToBootloader(otInstance *aInstance)
 }
 #endif
 
-const otRadioSpinelMetrics *otSysGetRadioSpinelMetrics(void) { return GetRadioSpinel().GetRadioSpinelMetrics(); }
+const otRadioSpinelMetrics *otSysGetRadioSpinelMetrics(void) { return &GetRadioSpinel().GetRadioSpinelMetrics(); }
 
 const otRcpInterfaceMetrics *otSysGetRcpInterfaceMetrics(void)
 {
     return sRadio.GetSpinelInterface().GetRcpInterfaceMetrics();
 }
+
+#if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
+void otSysSetRcpRestorationEnabled(bool aEnabled) { return GetRadioSpinel().SetRcpRestorationEnabled(aEnabled); }
+#endif

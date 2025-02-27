@@ -133,6 +133,25 @@ bool otMacFrameDoesAddrMatch(const otRadioFrame *aFrame,
                              const otExtAddress *aExtAddress);
 
 /**
+ * Check if @p aFrame matches the @p aPandId and @p aShortAddress, or @p aAltShortAddress or @p aExtAddress.
+ *
+ * @param[in]   aFrame            A pointer to the frame.
+ * @param[in]   aPanId            The PAN id to match with.
+ * @param[in]   aShortAddress     The short address to match with.
+ * @param[in]   aAltShortAddress  The alternate short address to match with. Can be `OT_RADIO_INVALID_SHORT_ADDR` if
+ *                                there is no alternate address.
+ * @param[in]   aExtAddress       The extended address to match with.
+ *
+ * @retval  true    It is a broadcast or matches with the PAN id and one of the addresses.
+ * @retval  false   It doesn't match.
+ */
+bool otMacFrameDoesAddrMatchAny(const otRadioFrame *aFrame,
+                                otPanId             aPanId,
+                                otShortAddress      aShortAddress,
+                                otShortAddress      aAltShortAddress,
+                                const otExtAddress *aExtAddress);
+
+/**
  * Get source MAC address.
  *
  * @param[in]   aFrame          A pointer to the frame.
@@ -241,6 +260,16 @@ bool otMacFrameIsSecurityEnabled(otRadioFrame *aFrame);
 bool otMacFrameIsKeyIdMode1(otRadioFrame *aFrame);
 
 /**
+ * Tell if the key ID mode of @p aFrame is 2.
+ *
+ * @param[in]   aFrame          A pointer to the frame.
+ *
+ * @retval  true    The frame key ID mode is 2.
+ * @retval  false   The frame security is not enabled or key ID mode is not 2.
+ */
+bool otMacFrameIsKeyIdMode2(otRadioFrame *aFrame);
+
+/**
  * Get the key ID of @p aFrame.
  *
  * @param[in]   aFrame          A pointer to the frame.
@@ -315,9 +344,11 @@ typedef struct otRadioContext
 {
     otExtAddress     mExtAddress; ///< In little-endian byte order.
     uint32_t         mMacFrameCounter;
+    uint32_t         mPrevMacFrameCounter;
     uint32_t         mCslSampleTime; ///< The sample time based on the microsecond timer.
     uint16_t         mCslPeriod;     ///< In unit of 10 symbols.
     otShortAddress   mShortAddress;
+    otShortAddress   mAlternateShortAddress;
     otRadioKeyType   mKeyType;
     uint8_t          mKeyId;
     otMacKeyMaterial mPrevKey;

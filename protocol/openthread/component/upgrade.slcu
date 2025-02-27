@@ -14,3 +14,11 @@ upgrade:
         description: >
           The implementation for platform defined logging has been split into the ot_rtt_log component.
           If a project configures for platform defined logging, this component must be included.
+
+  - sdk:
+      id: gecko_sdk
+      version: "4.4.5"
+    configuration:
+      - script: protocol/openthread/component/script/upgrade_multipan_configs.lua
+        description: >
+          Enable OpenThread multiple static instance configuration options for MultiPAN application.

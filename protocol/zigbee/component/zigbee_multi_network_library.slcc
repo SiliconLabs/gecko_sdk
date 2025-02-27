@@ -44,12 +44,34 @@ library:
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-multi-network/release_lto/libzigbee-multi-network.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-multi-network/release/libzigbee-multi-network.a
     condition:
       - toolchain_gcc
       - cortexm4
       - zigbee_phy_2_4
       - zigbee_multi_network
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-multi-network/release_lto/libzigbee-multi-network.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator

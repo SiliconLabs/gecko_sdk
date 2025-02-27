@@ -154,7 +154,7 @@ size_t zpal_nvm_enum_objects(zpal_nvm_handle_t handle,
                              zpal_nvm_object_key_t key_max);
 
 /**
- * @brief Opens the NVM for a backup/restore operation.
+ * @brief Opens the NVM for a backup/restore operation and temporarily disables access to other processes.
  *
  * @return @ref ZPAL_STATUS_OK on success and @ref ZPAL_STATUS_FAIL otherwise.
  */
@@ -163,7 +163,7 @@ zpal_status_t zpal_nvm_backup_open(void);
 /**
  * @brief Closes the NVM after backup/restore operation.
  */
-void zpal_nvm_backup_close(void);
+zpal_status_t zpal_nvm_backup_close(void);
 
 /**
  * @brief Reads raw data from the NVM.

@@ -3514,7 +3514,11 @@ __STATIC_INLINE void CMU_IntClear(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void CMU_IntDisable(uint32_t flags)
 {
+#if defined (CMU_HAS_SET_CLEAR)
+  CMU->IEN_CLR = flags;
+#else
   CMU->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -3531,7 +3535,11 @@ __STATIC_INLINE void CMU_IntDisable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void CMU_IntEnable(uint32_t flags)
 {
+#if defined (CMU_HAS_SET_CLEAR)
+  CMU->IEN_SET = flags;
+#else
   CMU->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

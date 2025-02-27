@@ -41,8 +41,10 @@
 // Example: user will set to false for SE 1.2 Comms Hub (GBCS)
 static bool gInterpanEnabled;
 
+#if defined(ALLOW_FRAGMENTATION)
 // Global timeout value in seconds
 static uint16_t gMessageTimeout;
+#endif // ALLOW_FRAGMENTATION
 
 // MAC frame control
 // Bits:
@@ -122,10 +124,6 @@ static bool isMessageAllowed(EmberAfInterpanHeader *headerData,
 static void printMessage(EmberAfInterpanHeader *headerData);
 #else
   #define printMessage(x)
-#endif
-
-#if !defined(ALLOW_APS_ENCRYPTED_MESSAGES)
-  #define handleApsSecurity(...) (EMBER_LIBRARY_NOT_PRESENT)
 #endif
 
 #if !defined EMBER_AF_PLUGIN_INTERPAN_CUSTOM_FILTER
@@ -292,9 +290,9 @@ void interpanPluginInit(uint8_t init_level)
     case SL_ZIGBEE_INIT_LEVEL_LOCAL_DATA:
     {
       gInterpanEnabled = true;
-      gMessageTimeout  = IPMF_MSG_TIMEOUT_MS;
 
 #if defined(ALLOW_FRAGMENTATION)
+      gMessageTimeout  = IPMF_MSG_TIMEOUT_MS;
       uint8_t i;
 
       // The following two loops need adjustment if more than one packet is desired
@@ -463,18 +461,15 @@ static EmberStatus makeInterPanMessage(EmberAfInterpanHeader *headerData,
   finger = pushInt16u(finger, headerData->clusterId);
   finger = pushInt16u(finger, headerData->profileId);
 
-  uint8_t UNUSED apsHeaderLength = finger - apsFrame;
+  uint8_t apsHeaderLength = (uint8_t)(finger - apsFrame);
 
   MEMMOVE(finger, payload, *payloadLength);
   finger += *payloadLength;
 
   if (headerData->options & EMBER_AF_INTERPAN_OPTION_APS_ENCRYPT) {
-    EmberStatus status;
-    if (!APS_ENCRYPTION_ALLOWED) {
-      return EMBER_SECURITY_CONFIGURATION_INVALID;
-    }
-    uint8_t apsEncryptLength = finger - apsFrame;
-
+    EmberStatus status = EMBER_SECURITY_CONFIGURATION_INVALID;
+    uint8_t apsEncryptLength = apsHeaderLength + (uint8_t)(*payloadLength);
+    #if defined(ALLOW_APS_ENCRYPTED_MESSAGES)
     printData("Before Encryption", apsFrame, apsEncryptLength);
 
     status = handleApsSecurity(true,  // encrypt?
@@ -483,6 +478,7 @@ static EmberStatus makeInterPanMessage(EmberAfInterpanHeader *headerData,
                                &apsEncryptLength,
                                maxLength - (uint8_t)(apsFrame - message),
                                headerData);
+    #endif // ALLOW_APS_ENCRYPTED_MESSAGES
     if (status != EMBER_SUCCESS) {
       return status;
     }
@@ -593,22 +589,22 @@ static uint8_t parseInterpanMessage(uint8_t *message,
   finger += 2;
 
   if (apsFrameControl & INTERPAN_APS_FRAME_SECURITY) {
-    EmberStatus status;
+    EmberStatus status = EMBER_SECURITY_CONFIGURATION_INVALID;
     uint8_t apsEncryptLength = *messageLength - apsHeaderIndex;
-    uint8_t UNUSED apsHeaderLength = (uint8_t)(finger - message) - apsHeaderIndex;
     headerData->options |= EMBER_AF_INTERPAN_OPTION_APS_ENCRYPT;
-
+    #if defined(ALLOW_APS_ENCRYPTED_MESSAGES)
+    uint8_t UNUSED apsHeaderLength = (uint8_t)(finger - message) - apsHeaderIndex;
     printData("Before Decryption",
               message + apsHeaderIndex,
               apsEncryptLength);
 
-    status = handleApsSecurity(false,   // encrypt?
+    status = handleApsSecurity(false, // encrypt?
                                message + apsHeaderIndex,
                                apsHeaderLength,
                                &apsEncryptLength,
-                               0,       // maxLengthForEncryption (ignored)
+                               0,    // maxLengthForEncryption (ignored)
                                headerData);
-
+    #endif // ALLOW_APS_ENCRYPTED_MESSAGES
     if (status != EMBER_SUCCESS) {
       emberAfAppPrintln("%pAPS decryption failed (0x%X).",
                         "ERR: Inter-PAN ",

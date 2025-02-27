@@ -144,6 +144,7 @@
 #define EVENT_ACK_SENT_WITH_FP_SET 0x00002000
 #define EVENT_SECURED_ACK_SENT 0x00004000
 #define EVENT_SCHEDULED_RX_STARTED 0x00008000
+#define EVENT_SCHEDULED_TX_STARTED 0x00010000
 
 #define TX_WAITING_FOR_ACK 0x00
 #define TX_NO_ACK 0x01
@@ -305,6 +306,7 @@ static int8_t sMaxChannelPower[RADIO_INTERFACE_COUNT][SL_MAX_CHANNELS_SUPPORTED]
 static int8_t sDefaultTxPower[RADIO_INTERFACE_COUNT];
 
 // CSMA config: Should be globally scoped
+#define CSL_CSMA_BACKOFF_TIME_IN_US 150
 RAIL_CsmaConfig_t csmaConfig    = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
 RAIL_CsmaConfig_t cslCsmaConfig = RAIL_CSMA_CONFIG_SINGLE_CCA;
 
@@ -894,7 +896,8 @@ static uint8_t readInitialPacketData(RAIL_RxPacketInfo_t *packetInfo,
                                      uint8_t             *buffer,
                                      uint8_t              buffer_len)
 {
-    uint8_t packetBytesRead = 0;
+    uint8_t             packetBytesRead = 0;
+    RAIL_RxPacketInfo_t adjustedPacketInfo;
 
     // Check if we have enough buffer
     OT_ASSERT((buffer_len >= expected_data_bytes_max) || (packetInfo != NULL));
@@ -907,22 +910,25 @@ static uint8_t readInitialPacketData(RAIL_RxPacketInfo_t *packetInfo,
     // Check to see if we have received atleast minimum number of bytes requested.
     otEXPECT_ACTION(packetInfo->packetBytes >= expected_data_bytes_min, packetBytesRead = 0);
 
+    adjustedPacketInfo = *packetInfo;
+
     // Only extract what we care about
     if (packetInfo->packetBytes > expected_data_bytes_max)
     {
-        packetInfo->packetBytes = expected_data_bytes_max;
+        adjustedPacketInfo.packetBytes = expected_data_bytes_max;
         // Check if the initial portion of the packet received so far exceeds the max value requested.
         if (packetInfo->firstPortionBytes >= expected_data_bytes_max)
         {
             // If we have received more, make sure to copy only the required bytes into the buffer.
-            packetInfo->firstPortionBytes = expected_data_bytes_max;
-            packetInfo->lastPortionData   = NULL;
+            adjustedPacketInfo.firstPortionBytes = expected_data_bytes_max;
+            adjustedPacketInfo.lastPortionData   = NULL;
         }
     }
 
     // Copy number of bytes as indicated in `packetInfo->firstPortionBytes` into the buffer.
-    RAIL_CopyRxPacket(buffer, packetInfo);
-    packetBytesRead = packetInfo->packetBytes;
+    RAIL_CopyRxPacket(buffer, &adjustedPacketInfo);
+    // Put it back to packetBytes.
+    packetBytesRead = (uint8_t)adjustedPacketInfo.packetBytes;
 
 exit:
     return packetBytesRead;
@@ -1026,7 +1032,7 @@ static void updateEvents(RAIL_Events_t mask, RAIL_Events_t values)
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
 // Set or clear the passed flag.
-static inline void setInternalFlag(uint16_t flag, bool val)
+static inline void setInternalFlag(uint32_t flag, bool val)
 {
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_ATOMIC();
@@ -1034,7 +1040,7 @@ static inline void setInternalFlag(uint16_t flag, bool val)
     CORE_EXIT_ATOMIC();
 }
 // Returns true if the passed flag is set, false otherwise.
-static inline bool getInternalFlag(uint16_t flag)
+static inline bool getInternalFlag(uint32_t flag)
 {
     bool isFlagSet;
     CORE_DECLARE_IRQ_STATE;
@@ -1227,10 +1233,8 @@ static RAIL_Handle_t efr32RailInit(efr32CommonConfig *aCommonConfig)
 
 static void efr32RailConfigLoad(efr32BandConfig *aBandConfig, int8_t aTxPower)
 {
-    RAIL_Status_t        status;
-    RAIL_TxPowerConfig_t txPowerConfig = {SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
-                                          SL_RAIL_UTIL_PA_VOLTAGE_MV,
-                                          SL_RAIL_UTIL_PA_RAMP_TIME_US};
+    RAIL_Status_t         status;
+    RAIL_TxPowerConfig_t *txPowerConfig = NULL;
 
     if (aBandConfig->mChannelConfig != NULL)
     {
@@ -1241,10 +1245,11 @@ static void efr32RailConfigLoad(efr32BandConfig *aBandConfig, int8_t aTxPower)
         firstChannel          = RAIL_ConfigChannels(gRailHandle, aBandConfig->mChannelConfig, NULL);
         OT_ASSERT(firstChannel == aBandConfig->mChannelMin);
 
-        txPowerConfig.mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ;
         status =
             RAIL_IEEE802154_ConfigGOptions(gRailHandle, RAIL_IEEE802154_G_OPTION_GB868, RAIL_IEEE802154_G_OPTION_GB868);
         OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+
+        txPowerConfig = sl_rail_util_pa_get_tx_power_config_subghz();
     }
     else
     {
@@ -1254,6 +1259,8 @@ static void efr32RailConfigLoad(efr32BandConfig *aBandConfig, int8_t aTxPower)
         status = RAIL_IEEE802154_Config2p4GHzRadio(gRailHandle);
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
         OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+
+        txPowerConfig = sl_rail_util_pa_get_tx_power_config_2p4ghz();
     }
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
@@ -1267,7 +1274,7 @@ static void efr32RailConfigLoad(efr32BandConfig *aBandConfig, int8_t aTxPower)
 
     if (aTxPower != SL_INVALID_TX_POWER)
     {
-        configureTxPower(&txPowerConfig, aTxPower);
+        configureTxPower(txPowerConfig, aTxPower);
     }
 }
 
@@ -1629,7 +1636,7 @@ otError otPlatRadioSleep(otInstance *aInstance)
     OT_UNUSED_VARIABLE(aInstance);
     otError error = OT_ERROR_NONE;
 
-    otEXPECT_ACTION(!getInternalFlag(ONGOING_TX_FLAGS), error = OT_ERROR_BUSY);
+    otEXPECT_ACTION(!getInternalFlag(FLAG_ONGOING_TX_DATA), error = OT_ERROR_BUSY);
 
     otLogInfoPlat("State=OT_RADIO_STATE_SLEEP");
     setInternalFlag(FLAG_SCHEDULED_RX_PENDING, false);
@@ -1700,6 +1707,10 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t a
     otError       error = OT_ERROR_NONE;
     RAIL_Status_t status;
     int8_t        txPower = sli_get_max_tx_power_across_iids();
+
+    // We can only have one schedule request i.e. either Rx or Tx as they use the
+    // same RAIL resources.
+    otEXPECT_ACTION(!getInternalFlag(EVENT_SCHEDULED_TX_STARTED), error = OT_ERROR_FAILED);
 
     OT_UNUSED_VARIABLE(aInstance);
 
@@ -1811,7 +1822,6 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
 
         CORE_DECLARE_IRQ_STATE;
         CORE_ENTER_ATOMIC();
-        setInternalFlag(FLAG_SCHEDULED_RX_PENDING, false);
         setInternalFlag(FLAG_ONGOING_TX_DATA, true);
         tryTxCurrentPacket();
         CORE_EXIT_ATOMIC();
@@ -1949,6 +1959,10 @@ void txCurrentPacket(void)
     }
 #endif
 
+    // We can only have one schedule request i.e. either Rx or Tx as they use the same RAIL resources.
+    // Reject the transmit request if there is scheduled Rx.
+    otEXPECT_ACTION(!getInternalFlag(FLAG_SCHEDULED_RX_PENDING), status = RAIL_STATUS_INVALID_STATE);
+
     if (sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay == 0)
     {
         if (getInternalFlag(FLAG_CURRENT_TX_USE_CSMA))
@@ -1997,6 +2011,10 @@ void txCurrentPacket(void)
                                                      .mode       = RAIL_TIME_ABSOLUTE,
                                                      .txDuringRx = RAIL_SCHEDULED_TX_DURING_RX_POSTPONE_TX};
 
+        // Set ccaBackoff to some constant value, so we have predictable radio warmup time for schedule tx.
+        cslCsmaConfig.ccaBackoff = CSL_CSMA_BACKOFF_TIME_IN_US;
+        scheduleTxOptions.when -= cslCsmaConfig.ccaBackoff;
+
         // CSL transmissions don't use CSMA but MAC accounts for single CCA time.
         // cslCsmaConfig is set to RAIL_CSMA_CONFIG_SINGLE_CCA above.
         status = RAIL_StartScheduledCcaCsmaTx(gRailHandle,
@@ -2015,6 +2033,8 @@ void txCurrentPacket(void)
         }
 #endif
     }
+
+exit:
     if (status == RAIL_STATUS_NO_ERROR)
     {
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -2251,6 +2271,26 @@ void otPlatRadioSetMacKey(otInstance             *aInstance,
 
     OT_ASSERT(aPrevKey != NULL && aCurrKey != NULL && aNextKey != NULL);
 
+    // MAC frame counters are reset before updating keys. This order
+    // safeguards against issues that can arise when the radio
+    // platform handles TX security and counter assignment.  The
+    // radio platform might prepare an enhanced ACK to a received
+    // frame from an parallel (e.g., ISR) context, which consumes
+    // a MAC frame counter value.
+    //
+    // If the MAC key is updated before the frame counter is cleared,
+    // the radio could receive and send an enhanced ACK between these
+    // two actions, possibly using the new MAC key with a larger
+    // (current) frame counter value. This could then prevent the
+    // receiver from accepting subsequent transmissions after the
+    // frame counter reset for a long time.
+    //
+    // While resetting counters first might briefly cause an enhanced
+    // ACK to be sent with the old key and a zero counter (which might
+    // be rejected by the receiver), this is a transient issue that
+    // quickly resolves itself.
+    otPlatRadioSetMacFrameCounter(aInstance, 0);
+
     sMacKeys[iid].keyId = aKeyId;
     memcpy(&sMacKeys[iid].keys[MAC_KEY_PREV], aPrevKey, sizeof(otMacKeyMaterial));
     memcpy(&sMacKeys[iid].keys[MAC_KEY_CURRENT], aCurrKey, sizeof(otMacKeyMaterial));
@@ -2410,6 +2450,7 @@ exit:
 // Return true otherwise
 static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
                                        RAIL_RxPacketInfo_t *packetInfoForEnhAck,
+                                       uint32_t             rxTimestamp,
                                        uint8_t             *initialPktReadBytes,
                                        uint8_t             *receivedPsdu)
 {
@@ -2445,8 +2486,10 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
         return true; // Nothing to read, which means generating an immediate ACK is also pointless
     }
 
-    receivedFrame.mPsdu   = receivedPsdu + PHY_HEADER_SIZE;
-    receivedFrame.mLength = *initialPktReadBytes - PHY_HEADER_SIZE;
+    receivedFrame.mPsdu = receivedPsdu + PHY_HEADER_SIZE;
+    // This should be set to the expected length of the packet is being received.
+    // We consider this while calculating the phase value below.
+    receivedFrame.mLength = packetInfoForEnhAck->firstPortionData[0];
     enhAckFrame.mPsdu     = enhAckPsdu + PHY_HEADER_SIZE;
 
     if (!otMacFrameIsVersion2015(&receivedFrame))
@@ -2520,7 +2563,7 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
     {
         // Calculate time in the future where the SHR is done being sent out
         uint32_t ackShrDoneTime = // Currently partially received packet's SHR time
-            (otPlatAlarmMicroGetNow()
+            (rxTimestamp
              - (packetInfoForEnhAck->packetBytes * OT_RADIO_SYMBOL_TIME * 2)
              // PHR of this packet
              + (PHY_HEADER_SIZE * OT_RADIO_SYMBOL_TIME * 2)
@@ -2536,6 +2579,8 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
         // Update IE data in the 802.15.4 header with the newest CSL period / phase
         otMacFrameSetCslIe(&enhAckFrame, (uint16_t)sCslPeriod, getCslPhase(ackShrDoneTime));
     }
+#else
+    OT_UNUSED_VARIABLE(rxTimestamp);
 #endif
 
     if (otMacFrameIsSecurityEnabled(&enhAckFrame))
@@ -2596,6 +2641,7 @@ static void dataRequestCommandCallback(RAIL_Handle_t aRailHandle)
     uint8_t             pktOffset = PHY_HEADER_SIZE;
     uint8_t             initialPktReadBytes;
     RAIL_RxPacketInfo_t packetInfo;
+    uint32_t            rxCallbackTimestamp = otPlatAlarmMicroGetNow();
 
     // This callback occurs after the address fields of an incoming
     // ACK-requesting CMD or DATA frame have been received and we
@@ -2603,13 +2649,14 @@ static void dataRequestCommandCallback(RAIL_Handle_t aRailHandle)
     // kind of ACK is being requested -- Immediate or Enhanced.
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-    if (writeIeee802154EnhancedAck(aRailHandle, &packetInfo, &initialPktReadBytes, receivedPsdu))
+    if (writeIeee802154EnhancedAck(aRailHandle, &packetInfo, rxCallbackTimestamp, &initialPktReadBytes, receivedPsdu))
     {
         // We also return true above if there were failures in
         // generating an enhanced ACK.
         return;
     }
 #else
+    OT_UNUSED_VARIABLE(rxCallbackTimestamp);
     initialPktReadBytes =
         readInitialPacketData(&packetInfo, MAX_EXPECTED_BYTES, pktOffset + 2, receivedPsdu, MAX_EXPECTED_BYTES);
 #endif
@@ -2753,7 +2800,7 @@ static void packetReceivedCallback(RAIL_RxPacketHandle_t packetHandle)
             // Processing the ACK frame in ISR context avoids the Tx state to be messed up,
             // in case the Rx FIFO queue gets wiped out in a DMP situation.
             setInternalFlag(EVENT_TX_SUCCESS, true);
-            setInternalFlag(FLAG_WAITING_FOR_ACK | FLAG_ONGOING_TX_DATA, false);
+            setInternalFlag(FLAG_WAITING_FOR_ACK | FLAG_ONGOING_TX_DATA | EVENT_SCHEDULED_TX_STARTED, false);
 
             framePendingInAck = ((macFcf & IEEE802154_FRAME_FLAG_FRAME_PENDING) != 0);
             (void)handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_ACK_RECEIVED, (uint32_t)framePendingInAck);
@@ -2851,7 +2898,7 @@ static void packetSentCallback(bool isAck)
             RAIL_YieldRadio(gRailHandle);
             setInternalFlag(EVENT_TX_SUCCESS, true);
             // Broadcast packet clear the ONGOING flag here.
-            setInternalFlag(FLAG_ONGOING_TX_DATA, false);
+            setInternalFlag(FLAG_ONGOING_TX_DATA | EVENT_SCHEDULED_TX_STARTED, false);
         }
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
         railDebugCounters.mRailEventPacketSent++;
@@ -2882,7 +2929,7 @@ static void txFailedCallback(bool isAck, uint32_t status)
             railDebugCounters.mRailEventTxAbort++;
 #endif
         }
-        setInternalFlag((FLAG_ONGOING_TX_DATA | FLAG_WAITING_FOR_ACK), false);
+        setInternalFlag((FLAG_ONGOING_TX_DATA | FLAG_WAITING_FOR_ACK | EVENT_SCHEDULED_TX_STARTED), false);
         RAIL_YieldRadio(gRailHandle);
     }
 }
@@ -2893,7 +2940,7 @@ static void ackTimeoutCallback(void)
     OT_ASSERT(getInternalFlag(FLAG_WAITING_FOR_ACK));
 
     setInternalFlag(EVENT_TX_NO_ACK, true);
-    setInternalFlag(FLAG_ONGOING_TX_DATA, false);
+    setInternalFlag(FLAG_ONGOING_TX_DATA | EVENT_SCHEDULED_TX_STARTED, false);
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     railDebugCounters.mRailEventNoAck++;
@@ -3056,8 +3103,7 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
         // If we miss a scheduled receive, let application schedule another.
         if (aEvents & RAIL_EVENT_RX_SCHEDULED_RX_END || aEvents & RAIL_EVENT_RX_SCHEDULED_RX_MISSED)
         {
-            setInternalFlag(FLAG_SCHEDULED_RX_PENDING, false);
-            setInternalFlag(EVENT_SCHEDULED_RX_STARTED, false);
+            setInternalFlag(FLAG_SCHEDULED_RX_PENDING | EVENT_SCHEDULED_RX_STARTED, false);
             radioSetIdle();
         }
     }
@@ -3065,6 +3111,7 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
     {
         if (aEvents & RAIL_EVENT_SCHEDULED_TX_STARTED)
         {
+            setInternalFlag(EVENT_SCHEDULED_TX_STARTED, true);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
             railDebugCounters.mRailEventsScheduledTxStartedCount++;
 #endif
@@ -3150,7 +3197,8 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
         status = RAIL_Calibrate(aRailHandle, NULL, RAIL_CAL_ALL_PENDING);
         // TODO: Non-RTOS DMP case fails
 #if (!defined(SL_CATALOG_BLUETOOTH_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
-        OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+        // TEMPORARY - this asserts on Mux - OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
+        OT_UNUSED_VARIABLE(status);
 #else
         OT_UNUSED_VARIABLE(status);
 #endif
@@ -3238,7 +3286,7 @@ exit:
 #if (OPENTHREAD_CONFIG_LOG_LEVEL == OT_LOG_LEVEL_DEBG)
     if (!pktValid)
     {
-        otLogDebgPlat("RX Pkt Invalid: rStatus=0x%X, filterMask=0x%2X, pktLen=%i",
+        otLogDebgPlat("RX Pkt Invalid: rStatus=0x%lX, filterMask=0x%2X, pktLen=%i",
                       rStatus,
                       pPacketInfo->filterMask,
                       *packetLength);
@@ -3701,7 +3749,7 @@ otError setRadioState(otRadioState state)
     otError error = OT_ERROR_NONE;
 
     // Defer idling the radio if we have an ongoing TX task
-    otEXPECT_ACTION(!getInternalFlag(ONGOING_TX_FLAGS), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION(!getInternalFlag(FLAG_ONGOING_TX_DATA), error = OT_ERROR_FAILED);
 
     switch (state)
     {

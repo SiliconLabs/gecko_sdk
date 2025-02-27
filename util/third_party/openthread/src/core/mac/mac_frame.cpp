@@ -41,7 +41,7 @@
 #include "common/log.hpp"
 #include "common/num_utils.hpp"
 #include "radio/trel_link.hpp"
-#if !OPENTHREAD_RADIO || OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE
+#if OPENTHREAD_FTD || OPENTHREAD_MTD || OPENTHREAD_CONFIG_MAC_SOFTWARE_TX_SECURITY_ENABLE
 #include "crypto/aes_ccm.hpp"
 #endif
 
@@ -116,6 +116,12 @@ void TxFrame::Info::PrepareHeadersIn(TxFrame &aTxFrame) const
         // | 13 | Extended     | Short        | Present      | Not Present  |      1       |
         // | 14 | Short        | Short        | Present      | Not Present  |      1       |
         // +----+--------------+--------------+--------------+--------------+--------------+
+        //
+        // This table shows the combination of flags allowed in an encoded MAC
+        // header. Regarding rows 9-14, when both Source and Destination
+        // Address fields are present and at least one uses a short address
+        // format, then if the source and destination PAN IDs are equal, PAN
+        // ID compression is set to 1.
 
         if (mAddrs.mDestination.IsNone())
         {
@@ -168,6 +174,15 @@ void TxFrame::Info::PrepareHeadersIn(TxFrame &aTxFrame) const
         fcf |= kFcfSequenceSuppression;
     }
 
+#if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+    fcf |= (mAppendTimeIe ? kFcfIePresent : 0);
+#endif
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+    fcf |= (mAppendCslIe ? kFcfIePresent : 0);
+#endif
+#endif
+
     builder.Init(aTxFrame.mPsdu, aTxFrame.GetMtu());
     IgnoreError(builder.AppendLittleEndianUint16(fcf));
 
@@ -202,9 +217,35 @@ void TxFrame::Info::PrepareHeadersIn(TxFrame &aTxFrame) const
         micSize = CalculateMicSize(secCtl);
     }
 
+#if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
+
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+    if (mAppendTimeIe)
+    {
+        builder.Append<HeaderIe>()->Init(TimeIe::kHeaderIeId, sizeof(TimeIe));
+        builder.Append<TimeIe>()->Init();
+    }
+#endif
+
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+    if (mAppendCslIe)
+    {
+        builder.Append<HeaderIe>()->Init(CslIe::kHeaderIeId, sizeof(CslIe));
+        builder.Append<CslIe>();
+        aTxFrame.SetCslIePresent(true);
+    }
+#endif
+
+    if ((fcf & kFcfIePresent) && ((mType == kTypeMacCmd) || !mEmptyPayload))
+    {
+        builder.Append<HeaderIe>()->Init(Termination2Ie::kHeaderIeId, Termination2Ie::kIeContentSize);
+    }
+
+#endif //  OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
+
     if (mType == kTypeMacCmd)
     {
-        builder.Append<uint8_t>(); // Placeholder for Command ID
+        IgnoreError(builder.AppendUint8(mCommandId));
     }
 
     builder.AppendLength(micSize + aTxFrame.GetFcsSize());
@@ -712,55 +753,55 @@ const uint8_t *Frame::GetKeySource(void) const
     return &mPsdu[index + kSecurityControlSize + kFrameCounterSize];
 }
 
-uint8_t Frame::GetKeySourceLength(uint8_t aKeyIdMode)
+uint8_t Frame::CalculateKeySourceSize(uint8_t aSecurityControl)
 {
-    uint8_t len = 0;
+    uint8_t size = 0;
 
-    switch (aKeyIdMode)
+    switch (aSecurityControl & kKeyIdModeMask)
     {
     case kKeyIdMode0:
-        len = kKeySourceSizeMode0;
+        size = kKeySourceSizeMode0;
         break;
 
     case kKeyIdMode1:
-        len = kKeySourceSizeMode1;
+        size = kKeySourceSizeMode1;
         break;
 
     case kKeyIdMode2:
-        len = kKeySourceSizeMode2;
+        size = kKeySourceSizeMode2;
         break;
 
     case kKeyIdMode3:
-        len = kKeySourceSizeMode3;
+        size = kKeySourceSizeMode3;
         break;
     }
 
-    return len;
+    return size;
 }
 
 void Frame::SetKeySource(const uint8_t *aKeySource)
 {
-    uint8_t keySourceLength;
+    uint8_t keySourceSize;
     uint8_t index = FindSecurityHeaderIndex();
 
     OT_ASSERT(index != kInvalidIndex);
 
-    keySourceLength = GetKeySourceLength(mPsdu[index] & kKeyIdModeMask);
+    keySourceSize = CalculateKeySourceSize(mPsdu[index]);
 
-    memcpy(&mPsdu[index + kSecurityControlSize + kFrameCounterSize], aKeySource, keySourceLength);
+    memcpy(&mPsdu[index + kSecurityControlSize + kFrameCounterSize], aKeySource, keySourceSize);
 }
 
 Error Frame::GetKeyId(uint8_t &aKeyId) const
 {
     Error   error = kErrorNone;
-    uint8_t keySourceLength;
+    uint8_t keySourceSize;
     uint8_t index = FindSecurityHeaderIndex();
 
     VerifyOrExit(index != kInvalidIndex, error = kErrorParse);
 
-    keySourceLength = GetKeySourceLength(mPsdu[index] & kKeyIdModeMask);
+    keySourceSize = CalculateKeySourceSize(mPsdu[index]);
 
-    aKeyId = mPsdu[index + kSecurityControlSize + kFrameCounterSize + keySourceLength];
+    aKeyId = mPsdu[index + kSecurityControlSize + kFrameCounterSize + keySourceSize];
 
 exit:
     return error;
@@ -768,14 +809,14 @@ exit:
 
 void Frame::SetKeyId(uint8_t aKeyId)
 {
-    uint8_t keySourceLength;
+    uint8_t keySourceSize;
     uint8_t index = FindSecurityHeaderIndex();
 
     OT_ASSERT(index != kInvalidIndex);
 
-    keySourceLength = GetKeySourceLength(mPsdu[index] & kKeyIdModeMask);
+    keySourceSize = CalculateKeySourceSize(mPsdu[index]);
 
-    mPsdu[index + kSecurityControlSize + kFrameCounterSize + keySourceLength] = aKeyId;
+    mPsdu[index + kSecurityControlSize + kFrameCounterSize + keySourceSize] = aKeyId;
 }
 
 Error Frame::GetCommandId(uint8_t &aCommandId) const
@@ -786,19 +827,6 @@ Error Frame::GetCommandId(uint8_t &aCommandId) const
     VerifyOrExit(index != kInvalidIndex, error = kErrorParse);
 
     aCommandId = mPsdu[IsVersion2015() ? index : (index - 1)];
-
-exit:
-    return error;
-}
-
-Error Frame::SetCommandId(uint8_t aCommandId)
-{
-    Error   error = kErrorNone;
-    uint8_t index = FindPayloadIndex();
-
-    VerifyOrExit(index != kInvalidIndex, error = kErrorParse);
-
-    mPsdu[IsVersion2015() ? index : (index - 1)] = aCommandId;
 
 exit:
     return error;
@@ -922,27 +950,15 @@ uint16_t Frame::DetermineFcfAddrType(const Address &aAddress, uint16_t aBitShift
 
 uint8_t Frame::CalculateSecurityHeaderSize(uint8_t aSecurityControl)
 {
-    uint8_t size = kSecurityControlSize + kFrameCounterSize;
+    uint8_t size;
 
     VerifyOrExit((aSecurityControl & kSecLevelMask) != kSecurityNone, size = kInvalidSize);
 
-    switch (aSecurityControl & kKeyIdModeMask)
+    size = kSecurityControlSize + kFrameCounterSize + CalculateKeySourceSize(aSecurityControl);
+
+    if ((aSecurityControl & kKeyIdModeMask) != kKeyIdMode0)
     {
-    case kKeyIdMode0:
-        size += kKeySourceSizeMode0;
-        break;
-
-    case kKeyIdMode1:
-        size += kKeySourceSizeMode1 + kKeyIndexSize;
-        break;
-
-    case kKeyIdMode2:
-        size += kKeySourceSizeMode2 + kKeyIndexSize;
-        break;
-
-    case kKeyIdMode3:
-        size += kKeySourceSizeMode3 + kKeyIndexSize;
-        break;
+        size += kKeyIndexSize;
     }
 
 exit:
@@ -1098,65 +1114,6 @@ exit:
     return index;
 }
 
-#if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
-template <typename IeType> Error Frame::AppendHeaderIeAt(uint8_t &aIndex)
-{
-    Error error = kErrorNone;
-
-    SuccessOrExit(error = InitIeHeaderAt(aIndex, IeType::kHeaderIeId, IeType::kIeContentSize));
-
-    InitIeContentAt<IeType>(aIndex);
-
-exit:
-    return error;
-}
-
-Error Frame::InitIeHeaderAt(uint8_t &aIndex, uint8_t ieId, uint8_t ieContentSize)
-{
-    Error error = kErrorNone;
-
-    SetIePresent(true);
-
-    if (aIndex == 0)
-    {
-        aIndex = FindHeaderIeIndex();
-    }
-
-    VerifyOrExit(aIndex != kInvalidIndex, error = kErrorNotFound);
-
-    reinterpret_cast<HeaderIe *>(mPsdu + aIndex)->Init(ieId, ieContentSize);
-    aIndex += sizeof(HeaderIe);
-
-    mLength += sizeof(HeaderIe) + ieContentSize;
-exit:
-    return error;
-}
-
-#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
-template <> void Frame::InitIeContentAt<TimeIe>(uint8_t &aIndex)
-{
-    reinterpret_cast<TimeIe *>(mPsdu + aIndex)->Init();
-    aIndex += sizeof(TimeIe);
-}
-#endif
-
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-template <> void Frame::InitIeContentAt<RendezvousTimeIe>(uint8_t &aIndex) { aIndex += sizeof(RendezvousTimeIe); }
-
-template <> void Frame::InitIeContentAt<ConnectionIe>(uint8_t &aIndex)
-{
-    reinterpret_cast<ConnectionIe *>(mPsdu + aIndex)->Init();
-    aIndex += sizeof(ConnectionIe);
-}
-#endif
-
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-template <> void Frame::InitIeContentAt<CslIe>(uint8_t &aIndex) { aIndex += sizeof(CslIe); }
-#endif
-
-template <> void Frame::InitIeContentAt<Termination2Ie>(uint8_t &aIndex) { OT_UNUSED_VARIABLE(aIndex); }
-#endif // OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
-
 const uint8_t *Frame::GetHeaderIe(uint8_t aIeId) const
 {
     uint8_t        index        = FindHeaderIeIndex();
@@ -1239,7 +1196,7 @@ exit:
 bool Frame::HasCslIe(void) const { return GetHeaderIe(CslIe::kHeaderIeId) != nullptr; }
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || (OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE)
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
 const CslIe *Frame::GetCslIe(void) const
 {
     const uint8_t *cur;
@@ -1336,21 +1293,6 @@ uint8_t Frame::GetFcsSize(void) const
 uint16_t Frame::GetMtu(void) const { return Trel::Link::kMtuSize; }
 
 uint8_t Frame::GetFcsSize(void) const { return Trel::Link::kFcsSize; }
-#endif
-
-// Explicit instantiation
-#if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
-#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
-template Error Frame::AppendHeaderIeAt<TimeIe>(uint8_t &aIndex);
-#endif
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-template Error Frame::AppendHeaderIeAt<RendezvousTimeIe>(uint8_t &aIndex);
-template Error Frame::AppendHeaderIeAt<ConnectionIe>(uint8_t &aIndex);
-#endif
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-template Error Frame::AppendHeaderIeAt<CslIe>(uint8_t &aIndex);
-#endif
-template Error Frame::AppendHeaderIeAt<Termination2Ie>(uint8_t &aIndex);
 #endif
 
 void TxFrame::CopyFrom(const TxFrame &aFromFrame)
@@ -1532,7 +1474,6 @@ Error TxFrame::GenerateWakeupFrame(PanId aPanId, const Address &aDest, const Add
     Error        error = kErrorNone;
     uint16_t     fcf;
     uint8_t      secCtl;
-    uint8_t      index = 0;
     FrameBuilder builder;
 
     fcf = kTypeMultipurpose | kMpFcfLongFrame | kMpFcfPanidPresent | kMpFcfSecurityEnabled | kMpFcfSequenceSuppression |
@@ -1554,12 +1495,15 @@ Error TxFrame::GenerateWakeupFrame(PanId aPanId, const Address &aDest, const Add
     IgnoreError(builder.AppendUint8(secCtl));
     builder.AppendLength(CalculateSecurityHeaderSize(secCtl) - sizeof(secCtl));
 
+    builder.Append<HeaderIe>()->Init(RendezvousTimeIe::kHeaderIeId, sizeof(RendezvousTimeIe));
+    builder.Append<RendezvousTimeIe>();
+
+    builder.Append<HeaderIe>()->Init(ConnectionIe::kHeaderIeId, sizeof(ConnectionIe));
+    builder.Append<ConnectionIe>()->Init();
+
     builder.AppendLength(CalculateMicSize(secCtl) + GetFcsSize());
 
     mLength = builder.GetLength();
-
-    SuccessOrExit(error = AppendHeaderIeAt<RendezvousTimeIe>(index));
-    SuccessOrExit(error = AppendHeaderIeAt<ConnectionIe>(index));
 
 exit:
     return error;

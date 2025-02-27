@@ -54,6 +54,9 @@
 /******************************************************************************
  * Main function
  *****************************************************************************/
+#if defined(__ICCARM__)
+#pragma diag_suppress=Pe111
+#endif // defined(__ICCARM__)
 int main(void)
 {
   // Initialize Silicon Labs device, system, service(s) and protocol stack(s).

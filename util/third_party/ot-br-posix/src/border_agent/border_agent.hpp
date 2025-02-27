@@ -43,8 +43,8 @@
 #include "backbone_router/backbone_agent.hpp"
 #include "common/code_utils.hpp"
 #include "common/mainloop.hpp"
+#include "host/rcp_host.hpp"
 #include "mdns/mdns.hpp"
-#include "ncp/rcp_host.hpp"
 #include "sdp_proxy/advertising_proxy.hpp"
 #include "sdp_proxy/discovery_proxy.hpp"
 #include "trel_dnssd/trel_dnssd.hpp"
@@ -75,7 +75,7 @@ namespace otbr {
 /**
  * This class implements Thread border agent functionality.
  */
-class BorderAgent : private NonCopyable
+class BorderAgent : public Mdns::StateObserver, private NonCopyable
 {
 public:
     /** The callback for receiving ephemeral key changes. */
@@ -87,7 +87,7 @@ public:
      * @param[in] aHost       A reference to the Thread controller.
      * @param[in] aPublisher  A reference to the mDNS Publisher.
      */
-    BorderAgent(otbr::Ncp::RcpHost &aHost, Mdns::Publisher &aPublisher);
+    BorderAgent(otbr::Host::RcpHost &aHost, Mdns::Publisher &aPublisher);
 
     ~BorderAgent(void) = default;
 
@@ -139,7 +139,7 @@ public:
      *
      * @param[in] aState  The state of mDNS publisher.
      */
-    void HandleMdnsState(Mdns::Publisher::State aState);
+    void HandleMdnsState(Mdns::Publisher::State aState) override;
 
     /**
      * This method creates ephemeral key in the Border Agent.
@@ -177,13 +177,14 @@ private:
     std::string GetAlternativeServiceInstanceName() const;
 
     static void HandleEpskcStateChanged(void *aContext);
+    void        HandleEpskcStateChanged(void);
     void        PublishEpskcService(void);
     void        UnpublishEpskcService(void);
 
-    otbr::Ncp::RcpHost &mHost;
-    Mdns::Publisher    &mPublisher;
-    bool                mIsEnabled;
-    bool                mIsEphemeralKeyEnabled;
+    otbr::Host::RcpHost &mHost;
+    Mdns::Publisher     &mPublisher;
+    bool                 mIsEnabled;
+    bool                 mIsEphemeralKeyEnabled;
 
     std::map<std::string, std::vector<uint8_t>> mMeshCopTxtUpdate;
 

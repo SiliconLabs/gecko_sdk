@@ -83,7 +83,7 @@ WEAK(void emberAfPluginGreenPowerClientPrintProxyTable(SL_CLI_COMMAND_ARG))
 #endif // SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
 }
 
-WEAK(void emberAfPluginGreenPowerClientClearProxyTable(void))
+WEAK(void emberAfPluginGreenPowerClientClearProxyTableCommand(void))
 {
 #ifdef SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT
   uint16_t proxyTableSize = 0;

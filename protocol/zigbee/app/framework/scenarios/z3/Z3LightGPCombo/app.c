@@ -622,42 +622,47 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
                                          128) != EMBER_NULL_MESSAGE_BUFFER) {
     // Allocate a buffer and prepare a outgoing MAC header using gpd address in the sli_zigbee_gp_tx_queue
     EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(sli_zigbee_gp_tx_queue.addr));
+    if (header == EMBER_NULL_MESSAGE_BUFFER) {
+      return NULL;
+    }
+
     // Add the command Id from the queue to the buffer
     uint8_t len = emberMessageBufferLength(header) + 1;
-    emberAppendToLinkedBuffers(header, &(sli_zigbee_gp_tx_queue.gpdCommandId), 1);
-    // Copy Command Payload from the queue to the buffer and update the length
-    emberSetLinkedBuffersLength(header,
-                                emberMessageBufferLength(header)
-                                + dataLength);
-    // Add the payload
-    emberCopyToLinkedBuffers(data,
-                             header,
-                             len,
-                             dataLength);
-    // Clear the Stub queue because everything is serialised in header
-    emberGpRemoveFromTxQueue(&sli_zigbee_gp_tx_queue);
+    if ((emberAppendToLinkedBuffers(header, &(sli_zigbee_gp_tx_queue.gpdCommandId), 1) == SL_STATUS_OK)
+        // Copy Command Payload from the queue to the buffer and update the length
+        && (emberSetLinkedBuffersLength(header,
+                                        emberMessageBufferLength(header)
+                                        + dataLength) == SL_STATUS_OK)
+        // Add the payload
+        && (emberCopyToLinkedBuffers(data,
+                                     header,
+                                     len,
+                                     dataLength) == SL_STATUS_OK)) {
+      // Clear the Stub queue because everything is serialised in header
+      emberGpRemoveFromTxQueue(&sli_zigbee_gp_tx_queue);
 
-    // Prepare a RAIL frame to be transported using the additional handle
-    uint8_t outPktLength = emberMessageBufferLength(header);
-    uint8_t outPkt[128]; //128 = MAX size
-    // RAIL Frame : [Total Length (excludes itself) | <-----MAC FRAME ---->| 2 byte CRC]
-    outPkt[0] = outPktLength + 2;
-    // Copy the data from the buffer
-    emberCopyFromLinkedBuffers(header,
-                               0,
-                               &outPkt[1],
-                               outPktLength);
-    // Free the header as the rail frame will be submitted with a new buffer asdu
-    emberReleaseMessageBuffer(header);
+      // Prepare a RAIL frame to be transported using the additional handle
+      uint8_t outPktLength = emberMessageBufferLength(header);
+      uint8_t outPkt[128]; //128 = MAX size
+      // RAIL Frame : [Total Length (excludes itself) | <-----MAC FRAME ---->| 2 byte CRC]
+      outPkt[0] = outPktLength + 2;
+      // Copy the data from the buffer
+      emberCopyFromLinkedBuffers(header,
+                                 0,
+                                 &outPkt[1],
+                                 outPktLength);
+      // Free the header as the rail frame will be submitted with a new buffer asdu
+      emberReleaseMessageBuffer(header);
 
-    // This entry is exempt from marking (see emberAfMarkBuffersCallback below),
-    // since it is allocated and released within the context of the same function
-    // call (appGpScheduleOutgoingGpdf).
-    static EmberGpTxQueueEntry copyOfGpStubTxQueue;
-    copyOfGpStubTxQueue.inUse = true;
-    copyOfGpStubTxQueue.asdu = emberFillLinkedBuffers(outPkt, (outPkt[0] + 1));
-    MEMCOPY(&(copyOfGpStubTxQueue.addr), addr, sizeof(EmberGpAddress));
-    return &copyOfGpStubTxQueue;
+      // This entry is exempt from marking (see emberAfMarkBuffersCallback below),
+      // since it is allocated and released within the context of the same function
+      // call (appGpScheduleOutgoingGpdf).
+      static EmberGpTxQueueEntry copyOfGpStubTxQueue;
+      copyOfGpStubTxQueue.inUse = true;
+      copyOfGpStubTxQueue.asdu = emberFillLinkedBuffers(outPkt, (outPkt[0] + 1));
+      MEMCOPY(&(copyOfGpStubTxQueue.addr), addr, sizeof(EmberGpAddress));
+      return &copyOfGpStubTxQueue;
+    }
   }
   return NULL;
 }

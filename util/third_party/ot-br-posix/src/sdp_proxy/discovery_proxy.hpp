@@ -47,8 +47,8 @@
 #include <openthread/instance.h>
 
 #include "common/dns_utils.hpp"
+#include "host/rcp_host.hpp"
 #include "mdns/mdns.hpp"
-#include "ncp/rcp_host.hpp"
 
 namespace otbr {
 namespace Dnssd {
@@ -56,7 +56,7 @@ namespace Dnssd {
 /**
  * This class implements the DNS-SD Discovery Proxy.
  */
-class DiscoveryProxy : private NonCopyable
+class DiscoveryProxy : public Mdns::StateObserver, private NonCopyable
 {
 public:
     /**
@@ -65,7 +65,7 @@ public:
      * @param[in] aHost       A reference to the OpenThread Controller instance.
      * @param[in] aPublisher  A reference to the mDNS Publisher.
      */
-    explicit DiscoveryProxy(Ncp::RcpHost &aHost, Mdns::Publisher &aPublisher);
+    explicit DiscoveryProxy(Host::RcpHost &aHost, Mdns::Publisher &aPublisher);
 
     /**
      * This method enables/disables the Discovery Proxy.
@@ -108,7 +108,7 @@ private:
     void Stop(void);
     bool IsEnabled(void) const { return mIsEnabled; }
 
-    Ncp::RcpHost    &mHost;
+    Host::RcpHost   &mHost;
     Mdns::Publisher &mMdnsPublisher;
     bool             mIsEnabled;
     uint64_t         mSubscriberId = 0;

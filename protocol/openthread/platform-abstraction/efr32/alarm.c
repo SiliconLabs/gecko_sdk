@@ -493,7 +493,7 @@ uint32_t otPlatAlarmMilliGetNow(void)
     return sMsAlarmHandles[0].mTimerGetNow();
 }
 
-uint32_t otPlatTimeGetXtalAccuracy(void)
+uint16_t otPlatTimeGetXtalAccuracy(void)
 {
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
     // For sleepies, we need to account for the low-frequency crystal

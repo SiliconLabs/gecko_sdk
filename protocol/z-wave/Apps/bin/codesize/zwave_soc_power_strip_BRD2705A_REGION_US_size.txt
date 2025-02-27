@@ -5,42 +5,42 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_power_strip.out  :
 section                                        size         addr
-.text                                       0x38584    0x8006000
-_zaf_event_distributor_cc_event_handler        0x10    0x803e584
-_zaf_cc_config                                 0x28    0x803e594
-_cc_handlers_v3                               0x2ac    0x803e5bc
-_zw_protocol_cmd_handlers                      0x70    0x803e868
-_zw_protocol_cmd_handlers_lr                   0x30    0x803e8d8
-.ARM.exidx                                      0x8    0x803e908
-.copy.table                                     0xc    0x803e910
-.zero.table                                     0x0    0x803e91c
+.text                                       0x38544    0x8006000
+_zaf_event_distributor_cc_event_handler        0x10    0x803e544
+_zaf_cc_config                                 0x28    0x803e554
+_cc_handlers_v3                               0x2ac    0x803e57c
+_zw_protocol_cmd_handlers                      0x70    0x803e828
+_zw_protocol_cmd_handlers_lr                   0x30    0x803e898
+.ARM.exidx                                      0x8    0x803e8c8
+.copy.table                                     0xc    0x803e8d0
+.zero.table                                     0x0    0x803e8dc
 .stack                                       0x1000   0x20000000
 .data                                         0x6c4   0x20001000
 .bss                                         0xac6c   0x200016c4
 text_application_ram                            0x0   0x2000c330
 .heap                                         0x800   0x2000c330
-.internal_storage                           0x30000    0x803e91c
-.zwave_nvm                                      0x0    0x806e91c
-.nvm                                         0x8000    0x806e91c
+.internal_storage                           0x30000    0x803e8dc
+.zwave_nvm                                      0x0    0x806e8dc
+.nvm                                         0x8000    0x806e8dc
 .ARM.attributes                                0x36          0x0
 .comment                                       0x45          0x0
 .debug_line_str                               0x29a          0x0
-.debug_frame                                0x12778          0x0
-.debug_info                                0xe0e248          0x0
-.debug_abbrev                               0x296c8          0x0
-.debug_loclists                             0x2dc09          0x0
+.debug_frame                                0x12790          0x0
+.debug_info                                0xe0e217          0x0
+.debug_abbrev                               0x296b9          0x0
+.debug_loclists                             0x2dc1f          0x0
 .debug_aranges                               0x6a00          0x0
-.debug_rnglists                              0x5188          0x0
-.debug_line                                 0x79064          0x0
-.debug_str                                  0x90faf          0x0
-.debug_loc                                  0x2b775          0x0
-.debug_ranges                                0x4a50          0x0
-Total                                     0x103b152
+.debug_rnglists                              0x5195          0x0
+.debug_line                                 0x7902f          0x0
+.debug_str                                  0x90fa9          0x0
+.debug_loc                                  0x2b7ee          0x0
+.debug_ranges                                0x4a00          0x0
+Total                                     0x103b0fb
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   233440
+   233376
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    32768
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)

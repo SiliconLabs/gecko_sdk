@@ -183,8 +183,13 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
 
  #if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
     config->usart->ROUTELOC1 = (config->usart_cts_location << _USART_ROUTELOC1_CTSLOC_SHIFT);
+    #if defined(USART_HAS_SET_CLEAR)
+    config->usart->CTRLX_SET = USART_CTRLX_CTSEN;
+    config->usart->ROUTEPEN_SET = USART_ROUTEPEN_CTSPEN;
+    #else
     config->usart->CTRLX    |= USART_CTRLX_CTSEN;
     config->usart->ROUTEPEN |= USART_ROUTEPEN_CTSPEN;
+    #endif
  #elif defined(_GPIO_USART_ROUTEEN_MASK)
     GPIO->USARTROUTE_SET[config->usart_index].CTSROUTE = (config->cts_port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
                                                          | (config->cts_pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
@@ -194,8 +199,13 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
   if (rts == true) {
     GPIO_PinModeSet(config->rts_port, config->rts_pin, gpioModePushPull, 0);
  #if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
+    #if defined(USART_HAS_SET_CLEAR)
+    config->usart->ROUTELOC1_SET = (config->usart_rts_location << _USART_ROUTELOC1_RTSLOC_SHIFT);
+    config->usart->ROUTEPEN_SET = USART_ROUTEPEN_RTSPEN;
+    #else
     config->usart->ROUTELOC1 |= (config->usart_rts_location << _USART_ROUTELOC1_RTSLOC_SHIFT);
     config->usart->ROUTEPEN |= USART_ROUTEPEN_RTSPEN;
+    #endif
 
  #elif defined(_GPIO_USART_ROUTEEN_MASK)
     GPIO->USARTROUTE_SET[config->usart_index].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;

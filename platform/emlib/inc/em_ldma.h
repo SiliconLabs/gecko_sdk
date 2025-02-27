@@ -2735,7 +2735,11 @@ __STATIC_INLINE void LDMA_IntClear(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LDMA_IntDisable(uint32_t flags)
 {
+#if defined (LDMA_HAS_SET_CLEAR)
+  LDMA->IEN_CLR = flags;
+#else
   LDMA->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -2754,7 +2758,11 @@ __STATIC_INLINE void LDMA_IntDisable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LDMA_IntEnable(uint32_t flags)
 {
+#if defined (LDMA_HAS_SET_CLEAR)
+  LDMA->IEN_SET = flags;
+#else
   LDMA->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

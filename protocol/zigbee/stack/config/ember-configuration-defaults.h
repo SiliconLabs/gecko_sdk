@@ -414,12 +414,12 @@
   #define EMBER_BINDING_TABLE_SIZE 0
 #endif
 /** @brief The maximum number of EUI64<->network address associations
- * that the stack can maintain.  The default value is 8.
+ * that the stack can maintain.  The default value is 12.
  *
  * Address table entries are 10 bytes in size.
  */
 #ifndef EMBER_ADDRESS_TABLE_SIZE
-  #define EMBER_ADDRESS_TABLE_SIZE 8
+  #define EMBER_ADDRESS_TABLE_SIZE 12
 #endif
 /** @brief The maximum number of destinations to which a node can
  * route messages. This include both messages originating at this node

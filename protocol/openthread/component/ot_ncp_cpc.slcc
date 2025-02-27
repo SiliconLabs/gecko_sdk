@@ -62,3 +62,6 @@ toolchain_settings:
     value: size
     condition:
     - "device_family_efr32mg1"
+
+validation_helper:
+  - path: protocol/openthread/component/script/ot_multipan_config_validation.lua

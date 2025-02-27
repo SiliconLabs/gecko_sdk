@@ -4,7 +4,7 @@ package: "Bluetooth"
 description: >
   This component brings in necessary functionalities for scanning the advertisements
   that use legacy or extended advertising PDUs.
-  
+
   Include this component if the application needs to scan advertisements that
   use extended advertising PDUs. When this component is included by
   the application, advertisements received by the scanner are reported with the
@@ -31,11 +31,6 @@ template_contribution:
   - name: component_catalog
     value: bluetooth_feature_extended_scanner
 
-# TODO: This cannot be enabled for RCP yet:
-#  - name: bluetooth_controller_init
-#    value:
-#      function: sl_btctrl_init_scan_ext()
-#    priority: 8
 documentation:
   docset: bluetooth
   document: bluetooth-stack-api/sl-bt-scanner

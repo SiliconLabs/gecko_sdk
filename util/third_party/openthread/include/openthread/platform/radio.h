@@ -82,6 +82,9 @@ enum
     OT_RADIO_LQI_NONE      = 0,   ///< LQI measurement not supported
     OT_RADIO_RSSI_INVALID  = 127, ///< Invalid or unknown RSSI value
     OT_RADIO_POWER_INVALID = 127, ///< Invalid or unknown power value
+
+    OT_RADIO_INVALID_SHORT_ADDR   = 0xfffe, ///< Invalid short address.
+    OT_RADIO_BROADCAST_SHORT_ADDR = 0xffff, ///< Broadcast short address.
 };
 
 /**
@@ -120,17 +123,18 @@ typedef uint16_t otRadioCaps;
  */
 enum
 {
-    OT_RADIO_CAPS_NONE                 = 0,      ///< Radio supports no capability.
-    OT_RADIO_CAPS_ACK_TIMEOUT          = 1 << 0, ///< Radio supports AckTime event.
-    OT_RADIO_CAPS_ENERGY_SCAN          = 1 << 1, ///< Radio supports Energy Scans.
-    OT_RADIO_CAPS_TRANSMIT_RETRIES     = 1 << 2, ///< Radio supports tx retry logic with collision avoidance (CSMA).
-    OT_RADIO_CAPS_CSMA_BACKOFF         = 1 << 3, ///< Radio supports CSMA backoff for frame transmission (but no retry).
-    OT_RADIO_CAPS_SLEEP_TO_TX          = 1 << 4, ///< Radio supports direct transition from sleep to TX with CSMA.
-    OT_RADIO_CAPS_TRANSMIT_SEC         = 1 << 5, ///< Radio supports tx security.
-    OT_RADIO_CAPS_TRANSMIT_TIMING      = 1 << 6, ///< Radio supports tx at specific time.
-    OT_RADIO_CAPS_RECEIVE_TIMING       = 1 << 7, ///< Radio supports rx at specific time.
-    OT_RADIO_CAPS_RX_ON_WHEN_IDLE      = 1 << 8, ///< Radio supports RxOnWhenIdle handling.
-    OT_RADIO_CAPS_TRANSMIT_FRAME_POWER = 1 << 9, ///< Radio supports setting per-frame transmit power.
+    OT_RADIO_CAPS_NONE                 = 0,       ///< Radio supports no capability.
+    OT_RADIO_CAPS_ACK_TIMEOUT          = 1 << 0,  ///< Radio supports AckTime event.
+    OT_RADIO_CAPS_ENERGY_SCAN          = 1 << 1,  ///< Radio supports Energy Scans.
+    OT_RADIO_CAPS_TRANSMIT_RETRIES     = 1 << 2,  ///< Radio supports tx retry logic with collision avoidance (CSMA).
+    OT_RADIO_CAPS_CSMA_BACKOFF         = 1 << 3,  ///< Radio supports CSMA backoff for frame tx (but no retry).
+    OT_RADIO_CAPS_SLEEP_TO_TX          = 1 << 4,  ///< Radio supports direct transition from sleep to TX with CSMA.
+    OT_RADIO_CAPS_TRANSMIT_SEC         = 1 << 5,  ///< Radio supports tx security.
+    OT_RADIO_CAPS_TRANSMIT_TIMING      = 1 << 6,  ///< Radio supports tx at specific time.
+    OT_RADIO_CAPS_RECEIVE_TIMING       = 1 << 7,  ///< Radio supports rx at specific time.
+    OT_RADIO_CAPS_RX_ON_WHEN_IDLE      = 1 << 8,  ///< Radio supports RxOnWhenIdle handling.
+    OT_RADIO_CAPS_TRANSMIT_FRAME_POWER = 1 << 9,  ///< Radio supports setting per-frame transmit power.
+    OT_RADIO_CAPS_ALT_SHORT_ADDR       = 1 << 10, ///< Radio supports setting alternate short address.
 };
 
 #define OT_PANID_BROADCAST 0xffff ///< IEEE 802.15.4 Broadcast PAN ID
@@ -262,6 +266,10 @@ typedef struct otRadioFrame
              * The base time in microseconds for scheduled transmissions
              * relative to the local radio clock, see `otPlatRadioGetNow` and
              * `mTxDelay`.
+             *
+             * If this field is non-zero, `mMaxCsmaBackoffs` should be ignored.
+             *
+             * This field does not affect CCA behavior which is controlled by `mCsmaCaEnabled`.
              */
             uint32_t mTxDelayBaseTime;
 
@@ -272,10 +280,27 @@ typedef struct otRadioFrame
              * Note: `mTxDelayBaseTime` + `mTxDelay` SHALL point to the point in
              * time when the end of the SFD will be present at the local
              * antenna, relative to the local radio clock.
+             *
+             * If this field is non-zero, `mMaxCsmaBackoffs` should be ignored.
+             *
+             * This field does not affect CCA behavior which is controlled by `mCsmaCaEnabled`.
              */
             uint32_t mTxDelay;
 
-            uint8_t mMaxCsmaBackoffs; ///< Maximum number of backoffs attempts before declaring CCA failure.
+            /**
+             * Maximum number of CSMA backoff attempts before declaring channel access failure.
+             *
+             * This is applicable and MUST be used when radio platform provides the `OT_RADIO_CAPS_CSMA_BACKOFF` and/or
+             * `OT_RADIO_CAPS_TRANSMIT_RETRIES`.
+             *
+             * This field MUST be ignored if `mCsmaCaEnabled` is set to `false` (CCA is disabled) or
+             * either `mTxDelayBaseTime` or `mTxDelay` is non-zero (frame transmission is expected at a specific time).
+             *
+             * It can be set to `0` to skip backoff mechanism (note that CCA MUST still be performed assuming
+             * `mCsmaCaEnabled` is `true`).
+             */
+            uint8_t mMaxCsmaBackoffs;
+
             uint8_t mMaxFrameRetries; ///< Maximum number of retries allowed after a transmission failure.
 
             /**
@@ -337,8 +362,14 @@ typedef struct otRadioFrame
              * it must also set this flag before passing the frame back from the `otPlatRadioTxDone()` callback.
              */
             bool mIsHeaderUpdated : 1;
-            bool mIsARetx : 1;             ///< Indicates whether the frame is a retransmission or not.
-            bool mCsmaCaEnabled : 1;       ///< Set to true to enable CSMA-CA for this packet, false otherwise.
+            bool mIsARetx : 1; ///< Indicates whether the frame is a retransmission or not.
+            /**
+             * Set to true to enable CSMA-CA for this packet, false to disable both CSMA backoff and CCA.
+             *
+             * When it is set to `false`, the frame MUST be sent without performing CCA. In this case `mMaxCsmaBackoffs`
+             * MUST also be ignored.
+             */
+            bool mCsmaCaEnabled : 1;
             bool mCslPresent : 1;          ///< Set to true if CSL header IE is present.
             bool mIsSecurityProcessed : 1; ///< True if SubMac should skip the AES processing of this frame.
 
@@ -518,6 +549,26 @@ void otPlatRadioSetExtendedAddress(otInstance *aInstance, const otExtAddress *aE
 void otPlatRadioSetShortAddress(otInstance *aInstance, otShortAddress aShortAddress);
 
 /**
+ * Set the alternate short address.
+ *
+ * This is an optional radio platform API. The radio platform MUST indicate support for this API by including the
+ * capability `OT_RADIO_CAPS_ALT_SHORT_ADDR` in `otPlatRadioGetCaps()`.
+ *
+ * When supported, the radio should accept received frames destined to the specified alternate short address in
+ * addition to the short address provided in `otPlatRadioSetShortAddress()`.
+ *
+ * The @p aShortAddress can be set to `OT_RADIO_INVALID_SHORT_ADDR` (0xfffe) to clear any previously set alternate
+ * short address.
+ *
+ * This function is used by OpenThread stack during child-to-router role transitions, allowing the device to continue
+ * receiving frames addressed to its previous short address for a short period.
+ *
+ * @param[in] aInstance      The OpenThread instance structure.
+ * @param[in] aShortAddress  The alternate IEEE 802.15.4 short address. `OT_RADIO_INVALID_SHORT_ADDR` to clear.
+ */
+void otPlatRadioSetAlternateShortAddress(otInstance *aInstance, otShortAddress aShortAddress);
+
+/**
  * Get the radio's transmit power in dBm.
  *
  * @note The transmit power returned will be no larger than the power specified in the max power table for
@@ -533,10 +584,10 @@ void otPlatRadioSetShortAddress(otInstance *aInstance, otShortAddress aShortAddr
 otError otPlatRadioGetTransmitPower(otInstance *aInstance, int8_t *aPower);
 
 /**
- * Set the radio's transmit power in dBm.
+ * Set the radio's transmit power in dBm for all channels.
  *
  * @note The real transmit power will be no larger than the power specified in the max power table for
- * the current channel.
+ * the current channel that was configured by `otPlatRadioSetChannelMaxTransmitPower()`.
  *
  * @param[in] aInstance  The OpenThread instance structure.
  * @param[in] aPower     The transmit power in dBm.
@@ -650,6 +701,10 @@ void otPlatRadioSetRxOnWhenIdle(otInstance *aInstance, bool aEnable);
  * Update MAC keys and key index
  *
  * Is used when radio provides OT_RADIO_CAPS_TRANSMIT_SEC capability.
+ *
+ * The radio platform should reset the current security MAC frame counter tracked by the radio on this call. While this
+ * is highly recommended, the OpenThread stack, as a safeguard, will also reset the frame counter using the
+ * `otPlatRadioSetMacFrameCounter()` before calling this API.
  *
  * @param[in]   aInstance    A pointer to an OpenThread instance.
  * @param[in]   aKeyIdMode   The key ID mode.
@@ -1185,6 +1240,9 @@ uint8_t otPlatRadioGetCslUncertainty(otInstance *aInstance);
 /**
  * Set the max transmit power for a specific channel.
  *
+ * @note This function will be deprecated in October 2027. It is recommended to use the function
+ *       `otPlatRadioSetChannelTargetPower()`.
+ *
  * @param[in]  aInstance    The OpenThread instance structure.
  * @param[in]  aChannel     The radio channel.
  * @param[in]  aMaxPower    The max power in dBm, passing OT_RADIO_RSSI_INVALID will disable this channel.
@@ -1300,7 +1358,9 @@ otError otPlatRadioClearCalibratedPowers(otInstance *aInstance);
  * Set the target power for the given channel.
  *
  * @note This API is an optional radio platform API. It's up to the platform layer to implement it.
- *       If this API is implemented, the function `otPlatRadioSetTransmitPower()` should be disabled.
+ *       If this function and `otPlatRadioSetTransmitPower()` are implemented at the same time:
+ *       - If neither of these two functions is called, the radio outputs the platform-defined default power.
+ *       - If both functions are called, the last one to be called takes effect.
  *
  * The radio driver should set the actual output power to be less than or equal to the @p aTargetPower and as close
  * as possible to the @p aTargetPower. If the @p aTargetPower is lower than the minimum output power supported

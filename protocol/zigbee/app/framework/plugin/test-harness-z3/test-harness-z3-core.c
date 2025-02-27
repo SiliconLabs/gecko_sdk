@@ -632,12 +632,12 @@ void sli_zigbee_af_test_harness_z3_set_device_mode_command(SL_CLI_COMMAND_ARG)
     } else if ((mode & 0xFE) == EM_AF_PLUGIN_TEST_HARNESS_Z3_DEVICE_MODE_ZED_NOT_ADDRESS_ASSIGNABLE) {
       sli_zigbee_af_current_zigbee_pro_network->nodeType = EMBER_END_DEVICE;
 #ifdef SL_CATALOG_ZIGBEE_END_DEVICE_SUPPORT_PRESENT
-      sli_zigbee_af_end_device_support_polling_init();
+      sli_zigbee_af_end_device_support_polling_init(SL_ZIGBEE_INIT_LEVEL_EVENT);
 #endif
     } else {
       sli_zigbee_af_current_zigbee_pro_network->nodeType = EMBER_SLEEPY_END_DEVICE;
 #ifdef SL_CATALOG_ZIGBEE_END_DEVICE_SUPPORT_PRESENT
-      sli_zigbee_af_end_device_support_polling_init();
+      sli_zigbee_af_end_device_support_polling_init(SL_ZIGBEE_INIT_LEVEL_EVENT);
 #endif
     }
 

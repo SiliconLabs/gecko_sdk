@@ -1025,7 +1025,11 @@ __STATIC_INLINE void TIMER_IntClear(TIMER_TypeDef *timer, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void TIMER_IntDisable(TIMER_TypeDef *timer, uint32_t flags)
 {
+#if defined (TIMER_HAS_SET_CLEAR)
+  timer->IEN_CLR = flags;
+#else
   timer->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -1047,7 +1051,11 @@ __STATIC_INLINE void TIMER_IntDisable(TIMER_TypeDef *timer, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void TIMER_IntEnable(TIMER_TypeDef *timer, uint32_t flags)
 {
+#if defined (TIMER_HAS_SET_CLEAR)
+  timer->IEN_SET = flags;
+#else
   timer->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

@@ -44,6 +44,8 @@ from hashlib import sha256
 import hmac
 import binascii
 
+CHALLENGE_SIZE = 8
+
 
 class HelpCommand(Command):
 
@@ -73,6 +75,9 @@ class BleCommand(Command):
         pass
 
     async def execute_default(self, args, context):
+        if 'ble_sstream' not in context or context['ble_sstream'] is None:
+            print("TCAT Device not connected.")
+            return CommandResultNone()
         bless: BleStreamSecure = context['ble_sstream']
 
         print(self.get_log_string())
@@ -82,9 +87,14 @@ class BleCommand(Command):
             if not response:
                 return
             tlv_response = TLV.from_bytes(response)
+            self.process_response(tlv_response, context)
             return CommandResultTLV(tlv_response)
         except DataNotPrepared as err:
             print('Command failed', err)
+        return CommandResultNone()
+
+    def process_response(self, tlv_response, context):
+        pass
 
 
 class HelloCommand(BleCommand):
@@ -123,6 +133,51 @@ class DecommissionCommand(BleCommand):
 
     def prepare_data(self, args, context):
         return TLV(TcatTLVType.DECOMMISSION.value, bytes()).to_bytes()
+
+
+class DisconnectCommand(Command):
+
+    def get_help_string(self) -> str:
+        return 'Disconnect client from TCAT device'
+
+    async def execute_default(self, args, context):
+        if 'ble_sstream' not in context or context['ble_sstream'] is None:
+            print("TCAT Device not connected.")
+            return CommandResultNone()
+        await context['ble_sstream'].close()
+        return CommandResultNone()
+
+
+class ExtractDatasetCommand(BleCommand):
+
+    def get_log_string(self) -> str:
+        return 'Getting active dataset.'
+
+    def get_help_string(self) -> str:
+        return 'Get active dataset from device.'
+
+    def prepare_data(self, args, context):
+        return TLV(TcatTLVType.GET_ACTIVE_DATASET.value, bytes()).to_bytes()
+
+    def process_response(self, tlv_response, context):
+        if tlv_response.type == TcatTLVType.RESPONSE_W_PAYLOAD.value:
+            dataset = ThreadDataset()
+            dataset.set_from_bytes(tlv_response.value)
+            dataset.print_content()
+        else:
+            print('Dataset extraction error.')
+
+
+class GetCommissionerCertificate(BleCommand):
+
+    def get_log_string(self) -> str:
+        return 'Getting commissioner certificate.'
+
+    def get_help_string(self) -> str:
+        return 'Get commissioner certificate from device.'
+
+    def prepare_data(self, args, context):
+        return TLV(TcatTLVType.GET_COMMISSIONER_CERTIFICATE.value, bytes()).to_bytes()
 
 
 class GetDeviceIdCommand(BleCommand):
@@ -173,6 +228,89 @@ class GetNetworkNameCommand(BleCommand):
         return TLV(TcatTLVType.GET_NETWORK_NAME.value, bytes()).to_bytes()
 
 
+class GetPskdHash(BleCommand):
+
+    def get_log_string(self) -> str:
+        return 'Retrieving peer PSKd hash.'
+
+    def get_help_string(self) -> str:
+        return 'Get calculated PSKd hash.'
+
+    def prepare_data(self, args, context):
+        bless: BleStreamSecure = context['ble_sstream']
+        if bless.peer_public_key is None:
+            raise DataNotPrepared("Peer certificate not present.")
+
+        challenge = token_bytes(CHALLENGE_SIZE)
+        pskd = bytes(args[0], 'utf-8')
+
+        data = TLV(TcatTLVType.GET_PSKD_HASH.value, challenge).to_bytes()
+
+        hash = hmac.new(pskd, digestmod=sha256)
+        hash.update(challenge)
+        hash.update(bless.peer_public_key)
+        self.digest = hash.digest()
+        return data
+
+    def process_response(self, tlv_response, context):
+        if tlv_response.value == self.digest:
+            print('Requested hash is valid.')
+        else:
+            print('Requested hash is NOT valid.')
+
+
+class GetRandomNumberChallenge(BleCommand):
+
+    def get_log_string(self) -> str:
+        return 'Retrieving random challenge.'
+
+    def get_help_string(self) -> str:
+        return 'Get the device random number challenge.'
+
+    def prepare_data(self, args, context):
+        return TLV(TcatTLVType.GET_RANDOM_NUMBER_CHALLENGE.value, bytes()).to_bytes()
+
+    def process_response(self, tlv_response, context):
+        bless: BleStreamSecure = context['ble_sstream']
+        if tlv_response.value != None:
+            if len(tlv_response.value) == CHALLENGE_SIZE:
+                bless.peer_challenge = tlv_response.value
+            else:
+                print('Challenge format invalid.')
+                return CommandResultNone()
+
+
+class PingCommand(Command):
+
+    def get_help_string(self) -> str:
+        return 'Send echo request to TCAT device.'
+
+    async def execute_default(self, args, context):
+        bless: BleStreamSecure = context['ble_sstream']
+        payload_size = 10
+        max_payload = 512
+        if len(args) > 0:
+            payload_size = int(args[0])
+            if payload_size > max_payload:
+                print(f'Payload size too large. Maximum supported value is {max_payload}')
+                return CommandResultNone()
+        to_send = token_bytes(payload_size)
+        data = TLV(TcatTLVType.PING.value, to_send).to_bytes()
+        elapsed_time = time()
+        response = await bless.send_with_resp(data)
+        elapsed_time = 1e3 * (time() - elapsed_time)
+        if not response:
+            return CommandResultNone()
+
+        tlv_response = TLV.from_bytes(response)
+        if tlv_response.value != to_send:
+            print("Received malformed response.")
+
+        print(f"Roundtrip time: {elapsed_time} ms")
+
+        return CommandResultTLV(tlv_response)
+
+
 class PresentHash(BleCommand):
 
     def get_log_string(self) -> str:
@@ -211,102 +349,41 @@ class PresentHash(BleCommand):
         return data
 
 
-class GetPskdHash(Command):
-
-    def get_log_string(self) -> str:
-        return 'Retrieving peer PSKd hash.'
+class ScanCommand(Command):
 
     def get_help_string(self) -> str:
-        return 'Get calculated PSKd hash.'
+        return 'Perform scan for TCAT devices.'
 
     async def execute_default(self, args, context):
-        bless: BleStreamSecure = context['ble_sstream']
+        if 'ble_sstream' in context and context['ble_sstream'] is not None:
+            context['ble_sstream'].close()
+            del context['ble_sstream']
 
-        print(self.get_log_string())
-        try:
-            if bless.peer_public_key is None:
-                print("Peer certificate not present.")
-                return
-            challenge_size = 8
-            challenge = token_bytes(challenge_size)
-            pskd = bytes(args[0], 'utf-8')
-            data = TLV(TcatTLVType.GET_PSKD_HASH.value, challenge).to_bytes()
-            response = await bless.send_with_resp(data)
-            if not response:
-                return
-            tlv_response = TLV.from_bytes(response)
-            if tlv_response.value != None:
-                hash = hmac.new(pskd, digestmod=sha256)
-                hash.update(challenge)
-                hash.update(bless.peer_public_key)
-                digest = hash.digest()
-                if digest == tlv_response.value:
-                    print('Requested hash is valid.')
-                else:
-                    print('Requested hash is NOT valid.')
-            return CommandResultTLV(tlv_response)
-        except DataNotPrepared as err:
-            print('Command failed', err)
+        tcat_devices = await ble_scanner.scan_tcat_devices()
+        device = select_device_by_user_input(tcat_devices)
 
+        if device is None:
+            return CommandResultNone()
 
-class GetRandomNumberChallenge(Command):
+        ble_sstream = None
 
-    def get_log_string(self) -> str:
-        return 'Retrieving random challenge.'
-
-    def get_help_string(self) -> str:
-        return 'Get the device random number challenge.'
-
-    async def execute_default(self, args, context):
-        bless: BleStreamSecure = context['ble_sstream']
-
-        print(self.get_log_string())
-        try:
-            data = TLV(TcatTLVType.GET_RANDOM_NUMBER_CHALLENGE.value, bytes()).to_bytes()
-            response = await bless.send_with_resp(data)
-            if not response:
-                return
-            tlv_response = TLV.from_bytes(response)
-            if tlv_response.value != None:
-                if len(tlv_response.value) == 8:
-                    bless.peer_challenge = tlv_response.value
-                else:
-                    print('Challenge format invalid.')
-                    return CommandResultNone()
-            return CommandResultTLV(tlv_response)
-        except DataNotPrepared as err:
-            print('Command failed', err)
-
-
-class PingCommand(Command):
-
-    def get_help_string(self) -> str:
-        return 'Send echo request to TCAT device.'
-
-    async def execute_default(self, args, context):
-        bless: BleStreamSecure = context['ble_sstream']
-        payload_size = 10
-        max_payload = 512
-        if len(args) > 0:
-            payload_size = int(args[0])
-            if payload_size > max_payload:
-                print(f'Payload size too large. Maximum supported value is {max_payload}')
-                return
-        to_send = token_bytes(payload_size)
-        data = TLV(TcatTLVType.PING.value, to_send).to_bytes()
-        elapsed_time = time()
-        response = await bless.send_with_resp(data)
-        elapsed_time = 1e3 * (time() - elapsed_time)
-        if not response:
-            return
-
-        tlv_response = TLV.from_bytes(response)
-        if tlv_response.value != to_send:
-            print("Received malformed response.")
-
-        print(f"Roundtrip time: {elapsed_time} ms")
-
-        return CommandResultTLV(tlv_response)
+        print(f'Connecting to {device}')
+        ble_stream = await BleStream.create(device.address, BBTC_SERVICE_UUID, BBTC_TX_CHAR_UUID, BBTC_RX_CHAR_UUID)
+        ble_sstream = BleStreamSecure(ble_stream)
+        cert_path = context['cmd_args'].cert_path if context['cmd_args'] else 'auth'
+        ble_sstream.load_cert(
+            certfile=path.join(cert_path, 'commissioner_cert.pem'),
+            keyfile=path.join(cert_path, 'commissioner_key.pem'),
+            cafile=path.join(cert_path, 'ca_cert.pem'),
+        )
+        print('Setting up secure channel...')
+        if await ble_sstream.do_handshake():
+            print('Done')
+            context['ble_sstream'] = ble_sstream
+        else:
+            print('Secure channel not established.')
+            await ble_stream.disconnect()
+        return CommandResultNone()
 
 
 class ThreadStartCommand(BleCommand):
@@ -344,38 +421,3 @@ class ThreadStateCommand(Command):
     async def execute_default(self, args, context):
         print('Invalid usage. Provide a subcommand.')
         return CommandResultNone()
-
-
-class ScanCommand(Command):
-
-    def get_help_string(self) -> str:
-        return 'Perform scan for TCAT devices.'
-
-    async def execute_default(self, args, context):
-        if not (context['ble_sstream'] is None):
-            del context['ble_sstream']
-
-        tcat_devices = await ble_scanner.scan_tcat_devices()
-        device = select_device_by_user_input(tcat_devices)
-
-        if device is None:
-            return CommandResultNone()
-
-        ble_sstream = None
-
-        print(f'Connecting to {device}')
-        ble_stream = await BleStream.create(device.address, BBTC_SERVICE_UUID, BBTC_TX_CHAR_UUID, BBTC_RX_CHAR_UUID)
-        ble_sstream = BleStreamSecure(ble_stream)
-        cert_path = context['cmd_args'].cert_path if context['cmd_args'] else 'auth'
-        ble_sstream.load_cert(
-            certfile=path.join(cert_path, 'commissioner_cert.pem'),
-            keyfile=path.join(cert_path, 'commissioner_key.pem'),
-            cafile=path.join(cert_path, 'ca_cert.pem'),
-        )
-        print('Setting up secure channel...')
-        if await ble_sstream.do_handshake():
-            print('Done')
-            context['ble_sstream'] = ble_sstream
-        else:
-            print('Secure channel not established.')
-            await ble_stream.disconnect()

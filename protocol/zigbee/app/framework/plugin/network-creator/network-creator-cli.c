@@ -108,3 +108,10 @@ void emberAfPluginNetworkCreatorStatusCommand(sl_cli_command_arg_t *args)
     emberAfCorePrintln("]");
   }
 }
+
+// plugin network-creator stop
+void emberAfPluginNetworkCreatorStopCommand(sl_cli_command_arg_t *args)
+{
+  (void) args;
+  emberAfPluginNetworkCreatorStop();
+}

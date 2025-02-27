@@ -574,6 +574,7 @@ void RoutingManager::SendRouterAdvertisement(RouterAdvTxMode aRaTxMode)
     RouterAdvert::Header    header;
     Ip6::Address            destAddress;
     InfraIf::Icmp6Packet    packet;
+    LinkLayerAddress        linkAddr;
 
     LogInfo("Preparing RA");
 
@@ -589,7 +590,7 @@ void RoutingManager::SendRouterAdvertisement(RouterAdvTxMode aRaTxMode)
     mRxRaTracker.SetHeaderFlagsOn(header);
     header.SetSnacRouterFlag();
 
-    SuccessOrExit(error = raMsg.AppendHeader(header));
+    SuccessOrExit(error = raMsg.Append(header));
 
     LogRaHeader(header);
 
@@ -608,11 +609,18 @@ void RoutingManager::SendRouterAdvertisement(RouterAdvTxMode aRaTxMode)
         SuccessOrExit(error = mRioAdvertiser.AppendRios(raMsg));
     }
 
+    if (Get<InfraIf>().GetLinkLayerAddress(linkAddr) == kErrorNone)
+    {
+        SuccessOrExit(error = raMsg.AppendLinkLayerOption(linkAddr, Option::kSourceLinkLayerAddr));
+    }
+
     if (mExtraRaOptions.GetLength() > 0)
     {
         SuccessOrExit(error = raMsg.AppendBytes(mExtraRaOptions.GetBytes(), mExtraRaOptions.GetLength()));
     }
 
+    // A valid RA message should contain at lease one option.
+    // Exit when the size of packet is less than the size of header.
     VerifyOrExit(raMsg.ContainsAnyOptions());
 
     destAddress.SetToLinkLocalAllNodesMulticast();
@@ -885,9 +893,13 @@ const char *RoutingManager::RouterAdvOriginToString(RouterAdvOrigin aRaOrigin)
         "(this BR other sw entity)", // (2) kThisBrOtherEntity
     };
 
-    static_assert(0 == kAnotherRouter, "kAnotherRouter value is incorrect");
-    static_assert(1 == kThisBrRoutingManager, "kThisBrRoutingManager value is incorrect");
-    static_assert(2 == kThisBrOtherEntity, "kThisBrOtherEntity value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kAnotherRouter);
+        ValidateNextEnum(kThisBrRoutingManager);
+        ValidateNextEnum(kThisBrOtherEntity);
+    };
 
     return kOriginStrings[aRaOrigin];
 }
@@ -1796,13 +1808,22 @@ void RoutingManager::RxRaTracker::HandleRouterTimer(void)
 
 void RoutingManager::RxRaTracker::SendNeighborSolicitToRouter(const Router &aRouter)
 {
-    InfraIf::Icmp6Packet   packet;
-    NeighborSolicitMessage neighborSolicitMsg;
+    InfraIf::Icmp6Packet  packet;
+    NeighborSolicitHeader nsHdr;
+    TxMessage             nsMsg;
+    LinkLayerAddress      linkAddr;
 
     VerifyOrExit(!Get<RoutingManager>().mRsSender.IsInProgress());
 
-    neighborSolicitMsg.SetTargetAddress(aRouter.mAddress);
-    packet.InitFrom(neighborSolicitMsg);
+    nsHdr.SetTargetAddress(aRouter.mAddress);
+    SuccessOrExit(nsMsg.Append(nsHdr));
+
+    if (Get<InfraIf>().GetLinkLayerAddress(linkAddr) == kErrorNone)
+    {
+        SuccessOrExit(nsMsg.AppendLinkLayerOption(linkAddr, Option::kSourceLinkLayerAddr));
+    }
+
+    nsMsg.GetAsPacket(packet);
 
     IgnoreError(Get<RoutingManager>().mInfraIf.Send(packet, aRouter.mAddress));
 
@@ -1828,7 +1849,9 @@ void RoutingManager::RxRaTracker::SetHeaderFlagsOn(RouterAdvert::Header &aHeader
 
 bool RoutingManager::RxRaTracker::IsAddressOnLink(const Ip6::Address &aAddress) const
 {
-    bool isOnLink = false;
+    bool isOnLink = Get<RoutingManager>().mOnLinkPrefixManager.AddressMatchesLocalPrefix(aAddress);
+
+    VerifyOrExit(!isOnLink);
 
     for (const Router &router : mRouters)
     {
@@ -2606,6 +2629,17 @@ void RoutingManager::OnLinkPrefixManager::Stop(void)
     }
 }
 
+bool RoutingManager::OnLinkPrefixManager::AddressMatchesLocalPrefix(const Ip6::Address &aAddress) const
+{
+    bool matches = false;
+
+    VerifyOrExit(GetState() != kIdle);
+    matches = aAddress.MatchesPrefix(mLocalPrefix);
+
+exit:
+    return matches;
+}
+
 void RoutingManager::OnLinkPrefixManager::Evaluate(void)
 {
     VerifyOrExit(!Get<RoutingManager>().mRsSender.IsInProgress());
@@ -2980,10 +3014,14 @@ const char *RoutingManager::OnLinkPrefixManager::StateToString(State aState)
         "Deprecating", // (3) kDeprecating
     };
 
-    static_assert(0 == kIdle, "kIdle value is incorrect");
-    static_assert(1 == kPublishing, "kPublishing value is incorrect");
-    static_assert(2 == kAdvertising, "kAdvertising value is incorrect");
-    static_assert(3 == kDeprecating, "kDeprecating value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kIdle);
+        ValidateNextEnum(kPublishing);
+        ValidateNextEnum(kAdvertising);
+        ValidateNextEnum(kDeprecating);
+    };
 
     return kStateStrings[aState];
 }
@@ -3463,9 +3501,13 @@ const char *RoutingManager::RoutePublisher::StateToString(State aState)
         "ula",       // (2) kPublishUla
     };
 
-    static_assert(0 == kDoNotPublish, "kDoNotPublish value is incorrect");
-    static_assert(1 == kPublishDefault, "kPublishDefault value is incorrect");
-    static_assert(2 == kPublishUla, "kPublishUla value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kDoNotPublish);
+        ValidateNextEnum(kPublishDefault);
+        ValidateNextEnum(kPublishUla);
+    };
 
     return kStateStrings[aState];
 }
@@ -3786,11 +3828,20 @@ void RoutingManager::RsSender::Stop(void) { mTimer.Stop(); }
 Error RoutingManager::RsSender::SendRs(void)
 {
     Ip6::Address         destAddress;
-    RouterSolicitMessage routerSolicit;
+    RouterSolicitHeader  rsHdr;
+    TxMessage            rsMsg;
+    LinkLayerAddress     linkAddr;
     InfraIf::Icmp6Packet packet;
     Error                error;
 
-    packet.InitFrom(routerSolicit);
+    SuccessOrExit(error = rsMsg.Append(rsHdr));
+
+    if (Get<InfraIf>().GetLinkLayerAddress(linkAddr) == kErrorNone)
+    {
+        SuccessOrExit(error = rsMsg.AppendLinkLayerOption(linkAddr, Option::kSourceLinkLayerAddr));
+    }
+
+    rsMsg.GetAsPacket(packet);
     destAddress.SetToLinkLocalAllRoutersMulticast();
 
     error = Get<RoutingManager>().mInfraIf.Send(packet, destAddress);
@@ -3803,6 +3854,7 @@ Error RoutingManager::RsSender::SendRs(void)
     {
         Get<Ip6::Ip6>().GetBorderRoutingCounters().mRsTxFailure++;
     }
+exit:
     return error;
 }
 
@@ -3996,7 +4048,7 @@ void RoutingManager::PdPrefixManager::ProcessRa(const uint8_t *aRouterAdvert, co
     // part of the DHCPv6 prefix delegation process for distributing
     // prefixes to interfaces.
 
-    RouterAdvert::Icmp6Packet packet;
+    InfraIf::Icmp6Packet packet;
 
     packet.Init(aRouterAdvert, aLength);
     Process(&packet, nullptr);
@@ -4012,8 +4064,8 @@ void RoutingManager::PdPrefixManager::ProcessPrefix(const PrefixTableEntry &aPre
     Process(nullptr, &aPrefixTableEntry);
 }
 
-void RoutingManager::PdPrefixManager::Process(const RouterAdvert::Icmp6Packet *aRaPacket,
-                                              const PrefixTableEntry          *aPrefixTableEntry)
+void RoutingManager::PdPrefixManager::Process(const InfraIf::Icmp6Packet *aRaPacket,
+                                              const PrefixTableEntry     *aPrefixTableEntry)
 {
     // Processes DHCPv6 Prefix Delegation (PD) prefixes, either from
     // an RA message or directly set. Requires either `aRaPacket` or
@@ -4068,7 +4120,7 @@ void RoutingManager::PdPrefixManager::Process(const RouterAdvert::Icmp6Packet *a
         Get<RoutingManager>().ScheduleRoutingPolicyEvaluation(kImmediately);
     }
 
-    if (HasPrefix() && currentPrefixUpdated)
+    if (HasPrefix())
     {
         mTimer.FireAt(mPrefix.GetDeprecationTime());
     }
@@ -4164,10 +4216,14 @@ const char *RoutingManager::PdPrefixManager::StateToString(State aState)
         "Idle",     // (3) kIdle
     };
 
-    static_assert(0 == kDhcp6PdStateDisabled, "kDhcp6PdStateDisabled value is incorrect");
-    static_assert(1 == kDhcp6PdStateStopped, "kDhcp6PdStateStopped value is incorrect");
-    static_assert(2 == kDhcp6PdStateRunning, "kDhcp6PdStateRunning value is incorrect");
-    static_assert(3 == kDhcp6PdStateIdle, "kDhcp6PdStateIdle value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kDhcp6PdStateDisabled);
+        ValidateNextEnum(kDhcp6PdStateStopped);
+        ValidateNextEnum(kDhcp6PdStateRunning);
+        ValidateNextEnum(kDhcp6PdStateIdle);
+    };
 
     return kStateStrings[aState];
 }

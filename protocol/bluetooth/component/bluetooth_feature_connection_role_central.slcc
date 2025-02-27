@@ -1,0 +1,17 @@
+id: "bluetooth_feature_connection_role_central"
+label:  "Connection"
+package: "Bluetooth"
+description: >
+  Provides support for Bluetooth connections where the local device is in the Central role
+category: Bluetooth|Bluetooth LE Controller (Link Layer)|Features with Commands and Events
+quality: "production"
+requires:
+  - name: "bluetooth_feature_connection"
+provides:
+  - name: "bluetooth_feature_connection_role_central"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_connection_role_central
+documentation:
+  docset: bluetooth
+  document: bluetooth-stack-api/sl-bt-connection

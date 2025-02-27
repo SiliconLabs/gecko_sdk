@@ -39,12 +39,9 @@ namespace ot {
 
 void TestMessage(void)
 {
-    enum : uint16_t
-    {
-        kMaxSize    = (kBufferSize * 3 + 24),
-        kOffsetStep = 101,
-        kLengthStep = 21,
-    };
+    static constexpr uint16_t kMaxSize    = (kBufferSize * 3 + 24);
+    static constexpr uint16_t kOffsetStep = 101;
+    static constexpr uint16_t kLengthStep = 21;
 
     Instance    *instance;
     MessagePool *messagePool;
@@ -67,10 +64,10 @@ void TestMessage(void)
     Random::NonCrypto::FillBuffer(writeBuffer, kMaxSize);
 
     VerifyOrQuit((message = messagePool->Allocate(Message::kTypeIp6)) != nullptr);
-    message->SetLinkSecurityEnabled(Message::kWithLinkSecurity);
+    message->SetLinkSecurityEnabled(kWithLinkSecurity);
     SuccessOrQuit(message->SetPriority(Message::Priority::kPriorityNet));
     message->SetType(Message::Type::kType6lowpan);
-    message->SetSubType(Message::SubType::kSubTypeMleChildIdRequest);
+    message->SetSubType(Message::SubType::kSubTypeJoinerEntrust);
     message->SetLoopbackToHostAllowed(true);
     message->SetOrigin(Message::kOriginHostUntrusted);
     SuccessOrQuit(message->SetLength(kMaxSize));

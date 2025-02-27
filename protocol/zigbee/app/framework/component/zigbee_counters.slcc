@@ -88,7 +88,7 @@ template_contribution:
     value:
       group: counters
       name: clear
-      handler: emberAfPluginCountersClear
+      handler: emberAfPluginCountersClearCommand
       help: Clears all counter values.
   - name: cli_command
     value:
@@ -111,7 +111,7 @@ template_contribution:
     value:
       group: counters
       name: reset-thresholds
-      handler: emberAfPluginCountersResetThresholds
+      handler: emberAfPluginCountersResetThresholdsCommand
       help: Resets all thresholds values to 0xFFFF.
   - name: cli_command
     value:

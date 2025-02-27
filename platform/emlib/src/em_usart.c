@@ -189,7 +189,12 @@ static void prsRxInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
     PRS->CONSUMER_USART2_RX = ch;
   }
 #endif
+#if defined(USART_HAS_SET_CLEAR)
+  usart->CTRLX_SET = USART_CTRLX_RXPRSEN;
+#else
   usart->CTRLX |= USART_CTRLX_RXPRSEN;
+#endif
+
 #endif
 }
 #endif
@@ -208,11 +213,21 @@ static void prsRxInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 static void prsIrInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 {
 #if defined(_USART_IRCTRL_IRPRSSEL_SHIFT)
+  #if defined(USART_HAS_SET_CLEAR)
+  usart->IRCTRL_SET = ((uint32_t)ch << _USART_IRCTRL_IRPRSSEL_SHIFT)
+                      | USART_IRCTRL_IRPRSEN;
+  #else
   usart->IRCTRL |= ((uint32_t)ch << _USART_IRCTRL_IRPRSSEL_SHIFT)
                    | USART_IRCTRL_IRPRSEN;
+  #endif
+
 #else
   (void)ch;
+  #if defined(USART_HAS_SET_CLEAR)
+  usart->IRCTRL_SET = USART_IRCTRL_IRPRSEN;
+  #else
   usart->IRCTRL |= USART_IRCTRL_IRPRSEN;
+  #endif
 #endif
 }
 #endif
@@ -243,7 +258,11 @@ static void prsIrInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
     PRS->CONSUMER_USART2_IR = ch;
   }
 #endif
+#if defined(USART_HAS_SET_CLEAR)
+  usart->IRCTRL_SET = USART_IRCTRL_IRPRSEN;
+#else
   usart->IRCTRL |= USART_IRCTRL_IRPRSEN;
+#endif
 }
 #endif
 
@@ -417,9 +436,14 @@ void USART_BaudrateAsyncSet(USART_TypeDef *usart,
 
     /* Make sure that reserved bits are not written to. */
     clkdiv &= CLKDIV_MASK;
-
+  #if defined(USART_HAS_SET_CLEAR)
+    usart->CTRL_CLR = _USART_CTRL_OVS_MASK;
+    usart->CTRL_SET = ovs;
+  #else
     usart->CTRL  &= ~_USART_CTRL_OVS_MASK;
     usart->CTRL  |= ovs;
+  #endif
+
     usart->CLKDIV = clkdiv;
   }
 }
@@ -977,7 +1001,11 @@ void USARTn_InitIrDA(USART_TypeDef *usart, const USART_InitIrDA_TypeDef *init)
 #endif
 
   /* Enable IrDA. */
+  #if defined(USART_HAS_SET_CLEAR)
+  usart->IRCTRL_SET = USART_IRCTRL_IREN;
+  #else
   usart->IRCTRL |= USART_IRCTRL_IREN;
+  #endif
 }
 
 #if defined(_USART_I2SCTRL_MASK)

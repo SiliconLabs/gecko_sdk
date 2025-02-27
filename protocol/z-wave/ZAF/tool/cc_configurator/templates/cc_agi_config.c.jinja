@@ -5,9 +5,23 @@
  * @copyright 2022 Silicon Laboratories Inc.
  */
 
-#include <cc_agi_config_api.h>
-#include <Assert.h>
-#include <SizeOf.h>
+#include "cc_agi_config_api.h"
+#include "SizeOf.h"
+#include "cc_association_config.h"
+
+{# Warn if the number of groups for any endpoint is higher than allowed. #}
+{% set maximum = namespace(endpoint=0, most_groups=0) %}
+{% for endpoint in endpoints %}
+  {% if (endpoint.groups | length) > maximum.most_groups %}
+    {% set maximum.most_groups = endpoint.groups | length %}
+    {% set maximum.endpoint = endpoint.endpoint %}
+  {% endif %}
+{% endfor %}
+#define CC_AGI_MOST_GROUPS_PER_ENDPOINT {{ maximum.most_groups }}
+
+#if (CC_AGI_MOST_GROUPS_PER_ENDPOINT > CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT)
+#error "Endpoint {{ maximum.endpoint }} has more groups ({{ maximum.most_groups }}) than the upper limit (CC_ASSOCIATION_MAX_GROUPS_PER_ENDPOINT)."
+#endif
 
 {# Generate group names and array of commands for each endpoint.
  #}

@@ -419,7 +419,7 @@
  *
  * Please see section "Spinel definition compatibility guideline" for more details.
  */
-#define SPINEL_RCP_API_VERSION 10
+#define SPINEL_RCP_API_VERSION 11
 
 /**
  * @def SPINEL_MIN_HOST_SUPPORTED_RCP_API_VERSION
@@ -2092,6 +2092,24 @@ enum
      * state during idle periods.
      */
     SPINEL_PROP_MAC_RX_ON_WHEN_IDLE_MODE = SPINEL_PROP_MAC__BEGIN + 11,
+
+    /// MAC Alternate Short Address
+    /** Format: `S`
+     *
+     * The 802.15.4 alternate short address.
+     */
+    SPINEL_PROP_MAC_15_4_ALT_SADDR = SPINEL_PROP_MAC__BEGIN + 12,
+
+    /// MAC Receive At
+    /** Format: `XLC`
+     *
+     * Schedule a radio reception window at a specific time and duration.
+     *
+     *   `X`: The receive window start time.
+     *   `L`: The receive window duration.
+     *   `C`: The receive channel.
+     */
+    SPINEL_PROP_MAC_RX_AT = SPINEL_PROP_MAC__BEGIN + 13,
 
     SPINEL_PROP_MAC__END = 0x40,
 
@@ -4763,7 +4781,108 @@ enum
      */
     SPINEL_PROP_INFRA_IF_RECV_ICMP6 = SPINEL_PROP_INFRA_IF__BEGIN + 2,
 
+    /// ICMP6 message sent by NCP and needs to be sent on the infrastructure interface.
+    /** Format: `L6d`
+     * Type: Unsolicited notifications only
+     *
+     * `L`: The infrastructure interface index.
+     * `6`: The IP6 destination address of the message to send.
+     * `d`: The data of the message to send.
+     */
+    SPINEL_PROP_INFRA_IF_SEND_ICMP6 = SPINEL_PROP_INFRA_IF__BEGIN + 3,
+
     SPINEL_PROP_INFRA_IF__END = 0x920,
+
+    SPINEL_PROP_SRP_SERVER__BEGIN = 0x920,
+
+    /// SRP server state.
+    /** Format `b`
+     * Type: Read-Write
+     *
+     * `b`: Whether to enable or disable the SRP server.
+     */
+    SPINEL_PROP_SRP_SERVER_ENABLED = SPINEL_PROP_SRP_SERVER__BEGIN + 1,
+
+    /// SRP server auto enable mode.
+    /** Format `b`
+     * Type: Read-Write
+     *
+     * `b`: A boolean that indicates the SRP server auto enable mode.
+     */
+    SPINEL_PROP_SRP_SERVER_AUTO_ENABLE_MODE = SPINEL_PROP_SRP_SERVER__BEGIN + 2,
+
+    SPINEL_PROP_SRP_SERVER__END = 0x930,
+
+    SPINEL_PROP_DNSSD__BEGIN = 0x930,
+
+    /// Dnssd State
+    /** Format `C`: Write-only
+     *
+     * `C`: The dnssd state.
+     */
+    SPINEL_PROP_DNSSD_STATE = SPINEL_PROP_DNSSD__BEGIN + 1,
+
+    /// Dnssd Request Result
+    /** Format `CLD`: Write
+     *
+     * `C` : The result of the request. A unsigned int8 corresponds to otError.
+     * `L` : The Dnssd Request ID.
+     * `D` : The context of the request. (A pointer to the callback for the request)
+     *
+     * Host uses this property to notify the NCP of the result of NCP's DNS-SD request.
+     */
+    SPINEL_PROP_DNSSD_REQUEST_RESULT = SPINEL_PROP_DNSSD__BEGIN + 2,
+
+    /// DNS-SD Host
+    /** Format `USA(6)LD`: Inserted/Removed
+     *
+     * `U`    : The host name.
+     * `S`    : The count of IPv6 addresses.
+     * `A(6)` : The IPv6 addresses of the host.
+     * `L`    : The Dnssd Request ID.
+     * `D`    : The context of the request. (A pointer to the callback for the request)
+     *
+     * NCP uses this property to register/unregister a DNS-SD host.
+     */
+    SPINEL_PROP_DNSSD_HOST = SPINEL_PROP_DNSSD__BEGIN + 3,
+
+    /// DNS-SD Service
+    /**
+     * Format `UUUt(A(U))dSSSSLD`: Inserted/Removed
+     *
+     * `U`       : The host name (does not include domain name).
+     * `U`       : The service instance name label (not the full name).
+     * `U`       : The service type (e.g., "_mt._udp", does not include domain name).
+     * `t(A(U))` : Array of sub-type labels (can be empty array if no label).
+     * `d`       : Encoded TXT data bytes.
+     * `S`       : The service port number.
+     * `S`       : The service priority.
+     * `S`       : The service weight.
+     * `L`       : The service TTL in seconds.
+     * `L`       : The Dnssd Request ID.
+     * `D`       : The context of the request. (A pointer to the callback for the request)
+     *
+     * NCP uses this property to register/unregister a DNS-SD service.
+     */
+    SPINEL_PROP_DNSSD_SERVICE = SPINEL_PROP_DNSSD__BEGIN + 4,
+
+    /// DNS-SD Key Record
+    /**
+     * Format `Ut(U)dSSLD`: Inserted/Removed
+     *
+     * `U`    : A host or a service instance name (does not include domain name).
+     * `t(U)` : The service type if key is for a service (does not include domain name).
+     * `d`    : Byte array containing the key record data.
+     * `S`    : The resource record class.
+     * `L`    : The TTL in seconds.
+     * `L`    : The Dnssd Request ID.
+     * `D`    : The context of the request. (A pointer to the callback for the request)
+     *
+     * NCP uses this property to register/unregister a DNS-SD key record.
+     */
+    SPINEL_PROP_DNSSD_KEY_RECORD = SPINEL_PROP_DNSSD__BEGIN + 5,
+
+    SPINEL_PROP_DNSSD__END = 0x950,
 
     SPINEL_PROP_NEST__BEGIN = 0x3BC0,
 

@@ -1,5 +1,5 @@
-Silicon Labs OpenThread SDK 2.4.5.0
+Silicon Labs OpenThread SDK 2.4.6.0
 - Thread
-  - Includes conformance and support for Thread 1.4 Credential sharing, Network diagnostics features, and improvements made for border router Public Internet Connectivity. Support for 1.4 commercial TCAT (Thread over Authenticated TLS) feature is present but not tested.
+  - Targeted quality improvements and bug fixes.
 - Multiprotocol
   - Targeted quality improvements and bug fixes.

@@ -20,11 +20,13 @@
 #include "stack/include/ember-types-internal.h"
 
 void sli_zigbee_handle_ieee_joining_list_request(EmberNodeId source,
+                                                 EmberApsFrame *apsFrame,
                                                  PacketHeader header,
                                                  bool broadcastRequest,
                                                  uint8_t *contents)
 {
   (void)source;
+  (void)apsFrame;
   (void)header;
   (void)broadcastRequest;
   (void)contents;

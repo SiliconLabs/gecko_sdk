@@ -1488,7 +1488,150 @@ bool NcpBase::InfraIfHasAddress(uint32_t aInfraIfIndex, const otIp6Address *aAdd
     return aInfraIfIndex == mInfraIfIndex && InfraIfContainsAddress(*aAddress);
 }
 
+otError NcpBase::InfraIfSendIcmp6Nd(uint32_t            aInfraIfIndex,
+                                    const otIp6Address *aDestAddress,
+                                    const uint8_t      *aBuffer,
+                                    uint16_t            aBufferLength)
+{
+    otError error  = OT_ERROR_NONE;
+    uint8_t header = SPINEL_HEADER_FLAG | SPINEL_HEADER_IID_0;
+
+    SuccessOrExit(error = mEncoder.BeginFrame(header, SPINEL_CMD_PROP_VALUE_IS, SPINEL_PROP_INFRA_IF_SEND_ICMP6));
+    SuccessOrExit(error = mEncoder.WriteUint32(aInfraIfIndex));
+    SuccessOrExit(error = mEncoder.WriteIp6Address(*aDestAddress));
+    SuccessOrExit(error = mEncoder.WriteDataWithLen(aBuffer, aBufferLength));
+    SuccessOrExit(error = mEncoder.EndFrame());
+
+exit:
+    return error;
+}
+
 #endif // OPENTHREAD_CONFIG_NCP_INFRA_IF_ENABLE && OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+
+#if OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_SRP_SERVER_ENABLED>(void)
+{
+    otError error = OT_ERROR_NONE;
+    bool    enable;
+
+    SuccessOrExit(error = mDecoder.ReadBool(enable));
+    otSrpServerSetEnabled(mInstance, enable);
+
+exit:
+    return error;
+}
+
+template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_SRP_SERVER_ENABLED>(void)
+{
+    otSrpServerState srpServerState = otSrpServerGetState(mInstance);
+
+    return mEncoder.WriteBool(srpServerState != OT_SRP_SERVER_STATE_DISABLED);
+}
+
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_SRP_SERVER_AUTO_ENABLE_MODE>(void)
+{
+    otError error = OT_ERROR_NONE;
+    bool    enable;
+
+    SuccessOrExit(error = mDecoder.ReadBool(enable));
+    otSrpServerSetAutoEnableMode(mInstance, enable);
+
+exit:
+    return error;
+}
+
+template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_SRP_SERVER_AUTO_ENABLE_MODE>(void)
+{
+    return mEncoder.WriteBool(otSrpServerIsAutoEnableMode(mInstance));
+}
+#endif // OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#endif // OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
+
+#if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
+
+void NcpBase::DnssdRegisterHost(const otPlatDnssdHost      *aHost,
+                                otPlatDnssdRequestId        aRequestId,
+                                otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aHost, aRequestId, aCallback, /* aRegister */ true);
+}
+
+void NcpBase::DnssdUnregisterHost(const otPlatDnssdHost      *aHost,
+                                  otPlatDnssdRequestId        aRequestId,
+                                  otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aHost, aRequestId, aCallback, /* aRegister */ false);
+}
+
+void NcpBase::DnssdRegisterService(const otPlatDnssdService   *aService,
+                                   otPlatDnssdRequestId        aRequestId,
+                                   otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aService, aRequestId, aCallback, /* aRegister */ true);
+}
+
+void NcpBase::DnssdUnregisterService(const otPlatDnssdService   *aService,
+                                     otPlatDnssdRequestId        aRequestId,
+                                     otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aService, aRequestId, aCallback, /* aRegister */ false);
+}
+
+void NcpBase::DnssdRegisterKey(const otPlatDnssdKey       *aKey,
+                               otPlatDnssdRequestId        aRequestId,
+                               otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aKey, aRequestId, aCallback, /* aRegister */ true);
+}
+
+void NcpBase::DnssdUnregisterKey(const otPlatDnssdKey       *aKey,
+                                 otPlatDnssdRequestId        aRequestId,
+                                 otPlatDnssdRegisterCallback aCallback)
+{
+    DnssdUpdate(aKey, aRequestId, aCallback, /* aRegister */ false);
+}
+
+otPlatDnssdState NcpBase::DnssdGetState(void) { return mDnssdState; }
+
+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_STATE>(void)
+{
+    otError error = OT_ERROR_NONE;
+    uint8_t state;
+
+    SuccessOrExit(error = mDecoder.ReadUint8(state));
+
+    if (state != mDnssdState)
+    {
+        mDnssdState = static_cast<otPlatDnssdState>(state);
+        otPlatDnssdStateHandleStateChange(mInstance);
+    }
+
+exit:
+    return error;
+}
+
+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_REQUEST_RESULT>(void)
+{
+    otError                     error = OT_ERROR_NONE;
+    otPlatDnssdRequestId        requestId;
+    uint8_t                     result;
+    otPlatDnssdRegisterCallback callback = nullptr;
+    const uint8_t              *context;
+    uint16_t                    contextLen;
+
+    SuccessOrExit(error = mDecoder.ReadUint8(result));
+    SuccessOrExit(error = mDecoder.ReadUint32(requestId));
+    SuccessOrExit(error = mDecoder.ReadData(context, contextLen));
+    VerifyOrExit(contextLen == sizeof(otPlatDnssdRegisterCallback), error = OT_ERROR_PARSE);
+    callback = *reinterpret_cast<const otPlatDnssdRegisterCallback *>(context);
+    callback(mInstance, requestId, static_cast<otError>(result));
+
+exit:
+    return error;
+}
+
+#endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
 
 } // namespace Ncp
 } // namespace ot

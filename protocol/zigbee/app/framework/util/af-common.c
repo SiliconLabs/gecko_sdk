@@ -263,7 +263,7 @@ WEAK(void sli_zigbee_af_stack_status_callback(EmberStatus status))
     case EMBER_TRUST_CENTER_SWAPPED_OUT_EUI_HAS_NOT_CHANGED:  // also means NETWORK_UP
     {
       // ZigBee 3.0 security configuration is handled in plugins.
-#ifndef EMBER_AF_HAS_SECURITY_PROFILE_Z3
+#if !defined(EMBER_AF_HAS_SECURITY_PROFILE_Z3) && defined(SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE)
       // Set the runtime security settings as soon as the stack goes up.
       EmberExtendedSecurityBitmask oldExtended;
       EmberExtendedSecurityBitmask newExtended = 0;

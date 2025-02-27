@@ -52,13 +52,13 @@ static void retrySendReport(EmberOutgoingMessageType type,
                             uint8_t *message,
                             EmberStatus status);
 static uint32_t computeStringHash(uint8_t *data, uint8_t length);
-static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
-                                                uint8_t entryIndex,
-                                                EmberAfAttributeType* pDataType,
-                                                uint16_t* pDataSize,
-                                                uint8_t* pReadData,
-                                                uint16_t readDataSize,
-                                                bool reportChange);
+static EmberAfStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
+                                                  uint8_t entryIndex,
+                                                  EmberAfAttributeType* pDataType,
+                                                  uint16_t* pDataSize,
+                                                  uint8_t* pReadData,
+                                                  uint16_t readDataSize,
+                                                  bool reportChange);
 static void markReportTableChange(uint8_t *dataRef,
                                   uint8_t dataSize,
                                   EmberAfAttributeType dataType,
@@ -479,7 +479,7 @@ bool emberAfConfigureReportingCommandCallback(const EmberAfClusterCommand *cmd)
         } else {
           // Add a reporting entry for a reported attribute.  The reports will
           // be sent from us to the source of the Configure Reporting command.
-          EmberAfPluginReportingEntry newEntry = { 0 };
+          EmberAfPluginReportingEntry newEntry;
           newEntry.direction = EMBER_ZCL_REPORTING_DIRECTION_REPORTED;
           newEntry.endpoint = cmd->apsFrame->destinationEndpoint;
           newEntry.clusterId = cmd->apsFrame->clusterId;
@@ -757,26 +757,26 @@ static void markReportTableChange(uint8_t *dataRef,
 
 // This function will check specified entry in report table and update
 // lastReportValue field with current value of attribute
-static EmberStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
-                                                uint8_t entryIndex,
-                                                EmberAfAttributeType* pDataType,
-                                                uint16_t* pDataSize,
-                                                uint8_t* pReadData,
-                                                uint16_t readDataSize,
-                                                bool reportChange)
+static EmberAfStatus readAttributeAndGetLastValue(const EmberAfPluginReportingEntry* const entry,
+                                                  uint8_t entryIndex,
+                                                  EmberAfAttributeType* pDataType,
+                                                  uint16_t* pDataSize,
+                                                  uint8_t* pReadData,
+                                                  uint16_t readDataSize,
+                                                  bool reportChange)
 {
   uint8_t readData[READ_DATA_SIZE];
   uint16_t dataSize;
   EmberAfAttributeType dataType;
 
-  EmberStatus status = sli_zigbee_af_read_attribute(entry->endpoint,
-                                                    entry->clusterId,
-                                                    entry->attributeId,
-                                                    entry->mask,
-                                                    entry->manufacturerCode,
-                                                    readData,
-                                                    READ_DATA_SIZE,
-                                                    &dataType);
+  EmberAfStatus status = sli_zigbee_af_read_attribute(entry->endpoint,
+                                                      entry->clusterId,
+                                                      entry->attributeId,
+                                                      entry->mask,
+                                                      entry->manufacturerCode,
+                                                      readData,
+                                                      READ_DATA_SIZE,
+                                                      &dataType);
 
   if (status != EMBER_ZCL_STATUS_SUCCESS) {
     emberAfReportingPrintln("ERR: reading cluster 0x%2x attribute 0x%2x: 0x%x",

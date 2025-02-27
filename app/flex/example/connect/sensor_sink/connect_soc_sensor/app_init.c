@@ -141,6 +141,10 @@ void emberAfInitCallback(void)
   em_status = emberNetworkInit();
   app_log_info("Network status 0x%02X\n", em_status);
 
+  if (em_status == EMBER_SUCCESS) {
+    emberEventControlSetActive(*report_control);
+  }
+
 #if defined(EMBER_AF_PLUGIN_BLE)
   bleConnectionInfoTableInit();
 #endif

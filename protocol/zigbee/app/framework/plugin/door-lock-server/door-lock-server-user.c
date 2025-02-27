@@ -34,8 +34,9 @@ static EmberAfPluginDoorLockServerUser rfidUserTable[EMBER_AF_PLUGIN_DOOR_LOCK_S
 // This is the current number of invalid PIN/RFID's in a row.
 static uint8_t wrongCodeEntryCount = 0;
 
-void sli_zigbee_af_door_lock_server_init_events(void)
+void sli_zigbee_af_door_lock_server_init_events(uint8_t init_level)
 {
+  (void) init_level;
   sl_zigbee_event_init(&emberAfPluginDoorLockServerLockoutEvent,
                        emberAfPluginDoorLockServerLockoutEventHandler);
   sl_zigbee_event_init(&emberAfPluginDoorLockServerRelockEvent,

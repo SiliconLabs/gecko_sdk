@@ -235,8 +235,8 @@ void emberAfPluginOtaClientPreBootloadCallback(uint8_t srcEndpoint,
 /** @} */ // end of ota-client
 
 void sli_zigbee_af_ota_client_stop(void);
-void sli_zigbee_af_ota_client_print_state(void);
-void sli_zigbee_af_send_image_block_request_test(void);
+void sli_zigbee_af_ota_client_print_state(SL_CLI_COMMAND_ARG);
+void sli_zigbee_af_send_image_block_request_test(SL_CLI_COMMAND_ARG);
 
 void sli_zigbee_af_set_page_request(bool pageRequest);
 bool sli_zigbee_af_using_page_request(void);

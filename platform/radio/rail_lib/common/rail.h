@@ -802,6 +802,11 @@ RAIL_Status_t RAIL_GetSyncWords(RAIL_Handle_t railHandle,
  * This function will return \ref RAIL_STATUS_INVALID_STATE if called when BLE
  * has been enabled for this railHandle. When changing sync words in BLE mode,
  * use \ref RAIL_BLE_ConfigChannelRadioParams instead.
+ *
+ * @note If multiple protocols share the same radio configuration, the user
+ *   should not set custom sync words in any of those protocols as these
+ *   sync words could leak into the other protocol sharing the same radio
+ *   configuration.
  **/
 RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
                                    const RAIL_SyncWordConfig_t *syncWordConfig);

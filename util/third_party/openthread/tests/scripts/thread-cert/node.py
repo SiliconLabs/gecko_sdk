@@ -425,8 +425,8 @@ class OtbrDocker:
     def activate_ephemeral_key_mode(self, lifetime):
         return self.call_dbus_method('io.openthread.BorderRouter', 'ActivateEphemeralKeyMode', lifetime)
 
-    def deactivate_ephemeral_key_mode(self):
-        return self.call_dbus_method('io.openthread.BorderRouter', 'DeactivateEphemeralKeyMode')
+    def deactivate_ephemeral_key_mode(self, retain_active_session):
+        return self.call_dbus_method('io.openthread.BorderRouter', 'DeactivateEphemeralKeyMode', retain_active_session)
 
     @property
     def nat64_cidr(self):
@@ -936,7 +936,7 @@ class NodeImpl:
         cmd = cmd.strip()
         while True:
             line = self.__readline()
-            if line == cmd:
+            if line.strip() == cmd:
                 break
 
             logging.warning("expecting echo %r, but read %r", cmd, line)
@@ -1456,16 +1456,6 @@ class NodeImpl:
         self.send_command(cmd)
         return int(self._expect_command_output()[0])
 
-    def set_epskc(self, keystring: str, timeout=120000, port=0):
-        cmd = 'ba ephemeralkey set ' + keystring + ' ' + str(timeout) + ' ' + str(port)
-        self.send_command(cmd)
-        self._expect(r"(Done|Error .*)")
-
-    def clear_epskc(self):
-        cmd = 'ba ephemeralkey clear'
-        self.send_command(cmd)
-        self._expect_done()
-
     def get_border_agent_counters(self):
         cmd = 'ba counters'
         self.send_command(cmd)
@@ -1934,7 +1924,7 @@ class NodeImpl:
 
     def get_ephemeral_key_state(self):
         cmd = 'ba ephemeralkey'
-        states = [r'inactive', r'active']
+        states = [r'Disabled', r'Stopped', r'Started', r'Connected', r'Accepted']
         self.send_command(cmd)
         return self._expect_result(states)
 
@@ -2515,16 +2505,16 @@ class NodeImpl:
         self.send_command('netdata register')
         self._expect_done()
 
-    def netdata_publish_dnssrp_anycast(self, seqnum):
-        self.send_command(f'netdata publish dnssrp anycast {seqnum}')
+    def netdata_publish_dnssrp_anycast(self, seqnum, version=0):
+        self.send_command(f'netdata publish dnssrp anycast {seqnum} {version}')
         self._expect_done()
 
-    def netdata_publish_dnssrp_unicast(self, address, port):
-        self.send_command(f'netdata publish dnssrp unicast {address} {port}')
+    def netdata_publish_dnssrp_unicast(self, address, port, version=0):
+        self.send_command(f'netdata publish dnssrp unicast {address} {port} {version}')
         self._expect_done()
 
-    def netdata_publish_dnssrp_unicast_mleid(self, port):
-        self.send_command(f'netdata publish dnssrp unicast {port}')
+    def netdata_publish_dnssrp_unicast_mleid(self, port, version=0):
+        self.send_command(f'netdata publish dnssrp unicast {port} {version}')
         self._expect_done()
 
     def netdata_unpublish_dnssrp(self):
@@ -3818,19 +3808,27 @@ class LinuxHost():
 
         self.bash(f'ip link set {self.ETH_DEV} down')
 
-    def get_ether_addrs(self):
-        output = self.bash(f'ip -6 addr list dev {self.ETH_DEV}')
+    def get_ether_addrs(self, ipv4=False, ipv6=True):
+        output = self.bash(f'ip addr list dev {self.ETH_DEV}')
 
         addrs = []
         for line in output:
-            # line example: "inet6 fe80::42:c0ff:fea8:903/64 scope link"
+            # line examples:
+            # "inet6 fe80::42:c0ff:fea8:903/64 scope link"
+            # "inet 192.168.9.1/24 brd 192.168.9.255 scope global eth0"
             line = line.strip().split()
 
-            if line and line[0] == 'inet6':
-                addr = line[1]
-                if '/' in addr:
-                    addr = addr.split('/')[0]
-                addrs.append(addr)
+            if not line or not line[0].startswith('inet'):
+                continue
+            if line[0] == 'inet' and not ipv4:
+                continue
+            if line[0] == 'inet6' and not ipv6:
+                continue
+
+            addr = line[1]
+            if '/' in addr:
+                addr = addr.split('/')[0]
+            addrs.append(addr)
 
         logging.debug('%s: get_ether_addrs: %r', self, addrs)
         return addrs

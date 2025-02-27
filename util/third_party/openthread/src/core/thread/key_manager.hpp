@@ -140,7 +140,7 @@ class NetworkKey : public otNetworkKey, public Equatable<NetworkKey>, public Cle
 public:
     static constexpr uint8_t kSize = OT_NETWORK_KEY_SIZE; ///< Size of the Thread Network Key (in bytes).
 
-#if !OPENTHREAD_RADIO
+#if OPENTHREAD_FTD || OPENTHREAD_MTD
     /**
      * Generates a cryptographically secure random sequence to populate the Thread Network Key.
      *
@@ -168,7 +168,7 @@ class Pskc : public otPskc, public Equatable<Pskc>, public Clearable<Pskc>
 public:
     static constexpr uint8_t kSize = OT_PSKC_MAX_SIZE; ///< Size (number of bytes) of the PSKc.
 
-#if !OPENTHREAD_RADIO
+#if OPENTHREAD_FTD || OPENTHREAD_MTD
     /**
      * Generates a cryptographically secure random sequence to populate the Thread PSKc.
      *
@@ -357,6 +357,15 @@ public:
      * @returns The temporary MLE key.
      */
     const Mle::KeyMaterial &GetTemporaryMleKey(uint32_t aKeySequence);
+
+    /**
+     * Returns a temporary MAC key Material computed from the given key sequence.
+     *
+     * @param[in]  aKeySequence  The key sequence value.
+     *
+     * @returns The temporary MAC key.
+     */
+    const Mle::KeyMaterial &GetTemporaryMacKey(uint32_t aKeySequence);
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
     /**
@@ -597,6 +606,10 @@ private:
     uint32_t         mKeySequence;
     Mle::KeyMaterial mMleKey;
     Mle::KeyMaterial mTemporaryMleKey;
+
+#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    Mle::KeyMaterial mTemporaryMacKey;
+#endif
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
     Mac::KeyMaterial mTrelKey;

@@ -246,9 +246,11 @@ SL_WEAK sl_status_t sli_zigbee_get_device_capability_extension_data(bool* attach
 }
 
 SL_WEAK bool  sli_zigbee_zdo_check_and_handle_fragmented_messages(uint8_t* apsFrameControl,
+                                                                  EmberApsFrame *requestApsFrame,
                                                                   PacketHeader* header)
 {
   (void)apsFrameControl;
+  (void)requestApsFrame;
   (void)header;
   return false;
 }

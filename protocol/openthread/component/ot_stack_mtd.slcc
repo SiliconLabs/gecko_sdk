@@ -10,12 +10,14 @@ provides:
   - name: ot_stack_mtd
 requires:
   - name: ot_stack_implementation
+  - name: ot_stack_tcp_implementation
   - name: ot_headers
   - name: ot_platform_abstraction
   - name: ot_mbedtls
   - name: ot_psa_crypto
 recommends:
   - id: ot_stack_source
+  - id: ot_stack_tcp
   - id: ot_platform_abstraction
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
@@ -27,7 +29,10 @@ config_file:
   - path: protocol/openthread/config/sl_openthread_reference_device_config.h
     file_id: openthread_features
     condition: [ot_reference_device]
-  - path: protocol/openthread/config/sl_openthread_generic_config.h
+include:
+  - path: protocol/openthread/include
+    file_list:
+      - path: sl_openthread_package_info.h
 validation_helper:
   - path: protocol/openthread/component/script/ot_log_validation.lua
 define:
@@ -41,7 +46,7 @@ define:
     value: "\"sl_openthread_reference_device_config.h\""
     condition: [ot_reference_device]
   - name: OPENTHREAD_CONFIG_FILE
-    value: "\"sl_openthread_generic_config.h\""
+    value: "\"sl_openthread_package_info.h\""
   - name: OPENTHREAD_MTD
     value: 1
   - name: OPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE

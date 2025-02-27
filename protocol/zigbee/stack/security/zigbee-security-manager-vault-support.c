@@ -1021,7 +1021,6 @@ sl_status_t psa_to_sl_status(psa_status_t sec_man_error)
     default:
       return SL_STATUS_FAIL;
   }
-  return SL_STATUS_FAIL;
 }
 
 sl_status_t sl_zb_sec_man_aes_128_crypt_block(bool encrypt,

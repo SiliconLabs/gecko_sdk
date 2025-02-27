@@ -149,12 +149,12 @@ void Server::Enable(void)
     {
     case kAddressModeUnicast:
         SelectPort();
-        Get<NetworkData::Publisher>().PublishDnsSrpServiceUnicast(mPort);
+        Get<NetworkData::Publisher>().PublishDnsSrpServiceUnicast(mPort, kSrpVersion);
         break;
 
     case kAddressModeAnycast:
         mPort = kAnycastAddressModePort;
-        Get<NetworkData::Publisher>().PublishDnsSrpServiceAnycast(mAnycastSequenceNumber);
+        Get<NetworkData::Publisher>().PublishDnsSrpServiceAnycast(mAnycastSequenceNumber, kSrpVersion);
         break;
     }
 
@@ -658,8 +658,8 @@ Error Server::PrepareSocket(void)
 #endif
 
     VerifyOrExit(!mSocket.IsOpen());
-    SuccessOrExit(error = mSocket.Open());
-    error = mSocket.Bind(mPort, Ip6::kNetifThread);
+    SuccessOrExit(error = mSocket.Open(Ip6::kNetifThreadInternal));
+    error = mSocket.Bind(mPort);
 
 exit:
     if (error != kErrorNone)
@@ -778,8 +778,7 @@ const Server::UpdateMetadata *Server::FindOutstandingUpdate(const MessageMetadat
     for (const UpdateMetadata &update : mOutstandingUpdates)
     {
         if (aMessageMetadata.mDnsHeader.GetMessageId() == update.GetDnsHeader().GetMessageId() &&
-            aMessageMetadata.mMessageInfo->GetPeerAddr() == update.GetMessageInfo().GetPeerAddr() &&
-            aMessageMetadata.mMessageInfo->GetPeerPort() == update.GetMessageInfo().GetPeerPort())
+            aMessageMetadata.mMessageInfo->HasSamePeerAddrAndPort(update.GetMessageInfo()))
         {
             ExitNow(ret = &update);
         }
@@ -1719,8 +1718,12 @@ const char *Server::AddressModeToString(AddressMode aMode)
         "anycast", // (1) kAddressModeAnycast
     };
 
-    static_assert(kAddressModeUnicast == 0, "kAddressModeUnicast value is incorrect");
-    static_assert(kAddressModeAnycast == 1, "kAddressModeAnycast value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kAddressModeUnicast);
+        ValidateNextEnum(kAddressModeAnycast);
+    };
 
     return kAddressModeStrings[aMode];
 }
@@ -1931,13 +1934,17 @@ void Server::Service::Log(Action aAction) const
         "KEY LEASE expired for",     // (6) kKeyLeaseExpired
     };
 
-    static_assert(0 == kAddNew, "kAddNew value is incorrect");
-    static_assert(1 == kUpdateExisting, "kUpdateExisting value is incorrect");
-    static_assert(2 == kKeepUnchanged, "kKeepUnchanged value is incorrect");
-    static_assert(3 == kRemoveButRetainName, "kRemoveButRetainName value is incorrect");
-    static_assert(4 == kFullyRemove, "kFullyRemove value is incorrect");
-    static_assert(5 == kLeaseExpired, "kLeaseExpired value is incorrect");
-    static_assert(6 == kKeyLeaseExpired, "kKeyLeaseExpired value is incorrect");
+    struct EnumCheck
+    {
+        InitEnumValidatorCounter();
+        ValidateNextEnum(kAddNew);
+        ValidateNextEnum(kUpdateExisting);
+        ValidateNextEnum(kKeepUnchanged);
+        ValidateNextEnum(kRemoveButRetainName);
+        ValidateNextEnum(kFullyRemove);
+        ValidateNextEnum(kLeaseExpired);
+        ValidateNextEnum(kKeyLeaseExpired);
+    };
 
     // We only log if the `Service` is marked as committed. This
     // ensures that temporary `Service` entries associated with a

@@ -163,6 +163,7 @@ void emberAfPluginEsiManagementDeleteEntry(uint8_t index)
   assert(index < EMBER_AF_PLUGIN_ESI_MANAGEMENT_ESI_TABLE_SIZE);
 
   esiTable[index].nodeId = EMBER_NULL_NODE_ID;
+  memset(esiTable[index].eui64, 0xFF, EUI64_SIZE);
   performDeletionAnnouncement(index);
 }
 

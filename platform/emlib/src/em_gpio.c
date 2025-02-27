@@ -428,14 +428,28 @@ void GPIO_EM4EnablePinWakeup(uint32_t pinmask, uint32_t polaritymask)
 
 #if defined(_GPIO_EM4WUPOL_MASK)
   EFM_ASSERT((polaritymask & ~_GPIO_EM4WUPOL_MASK) == 0);
-  GPIO->EM4WUPOL &= ~pinmask;               /* Set the wakeup polarity. */
+  #if defined(GPIO_HAS_SET_CLEAR)
+  GPIO->EM4WUPOL_CLR = pinmask;                   /* Set the wakeup polarity. */
+  GPIO->EM4WUPOL_SET = pinmask & polaritymask;
+  #else
+  GPIO->EM4WUPOL &= ~pinmask;
   GPIO->EM4WUPOL |= pinmask & polaritymask;
+  #endif
 #elif defined(_GPIO_EXTILEVEL_MASK)
   EFM_ASSERT((polaritymask & ~_GPIO_EXTILEVEL_MASK) == 0);
+  #if defined(GPIO_HAS_SET_CLEAR)
+  GPIO->EXTILEVEL_CLR = pinmask;
+  GPIO->EXTILEVEL_SET = pinmask & polaritymask;
+  #else
   GPIO->EXTILEVEL &= ~pinmask;
   GPIO->EXTILEVEL |= pinmask & polaritymask;
+  #endif
 #endif
-  GPIO->EM4WUEN  |= pinmask;                /* Enable wakeup. */
+  #if defined(GPIO_HAS_SET_CLEAR)
+  GPIO->EM4WUEN_SET = pinmask;                    /* Enable wakeup. */
+  #else
+  GPIO->EM4WUEN |= pinmask;
+  #endif
 
   GPIO_EM4SetPinRetention(true);            /* Enable the pin retention. */
 

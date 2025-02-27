@@ -732,7 +732,7 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
   wasLocked = MSC_IS_LOCKED();
   MSC->LOCK = MSC_LOCK_LOCKKEY_UNLOCK;
   // Enable writing to the MSC module.
-  MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
+  MSC->WRITECTRL_SET = MSC_WRITECTRL_WREN;
 
   while (numBytes) {
     // Max burst length is up to next flash page boundary
@@ -771,7 +771,8 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
   }
 
   // Disable writing to the MSC module.
-  MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
+  MSC->WRITECTRL_CLR = MSC_WRITECTRL_WREN;
+
   if (wasLocked) {
     MSC->LOCK = MSC_LOCK_LOCKKEY_LOCK;
   }

@@ -50,9 +50,9 @@
 #include "ncp_test.hpp"
 #endif // SL_CATALOG_OPENTHREAD_TEST_CLI_PRESENT
 
-#ifdef SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#ifdef SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
 #include "ncp_efr32.hpp"
-#endif // SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#endif // SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
 
 #if OPENTHREAD_ENABLE_NCP_VENDOR_HOOK
 
@@ -125,11 +125,11 @@ otError NcpBase::VendorGetPropertyHandler(spinel_prop_key_t aPropKey)
         break;
 #endif // SL_CATALOG_OPENTHREAD_TEST_CLI_PRESENT
 
-#ifdef SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#ifdef SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
     case SpinelProp::SPINEL_PROP_VENDOR_EFR32:
         error = Vendor::Efr32::getEfr32Property(mDecoder, mEncoder);
         break;
-#endif // SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#endif // SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
     default:
         error = OT_ERROR_NOT_FOUND;
         break;
@@ -175,11 +175,11 @@ otError NcpBase::VendorSetPropertyHandler(spinel_prop_key_t aPropKey)
         break;
 #endif // SL_CATALOG_OPENTHREAD_TEST_CLI_PRESENT
 
-#ifdef SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#ifdef SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
     case SpinelProp::SPINEL_PROP_VENDOR_EFR32:
         error = Vendor::Efr32::setEfr32Property(mDecoder);
         break;
-#endif // SL_CATALOG_OPENTHREAD_EFR32_CLI_PRESENT
+#endif // SL_CATALOG_OPENTHREAD_EFR32_EXT_PRESENT
     default:
         error = OT_ERROR_NOT_FOUND;
         break;

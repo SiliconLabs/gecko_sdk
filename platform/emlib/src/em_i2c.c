@@ -929,9 +929,13 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
   /* Enable relevant interrupts. */
   /* Notice that the I2C interrupt must also be enabled in the NVIC, but */
   /* that is left for an additional driver wrapper. */
+#if defined(I2C_HAS_SET_CLEAR)
+  i2c->IEN_SET = I2C_IEN_NACK | I2C_IEN_ACK | I2C_IEN_MSTOP
+                 | I2C_IEN_RXDATAV | I2C_IEN_ERRORS;
+#else
   i2c->IEN |= I2C_IEN_NACK | I2C_IEN_ACK | I2C_IEN_MSTOP
               | I2C_IEN_RXDATAV | I2C_IEN_ERRORS;
-
+#endif
   /* Start a transfer. */
   return I2C_Transfer(i2c);
 }

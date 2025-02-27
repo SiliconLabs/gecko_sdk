@@ -312,7 +312,11 @@ __STATIC_INLINE void PDM_IntClear(PDM_TypeDef *pdm, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntDisable(PDM_TypeDef *pdm, uint32_t flags)
 {
+#if defined(PDM_HAS_SET_CLEAR)
+  pdm->IEN_CLR = flags;
+#else
   pdm->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -334,7 +338,11 @@ __STATIC_INLINE void PDM_IntDisable(PDM_TypeDef *pdm, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntEnable(PDM_TypeDef *pdm, uint32_t flags)
 {
+#if defined(PDM_HAS_SET_CLEAR)
+  pdm->IEN_SET = flags;
+#else
   pdm->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

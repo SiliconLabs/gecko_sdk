@@ -330,7 +330,7 @@ sl_status_t sl_sleeptimer_start_periodic_timer_ms(sl_sleeptimer_timer_handle_t *
 
   // Calculate ms to ticks conversion error
   handle->conversion_error = 1000
-                             - ((uint64_t)(timeout_ms * sl_sleeptimer_get_timer_frequency())
+                             - (((uint64_t)timeout_ms * sl_sleeptimer_get_timer_frequency())
                                 % 1000);
   if (handle->conversion_error == 1000) {
     handle->conversion_error = 0;
@@ -436,6 +436,9 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
   sl_status_t error;
   bool set_comparator = false;
 
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
   // Disable PRS compare and capture channel, if configured for early wakeup
 #if ((SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
   && defined(SL_CATALOG_POWER_MANAGER_PRESENT)                     \
@@ -444,10 +447,6 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
     sleeptimer_hal_disable_prs_compare_and_capture_channel();
   }
 #endif
-
-  if (handle == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
 
   CORE_ENTER_CRITICAL();
   update_delta_list();
@@ -1583,7 +1582,7 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
   && defined(SL_CATALOG_POWER_MANAGER_PRESENT)                     \
   && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT))
   if (option_flags == (SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG | SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG)) {
-    HFXO0->CTRL |= HFXO_CTRL_EM23ONDEMAND;
+    HFXO0->CTRL_SET = HFXO_CTRL_EM23ONDEMAND;
     sleeptimer_hal_set_compare_prs_hfxo_startup(timeout_initial);
     return SL_STATUS_OK;
   }

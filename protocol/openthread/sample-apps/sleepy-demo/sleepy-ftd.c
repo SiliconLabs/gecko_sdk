@@ -127,7 +127,7 @@ void initUdp(void)
     }
 
     // Bind to the socket. Close the socket if bind fails.
-    error = otUdpBind(otGetInstance(), &sFtdSocket, &bindAddr, OT_NETIF_THREAD);
+    error = otUdpBind(otGetInstance(), &sFtdSocket, &bindAddr, OT_NETIF_THREAD_INTERNAL);
     if (error != OT_ERROR_NONE)
     {
         otCliOutputFormat("FTD failed to bind udp multicast with: %d, %s\r\n", error, otThreadErrorToString(error));

@@ -102,6 +102,11 @@ include:
       - path: platform/toolchain.h
       - path: platform/trel.h
       - path: platform/debug_uart.h
+  - path: ../include
+    file_list:
+      - path: common/arg_macros.hpp
+      - path: common/code_utils.hpp
+      - path: common/new.hpp
   - path: ./
     file_list:
       - path: openthread-core-config.h
@@ -117,16 +122,14 @@ include:
       - path: coap/coap_message.hpp
       - path: coap/coap_secure.hpp
       - path: common/appender.hpp
-      - path: common/arg_macros.hpp
       - path: common/array.hpp
       - path: common/as_core_type.hpp
       - path: common/binary_search.hpp
-      - path: common/bit_vector.hpp
+      - path: common/bit_set.hpp
       - path: common/callback.hpp
       - path: common/clearable.hpp
-      - path: common/code_utils.hpp
       - path: common/const_cast.hpp
-      - path: common/crc16.hpp
+      - path: common/crc.hpp
       - path: common/data.hpp
       - path: common/debug.hpp
       - path: common/encoding.hpp
@@ -145,7 +148,6 @@ include:
       - path: common/log.hpp
       - path: common/logging.hpp
       - path: common/message.hpp
-      - path: common/new.hpp
       - path: common/non_copyable.hpp
       - path: common/notifier.hpp
       - path: common/num_utils.hpp
@@ -241,6 +243,7 @@ include:
       - path: mac/mac_links.hpp
       - path: mac/mac_types.hpp
       - path: mac/sub_mac.hpp
+      - path: mac/wakeup_tx_scheduler.hpp
       - path: meshcop/announce_begin_client.hpp
       - path: meshcop/border_agent.hpp
       - path: meshcop/commissioner.hpp
@@ -359,6 +362,7 @@ include:
       - path: utils/power_calibration.hpp
       - path: utils/slaac_address.hpp
       - path: utils/srp_client_buffers.hpp
+      - path: utils/static_counter.hpp
       - path: utils/verhoeff_checksum.hpp
   - path: ../lib
     file_list:

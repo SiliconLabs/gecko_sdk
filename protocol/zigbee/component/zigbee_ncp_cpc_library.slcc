@@ -27,6 +27,7 @@ library:
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_dualrail/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -36,6 +37,7 @@ library:
       - zigbee_multi_network
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_dualrail_singlenetwork/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -45,6 +47,49 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_lto/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_ncp
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_lto_dualrail/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_ncp
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_lto_dualrail_singlenetwork/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_ncp
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_lto_singlenetwork/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_ncp
+      - zigbee_phy_2_4
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-ncp-cpc/release_singlenetwork/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -55,6 +100,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -63,6 +109,49 @@ library:
       - zigbee_phy_2_4
       - zigbee_multi_network
     unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_lto/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_ncp
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_lto_railgb/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_ncp
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_lto_railgb_singlenetwork/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_ncp
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_lto_singlenetwork/libzigbee-ncp-cpc.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_ncp
+      - zigbee_phy_2_4
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_railgb/libzigbee-ncp-cpc.a
@@ -74,6 +163,7 @@ library:
       - zigbee_multi_network
     unless:
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_railgb_singlenetwork/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -83,6 +173,7 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-ncp-cpc/release_singlenetwork/libzigbee-ncp-cpc.a
     condition:
       - toolchain_gcc
@@ -93,6 +184,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/iar/cortex-m33/zigbee-ncp-cpc/release/libzigbee-ncp-cpc.a
     condition:
       - toolchain_iar

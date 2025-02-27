@@ -53,6 +53,7 @@
 #if OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
 #include <openthread/srp_client.h>
 #endif
+#include <openthread/platform/dnssd.h>
 
 #include "changed_props_set.hpp"
 #include "common/tasklet.hpp"
@@ -61,6 +62,7 @@
 #include "lib/spinel/spinel_buffer.hpp"
 #include "lib/spinel/spinel_decoder.hpp"
 #include "lib/spinel/spinel_encoder.hpp"
+#include "lib/spinel/spinel_prop_codec.hpp"
 
 #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
 #define SPINEL_HEADER_IID_BROADCAST OPENTHREAD_SPINEL_CONFIG_BROADCAST_IID
@@ -223,6 +225,101 @@ public:
      * @param[in]  aAddress       The IPv6 address to query.
      */
     bool InfraIfHasAddress(uint32_t aInfraIfIndex, const otIp6Address *aAddress);
+
+    /**
+     * Send a ICMP6 ND message through the Infrastructure interface on the host.
+     *
+     * @param[in]  aInfraIfIndex  The index of the infrastructure interface this message is sent to.
+     * @param[in]  aDestAddress   The destination address this message is sent to.
+     * @param[in]  aBuffer        The ICMPv6 message buffer. The ICMPv6 checksum is left zero and the
+     *                            platform should do the checksum calculate.
+     * @param[in]  aBufferLength  The length of the message buffer.
+     *
+     * @note  Per RFC 4861, the implementation should send the message with IPv6 link-local source address
+     *        of interface @p aInfraIfIndex and IP Hop Limit 255.
+     *
+     * @retval OT_ERROR_NONE    Successfully sent the ICMPv6 message.
+     * @retval OT_ERROR_FAILED  Failed to send the ICMPv6 message.
+     */
+    otError InfraIfSendIcmp6Nd(uint32_t            aInfraIfIndex,
+                               const otIp6Address *aDestAddress,
+                               const uint8_t      *aBuffer,
+                               uint16_t            aBufferLength);
+
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
+    /**
+     * Registers or updates a host on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aHost         Information about the host to register.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdRegisterHost(const otPlatDnssdHost      *aHost,
+                           otPlatDnssdRequestId        aRequestId,
+                           otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Unregisters a host on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aHost         Information about the host to register.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdUnregisterHost(const otPlatDnssdHost      *aHost,
+                             otPlatDnssdRequestId        aRequestId,
+                             otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Registers or updates a service on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aService      Information about the service to register.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdRegisterService(const otPlatDnssdService   *aService,
+                              otPlatDnssdRequestId        aRequestId,
+                              otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Unregisters a service on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aService      Information about the service to unregister.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdUnregisterService(const otPlatDnssdService   *aService,
+                                otPlatDnssdRequestId        aRequestId,
+                                otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Registers or updates a key record on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aKey          Information about the key record to register.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdRegisterKey(const otPlatDnssdKey       *aKey,
+                          otPlatDnssdRequestId        aRequestId,
+                          otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Unregisters a key record on the infrastructure network's DNS-SD module (on host).
+     *
+     * @param[in] aKey          Information about the key record to register.
+     * @param[in] aRequestId    The ID associated with this request.
+     * @param[in] aCallback     The callback function pointer to report the outcome (may be NULL if no callback needed).
+     */
+    void DnssdUnregisterKey(const otPlatDnssdKey       *aKey,
+                            otPlatDnssdRequestId        aRequestId,
+                            otPlatDnssdRegisterCallback aCallback);
+
+    /**
+     * Gets the Dnssd state.
+     *
+     * Returns the platform dnssd state.
+     */
+    otPlatDnssdState DnssdGetState(void);
+#endif
 
 protected:
     static constexpr uint8_t kBitsPerByte = 8; ///< Number of bits in a byte.
@@ -705,10 +802,7 @@ protected:
     uint32_t mDroppedInboundIpFrameCounter;   // Number of dropped inbound data/IP frames.
 
 #if OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
-    enum : uint8_t
-    {
-        kSrpClientMaxHostAddresses = OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_HOST_ADDRESSES,
-    };
+    static constexpr uint8_t kSrpClientMaxHostAddresses = OPENTHREAD_CONFIG_SRP_CLIENT_BUFFERS_MAX_HOST_ADDRESSES;
 
     otError EncodeSrpClientHostInfo(const otSrpClientHostInfo &aHostInfo);
     otError EncodeSrpClientServices(const otSrpClientService *aServices);
@@ -739,7 +833,8 @@ protected:
 
     uint64_t mLogTimestampBase; // Timestamp base used for logging
 
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_NCP_INFRA_IF_ENABLE && OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
+#if OPENTHREAD_FTD
+#if OPENTHREAD_CONFIG_NCP_INFRA_IF_ENABLE && OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
     otError InfraIfAddAddress(const otIp6Address &aAddress);
     bool    InfraIfContainsAddress(const otIp6Address &aAddress);
 
@@ -748,6 +843,36 @@ protected:
     uint8_t                  mInfraIfAddrCount;
     uint32_t                 mInfraIfIndex;
 #endif
+
+#if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
+
+    template <typename DnssdObjType>
+    void DnssdUpdate(const DnssdObjType         *aObj,
+                     otPlatDnssdRequestId        aRequestId,
+                     otPlatDnssdRegisterCallback aCallback,
+                     bool                        aRegister)
+    {
+        otError          error  = OT_ERROR_NONE;
+        uint8_t          header = SPINEL_HEADER_FLAG | SPINEL_HEADER_TX_NOTIFICATION_IID;
+        spinel_command_t cmd    = aRegister ? SPINEL_CMD_PROP_VALUE_INSERTED : SPINEL_CMD_PROP_VALUE_REMOVED;
+
+        VerifyOrExit(aObj != nullptr, error = OT_ERROR_INVALID_ARGS);
+        VerifyOrExit(mDnssdState == OT_PLAT_DNSSD_READY, error = OT_ERROR_INVALID_STATE);
+
+        SuccessOrExit(error = mEncoder.BeginFrame(header, cmd));
+        SuccessOrExit(error = Spinel::EncodeDnssd(mEncoder, *aObj, aRequestId, aCallback));
+        SuccessOrExit(error = mEncoder.EndFrame());
+
+    exit:
+        if (error != OT_ERROR_NONE)
+        {
+            aCallback(mInstance, aRequestId, error);
+        }
+    }
+
+    otPlatDnssdState mDnssdState;
+#endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
+#endif // OPENTHREAD_FTD
 
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
     char    *mDiagOutput;

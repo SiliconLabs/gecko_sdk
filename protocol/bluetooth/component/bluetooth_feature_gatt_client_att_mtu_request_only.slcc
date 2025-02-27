@@ -1,0 +1,21 @@
+id: bluetooth_feature_gatt_client_att_mtu_request_only
+label: GATT Client ATT MTU Request Only
+package: Bluetooth
+description: >
+  Provides minimal GATT Client that only initiates an ATT MTU exchange
+  procedure when the GATT connection is open. This component does not provide
+  the GATT Client API. Use the GATT Server API
+  sl_bt_gatt_server_set_max_mtu to set the maximum size of ATT MTU in the host
+  stack.
+category: Bluetooth|Bluetooth Host (Stack)|Additional Features
+quality: production
+requires:
+  - name: bluetooth_stack
+  - name: bluetooth_feature_gatt_server
+provides:
+  - name: bluetooth_feature_gatt_client_att_mtu_request_only
+conflicts:
+  - name: bluetooth_feature_gatt
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_gatt_client_att_mtu_request_only

@@ -53,10 +53,11 @@ CoapBase::CoapBase(Instance &aInstance, Sender aSender)
 {
 }
 
-void CoapBase::ClearRequestsAndResponses(void)
+void CoapBase::ClearAllRequestsAndResponses(void)
 {
     ClearRequests(nullptr); // Clear requests matching any address.
     mResponsesQueue.DequeueAllResponses();
+    mRetransmissionTimer.Stop();
 }
 
 void CoapBase::ClearRequests(const Ip6::Address &aAddress) { ClearRequests(&aAddress); }
@@ -109,7 +110,7 @@ Message *CoapBase::NewMessage(void) { return NewMessage(Message::Settings::GetDe
 
 Message *CoapBase::NewPriorityMessage(void)
 {
-    return NewMessage(Message::Settings(Message::kWithLinkSecurity, Message::kPriorityNet));
+    return NewMessage(Message::Settings(kWithLinkSecurity, Message::kPriorityNet));
 }
 
 Message *CoapBase::NewPriorityConfirmablePostMessage(Uri aUri)
@@ -1483,8 +1484,7 @@ const Message *ResponsesQueue::FindMatchedResponse(const Message &aRequest, cons
 
             metadata.ReadFrom(message);
 
-            if ((metadata.mMessageInfo.GetPeerPort() == aMessageInfo.GetPeerPort()) &&
-                (metadata.mMessageInfo.GetPeerAddr() == aMessageInfo.GetPeerAddr()))
+            if (metadata.mMessageInfo.HasSamePeerAddrAndPort(aMessageInfo))
             {
                 response = &message;
                 break;
@@ -1554,7 +1554,11 @@ void ResponsesQueue::UpdateQueue(void)
 
 void ResponsesQueue::DequeueResponse(Message &aMessage) { mQueue.DequeueAndFree(aMessage); }
 
-void ResponsesQueue::DequeueAllResponses(void) { mQueue.DequeueAndFreeAll(); }
+void ResponsesQueue::DequeueAllResponses(void)
+{
+    mQueue.DequeueAndFreeAll();
+    mTimer.Stop();
+}
 
 void ResponsesQueue::HandleTimer(Timer &aTimer)
 {
@@ -1673,10 +1677,10 @@ Error Coap::Start(uint16_t aPort, Ip6::NetifIdentifier aNetifIdentifier)
 
     VerifyOrExit(!mSocket.IsBound());
 
-    SuccessOrExit(error = mSocket.Open());
+    SuccessOrExit(error = mSocket.Open(aNetifIdentifier));
     socketOpened = true;
 
-    SuccessOrExit(error = mSocket.Bind(aPort, aNetifIdentifier));
+    SuccessOrExit(error = mSocket.Bind(aPort));
 
 exit:
     if (error != kErrorNone && socketOpened)
@@ -1694,7 +1698,7 @@ Error Coap::Stop(void)
     VerifyOrExit(mSocket.IsBound());
 
     SuccessOrExit(error = mSocket.Close());
-    ClearRequestsAndResponses();
+    ClearAllRequestsAndResponses();
 
 exit:
     return error;

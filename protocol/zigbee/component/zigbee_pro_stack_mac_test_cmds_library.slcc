@@ -17,26 +17,6 @@ requires:
   - name: zigbee_pro_stack_mac_test_cmds
 
 library:
-  - path: protocol/zigbee/build/gcc/arm32v7/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - arm32v7
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_multi_network
-      - linux_arch_32
-    unless:
-      - zigbee_i386
-  - path: protocol/zigbee/build/gcc/arm32v7/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - arm32v7
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - linux_arch_32
-    unless:
-      - zigbee_multi_network
-      - zigbee_i386
   - path: protocol/zigbee/build/gcc/arm32v7/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -57,26 +37,6 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_i386
-  - path: protocol/zigbee/build/gcc/arm64v8/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - arm64v8
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_multi_network
-      - linux_arch_64
-    unless:
-      - zigbee_x86_64
-  - path: protocol/zigbee/build/gcc/arm64v8/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - arm64v8
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - linux_arch_64
-    unless:
-      - zigbee_multi_network
-      - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/arm64v8/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -97,44 +57,6 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_x86_64
-  - path: protocol/zigbee/build/gcc/cortex-m33/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/cortex-m33/ncp-pro-library/release_dualrail/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-  - path: protocol/zigbee/build/gcc/cortex-m33/ncp-pro-library/release_dualrail_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-  - path: protocol/zigbee/build/gcc/cortex-m33/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -145,6 +67,7 @@ library:
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_dualrail/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -154,6 +77,7 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_dualrail_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -163,6 +87,49 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_lto/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_lto_dualrail/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_lto_dualrail_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_lto_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -173,44 +140,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/cortex-m4/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/cortex-m4/ncp-pro-library/release_railgb/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/cortex-m4/ncp-pro-library/release_railgb_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/cortex-m4/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -219,6 +149,49 @@ library:
       - zigbee_multi_network
       - zigbee_mac_test_commands_support
     unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_lto/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_lto_railgb/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_lto_railgb_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_lto_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_railgb/libzigbee-pro-stack-mac-test-cmds.a
@@ -230,6 +203,7 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_railgb_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -239,6 +213,7 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -249,24 +224,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/gcc/i386/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - i386
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_multi_network
-      - zigbee_i386
-    unless: []
-  - path: protocol/zigbee/build/gcc/i386/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - i386
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_i386
-    unless:
-      - zigbee_multi_network
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/i386/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -283,24 +241,6 @@ library:
       - zigbee_stack_unix
       - zigbee_i386
       - zigbee_mac_test_commands_support
-    unless:
-      - zigbee_multi_network
-  - path: protocol/zigbee/build/gcc/x86-64/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - x86-64
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_multi_network
-      - zigbee_x86_64
-    unless: []
-  - path: protocol/zigbee/build/gcc/x86-64/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_gcc
-      - x86-64
-      - zigbee_ncp
-      - zigbee_stack_unix
-      - zigbee_x86_64
     unless:
       - zigbee_multi_network
   - path: protocol/zigbee/build/gcc/x86-64/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
@@ -321,90 +261,6 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_multi_network
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_dualrail/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_dualrail_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_stackprotection/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-      - stack_protection_iar
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_stackprotection_dualrail/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - zigbee_multi_network
-      - stack_protection_iar
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_stackprotection_dualrail_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-  - path: protocol/zigbee/build/iar/cortex-m33/ncp-pro-library/release_stackprotection_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm33
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - stack_protection_iar
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/iar/cortex-m33/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_iar
@@ -484,90 +340,6 @@ library:
       - cortexm33
       - zigbee_phy_2_4
       - zigbee_mac_test_commands_support
-      - stack_protection_iar
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_railgb/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_multi_network
-    unless:
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_railgb_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-      - stack_protection_iar
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_stackprotection/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
-      - zigbee_multi_network
-      - stack_protection_iar
-    unless:
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_stackprotection_railgb/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - zigbee_multi_network
-      - stack_protection_iar
-    unless:
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_stackprotection_railgb_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4_subghz_selection_end_device
-      - stack_protection_iar
-    unless:
-      - zigbee_multi_network
-      - zigbee_phy_2_4_subghz_switch_coordinator
-  - path: protocol/zigbee/build/iar/cortex-m4/ncp-pro-library/release_stackprotection_singlenetwork/libncp-pro-library.a
-    condition:
-      - toolchain_iar
-      - cortexm4
-      - zigbee_ncp
-      - zigbee_phy_2_4
       - stack_protection_iar
     unless:
       - zigbee_multi_network

@@ -220,3 +220,9 @@ void emberAfPluginGreenPowerClientSpoofDevAnnce(SL_CLI_COMMAND_ARG)
                                       eui64,
                                       capabilities);
 }
+
+void emberAfPluginGreenPowerClientClearProxyTableCommand(SL_CLI_COMMAND_ARG)
+{
+  (void) arguments;
+  emberAfPluginGreenPowerClientClearProxyTable();
+}

@@ -677,7 +677,11 @@ __STATIC_INLINE void RTCC_IntClear(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void RTCC_IntDisable(uint32_t flags)
 {
+#if defined (RTCC_HAS_SET_CLEAR)
+  RTCC->IEN_CLR = flags;
+#else
   RTCC->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -695,7 +699,11 @@ __STATIC_INLINE void RTCC_IntDisable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void RTCC_IntEnable(uint32_t flags)
 {
+#if defined (RTCC_HAS_SET_CLEAR)
+  RTCC->IEN_SET = flags;
+#else
   RTCC->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

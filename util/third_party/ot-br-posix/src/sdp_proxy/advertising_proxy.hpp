@@ -44,15 +44,15 @@
 #include <openthread/srp_server.h>
 
 #include "common/code_utils.hpp"
+#include "host/rcp_host.hpp"
 #include "mdns/mdns.hpp"
-#include "ncp/rcp_host.hpp"
 
 namespace otbr {
 
 /**
  * This class implements the Advertising Proxy.
  */
-class AdvertisingProxy : private NonCopyable
+class AdvertisingProxy : public Mdns::StateObserver, private NonCopyable
 {
 public:
     /**
@@ -61,7 +61,7 @@ public:
      * @param[in] aHost       A reference to the NCP controller.
      * @param[in] aPublisher  A reference to the mDNS publisher.
      */
-    explicit AdvertisingProxy(Ncp::RcpHost &aHost, Mdns::Publisher &aPublisher);
+    explicit AdvertisingProxy(Host::RcpHost &aHost, Mdns::Publisher &aPublisher);
 
     /**
      * This method enables/disables the Advertising Proxy.
@@ -80,7 +80,7 @@ public:
      *
      * @param[in] aState  The state of mDNS publisher.
      */
-    void HandleMdnsState(Mdns::Publisher::State aState);
+    void HandleMdnsState(Mdns::Publisher::State aState) override;
 
 private:
     struct OutstandingUpdate
@@ -123,7 +123,7 @@ private:
     otInstance *GetInstance(void) { return mHost.GetInstance(); }
 
     // A reference to the NCP controller, has no ownership.
-    Ncp::RcpHost &mHost;
+    Host::RcpHost &mHost;
 
     // A reference to the mDNS publisher, has no ownership.
     Mdns::Publisher &mPublisher;

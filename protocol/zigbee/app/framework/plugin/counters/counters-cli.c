@@ -124,3 +124,15 @@ static void emberAfPluginCountersPrint(void)
                        emberCounters[i]);
   }
 }
+
+void emberAfPluginCountersClearCommand(sl_cli_command_arg_t *args)
+{
+  (void) args;
+  emberAfPluginCountersClear();
+}
+
+void emberAfPluginCountersResetThresholdsCommand(sl_cli_command_arg_t *args)
+{
+  (void) args;
+  emberAfPluginCountersResetThresholds();
+}

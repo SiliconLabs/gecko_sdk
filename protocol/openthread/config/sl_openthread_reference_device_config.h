@@ -79,7 +79,7 @@
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         1
 #endif
-// <q>  TCPlp (Low power TCP over OpenThread)
+// <q>  TCP API
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE
 #define OPENTHREAD_CONFIG_TCP_ENABLE                1
 #endif
@@ -242,6 +242,11 @@
 // <e>  Service Entries in Thread Network Data
 #ifndef OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE
 #define OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE    1
+#endif
+// </e>
+// <e>  Uptime of OpenThread instance
+#ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
+#define OPENTHREAD_CONFIG_UPTIME_ENABLE             1
 #endif
 // </e>
 // <e>  RAM (volatile-only storage)

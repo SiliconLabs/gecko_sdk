@@ -2828,7 +2828,11 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
 #if defined(_EMU_PWRCTRL_REGPWRSEL_MASK)
   /* Select DVDD as input to the digital regulator. The switch to DVDD will take
      effect once the DCDC output is stable. */
+  #if defined (EMU_HAS_SET_CLEAR)
+  EMU->PWRCTRL_SET = EMU_PWRCTRL_REGPWRSEL_DVDD;
+  #else
   EMU->PWRCTRL |= EMU_PWRCTRL_REGPWRSEL_DVDD;
+  #endif
 #endif
 
   /* Set EM0 DCDC operating mode. Output voltage set in
@@ -2977,9 +2981,17 @@ bool EMU_DCDCPowerOff(void)
 
   /* Select DVDD as input to the digital regulator. */
 #if defined(EMU_PWRCTRL_IMMEDIATEPWRSWITCH)
+ #if defined (EMU_HAS_SET_CLEAR)
+  EMU->PWRCTRL_SET = EMU_PWRCTRL_REGPWRSEL_DVDD | EMU_PWRCTRL_IMMEDIATEPWRSWITCH;
+  #else
   EMU->PWRCTRL |= EMU_PWRCTRL_REGPWRSEL_DVDD | EMU_PWRCTRL_IMMEDIATEPWRSWITCH;
+  #endif
 #elif defined(EMU_PWRCTRL_REGPWRSEL_DVDD)
+  #if defined (EMU_HAS_SET_CLEAR)
+  EMU->PWRCTRL_SET = EMU_PWRCTRL_REGPWRSEL_DVDD;
+  #else
   EMU->PWRCTRL |= EMU_PWRCTRL_REGPWRSEL_DVDD;
+  #endif
 #endif
 
   /* Set DCDC to OFF and disable LP in EM2/3/4. Verify that the required

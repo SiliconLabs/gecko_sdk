@@ -44,7 +44,8 @@
 #if OTBR_ENABLE_BORDER_AGENT
 #include "border_agent/border_agent.hpp"
 #endif
-#include "ncp/rcp_host.hpp"
+#include "host/ncp_host.hpp"
+#include "host/rcp_host.hpp"
 #if OTBR_ENABLE_BACKBONE_ROUTER
 #include "backbone_router/backbone_agent.hpp"
 #endif
@@ -87,22 +88,22 @@ class VendorServer;
 class Application : private NonCopyable
 {
 public:
+    typedef std::function<otbrError(void)> ErrorCondition;
+
     /**
      * This constructor initializes the Application instance.
      *
+     * @param[in] aHost                  A reference to the ThreadHost object.
      * @param[in] aInterfaceName         Name of the Thread network interface.
      * @param[in] aBackboneInterfaceName Name of the backbone network interface.
-     * @param[in] aRadioUrls             The radio URLs (can be IEEE802.15.4 or TREL radio).
-     * @param[in] aEnableAutoAttach      Whether or not to automatically attach to the saved network.
      * @param[in] aRestListenAddress     Network address to listen on.
      * @param[in] aRestListenPort        Network port to listen on.
      */
-    explicit Application(const std::string               &aInterfaceName,
-                         const std::vector<const char *> &aBackboneInterfaceNames,
-                         const std::vector<const char *> &aRadioUrls,
-                         bool                             aEnableAutoAttach,
-                         const std::string               &aRestListenAddress,
-                         int                              aRestListenPort);
+    explicit Application(Host::ThreadHost  &aHost,
+                         const std::string &aInterfaceName,
+                         const std::string &aBackboneInterfaceName,
+                         const std::string &aRestListenAddress,
+                         int                aRestListenPort);
 
     /**
      * This method initializes the Application instance.
@@ -113,6 +114,16 @@ public:
      * This method de-initializes the Application instance.
      */
     void Deinit(void);
+
+    /**
+     * This method sets an error condition for the application.
+     *
+     * If the error condition returns an error other than 'OTBR_ERROR_NONE', the application will
+     * exit the loop in `Run`.
+     *
+     * @param[in] aErrorCondition  The error condition.
+     */
+    void SetErrorCondition(ErrorCondition aErrorCondition) { mErrorCondition = aErrorCondition; }
 
     /**
      * This method runs the application until exit.
@@ -127,7 +138,7 @@ public:
      *
      * @returns The OpenThread controller object.
      */
-    Ncp::ThreadHost &GetHost(void) { return *mHost; }
+    Host::ThreadHost &GetHost(void) { return mHost; }
 
 #if OTBR_ENABLE_MDNS
     /**
@@ -237,13 +248,6 @@ public:
     }
 #endif
 
-    /**
-     * This method handles mDNS publisher's state changes.
-     *
-     * @param[in] aState  The state of mDNS publisher.
-     */
-    void HandleMdnsState(Mdns::Publisher::State aState);
-
 private:
     // Default poll timeout.
     static const struct timeval kPollTimeout;
@@ -257,13 +261,11 @@ private:
     void InitNcpMode(void);
     void DeinitNcpMode(void);
 
-    std::string mInterfaceName;
-#if __linux__
-    otbr::Utils::InfraLinkSelector mInfraLinkSelector;
-#endif
-    const char                      *mBackboneInterfaceName;
-    std::unique_ptr<Ncp::ThreadHost> mHost;
+    std::string       mInterfaceName;
+    const char       *mBackboneInterfaceName;
+    Host::ThreadHost &mHost;
 #if OTBR_ENABLE_MDNS
+    Mdns::StateSubject               mMdnsStateSubject;
     std::unique_ptr<Mdns::Publisher> mPublisher;
 #endif
 #if OTBR_ENABLE_BORDER_AGENT
@@ -295,6 +297,7 @@ private:
 #endif
 
     static std::atomic_bool sShouldTerminate;
+    ErrorCondition          mErrorCondition;
 };
 
 /**

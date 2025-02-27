@@ -42,7 +42,7 @@
 #include <openthread/border_router.h>
 
 #include "common/api_strings.hpp"
-#include "ncp/rcp_host.hpp"
+#include "host/rcp_host.hpp"
 #include "openthread/dataset.h"
 #include "openthread/dataset_ftd.h"
 #include "rest/json.hpp"
@@ -50,7 +50,7 @@
 #include "rest/response.hpp"
 #include "utils/thread_helper.hpp"
 
-using otbr::Ncp::RcpHost;
+using otbr::Host::RcpHost;
 using std::chrono::steady_clock;
 
 namespace otbr {
@@ -125,8 +125,11 @@ private:
     void Dataset(DatasetType aDatasetType, const Request &aRequest, Response &aResponse) const;
     void DatasetActive(const Request &aRequest, Response &aResponse) const;
     void DatasetPending(const Request &aRequest, Response &aResponse) const;
+    void CommissionerState(const Request &aRequest, Response &aResponse) const;
+    void CommissionerJoiner(const Request &aRequest, Response &aResponse) const;
     void Diagnostic(const Request &aRequest, Response &aResponse) const;
     void HandleDiagnosticCallback(const Request &aRequest, Response &aResponse);
+    void CoprocessorVersion(const Request &aRequest, Response &aResponse) const;
 
     void GetNodeInfo(Response &aResponse) const;
     void DeleteNodeInfo(Response &aResponse) const;
@@ -142,6 +145,12 @@ private:
     void GetDataRloc(Response &aResponse) const;
     void GetDataset(DatasetType aDatasetType, const Request &aRequest, Response &aResponse) const;
     void SetDataset(DatasetType aDatasetType, const Request &aRequest, Response &aResponse) const;
+    void GetCommissionerState(Response &aResponse) const;
+    void SetCommissionerState(const Request &aRequest, Response &aResponse) const;
+    void GetJoiners(Response &aResponse) const;
+    void AddJoiner(const Request &aRequest, Response &aResponse) const;
+    void RemoveJoiner(const Request &aRequest, Response &aResponse) const;
+    void GetCoprocessorVersion(Response &aResponse) const;
 
     void DeleteOutDatedDiagnostic(void);
     void UpdateDiag(std::string aKey, std::vector<otNetworkDiagTlv> &aDiag);

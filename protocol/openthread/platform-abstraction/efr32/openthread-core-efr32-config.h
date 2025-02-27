@@ -189,11 +189,11 @@
 /**
  * @def OPENTHREAD_CONFIG_UPTIME_ENABLE
  *
- * (For FTDs only) Define to 1 to enable tracking the uptime of OpenThread instance.
+ * (For FTDs/MTDs only) Define to 1 to enable tracking the uptime of OpenThread instance.
  *
  */
 #ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
-#define OPENTHREAD_CONFIG_UPTIME_ENABLE OPENTHREAD_FTD
+#define OPENTHREAD_CONFIG_UPTIME_ENABLE (OPENTHREAD_FTD || OPENTHREAD_MTD)
 #endif
 
 /**
@@ -366,7 +366,7 @@
 /**
  * @def OPENTHREAD_CONFIG_TCP_ENABLE
  *
- * Define as 1 to enable TCPlp (low power TCP defined in Thread spec).
+ * Define as 1 to enable OpenThread TCP API
  *
  */
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE

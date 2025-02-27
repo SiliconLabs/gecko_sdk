@@ -90,7 +90,7 @@
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         0
 #endif
-// <q>  TCPlp (Low power TCP over OpenThread)
+// <q>  TCP API
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE
 #define OPENTHREAD_CONFIG_TCP_ENABLE                1
 #endif
@@ -263,6 +263,16 @@
 // <e>  TMF Network Diagnostic client API
 #ifndef OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
 #define OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE   1
+#endif
+// </e>
+// <e>  Run-time configuration of Vendor Info
+#ifndef OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
+#define OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE   1
+#endif
+// </e>
+// <e>  Uptime of OpenThread instance
+#ifndef OPENTHREAD_CONFIG_UPTIME_ENABLE
+#define OPENTHREAD_CONFIG_UPTIME_ENABLE             1
 #endif
 // </e>
 // <e>  Time Synchronization Service

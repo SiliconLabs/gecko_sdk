@@ -79,10 +79,16 @@ configuration:
     condition:
       - device_sdid_220
   - name: BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX
+    value: "2102" # SL_RAIL_TEST_MAX_PACKET_LENGTH==2058
+                  # + sizeof(RailAppEvent_t)==44
+    condition:
+      - device_sdid_235
+  - name: BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX
     value: "1068" # SL_RAIL_TEST_MAX_PACKET_LENGTH==1024
                   # + sizeof(RailAppEvent_t)==44
     unless:
       - device_sdid_220
+      - device_sdid_235
   # stdio
   #   for all
   - name: SL_BOARD_ENABLE_VCOM

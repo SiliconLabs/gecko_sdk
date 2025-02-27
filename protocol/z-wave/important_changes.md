@@ -3,16 +3,26 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.6 {#section-7-21-6}
+## Restore NVM handler after backup/restore operations
+To avoid NVM acces by the stack or the application during backup/restore operations, the NVM3 handler is closed by the SAPI command NVMBackupRestoreOperationOpen. However it was never restored.
+The NVM3 handler of the stack is restored by the SAPI command NVMBackupRestoreOperationClose. It should no longer be required to reset the controller after a backup operation. The controller must always be restarted after a restore operation.
+The SAPI command NVM backup close now send an answer with the result of the operation (as specified). In case of error when restoring the NVM3 handler, the controller wil answer an error. In this case, the controller should be reset.
+
 # 7.21.5 {#section-7-21-5}
 ## RF Configuration in Apps
 prior to this release, RF configuration was stored in two different files, depending on whether or not the chip supported the  20dBm TX level. These files have now been merged. The range for APP_MAX_TX_POWER_LR & APP_MAX_TX_POWER values now has a high value of 200 for all chips. It needs to be increased to allow 20dBm transmission on supported chips.
+
+## Exclusion from foreign network
+After an exclusion from a foreign network, the controller sent nops. However, nops were sent on the controller's network instead of the foreign network.
+So according to the network specification (NWK:01C8.1 & LR-NWK:0078.1), the controller no longer sends nops in case of foreign exclusion.
 
 
 # 7.21.4 {#section-7-21-4}
 
 ## MAX Number of LR Nodes
-Max number of Long Range Nodes has been lowered from 1024 to 256 in this release to reduce RAM usage. 
-The modification only affects the RAM usage and the space reserved in NVM is still large enough to store 1024 nodes to avoid needing a specific migration script. 
+Max number of Long Range Nodes has been lowered from 1024 to 256 in this release to reduce RAM usage.
+The modification only affects the RAM usage and the space reserved in NVM is still large enough to store 1024 nodes to avoid needing a specific migration script.
 
 ## New serial API commands
 Add new serial API commands: Z-Wave API Setup Get Supported Regions Sub Command (0x15) & Z-Wave API Setup Regions Info (0x16).

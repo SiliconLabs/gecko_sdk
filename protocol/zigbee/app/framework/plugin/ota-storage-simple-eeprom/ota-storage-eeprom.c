@@ -52,7 +52,7 @@ static void printDataBlock(const uint8_t* block);
 #endif // DEBUG_PRINT
 
 void calculateSlotAndEepromOffsets();
-void sli_eeprom_info_command(void);
+void sli_eeprom_info();
 
 //------------------------------------------------------------------------------
 // Globals
@@ -564,7 +564,7 @@ void sli_zigbee_af_ota_storage_driver_info_print(void)
   printImageInfoStartData();
 #endif // DEBUG_PRINT
 
-  sli_eeprom_info_command();
+  sli_eeprom_info();
 }
 
 #if defined(DEBUG_PRINT)

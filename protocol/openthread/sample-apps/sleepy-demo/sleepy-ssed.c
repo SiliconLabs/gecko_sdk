@@ -164,7 +164,7 @@ void initUdp(void)
     }
 
     // Bind to the socket. Close the socket if bind fails.
-    error = otUdpBind(otGetInstance(), &sSsedSocket, &bindAddr, OT_NETIF_THREAD);
+    error = otUdpBind(otGetInstance(), &sSsedSocket, &bindAddr, OT_NETIF_THREAD_INTERNAL);
     if (error != OT_ERROR_NONE)
     {
         otCliOutputFormat("SSED failed to bind udp socket with: %d, %s\r\n", error, otThreadErrorToString(error));

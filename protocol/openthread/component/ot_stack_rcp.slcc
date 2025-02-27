@@ -17,14 +17,17 @@ recommends:
   - id: ot_platform_abstraction
 config_file:
   - path: protocol/openthread/config/sl_openthread_features_config.h
-  - path: protocol/openthread/config/sl_openthread_generic_config.h
+include:
+  - path: protocol/openthread/include
+    file_list:
+      - path: sl_openthread_package_info.h
 validation_helper:
   - path: protocol/openthread/component/script/ot_log_validation.lua
 define:
   - name: SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE
     value: "\"sl_openthread_features_config.h\""
   - name: OPENTHREAD_CONFIG_FILE
-    value: "\"sl_openthread_generic_config.h\""
+    value: "\"sl_openthread_package_info.h\""
   - name: OPENTHREAD_RADIO
     value: 1
   - name: OPENTHREAD_SPINEL_CONFIG_OPENTHREAD_MESSAGE_ENABLE

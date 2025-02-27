@@ -1,5 +1,6 @@
-Zigbee EmberZNet SDK 7.4.5.0
+Zigbee EmberZNet SDK 7.5.0.0
 Zigbee:
-- Targeted quality improvements and bug fixes.
+   - Limited support of GCC LTO.
+   - Targeted quality improvements and bug fixes.
 Multiprotocol
-- Targeted quality improvements and bug fixes.
+   - Targeted quality improvements and bug fixes.

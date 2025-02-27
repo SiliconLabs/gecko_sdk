@@ -41,14 +41,14 @@ void emberCopyBufferBytes(Buffer to,
 
 uint16_t emberGetLinkedBuffersLowHighInt16u(Buffer buffer,
                                             uint8_t index);
-void emberSetLinkedBuffersLowHighInt16u(Buffer buffer,
-                                        uint8_t index,
-                                        uint16_t value);
+sl_status_t emberSetLinkedBuffersLowHighInt16u(Buffer buffer,
+                                               uint8_t index,
+                                               uint16_t value);
 uint32_t emberGetLinkedBuffersLowHighInt32u(EmberMessageBuffer buffer,
                                             uint8_t index);
-void emberSetLinkedBuffersLowHighInt32u(EmberMessageBuffer buffer,
-                                        uint8_t index,
-                                        uint32_t value);
+sl_status_t emberSetLinkedBuffersLowHighInt32u(EmberMessageBuffer buffer,
+                                               uint8_t index,
+                                               uint32_t value);
 
 EmberMessageBuffer
 emberFillStackBuffer(unsigned int count, ...);

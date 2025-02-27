@@ -407,4 +407,32 @@
 #define OPENTHREAD_POSIX_CONFIG_RCP_CAPS_DIAG_ENABLE OPENTHREAD_CONFIG_DIAG_ENABLE
 #endif
 
+/**
+ * @def OPENTHREAD_POSIX_CONFIG_UPSTREAM_DNS_BIND_TO_INFRA_NETIF
+ *
+ * Define as 1 to let the upstream DNS bind the socket to infra network interface.
+ */
+#ifndef OPENTHREAD_POSIX_CONFIG_UPSTREAM_DNS_BIND_TO_INFRA_NETIF
+#define OPENTHREAD_POSIX_CONFIG_UPSTREAM_DNS_BIND_TO_INFRA_NETIF 1
+#endif
+
+/**
+ * @def OPENTHREAD_POSIX_CONFIG_TREL_SELECT_INFRA_IF
+ *
+ * Define to 1 to let TREL select the infrastructure interface, otherwise use the interface in the TREL URL.
+ */
+#ifndef OPENTHREAD_POSIX_CONFIG_TREL_SELECT_INFRA_IF
+#define OPENTHREAD_POSIX_CONFIG_TREL_SELECT_INFRA_IF 0
+#endif
+
+/**
+ * @def OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
+ *
+ * Define as 1 to enable the temporary storage. The key-value pairs stored in the temporary storage will be erased
+ * after the system is rebooted.
+ */
+#ifndef OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
+#define OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE 1
+#endif
+
 #endif // OPENTHREAD_PLATFORM_POSIX_CONFIG_H_

@@ -872,7 +872,7 @@ static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle
       break;
 #endif
   }
-
+  EFM_ASSERT(baud > 0);
   if (baud != 0) {  // Avoid division by 0
     // Calculate the number of sleeptimer ticks for:
     // 3 bytes: two in FIFO and one in shift register.

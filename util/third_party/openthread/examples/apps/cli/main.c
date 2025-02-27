@@ -60,8 +60,6 @@ OT_TOOL_WEAK void *otPlatCAlloc(size_t aNum, size_t aSize) { return calloc(aNum,
 OT_TOOL_WEAK void otPlatFree(void *aPtr) { free(aPtr); }
 #endif
 
-void otTaskletsSignalPending(otInstance *aInstance) { OT_UNUSED_VARIABLE(aInstance); }
-
 #if OPENTHREAD_POSIX && !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
 static otError ProcessExit(void *aContext, uint8_t aArgsLength, char *aArgs[])
 {
@@ -74,6 +72,9 @@ static otError ProcessExit(void *aContext, uint8_t aArgsLength, char *aArgs[])
 
 #if OPENTHREAD_EXAMPLES_SIMULATION
 extern otError ProcessNodeIdFilter(void *aContext, uint8_t aArgsLength, char *aArgs[]);
+#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+extern otError ProcessTrelTest(void *aContext, uint8_t aArgsLength, char *aArgs[]);
+#endif
 #endif
 
 static const otCliCommand kCommands[] = {
@@ -94,6 +95,9 @@ static const otCliCommand kCommands[] = {
      *     - `nodeidfilter`               :  Outputs filter mode (allow-list or deny-list) and filtered node IDs.
      */
     {"nodeidfilter", ProcessNodeIdFilter},
+#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
+    {"treltest", ProcessTrelTest},
+#endif
 #endif
 };
 #endif // OPENTHREAD_POSIX && !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)

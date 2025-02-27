@@ -104,10 +104,12 @@ include(GNUInstallDirs)
 
 pkg_check_modules(SYSTEMD systemd)
 
-if(SYSTEMD_FOUND)
+if(SYSTEMD_FOUND AND (NOT DEFINED INSTALL_SYSTEMD_UNIT OR INSTALL_SYSTEMD_UNIT))
     pkg_get_variable(OTBR_SYSTEMD_UNIT_DIR systemd systemdsystemunitdir)
 endif()
 
+set(OPENTHREAD_PROJECT_DIRECTORY ${PROJECT_SOURCE_DIR}/third_party/openthread/repo)
+set(OTBR_PROJECT_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 add_subdirectory(third_party EXCLUDE_FROM_ALL)
 add_subdirectory(src)

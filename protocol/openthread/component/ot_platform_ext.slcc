@@ -36,5 +36,6 @@ source:
 define:
   - name: SL_OPENTHREAD_EFR32_CLI_ENABLE
     value: 1
+    condition: [sl_ot_custom_cli]
   - name: RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     value: 1

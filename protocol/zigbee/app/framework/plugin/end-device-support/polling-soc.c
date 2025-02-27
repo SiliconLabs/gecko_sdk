@@ -28,8 +28,9 @@ void emberAfPluginEndDeviceSupportPollingNetworkEventHandler(sl_zigbee_event_t *
 // *****************************************************************************
 // Functions
 
-void sli_zigbee_af_end_device_support_polling_init(void)
+void sli_zigbee_af_end_device_support_polling_init(uint8_t init_level)
 {
+  (void) init_level;
   sl_zigbee_network_event_init(emberAfPluginEndDeviceSupportPollingNetworkEvents,
                                emberAfPluginEndDeviceSupportPollingNetworkEventHandler);
 }

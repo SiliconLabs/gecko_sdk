@@ -338,13 +338,13 @@ exit:
 void MlrManager::HandleRegisterResponse(void                *aContext,
                                         otMessage           *aMessage,
                                         const otMessageInfo *aMessageInfo,
-                                        Error                aResult)
+                                        otError              aResult)
 {
     static_cast<MlrManager *>(aContext)->HandleRegisterResponse(AsCoapMessagePtr(aMessage), AsCoreTypePtr(aMessageInfo),
                                                                 aResult);
 }
 
-void MlrManager::HandleRegisterResponse(otMessage *aMessage, const otMessageInfo *aMessageInfo, Error aResult)
+void MlrManager::HandleRegisterResponse(otMessage *aMessage, const otMessageInfo *aMessageInfo, otError aResult)
 {
     OT_UNUSED_VARIABLE(aMessageInfo);
 
@@ -428,7 +428,7 @@ exit:
 void MlrManager::HandleMlrResponse(void                *aContext,
                                    otMessage           *aMessage,
                                    const otMessageInfo *aMessageInfo,
-                                   Error                aResult)
+                                   otError              aResult)
 {
     static_cast<MlrManager *>(aContext)->HandleMlrResponse(AsCoapMessagePtr(aMessage), AsCoreTypePtr(aMessageInfo),
                                                            aResult);
@@ -718,6 +718,8 @@ void MlrManager::CheckInvariants(void) const
 {
 #if OPENTHREAD_EXAMPLES_SIMULATION && OPENTHREAD_CONFIG_ASSERT_ENABLE
     uint16_t registeringNum = 0;
+
+    OT_UNUSED_VARIABLE(registeringNum);
 
     OT_ASSERT(!mMlrPending || mSendDelay == 0);
 

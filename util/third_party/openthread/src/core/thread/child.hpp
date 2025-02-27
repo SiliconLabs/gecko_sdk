@@ -36,6 +36,7 @@
 
 #include "openthread-core-config.h"
 
+#include "common/bit_set.hpp"
 #include "thread/neighbor.hpp"
 
 namespace ot {
@@ -49,13 +50,7 @@ namespace ot {
 /**
  * Represents a Thread Child.
  */
-class Child : public Neighbor,
-              public IndirectSender::ChildInfo,
-              public DataPollHandler::ChildInfo
-#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-    ,
-              public CslTxScheduler::ChildInfo
-#endif
+class Child : public CslNeighbor
 {
 public:
     static constexpr uint8_t kMaxRequestTlvs = 6;
@@ -358,7 +353,7 @@ public:
      * @retval true   If the Child has any IPv6 address of MLR state `kMlrStateRegistered`.
      * @retval false  If the Child does not have any IPv6 address of MLR state `kMlrStateRegistered`.
      */
-    bool HasAnyMlrRegisteredAddress(void) const { return mMlrRegisteredMask.HasAny(); }
+    bool HasAnyMlrRegisteredAddress(void) const { return !mMlrRegisteredSet.IsEmpty(); }
 
     /**
      * Returns if the Child has any IPv6 address of MLR state `kMlrStateToRegister`.
@@ -366,19 +361,19 @@ public:
      * @retval true   If the Child has any IPv6 address of MLR state `kMlrStateToRegister`.
      * @retval false  If the Child does not have any IPv6 address of MLR state `kMlrStateToRegister`.
      */
-    bool HasAnyMlrToRegisterAddress(void) const { return mMlrToRegisterMask.HasAny(); }
+    bool HasAnyMlrToRegisterAddress(void) const { return !mMlrToRegisterSet.IsEmpty(); }
 #endif // OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
 
 private:
-    typedef BitVector<kNumIp6Addresses> ChildIp6AddressMask;
+    typedef BitSet<kNumIp6Addresses> ChildIp6AddressSet;
 
     uint32_t mTimeout;
 
     Ip6::InterfaceIdentifier mMeshLocalIid;
     Ip6AddressArray          mIp6Addresses;
 #if OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE
-    ChildIp6AddressMask mMlrToRegisterMask;
-    ChildIp6AddressMask mMlrRegisteredMask;
+    ChildIp6AddressSet mMlrToRegisterSet;
+    ChildIp6AddressSet mMlrRegisteredSet;
 #endif
 
     uint8_t mNetworkDataVersion;
@@ -391,8 +386,6 @@ private:
 
     uint16_t mSupervisionInterval;
     uint16_t mSecondsSinceSupervision;
-
-    static_assert(OPENTHREAD_CONFIG_NUM_MESSAGE_BUFFERS < 8192, "mQueuedMessageCount cannot fit max required!");
 };
 
 DefineCoreType(otChildInfo, Child::Info);

@@ -84,6 +84,14 @@ void sl_bt_controller_init(void)
   {%-   endif %}
   {%- endfor %}
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_LEGACY_SCANNER_PRESENT) \
+    || defined(SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_SCANNER_PRESENT)
+  sl_btctrl_init_scan();
+#if defined (SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_SCANNER_PRESENT)
+  sl_btctrl_init_scan_ext();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_SCANNER_PRESENT
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_CS_TEST_PRESENT)
   struct sl_btctrl_cs_config cs_config = { 0 };
   cs_config.configs_per_connection = SL_BT_CONFIG_MAX_CS_CONFIGS_PER_CONNECTION;

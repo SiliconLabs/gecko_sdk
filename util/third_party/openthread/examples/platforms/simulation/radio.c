@@ -42,6 +42,7 @@
 #include <openthread/platform/time.h>
 
 #include "simul_utils.h"
+#include "lib/platform/exit_code.h"
 #include "utils/code_utils.h"
 #include "utils/link_metrics.h"
 #include "utils/mac_frame.h"
@@ -380,6 +381,15 @@ void otPlatRadioSetShortAddress(otInstance *aInstance, otShortAddress aShortAddr
     assert(aInstance != NULL);
 
     sRadioContext.mShortAddress = aShortAddress;
+}
+
+void otPlatRadioSetAlternateShortAddress(otInstance *aInstance, otShortAddress aShortAddress)
+{
+    OT_UNUSED_VARIABLE(aInstance);
+
+    assert(aInstance != NULL);
+
+    sRadioContext.mAlternateShortAddress = aShortAddress;
 }
 
 void otPlatRadioSetPromiscuous(otInstance *aInstance, bool aEnable)
@@ -849,9 +859,9 @@ void radioProcessFrame(otInstance *aInstance)
 
     otEXPECT(sPromiscuous == false);
 
-    otEXPECT_ACTION(
-        otMacFrameDoesAddrMatch(&sReceiveFrame, sPanid, sRadioContext.mShortAddress, &sRadioContext.mExtAddress),
-        error = OT_ERROR_ABORT);
+    otEXPECT_ACTION(otMacFrameDoesAddrMatchAny(&sReceiveFrame, sPanid, sRadioContext.mShortAddress,
+                                               sRadioContext.mAlternateShortAddress, &sRadioContext.mExtAddress),
+                    error = OT_ERROR_ABORT);
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
     otEXPECT_ACTION(otMacFrameGetSrcAddr(&sReceiveFrame, &macAddress) == OT_ERROR_NONE, error = OT_ERROR_PARSE);
@@ -1144,8 +1154,11 @@ void otPlatRadioSetMacKey(otInstance             *aInstance,
 
     otEXPECT(aPrevKey != NULL && aCurrKey != NULL && aNextKey != NULL);
 
-    sRadioContext.mKeyId   = aKeyId;
-    sRadioContext.mKeyType = aKeyType;
+    sRadioContext.mKeyId               = aKeyId;
+    sRadioContext.mKeyType             = aKeyType;
+    sRadioContext.mPrevMacFrameCounter = sRadioContext.mMacFrameCounter;
+    sRadioContext.mMacFrameCounter     = 0;
+
     memcpy(&sRadioContext.mPrevKey, aPrevKey, sizeof(otMacKeyMaterial));
     memcpy(&sRadioContext.mCurrKey, aCurrKey, sizeof(otMacKeyMaterial));
     memcpy(&sRadioContext.mNextKey, aNextKey, sizeof(otMacKeyMaterial));
@@ -1219,7 +1232,7 @@ void parseFromEnvAsUint16(const char *aEnvName, uint16_t *aValue)
         if (*endptr != '\0')
         {
             fprintf(stderr, "Invalid %s: %s\n", aEnvName, env);
-            exit(EXIT_FAILURE);
+            DieNow(OT_EXIT_FAILURE);
         }
     }
 }

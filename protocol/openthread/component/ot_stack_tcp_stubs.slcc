@@ -1,0 +1,15 @@
+id: ot_stack_tcp_stubs
+label: TCPlp stubs for OpenThread TCP API
+package: OpenThread
+category: OpenThread
+quality: production
+description: If this component is installed, TCPlp implementation will be stubbed out for an FTD/MTD application. Otherwise, the TCPlp implementation is included by default.
+provides:
+  - name: ot_stack_tcp_stubs
+  - name: ot_stack_tcp_implementation
+    allow_multiple: true
+requires:
+  - name: ot_headers
+root_path: protocol/openthread/src/stubs/tcp
+source:
+  - path: tcp_stubs.c

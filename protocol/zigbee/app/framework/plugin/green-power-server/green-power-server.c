@@ -2049,6 +2049,7 @@ static void handleChannelRequest(uint16_t options,
   }
 }
 
+#if (EMBER_GP_SINK_TABLE_SIZE > 0)
 static uint16_t storeSinkTableEntryInBuffer(EmberGpSinkTableEntry *entry,
                                             uint8_t *buffer)
 {
@@ -2140,6 +2141,7 @@ static uint16_t storeSinkTableEntryInBuffer(EmberGpSinkTableEntry *entry,
   }
   return (uint16_t)(finger - buffer);
 }
+#endif // EMBER_GP_SINK_TABLE_SIZE > 0
 
 static bool processCommNotificationsWithSecurityProcessingFailedFlag(uint16_t commNotificationOptions,
                                                                      EmberGpAddress *gpdAddr,
@@ -2275,7 +2277,6 @@ bool sli_zigbee_af_green_power_server_retrieve_attribute_and_craft_response(uint
                                                                             uint16_t manufacturerCode,
                                                                             uint16_t readLength)
 {
-  uint8_t sinkTableEntryAppResponseData[EMBER_AF_RESPONSE_BUFFER_LEN];
   uint8_t zclStatus = EMBER_ZCL_STATUS_SUCCESS;
   uint16_t stringDataOffsetStart = 0;
   uint16_t stringLength = 0;
@@ -2300,6 +2301,8 @@ bool sli_zigbee_af_green_power_server_retrieve_attribute_and_craft_response(uint
     uint16_t stringDataOffset =  appResponseLength + 4;
     stringDataOffsetStart = stringDataOffset;
     // Search the sink table and respond with entries
+    #if (EMBER_GP_SINK_TABLE_SIZE > 0)
+    uint8_t sinkTableEntryAppResponseData[EMBER_AF_RESPONSE_BUFFER_LEN];
     for (uint8_t i = 0; i < EMBER_GP_SINK_TABLE_SIZE; i++) {
       EmberGpSinkTableEntry entry;
       if (emberGpSinkTableGetEntry(i, &entry) == EMBER_SUCCESS) {
@@ -2318,6 +2321,7 @@ bool sli_zigbee_af_green_power_server_retrieve_attribute_and_craft_response(uint
         }
       }
     }
+    #endif // EMBER_GP_SINK_TABLE_SIZE > 0
     // calculate string length
     stringLength = stringDataOffset - stringDataOffsetStart;
     if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {
@@ -3091,17 +3095,20 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
   uint8_t gpPairingConfigSecurityLevel = (cmd_data.securityOptions
                                           & EMBER_AF_GP_SINK_TABLE_ENTRY_SECURITY_OPTIONS_SECURITY_LEVEL);
 
+  EmberAfStatus secLevelStatus;
   uint8_t gpsSecurityLevelAttribute = 0;
-  EmberAfStatus UNUSED status;
   EmberAfAttributeType type;
-  status = emberAfReadAttribute(EMBER_GP_ENDPOINT,
-                                ZCL_GREEN_POWER_CLUSTER_ID,
-                                ZCL_GP_SERVER_GPS_SECURITY_LEVEL_ATTRIBUTE_ID,
-                                (CLUSTER_MASK_SERVER),
-                                (uint8_t*)&gpsSecurityLevelAttribute,
-                                sizeof(uint8_t),
-                                &type);
+  secLevelStatus = emberAfReadAttribute(EMBER_GP_ENDPOINT,
+                                        ZCL_GREEN_POWER_CLUSTER_ID,
+                                        ZCL_GP_SERVER_GPS_SECURITY_LEVEL_ATTRIBUTE_ID,
+                                        (CLUSTER_MASK_SERVER),
+                                        (uint8_t*)&gpsSecurityLevelAttribute,
+                                        sizeof(uint8_t),
+                                        &type);
 
+  if (secLevelStatus != EMBER_ZCL_STATUS_SUCCESS) {
+    return false; //  No security Level attribute ? Don't proceed
+  }
   gpsSecurityLevelAttribute = gpsSecurityLevelAttribute & 0x03; // mask the encryption part
   if ((cmd_data.groupListCount == 0xFF || cmd_data.groupList == NULL)
       || (sinkFunctionalitySupported(EMBER_AF_GP_GPS_FUNCTIONALITY_SINK_TABLE_BASED_GROUPCAST_FORWARDING)
@@ -3120,7 +3127,7 @@ bool emberAfGreenPowerClusterGpPairingConfigurationCallback(EmberAfClusterComman
                 && sli_zigbee_af_gp_check_communication_mode_support(gpPairingConfigCommunicationMode)))) {
       emberAfGreenPowerClusterPrintln("Replace or Extend Sink");
       emberAfGreenPowerServerRemoveSinkEntry(&gpdAddr);
-      commissioningGpd->communicationMode = gpPairingConfigCommunicationMode;
+      commissioningGpd->communicationMode = (EmberGpSinkType)gpPairingConfigCommunicationMode;
       // Set/reset the doNotSendGpPairing flag to be used when finaliing paring, Note : the negation.
       commissioningGpd->doNotSendGpPairing = ((cmd_data.actions & EMBER_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING)
                                               ? false : true);
@@ -3210,26 +3217,26 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
     return false;
   }
 
+  emberAfGreenPowerClusterPrintln("Got sink table request with options %1x and index %1x", cmd_data.options, cmd_data.index);
+
+  // the device SHALL check if it implements a Sink Table.
+  // If not, it SHALL generate a ZCL Default Response command,
+  // with the Status code field carrying UNSUP_COMMAND, subject to the rules as specified in sec. 2.4.12 of [3]
+  #if (EMBER_GP_SINK_TABLE_SIZE == 0)
+  emberAfGreenPowerClusterPrintln("Unsup cluster command");
+  emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
+  return true;
+  #else
   uint8_t entryIndex = 0;
   uint8_t appId = (cmd_data.options & EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_APPLICATION_ID);
   uint8_t requestType = (cmd_data.options & EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
                         >> EMBER_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET;
   EmberGpSinkTableEntry entry;
 
-  emberAfGreenPowerClusterPrintln("Got sink table request with options %1x and index %1x", cmd_data.options, cmd_data.index);
   // only respond to unicast messages.
   if (cmd->type != EMBER_INCOMING_UNICAST) {
     emberAfGreenPowerClusterPrintln("Not unicast");
     goto kickout;
-  }
-
-  // the device SHALL check if it implements a Sink Table.
-  // If not, it SHALL generate a ZCL Default Response command,
-  // with the Status code field carrying UNSUP_COMMAND, subject to the rules as specified in sec. 2.4.12 of [3]
-  if (EMBER_GP_SINK_TABLE_SIZE == 0) {
-    emberAfGreenPowerClusterPrintln("Unsup cluster command");
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_UNSUP_COMMAND);
-    return true;
   }
 
   if (emberAfCurrentEndpoint() != EMBER_GP_ENDPOINT) {
@@ -3369,6 +3376,7 @@ bool emberAfGreenPowerClusterGpSinkTableRequestCallback(EmberAfClusterCommand *c
   }
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
   kickout: return true;
+  #endif // EMBER_GP_SINK_TABLE_SIZE == 0
 }
 
 GpCommDataSaved *emberAfGreenPowerServerFindCommissioningGpdInstance(EmberGpAddress *gpdAddr)

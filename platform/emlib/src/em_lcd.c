@@ -81,8 +81,8 @@ void LCD_Init(const LCD_Init_TypeDef *lcdInit)
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  LCD->CTRL &= ~_LCD_CTRL_PRESCALE_MASK;
-  LCD->CTRL |= lcdInit->clockPrescaler << _LCD_CTRL_PRESCALE_SHIFT;
+  LCD->CTRL_CLR = _LCD_CTRL_PRESCALE_MASK;
+  LCD->CTRL_SET = lcdInit->clockPrescaler << _LCD_CTRL_PRESCALE_SHIFT;
 #endif
 
   /* Make sure the other bit fields don't get affected (i.e., voltage boost). */
@@ -393,7 +393,7 @@ void LCD_ComEnable(uint8_t com, bool enable)
 void LCD_DmaModeSet(LCD_DmaMode_Typedef mode)
 {
   LCD->BIASCTRL_CLR = _LCD_BIASCTRL_DMAMODE_MASK;
-  LCD->BIASCTRL |= mode;
+  LCD->BIASCTRL_SET = mode;
 }
 #endif
 

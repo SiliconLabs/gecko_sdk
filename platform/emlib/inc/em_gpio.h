@@ -721,8 +721,11 @@ void GPIO_DriveStrengthSet(GPIO_Port_TypeDef port, GPIO_DriveStrength_TypeDef st
 __STATIC_INLINE void GPIO_EM4DisablePinWakeup(uint32_t pinmask)
 {
   EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
-
+#if defined(GPIO_HAS_SET_CLEAR)
+  GPIO->EM4WUEN_CLR = pinmask;
+#else
   GPIO->EM4WUEN &= ~pinmask;
+#endif
 }
 #endif
 

@@ -11251,6 +11251,10 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm);
  * when the built-in bonding database
  * (bluetooth_feature_builtin_bonding_database) is used.
  *
+ * When used with Filter Accept List (bluetooth_feature_accept_list) or
+ * Resolving List (bluetooth_feature_resolving_list), this command removes the
+ * deleted device from the lists.
+ *
  * This command is unavailable if the external bonding database
  * (bluetooth_feature_external_bonding_database) is used.
  *
@@ -11268,6 +11272,10 @@ sl_status_t sl_bt_sm_delete_bonding(uint8_t bonding);
  *
  * This command empties the persistent bonding database when the built-in
  * bonding database (bluetooth_feature_builtin_bonding_database) is used.
+ *
+ * When used with Filter Accept List (bluetooth_feature_accept_list) or
+ * Resolving List (bluetooth_feature_resolving_list), this command removes the
+ * deleted devices from the lists.
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.

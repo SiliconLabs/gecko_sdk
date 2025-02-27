@@ -66,6 +66,7 @@
 #include "radio/radio.hpp"
 #include "utils/otns.hpp"
 #include "utils/power_calibration.hpp"
+#include "utils/static_counter.hpp"
 
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
 #include "backbone_router/backbone_tmf.hpp"
@@ -78,7 +79,9 @@
 #include "common/notifier.hpp"
 #include "common/settings.hpp"
 #include "crypto/mbedtls.hpp"
+#include "crypto/storage.hpp"
 #include "mac/mac.hpp"
+#include "mac/wakeup_tx_scheduler.hpp"
 #include "meshcop/border_agent.hpp"
 #include "meshcop/commissioner.hpp"
 #include "meshcop/dataset_manager.hpp"
@@ -252,6 +255,15 @@ public:
      */
     uint32_t GetId(void) const { return mId; }
 
+#if OPENTHREAD_PLATFORM_NEXUS
+    /**
+     * Sets the instance identifier.
+     *
+     * @param[in] aId  The identifier to assign to the `Instance`.
+     */
+    void SetId(uint32_t aId) { mId = aId; }
+#endif
+
     /**
      * Indicates whether or not the instance is valid/initialized and not yet finalized.
      *
@@ -357,7 +369,7 @@ public:
      *
      * @returns A reference to the application COAP Secure object.
      */
-    Coap::CoapSecure &GetApplicationCoapSecure(void) { return mApplicationCoapSecure; }
+    Coap::ApplicationCoapSecure &GetApplicationCoapSecure(void) { return mApplicationCoapSecure; }
 #endif
 
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
@@ -412,9 +424,40 @@ public:
      */
     template <typename Type> inline Type &Get(void);
 
+#if OPENTHREAD_PLATFORM_NEXUS
+    /**
+     * Constructor to initialize an `Instance`
+     */
+    Instance(void);
+
+    /**
+     * Called after constructor initialization.
+     */
+    void AfterInit(void);
+#endif
+
 private:
+#if !OPENTHREAD_PLATFORM_NEXUS
     Instance(void);
     void AfterInit(void);
+#endif
+
+    //-----------------------------------------------------------------------------------------------------------------
+    // `static` variables
+
+#if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
+    static LogLevel sLogLevel;
+#endif
+
+#if (OPENTHREAD_MTD || OPENTHREAD_FTD) && !OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
+    static Utils::Heap *sHeap;
+#endif
+
+#if (OPENTHREAD_MTD || OPENTHREAD_FTD) && OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+    static bool sDnsNameCompressionEnabled;
+#endif
+
+    //-----------------------------------------------------------------------------------------------------------------
 
     // Order of variables (their initialization in `Instance`)
     // is important.
@@ -431,11 +474,8 @@ private:
 #if OPENTHREAD_MTD || OPENTHREAD_FTD
     // Random::Manager is initialized before other objects. Note that it
     // requires MbedTls which itself may use Heap.
-#if !OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
-    static Utils::Heap *sHeap;
-#endif
     Crypto::MbedTls mMbedTls;
-#endif // OPENTHREAD_MTD || OPENTHREAD_FTD
+#endif
 
     Random::Manager mRandomManager;
 
@@ -462,6 +502,10 @@ private:
     // DNS-SD (mDNS) platform is initialized early to
     // allow other modules to use it.
     Dnssd mDnssd;
+#endif
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+    Crypto::Storage::KeyRefManager mCryptoStorageKeyRefManager;
 #endif
 
     Ip6::Ip6    mIp6;
@@ -632,7 +676,7 @@ private:
 #endif
 
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-    Coap::CoapSecure mApplicationCoapSecure;
+    Coap::ApplicationCoapSecure mApplicationCoapSecure;
 #endif
 
 #if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
@@ -690,10 +734,6 @@ private:
     Mac::LinkRaw mLinkRaw;
 #endif
 
-#if OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE
-    static LogLevel sLogLevel;
-#endif
-
 #if OPENTHREAD_ENABLE_VENDOR_EXTENSION
     Extension::ExtensionBase &mExtension;
 #endif
@@ -706,10 +746,6 @@ private:
 #endif
 
     bool mIsInitialized;
-
-#if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE && (OPENTHREAD_FTD || OPENTHREAD_MTD)
-    static bool sDnsNameCompressionEnabled;
-#endif
 
     uint32_t mId;
 };
@@ -726,7 +762,7 @@ template <> inline Radio &Instance::Get(void) { return mRadio; }
 template <> inline Radio::Callbacks &Instance::Get(void) { return mRadio.mCallbacks; }
 
 #if OPENTHREAD_CONFIG_RADIO_STATS_ENABLE && (OPENTHREAD_FTD || OPENTHREAD_MTD)
-template <> inline RadioStatistics &Instance::Get(void) { return mRadio.mRadioStatistics; }
+template <> inline Radio::Statistics &Instance::Get(void) { return mRadio.mStatistics; }
 #endif
 
 #if OPENTHREAD_CONFIG_UPTIME_ENABLE
@@ -743,6 +779,10 @@ template <> inline Settings &Instance::Get(void) { return mSettings; }
 template <> inline SettingsDriver &Instance::Get(void) { return mSettingsDriver; }
 
 template <> inline MeshForwarder &Instance::Get(void) { return mMeshForwarder; }
+
+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
+template <> inline Crypto::Storage::KeyRefManager &Instance::Get(void) { return mCryptoStorageKeyRefManager; }
+#endif
 
 #if OPENTHREAD_CONFIG_MULTI_RADIO
 template <> inline RadioSelector &Instance::Get(void) { return mRadioSelector; }
@@ -762,6 +802,10 @@ template <> inline NeighborTable &Instance::Get(void) { return mMleRouter.mNeigh
 template <> inline ChildTable &Instance::Get(void) { return mMleRouter.mChildTable; }
 
 template <> inline RouterTable &Instance::Get(void) { return mMleRouter.mRouterTable; }
+#endif
+
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+template <> inline WakeupTxScheduler &Instance::Get(void) { return mMleRouter.mWakeupTxScheduler; }
 #endif
 
 template <> inline Ip6::Netif &Instance::Get(void) { return mThreadNetif; }
@@ -792,9 +836,15 @@ template <> inline Ip6::Filter &Instance::Get(void) { return mIp6Filter; }
 
 template <> inline AddressResolver &Instance::Get(void) { return mAddressResolver; }
 
-#if OPENTHREAD_FTD
-
+#if OPENTHREAD_FTD || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
 template <> inline IndirectSender &Instance::Get(void) { return mMeshForwarder.mIndirectSender; }
+#endif
+
+#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+template <> inline CslTxScheduler &Instance::Get(void) { return mMeshForwarder.mIndirectSender.mCslTxScheduler; }
+#endif
+
+#if OPENTHREAD_FTD
 
 template <> inline SourceMatchController &Instance::Get(void)
 {
@@ -802,10 +852,6 @@ template <> inline SourceMatchController &Instance::Get(void)
 }
 
 template <> inline DataPollHandler &Instance::Get(void) { return mMeshForwarder.mIndirectSender.mDataPollHandler; }
-
-#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-template <> inline CslTxScheduler &Instance::Get(void) { return mMeshForwarder.mIndirectSender.mCslTxScheduler; }
-#endif
 
 template <> inline MeshCoP::Leader &Instance::Get(void) { return mLeader; }
 
@@ -976,6 +1022,13 @@ template <> inline MeshCoP::DatasetUpdater &Instance::Get(void) { return mDatase
 
 #if OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
 template <> inline MeshCoP::BorderAgent &Instance::Get(void) { return mBorderAgent; }
+#endif
+
+#if OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE && OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE
+template <> inline MeshCoP::BorderAgent::EphemeralKeyManager &Instance::Get(void)
+{
+    return mBorderAgent.GetEphemeralKeyManager();
+}
 #endif
 
 #if OPENTHREAD_CONFIG_ANNOUNCE_SENDER_ENABLE

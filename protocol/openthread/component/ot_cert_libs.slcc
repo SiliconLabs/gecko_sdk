@@ -7,9 +7,10 @@ description: Includes OpenThread certification libraries with default certificat
 provides:
   - name: ot_cert_libs
   - name: ot_stack_implementation
+  - name: ot_stack_tcp_implementation
+    allow_multiple: true
   - name: ot_stack_configuration
   - name: ot_platform_abstraction_implementation
-
 library:
   - path: protocol/openthread/libs/libsl_ot_stack_ftd_efr32mg12_gcc.a
     condition:
@@ -37,6 +38,12 @@ library:
       - device_sdid_84
       - ot_stack_mtd
       - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_tcp_efr32mg12_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_84
+    unless:
+      - ot_stack_tcp_stubs
   - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg12_gcc.a
     condition:
       - toolchain_gcc
@@ -89,6 +96,12 @@ library:
       - device_sdid_89
       - ot_stack_mtd
       - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_tcp_efr32mg13_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_89
+    unless:
+      - ot_stack_tcp_stubs
   - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg13_gcc.a
     condition:
       - toolchain_gcc
@@ -141,6 +154,12 @@ library:
       - device_sdid_200
       - ot_stack_mtd
       - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_tcp_efr32mg21_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_200
+    unless:
+      - ot_stack_tcp_stubs
   - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg21_gcc.a
     condition:
       - toolchain_gcc
@@ -193,6 +212,12 @@ library:
       - device_sdid_215
       - ot_stack_mtd
       - ot_coap_cert_libs
+  - path: protocol/openthread/libs/libsl_ot_stack_tcp_efr32mg24_gcc.a
+    condition:
+      - toolchain_gcc
+      - device_sdid_215
+    unless:
+      - ot_stack_tcp_stubs
   - path: protocol/openthread/libs/libsl_platform_ftd_efr32mg24_gcc.a
     condition:
       - toolchain_gcc

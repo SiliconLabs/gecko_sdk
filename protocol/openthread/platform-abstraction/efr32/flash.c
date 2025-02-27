@@ -311,13 +311,23 @@ exit:
 
 void otPlatSettingsWipe(otInstance *aInstance)
 {
+    nvm3_ObjectKey_t firstNvm3Key = makeNvm3ObjKey(1, 0);
+    nvm3_ObjectKey_t LastNvm3Key  = makeNvm3ObjKey(0xFF, 0xFF);
+    nvm3_ObjectKey_t keys[ENUM_NVM3_KEY_LIST_SIZE];
+    size_t           objCnt;
+
     OT_UNUSED_VARIABLE(aInstance);
 
-    // Delete nvm3 objects for all OT Settings keys (and any of their associated 'indexes').
-    // Note- any OT User nvm3 objects in the OT nvm3 area are NOT be erased.
-    for (uint16_t aKey = 0; aKey < 8; ++aKey)
+    objCnt = nvm3_enumObjects(nvm3_defaultHandle, keys, ENUM_NVM3_KEY_LIST_SIZE, firstNvm3Key, LastNvm3Key);
+
+    while (objCnt > 0)
     {
-        otPlatSettingsDelete(NULL, aKey, -1);
+        for (size_t i = 0; i < objCnt; ++i)
+        {
+            nvm3_deleteObject(nvm3_defaultHandle, keys[i]);
+        }
+
+        objCnt = nvm3_enumObjects(nvm3_defaultHandle, keys, ENUM_NVM3_KEY_LIST_SIZE, firstNvm3Key, LastNvm3Key);
     }
 }
 

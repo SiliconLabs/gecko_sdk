@@ -37,6 +37,7 @@ include:
       - path: spinel_helper.hpp
       - path: spinel_interface.hpp
       - path: spinel_platform.h
+      - path: spinel_prop_codec.hpp
       - path: openthread-spinel-config.h
   - path: lib/hdlc
     file_list:
@@ -45,7 +46,6 @@ include:
     file_list:
       - path: endian.hpp
       - path: math.hpp
-      - path: utils.hpp
 source:
       - path: ../examples/apps/ncp/ncp.c
         unless:
@@ -59,6 +59,7 @@ source:
       - path: ncp/ncp_base_radio.cpp
       - path: ncp/ncp_hdlc.cpp
       - path: ncp/ncp_spi.cpp
+      - path: ncp/platform/dnssd.cpp
       - path: ncp/platform/infra_if.cpp
       - path: lib/spinel/logger.cpp
       - path: lib/spinel/radio_spinel.cpp
@@ -68,6 +69,7 @@ source:
       - path: lib/spinel/spinel_driver.cpp
       - path: lib/spinel/spinel_encoder.cpp
       - path: lib/spinel/spinel_helper.cpp
+      - path: lib/spinel/spinel_prop_codec.cpp
       - path: lib/hdlc/hdlc.cpp
 define:
   - name: SPINEL_PLATFORM_HEADER

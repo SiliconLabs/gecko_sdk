@@ -90,8 +90,8 @@ void sl_ot_sys_init(void)
 #if USE_EFR32_LOG
     efr32LogInit();
 #endif
-    efr32RadioInit();
     efr32AlarmInit();
+    efr32RadioInit();
     efr32MiscInit();
 }
 

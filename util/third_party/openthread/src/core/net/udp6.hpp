@@ -70,9 +70,10 @@ class Udp;
  */
 enum NetifIdentifier : uint8_t
 {
-    kNetifUnspecified = OT_NETIF_UNSPECIFIED, ///< Unspecified network interface.
-    kNetifThread      = OT_NETIF_THREAD,      ///< The Thread interface.
-    kNetifBackbone    = OT_NETIF_BACKBONE,    ///< The Backbone interface.
+    kNetifUnspecified    = OT_NETIF_UNSPECIFIED,     ///< Unspecified network interface.
+    kNetifThreadHost     = OT_NETIF_THREAD_HOST,     ///< The host Thread interface - allow use of platform UDP.
+    kNetifThreadInternal = OT_NETIF_THREAD_INTERNAL, ///< The internal Thread interface - do not use platform UDP.
+    kNetifBackbone       = OT_NETIF_BACKBONE,        ///< The Backbone interface.
 };
 
 /**
@@ -127,6 +128,38 @@ public:
          * @returns A reference to the peer's socket address.
          */
         const SockAddr &GetPeerName(void) const { return AsCoreType(&mPeerName); }
+
+        /**
+         * Returns the network interface identifier.
+         *
+         * @returns The network interface identifier.
+         */
+        NetifIdentifier GetNetifId(void) const { return static_cast<NetifIdentifier>(mNetifId); }
+
+        /**
+         * Sets the network interface identifier.
+         *
+         * @param[in] aNetifId   The network interface identifier.
+         */
+        void SetNetifId(NetifIdentifier aNetifId) { mNetifId = static_cast<otNetifIdentifier>(aNetifId); }
+
+        /**
+         * Indicates whether or not the socket can use platform UDP.
+         *
+         * @retval TRUE    This socket should use platform UDP.
+         * @retval FALSE   This socket is associated with the internal Thread interface and should not use platform UDP.
+         */
+        bool ShouldUsePlatformUdp(void) const { return GetNetifId() != kNetifThreadInternal; }
+
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
+        /**
+         * Indicate whether or not the socket is bound to the backbone network interface.
+         *
+         * @retval TRUE    This is a backbone socket.
+         * @retval FALSE   This is not a backbone socket.
+         */
+        bool IsBackbone(void) const { return (GetNetifId() == kNetifBackbone); }
+#endif
 
     private:
         bool Matches(const MessageInfo &aMessageInfo) const;
@@ -183,10 +216,12 @@ public:
         /**
          * Opens the UDP socket.
          *
+         * @param[in]  aNetifId   The network interface identifier.
+         *
          * @retval kErrorNone     Successfully opened the socket.
          * @retval kErrorFailed   Failed to open the socket.
          */
-        Error Open(void);
+        Error Open(NetifIdentifier aNetifId);
 
         /**
          * Returns if the UDP socket is open.
@@ -198,25 +233,23 @@ public:
         /**
          * Binds the UDP socket.
          *
-         * @param[in]  aSockAddr            A reference to the socket address.
-         * @param[in]  aNetifIdentifier     The network interface identifier.
+         * @param[in]  aSockAddr         A reference to the socket address.
          *
          * @retval kErrorNone            Successfully bound the socket.
          * @retval kErrorInvalidArgs     Unable to bind to Thread network interface with the given address.
          * @retval kErrorFailed          Failed to bind UDP Socket.
          */
-        Error Bind(const SockAddr &aSockAddr, NetifIdentifier aNetifIdentifier = kNetifThread);
+        Error Bind(const SockAddr &aSockAddr);
 
         /**
          * Binds the UDP socket.
          *
-         * @param[in]  aPort                A port number.
-         * @param[in]  aNetifIdentifier     The network interface identifier.
+         * @param[in]  aPort             A port number.
          *
          * @retval kErrorNone            Successfully bound the socket.
          * @retval kErrorFailed          Failed to bind UDP Socket.
          */
-        Error Bind(uint16_t aPort, NetifIdentifier aNetifIdentifier = kNetifThread);
+        Error Bind(uint16_t aPort);
 
         /**
          * Binds the UDP socket.
@@ -462,13 +495,14 @@ public:
      * Opens a UDP socket.
      *
      * @param[in]  aSocket   A reference to the socket.
+     * @param[in]  aNetifId  A network interface identifier.
      * @param[in]  aHandler  A pointer to a function that is called when receiving UDP messages.
      * @param[in]  aContext  A pointer to arbitrary context information.
      *
      * @retval kErrorNone     Successfully opened the socket.
      * @retval kErrorFailed   Failed to open the socket.
      */
-    Error Open(SocketHandle &aSocket, ReceiveHandler aHandler, void *aContext);
+    Error Open(SocketHandle &aSocket, NetifIdentifier aNetifId, ReceiveHandler aHandler, void *aContext);
 
     /**
      * Returns if a UDP socket is open.
@@ -484,13 +518,12 @@ public:
      *
      * @param[in]  aSocket          A reference to the socket.
      * @param[in]  aSockAddr        A reference to the socket address.
-     * @param[in]  aNetifIdentifier The network interface identifier.
      *
      * @retval kErrorNone            Successfully bound the socket.
      * @retval kErrorInvalidArgs     Unable to bind to Thread network interface with the given address.
      * @retval kErrorFailed          Failed to bind UDP Socket.
      */
-    Error Bind(SocketHandle &aSocket, const SockAddr &aSockAddr, NetifIdentifier aNetifIdentifier);
+    Error Bind(SocketHandle &aSocket, const SockAddr &aSockAddr);
 
     /**
      * Connects a UDP socket.
@@ -617,16 +650,6 @@ public:
      */
     bool IsPortInUse(uint16_t aPort) const;
 
-    /**
-     * Returns whether a udp port belongs to the platform or the stack.
-     *
-     * @param[in]   aPort       The udp port
-     *
-     * @retval True when the port belongs to the platform.
-     * @retval False when the port belongs to the stack.
-     */
-    bool ShouldUsePlatformUdp(uint16_t aPort) const;
-
 private:
     static constexpr uint16_t kDynamicPortMin = 49152; // Service Name and Transport Protocol Port Number Registry
     static constexpr uint16_t kDynamicPortMax = 65535; // Service Name and Transport Protocol Port Number Registry
@@ -635,26 +658,28 @@ private:
     static constexpr uint16_t kSrpServerPortMin = OPENTHREAD_CONFIG_SRP_SERVER_UDP_PORT_MIN;
     static constexpr uint16_t kSrpServerPortMax = OPENTHREAD_CONFIG_SRP_SERVER_UDP_PORT_MAX;
 
+#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
+    struct Plat
+    {
+        static Error Open(SocketHandle &aSocket);
+        static Error Close(SocketHandle &aSocket);
+        static Error Bind(SocketHandle &aSocket);
+        static Error BindToNetif(SocketHandle &aSocket);
+        static Error Connect(SocketHandle &aSocket);
+        static Error Send(SocketHandle &aSocket, Message &aMessage, const MessageInfo &aMessageInfo);
+        static Error JoinMulticastGroup(SocketHandle &aSocket, NetifIdentifier aNetifId, const Address &aAddress);
+        static Error LeaveMulticastGroup(SocketHandle &aSocket, NetifIdentifier aNetifId, const Address &aAddress);
+    };
+#endif
+
     static bool IsPortReserved(uint16_t aPort);
 
     void AddSocket(SocketHandle &aSocket);
     void RemoveSocket(SocketHandle &aSocket);
-#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
-    bool ShouldUsePlatformUdp(const SocketHandle &aSocket) const;
-#endif
-
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-    void                SetBackboneSocket(SocketHandle &aSocket);
-    const SocketHandle *GetBackboneSockets(void) const;
-    bool                IsBackboneSocket(const SocketHandle &aSocket) const;
-#endif
 
     uint16_t                 mEphemeralPort;
     LinkedList<Receiver>     mReceivers;
     LinkedList<SocketHandle> mSockets;
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
-    SocketHandle *mPrevBackboneSockets;
-#endif
 #if OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
     Callback<otUdpForwarder> mUdpForwarder;
 #endif

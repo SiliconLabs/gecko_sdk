@@ -71,7 +71,11 @@ configuration:
   - name: SL_HEAP_SIZE
     value: 16384
   - name: SL_STACK_SIZE
+    value: 5120
+    unless: [freertos]
+  - name: SL_STACK_SIZE
     value: 4608
+    condition: [freertos]
   - name: OPENTHREAD_CONFIG_TMF_NETDIAG_CLIENT_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT
@@ -88,6 +92,12 @@ configuration:
     condition: [ot_rtt_log]
   - name: configTIMER_TASK_PRIORITY
     value: 53
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_usart]
+  - name: SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_eusart]
 
 tag:
   - prebuilt_demo

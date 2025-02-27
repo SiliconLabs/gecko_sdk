@@ -45,7 +45,7 @@ template_contribution:
     value:
       group: network-creator
       name: stop
-      handler: emberAfPluginNetworkCreatorStop
+      handler: emberAfPluginNetworkCreatorStopCommand
       help: Stops the network formation process.
   - name: cli_command
     value:

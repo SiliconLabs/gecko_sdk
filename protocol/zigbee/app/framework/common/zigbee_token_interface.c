@@ -73,8 +73,9 @@ void sl_zigbee_token_factory_reset(bool exclude_outgoing_fc, bool exclude_boot_c
           emberSetTokenData(token_info.nvm3Key,
                             arrayIndex,
                             &token_data);
+          // NVM3 write may take a long time to run, thus manually reset the watchdog.
+          halResetWatchdog();
         }
-        halResetWatchdog();
       }
     }
   }

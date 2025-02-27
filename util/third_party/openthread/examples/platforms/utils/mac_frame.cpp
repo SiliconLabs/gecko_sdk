@@ -42,6 +42,15 @@ bool otMacFrameDoesAddrMatch(const otRadioFrame *aFrame,
                              otShortAddress      aShortAddress,
                              const otExtAddress *aExtAddress)
 {
+    return otMacFrameDoesAddrMatchAny(aFrame, aPanId, aShortAddress, Mac::kShortAddrInvalid, aExtAddress);
+}
+
+bool otMacFrameDoesAddrMatchAny(const otRadioFrame *aFrame,
+                                otPanId             aPanId,
+                                otShortAddress      aShortAddress,
+                                otShortAddress      aAltShortAddress,
+                                const otExtAddress *aExtAddress)
+{
     const Mac::Frame &frame = *static_cast<const Mac::Frame *>(aFrame);
     bool              rval  = true;
     Mac::Address      dst;
@@ -52,7 +61,9 @@ bool otMacFrameDoesAddrMatch(const otRadioFrame *aFrame,
     switch (dst.GetType())
     {
     case Mac::Address::kTypeShort:
-        VerifyOrExit(dst.GetShort() == Mac::kShortAddrBroadcast || dst.GetShort() == aShortAddress, rval = false);
+        VerifyOrExit(dst.GetShort() == Mac::kShortAddrBroadcast || dst.GetShort() == aShortAddress ||
+                         (aAltShortAddress != Mac::kShortAddrInvalid && dst.GetShort() == aAltShortAddress),
+                     rval = false);
         break;
 
     case Mac::Address::kTypeExtended:
@@ -213,6 +224,16 @@ bool otMacFrameIsKeyIdMode1(otRadioFrame *aFrame)
     return (error == OT_ERROR_NONE) ? (keyIdMode == Mac::Frame::kKeyIdMode1) : false;
 }
 
+bool otMacFrameIsKeyIdMode2(otRadioFrame *aFrame)
+{
+    uint8_t keyIdMode;
+    otError error;
+
+    error = static_cast<const Mac::Frame *>(aFrame)->GetKeyIdMode(keyIdMode);
+
+    return (error == OT_ERROR_NONE) ? (keyIdMode == Mac::Frame::kKeyIdMode2) : false;
+}
+
 uint8_t otMacFrameGetKeyId(otRadioFrame *aFrame)
 {
     uint8_t keyId = 0;
@@ -294,9 +315,16 @@ otError otMacFrameProcessTransmitSecurity(otRadioFrame *aFrame, otRadioContext *
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
     otMacKeyMaterial *key = nullptr;
     uint8_t           keyId;
+    uint32_t          frameCounter;
+    bool              processKeyId;
 
-    VerifyOrExit(otMacFrameIsSecurityEnabled(aFrame) && otMacFrameIsKeyIdMode1(aFrame) &&
-                 !aFrame->mInfo.mTxInfo.mIsSecurityProcessed);
+    processKeyId =
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+        otMacFrameIsKeyIdMode2(aFrame) ||
+#endif
+        otMacFrameIsKeyIdMode1(aFrame);
+
+    VerifyOrExit(otMacFrameIsSecurityEnabled(aFrame) && processKeyId && !aFrame->mInfo.mTxInfo.mIsSecurityProcessed);
 
     if (otMacFrameIsAck(aFrame))
     {
@@ -306,15 +334,18 @@ otError otMacFrameProcessTransmitSecurity(otRadioFrame *aFrame, otRadioContext *
 
         if (keyId == aRadioContext->mKeyId)
         {
-            key = &aRadioContext->mCurrKey;
+            key          = &aRadioContext->mCurrKey;
+            frameCounter = aRadioContext->mMacFrameCounter++;
         }
         else if (keyId == aRadioContext->mKeyId - 1)
         {
-            key = &aRadioContext->mPrevKey;
+            key          = &aRadioContext->mPrevKey;
+            frameCounter = aRadioContext->mPrevMacFrameCounter++;
         }
         else if (keyId == aRadioContext->mKeyId + 1)
         {
-            key = &aRadioContext->mNextKey;
+            key          = &aRadioContext->mNextKey;
+            frameCounter = 0;
         }
         else
         {
@@ -323,8 +354,9 @@ otError otMacFrameProcessTransmitSecurity(otRadioFrame *aFrame, otRadioContext *
     }
     else if (!aFrame->mInfo.mTxInfo.mIsHeaderUpdated)
     {
-        key   = &aRadioContext->mCurrKey;
-        keyId = aRadioContext->mKeyId;
+        key          = &aRadioContext->mCurrKey;
+        keyId        = aRadioContext->mKeyId;
+        frameCounter = aRadioContext->mMacFrameCounter++;
     }
 
     if (key != nullptr)
@@ -332,7 +364,7 @@ otError otMacFrameProcessTransmitSecurity(otRadioFrame *aFrame, otRadioContext *
         aFrame->mInfo.mTxInfo.mAesKey = key;
 
         otMacFrameSetKeyId(aFrame, keyId);
-        otMacFrameSetFrameCounter(aFrame, aRadioContext->mMacFrameCounter++);
+        otMacFrameSetFrameCounter(aFrame, frameCounter);
         aFrame->mInfo.mTxInfo.mIsHeaderUpdated = true;
     }
 #else

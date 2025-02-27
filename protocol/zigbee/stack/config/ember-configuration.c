@@ -234,13 +234,13 @@ uint8_t sli_zigbee_store_and_forward_queue_size = EMBER_STORE_AND_FORWARD_QUEUE_
 //------------------------------------------------------------------------------
 // Green Power stack tables
 uint8_t sli_zigbee_gp_incoming_fc_token_table_size = EMBER_GP_INCOMING_FC_TOKEN_TABLE_SIZE;
-uint8_t sli_zigbee_gp_incoming_fc_token_timeout = EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT;
+uint32_t sli_zigbee_gp_incoming_fc_token_timeout = EMBER_GP_INCOMING_FC_TOKEN_TIMEOUT;
 
 EmberGpProxyTableEntry sli_zigbee_gp_proxy_table[EMBER_GP_PROXY_TABLE_SIZE];
 uint8_t sli_zigbee_gp_proxy_table_size = EMBER_GP_PROXY_TABLE_SIZE;
 
 uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_table_size = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TABLE_SIZE;
-uint8_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TIMEOUT;
+uint32_t sli_zigbee_gp_incoming_fc_in_sink_token_timeout = EMBER_GP_INCOMING_FC_IN_SINK_TOKEN_TIMEOUT;
 
 #if (EMBER_GP_SINK_TABLE_SIZE > 0)
 EmberGpSinkTableEntry sli_zigbee_gp_sink_table[EMBER_GP_SINK_TABLE_SIZE];

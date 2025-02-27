@@ -482,15 +482,6 @@ public:
     Error GetCommandId(uint8_t &aCommandId) const;
 
     /**
-     * Sets the Command ID.
-     *
-     * @param[in]  aCommandId  The Command ID.
-     *
-     * @retval kErrorNone  Successfully set the Command ID.
-     */
-    Error SetCommandId(uint8_t aCommandId);
-
-    /**
      * Indicates whether the frame is a MAC Data Request command (data poll).
      *
      * For 802.15.4-2015 and above frame, the frame should be already decrypted.
@@ -628,25 +619,6 @@ public:
 
 #if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
     /**
-     * Appends an Header IE at specified index in this frame.
-     *
-     * Also sets the IE present bit in the Frame Control Field (FCF).
-     *
-     * @param[in,out]   aIndex  The index to append IE. If `aIndex` is `0` on input, this method finds the index
-     *                          for the first IE and appends the IE at that position. If the position is not found
-     *                          successfully, `aIndex` will be set to `kInvalidIndex`. Otherwise the IE will be
-     *                          appended at `aIndex` on input. And on output, `aIndex` will be set to the end of the
-     *                          IE just appended.
-     *
-     * @tparam  IeType  The Header IE type, it MUST contain a constant `kHeaderIeId` equal to the IE's Id
-     *                  and a constant `kIeContentSize` indicating the IE body's size.
-     *
-     * @retval kErrorNone      Successfully appended the Header IE.
-     * @retval kErrorNotFound  The position for first IE is not found.
-     */
-    template <typename IeType> Error AppendHeaderIeAt(uint8_t &aIndex);
-
-    /**
      * Returns a pointer to the Header IE.
      *
      * @param[in] aIeId  The Element Id of the Header IE.
@@ -704,7 +676,7 @@ public:
     bool HasCslIe(void) const;
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || (OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE)
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     /**
      * Returns a pointer to a CSL IE.
      *
@@ -718,7 +690,7 @@ public:
      * @returns A pointer to the CSL IE, `nullptr` if not found.
      */
     CslIe *GetCslIe(void) { return AsNonConst(AsConst(this)->GetCslIe()); }
-#endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || (OPENTHREAD_FTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE)
+#endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
 
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
     /**
@@ -884,12 +856,7 @@ protected:
     uint8_t FindPayloadIndex(void) const;
 #if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
     uint8_t FindHeaderIeIndex(void) const;
-
-    Error                           InitIeHeaderAt(uint8_t &aIndex, uint8_t ieId, uint8_t ieContentSize);
-    template <typename IeType> void InitIeContentAt(uint8_t &aIndex);
 #endif
-
-    static uint8_t GetKeySourceLength(uint8_t aKeyIdMode);
 
 #if OPENTHREAD_CONFIG_MAC_MULTIPURPOSE_FRAME
     static uint8_t GetFcfSize(uint16_t aFcf) { return IsShortFcf(aFcf) ? kShortFcfSize : kFcfSize; }
@@ -946,6 +913,7 @@ protected:
 
     static uint8_t CalculateAddrFieldSize(uint16_t aFcf);
     static uint8_t CalculateSecurityHeaderSize(uint8_t aSecurityControl);
+    static uint8_t CalculateKeySourceSize(uint8_t aSecurityControl);
     static uint8_t CalculateMicSize(uint8_t aSecurityControl);
 };
 
@@ -1004,7 +972,7 @@ public:
      * 6.9.1 (albeit both unrelated to OT).
      *
      * The time is relative to the local radio clock as defined by
-     * `otPlatRadioGetNow`.
+     * `Radio::GetNow()`.
      *
      * @returns The timestamp in microseconds.
      */
@@ -1071,8 +1039,11 @@ public:
          *   - The destination address is not the broadcast address
          *   - The frame type is not an ACK frame
          *
-         * The Frame Pending and IE Present flags in the FCF are not set. They may need to be set separately depending
-         * on the specific requirements of the frame being transmitted.
+         * The header IE entries are prepared based on `mAppendTimeIe` and `mAppendCslIe` flags and the IE Present
+         * flag in FCF is determined accordingly.
+         *
+         * The Frame Pending flag in FCF is not set. It may need to be set separately depending on the specific
+         * requirements of the frame being transmitted.
          *
          * @param[in,out] aTxFrame  The `TxFrame` instance in which to prepare and append the MAC headers.
          */
@@ -1084,7 +1055,18 @@ public:
         PanIds        mPanIds;               ///< Source and destination PAN Ids.
         SecurityLevel mSecurityLevel;        ///< Frame security level.
         KeyIdMode     mKeyIdMode;            ///< Frame security key ID mode.
+        CommandId     mCommandId;            ///< Command ID (applicable when `mType == kTypeMacCmd`).
         bool          mSuppressSequence : 1; ///< Whether to suppress seq number.
+
+#if OPENTHREAD_CONFIG_MAC_HEADER_IE_SUPPORT
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+        bool mAppendTimeIe : 1; ///< Whether to append Time IE.
+#endif
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
+        bool mAppendCslIe : 1; ///< Whether to append CSL IE.
+#endif
+        bool mEmptyPayload : 1; ///< Whether payload is empty (to decide about appending Termination2 IE).
+#endif
     };
 
     /**

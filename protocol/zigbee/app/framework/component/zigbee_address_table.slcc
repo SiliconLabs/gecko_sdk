@@ -8,6 +8,8 @@ provides:
   - name: zigbee_address_table
 config_file:
   - path: protocol/zigbee/app/framework/plugin/address-table/config/address-table-config.h
+validation_helper:
+  - path: protocol/zigbee/app/framework/component/scripts/zigbee_address_table.lua
 source:
   - path: protocol/zigbee/app/framework/plugin/address-table/address-table.c
   - path: protocol/zigbee/app/framework/plugin/address-table/address-table-cli.c

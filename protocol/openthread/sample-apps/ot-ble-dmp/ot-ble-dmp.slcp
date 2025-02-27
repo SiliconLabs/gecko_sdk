@@ -90,6 +90,12 @@ configuration:
     condition: [ot_rtt_log]
   - name: configTIMER_TASK_PRIORITY
     value: 53
+  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_usart]
+  - name: SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE
+    value: uartdrvFlowControlHwUart
+    condition: [uartdrv_eusart]
 
 tag:
   - prebuilt_demo

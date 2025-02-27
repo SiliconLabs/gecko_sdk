@@ -33,9 +33,6 @@
 #include "multi-phy.h"
 
 extern void halReboot(void);
-#ifdef EMBER_TEST
-#define halReboot()
-#endif // EMBER_TEST
 
 // Extern for the auto generated handler as specified in the ezsp.yaml
 extern bool sli_zigbee_af_process_ezsp_command_token_interface(uint16_t commandId);

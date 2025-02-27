@@ -475,6 +475,13 @@ const otMleCounters *otThreadGetMleCounters(otInstance *aInstance)
 
 void otThreadResetMleCounters(otInstance *aInstance) { AsCoreType(aInstance).Get<Mle::MleRouter>().ResetCounters(); }
 
+#if OPENTHREAD_CONFIG_UPTIME_ENABLE
+uint32_t otThreadGetCurrentAttachDuration(otInstance *aInstance)
+{
+    return AsCoreType(aInstance).Get<Mle::MleRouter>().GetCurrentAttachDuration();
+}
+#endif
+
 #if OPENTHREAD_CONFIG_MLE_PARENT_RESPONSE_CALLBACK_API_ENABLE
 void otThreadRegisterParentResponseCallback(otInstance                    *aInstance,
                                             otThreadParentResponseCallback aCallback,
@@ -513,6 +520,19 @@ void otThreadSetStoreFrameCounterAhead(otInstance *aInstance, uint32_t aStoreFra
 uint32_t otThreadGetStoreFrameCounterAhead(otInstance *aInstance)
 {
     return AsCoreType(aInstance).Get<Mle::Mle>().GetStoreFrameCounterAhead();
+}
+#endif
+
+#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
+otError otThreadWakeup(otInstance         *aInstance,
+                       const otExtAddress *aWedAddress,
+                       uint16_t            aWakeupIntervalUs,
+                       uint16_t            aWakeupDurationMs,
+                       otWakeupCallback    aCallback,
+                       void               *aCallbackContext)
+{
+    return AsCoreType(aInstance).Get<Mle::Mle>().Wakeup(AsCoreType(aWedAddress), aWakeupIntervalUs, aWakeupDurationMs,
+                                                        aCallback, aCallbackContext);
 }
 #endif
 

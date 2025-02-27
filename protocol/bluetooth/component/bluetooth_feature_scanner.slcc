@@ -32,14 +32,6 @@ template_contribution:
     value: bluetooth_extended_scanning_incompatible
     condition:
       - "device_sdid_80"
-  - name: bluetooth_controller_init
-    value:
-      function: sl_btctrl_init_scan()
-    priority: 4
-  - name: bluetooth_controller_init
-    value:
-      function: sl_btctrl_init_scan_ext()
-    priority: 8
 documentation:
   docset: bluetooth
   document: bluetooth-stack-api/sl-bt-scanner

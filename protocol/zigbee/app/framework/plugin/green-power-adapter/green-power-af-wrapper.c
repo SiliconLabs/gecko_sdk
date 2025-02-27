@@ -27,7 +27,7 @@ WEAK(EmberAfStatus emberAfReadAttributeWrapper(uint8_t endpoint,
                                                uint8_t readLength,
                                                EmberAfAttributeType *dataType))
 {
-  return 0xff;
+  return EMBER_ZCL_STATUS_FAILURE;
 }
 
 WEAK(EmberAfStatus emberAfWriteAttributeWrapper(uint8_t endpoint,
@@ -37,7 +37,7 @@ WEAK(EmberAfStatus emberAfWriteAttributeWrapper(uint8_t endpoint,
                                                 uint8_t* dataPtr,
                                                 EmberAfAttributeType dataType))
 {
-  return 0xff;
+  return EMBER_ZCL_STATUS_FAILURE;
 }
 
 WEAK(EmberAfStatus emberAfWriteClientAttributeWrapper(uint8_t endpoint,
@@ -46,7 +46,7 @@ WEAK(EmberAfStatus emberAfWriteClientAttributeWrapper(uint8_t endpoint,
                                                       uint8_t* dataPtr,
                                                       EmberAfAttributeType dataType))
 {
-  return 0xff;
+  return EMBER_ZCL_STATUS_FAILURE;
 }
 
 WEAK(bool emberAfContainsServerWrapper(uint8_t endpoint, EmberAfClusterId clusterId))
@@ -74,19 +74,19 @@ WEAK(EmberApsFrame *emberAfGetCommandApsFrameWrapper(void))
 WEAK(EmberStatus emberAfSendCommandUnicastWrapper(EmberOutgoingMessageType type,
                                                   uint16_t indexOrDestination))
 {
-  return 0xff;
+  return EMBER_INVALID_CALL;
 }
 
 WEAK(EmberStatus emberAfSendCommandBroadcastWithAliasWrapper(EmberNodeId destination,
                                                              EmberNodeId alias,
                                                              uint8_t sequence))
 {
-  return 0xff;
+  return EMBER_INVALID_CALL;
 }
 
 WEAK(EmberStatus emberAfSendCommandMulticastWithAliasWrapper(EmberMulticastId multicastId, EmberNodeId alias, uint8_t sequence))
 {
-  return 0xff;
+  return EMBER_INVALID_CALL;
 }
 
 WEAK(uint16_t emberAfFillExternalBufferWrapper(uint8_t frameControl,
@@ -95,7 +95,7 @@ WEAK(uint16_t emberAfFillExternalBufferWrapper(uint8_t frameControl,
                                                const char *format,
                                                ...))
 {
-  return 0xff;
+  return 0xFFFF;
 }
 #endif // (EMBER_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_AF_INTERFACE == 1)
 

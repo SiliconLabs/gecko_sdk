@@ -69,6 +69,8 @@ struct otMessage
 
 namespace ot {
 
+template <typename UintType> class CrcCalculator;
+
 namespace Crypto {
 
 class AesCcm;
@@ -148,6 +150,15 @@ class PriorityQueue;
 class ThreadLinkInfo;
 
 /**
+ * Represents the link security mode indicating whether to use MAC (layer two) security.
+ */
+enum LinkSecurityMode : bool
+{
+    kNoLinkSecurity   = false, ///< Link security disabled (no link security).
+    kWithLinkSecurity = true,  ///< Link security enabled.
+};
+
+/**
  * Represents a Message buffer.
  */
 class Buffer : public otMessageBuffer, public LinkedListEntry<Buffer>
@@ -179,46 +190,52 @@ public:
 protected:
     struct Metadata
     {
+        bool mDirectTx : 1;            // Whether a direct transmission is required.
+        bool mLinkSecurity : 1;        // Whether link security is enabled.
+        bool mInPriorityQ : 1;         // Whether the message is queued in normal or priority queue.
+        bool mTxSuccess : 1;           // Whether the direct tx of the message was successful.
+        bool mDoNotEvict : 1;          // Whether this message may be evicted.
+        bool mMulticastLoop : 1;       // Whether this multicast message may be looped back.
+        bool mResolvingAddress : 1;    // Whether the message is pending an address query resolution.
+        bool mAllowLookbackToHost : 1; // Whether the message is allowed to be looped back to host.
+        bool mIsDstPanIdBroadcast : 1; // Whether the dest PAN ID is broadcast.
+#if OPENTHREAD_CONFIG_MULTI_RADIO
+        bool mIsRadioTypeSet : 1; // Whether the radio type is set.
+#endif
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+        bool mTimeSync : 1; // Whether the message is also used for time sync purpose.
+#endif
+        uint8_t mPriority : 2; // The message priority level (higher value is higher priority).
+        uint8_t mOrigin : 2;   // The origin of the message.
+#if OPENTHREAD_CONFIG_MULTI_RADIO
+        uint8_t mRadioType : 2; // The radio link type the message was received on, or should be sent on.
+        static_assert(Mac::kNumRadioTypes <= (1 << 2), "mRadioType bitfield cannot store all radio type values");
+#endif
+        uint8_t mType : 3;    // The message type.
+        uint8_t mSubType : 4; // The message sub type.
+        uint8_t mMleCommand;  // The MLE command type (used when `mSubType is `Mle`).
+        uint8_t mChannel;     // The message channel (used for MLE Announce).
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+        uint8_t mTimeSyncSeq; // The time sync sequence.
+#endif
+        uint16_t mLength;      // Current message length (number of bytes).
+        uint16_t mOffset;      // A byte offset within the message.
+        uint16_t mReserved;    // Number of reserved bytes (for header).
+        uint16_t mMeshDest;    // Used for unicast non-link-local messages.
+        uint16_t mPanId;       // PAN ID (used for MLE Discover Request and Response).
+        uint32_t mDatagramTag; // The datagram tag used for 6LoWPAN frags or IPv6fragmentation.
+#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
+        int64_t mNetworkTimeOffset; // The time offset to the Thread network time, in microseconds.
+#endif
+        TimeMilli    mTimestamp;   // The message timestamp.
         Message     *mNext;        // Next message in a doubly linked list.
         Message     *mPrev;        // Previous message in a doubly linked list.
         MessagePool *mMessagePool; // Message pool for this message.
         void        *mQueue;       // The queue where message is queued (if any). Queue type from `mInPriorityQ`.
-        uint32_t     mDatagramTag; // The datagram tag used for 6LoWPAN frags or IPv6fragmentation.
-        TimeMilli    mTimestamp;   // The message timestamp.
-        uint16_t     mReserved;    // Number of reserved bytes (for header).
-        uint16_t     mLength;      // Current message length (number of bytes).
-        uint16_t     mOffset;      // A byte offset within the message.
-        uint16_t     mMeshDest;    // Used for unicast non-link-local messages.
-        uint16_t     mPanId;       // PAN ID (used for MLE Discover Request and Response).
-        uint8_t      mChannel;     // The message channel (used for MLE Announce).
         RssAverager  mRssAverager; // The averager maintaining the received signal strength (RSS) average.
         LqiAverager  mLqiAverager; // The averager maintaining the Link quality indicator (LQI) average.
 #if OPENTHREAD_FTD
         ChildMask mChildMask; // ChildMask to indicate which sleepy children need to receive this.
-#endif
-
-        uint8_t mType : 3;                // The message type.
-        uint8_t mSubType : 4;             // The message sub type.
-        bool    mDirectTx : 1;            // Whether a direct transmission is required.
-        bool    mLinkSecurity : 1;        // Whether link security is enabled.
-        uint8_t mPriority : 2;            // The message priority level (higher value is higher priority).
-        bool    mInPriorityQ : 1;         // Whether the message is queued in normal or priority queue.
-        bool    mTxSuccess : 1;           // Whether the direct tx of the message was successful.
-        bool    mDoNotEvict : 1;          // Whether this message may be evicted.
-        bool    mMulticastLoop : 1;       // Whether this multicast message may be looped back.
-        bool    mResolvingAddress : 1;    // Whether the message is pending an address query resolution.
-        bool    mAllowLookbackToHost : 1; // Whether the message is allowed to be looped back to host.
-        bool    mIsDstPanIdBroadcast : 1; // Whether the dest PAN ID is broadcast.
-        uint8_t mOrigin : 2;              // The origin of the message.
-#if OPENTHREAD_CONFIG_MULTI_RADIO
-        uint8_t mRadioType : 2;      // The radio link type the message was received on, or should be sent on.
-        bool    mIsRadioTypeSet : 1; // Whether the radio type is set.
-        static_assert(Mac::kNumRadioTypes <= (1 << 2), "mRadioType bitfield cannot store all radio type values");
-#endif
-#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
-        bool    mTimeSync : 1;      // Whether the message is also used for time sync purpose.
-        int64_t mNetworkTimeOffset; // The time offset to the Thread network time, in microseconds.
-        uint8_t mTimeSyncSeq;       // The time sync sequence.
 #endif
     };
 
@@ -257,6 +274,8 @@ static_assert(sizeof(Buffer) >= kBufferSize,
 class Message : public otMessage, public Buffer, public GetProvider<Message>
 {
     friend class Checksum;
+    friend class CrcCalculator<uint16_t>;
+    friend class CrcCalculator<uint32_t>;
     friend class Crypto::HmacSha256;
     friend class Crypto::Sha256;
     friend class Crypto::AesCcm;
@@ -284,18 +303,12 @@ public:
      */
     enum SubType : uint8_t
     {
-        kSubTypeNone                   = 0,  ///< None
-        kSubTypeMleAnnounce            = 1,  ///< MLE Announce
-        kSubTypeMleDiscoverRequest     = 2,  ///< MLE Discover Request
-        kSubTypeMleDiscoverResponse    = 3,  ///< MLE Discover Response
-        kSubTypeJoinerEntrust          = 4,  ///< Joiner Entrust
-        kSubTypeMplRetransmission      = 5,  ///< MPL next retransmission message
-        kSubTypeMleGeneral             = 6,  ///< General MLE
-        kSubTypeJoinerFinalizeResponse = 7,  ///< Joiner Finalize Response
-        kSubTypeMleChildUpdateRequest  = 8,  ///< MLE Child Update Request
-        kSubTypeMleDataResponse        = 9,  ///< MLE Data Response
-        kSubTypeMleChildIdRequest      = 10, ///< MLE Child ID Request
-        kSubTypeMleDataRequest         = 11, ///< MLE Data Request
+        kSubTypeNone                   = 0, ///< None
+        kSubTypeMle                    = 1, ///< MLE message
+        kSubTypeMplRetransmission      = 2, ///< MPL next retransmission message
+        kSubTypeJoinerEntrust          = 3, ///< Joiner Entrust
+        kSubTypeJoinerFinalizeResponse = 4, ///< Joiner Finalize Response
+
     };
 
     enum Priority : uint8_t
@@ -307,15 +320,6 @@ public:
     };
 
     static constexpr uint8_t kNumPriorities = 4; ///< Number of priority levels.
-
-    /**
-     * Represents the link security mode (used by `Settings` constructor).
-     */
-    enum LinkSecurityMode : bool
-    {
-        kNoLinkSecurity   = false, ///< Link security disabled (no link security).
-        kWithLinkSecurity = true,  ///< Link security enabled.
-    };
 
     /**
      * Represents the message ownership model when a `Message` instance is passed to a method/function.
@@ -561,12 +565,43 @@ public:
     void SetSubType(SubType aSubType) { GetMetadata().mSubType = aSubType; }
 
     /**
-     * Returns whether or not the message is of MLE subtype.
+     * Indicates whether or not the message is of MLE sub type.
      *
-     * @retval TRUE   If message is of MLE subtype.
-     * @retval FALSE  If message is not of MLE subtype.
+     * @retval TRUE   The message is of MLE sub type.
+     * @retval FALSE  The message is not of MLE sub type.
      */
-    bool IsSubTypeMle(void) const;
+    bool IsSubTypeMle(void) const { return (GetSubType() == kSubTypeMle); }
+
+    /**
+     * Indicates whether or not the message is a given MLE command.
+     *
+     * It checks `IsSubTypeMle()` and then if `GetMleCommand()` is the same as `aMleCommand`.
+     *
+     * @param[in] aMleCommand  The MLE command type.
+     *
+     * @retval TRUE  The message is an MLE command of @p aMleCommand type.
+     * @retval FALSE The message is not an MLE command of @p aMleCommand type.
+     */
+    bool IsMleCommand(Mle::Command aMleCommand) const;
+
+    /**
+     * Gets the MLE command type.
+     *
+     * Caller MUST ensure that message sub type is `kSubTypeMle` before calling this method. Otherwise the returned
+     * value is not meaningful.
+     *
+     * @returns The message's MLE command type.
+     */
+    Mle::Command GetMleCommand(void) const { return static_cast<Mle::Command>(GetMetadata().mMleCommand); }
+
+    /**
+     * Set the MLE command type of message.
+     *
+     * Caller should also set the sub type to `kSubTypeMle`.
+     *
+     * @param[in] aMleCommand  The MLE command type.
+     */
+    void SetMleCommand(Mle::Command aMleCommand) { GetMetadata().mMleCommand = aMleCommand; }
 
     /**
      * Checks whether this multicast message may be looped back.
@@ -1022,37 +1057,23 @@ public:
 
 #if OPENTHREAD_FTD
     /**
-     * Returns whether or not the message forwarding is scheduled for the child.
+     * Gets the indirect transmission `ChildMask` associated with this `Message`.
      *
-     * @param[in]  aChildIndex  The index into the child table.
+     * The `ChildMask` indicates the set of children for which this message is scheduled for indirect transmission.
      *
-     * @retval TRUE   If the message is scheduled to be forwarded to the child.
-     * @retval FALSE  If the message is not scheduled to be forwarded to the child.
+     * @returns A reference to the indirect transmission `ChildMask`.
      */
-    bool GetChildMask(uint16_t aChildIndex) const;
+    ChildMask &GetIndirectTxChildMask(void) { return GetMetadata().mChildMask; }
 
     /**
-     * Unschedules forwarding of the message to the child.
+     * Gets the indirect transmission `ChildMask` associated with this `Message`.
      *
-     * @param[in]  aChildIndex  The index into the child table.
-     */
-    void ClearChildMask(uint16_t aChildIndex);
-
-    /**
-     * Schedules forwarding of the message to the child.
+     * The `ChildMask` indicates the set of children for which this message is scheduled for indirect transmission.
      *
-     * @param[in]  aChildIndex  The index into the child table.
+     * @returns A reference to the indirect transmission `ChildMask`.
      */
-    void SetChildMask(uint16_t aChildIndex);
-
-    /**
-     * Returns whether or not the message forwarding is scheduled for at least one child.
-     *
-     * @retval TRUE   If message forwarding is scheduled for at least one child.
-     * @retval FALSE  If message forwarding is not scheduled for any child.
-     */
-    bool IsChildPending(void) const;
-#endif // OPENTHREAD_FTD
+    const ChildMask &GetIndirectTxChildMask(void) const { return GetMetadata().mChildMask; }
+#endif
 
     /**
      * Returns the RLOC16 of the mesh destination.

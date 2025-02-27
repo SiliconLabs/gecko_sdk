@@ -62,6 +62,7 @@ library:
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_dualrail/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -70,6 +71,7 @@ library:
       - zigbee_multi_network
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_dualrail_singlenetwork/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -78,6 +80,45 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_lto/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_lto_dualrail/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_lto_dualrail_singlenetwork/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_lto_singlenetwork/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r23-support/release_singlenetwork/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -87,6 +128,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -94,6 +136,45 @@ library:
       - zigbee_phy_2_4
       - zigbee_multi_network
     unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_lto/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_lto_railgb/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_multi_network
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_lto_railgb_singlenetwork/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_lto_singlenetwork/libzigbee-r23-support.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_railgb/libzigbee-r23-support.a
@@ -104,6 +185,7 @@ library:
       - zigbee_multi_network
     unless:
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_railgb_singlenetwork/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -112,6 +194,7 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r23-support/release_singlenetwork/libzigbee-r23-support.a
     condition:
       - toolchain_gcc
@@ -121,6 +204,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/i386/zigbee-r23-support/release/libzigbee-r23-support.a
     condition:
       - toolchain_gcc

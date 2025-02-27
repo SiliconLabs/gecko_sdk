@@ -5,44 +5,44 @@ The output of the size tool: (e.g. arm-none-ambi-size.exe)
 
 zwave_soc_door_lock_keypad.out  :
 section                                       size         addr
-.text                                      0x30278          0x0
-_zaf_event_distributor_cc_event_handler       0x30      0x30278
-_zaf_cc_config                                 0x8      0x302a8
-_cc_handlers_v3                              0x240      0x302b0
-_zw_protocol_cmd_handlers                     0x70      0x304f0
-_zw_protocol_cmd_handlers_lr                  0x30      0x30560
-.ARM.exidx                                     0x8      0x30590
-.copy.table                                    0xc      0x30598
-.zero.table                                    0x0      0x305a4
+.text                                      0x30338          0x0
+_zaf_event_distributor_cc_event_handler       0x30      0x30338
+_zaf_cc_config                                 0x8      0x30368
+_cc_handlers_v3                              0x240      0x30370
+_zw_protocol_cmd_handlers                     0x70      0x305b0
+_zw_protocol_cmd_handlers_lr                  0x30      0x30620
+.ARM.exidx                                     0x8      0x30650
+.copy.table                                    0xc      0x30658
+.zero.table                                    0x0      0x30664
 .stack                                      0x1000   0x20000000
 .data                                        0x41c   0x20001000
-.bss                                        0xa06c   0x2000141c
-text_application_ram                           0x0   0x2000b488
+.bss                                        0xa068   0x2000141c
+text_application_ram                           0x0   0x2000b484
 .heap                                        0x800   0x2000b488
-.internal_storage                          0x3a000      0x305a4
-.zwave_nvm                                  0x3000      0x6a5a4
-.nvm                                        0x9000      0x6d5a4
+.internal_storage                          0x3a000      0x30664
+.zwave_nvm                                  0x3000      0x6a664
+.nvm                                        0x9000      0x6d664
 .ARM.attributes                               0x2e          0x0
 .comment                                      0x45          0x0
 .debug_line_str                              0x29d          0x0
-.debug_frame                                0xf7c4          0x0
-.debug_info                               0xcfcfa5          0x0
-.debug_abbrev                              0x23686          0x0
-.debug_loclists                            0x19292          0x0
+.debug_frame                                0xf7d4          0x0
+.debug_info                               0xcfcfa9          0x0
+.debug_abbrev                              0x23671          0x0
+.debug_loclists                            0x19297          0x0
 .debug_aranges                              0x5b38          0x0
-.debug_rnglists                             0x3895          0x0
-.debug_line                                0x61b9d          0x0
-.debug_str                                 0x87390          0x0
-.debug_loc                                 0x2cb10          0x0
-.debug_ranges                               0x4af0          0x0
-Total                                     0xeeeeb7
+.debug_rnglists                             0x38a2          0x0
+.debug_line                                0x61b7a          0x0
+.debug_str                                 0x8738a          0x0
+.debug_loc                                 0x2cba0          0x0
+.debug_ranges                               0x4aa0          0x0
+Total                                     0xeeef9b
 
 The calculated FLASH and SRAM usage summary:
 ============================================
 FLASH used as program memory:  (Including only the sections: .text, .ARM.exidx, .data, _cc_handlers_v3)
-   199104
+   199296
 FLASH used for storage: (Including only the sections: .zwavenvm, .simee, .nvm, .zwave_nvm)
    49152
 SRAM usage:             (Including only the sections: .data, .bss, .heap (limited to 2048 per sl_memory_config.h), .stack_dummy, .reset_info)
-   48264
+   48260
 

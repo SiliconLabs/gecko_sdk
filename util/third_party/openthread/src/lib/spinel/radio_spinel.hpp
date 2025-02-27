@@ -134,6 +134,28 @@ struct RadioSpinelCallbacks
      */
     void (*mDiagTransmitDone)(otInstance *aInstance, otRadioFrame *aFrame, Error aError);
 #endif // OPENTHREAD_CONFIG_DIAG_ENABLE
+
+    /**
+     * This method saves the radio spinel metrics to the temporary storage.
+     *
+     * @param[in]  aMetrics   A reference to the radio spinel metrics.
+     * @param[in]  aContext   A pointer to application-specific context.
+     */
+    void (*mSaveRadioSpinelMetrics)(const otRadioSpinelMetrics &aMetrics, void *aContext);
+
+    /**
+     * This method restores the radio spinel metrics from the temporary storage.
+     *
+     * @param[out] aMetrics   A reference to the radio spinel metrics.
+     * @param[in]  aContext   A pointer to application-specific context.
+     */
+    otError (*mRestoreRadioSpinelMetrics)(otRadioSpinelMetrics &aMetrics, void *aContext);
+
+    /**
+     * The pointer to application-specific context for methods `mSaveRadioSpinelMetrics()` and
+     * `mRestoreRadioSpinelMetrics()`.
+     */
+    void *mRadioSpinelMetricsContext;
 };
 
 /**
@@ -156,7 +178,7 @@ public:
     /**
      * Initialize this radio transceiver.
      *
-     * @param[in]  aSkipRcpCompatibilityCheck  TRUE to skip RCP compatibility check, FALSE to perform the check.
+     * @param[in]  aSkipRcpVersionCheck        TRUE to skip RCP version check, FALSE to perform the check.
      * @param[in]  aSoftwareReset              When doing RCP recovery, TRUE to try software reset first, FALSE to
      *                                         directly do a hardware reset.
      * @param[in]  aSpinelDriver               A pointer to the spinel driver instance that this object depends on.
@@ -164,7 +186,7 @@ public:
      *                                         the required capabilities during initialization.
      * @param[in]  aEnableRcpTimeSync          TRUE to enable RCP time sync, FALSE to not enable.
      */
-    void Init(bool          aSkipRcpCompatibilityCheck,
+    void Init(bool          aSkipRcpVersionCheck,
               bool          aSoftwareReset,
               SpinelDriver *aSpinelDriver,
               otRadioCaps   aRequiredRadioCaps,
@@ -222,6 +244,17 @@ public:
      * @retval  OT_ERROR_RESPONSE_TIMEOUT   Failed due to no response received from the transceiver.
      */
     otError SetShortAddress(uint16_t aAddress);
+
+    /**
+     * Sets the alternate short address.
+     *
+     * @param[in] aShortAddress   The alternate short address.
+     *
+     * @retval  OT_ERROR_NONE               Succeeded.
+     * @retval  OT_ERROR_BUSY               Failed due to another operation is on going.
+     * @retval  OT_ERROR_RESPONSE_TIMEOUT   Failed due to no response received from the transceiver.
+     */
+    otError SetAlternateShortAddress(uint16_t aAddress);
 
     /**
      * Gets the factory-assigned IEEE EUI-64 for this transceiver.
@@ -557,6 +590,22 @@ public:
      * @retval OT_ERROR_INVALID_STATE The radio was disabled or transmitting.
      */
     otError Receive(uint8_t aChannel);
+
+    /**
+     * Schedule a radio reception window at a specific time and duration.
+     *
+     * @param[in]  aWhen      The receive window start time in the local
+     *                        radio clock, see `otPlatRadioGetNow`. The radio
+     *                        receiver SHALL be on and ready to receive the first
+     *                        symbol of a frame's SHR at the window start time.
+     * @param[in]  aDuration  The receive window duration, in microseconds, as
+     *                        measured by the local radio clock.
+     * @param[in]  aChannel   The channel to use for receiving.
+     *
+     * @retval OT_ERROR_NONE          Successfully scheduled the reception.
+     * @retval OT_ERROR_INVALID_STATE The radio was disabled.
+     */
+    otError ReceiveAt(uint64_t aWhen, uint32_t aDuration, uint8_t aChannel);
 
     /**
      * Switches the radio state from Receive to Sleep.
@@ -931,7 +980,7 @@ public:
      *
      * @returns The radio Spinel metrics.
      */
-    const otRadioSpinelMetrics *GetRadioSpinelMetrics(void) const { return &mRadioSpinelMetrics; }
+    const otRadioSpinelMetrics &GetRadioSpinelMetrics(void) const { return mMetrics.GetMetrics(); }
 
 #if OPENTHREAD_CONFIG_PLATFORM_POWER_CALIBRATION_ENABLE
     /**
@@ -1006,8 +1055,10 @@ public:
 
     /**
      *  A callback type for restoring vendor properties.
+     *
+     * @param[in] aContext  A pointer to the user context.
      */
-    typedef void (*otRadioSpinelVendorRestorePropertiesCallback)(void *context);
+    typedef void (*otRadioSpinelVendorRestorePropertiesCallback)(void *aContext);
 
     /**
      * Registers a callback to restore vendor properties.
@@ -1016,10 +1067,31 @@ public:
      * properties occurs (such as an unexpected RCP reset), the user can restore the vendor properties via the callback.
      *
      * @param[in] aCallback The callback.
-     * @param[in] aContext  The context.
+     * @param[in] aContext  A pointer to the user context.
      */
     void SetVendorRestorePropertiesCallback(otRadioSpinelVendorRestorePropertiesCallback aCallback, void *aContext);
 #endif // OPENTHREAD_SPINEL_CONFIG_VENDOR_HOOK_ENABLE
+
+#if OPENTHREAD_SPINEL_CONFIG_COMPATIBILITY_ERROR_CALLBACK_ENABLE
+    /**
+     * A callback type for handling compatibility error of radio spinel.
+     *
+     * @param[in] aContext  A pointer to the user context.
+     */
+    typedef void (*otRadioSpinelCompatibilityErrorCallback)(void *aContext);
+
+    /**
+     * Registers a callback to handle error of radio spinel.
+     *
+     * This function is used to register a callback to handle radio spinel compatibility errors. When a radio spinel
+     * compatibility error occurs that cannot be resolved by a restart (e.g., RCP version mismatch), the user can
+     * handle the error through the callback(such as OTA) instead of letting the program crash directly.
+     *
+     * @param[in] aCallback The callback.
+     * @param[in] aContext  A pointer to the user context.
+     */
+    void SetCompatibilityErrorCallback(otRadioSpinelCompatibilityErrorCallback aCallback, void *aContext);
+#endif
 
     /**
      * Enables or disables the time synchronization between the host and RCP.
@@ -1027,6 +1099,15 @@ public:
      * @param[in]  aOn  TRUE to turn on the time synchronization, FALSE otherwise.
      */
     void SetTimeSyncState(bool aOn) { mTimeSyncOn = aOn; }
+
+#if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
+    /**
+     * Enables or disables the RCP restoration feature.
+     *
+     * @param[in]  aEnabled  TRUE to enable the RCP restoration feature, FALSE otherwise.
+     */
+    void SetRcpRestorationEnabled(bool aEnabled) { mRcpRestorationEnabled = aEnabled; }
+#endif
 
 private:
     enum
@@ -1139,7 +1220,10 @@ private:
 
     void UpdateParseErrorCount(otError aError)
     {
-        mRadioSpinelMetrics.mSpinelParseErrorCount += (aError == OT_ERROR_PARSE) ? 1 : 0;
+        if (aError == OT_ERROR_PARSE)
+        {
+            mMetrics.IncrementSpinelParseErrorCount();
+        }
     }
 
     otError SetMacKey(uint8_t         aKeyIdMode,
@@ -1154,6 +1238,44 @@ private:
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
     void PlatDiagOutput(const char *aFormat, ...);
 #endif
+
+    void HandleCompatibilityError(void);
+
+    typedef otRadioSpinelMetrics Metrics;
+
+    class MetricsTracker
+    {
+    public:
+        explicit MetricsTracker(RadioSpinelCallbacks &aCallbacks)
+            : mCallbacks(aCallbacks)
+        {
+            memset(&mMetrics, 0, sizeof(mMetrics));
+        }
+
+        void Init(void);
+        void IncrementRcpTimeoutCount(void) { IncrementCount(kTypeTimeoutCount); }
+        void IncrementRcpUnexpectedResetCount(void) { IncrementCount(kTypeUnexpectResetCount); }
+        void IncrementRcpRestorationCount(void) { IncrementCount(kTypeRestorationCount); }
+        void IncrementSpinelParseErrorCount(void) { IncrementCount(kTypeSpinelParseErrorCount); }
+
+        const Metrics &GetMetrics(void) const { return mMetrics; }
+
+    private:
+        enum MetricType : uint8_t
+        {
+            kTypeTimeoutCount,
+            kTypeUnexpectResetCount,
+            kTypeRestorationCount,
+            kTypeSpinelParseErrorCount,
+        };
+
+        void RestoreMetrics(void);
+        void SaveMetrics(void);
+        void IncrementCount(MetricType aType);
+
+        RadioSpinelCallbacks &mCallbacks;
+        Metrics               mMetrics;
+    };
 
     otInstance *mInstance;
 
@@ -1231,6 +1353,7 @@ private:
     int8_t       mFemLnaGain;
     bool         mCoexEnabled : 1;
     bool         mSrcMatchEnabled : 1;
+    bool         mRcpRestorationEnabled : 1;
 
     bool mMacKeySet : 1;                   ///< Whether MAC key has been set.
     bool mCcaEnergyDetectThresholdSet : 1; ///< Whether CCA energy detect threshold has been set.
@@ -1253,13 +1376,17 @@ private:
     uint64_t mRadioTimeRecalcStart; ///< When to recalculate RCP time offset.
     uint64_t mRadioTimeOffset;      ///< Time difference with estimated RCP time minus host time.
 
-    MaxPowerTable mMaxPowerTable;
-
-    otRadioSpinelMetrics mRadioSpinelMetrics;
+    MaxPowerTable  mMaxPowerTable;
+    MetricsTracker mMetrics;
 
 #if OPENTHREAD_SPINEL_CONFIG_VENDOR_HOOK_ENABLE
     otRadioSpinelVendorRestorePropertiesCallback mVendorRestorePropertiesCallback;
     void                                        *mVendorRestorePropertiesContext;
+#endif
+
+#if OPENTHREAD_SPINEL_CONFIG_COMPATIBILITY_ERROR_CALLBACK_ENABLE
+    otRadioSpinelCompatibilityErrorCallback mCompatibilityErrorCallback;
+    void                                   *mCompatibilityErrorContext;
 #endif
 
     bool mTimeSyncEnabled : 1;

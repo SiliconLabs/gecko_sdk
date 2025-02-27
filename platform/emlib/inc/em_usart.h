@@ -822,7 +822,11 @@ __STATIC_INLINE void USART_IntClear(USART_TypeDef *usart, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void USART_IntDisable(USART_TypeDef *usart, uint32_t flags)
 {
+#if defined (USART_HAS_SET_CLEAR)
+  usart->IEN_CLR = flags;
+#else
   usart->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -843,7 +847,11 @@ __STATIC_INLINE void USART_IntDisable(USART_TypeDef *usart, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void USART_IntEnable(USART_TypeDef *usart, uint32_t flags)
 {
+#if defined (USART_HAS_SET_CLEAR)
+  usart->IEN_SET = flags;
+#else
   usart->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**

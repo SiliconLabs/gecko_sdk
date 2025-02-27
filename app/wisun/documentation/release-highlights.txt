@@ -1,2 +1,2 @@
-Wi-SUN SDK 1.10.2
-- Targeted quality improvements and bug fixes.
+Wi-SUN SDK 1.10.4
+- The current version of the Wi-SUN SDK has undergone limited testing and has not been fully validated with the latest Gecko SDK. We strongly recommend using the SiSDK instead. Please note that the Wi-SUN SDK will be removed in the next Gecko SDK releases.

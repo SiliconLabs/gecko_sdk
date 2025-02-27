@@ -25,6 +25,8 @@
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
 
+#define CC_USER_CODE_MAX_IDS_MAX (50)
+
 typedef struct
 {
   uint8_t userIdentifier;
@@ -46,6 +48,10 @@ static s_CC_userCode_data_t userCodeData = { 0 };
 /****************************************************************************/
 /*                            PRIVATE FUNCTIONS                             */
 /****************************************************************************/
+
+_Static_assert(CC_USER_CODE_MAX_IDS <= CC_USER_CODE_MAX_IDS_MAX,
+               "STATIC_ASSERT_FAILED_User_Code_Max_IDs_too_high");
+
 static void CC_UserCode_report_stx(zaf_tx_options_t *tx_options, void* pData);
 
 

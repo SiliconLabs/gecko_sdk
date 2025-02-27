@@ -67,6 +67,7 @@ library:
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_dualrail/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -76,6 +77,7 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_dualrail_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -85,6 +87,49 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_lto/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_lto_dualrail/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_lto_dualrail_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+  - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_lto_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm33
+      - zigbee_phy_2_4
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -95,6 +140,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -103,6 +149,49 @@ library:
       - zigbee_multi_network
       - zigbee_mac_test_commands_support
     unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_lto/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_lto_railgb/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_multi_network
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_lto_railgb_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4_subghz_selection_end_device
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
+      - zigbee_phy_2_4_subghz_switch_coordinator
+  - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_lto_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - cortexm4
+      - zigbee_phy_2_4
+      - zigbee_mac_test_commands_support
+      - toolchain_lto
+    unless:
+      - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_railgb/libzigbee-r22-support-mac-test-cmds.a
@@ -114,6 +203,7 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_railgb_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -123,6 +213,7 @@ library:
     unless:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/cortex-m4/zigbee-r22-support-mac-test-cmds/release_singlenetwork/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -133,6 +224,7 @@ library:
       - zigbee_multi_network
       - zigbee_phy_2_4_subghz_selection_end_device
       - zigbee_phy_2_4_subghz_switch_coordinator
+      - toolchain_lto
   - path: protocol/zigbee/build/gcc/i386/zigbee-r22-support-mac-test-cmds/release/libzigbee-r22-support-mac-test-cmds.a
     condition:
       - toolchain_gcc
