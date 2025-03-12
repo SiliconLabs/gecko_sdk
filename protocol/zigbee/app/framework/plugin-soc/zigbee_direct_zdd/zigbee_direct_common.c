@@ -778,7 +778,7 @@ static void sli_zigbee_zdd_join_network_write(void)
       sl_zigbee_direct_network_params.joinMethod = EMBER_USE_CONFIGURED_NWK_STATE;
       sl_zigbee_direct_network_params.nwkManagerId = 0x0000; // use TC node ID
       sl_zigbee_direct_security_state.bitmask = (EMBER_STANDARD_SECURITY_MODE | EMBER_HAVE_NETWORK_KEY | EMBER_HAVE_PRECONFIGURED_KEY | EMBER_HAVE_TRUST_CENTER_EUI64);
-      if (sl_zigbee_tlv_search_buffer_payload_for_id(my_Buffer, 0, SL_ZIGBEE_DIRECT_TLV_TRUST_CENTER_ADDRESS_TAG_ID, (sl_zigbee_tlv_t *) &sl_tlv_pointer1, current_writeValue->len  - 1) == EMBER_SUCCESS) {
+      if (sl_zigbee_tlv_search_buffer_payload_for_id(my_Buffer, 0, SL_ZIGBEE_DIRECT_TLV_TRUST_CENTER_ADDRESS_TAG_ID, (sl_zigbee_tlv_t *) &sl_tlv_pointer1, current_writeValue->len  - 1) != EMBER_SUCCESS) {
         sl_zigbee_direct_security_state.bitmask |= EMBER_DISTRIBUTED_TRUST_CENTER_MODE;
         sl_zigbee_app_debug_println("Distributed TC mode detected");
       }
