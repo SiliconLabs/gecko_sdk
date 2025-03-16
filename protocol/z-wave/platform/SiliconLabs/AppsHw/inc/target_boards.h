@@ -19,7 +19,10 @@
 /* Radio Board Definitions                                               */
 /*************************************************************************/
 
-#if defined(RADIO_BOARD_EFR32ZG13L)
+#if defined(RADIO_NO_BOARD)
+#include "radio_no_board.h"
+
+#elif defined(RADIO_BOARD_EFR32ZG13L)
 #include "radio_board_efr32zg13l.h"
 
 #elif defined(RADIO_BOARD_EFR32ZG13P32)
@@ -42,9 +45,6 @@
 
 #elif defined(RADIO_BOARD_BRD2705A)
 #include "radio_board_brd2705a.h"
-
-#elif defined(RADIO_NO_BOARD)
-#include "radio_no_board.h"
 
 #endif
 
