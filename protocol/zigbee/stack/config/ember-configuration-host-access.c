@@ -38,10 +38,10 @@ sl_status_t sl_zigbee_set_multicast_table_size(uint8_t size)
 
 uint8_t sl_zigbee_get_multicast_table_size(void)
 {
-  uint8_t multicast_table_size;
+  uint16_t multicast_table_size;
   (void) ezspGetConfigurationValue(EZSP_CONFIG_MULTICAST_TABLE_SIZE,
                                    (uint16_t*)&multicast_table_size);
-  return multicast_table_size;
+  return (uint8_t)multicast_table_size;
 }
 
 EmberMulticastTableEntry* sl_zigbee_get_multicast_table(EmberMulticastTableEntry* table)
@@ -92,9 +92,9 @@ sl_status_t sl_zigbee_set_binding_table_size(uint8_t size)
 
 uint8_t sl_zigbee_get_binding_table_size(void)
 {
-  uint8_t binding_table_size;
+  uint16_t binding_table_size;
   (void) ezspGetConfigurationValue(EZSP_CONFIG_BINDING_TABLE_SIZE, (uint16_t*)&(binding_table_size));
-  return binding_table_size;
+  return (uint8_t)binding_table_size;
 }
 
 sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
@@ -110,10 +110,10 @@ sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
 
 uint8_t sl_zigbee_get_max_end_device_children(void)
 {
-  uint8_t max_end_device_children;
+  uint16_t max_end_device_children;
   (void) ezspGetConfigurationValue(EZSP_CONFIG_MAX_END_DEVICE_CHILDREN,
                                    (uint16_t*)&(max_end_device_children));
-  return max_end_device_children;
+  return (uint8_t)max_end_device_children;
 }
 
 sl_status_t sl_zigbee_set_transient_device_table_timeout_ms(uint16_t timeout)

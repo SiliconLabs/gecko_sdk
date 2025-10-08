@@ -117,7 +117,7 @@ module :
 -
   name      : "fatfs"
   path      : "util/third_party/fatfs/"
-  symbol    : "FATFS" 
+  symbol    : "FATFS"
 
 -
   name      : "flex"
@@ -142,7 +142,7 @@ module :
 -
   name      : "hardware module"
   path      : "hardware/module"
-  symbol    : "HARDWARE_MODULE" 
+  symbol    : "HARDWARE_MODULE"
 
 -
   name      : "hwconf data"
@@ -191,7 +191,7 @@ module :
 -
   name      : "mcu example"
   path      : "app/mcu_example"
-  symbol    : "MCU_EXAMPLE" 
+  symbol    : "MCU_EXAMPLE"
 
 -
   name      : "micrium OS"
@@ -291,7 +291,7 @@ module :
 -
   name      : "studio"
   path      : ".studio"
-  symbol    : "STUDIO" 
+  symbol    : "STUDIO"
 
 -
   name      : "toolchain manager"
@@ -363,7 +363,7 @@ module :
 -
   name      : "hardware board"
   path      : "hardware/board"
-  symbol    : "HARDWARE_BOARD" 
+  symbol    : "HARDWARE_BOARD"
 
 -
   name      : "app flex"
@@ -394,11 +394,6 @@ module :
   name      : "wfx_fmac_driver"
   path      : "platform/radio/wifi/wfx_fmac_driver"
   symbol    : "WFX_FMAC_DRIVER"
-
--
-  name      : "wi-sun"
-  path      : "protocol/wisun"
-  symbol    : "WISUN"
 
 -
   name      : "security"

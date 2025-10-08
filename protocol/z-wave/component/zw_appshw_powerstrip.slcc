@@ -13,12 +13,7 @@ include:
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/PowerStrip
     file_list:
       - path: PowerStrip_buttons.h
-  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/PowerStrip/config/Thunderboard
-    condition: [thunderboard]
-    file_list:
-      - path: PowerStrip_buttons_thunderboard.h
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/PowerStrip/config/WSTK
-    unless: [thunderboard]
     file_list:
       - path: PowerStrip_buttons_wstk.h
 

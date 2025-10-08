@@ -52,6 +52,10 @@ namespace Utils {
 class MeshDiag;
 }
 
+namespace MeshCoP {
+class TcatAgent;
+}
+
 namespace NetworkDiagnostic {
 
 /**
@@ -71,15 +75,46 @@ class Client;
 class Server : public InstanceLocator, private NonCopyable
 {
     friend class Tmf::Agent;
+    friend class MeshCoP::TcatAgent;
     friend class Client;
 
 public:
+    /**
+     * Callback function pointer to notify a reset request for `kNonPreferredChannels` TLV value.
+     */
+    typedef otThreadNonPreferredChannelsResetCallback NonPreferredChannelsResetCallback;
+
     /**
      * Initializes the Server.
      *
      * @param[in] aInstance   The OpenThread instance.
      */
     explicit Server(Instance &aInstance);
+
+    /**
+     * Sets the non-preferred channels value for `kNonPreferredChannels` TLV.
+     *
+     * @param[in] aChannelMask   A channel mask for non-preferred channels.
+     */
+    void SetNonPreferredChannels(uint32_t aChannelMask) { mNonPreferredChannels = aChannelMask; }
+
+    /**
+     * Gets the non-preferred channel mask value for `kNonPreferredChannels` TLV.
+     *
+     * @returns The non-preferred channels as a channel mask.
+     */
+    uint32_t GetNonPreferredChannels(void) const { return mNonPreferredChannels; }
+
+    /**
+     * Sets the callback to notify when a Diagnostic Reset request is received for `kNonPreferredChannels` TLV value.
+     *
+     * @param[in] aCallback   The callback function pointer.
+     * @param[in] aContext    An arbitrary context used with @p aCallback.
+     */
+    void SetNonPreferredChannelsResetCallback(NonPreferredChannelsResetCallback aCallback, void *aContext)
+    {
+        mNonPreferredChannelsResetCallback.Set(aCallback, aContext);
+    }
 
 #if OPENTHREAD_CONFIG_NET_DIAG_VENDOR_INFO_SET_API_ENABLE
     /**
@@ -191,6 +226,10 @@ private:
     Error AppendRequestedTlvs(const Message &aRequest, Message &aResponse);
     void  PrepareMessageInfoForDest(const Ip6::Address &aDestination, Tmf::MessageInfo &aMessageInfo) const;
 
+#if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
+    Error AppendRequestedTlvsForTcat(const Message &aRequest, Message &aResponse, OffsetRange &aOffsetRange);
+#endif
+
 #if OPENTHREAD_MTD
     void SendAnswer(const Ip6::Address &aDestination, const Message &aRequest);
 #elif OPENTHREAD_FTD
@@ -204,7 +243,14 @@ private:
     Error       AppendChildTableAsChildTlvs(Coap::Message *&aAnswer, AnswerInfo &aInfo);
     Error       AppendRouterNeighborTlvs(Coap::Message *&aAnswer, AnswerInfo &aInfo);
     Error       AppendChildTableIp6AddressList(Coap::Message *&aAnswer, AnswerInfo &aInfo);
-    Error       AppendChildIp6AddressListTlv(Coap::Message &aAnswer, const Child &aChild);
+    Error       AppendChildIp6AddressListTlv(Message &aAnswer, const Child &aChild);
+    Error       AppendEnhancedRoute(Message &aMessage);
+
+#if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
+    Error       AppendChildTableAsChildTlvs(Message &aMessage);
+    Error       AppendRouterNeighborTlvs(Message &aMessage);
+    Error       AppendChildTableIp6AddressList(Message &aMessage);
+#endif
 
     static void HandleAnswerResponse(void                *aContext,
                                      otMessage           *aMessage,
@@ -228,6 +274,8 @@ private:
 #if OPENTHREAD_FTD
     Coap::MessageQueue mAnswerQueue;
 #endif
+    uint32_t                                    mNonPreferredChannels;
+    Callback<NonPreferredChannelsResetCallback> mNonPreferredChannelsResetCallback;
 };
 
 DeclareTmfHandler(Server, kUriDiagnosticGetRequest);

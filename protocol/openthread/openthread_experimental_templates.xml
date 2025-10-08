@@ -13,6 +13,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/ot-ncp-ftd.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-ncp-mtd" label="OpenThread - NCP (MTD)" description="This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.&#xA;">
@@ -28,6 +30,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/ot-ncp-mtd.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
 </model:MDescriptors>

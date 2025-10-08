@@ -295,9 +295,11 @@ public:
     Error Disable(void);
 
     /**
-     * Transitions the radio to Sleep.
+     * Request radio to transition to sleep state.
      *
-     * @retval kErrorNone          Successfully transitioned to Sleep.
+     * The `SubMac` layer may enter `Receive()` state when the CSL receiver is enabled.
+     *
+     * @retval kErrorNone          Successfully transitioned to Sleep or the radio is handled by the CSL receiver.
      * @retval kErrorBusy          The radio was transmitting.
      * @retval kErrorInvalidState  The radio was disabled.
      */
@@ -376,24 +378,14 @@ public:
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     /**
-     * Configures CSL parameters in 'SubMac'.
+     * Sets CSL parameters in 'SubMac'.
      *
-     * @param[in]  aPeriod    The CSL period (in unit of 10 symbols).
+     * @param[in]  aPeriod    The CSL period (in unit of 10 symbols), 0 for disabling CSL receiver.
      * @param[in]  aChannel   The CSL channel.
      * @param[in]  aShortAddr The short source address of CSL receiver's peer.
      * @param[in]  aExtAddr   The extended source address of CSL receiver's peer.
-     *
-     * @retval  TRUE if CSL Period or CSL Channel changed.
-     * @retval  FALSE if CSL Period and CSL Channel did not change.
      */
-    bool UpdateCsl(uint16_t aPeriod, uint8_t aChannel, otShortAddress aShortAddr, const otExtAddress *aExtAddr);
-
-    /**
-     * Lets `SubMac` start CSL sample mode given a configured non-zero CSL period.
-     *
-     * `SubMac` would switch the radio state between `Receive` and `Sleep` according the CSL timer.
-     */
-    void CslSample(void);
+    void SetCslParams(uint16_t aPeriod, uint8_t aChannel, ShortAddress aShortAddr, const ExtAddress &aExtAddr);
 
     /**
      * Returns parent CSL accuracy (clock accuracy and uncertainty).
@@ -515,14 +507,20 @@ private:
     void        HandleCslTimer(void);
     void        GetCslWindowEdges(uint32_t &aAhead, uint32_t &aAfter);
     uint32_t    GetLocalTime(void);
+    bool        IsCslEnabled(void) const { return mCslPeriod > 0; }
 #if OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
     void LogReceived(RxFrame *aFrame);
 #endif
+    void HandleCslReceiveAt(uint32_t aTimeAhead, uint32_t aTimeAfter);
+    void HandleCslReceiveOrSleep(uint32_t aTimeAhead, uint32_t aTimeAfter);
+    void LogCslWindow(uint32_t aWinStart, uint32_t aWinDuration);
 #endif
 #if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
     void        WedInit(void);
     static void HandleWedTimer(Timer &aTimer);
     void        HandleWedTimer(void);
+    void        HandleWedReceiveAt(void);
+    void        HandleWedReceiveOrSleep(void);
 #endif
 
     static constexpr uint8_t  kCsmaMinBe         = 3;                  // macMinBE (IEEE 802.15.4-2006).
@@ -556,8 +554,9 @@ private:
 #if !OPENTHREAD_MTD && OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
         kStateCslTransmit, // CSL transmission.
 #endif
-#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-        kStateCslSample, // CSL receive.
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+        kStateRadioSample, // Mac layer has requested the SubMac to enter sleep state, but the SubMac is in the periodic
+                           // sample state.
 #endif
     };
 
@@ -626,8 +625,16 @@ private:
     void HandleEnergyScanDone(int8_t aMaxRssi);
     void HandleTimer(void);
 
+    Error RadioSleep(void);
+
     void               SetState(State aState);
     static const char *StateToString(State aState);
+
+#if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    bool IsRadioSampleEnabled(void) const;
+    void UpdateRadioSampleState(void);
+    void RadioSample(void);
+#endif
 
     using SubMacTimer =
 #if OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
@@ -663,18 +670,22 @@ private:
     SubMacTimer mTimer;
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-    uint16_t mCslPeriod;            // The CSL sample period, in units of 10 symbols (160 microseconds).
-    uint8_t  mCslChannel : 7;       // The CSL sample channel.
-    bool     mIsCslSampling : 1;    // Indicates that the radio is receiving in CSL state for platforms not supporting
-                                    // delayed reception.
-    uint16_t    mCslPeerShort;      // The CSL peer short address.
-    TimeMicro   mCslSampleTime;     // The CSL sample time of the current period relative to the local radio clock.
-    TimeMicro   mCslLastSync;       // The timestamp of the last successful CSL synchronization.
-    CslAccuracy mCslParentAccuracy; // The parent's CSL accuracy (clock accuracy and uncertainty).
+    uint16_t mCslPeriod;             // The CSL sample period, in units of 10 symbols (160 microseconds).
+    uint8_t  mCslChannel : 7;        // The CSL sample channel.
+    bool     mIsCslSampling : 1;     // Indicates that the current time is in CSL sample window
+                                     // for platforms not supporting `Radio::ReceiveAt()`.
+    uint16_t    mCslPeerShort;       // The CSL peer short address.
+    uint32_t    mCslSampleTimeRadio; // The CSL sample time of the current period based on radio time (lower 32-bit).
+    TimeMicro   mCslSampleTimeLocal; // The CSL sample time of the current period based on local time.
+    TimeMicro   mCslLastSync;        // The timestamp of the last successful CSL synchronization.
+    CslAccuracy mCslParentAccuracy;  // The parent's CSL accuracy (clock accuracy and uncertainty).
     TimerMicro  mCslTimer;
 #endif
 
 #if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
+    bool mIsWedSampling : 1;          // Indicates that the current time is in WED's sample window
+                                      // for platforms not supporting `Radio::ReceiveAt()`.
+    bool       mIsWedEnabled : 1;     // Indicates if the WED is enabled.
     uint32_t   mWakeupListenInterval; // The wake-up listen interval, in microseconds.
     uint32_t   mWakeupListenDuration; // The wake-up listen duration, in microseconds.
     uint8_t    mWakeupChannel;        // The wake-up sample channel.

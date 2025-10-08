@@ -41,15 +41,9 @@
 #include <openthread/trel.h>
 #include <openthread/platform/trel.h>
 
-#include "common/array.hpp"
 #include "common/locator.hpp"
-#include "common/tasklet.hpp"
-#include "common/time.hpp"
-#include "mac/mac_types.hpp"
-#include "net/ip6_address.hpp"
 #include "net/socket.hpp"
 #include "radio/trel_packet.hpp"
-#include "thread/mle_types.hpp"
 
 namespace ot {
 namespace Trel {
@@ -60,8 +54,6 @@ extern "C" void otPlatTrelHandleReceived(otInstance       *aInstance,
                                          uint8_t          *aBuffer,
                                          uint16_t          aLength,
                                          const otSockAddr *aSenderAddr);
-extern "C" void otPlatTrelHandleDiscoveredPeerInfo(otInstance *aInstance, const otPlatTrelPeerInfo *aInfo);
-
 /**
  * Represents a group of TREL counters.
  */
@@ -77,89 +69,8 @@ class Interface : public InstanceLocator
                                          uint8_t          *aBuffer,
                                          uint16_t          aLength,
                                          const otSockAddr *aSenderAddr);
-    friend void otPlatTrelHandleDiscoveredPeerInfo(otInstance *aInstance, const otPlatTrelPeerInfo *aInfo);
 
 public:
-    /**
-     * Represents information about a discovered TREL peer.
-     */
-    class Peer : public otTrelPeer
-    {
-        friend class Interface;
-        friend void otPlatTrelHandleDiscoveredPeerInfo(otInstance *aInstance, const otPlatTrelPeerInfo *aInfo);
-
-    public:
-        /**
-         * Returns the Extended MAC Address of the discovered TREL peer.
-         *
-         * @returns The Extended MAC Address of the TREL peer.
-         */
-        const Mac::ExtAddress &GetExtAddress(void) const { return static_cast<const Mac::ExtAddress &>(mExtAddress); }
-
-        /**
-         * Returns the Extended PAN Identifier of the discovered TREL peer.
-         *
-         * @returns The Extended PAN Identifier of the TREL peer.
-         */
-        const MeshCoP::ExtendedPanId &GetExtPanId(void) const
-        {
-            return static_cast<const MeshCoP::ExtendedPanId &>(mExtPanId);
-        }
-
-        /**
-         * Returns the IPv6 socket address of the discovered TREL peer.
-         *
-         * @returns The IPv6 socket address of the TREL peer.
-         */
-        const Ip6::SockAddr &GetSockAddr(void) const { return static_cast<const Ip6::SockAddr &>(mSockAddr); }
-
-        /**
-         * Set the IPv6 socket address of the discovered TREL peer.
-         *
-         * @param[in] aSockAddr   The IPv6 socket address.
-         */
-        void SetSockAddr(const Ip6::SockAddr &aSockAddr) { mSockAddr = aSockAddr; }
-
-        /**
-         * Indicates whether the peer matches a given Extended Address.
-         *
-         * @param[in] aExtAddress   A Extended Address to match with.
-         *
-         * @retval TRUE if the peer matches @p aExtAddress.
-         * @retval FALSE if the peer does not match @p aExtAddress.
-         */
-        bool Matches(const Mac::ExtAddress &aExtAddress) const { return GetExtAddress() == aExtAddress; }
-
-        /**
-         * Indicates whether the peer matches a given Socket Address.
-         *
-         * @param[in] aSockAddr   A Socket Address to match with.
-         *
-         * @retval TRUE if the peer matches @p aSockAddr.
-         * @retval FALSE if the peer does not match @p aSockAddr.
-         */
-        bool Matches(const Ip6::SockAddr &aSockAddr) const { return GetSockAddr() == aSockAddr; }
-
-    private:
-        class Info : public otPlatTrelPeerInfo
-        {
-        public:
-            bool                 IsRemoved(void) const { return mRemoved; }
-            const uint8_t       *GetTxtData(void) const { return mTxtData; }
-            uint16_t             GetTxtLength(void) const { return mTxtLength; }
-            const Ip6::SockAddr &GetSockAddr(void) const { return static_cast<const Ip6::SockAddr &>(mSockAddr); }
-        };
-
-        void SetExtAddress(const Mac::ExtAddress &aExtAddress) { mExtAddress = aExtAddress; }
-        void SetExtPanId(const MeshCoP::ExtendedPanId &aExtPanId) { mExtPanId = aExtPanId; }
-        void Log(const char *aAction) const;
-    };
-
-    /**
-     * Represents an iterator for iterating over TREL peer table entries.
-     */
-    typedef otTrelPeerIterator PeerIterator;
-
     /**
      * Enables or disables the TREL interface.
      *
@@ -192,29 +103,6 @@ public:
      * @retval FALSE if the TREL interface is disabled.
      */
     bool IsEnabled(void) const { return mEnabled; }
-
-    /**
-     * Initializes a peer table iterator.
-     *
-     * @param[in] aIterator   The iterator to initialize.
-     */
-    void InitIterator(PeerIterator &aIterator) const { aIterator = 0; }
-
-    /**
-     * Iterates over the peer table entries.
-     *
-     * @param[in] aIterator   The iterator. MUST be initialized.
-     *
-     * @returns A pointer to the next `Peer` entry or `nullptr` if no more entries in the table.
-     */
-    const Peer *GetNextPeer(PeerIterator &aIterator) const;
-
-    /**
-     * Returns the number of TREL peers.
-     *
-     * @returns  The number of TREL peers.
-     */
-    uint16_t GetNumberOfPeers(void) const { return mPeerTable.GetLength(); }
 
     /**
      * Sets the filter mode (enables/disables filtering).
@@ -256,64 +144,21 @@ public:
      */
     uint16_t GetUdpPort(void) const { return mUdpPort; }
 
-    /**
-     * Finds the TREL peer associated with a given Extended Address.
-     *
-     * @param[in] aExtAddress  The extended address.
-     *
-     * @returns The peer associated with @ aExtAddress, or `nullptr` if not found.
-     */
-    Peer *FindPeer(const Mac::ExtAddress &aExtAddress);
-
-    /**
-     * Notifies platform that a TREL packet is received from a peer using a different socket address than the one
-     * reported earlier.
-     *
-     * @param[in] aPeerSockAddr   The previously reported peer sock addr.
-     * @param[in] aRxSockAddr     The address of received packet from the same peer.
-     */
-    void NotifyPeerSocketAddressDifference(const Ip6::SockAddr &aPeerSockAddr, const Ip6::SockAddr &aRxSockAddr);
-
 private:
-#if OPENTHREAD_CONFIG_TREL_PEER_TABLE_SIZE != 0
-    static constexpr uint16_t kPeerTableSize = OPENTHREAD_CONFIG_TREL_PEER_TABLE_SIZE;
-#else
-    static constexpr uint16_t kPeerTableExtraEntries = 32;
-    static constexpr uint16_t kPeerTableSize         = Mle::kMaxRouters + Mle::kMaxChildren + kPeerTableExtraEntries;
-#endif
-    static const char kTxtRecordExtAddressKey[];
-    static const char kTxtRecordExtPanIdKey[];
-
-    typedef Array<Peer, kPeerTableSize, uint16_t> PeerTable;
-
     explicit Interface(Instance &aInstance);
 
     // Methods used by `Trel::Link`.
     void  Init(void);
-    void  HandleExtAddressChange(void);
-    void  HandleExtPanIdChange(void);
     Error Send(const Packet &aPacket, bool aIsDiscovery = false);
 
     // Callbacks from `otPlatTrel`.
     void HandleReceived(uint8_t *aBuffer, uint16_t aLength, const Ip6::SockAddr &aSenderAddr);
-    void HandleDiscoveredPeerInfo(const Peer::Info &aInfo);
 
-    void  RegisterService(void);
-    Error ParsePeerInfoTxtData(const Peer::Info       &aInfo,
-                               Mac::ExtAddress        &aExtAddress,
-                               MeshCoP::ExtendedPanId &aExtPanId) const;
-    Peer *GetNewPeerEntry(void);
-    void  RemovePeerEntry(Peer &aEntry);
-
-    using RegisterServiceTask = TaskletIn<Interface, &Interface::RegisterService>;
-
-    bool                mInitialized : 1;
-    bool                mEnabled : 1;
-    bool                mFiltered : 1;
-    RegisterServiceTask mRegisterServiceTask;
-    uint16_t            mUdpPort;
-    Packet              mRxPacket;
-    PeerTable           mPeerTable;
+    bool     mInitialized : 1;
+    bool     mEnabled : 1;
+    bool     mFiltered : 1;
+    uint16_t mUdpPort;
+    Packet   mRxPacket;
 };
 
 } // namespace Trel

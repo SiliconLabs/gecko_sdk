@@ -20,6 +20,10 @@
 #include "zigbee_app_framework_event.h"
 #include "ember-multi-network.h"
 #include "rail.h"
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
+#include "sl_rail_util_ieee802154_phy_select.h"
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT
 static sl_zigbee_event_t app_cli_event;
 
 #define MIN_PAYLOAD_LEN 2
@@ -39,6 +43,8 @@ void sl_high_datarate_phy_clr_stats_command(sl_cli_command_arg_t *arguments);
 void sl_high_datarate_phy_print_stats_command(sl_cli_command_arg_t *arguments);
 void sl_high_datarate_phy_tx_command(sl_cli_command_arg_t *arguments);
 void sl_high_datarate_phy_tx_sched_command(sl_cli_command_arg_t *arguments);
+void sl_high_datarate_phy_set_phy_command(sl_cli_command_arg_t *arguments);
+void sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca_command(sl_cli_command_arg_t *arguments);
 
 extern void(*sl_high_datarate_phy_rx_callback)(uint8_t * packet, uint8_t linkQuality, int8_t rssi, uint32_t pkt_rx_timestamp);
 extern void(*sl_high_datarate_phy_tx_complete_callback)(uint8_t mac_index, sl_status_t status, PacketHeader packet, uint8_t tag);
@@ -48,6 +54,8 @@ extern void sli_mac_lower_mac_set_high_datarate_csma_params (RAIL_CsmaConfig_t *
 extern RAIL_Status_t sl_mac_set_mode_switch_sync_detect(bool enable_f);
 extern void sli_mac_lower_mac_set_high_datarate_csma_params (RAIL_CsmaConfig_t *csmaParams);
 extern void sli_mac_lower_mac_set_high_datarate_phy_radio_priorities (EmberMultiprotocolPriorities *priorities);
+extern sl_status_t sli_mac_force_tx_after_failed_hdr_phy_cca(uint8_t hdr_csma_attempts, uint32_t min_bo_period_us, uint32_t max_bo_period_us);
+
 /**
  * Default receive callback function for High-BW-phy packets
  * Note that packet does not include 4 byte CRC
@@ -178,6 +186,11 @@ void sl_high_datarate_phy_config_radio_priorities(EmberMultiprotocolPriorities *
   sli_mac_lower_mac_set_high_datarate_phy_radio_priorities(priorities);
 }
 
+sl_status_t sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca(uint8_t hdr_csma_attempts, uint32_t min_bo_period_us, uint32_t max_bo_period_us)
+{
+  return sli_mac_force_tx_after_failed_hdr_phy_cca(hdr_csma_attempts, min_bo_period_us, max_bo_period_us);
+}
+
 /**
  * Transmits a High-BW-Phy packet consisting of <len> bytes of payload
  * Note that there is a 4 byte CRC which is tacked on later and is not part
@@ -215,6 +228,29 @@ void sl_high_datarate_phy_tx_command(sl_cli_command_arg_t *arguments)
 }
 
 /**
+ * @brief Forces a transmission after a failed high data rate PHY CCA command.
+ *
+ * This function is invoked via CLI to force a transmission attempt after the
+ * Clear Channel Assessment (CCA) fails in high data rate PHY mode. It retrieves
+ * the number of CSMA attempts and the minimum and maximum backoff periods from
+ * the CLI arguments, then calls the underlying PHY function to perform the operation.
+ * The result status is printed for debugging purposes.
+ *
+ * @param arguments Pointer to the CLI command arguments structure.
+ *   - arguments[0]: Number of CSMA attempts (uint8_t)
+ *   - arguments[1]: Minimum backoff period in microseconds (uint32_t)
+ *   - arguments[2]: Maximum backoff period in microseconds (uint32_t)
+ */
+void sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca_command(sl_cli_command_arg_t *arguments)
+{
+  uint8_t hdr_csma_attempts = sl_cli_get_argument_uint8(arguments, 0);
+  uint32_t min_bo_period_us = sl_cli_get_argument_uint32(arguments, 1);
+  uint32_t max_bo_period_us = sl_cli_get_argument_uint32(arguments, 2);
+  sl_status_t status = sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca(hdr_csma_attempts, min_bo_period_us, max_bo_period_us);
+  sl_zigbee_app_debug_println("force_tx_after_failed_hdr_phy_cca: Status = 0x%02X", status);
+}
+
+/**
  * CLI Command handler to transmit High-BW-Phy scheduled packet
  * @param[in] length Transmits a packet that contains <length> bytes using the high-BW-phy
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])
@@ -249,8 +285,9 @@ static void app_cli_event_handler(sl_zigbee_event_t *event)
     local_byte_array[i] = i - 1;
   }
   if (timestamp) {
-    sl_zigbee_app_debug_println("Status = 0x%02x", sl_high_datarate_phy_transmit_scheduled(local_byte_array, timestamp));
+    sl_status_t status = sl_high_datarate_phy_transmit_scheduled(local_byte_array, timestamp);
     timestamp = 0;
+    sl_zigbee_app_debug_println("Status = 0x%02x", status);
   } else {
     sl_zigbee_app_debug_println("Status = 0x%02x", sl_high_datarate_phy_transmit(local_byte_array));
   }
@@ -324,4 +361,23 @@ sl_status_t sl_high_datarate_phy_transmit_scheduled(uint8_t *payload, RAIL_Time_
     return SL_STATUS_INVALID_MODE;
   }
   return sl_mac_send_raw_high_datarate_phy_scheduled_message(sli_zigbee_get_current_network_index(), payload, timestamp);
+}
+
+static sl_rail_util_radio_config_t desired_radio_config = SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS;
+
+sl_rail_util_radio_config_t sl_rail_util_ieee802154_get_high_speed_phy_config(void)
+{
+  return desired_radio_config;
+}
+
+void sl_high_datarate_phy_set_phy_command(sl_cli_command_arg_t *arguments)
+{
+  uint8_t switch_rate = sl_cli_get_argument_uint8(arguments, 0);
+  if ( switch_rate == 1) {
+    desired_radio_config = SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC;
+  } else if (switch_rate == 2) {
+    desired_radio_config = SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_2MBPS;
+  } else {
+    sl_zigbee_app_debug_println("No HDR phy switch to the invalid value of %d Mps.", switch_rate);
+  }
 }

@@ -37,6 +37,7 @@ target_compile_definitions(openthread-ncp-ftd PRIVATE
 
 target_compile_options(openthread-ncp-ftd PRIVATE
     ${OT_CFLAGS}
+    -Wundef
 )
 
 target_include_directories(openthread-ncp-ftd PUBLIC ${OT_PUBLIC_INCLUDES} PRIVATE ${COMMON_INCLUDES})
@@ -49,6 +50,7 @@ target_link_libraries(openthread-ncp-ftd
         openthread-ftd
     PRIVATE
         ${OT_MBEDTLS}
+        openthread-cli-ftd
         openthread-hdlc
         openthread-spinel-ncp
         ot-config-ftd

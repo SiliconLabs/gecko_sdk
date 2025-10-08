@@ -7,6 +7,7 @@ description: Provides transmit API and receive callback for high-datarate phy an
 
 requires:
   - name: rail_util_ieee802154_high_speed_phy
+  - name: rail_util_ieee802154_phy_select
 provides:
   - name: zigbee_high_datarate_phy
 
@@ -95,3 +96,34 @@ template_contribution:
       help: Enable or disable reception of high datarate packets
     condition:
       - cli
+
+  - name: cli_command
+    value:
+      group: high_datarate_phy
+      name: switch_phy
+      argument:
+        - type: uint8
+          help: switch_phy args 1 (for 1 mbps) and 2 (for 2mbps)
+      handler: sl_high_datarate_phy_set_phy_command
+      help: Switch high datarate phy rate betwen 1 Mbps and 2 Mbps for images built with SL_RAIL_UTIL_IEEE802154_RADIO_CONFIG_2P4_1MBPS_FEC_SUPPORTED set to 1
+    condition:
+      - cli
+
+  - name: cli_command
+    value:
+      group: high_datarate_phy
+      name: force_tx_after_failed_hdr_phy_cca
+      argument:
+        - type: uint8
+          help: hdr_csma_attempts (number of CSMA retries)
+        - type: uint32
+          help: min_bo_period_us (minimum random backoff in microseconds)
+        - type: uint32
+          help: max_bo_period_us (maximum random backoff in microseconds)
+      handler: sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca_command
+      help: Force TX after failed HDR PHY CCA with specified CSMA attempts and backoff periods
+    condition:
+      - cli
+metadata:
+  sbom:
+    license: MSLA

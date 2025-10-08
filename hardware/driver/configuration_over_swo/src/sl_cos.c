@@ -43,6 +43,7 @@
 #endif // SL_CATALOG_RAIL_UTIL_PTI_PRESENT
 
 #include "sl_status.h"
+#include "sl_common.h"
 #include "sl_debug_swo.h"
 
 /*******************************************************************************
@@ -234,7 +235,7 @@ static uint32_t sli_cos_pti_config(uint32_t baudrate,
 #if defined (SLI_COS_UARTDRV_VCOM_PRESENT)
 static void sli_cos_vcom_write(void)
 {
-  COS_ConfigOption_t Cos_Uart_Config;
+  COS_ConfigOption_t Cos_Uart_Config = {0};
   uartdrv_handle = sl_uartdrv_get_default();
   uint32_t baudrate = 0;
 
@@ -264,7 +265,7 @@ static void sli_cos_vcom_write(void)
 #if defined (SL_CATALOG_RAIL_UTIL_PTI_PRESENT)
 static void sli_cos_pti_write(void)
 {
-  COS_ConfigOption_t Cos_Pti_Config;
+  COS_ConfigOption_t Cos_Pti_Config = {0};
 
   Cos_Pti_Config.optionType = COS_CONFIG_OPTION_TYPE_PTI;
   Cos_Pti_Config.optionValue = sli_cos_pti_config(SL_RAIL_UTIL_PTI_BAUD_RATE_HZ, SL_RAIL_UTIL_PTI_MODE, COS_CONFIG_PTI_INTERFACE_0);
@@ -281,7 +282,7 @@ void sl_cos_config_pti(uint32_t baudrate,
                        COS_PtiMode_t mode,
                        COS_PtiInterface_t interface)
 {
-  COS_ConfigOption_t Cos_Pti_Config;
+  COS_ConfigOption_t Cos_Pti_Config = {0};
   uint32_t config = 0;
 
   Cos_Pti_Config.optionType = COS_CONFIG_OPTION_TYPE_PTI;
@@ -303,7 +304,7 @@ void sl_cos_config_pti(uint32_t baudrate,
 void sl_cos_config_vcom(uint32_t baudrate,
                         uint8_t flow_control)
 {
-  COS_ConfigOption_t Cos_Uart_Config;
+  COS_ConfigOption_t Cos_Uart_Config = {0};
 
   Cos_Uart_Config.optionType = COS_CONFIG_OPTION_TYPE_UART;
   Cos_Uart_Config.optionValue = sli_cos_vcom_config(baudrate, flow_control);
@@ -322,6 +323,9 @@ static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
   uint32_t i;
   uint8_t  output_byte;
   uint8_t  seq_nbr = 0;
+
+  // Ensure buffer_length is within expected bounds
+  EFM_ASSERT(buffer_length == sizeof(COS_ConfigOption_t));
 
   // Full length is 2 square braces, 1 byte length and 2 byte CRC
   packet_length = ( (uint32_t)buffer_length) + 9;

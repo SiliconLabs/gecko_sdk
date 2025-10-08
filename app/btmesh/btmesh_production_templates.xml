@@ -13,6 +13,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_ncp_empty/btmesh_ncp_empty.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_ncp_empty_v1_1" label="Bluetooth Mesh - NCP Empty v1.1" description="An NCP Target C application that makes it possible for the NCP Host Controller to access the Bluetooth Mesh stack via UART. It provides access to the host layer via BGAPI and not to the link layer via HCI. Contains models from BT mesh specification 1.1.&#xA;">
@@ -28,6 +30,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_ncp_empty/btmesh_ncp_empty_v1_1.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_ncp_empty" label="Bluetooth Mesh - NCP Empty" description="Demonstrates the bare minimum needed for an NCP Target C application.  This example is recommended for EFR32xG22, which has limited RAM and flash, and therefore some of the stack classes are disabled by default.&#xA;">
@@ -43,6 +47,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_ncp_empty/btmesh_ncp_empty_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_csr_generator" label="Bluetooth Mesh - SoC CSR Generator (Secure Vault)" description="Certificate generating firmware example. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority.&#xA;">
@@ -58,6 +64,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_csr_generator/btmesh_soc_csr_generator.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.&#xA;">
@@ -73,6 +81,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_dfu_distributor" label="Bluetooth Mesh - SoC DFU Distributor" description="Demonstrates the Firmware Distributor role based on the BT Mesh Model specification. Distributor is responsible for delivering new firmware images to the Target nodes and monitoring the progress of the firmware update.&#xA;">
@@ -88,6 +98,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_dfu_distributor/btmesh_soc_dfu_distributor_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_empty" label="Bluetooth Mesh - SoC Empty" description="Demonstrates the bare minimum needed for a Bluetooth Mesh C application. The application starts Unprovisioned Device Beaconing after booting, and then waits to be provisioned.&#xA;">
@@ -103,6 +115,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_empty/btmesh_soc_empty.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_empty_cbp" label="Bluetooth Mesh - SoC Empty with Certificate-Based Provisioning support" description="Demonstrates the bare minimum needed for a Bluetooth Mesh C application that allows Certificate-Based Provisioning (CBP). The application starts Unprovisioned Device Beaconing after boot waiting to be provisioned to a Mesh Network.&#xA;">
@@ -118,6 +132,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_empty_cbp/btmesh_soc_empty_cbp.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_ctl" label="Bluetooth Mesh - SoC Light CTL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, color temperature, and delta UV can be set.&#xA;">
@@ -133,6 +149,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_ctl/btmesh_soc_light_ctl_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_ctl" label="Bluetooth Mesh - SoC Light CTL" description="An out-of-the-box software demo where the LEDs of the Thunderboard Sense 2 board can be switched on and off, and their lighting intensity, color temperature, and delta UV can be set.&#xA;">
@@ -148,6 +166,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_ctl/btmesh_soc_light_ctl_brd4166a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_ctl" label="Bluetooth Mesh - SoC Light CTL" description="An out-of-the-box software demo where the LEDs of the WSTK can be switched on and off, and their lighting intensity, color temperature, and delta UV can be set.&#xA;">
@@ -163,6 +183,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_ctl/btmesh_soc_light_ctl_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_ctl" label="Bluetooth Mesh - SoC Light CTL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, color temperature, and delta UV can be set.&#xA;">
@@ -178,6 +200,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_ctl/btmesh_soc_light_ctl_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_ctl" label="Bluetooth Mesh - SoC Light CTL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, color temperature, and delta UV can be set.&#xA;">
@@ -193,6 +217,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_ctl/btmesh_soc_light_ctl_log_single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_hsl" label="Bluetooth Mesh - SoC Light HSL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, hue, and saturation can be set. The example also tries to establish friendship as a Friend node.&#xA;">
@@ -208,6 +234,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_hsl/btmesh_soc_light_hsl_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_hsl" label="Bluetooth Mesh - SoC Light HSL" description="An out-of-the-box software demo where the LEDs of the Thunderboard Sense 2 can be switched on and off, and their lighting intensity, hue, and saturation can be set. The example also tries to establish friendship as a Friend node.&#xA;">
@@ -223,6 +251,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_hsl/btmesh_soc_light_hsl_brd4166a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_hsl" label="Bluetooth Mesh - SoC Light HSL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, hue, and saturation can be set. The example also tries to establish friendship as a Friend node.&#xA;">
@@ -238,6 +268,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_hsl/btmesh_soc_light_hsl_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_hsl" label="Bluetooth Mesh - SoC Light HSL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, hue, and saturation can be set. The example also tries to establish friendship as a Friend node.&#xA;">
@@ -253,6 +285,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_hsl/btmesh_soc_light_hsl_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_light_hsl" label="Bluetooth Mesh - SoC Light HSL" description="An out-of-the-box software demo where the LEDs of the mainboard can be switched on and off, and their lighting intensity, hue, and saturation can be set. The example also tries to establish friendship as a Friend node.&#xA;">
@@ -268,6 +302,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_light_hsl/btmesh_soc_light_hsl_log_single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_lightness_controller" label="Bluetooth Mesh - NLC Basic Lightness Controller" description="An out-of-the-box software demo where the device acts as a Basic Lightness Controller in a Networked Lighting Control (NLC) system. The device listens to messages from other NLC devices, namely Occupancy Sensor, Ambient Light Sensor, Dimming Control and Basic Scene Selector nodes.&#xA;This project uses the RGB LED on the xG24 Dev Kit.&#xA;">
@@ -283,6 +319,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_lightness_controller/btmesh_soc_nlc_basic_lightness_controller_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_lightness_controller" label="Bluetooth Mesh - NLC Basic Lightness Controller" description="An out-of-the-box software demo where the device acts as a Basic Lightness Controller in a Networked Lighting Control (NLC) system. The device listens to messages from other NLC devices, namely Occupancy Sensor, Ambient Light Sensor, Dimming Control and Basic Scene Selector nodes.&#xA;This project uses the RGB LEDs on the Thunderboard Sense 2 board.&#xA;">
@@ -298,6 +336,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_lightness_controller/btmesh_soc_nlc_basic_lightness_controller_brd4166a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_lightness_controller" label="Bluetooth Mesh - NLC Basic Lightness Controller" description="An out-of-the-box software demo where the device acts as a Basic Lightness controller in a Networked Lighting Control (NLC) system. The device listens to messages from other NLC devices, namely Occupancy Sensor, Ambient Light Sensor, Dimming Control and Basic Scene Selector nodes.&#xA;This project uses the LEDs and display on the WSTK.&#xA;">
@@ -313,6 +353,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_lightness_controller/btmesh_soc_nlc_basic_lightness_controller_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_lightness_controller" label="Bluetooth Mesh - NLC Basic Lightness Controller" description="An out-of-the-box software demo where the device acts as a Basic Lightness controller in a Networked Lighting Control (NLC) system. The device listens to messages from other NLC devices, namely Occupancy Sensor, Ambient Light Sensor, Dimming Control and Basic Scene Selector nodes.&#xA;This project uses the LEDs on the mainboard.&#xA;">
@@ -328,6 +370,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_lightness_controller/btmesh_soc_nlc_basic_lightness_controller_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_lightness_controller" label="Bluetooth Mesh - NLC Basic Lightness Controller" description="An out-of-the-box software demo where the device acts as a Basic Lightness controller in a Networked Lighting Control (NLC) system. The device listens to messages from other NLC devices, namely Occupancy Sensor, Ambient Light Sensor, Dimming Control and Basic Scene Selector nodes.&#xA;This project uses the LEDs on the mainboard.&#xA;">
@@ -343,6 +387,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_lightness_controller/btmesh_soc_nlc_basic_lightness_controller_single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_scene_selector" label="Bluetooth Mesh - NLC Basic Scene Selector" description="An out-of-the-box Software Demo where the device acts as a Basic Scene Selector in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by scene recall requests.&#xA;">
@@ -358,6 +404,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_scene_selector/btmesh_soc_nlc_basic_scene_selector_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_scene_selector" label="Bluetooth Mesh - NLC Basic Scene Selector" description="An out-of-the-box Software Demo where the device acts as a Basic Scene Selector in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by scene recall requests.&#xA;">
@@ -373,6 +421,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_scene_selector/btmesh_soc_nlc_basic_scene_selector_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_scene_selector" label="Bluetooth Mesh - NLC Basic Scene Selector" description="An out-of-the-box Software Demo where the device acts as a Basic Scene Selector in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by scene recall requests.&#xA;">
@@ -388,6 +438,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_scene_selector/btmesh_soc_nlc_basic_scene_selector_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_basic_scene_selector_low_power" label="Bluetooth Mesh - NLC Basic Scene Selector Low Power" description="An out-of-the-box Software Demo where the device acts as a Basic Scene Selector in a Networked Lighting Control (NLC) system. It is optimized for low current consumption with disabled CLI, logging, and LCD. Push Button presses control Basic Lightness Controllers in the network by scene recall requests.&#xA;">
@@ -403,6 +455,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_basic_scene_selector/btmesh_soc_nlc_basic_scene_selector_low_power.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_dimming_control" label="Bluetooth Mesh - NLC Dimming Control" description="An out-of-the-box Software Demo where the device acts as a Dimming Control in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by Generic Level Delta or Generic On/Off messages.&#xA;">
@@ -418,6 +472,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_dimming_control/btmesh_soc_nlc_dimming_control_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_dimming_control" label="Bluetooth Mesh - NLC Dimming Control" description="An out-of-the-box Software Demo where the device acts as a Dimming Control in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by Generic Level Delta or Generic On/Off messages.&#xA;">
@@ -433,6 +489,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_dimming_control/btmesh_soc_nlc_dimming_control_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_dimming_control" label="Bluetooth Mesh - NLC Dimming Control" description="An out-of-the-box Software Demo where the device acts as a Dimming Control in a Networked Lighting Control (NLC) system. Push Button presses control Basic Lightness Controllers in the network by Generic Level Delta or Generic On/Off messages.&#xA;">
@@ -448,6 +506,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_dimming_control/btmesh_soc_nlc_dimming_control_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_dimming_control_low_power" label="Bluetooth Mesh - NLC Dimming Control Low Power" description="An out-of-the-box Software Demo where the device acts as a Dimming Control in a Networked Lighting Control (NLC) system. It is optimized for low current consumption with disabled CLI, logging, and LCD. Push Button presses control Basic Lightness Controllers in the network by Generic Level Delta or Generic On/Off messages.&#xA;">
@@ -463,6 +523,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_dimming_control/btmesh_soc_nlc_dimming_control_low_power.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor" description="An out-of-the-box Software Demo where the device acts as an Ambient Light Sensor in a Networked Lighting Control (NLC) system. The device measures ambient light and sends these measurements to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -478,6 +540,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor" description="An out-of-the-box Software Demo where the device acts as an Ambient Light Sensor in a Networked Lighting Control (NLC) system. The device measures ambient light and sends these measurements to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -493,6 +557,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_brd2602a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor (Mock)" description="An out-of-the-box Software Demo where the device acts as an ambient light sensor in a Networked Lighting Control (NLC) system. The device simulates ambient light measurements and sends these to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -508,6 +574,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_mock_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor (Mock)" description="An out-of-the-box Software Demo where the device acts as an ambient light sensor in a Networked Lighting Control (NLC) system. The device simulates ambient light measurements and sends these to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -523,6 +591,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_mock_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor (Mock)" description="An out-of-the-box Software Demo where the device acts as an ambient light sensor in a Networked Lighting Control (NLC) system. The device simulates ambient light measurements and sends these to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -538,6 +608,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_mock_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor" description="An out-of-the-box Software Demo where the device acts as an Ambient Light Sensor in a Networked Lighting Control (NLC) system. The device measures ambient light and sends these measurements to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -553,6 +625,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_tbbg22a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor" description="An out-of-the-box Software Demo where the device acts as an Ambient Light Sensor in a Networked Lighting Control (NLC) system. The device measures ambient light and sends these measurements to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -568,6 +642,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_tbbg22b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_ambient_light" label="Bluetooth Mesh - NLC Ambient Light Sensor" description="An out-of-the-box Software Demo where the device acts as an Ambient Light Sensor in a Networked Lighting Control (NLC) system. The device measures ambient light and sends these measurements to the network. Properly configured NLC Basic Lightness Controllers then can act on the received data.&#xA;">
@@ -583,6 +659,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_ambient_light/btmesh_soc_nlc_sensor_ambient_light_tbsense.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -598,6 +676,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -613,6 +693,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_brd2602a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -628,6 +710,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -643,6 +727,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -658,6 +744,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_mock_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -673,6 +761,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_mock_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -688,6 +778,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_tbbg22a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -703,6 +795,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_tbbg22b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_nlc_sensor_occupancy" label="Bluetooth Mesh - NLC Occupancy Sensor" description="An out-of-the-box Software Demo where the device acts as an Occupancy Sensor in a Networked Lighting Control (NLC) system. Push Button presses imitate people count changes which can control a properly configured NLC Basic Lightness Controller.&#xA;">
@@ -718,6 +812,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_nlc_sensor_occupancy/btmesh_soc_nlc_sensor_occupancy_tbsense.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It collects and displays sensor measurement data from remote device(s) (e.g., btmesh_soc_sensor_server).&#xA;">
@@ -733,6 +829,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_client/btmesh_soc_sensor_client_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It collects and displays sensor measurement data from remote device(s) (e.g., btmesh_soc_sensor_server).&#xA;">
@@ -748,6 +846,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_client/btmesh_soc_sensor_client_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_client" label="Bluetooth Mesh - SoC Sensor Client" description="This example demonstrates the Bluetooth Mesh Sensor Client Model. It collects and displays sensor measurement data from remote device(s) (e.g., btmesh_soc_sensor_server).&#xA;">
@@ -763,6 +863,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_client/btmesh_soc_sensor_client_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -778,6 +880,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_brd2601b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -793,6 +897,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_brd2602a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -808,6 +914,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -823,6 +931,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. If available, it measures CPU temperature and uses that data as temperature reading, otherwise it sends mocked temperature data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -838,6 +948,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_mock_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. If available, it measures CPU temperature and uses that data as temperature reading, otherwise it sends mocked temperature data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -853,6 +965,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_mock_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -868,6 +982,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_tbbg22a.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -883,6 +999,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_tbbg22b.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_sensor_thermometer" label="Bluetooth Mesh - SoC Sensor Thermometer" description="This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor Setup Server Model. It measures temperature and sends the measurement data to a remote device (e.g., btmesh_soc_sensor_client).&#xA;">
@@ -898,6 +1016,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_sensor_thermometer/btmesh_soc_sensor_thermometer_tbsense.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_switch_ctl" label="Bluetooth Mesh - SoC Switch CTL" description="An out-of-the-box Software Demo where the device acts as a switch using the Light CTL Client Model. Push Button presses or CLI commands can control the lightness and color temperature of the LEDs on a remote device.&#xA;Note - this example is not compatible with the Dimming Control NLC Profile.&#xA;">
@@ -913,6 +1033,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_switch_ctl/btmesh_soc_switch_ctl_display.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_switch_ctl" label="Bluetooth Mesh - SoC Switch CTL" description="An out-of-the-box Software Demo where the device acts as a switch using the Light CTL Client Model. Push Button presses or CLI commands can control the lightness and color temperature of the LEDs on a remote device.&#xA;Note - this example is not compatible with the Dimming Control NLC Profile.&#xA;">
@@ -928,6 +1050,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_switch_ctl/btmesh_soc_switch_ctl_log.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_switch_ctl" label="Bluetooth Mesh - SoC Switch CTL" description="An out-of-the-box Software Demo where the device acts as a switch using the Light CTL Client Model. Push Button presses or CLI commands can control the lightness and color temperature of the LEDs on a remote device.&#xA;Note - this example is not compatible with the Dimming Control NLC Profile.&#xA;">
@@ -943,6 +1067,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_switch_ctl/btmesh_soc_switch_ctl_log_xg22.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
   <descriptors name="btmesh_soc_switch_ctl_low_power" label="Bluetooth Mesh - SoC Switch CTL Low Power" description="An out-of-the-box Software Demo where the device acts as a switch using the Light CTL Client Model. It is optimized for low current consumption with disabled CLI, logging, and LCD. Push Button presses or CLI commands can control the lightness and color temperature of the LEDs on a remote device.&#xA;Note - this example is not compatible with the Dimming Control NLC Profile.&#xA;">
@@ -958,6 +1084,8 @@
     <properties key="category" value="Bluetooth Mesh Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/btmesh/example/btmesh_soc_switch_ctl/btmesh_soc_switch_ctl_low_power.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth\ Mesh"/>
   </descriptors>
 </model:MDescriptors>

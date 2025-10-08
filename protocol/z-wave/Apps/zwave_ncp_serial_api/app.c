@@ -518,6 +518,11 @@ appFileSystemInit(void)
     // write defualt values
     SaveApplicationSettings(AppNodeInfo->DeviceOptionsMask, AppNodeInfo->NodeType.generic, AppNodeInfo->NodeType.specific);
     // change the 20dBm tx power setting according to the application configuration
+    zpal_tx_power_t iTxPowerMaxSupported;
+    iTxPowerMaxSupported = GetMaxSupportedTxPower();
+    if (RadioConfig->iTxPowerLevelMaxLR > iTxPowerMaxSupported) {
+      RadioConfig->iTxPowerLevelMaxLR = iTxPowerMaxSupported;
+    }
     SaveApplicationMaxLRTxPwr(RadioConfig->iTxPowerLevelMaxLR);
 
     SaveApplicationEnablePTI(RadioConfig->radio_debug_enable);

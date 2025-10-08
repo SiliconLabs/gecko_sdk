@@ -1,3 +1,7 @@
-Gecko Platform 4.4.5.0
-- Targeted quality improvements and bug fixes.
-
+Gecko Platform 4.4.7
+- Peripherals
+  - Fixed a possible lock-up on Series 1 devices when exiting EM2 deep sleep with voltage scaling enabled.
+- Security
+  - Added separate components for the legacy Mbed TLS SHA224 and SHA384 algorithms.
+- RAIL Library 
+  - Targeted quality improvements and bug fixes. 

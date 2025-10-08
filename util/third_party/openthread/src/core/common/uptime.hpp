@@ -36,8 +36,8 @@
 
 #include "openthread-core-config.h"
 
-#if !OPENTHREAD_CONFIG_UPTIME_ENABLE && OPENTHREAD_FTD
-#error "OPENTHREAD_CONFIG_UPTIME_ENABLE is required for FTD"
+#if (OPENTHREAD_FTD || OPENTHREAD_MTD) && !OPENTHREAD_CONFIG_UPTIME_ENABLE
+#error "OPENTHREAD_CONFIG_UPTIME_ENABLE is required for FTD or MTD builds"
 #endif
 
 #if OPENTHREAD_CONFIG_UPTIME_ENABLE
@@ -100,6 +100,13 @@ public:
      * @param[in]     aIncludeMsec   Whether to include `.<mmm>` milliseconds in the string.
      */
     static void UptimeToString(uint64_t aUptime, StringWriter &aWriter, bool aIncludeMsec);
+
+    /**
+     * Returns the current device uptime in seconds.
+     *
+     * @returns The uptime in seconds.
+     */
+    uint32_t GetUptimeInSeconds(void) const;
 
     /**
      * Converts a given uptime as number of milliseconds to number of seconds.

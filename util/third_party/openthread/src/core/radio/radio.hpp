@@ -540,7 +540,7 @@ public:
      * @retval  kErrorFailed         Other platform specific errors.
      * @retval  kErrorNone           Successfully enabled or disabled CSL.
      */
-    Error EnableCsl(uint32_t aCslPeriod, otShortAddress aShortAddr, const otExtAddress *aExtAddr);
+    Error EnableCsl(uint32_t aCslPeriod, Mac::ShortAddress aShortAddr, const Mac::ExtAddress &aExtAddr);
 
     /**
      * Resets CSL receiver in radio.
@@ -980,9 +980,9 @@ inline void Radio::UpdateCslSampleTime(uint32_t aCslSampleTime)
     otPlatRadioUpdateCslSampleTime(GetInstancePtr(), aCslSampleTime);
 }
 
-inline Error Radio::EnableCsl(uint32_t aCslPeriod, otShortAddress aShortAddr, const otExtAddress *aExtAddr)
+inline Error Radio::EnableCsl(uint32_t aCslPeriod, Mac::ShortAddress aShortAddr, const Mac::ExtAddress &aExtAddr)
 {
-    return otPlatRadioEnableCsl(GetInstancePtr(), aCslPeriod, aShortAddr, aExtAddr);
+    return otPlatRadioEnableCsl(GetInstancePtr(), aCslPeriod, aShortAddr, &aExtAddr);
 }
 
 inline Error Radio::ResetCsl(void) { return otPlatRadioResetCsl(GetInstancePtr()); }
@@ -1019,11 +1019,6 @@ inline Error Radio::AddSrcMatchShortEntry(Mac::ShortAddress aShortAddress)
 inline Error Radio::ClearSrcMatchShortEntry(Mac::ShortAddress aShortAddress)
 {
     return otPlatRadioClearSrcMatchShortEntry(GetInstancePtr(), aShortAddress);
-}
-
-inline Error Radio::ClearSrcMatchExtEntry(const Mac::ExtAddress &aExtAddress)
-{
-    return otPlatRadioClearSrcMatchExtEntry(GetInstancePtr(), &aExtAddress);
 }
 
 inline void Radio::ClearSrcMatchShortEntries(void) { otPlatRadioClearSrcMatchShortEntries(GetInstancePtr()); }
@@ -1092,7 +1087,7 @@ inline Error Radio::ReceiveAt(uint8_t, uint32_t, uint32_t) { return kErrorNone; 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 inline void Radio::UpdateCslSampleTime(uint32_t) {}
 
-inline Error Radio::EnableCsl(uint32_t, otShortAddress aShortAddr, const otExtAddress *)
+inline Error Radio::EnableCsl(uint32_t, Mac::ShortAddress aShortAddr, const Mac::ExtAddress &)
 {
     return kErrorNotImplemented;
 }

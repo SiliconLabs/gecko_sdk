@@ -13,10 +13,6 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zw_zaf/zaf_config.h
     file_id: zaf_config
     condition: [device_series_1]
-  # For series 2
-  - path: protocol/z-wave/platform/SiliconLabs/PAL/config/zw_zaf/s2/zaf_config.h
-    file_id: zaf_config
-    condition: [device_series_2]
 include:
   - path: "protocol/z-wave/ZAF/configuration/inc/"
     file_list:

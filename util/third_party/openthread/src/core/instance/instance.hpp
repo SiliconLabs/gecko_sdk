@@ -122,7 +122,6 @@
 #include "thread/link_quality.hpp"
 #include "thread/mesh_forwarder.hpp"
 #include "thread/mle.hpp"
-#include "thread/mle_router.hpp"
 #include "thread/mlr_manager.hpp"
 #include "thread/network_data_local.hpp"
 #include "thread/network_data_notifier.hpp"
@@ -354,24 +353,6 @@ public:
     static Utils::Heap &GetHeap(void);
 #endif
 
-#if OPENTHREAD_CONFIG_COAP_API_ENABLE
-    /**
-     * Returns a reference to application COAP object.
-     *
-     * @returns A reference to the application COAP object.
-     */
-    Coap::Coap &GetApplicationCoap(void) { return mApplicationCoap; }
-#endif
-
-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-    /**
-     * Returns a reference to application COAP Secure object.
-     *
-     * @returns A reference to the application COAP Secure object.
-     */
-    Coap::ApplicationCoapSecure &GetApplicationCoapSecure(void) { return mApplicationCoapSecure; }
-#endif
-
 #if OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
     /**
      * Enables/disables the "DNS name compressions" mode.
@@ -569,7 +550,7 @@ private:
     Lowpan::Lowpan                 mLowpan;
     Mac::Mac                       mMac;
     MeshForwarder                  mMeshForwarder;
-    Mle::MleRouter                 mMleRouter;
+    Mle::Mle                       mMle;
     Mle::DiscoverScanner           mDiscoverScanner;
     AddressResolver                mAddressResolver;
 
@@ -672,7 +653,7 @@ private:
 #endif
 
 #if OPENTHREAD_CONFIG_COAP_API_ENABLE
-    Coap::Coap mApplicationCoap;
+    Coap::ApplicationCoap mApplicationCoap;
 #endif
 
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
@@ -788,24 +769,20 @@ template <> inline Crypto::Storage::KeyRefManager &Instance::Get(void) { return 
 template <> inline RadioSelector &Instance::Get(void) { return mRadioSelector; }
 #endif
 
-template <> inline Mle::Mle &Instance::Get(void) { return mMleRouter; }
-
-#if OPENTHREAD_FTD
-template <> inline Mle::MleRouter &Instance::Get(void) { return mMleRouter; }
-#endif
+template <> inline Mle::Mle &Instance::Get(void) { return mMle; }
 
 template <> inline Mle::DiscoverScanner &Instance::Get(void) { return mDiscoverScanner; }
 
-template <> inline NeighborTable &Instance::Get(void) { return mMleRouter.mNeighborTable; }
+template <> inline NeighborTable &Instance::Get(void) { return mMle.mNeighborTable; }
 
 #if OPENTHREAD_FTD
-template <> inline ChildTable &Instance::Get(void) { return mMleRouter.mChildTable; }
+template <> inline ChildTable &Instance::Get(void) { return mMle.mChildTable; }
 
-template <> inline RouterTable &Instance::Get(void) { return mMleRouter.mRouterTable; }
+template <> inline RouterTable &Instance::Get(void) { return mMle.mRouterTable; }
 #endif
 
 #if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-template <> inline WakeupTxScheduler &Instance::Get(void) { return mMleRouter.mWakeupTxScheduler; }
+template <> inline WakeupTxScheduler &Instance::Get(void) { return mMle.mWakeupTxScheduler; }
 #endif
 
 template <> inline Ip6::Netif &Instance::Get(void) { return mThreadNetif; }
@@ -822,6 +799,10 @@ template <> inline Mac::SubMac &Instance::Get(void) { return mMac.mLinks.mSubMac
 template <> inline Trel::Link &Instance::Get(void) { return mMac.mLinks.mTrel; }
 
 template <> inline Trel::Interface &Instance::Get(void) { return mMac.mLinks.mTrel.mInterface; }
+
+template <> inline Trel::PeerTable &Instance::Get(void) { return mMac.mLinks.mTrel.mPeerTable; }
+
+template <> inline Trel::PeerDiscoverer &Instance::Get(void) { return mMac.mLinks.mTrel.mPeerDiscoverer; }
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
@@ -1103,6 +1084,14 @@ template <> inline Srp::Server &Instance::Get(void) { return mSrpServer; }
 template <> inline Srp::AdvertisingProxy &Instance::Get(void) { return mSrpAdvertisingProxy; }
 #endif
 #endif // OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
+
+#if OPENTHREAD_CONFIG_COAP_API_ENABLE
+template <> inline Coap::ApplicationCoap &Instance::Get(void) { return mApplicationCoap; }
+#endif
+
+#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
+template <> inline Coap::ApplicationCoapSecure &Instance::Get(void) { return mApplicationCoapSecure; }
+#endif
 
 #if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
 template <> inline Ble::BleSecure &Instance::Get(void) { return mApplicationBleSecure; }

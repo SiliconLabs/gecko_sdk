@@ -203,6 +203,8 @@ set(COMMON_SOURCES
     radio/trel_interface.cpp
     radio/trel_link.cpp
     radio/trel_packet.cpp
+    radio/trel_peer.cpp
+    radio/trel_peer_discoverer.cpp
     thread/address_resolver.cpp
     thread/announce_begin_server.cpp
     thread/announce_sender.cpp
@@ -224,7 +226,7 @@ set(COMMON_SOURCES
     thread/mesh_forwarder_ftd.cpp
     thread/mesh_forwarder_mtd.cpp
     thread/mle.cpp
-    thread/mle_router.cpp
+    thread/mle_ftd.cpp
     thread/mle_tlvs.cpp
     thread/mle_types.cpp
     thread/mlr_manager.cpp
@@ -246,10 +248,12 @@ set(COMMON_SOURCES
     thread/router.cpp
     thread/router_table.cpp
     thread/src_match_controller.cpp
+    thread/thread_link_info.cpp
     thread/thread_netif.cpp
     thread/time_sync_service.cpp
     thread/tmf.cpp
     thread/uri_paths.cpp
+    thread/version.cpp
     utils/channel_manager.cpp
     utils/channel_monitor.cpp
     utils/flash.cpp

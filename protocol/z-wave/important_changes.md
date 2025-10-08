@@ -3,6 +3,15 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.7 {#section-7-21-7}
+
+## 800 Series Hardware Support
+800 series hardware is no longer supported in the Gecko SDK.
+Please use the Simplicity SDK to develop applications for EFR32ZG23, EFR32ZG28 and ZGM230S chips.
+
+## Set Default APP_MAX_TX_POWER_LR to 20dBm
+Default long range output power is set to 20dBm. During startup, this value is limited by the capability of the chip (if APP_MAX_TX_POWER_LR is set to 20dBm, it will be overwite at startup on 14dBm capable chip).
+
 # 7.21.6 {#section-7-21-6}
 ## Restore NVM handler after backup/restore operations
 To avoid NVM acces by the stack or the application during backup/restore operations, the NVM3 handler is closed by the SAPI command NVMBackupRestoreOperationOpen. However it was never restored.

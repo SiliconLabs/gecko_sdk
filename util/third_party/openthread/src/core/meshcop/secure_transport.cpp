@@ -311,6 +311,13 @@ Error SecureSession::Setup(void)
         VerifyOrExit(rval == 0);
     }
 
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    if (!mIsServer)
+    {
+        mbedtls_ssl_set_hostname(&mSsl, nullptr);
+    }
+#endif
+
     mReceiveMessage = nullptr;
     mMessageSubType = Message::kSubTypeNone;
 
@@ -676,13 +683,13 @@ SecureTransport::SecureTransport(Instance &aInstance, LinkSecurityMode aLayerTwo
     OT_UNUSED_VARIABLE(mVerifyPeerCertificate);
 }
 
-Error SecureTransport::Open(void)
+Error SecureTransport::Open(Ip6::NetifIdentifier aNetifIdentifier)
 {
     Error error;
 
     VerifyOrExit(!mIsOpen, error = kErrorAlready);
 
-    SuccessOrExit(error = mSocket.Open(Ip6::kNetifUnspecified));
+    SuccessOrExit(error = mSocket.Open(aNetifIdentifier));
     mIsOpen                      = true;
     mRemainingConnectionAttempts = mMaxConnectionAttempts;
 

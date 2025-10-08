@@ -423,13 +423,13 @@ void sli_zigbee_af_mfglib_set_options(SL_CLI_COMMAND_ARG)
 void sli_zigbee_af_mfglib_set_ctune_command(SL_CLI_COMMAND_ARG)
 {
   uint16_t ctune = sl_cli_get_argument_uint16(arguments, 0);
-  EmberStatus status = (EmberStatus)ezspSetConfigurationValue(EZSP_CONFIG_CTUNE_VALUE, ctune);
+  EzspStatus status = ezspSetConfigurationValue(EZSP_CONFIG_CTUNE_VALUE, ctune);
   emberAfCorePrintln("%s set ctune, status 0x%02X", PLUGIN_NAME, status);
 }
 
 void sli_zigbee_af_mfglib_get_ctune_command(SL_CLI_COMMAND_ARG)
 {
   uint16_t ctune = 0;
-  EmberStatus status = (EmberStatus)ezspGetConfigurationValue(EZSP_CONFIG_CTUNE_VALUE, &ctune);
-  emberAfCorePrintln("%s get ctune value: %d", PLUGIN_NAME, ctune);
+  EzspStatus status = ezspGetConfigurationValue(EZSP_CONFIG_CTUNE_VALUE, &ctune);
+  emberAfCorePrintln("%s get ctune value: %d, status 0x%02X", PLUGIN_NAME, ctune, status);
 }

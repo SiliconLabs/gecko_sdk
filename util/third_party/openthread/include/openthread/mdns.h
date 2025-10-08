@@ -40,6 +40,7 @@
 #include <openthread/error.h>
 #include <openthread/instance.h>
 #include <openthread/ip6.h>
+#include <openthread/nat64.h>
 #include <openthread/platform/dnssd.h>
 
 #ifdef __cplusplus
@@ -142,6 +143,20 @@ typedef enum otMdnsEntryState
 } otMdnsEntryState;
 
 /**
+ * Represents a local host IPv4 or IPv6 address entry.
+ */
+typedef struct otMdnsLocalHostAddress
+{
+    bool     mIsIp6;        ///< Indicates whether the address is IPv6 (`true`) or IPv4 (`false`).
+    uint32_t mInfraIfIndex; ///< The infrastructure network interface index.
+    union
+    {
+        otIp6Address mIp6; ///< The IPv6 address (valid when `mIsIp6` is true).
+        otIp4Address mIp4; ///< The IPv4 address (valid when `mIsIp6` is false).
+    } mAddress;            ///< The address.
+} otMdnsLocalHostAddress;
+
+/**
  * Enables or disables the mDNS module.
  *
  * The mDNS module should be enabled before registration any host, service, or key entries. Disabling mDNS will
@@ -202,6 +217,29 @@ bool otMdnsIsQuestionUnicastAllowed(otInstance *aInstance);
  * @param[in] aCallback     The conflict callback.
  */
 void otMdnsSetConflictCallback(otInstance *aInstance, otMdnsConflictCallback aCallback);
+
+/**
+ * Gets the local host name.
+ *
+ * @param[in] aInstance     The OpenThread instance.
+ *
+ * @returns The local host name.
+ */
+const char *otMdnsGetLocalHostName(otInstance *aInstance);
+
+/**
+ * Sets the local host name.
+ *
+ * The local host name can be set only when the mDNS module is disabled. If not set the mDNS module itself will
+ * auto-generate the local host name.
+ *
+ * @param[in] aInstance   The OpenThread instance.
+ * @param[in] aName       The local host name to use, can be to `NULL` to allow the mDNS module to choose the name.
+ *
+ * @retval OT_ERROR_NONE            The local host name was successfully set.
+ * @retval OT_ERROR_INVALID_STATE   mDNS module is already enabled.
+ */
+otError otMdnsSetLocalHostName(otInstance *aInstance, const char *aName);
 
 /**
  * Registers or updates a host on mDNS.
@@ -273,7 +311,8 @@ otError otMdnsUnregisterHost(otInstance *aInstance, const otMdnsHost *aHost);
  *   contain dot `.` character which is allowed in a service instance label.
  * - The `mServiceType` specifies the service type (e.g., "_tst._udp"). It is treated as multiple dot `.` separated
  *   labels. It MUST NOT contain the domain name.
- * - The `mHostName` field specifies the host name of the service. MUST NOT contain the domain name.
+ * - The `mHostName` field specifies the host name of the service if it is not NULL. Otherwise, if it is NULL, it
+ *   indicates that this service is for the local host (this device itself).
  * - The `mSubTypeLabels` is an array of strings representing sub-types associated with the service. Each array entry
  *   is a sub-type label. The `mSubTypeLabels can be NULL if there is no sub-type. Otherwise, the array length is
  *   specified by `mSubTypeLabelsLength`.
@@ -475,6 +514,27 @@ otError otMdnsGetNextService(otInstance       *aInstance,
 otError otMdnsGetNextKey(otInstance *aInstance, otMdnsIterator *aIterator, otMdnsKey *aKey, otMdnsEntryState *aState);
 
 /**
+ * Iterates over the local host IPv6 and IPv4 addresses tracked by OpenThread mDNS module.
+ *
+ * Requires `OPENTHREAD_CONFIG_MULTICAST_DNS_ENTRY_ITERATION_API_ENABLE`.
+ *
+ * The platform layer is responsible for monitoring and reporting all host IPv4 and IPv6 addresses to the OpenThread
+ * mDNS module, which then tracks the full address list (see `otPlatMdnsHandleHostAddressEvent()`). This function
+ * allows iteration through this tracked list, primarily intended for information and debugging purposes.
+ *
+ * @param[in]   aInstance           The OpenThread instance.
+ * @param[out]  aIterator           Pointer to the iterator to use.
+ * @param[out]  aAddress            Pointer to an `otMdnsLocalHostAddress` to output the next address entry.
+ *
+ * @retval OT_ERROR_NONE            The @p aAddress, and @p aIterator are updated successfully.
+ * @retval OT_ERROR_NOT_FOUND       Reached the end of the list.
+ * @retval OT_ERROR_INVALID_ARGS    Iterator is not valid.
+ */
+otError otMdnsGetNextLocalHostAddress(otInstance             *aInstance,
+                                      otMdnsIterator         *aIterator,
+                                      otMdnsLocalHostAddress *aAddress);
+
+/**
  * Represents a service browser.
  *
  * Refer to `otPlatDnssdBrowser` for documentation of member fields and `otMdnsStartBrowser()` for how they are used.
@@ -549,6 +609,21 @@ typedef otPlatDnssdAddressAndTtl otMdnsAddressAndTtl;
  * Represents address resolver result.
  */
 typedef otPlatDnssdAddressResult otMdnsAddressResult;
+
+/**
+ * Represents a record query result.
+ */
+typedef otPlatDnssdRecordResult otMdnsRecordResult;
+
+/**
+ * Represents the callback function used to report a record querier result.
+ */
+typedef otPlatDnssdRecordCallback otMdnsRecordCallback;
+
+/**
+ * Represents a record querier.
+ */
+typedef otPlatDnssdRecordQuerier otMdnsRecordQuerier;
 
 /**
  * Starts a service browser.
@@ -735,6 +810,63 @@ otError otMdnsStartIp4AddressResolver(otInstance *aInstance, const otMdnsAddress
 otError otMdnsStopIp4AddressResolver(otInstance *aInstance, const otMdnsAddressResolver *aResolver);
 
 /**
+ * Starts a record querier.
+ *
+ * Initiates a continuous query for a given `mRecordType` as specified in @p aQuerier. The queried name is specified
+ * by the combination of `mFirstLabel` and `mNextLabels` (optional rest of the labels) in @p aQuerier. The
+ * `mFirstLabel` MUST be non-NULL but `mNextLabels` can be `NULL` if there are no other labels. The `mNextLabels`
+ * MUST NOT include the domain name. The reason for a separate first label is to allow it to include a dot `.`
+ * character (as allowed for service instance labels).
+ *
+ * Discovered results are reported through the `mCallback` function in @p aQuerier, providing the record data bytes
+ * (RDATA). For NS, CNAME, SOA, PTR, MX, RP, AFSDB, RT, PX, SRV, KX, DNAME, and NSEC record types, the RDATA format
+ * contains one or more DNS names (which may use DNS name compression). For the above list, the reported record data
+ * bytes via @p mCallback will be decompressed to contain the full DNS name(s). For all other record types, the record
+ * data bytes are provided exactly as they appear in the received mDNS response. This aligns the implementation with
+ * RFC 6762 (section 18.14) regarding the use of name compression.
+ *
+ * A removed record data is indicated with a TTL value of zero. The callback may be invoked immediately with cached
+ * information (if available) and potentially before this function returns. When cached results are used, the reported
+ * TTL value will reflect the original TTL from the last received response.
+ *
+ * Multiple querier instances can be started for the same name, provided they use different callback functions.
+ *
+ * The record querier MUST not be used for record types PTR, SRV, TXT, A, and AAAA. Otherwise, `OT_ERROR_INVALID_ARGS`
+ * will be returned. For these, browsers/resolvers can be used. This design is intentional to enable the implementation
+ * of an "opportunistic cache mechanism", where, depending on currently active service browsers/resolvers, the mDNS
+ * implementation will also monitor and cache related records (e.g., when a service is resolved, the address records
+ * associated with its host name are cached even if there is no active address resolver for this hostname).
+ *
+ * The @p aQuerier and all its contained information (strings) are only valid during this call. The platform MUST save
+ * a copy of the information if it wants to retain the information after returning from this function.
+ *
+ * @param[in] aInstance   The OpenThread instance.
+ * @param[in] aQuerier    The record querier to be started.
+ *
+ * @retval OT_ERROR_NONE           Record @p aQuerier started successfully.
+ * @retval OT_ERROR_INVALID_STATE  mDNS module is not enabled.
+ * @retval OT_ERROR_ALREADY        An identical querier (same name, record type, and callback) is already active.
+ * @retval OT_ERROR_INVALID_ARGS   The `mRecordType` in @p aQuerier is invalid. MUST use browser/resolvers.
+ */
+otError otMdnsStartRecordQuerier(otInstance *aInstance, const otMdnsRecordQuerier *aQuerier);
+
+/**
+ * Stops a record querier.
+ *
+ * No action is performed if no matching querier with the same name and callback is currently active.
+ *
+ * The @p aQuerier and all its contained information (strings) are only valid during this call. The platform MUST save
+ * a copy of the information if it wants to retain the information after returning from this function.
+ *
+ * @param[in] aInstance   The OpenThread instance.
+ * @param[in] aQuerier    The record querier to be stopped.
+ *
+ * @retval OT_ERROR_NONE           Querier stopped successfully.
+ * @retval OT_ERROR_INVALID_STATE  mDNS module is not enabled.
+ */
+otError otMdnsStopRecordQuerier(otInstance *aInstance, const otMdnsRecordQuerier *aQuerier);
+
+/**
  * Represents additional information about a browser/resolver and its cached results.
  */
 typedef struct otMdnsCacheInfo
@@ -861,6 +993,30 @@ otError otMdnsGetNextIp4AddressResolver(otInstance            *aInstance,
                                         otMdnsIterator        *aIterator,
                                         otMdnsAddressResolver *aResolver,
                                         otMdnsCacheInfo       *aInfo);
+
+/**
+ * Iterates over record querier entries.
+ *
+ * Requires `OPENTHREAD_CONFIG_MULTICAST_DNS_ENTRY_ITERATION_API_ENABLE`.
+ *
+ * On success, @p aQuerier is populated with information about the next querier . The `mCallback` field is always
+ * set to `NULL` as there may be multiple active querier with different callbacks. Other pointers within the
+ * `otMdnsRecordQuerier` structure remain valid until the next call to any OpenThread stack's public or platform
+ * API/callback.
+ *
+ * @param[in]  aInstance   The OpenThread instance.
+ * @param[in]  aIterator   Pointer to the iterator.
+ * @param[out] aQuerier    Pointer to an `otMdnsRecordQuerier` to return the information about the next one.
+ * @param[out] aInfo       Pointer to an `otMdnsCacheInfo` to return additional information.
+ *
+ * @retval OT_ERROR_NONE         @p aQuerier, @p aInfo, & @p aIterator are updated successfully.
+ * @retval OT_ERROR_NOT_FOUND    Reached the end of the list.
+ * @retval OT_ERROR_INVALID_ARG  @p aIterator is not valid.
+ */
+otError otMdnsGetNextRecordQuerier(otInstance          *aInstance,
+                                   otMdnsIterator      *aIterator,
+                                   otMdnsRecordQuerier *aQuerier,
+                                   otMdnsCacheInfo     *aInfo);
 
 /**
  * @}

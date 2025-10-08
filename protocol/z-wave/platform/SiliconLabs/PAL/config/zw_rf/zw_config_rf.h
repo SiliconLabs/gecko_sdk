@@ -21,8 +21,8 @@
 
 // <o APP_MAX_TX_POWER_LR> The maximum allowed Tx power in deci dBm for Z-Wave Long Range network <140..200:1> <f.d>
 // <i> The maximum allowed Tx power in deci dBm for Z-Wave Long Range network
-// <i> Default: 140
-#define APP_MAX_TX_POWER_LR  140
+// <i> Default: 200
+#define APP_MAX_TX_POWER_LR  200
 
 // <o APP_MAX_TX_POWER> The maximum allowed Tx power in deci dBm for Z-Wave network <-100..200:1> <f.d>
 // <i> The maximum allowed Tx power in deci dBm for Z-Wave network

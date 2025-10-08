@@ -72,7 +72,6 @@ otbr_install()
         "-DCMAKE_INSTALL_PREFIX=/usr"
         "-DOTBR_DBUS=ON"
         "-DOTBR_DNSSD_DISCOVERY_PROXY=ON"
-        "-DOTBR_SRP_ADVERTISING_PROXY=ON"
         "-DOTBR_INFRA_IF_NAME=${INFRA_IF_NAME}"
         "-DOTBR_MDNS=${OTBR_MDNS:=mDNSResponder}"
         # Force re-evaluation of version strings
@@ -80,6 +79,16 @@ otbr_install()
         "-DOT_PACKAGE_VERSION="
         "${otbr_options[@]}"
     )
+
+    if with OT_SRP_ADV_PROXY; then
+        otbr_options+=(
+            "-DOTBR_OT_SRP_ADV_PROXY=ON"
+        )
+    else
+        otbr_options+=(
+            "-DOTBR_SRP_ADVERTISING_PROXY=ON"
+        )
+    fi
 
     if with WEB_GUI; then
         otbr_options+=("-DOTBR_WEB=ON")
@@ -121,7 +130,7 @@ otbr_install()
         )
     fi
 
-    if with NAT64 && [[ ${NAT64_SERVICE-} == "openthread" ]]; then
+    if with NAT64; then
         otbr_options+=(
             "-DOTBR_NAT64=ON"
             "-DOT_POSIX_NAT64_CIDR=${NAT64_DYNAMIC_POOL:-192.168.255.0/24}"

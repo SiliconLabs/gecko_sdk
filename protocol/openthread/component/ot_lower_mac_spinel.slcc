@@ -52,6 +52,7 @@ include:
       - path: firewall.hpp
       - path: hdlc_interface.hpp
       - path: infra_if.hpp
+      - path: ip6_utils.hpp
       - path: logger.hpp
       - path: mainloop.hpp
       - path: mdns_socket.hpp

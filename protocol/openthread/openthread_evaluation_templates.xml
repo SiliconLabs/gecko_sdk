@@ -13,6 +13,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/trustzone/ot-cli-ftd-tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <properties key="solutionProjects" value="protocol.openthread.sample-apps.ot-tz-secure-app.ot-tz-secure-application.slcp protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-ftd-tz-ns.slcp platform.bootloader.sample-apps.workspaces.Series-2.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
   </descriptors>
@@ -29,6 +31,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/trustzone/ot-cli-mtd-tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
     <properties key="solutionProjects" value="protocol.openthread.sample-apps.ot-tz-secure-app.ot-tz-secure-application.slcp protocol.openthread.sample-apps.ot-cli.trustzone.ot-cli-mtd-tz-ns.slcp platform.bootloader.sample-apps.workspaces.Series-2.bootloader-storage-internal-single.bootloader-storage-internal-single.slcp"/>
   </descriptors>
@@ -45,6 +49,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/trustzone/ot-cli-ftd-tz-ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-cli-mtd-tz-ns" label="OpenThread - SoC CLI (MTD) (TrustZone)" description="This is a variant of the openthread MTD CLI application with trustzone awareness enabled.&#xA;">
@@ -60,6 +66,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/trustzone/ot-cli-mtd-tz-ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-tz-secure-application" label="Sample project for TrustZone Secure Key Library" description="This is a trustzone enabled application used to manage security operations from trustzone aware OpenThread applications.&#xA;">
@@ -75,6 +83,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="EVALUATION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-tz-secure-app/ot-tz-secure-application.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
 </model:MDescriptors>

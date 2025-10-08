@@ -145,12 +145,6 @@ config_file:
       component: simple_rgb_pwm_led
       instance: led
     condition: ["device_series_1"]
-  - path: ../../platform/SiliconLabs/AppsHw/src/LEDBulb/config/s2/sl_simple_rgb_pwm_led_led_config.h
-    override:
-      file_id: simple_rgb_pwm_led_config
-      component: simple_rgb_pwm_led
-      instance: led
-    condition: ["device_series_2"]
   - path: LEDBulb.cc_config
     directory: cc_config
 

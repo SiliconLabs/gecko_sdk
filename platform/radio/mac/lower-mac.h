@@ -158,6 +158,7 @@ void sli_mac_lower_mac_force_sleep(bool sleep);
 #define DEFAULT_MAC_MAX_RETRIES                             3
 
 #define FORCE_TX_AFTER_FAILED_CCA_ATTEMPTS_LIMIT            3
+#define FORCE_HDR_PHY_TX_AFTER_FAILED_CCA_ATTEMPTS_LIMIT    5
 
 // The number of symbols forming the basic time period used by the CSMA-CA
 // algorithm.

@@ -61,6 +61,16 @@ void otMdnsSetConflictCallback(otInstance *aInstance, otMdnsConflictCallback aCa
     AsCoreType(aInstance).Get<Dns::Multicast::Core>().SetConflictCallback(aCallback);
 }
 
+const char *otMdnsGetLocalHostName(otInstance *aInstance)
+{
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().GetLocalHostName();
+}
+
+otError otMdnsSetLocalHostName(otInstance *aInstance, const char *aName)
+{
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().SetLocalHostName(aName);
+}
+
 otError otMdnsRegisterHost(otInstance            *aInstance,
                            const otMdnsHost      *aHost,
                            otMdnsRequestId        aRequestId,
@@ -156,6 +166,17 @@ otError otMdnsGetNextKey(otInstance *aInstance, otMdnsIterator *aIterator, otMdn
     return AsCoreType(aInstance).Get<Dns::Multicast::Core>().GetNextKey(*aIterator, *aKey, *aState);
 }
 
+otError otMdnsGetNextLocalHostAddress(otInstance             *aInstance,
+                                      otMdnsIterator         *aIterator,
+                                      otMdnsLocalHostAddress *aAddress)
+
+{
+    AssertPointerIsNotNull(aIterator);
+    AssertPointerIsNotNull(aAddress);
+
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().GetNextLocalHostAddress(*aIterator, *aAddress);
+}
+
 #endif // OPENTHREAD_CONFIG_MULTICAST_DNS_ENTRY_ITERATION_API_ENABLE
 
 otError otMdnsStartBrowser(otInstance *aInstance, const otMdnsBrowser *aBroswer)
@@ -228,6 +249,20 @@ otError otMdnsStopIp4AddressResolver(otInstance *aInstance, const otMdnsAddressR
     return AsCoreType(aInstance).Get<Dns::Multicast::Core>().StopIp4AddressResolver(*aResolver);
 }
 
+otError otMdnsStartRecordQuerier(otInstance *aInstance, const otMdnsRecordQuerier *aQuerier)
+{
+    AssertPointerIsNotNull(aQuerier);
+
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().StartRecordQuerier(*aQuerier);
+}
+
+otError otMdnsStopRecordQuerier(otInstance *aInstance, const otMdnsRecordQuerier *aQuerier)
+{
+    AssertPointerIsNotNull(aQuerier);
+
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().StopRecordQuerier(*aQuerier);
+}
+
 #if OPENTHREAD_CONFIG_MULTICAST_DNS_ENTRY_ITERATION_API_ENABLE
 
 otError otMdnsGetNextBrowser(otInstance      *aInstance,
@@ -288,6 +323,18 @@ otError otMdnsGetNextIp4AddressResolver(otInstance            *aInstance,
     AssertPointerIsNotNull(aInfo);
 
     return AsCoreType(aInstance).Get<Dns::Multicast::Core>().GetNextIp4AddressResolver(*aIterator, *aResolver, *aInfo);
+}
+
+otError otMdnsGetNextRecordQuerier(otInstance          *aInstance,
+                                   otMdnsIterator      *aIterator,
+                                   otMdnsRecordQuerier *aQuerier,
+                                   otMdnsCacheInfo     *aInfo)
+{
+    AssertPointerIsNotNull(aIterator);
+    AssertPointerIsNotNull(aQuerier);
+    AssertPointerIsNotNull(aInfo);
+
+    return AsCoreType(aInstance).Get<Dns::Multicast::Core>().GetNextRecordQuerier(*aIterator, *aQuerier, *aInfo);
 }
 
 #endif // OPENTHREAD_CONFIG_MULTICAST_DNS_ENTRY_ITERATION_API_ENABLE

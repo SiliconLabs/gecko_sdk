@@ -55,6 +55,7 @@
 #include "thread/indirect_sender.hpp"
 #include "thread/lowpan.hpp"
 #include "thread/network_data_leader.hpp"
+#include "thread/thread_link_info.hpp"
 
 namespace ot {
 
@@ -76,80 +77,6 @@ class HistoryTracker;
  */
 
 /**
- * Represents link-specific information for messages received from the Thread radio.
- */
-class ThreadLinkInfo : public otThreadLinkInfo, public Clearable<ThreadLinkInfo>
-{
-public:
-    /**
-     * Returns the IEEE 802.15.4 Source PAN ID.
-     *
-     * @returns The IEEE 802.15.4 Source PAN ID.
-     */
-    Mac::PanId GetPanId(void) const { return mPanId; }
-
-    /**
-     * Returns the IEEE 802.15.4 Channel.
-     *
-     * @returns The IEEE 802.15.4 Channel.
-     */
-    uint8_t GetChannel(void) const { return mChannel; }
-
-    /**
-     * Returns whether the Destination PAN ID is broadcast.
-     *
-     * @retval TRUE   If Destination PAN ID is broadcast.
-     * @retval FALSE  If Destination PAN ID is not broadcast.
-     */
-    bool IsDstPanIdBroadcast(void) const { return mIsDstPanIdBroadcast; }
-
-    /**
-     * Indicates whether or not link security is enabled.
-     *
-     * @retval TRUE   If link security is enabled.
-     * @retval FALSE  If link security is not enabled.
-     */
-    bool IsLinkSecurityEnabled(void) const { return mLinkSecurity; }
-
-    /**
-     * Returns the Received Signal Strength (RSS) in dBm.
-     *
-     * @returns The Received Signal Strength (RSS) in dBm.
-     */
-    int8_t GetRss(void) const { return mRss; }
-
-    /**
-     * Returns the frame/radio Link Quality Indicator (LQI) value.
-     *
-     * @returns The Link Quality Indicator value.
-     */
-    uint8_t GetLqi(void) const { return mLqi; }
-
-#if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
-    /**
-     * Returns the Time Sync Sequence.
-     *
-     * @returns The Time Sync Sequence.
-     */
-    uint8_t GetTimeSyncSeq(void) const { return mTimeSyncSeq; }
-
-    /**
-     * Returns the time offset to the Thread network time (in microseconds).
-     *
-     * @returns The time offset to the Thread network time (in microseconds).
-     */
-    int64_t GetNetworkTimeOffset(void) const { return mNetworkTimeOffset; }
-#endif
-
-    /**
-     * Sets the `ThreadLinkInfo` from a given received frame.
-     *
-     * @param[in] aFrame  A received frame.
-     */
-    void SetFrom(const Mac::RxFrame &aFrame);
-};
-
-/**
  * Implements mesh forwarding within Thread.
  */
 class MeshForwarder : public InstanceLocator, private NonCopyable
@@ -163,6 +90,22 @@ class MeshForwarder : public InstanceLocator, private NonCopyable
     friend class TimeTicker;
 
 public:
+    /**
+     * Represents the IPv6 message counters, tracking the number IPv6 message TX and RX that succeeded or failed.
+     */
+    class Counters : public otIpCounters, public Clearable<Counters>
+    {
+        friend class MeshForwarder;
+        friend class IndirectSender;
+
+    private:
+        Counters(void) { Clear(); }
+
+        void UpdateOnTxDone(const Message &aMessage, bool aTxSuccess);
+        void UpdateOnRx(const Message &aMessage);
+        void UpdateOnDrop(const Message &aMessage);
+    };
+
     /**
      * Initializes the object.
      *
@@ -251,30 +194,30 @@ public:
     Error EvictMessage(Message::Priority aPriority);
 
     /**
-     * Returns a reference to the send queue.
+     * Retrieves information about the send queue and the reassembly queue.
      *
-     * @returns  A reference to the send queue.
-     */
-    const PriorityQueue &GetSendQueue(void) const { return mSendQueue; }
-
-    /**
-     * Returns a reference to the reassembly queue.
+     * Provides details such as the number of messages and data buffers currently utilized by the priority send queue
+     * and the message reassembly queue.
      *
-     * @returns  A reference to the reassembly queue.
+     * @param[out] aSendQueueInfo         A `PriorityQueue::Info` to populate with info about the send queue.
+     * @param[out] aReassemblyQueueInfo   A `MessageQueue::Info` to populate with info about the reassembly queue.
      */
-    const MessageQueue &GetReassemblyQueue(void) const { return mReassemblyList; }
+    void GetQueueInfo(PriorityQueue::Info &aSendQueueInfo, MessageQueue::Info &aReassemblyQueueInfo) const
+    {
+        mSendQueue.GetInfo(aSendQueueInfo), mReassemblyList.GetInfo(aReassemblyQueueInfo);
+    }
 
     /**
      * Returns a reference to the IP level counters.
      *
      * @returns A reference to the IP level counters.
      */
-    const otIpCounters &GetCounters(void) const { return mIpCounters; }
+    const Counters &GetCounters(void) const { return mCounters; }
 
     /**
      * Resets the IP level counters.
      */
-    void ResetCounters(void) { ClearAllBytes(mIpCounters); }
+    void ResetCounters(void) { mCounters.Clear(); }
 
 #if OPENTHREAD_CONFIG_TX_QUEUE_STATISTICS_ENABLE
     /**
@@ -486,12 +429,13 @@ private:
     };
 #endif
 
-    void     SendIcmpErrorIfDstUnreach(const Message &aMessage, const Mac::Addresses &aMacAddrs);
-    Error    CheckReachability(RxInfo &aRxInfo);
-    Error    CheckReachability(uint16_t aMeshDest, const Ip6::Header &aIp6Header);
-    void     UpdateRoutes(RxInfo &aRxInfo);
+#if OPENTHREAD_FTD
+    bool  IsReachable(uint16_t aMeshDest, const Ip6::Header &aIp6Header) const;
+    void  CheckReachabilityToSendIcmpError(const Message &aMessage, const Mac::Addresses &aMacAddrs);
+    Error CheckReachabilityToSendIcmpError(RxInfo &aRxInfo);
+#endif
+    void     UpdateEidRlocCacheAndStaleChild(RxInfo &aRxInfo);
     Error    FrameToMessage(RxInfo &aRxInfo, uint16_t aDatagramSize, Message *&aMessage);
-    void     GetMacDestinationAddress(const Ip6::Address &aIp6Addr, Mac::Address &aMacAddr);
     void     GetMacSourceAddress(const Ip6::Address &aIp6Addr, Mac::Address &aMacAddr);
     Message *PrepareNextDirectTransmission(void);
     void     HandleMesh(RxInfo &aRxInfo);
@@ -641,7 +585,7 @@ private:
 
     TxTask mScheduleTransmissionTask;
 
-    otIpCounters mIpCounters;
+    Counters mCounters;
 
 #if OPENTHREAD_FTD || OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     IndirectSender mIndirectSender;
@@ -661,8 +605,6 @@ private:
 /**
  * @}
  */
-
-DefineCoreType(otThreadLinkInfo, ThreadLinkInfo);
 
 } // namespace ot
 

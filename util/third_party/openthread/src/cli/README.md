@@ -120,6 +120,7 @@ Done
 - [sntp](#sntp-query-sntp-server-ip-sntp-server-port)
 - [state](#state)
 - [srp](README_SRP.md)
+- [targetpower](#targetpower-channel-targetpower)
 - [tcat](README_TCAT.md)
 - [tcp](README_TCP.md)
 - [test](#test-tmforiginfilter-enabledisable)
@@ -141,8 +142,6 @@ Done
 ### attachtime
 
 Prints the attach time (duration since device was last attached).
-
-Requires `OPENTHREAD_CONFIG_UPTIME_ENABLE`.
 
 Duration is formatted as `{hh}:{mm}:{ss}` for hours, minutes, and seconds if it is less than one day. If the duration is longer than one day, the format is `{dd}d.{hh}:{mm}:{ss}`.
 
@@ -362,6 +361,29 @@ Done
 
 Show current Border Agent information.
 
+### ba enable
+
+Enables Border Agent service.
+
+By default, the Border Agent service is enabled. The `ba enable` and `ba disable` allow user to explicitly control its state. This can be useful in scenarios such as:
+
+- The user wishes to delay the start of the Border Agent service (and its mDNS advertisement of the `_meshcop._udp` service on the infrastructure link). This allows time to prepare or determine vendor-specific TXT data entries for inclusion.
+- Unit tests or test scripts might disable the Border Agent service to prevent it from interfering with specific test steps. For example, tests validating mDNS or DNS-SD functionality may disable the Border Agent to prevent its registration of the MeshCoP service.
+
+```
+> ba enable
+Done
+```
+
+### ba disable
+
+Disables Border Agent service.
+
+```
+> ba disable
+Done
+```
+
 ### ba port
 
 Print Border Agent's service port.
@@ -378,12 +400,43 @@ Print Border Agent's state.
 
 Possible states are
 
-- `Active`: Border Agent is active.
-- `Inactive`: Border Agent is not active.
+- `Disabled`: Border Agent service is disabled.
+- `Inactive`: Border Agent service is enabled but not yet active.
+- `Active`: Border Agent service is enabled and active. External commissioner can connect and establish secure DTLS sessions with the Border Agent using PSKc
 
 ```bash
 > ba state
 Active
+Done
+```
+
+### ba servicebasename \<name\>
+
+Sets the base name to construct the service instance name used when advertising the mDNS `_meshcop._udp` service by the Border Agent.
+
+Requires the `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE` feature.
+
+The name can also be configured using the `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_BASE_NAME` configuration option (which is the recommended way to specify this name). This CLI command (and its corresponding API) is provided for projects where the name needs to be set after device initialization and at run-time.
+
+Per the Thread specification, the service instance should be a user-friendly name identifying the device model or product. A recommended format is "VendorName ProductName". To construct the full name and ensure name uniqueness, the OpenThread Border Agent module will append the Extended Address of the device (as 16-character hex digits) to the given base name. Note that the same name will be used for the ephemeral key service `_meshcop-e._udp` when the ephemeral key feature is enabled and used.
+
+```bash
+ba servicebasename OpenThreadBorderAgent
+Done
+```
+
+### ba sessions
+
+Prints the list of Border Agent's sessions. Information per session:
+
+- Peer socket address (IPv6 address and port).
+- Whether or not the session is connected.
+- Whether or not the session is accepted as full commissioner.
+- Session lifetime in milliseconds (calculated from the time the session was first established).
+
+```bash
+ba sessions
+[fe80:0:0:0:cc79:2a29:d311:1aea]:9202 connected:yes commissioner:no lifetime:1860
 Done
 ```
 
@@ -1087,7 +1140,6 @@ Get the counter value.
 
 Note:
 
-- `OPENTHREAD_CONFIG_UPTIME_ENABLE` is required for MLE role time tracking in `counters mle`
 - `OPENTHREAD_CONFIG_IP6_BR_COUNTERS_ENABLE` is required for `counters br`
 
 ```bash
@@ -1183,9 +1235,9 @@ CSL period is shown in microseconds.
 
 ```bash
 > csl
-Channel: 11
-Period: 160000us
-Timeout: 1000s
+channel: 11
+period: 160000us
+timeout: 1000s
 Done
 ```
 
@@ -1547,6 +1599,28 @@ Send a service instance resolution DNS query for a given service instance with a
 Service instance label is provided first, followed by the service name (note that service instance label can contain dot '.' character).
 
 The parameters after `service-name` are optional. Any unspecified (or zero) value for these optional parameters is replaced by the value from the current default config (`dns config`).
+
+### dns query \<record-type\> \<first-label\> \<next-labels\> \[DNS server IP\] \[DNS server port\] \[response timeout (ms)\] \[max tx attempts\] \[recursion desired (boolean)\]
+
+Requires `OPENTHREAD_CONFIG_DNS_CLIENT_ENABLE` and `OPENTHREAD_CONFIG_DNS_CLIENT_ARBITRARY_RECORD_QUERY_ENABLE`.
+
+Sends a DNS query for a given record type and DNS name. DNS name is provided as a first label, followed by the next labels which are dot '.' separated. Note that the first label can itself contain the dot '.' character.
+
+The `record-type` is a numerical value corresponding to the DNS RRType values.
+
+The parameters after `next-labels` are optional. Any unspecified (or zero) value for these optional parameters is replaced by the value from the current default config (`dns config`).
+
+If record type is `PTR` (12), `CNAME` (5), `DNAME` (39), `NS` (2), or `SRV` (33), the record data in the received response contains a DNS name which may use DNS name compression. For these specific record types, the record data is first decompressed such that it contains the full uncompressed DNS name. This decompressed data is then provided in the output. For all other record types, the record data is read and provided as it appears in the received response message.
+
+```bash
+> dns query 25 myhost default.service.arpa.
+DNS query response for myhost.default.service.arpa.
+0)
+    RecordType:25, RecordLength: 32, TTL:7108, Section:answer
+    Name:myhost.default.service.arpa.
+    RecordData:[001900010000e02d00440201030d4983605c0406803deb2d672cc42224773977]
+Done
+```
 
 ### dns server upstream \[enable|disable\]
 
@@ -2851,10 +2925,23 @@ Done
 
 ### networkdiagnostic reset \<addr\> \<type\> ..
 
-Send network diagnostic request to reset \<addr\>'s tlv of \<type\>s. Currently only `MAC Counters`(9) is supported.
+Send network diagnostic request to reset \<addr\>'s tlv of \<type\>s. Currently `MAC Counters`(9) is supported.
 
 ```bash
 > diagnostic reset fd00:db8::ff:fe00:0 9
+Done
+```
+
+### networkdiagnostic nonpreferredchannels
+
+Get or set the non-preferred channels value as a channel mask. This is used to respond to a Network Diagnostics Get request for the corresponding TLV. The channel mask is a 32-bit unsigned integer value where the least significant bit (LSB), also referred to as bit 0, corresponds to channel number 0, and so on.
+
+```bash
+> networkdiagnostic nonpreferredchannels 0x4000000
+Done
+
+> networkdiagnostic nonpreferredchannels
+0x4000000
 Done
 ```
 
@@ -3748,7 +3835,7 @@ Return state of current state.
 
 ```bash
 > state
-offline, disabled, detached, child, router or leader
+disabled, detached, child, router or leader
 Done
 ```
 
@@ -3791,6 +3878,18 @@ Try to switch to state `detached`, `child`, `router`.
 
 ```bash
 > state detached
+Done
+```
+
+### targetpower \<channel\> \<targetpower\>
+
+Set the target power.
+
+- `channel` : Thread channel.
+- `targetpower` : The target power in the unit of 0.01dBm.
+
+```bash
+> targetpower 12 1000
 Done
 ```
 

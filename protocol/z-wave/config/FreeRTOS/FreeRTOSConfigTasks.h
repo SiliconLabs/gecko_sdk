@@ -52,7 +52,9 @@
  * SerialAPI is based on the controller_static library which doesn't have built-in security code.
  * Thus, we don't need to increase the stack size for the controller_static library
 */
-#ifdef ZW_CONTROLLER_STATIC
+#ifdef ZW_ZNIF_MODE
+#define TASK_STACK_SIZE_Z_WAVE_STACK            ( 1672 / sizeof(StackType_t) )  // ZG14 Zniffer mode uses reduced stack sizes to fit in limited RAM
+#elif defined(ZW_CONTROLLER_STATIC)
 #define TASK_STACK_SIZE_Z_WAVE_STACK            ( 4608 / sizeof(StackType_t) )  // 4608 bytes (security library requires this)
 #else
 #define TASK_STACK_SIZE_Z_WAVE_STACK            ( 5632 / sizeof(StackType_t) )  // 5632 bytes (security library requires this)
@@ -73,7 +75,11 @@
 /* FreeRTOS IDLE task has priority 0 (It gets complicated if the IDLE tasks shares its priority with another task.) */
 
 // USER-TASK STACK SIZES
+#ifdef ZW_ZNIF_MODE
+#define TASK_STACK_SIZE_MAIN_USER_APP           1152  // bytes (ZG14 Zniffer mode uses reduced stack sizes to fit in limited RAM)
+#else
 #define TASK_STACK_SIZE_MAIN_USER_APP           2304  // bytes (The main user-task!)
+#endif
 #define TASK_STACK_SIZE_MAX                     2304  // bytes (Tasks created by ZW_UserTask.h)
 #define TASK_STACK_SIZE_MIN                     TASK_STACK_SIZE_MINIMUM         //  512 bytes (Tasks created by ZW_UserTask.h)
 

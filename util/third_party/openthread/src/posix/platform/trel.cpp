@@ -49,6 +49,7 @@
 #include "logger.hpp"
 #include "radio_url.hpp"
 #include "system.hpp"
+#include "utils.hpp"
 #include "common/code_utils.hpp"
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
@@ -172,7 +173,7 @@ static void PrepareSocket(uint16_t &aUdpPort)
 
     LogDebg("PrepareSocket()");
 
-    sSocket = SocketWithCloseExec(AF_INET6, SOCK_DGRAM, 0, kSocketNonBlock);
+    sSocket = ot::Posix::SocketWithCloseExec(AF_INET6, SOCK_DGRAM, 0, ot::Posix::kSocketNonBlock);
     VerifyOrDie(sSocket >= 0, OT_EXIT_ERROR_ERRNO);
 
     // Make the socket non-blocking to allow immediate tx attempt.
@@ -180,6 +181,11 @@ static void PrepareSocket(uint16_t &aUdpPort)
     VerifyOrDie(val != -1, OT_EXIT_ERROR_ERRNO);
     val = val | O_NONBLOCK;
     VerifyOrDie(fcntl(sSocket, F_SETFL, val) == 0, OT_EXIT_ERROR_ERRNO);
+
+#if defined(IPV6_ADDR_PREFERENCES) && defined(IPV6_PREFER_SRC_PUBLIC)
+    val = IPV6_PREFER_SRC_PUBLIC;
+    setsockopt(sSocket, IPPROTO_IPV6, IPV6_ADDR_PREFERENCES, &val, sizeof(val));
+#endif
 
     // Bind the socket.
 

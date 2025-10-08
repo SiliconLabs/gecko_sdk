@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<demos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://www.silabs.com/ss/Studio.ecore" xsi:noNamespaceSchemaLocation="http://www.silabs.com/ss/Demo.ecore">
+  <demo name="brd4161a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
+    <model:description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
+    <property key="core.boardCompatibility" value="brd4161a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4161a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4166a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
+    <model:description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
+    <property key="core.boardCompatibility" value="brd4166a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4166a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4168a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
+    <model:description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
+    <property key="core.boardCompatibility" value="brd4168a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4168a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4180a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
+    <model:description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
+    <property key="core.boardCompatibility" value="brd4180a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4180a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4304a.demo.ot-ncp-ftd" label="OpenThread - NCP (FTD)">
+    <model:description>This is a simple OpenThread Full Thread Device NCP application. This is equivalent to the ot-ncp-ftd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (FTD)"/>
+    <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
+    <property key="core.boardCompatibility" value="brd4304a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-ftd/ot-ncp-ftd-brd4304a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4161a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
+    <model:description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg12p432f1024gl125.*"/>
+    <property key="core.boardCompatibility" value="brd4161a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4161a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4166a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
+    <model:description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg12p332f1024gl125.*"/>
+    <property key="core.boardCompatibility" value="brd4166a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4166a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4168a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
+    <model:description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg13p732f512gm48.*"/>
+    <property key="core.boardCompatibility" value="brd4168a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4168a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4180a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
+    <model:description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
+    <property key="core.partCompatibility" value=".*efr32mg21a020f1024im32.*"/>
+    <property key="core.boardCompatibility" value="brd4180a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4180a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+  <demo name="brd4304a.demo.ot-ncp-mtd" label="OpenThread - NCP (MTD)">
+    <model:description>This is a simple OpenThread Minimal Thread Device NCP application. This is equivalent to the ot-ncp-mtd application in the OpenThread GitHub repo.
+</model:description>
+    <property key="demos.blurb" value="OpenThread - NCP (MTD)"/>
+    <property key="core.partCompatibility" value=".*mgm12p32f1024ga.*"/>
+    <property key="core.boardCompatibility" value="brd4304a"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/openthread/demos/ot-ncp-mtd/ot-ncp-mtd-brd4304a.s37"/>
+    <property key="core.readmeFiles" value="sample-apps/ot-ncp/README-OT-NCP.md"/>
+    <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
+    <property key="core.quality" value="EXPERIMENTAL"/>
+  </demo>
+</demos>

@@ -69,10 +69,6 @@ config_file:
   - path: ../../platform/SiliconLabs/PAL/config/zw_zaf/zaf_config.h
     file_id: zaf_config
     condition: [device_series_1]
-  # For series 2
-  - path: ../../platform/SiliconLabs/PAL/config/zw_zaf/s2/zaf_config.h
-    file_id: zaf_config
-    condition: [device_series_2]
 configuration:
   - name: ZAF_CONFIG_GENERIC_TYPE
     value: GENERIC_TYPE_STATIC_CONTROLLER

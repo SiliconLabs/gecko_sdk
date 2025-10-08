@@ -1,2 +1,2 @@
-Bluetooth Mesh SDK 6.1.4
-- Targeted quality improvements and bug fixes
+Bluetooth Mesh SDK 6.1.5
+- Underlying platform changes only. 

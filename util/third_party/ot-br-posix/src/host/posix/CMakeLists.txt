@@ -27,13 +27,19 @@
 #
 
 add_library(otbr-posix
+    cli_daemon.hpp
+    cli_daemon.cpp
     dnssd.cpp
     infra_if.hpp
     infra_if.cpp
+    multicast_routing_manager.hpp
+    multicast_routing_manager.cpp
     netif.cpp
     netif_linux.cpp
     netif_unix.cpp
     netif.hpp
+    udp_proxy.cpp
+    udp_proxy.hpp
 )
 
 target_link_libraries(otbr-posix

@@ -14,9 +14,6 @@ include:
       - path: "extension_board_8029a.h"
       - path: "radio_board_efr32zg14.h"
         condition: [device_sdid_95]
-      - path: "radio_board_efr32zg23.h"
-        condition: [device_sdid_210, device_security_vault]
-        unless: [zgm230sa27hnn, zgm230sa27hgn, zgm230sb27hgn]
 config_file:
     # Series 1 basic peripheral description files (Pintool compatible)
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13.h"
@@ -28,49 +25,7 @@ config_file:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32xg13_slider.h"
     condition: [device_series_1, hardware_board_rb]
 
-    # Series 2 basic peripheral description files (Pintool compatible)
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23.h"
-    condition: [device_sdid_210, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_button.h"
-    condition: [device_sdid_210, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_led.h"
-    condition: [device_sdid_210, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg23_slider.h"
-    condition: [device_sdid_210, hardware_board_rb]
-
-    # Series 2 800 DevKit basic peripheral description files (Pintool compatible)
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a.h"
-    condition: [brd2603a]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_button.h"
-    condition: [brd2603a]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_led.h"
-    condition: [brd2603a]
-    unless: [zw_appshw_powerstrip]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2603a_led_pwm.h"
-    condition: [brd2603a, zw_appshw_powerstrip]
-
-    # Series 2 xG28 Explorer Kit basic peripheral description files (Pintool compatible)
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2705a.h"
-    condition: [brd2705a]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2705a_button.h"
-    condition: [brd2705a]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2705a_led.h"
-    condition: [brd2705a]
-    unless: [zw_appshw_powerstrip]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2705a_led_pwm.h"
-    condition: [brd2705a, zw_appshw_powerstrip]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_board_brd2705a_led_pwm.h"
-    condition: [brd2705a, zw_appshw_ledbulb]
-
-    # Margay basic peripheral description files (Pintool compatible)
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28.h"
-    condition: [device_sdid_235, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_button.h"
-    condition: [device_sdid_235, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_led.h"
-    condition: [device_sdid_235, hardware_board_rb]
-  - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/extension_board_8029a_efr32zg28_slider.h"
-    condition: [device_sdid_235, hardware_board_rb]
+    # The Gecko SDK no longer supports 800 series devices. Please use the Simplicity SDK instead.
 
     # No board basic peripheral description files (Pintool compatible)
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/config/radio_no_board.h"
@@ -84,24 +39,11 @@ define:
   - name: RADIO_BOARD_EFR32ZG14
     value: 1
     condition: [device_sdid_95]
-  - name: RADIO_BOARD_EFR32ZG23
-    value: 1
-    condition: [device_sdid_210, device_security_vault]
-    unless: [zgm230sa27hnn, zgm230sa27hgn, zgm230sb27hgn]
-  - name: RADIO_BOARD_BRD2603A
-    condition: [brd2603a]
-  - name: RADIO_BOARD_BRD2705A
-    condition: [brd2705a]
   - name: EXT_BOARD_8029A
     condition: [hardware_board_rb]
-    unless: [brd2603a, brd2705a]
   - name: RADIO_NO_BOARD
     unless: [hardware_board_stk, hardware_board_rb]
 provides:
   - name: zw_target_boards
-  - name: thunderboard
-    condition: [brd2603a]
-  - name: thunderboard
-    condition: [brd2705a]
 requires:
   - name: zw_series

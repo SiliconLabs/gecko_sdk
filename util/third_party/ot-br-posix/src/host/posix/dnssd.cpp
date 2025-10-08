@@ -35,6 +35,8 @@
 
 #include "host/posix/dnssd.hpp"
 
+#if OTBR_ENABLE_DNSSD_PLAT
+
 #include <string>
 
 #include <openthread/platform/dnssd.h>
@@ -47,7 +49,10 @@ static otbr::DnssdPlatform::RegisterCallback MakeRegisterCallback(otInstance    
                                                                   otPlatDnssdRegisterCallback aCallback)
 {
     return [aInstance, aCallback](otPlatDnssdRequestId aRequestId, otError aError) {
-        aCallback(aInstance, aRequestId, aError);
+        if (aCallback)
+        {
+            aCallback(aInstance, aRequestId, aError);
+        }
     };
 }
 
@@ -178,6 +183,18 @@ void otPlatDnssdStopIp4AddressResolver(otInstance *aInstance, const otPlatDnssdA
     OTBR_UNUSED_VARIABLE(aResolver);
 }
 
+void otPlatDnssdStartRecordQuerier(otInstance *aInstance, const otPlatDnssdRecordQuerier *aQuerier)
+{
+    OTBR_UNUSED_VARIABLE(aInstance);
+    OTBR_UNUSED_VARIABLE(aQuerier);
+}
+
+void otPlatDnssdStopRecordQuerier(otInstance *aInstance, const otPlatDnssdRecordQuerier *aQuerier)
+{
+    OTBR_UNUSED_VARIABLE(aInstance);
+    OTBR_UNUSED_VARIABLE(aQuerier);
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace otbr {
@@ -252,6 +269,7 @@ void DnssdPlatform::SetDnssdStateChangedCallback(DnssdStateChangeCallback aCallb
 
 void DnssdPlatform::RegisterService(const Service &aService, RequestId aRequestId, RegisterCallback aCallback)
 {
+    const char                  *hostName;
     Mdns::Publisher::SubTypeList subTypeList;
     Mdns::Publisher::TxtData     txtData(aService.mTxtData, aService.mTxtData + aService.mTxtDataLength);
 
@@ -260,8 +278,19 @@ void DnssdPlatform::RegisterService(const Service &aService, RequestId aRequestI
         subTypeList.push_back(aService.mSubTypeLabels[index]);
     }
 
-    mPublisher.PublishService(aService.mHostName, aService.mServiceInstance, aService.mServiceType, subTypeList,
-                              aService.mPort, txtData, MakePublisherCallback(aRequestId, aCallback));
+    // When `aService.mHostName` is `nullptr`, the service is for
+    // the local host. `Mdns::Publisher` expects an empty string
+    // to indicate this.
+
+    hostName = aService.mHostName;
+
+    if (hostName == nullptr)
+    {
+        hostName = "";
+    }
+
+    mPublisher.PublishService(hostName, aService.mServiceInstance, aService.mServiceType, subTypeList, aService.mPort,
+                              txtData, MakePublisherCallback(aRequestId, aCallback));
 }
 
 void DnssdPlatform::UnregisterService(const Service &aService, RequestId aRequestId, RegisterCallback aCallback)
@@ -323,3 +352,5 @@ void DnssdPlatform::HandleMdnsState(Mdns::Publisher::State aState)
 }
 
 } // namespace otbr
+
+#endif // OTBR_ENABLE_DNSSD_PLAT

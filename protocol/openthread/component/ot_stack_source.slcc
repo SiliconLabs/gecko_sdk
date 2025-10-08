@@ -184,6 +184,8 @@ source:
       - path: radio/trel_interface.cpp
       - path: radio/trel_link.cpp
       - path: radio/trel_packet.cpp
+      - path: radio/trel_peer.cpp
+      - path: radio/trel_peer_discoverer.cpp
       - path: thread/address_resolver.cpp
       - path: thread/announce_begin_server.cpp
       - path: thread/announce_sender.cpp
@@ -205,7 +207,7 @@ source:
       - path: thread/mesh_forwarder_ftd.cpp
       - path: thread/mesh_forwarder_mtd.cpp
       - path: thread/mle.cpp
-      - path: thread/mle_router.cpp
+      - path: thread/mle_ftd.cpp
       - path: thread/mle_tlvs.cpp
       - path: thread/mle_types.cpp
       - path: thread/mlr_manager.cpp
@@ -227,10 +229,12 @@ source:
       - path: thread/router.cpp
       - path: thread/router_table.cpp
       - path: thread/src_match_controller.cpp
+      - path: thread/thread_link_info.cpp
       - path: thread/thread_netif.cpp
       - path: thread/time_sync_service.cpp
       - path: thread/tmf.cpp
       - path: thread/uri_paths.cpp
+      - path: thread/version.cpp
       - path: utils/channel_manager.cpp
       - path: utils/channel_monitor.cpp
       - path: utils/flash.cpp

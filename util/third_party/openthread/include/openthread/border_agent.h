@@ -35,7 +35,9 @@
 #ifndef OPENTHREAD_BORDER_AGENT_H_
 #define OPENTHREAD_BORDER_AGENT_H_
 
+#include <openthread/dns.h>
 #include <openthread/instance.h>
+#include <openthread/ip6.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,16 +91,97 @@ typedef struct otBorderAgentCounters
 } otBorderAgentCounters;
 
 /**
- * Gets the counters of the Thread Border Agent.
+ * Represents information about a Border Agent session.
  *
- * @param[in]  aInstance  A pointer to an OpenThread instance.
+ * This structure is populated by `otBorderAgentGetNextSessionInfo()` during iteration over the list of sessions using
+ * an `otBorderAgentSessionIterator`.
  *
- * @returns A pointer to the Border Agent counters.
+ * To ensure consistent `mLifetime` calculations, the iterator's initialization time is stored within the iterator,
+ * and each session's `mLifetime` is calculated relative to this time.
  */
-const otBorderAgentCounters *otBorderAgentGetCounters(otInstance *aInstance);
+typedef struct otBorderAgentSessionInfo
+{
+    otSockAddr mPeerSockAddr;   ///< Socket address (IPv6 address and port number) of session peer.
+    bool       mIsConnected;    ///< Indicates whether the session is connected.
+    bool       mIsCommissioner; ///< Indicates whether the session is accepted as full commissioner.
+    uint64_t   mLifetime;       ///< Milliseconds since the session was first established.
+} otBorderAgentSessionInfo;
 
 /**
- * Indicates whether or not the Border Agent service is active and running.
+ * Represents an iterator for Border Agent sessions.
+ *
+ * The caller MUST NOT access or update the fields in this struct. It is intended for OpenThread internal use only.
+ */
+typedef struct otBorderAgentSessionIterator
+{
+    void    *mPtr;
+    uint64_t mData;
+} otBorderAgentSessionIterator;
+
+/**
+ * Maximum length of the OT core generated MeshCoP Service TXT data.
+ *
+ * Each field has the format:
+ * | Length (1 byte) | "Keyname=" | Data |
+ *
+ * Fields:
+ * Border Agent Id (id)                 - 4 + 16 = 20 bytes
+ * Version of TXT record format (rv)    - 4 + 1  = 5 bytes
+ * Network Name (nn)                    - 4 + 16 = 20 bytes
+ * ExtendedPanId (xp)                   - 4 + 8 = 12 bytes
+ * Thread Version (tv)                  - 4 + 5 = 9 bytes
+ * Extended Address (xa)                - 4 + 8 = 12 bytes
+ * State Bitmap (sb)                    - 4 + 4 = 8 bytes
+ * Partition Id (pt)                    - 4 + 4 = 8 bytes
+ * Active Timestamp (at)                - 4 + 8 = 12 bytes
+ * Backbone Router Sequence Number (sq) - 4 + 1 = 5 bytes
+ * Backbone Router Udp Port (bb)        - 4 + 2 = 6 bytes
+ * Backbone Router Domain Name (dn)     - 4 + 16 = 20 bytes
+ * On-Mesh Routable Prefix (omr)        - 5 + 9 = 14 bytes
+ *
+ * Maximum possible data length: 151 bytes
+ */
+#define OT_BORDER_AGENT_MESHCOP_SERVICE_TXT_DATA_MAX_LENGTH 256
+
+/**
+ * Represents the Border Agent MeshCoP Service TXT data.
+ */
+typedef struct otBorderAgentMeshCoPServiceTxtData
+{
+    uint8_t  mData[OT_BORDER_AGENT_MESHCOP_SERVICE_TXT_DATA_MAX_LENGTH];
+    uint16_t mLength;
+} otBorderAgentMeshCoPServiceTxtData;
+
+/**
+ * Enables or disables the Border Agent service on the device.
+ *
+ * By default, the Border Agent service is enabled when the `OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE` feature is used.
+ * This function allows higher-layer code to explicitly control its state. This can be useful in scenarios such as:
+ *
+ * - The higher-layer code wishes to delay the start of the Border Agent service (and its mDNS advertisement of the
+ *  `_meshcop._udp` service on the infrastructure link). This allows time to prepare or determine vendor-specific TXT
+ *   data entries for inclusion.
+ * - Unit tests or test scripts might disable the Border Agent service to prevent it from interfering with specific
+ *   test steps. For example, tests validating mDNS or DNS-SD functionality may disable the Border Agent to prevent its
+ *   registration of the MeshCoP service.
+ *
+ * @param[in] aInstance  The OpenThread instance.
+ * @param[in] aEnabled   A boolean to indicate whether to to enable (TRUE), or disable (FALSE).
+ */
+void otBorderAgentSetEnabled(otInstance *aInstance, bool aEnabled);
+
+/**
+ * Indicates whether or not the Border Agent service is enabled.
+ *
+ * @param[in] aInstance  The OpenThread instance.
+ *
+ * @retval TRUE   The Border Agent service is enabled.
+ * @retval FALSE  The Border Agent service is disabled.
+ */
+bool otBorderAgentIsEnabled(otInstance *aInstance);
+
+/**
+ * Indicates whether or not the Border Agent service is enabled and also active.
  *
  * While the Border Agent is active, external commissioner candidates can try to connect to and establish secure DTLS
  * sessions with the Border Agent using PSKc. A connected commissioner can then petition to become a full commissioner.
@@ -122,6 +205,109 @@ bool otBorderAgentIsActive(otInstance *aInstance);
  * @returns UDP port of the Border Agent.
  */
 uint16_t otBorderAgentGetUdpPort(otInstance *aInstance);
+
+/**
+ * This callback informs the application of the changes in the state of the MeshCoP service.
+ *
+ * In specific, the 'state' includes the MeshCoP TXT data originated from the Thread network and whether the
+ * Border Agent is Active (which can be obtained by `otBorderAgentIsActive`).
+ *
+ * @param[in] aContext  A pointer to application-specific context.
+ */
+typedef void (*otBorderAgentMeshCoPServiceChangedCallback)(void *aContext);
+
+/**
+ * Sets the callback function used by the Border Agent to notify of any changes to the state of the MeshCoP service.
+ *
+ * The callback is invoked when the 'Is Active' state of the Border Agent or the MeshCoP service TXT data values
+ * change. For example, it is invoked when the network name or the extended PAN ID changes and passes the updated
+ * encoded TXT data to the application layer.
+ *
+ * This callback is invoked once right after this API is called to provide initial states of the MeshCoP service.
+ *
+ * @param[in] aInstance  A pointer to an OpenThread instance.
+ * @param[in] aCallback  The callback to be invoked when there are any changes of the MeshCoP service.
+ * @param[in] aContext   A pointer to application-specific context.
+ */
+void otBorderAgentSetMeshCoPServiceChangedCallback(otInstance                                *aInstance,
+                                                   otBorderAgentMeshCoPServiceChangedCallback aCallback,
+                                                   void                                      *aContext);
+
+/**
+ * Gets the MeshCoP service TXT data.
+ *
+ * The generated TXT data includes a subset of keys (depending on the device's current state and whether features are
+ * enabled) as specified in the documentation of the `OT_BORDER_AGENT_MESHCOP_SERVICE_TXT_DATA_MAX_LENGTH` constant.
+ * Notably, if `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE` is enabled and `otBorderAgentSetVendorTxtData()`
+ * was used to set extra vendor-specific TXT data bytes, those vendor-specified TXT data bytes are NOT included in the
+ * TXT data returned by this function.
+ *
+ * @param[in]  aInstance  A pointer to an OpenThread instance.
+ * @param[out] aTxtData   A pointer to a MeshCoP Service TXT data struct to get the data.
+ *
+ * @retval OT_ERROR_NONE      If successfully retrieved the Border Agent MeshCoP Service TXT data.
+ * @retval OT_ERROR_NO_BUFS   If the buffer in @p aTxtData doesn't have enough size.
+ */
+otError otBorderAgentGetMeshCoPServiceTxtData(otInstance *aInstance, otBorderAgentMeshCoPServiceTxtData *aTxtData);
+
+/**
+ * Maximum string length of base name used in `otBorderAgentSetMeshCoPServiceBaseName()`.
+ *
+ * The full DNS label is constructed by appending the Extended Address of the device (as 16-character hex digits) to
+ * the given base name.
+ */
+#define OT_BORDER_AGENT_MESHCOP_SERVICE_BASE_NAME_MAX_LENGTH (OT_DNS_MAX_LABEL_SIZE - 17)
+
+/**
+ * Sets the base name to construct the service instance name used when advertising the mDNS `_meshcop._udp` service by
+ * the Border Agent.
+ *
+ * Requires the `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE` feature.
+ *
+ * The name can also be configured using the `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_BASE_NAME` configuration
+ * option (which is the recommended way to specify this name). This API is provided for projects where the name needs
+ * to be set after device initialization and at run-time.
+ *
+ * Per the Thread specification, the service instance should be a user-friendly name identifying the device model or
+ * product. A recommended format is "VendorName ProductName".
+ *
+ * To construct the full name and ensure name uniqueness, the OpenThread Border Agent module will append the Extended
+ * Address of the device (as 16-character hex digits) to the given base name.
+ *
+ * Note that the same name will be used for the ephemeral key service `_meshcop-e._udp` when the ephemeral key feature
+ * is enabled and used.
+ *
+ * @param[in] aInstance  The OpenThread instance.
+ * @param[in] aBaseName  The base name to use (MUST not be NULL).
+ *
+ * @retval OT_ERROR_NONE          The name was set successfully.
+ * @retval OT_ERROR_INVALID_ARGS  The name is too long or invalid.
+ */
+otError otBorderAgentSetMeshCoPServiceBaseName(otInstance *aInstance, const char *aBaseName);
+
+/**
+ * Sets the vendor extra TXT data to be included when the Border Agent advertises the mDNS `_meshcop._udp` service.
+ *
+ * Requires the `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE` feature.
+ *
+ * The provided @p aVendorData bytes are appended as they appear in the buffer to the end of the TXT data generated by
+ * the Border Agent itself, and are then included in the advertised mDNS `_meshcop._udp` service.
+ *
+ * This function itself does not perform any validation of the format of the provided @p aVendorData. Therefore, the
+ * caller MUST ensure it is formatted properly. Per the Thread specification, vendor-specific Key-Value TXT data pairs
+ * use TXT keys starting with 'v'. For example, `vn` for vendor name and generally `v*`.
+ *
+ * The OpenThread stack will create and retain its own copy of the bytes in @p aVendorData. So, the buffer passed to
+ * this function does not need to persist beyond the scope of the call.
+ *
+ * The vendor TXT data can be set at any time while the Border Agent is in any state. If there is a change from the
+ * previously set value, it will trigger an update of the registered mDNS service to advertise the new TXT data.
+ *
+ * @param[in] aInstance          The OpenThread instance.
+ * @param[in] aVendorData        A pointer to the buffer containing the vendor TXT data.
+ * @param[in] aVendorDataLength  The length of @p aVendorData in bytes.
+ */
+void otBorderAgentSetVendorTxtData(otInstance *aInstance, const uint8_t *aVendorData, uint16_t aVendorDataLength);
 
 /**
  * Gets the randomly generated Border Agent ID.
@@ -160,6 +346,38 @@ otError otBorderAgentGetId(otInstance *aInstance, otBorderAgentId *aId);
  * @sa otBorderAgentGetId
  */
 otError otBorderAgentSetId(otInstance *aInstance, const otBorderAgentId *aId);
+
+/**
+ * Initializes a session iterator.
+ *
+ * An iterator MUST be initialized before being used in `otBorderAgentGetNextSessionInfo()`. A previously initialized
+ * iterator can be re-initialized to start from the beginning of the session list.
+ *
+ * @param[in] aInstance   A pointer to an OpenThread instance.
+ * @param[in] aIterator   The iterator to initialize.
+ */
+void otBorderAgentInitSessionIterator(otInstance *aInstance, otBorderAgentSessionIterator *aIterator);
+
+/**
+ * Retrieves the next Border Agent session information.
+ *
+ * @param[in]  aIterator      The iterator to use.
+ * @param[out] aSessionInfo   A pointer to an `otBorderAgentSessionInfo` to populate.
+ *
+ * @retval OT_ERROR_NONE        Successfully retrieved the next session info.
+ * @retval OT_ERROR_NOT_FOUND   No more sessions are available. The end of the list has been reached.
+ */
+otError otBorderAgentGetNextSessionInfo(otBorderAgentSessionIterator *aIterator,
+                                        otBorderAgentSessionInfo     *aSessionInfo);
+
+/**
+ * Gets the counters of the Thread Border Agent.
+ *
+ * @param[in]  aInstance  A pointer to an OpenThread instance.
+ *
+ * @returns A pointer to the Border Agent counters.
+ */
+const otBorderAgentCounters *otBorderAgentGetCounters(otInstance *aInstance);
 
 /*--------------------------------------------------------------------------------------------------------------------
  * Border Agent Ephemeral Key feature */

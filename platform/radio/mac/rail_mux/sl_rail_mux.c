@@ -1721,6 +1721,7 @@ HIDDEN void fn_mux_rail_events_callback(RAIL_Handle_t railHandle, RAIL_Events_t 
         case RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL:
         case RAIL_SCHEDULER_STATUS_INTERNAL_ERROR:
         case RAIL_SCHEDULER_STATUS_TASK_FAIL:
+        case RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED:
           // If we were waiting for an ACK: we will never get the ACK we were waiting for
           // Clear flags to match lower mac statemachine and allow things to go back to idle
           // and retry upon resuming 15.4

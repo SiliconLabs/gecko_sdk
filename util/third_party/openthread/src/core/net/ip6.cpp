@@ -1071,6 +1071,107 @@ exit:
     return error;
 }
 
+void Ip6::DetermineAction(const Message &aMessage,
+                          const Header  &aHeader,
+                          bool          &aForwardThread,
+                          bool          &aForwardHost,
+                          bool          &aReceive) const
+{
+    // Determine `aForwardThread`, `aForwardHost` and `aReceive`
+    // based on the destination address and message origin.
+
+    uint16_t rloc16;
+
+    aForwardThread = false;
+    aForwardHost   = false;
+    aReceive       = false;
+
+    if (aHeader.GetDestination().IsMulticast())
+    {
+        // Destination is multicast
+
+        // Forward multicast message to thread unless we received it
+        // on Thread netif.
+
+        aForwardThread = !aMessage.IsOriginThreadNetif();
+
+#if OPENTHREAD_FTD
+        if (aMessage.IsOriginThreadNetif() && aHeader.GetDestination().IsMulticastLargerThanRealmLocal() &&
+            Get<ChildTable>().HasSleepyChildWithAddress(aHeader.GetDestination()))
+        {
+            aForwardThread = true;
+        }
+#endif
+
+        // Always forward multicast packets to host network stack
+        aForwardHost = true;
+
+        // If subscribed to the multicast address, receive if it is from the
+        // Thread netif or if multicast loop is allowed.
+
+        if ((aMessage.IsOriginThreadNetif() || aMessage.GetMulticastLoop()) &&
+            Get<ThreadNetif>().IsMulticastSubscribed(aHeader.GetDestination()))
+        {
+            aReceive = true;
+        }
+
+        ExitNow();
+    }
+
+    // Destination is unicast
+
+    if (Get<ThreadNetif>().HasUnicastAddress(aHeader.GetDestination()))
+    {
+        aReceive = true;
+        ExitNow();
+    }
+
+    if (aHeader.GetDestination().IsLinkLocalUnicast())
+    {
+        // Forward a message with a link-local destination address
+        // to thread, unless it is received on the Thread netif.
+
+        aForwardThread = !aMessage.IsOriginThreadNetif();
+        ExitNow();
+    }
+
+    if (IsOnLink(aHeader.GetDestination()))
+    {
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE
+        aForwardThread = (!aMessage.IsLoopbackToHostAllowed() ||
+                          !Get<BackboneRouter::Manager>().ShouldForwardDuaToBackbone(aHeader.GetDestination()));
+        aForwardHost   = !aForwardThread;
+#else
+        aForwardThread = true;
+#endif
+        ExitNow();
+    }
+
+    if (Get<NetworkData::Leader>().RouteLookup(aHeader.GetSource(), aHeader.GetDestination(), rloc16) != kErrorNone)
+    {
+        // No route in mesh, forward to host (as a last resort).
+        LogNote("Failed to find valid route for: %s", aHeader.GetDestination().ToString().AsCString());
+        aForwardHost = true;
+        ExitNow();
+    }
+
+    // `RouteLookup()` found a destination within the mesh. If we are
+    // the destination (device is acting as a Border Router), forward
+    // it to the host. Otherwise, forward to Thread.
+
+    if (Get<Mle::Mle>().HasRloc16(rloc16))
+    {
+        aForwardHost = true;
+    }
+    else
+    {
+        aForwardThread = true;
+    }
+
+exit:
+    return;
+}
+
 Error Ip6::HandleDatagram(OwnedPtr<Message> aMessagePtr, bool aIsReassembled)
 {
     Error   error;
@@ -1080,10 +1181,6 @@ Error Ip6::HandleDatagram(OwnedPtr<Message> aMessagePtr, bool aIsReassembled)
     bool    forwardHost;
     uint8_t nextHeader;
 
-    receive       = false;
-    forwardThread = false;
-    forwardHost   = false;
-
     SuccessOrExit(error = header.ParseFrom(*aMessagePtr));
 
     if (!aMessagePtr->IsOriginHostTrusted())
@@ -1091,63 +1188,7 @@ Error Ip6::HandleDatagram(OwnedPtr<Message> aMessagePtr, bool aIsReassembled)
         VerifyOrExit(!header.GetSource().IsLoopback() && !header.GetDestination().IsLoopback(), error = kErrorDrop);
     }
 
-    // Determine `forwardThread`, `forwardHost` and `receive`
-    // based on the destination address.
-
-    if (header.GetDestination().IsMulticast())
-    {
-        // Destination is multicast
-
-        forwardThread = !aMessagePtr->IsOriginThreadNetif();
-
-#if OPENTHREAD_FTD
-        if (aMessagePtr->IsOriginThreadNetif() && header.GetDestination().IsMulticastLargerThanRealmLocal() &&
-            Get<ChildTable>().HasSleepyChildWithAddress(header.GetDestination()))
-        {
-            forwardThread = true;
-        }
-#endif
-
-        // Always forward multicast packets to host network stack
-        forwardHost = true;
-
-        if ((aMessagePtr->IsOriginThreadNetif() || aMessagePtr->GetMulticastLoop()) &&
-            Get<ThreadNetif>().IsMulticastSubscribed(header.GetDestination()))
-        {
-            receive = true;
-        }
-    }
-    else
-    {
-        // Destination is unicast
-
-        if (Get<ThreadNetif>().HasUnicastAddress(header.GetDestination()))
-        {
-            receive = true;
-        }
-        else if (!aMessagePtr->IsOriginThreadNetif() || !header.GetDestination().IsLinkLocalUnicast())
-        {
-            if (header.GetDestination().IsLinkLocalUnicast())
-            {
-                forwardThread = true;
-            }
-            else if (IsOnLink(header.GetDestination()))
-            {
-#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE
-                forwardThread = (!aMessagePtr->IsLoopbackToHostAllowed() ||
-                                 !Get<BackboneRouter::Manager>().ShouldForwardDuaToBackbone(header.GetDestination()));
-#else
-                forwardThread = true;
-#endif
-            }
-            else if (RouteLookup(header.GetSource(), header.GetDestination()) == kErrorNone)
-            {
-                forwardThread = true;
-            }
-
-            forwardHost = !forwardThread;
-        }
-    }
+    DetermineAction(*aMessagePtr, header, forwardThread, forwardHost, receive);
 
     aMessagePtr->SetOffset(sizeof(header));
 
@@ -1374,28 +1415,6 @@ bool Ip6::IsOnLink(const Address &aAddress) const
 
 exit:
     return isOnLink;
-}
-
-Error Ip6::RouteLookup(const Address &aSource, const Address &aDestination) const
-{
-    Error    error;
-    uint16_t rloc;
-
-    error = Get<NetworkData::Leader>().RouteLookup(aSource, aDestination, rloc);
-
-    if (error == kErrorNone)
-    {
-        if (rloc == Get<Mle::MleRouter>().GetRloc16())
-        {
-            error = kErrorNoRoute;
-        }
-    }
-    else
-    {
-        LogNote("Failed to find valid route for: %s", aDestination.ToString().AsCString());
-    }
-
-    return error;
 }
 
 #if OPENTHREAD_CONFIG_IP6_BR_COUNTERS_ENABLE

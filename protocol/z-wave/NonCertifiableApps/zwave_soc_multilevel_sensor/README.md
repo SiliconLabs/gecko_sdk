@@ -119,7 +119,7 @@ The following LEDs and buttons shown in the next table below are used.
 </tr>
 </table>
 
-Note : BTN0 press works only on the 800 series and has no effect on the 700 series. This is due to the differences in the silicon. The BTN0 press is able to wake up the 800 series from EM4 mode where as this is not possible for the 700 series.
+Note : BTN0 only works when the device is already awake, as it is not possible to wake up the device from EM4 via this interrupt due to the silicon.
 
 ## Firmware Update
 

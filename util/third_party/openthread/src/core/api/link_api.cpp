@@ -69,7 +69,7 @@ otError otLinkSetChannel(otInstance *aInstance, uint8_t aChannel)
     }
 #endif
 
-    VerifyOrExit(instance.Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(instance.Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
 
     SuccessOrExit(error = instance.Get<Mac::Mac>().SetPanChannel(aChannel));
     instance.Get<MeshCoP::ActiveDatasetManager>().Clear();
@@ -90,7 +90,7 @@ otError otLinkSetWakeupChannel(otInstance *aInstance, uint8_t aChannel)
     Error     error    = kErrorNone;
     Instance &instance = AsCoreType(aInstance);
 
-    VerifyOrExit(instance.Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(instance.Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
 
     SuccessOrExit(error = instance.Get<Mac::Mac>().SetWakeupChannel(aChannel));
 
@@ -112,7 +112,7 @@ otError otLinkSetSupportedChannelMask(otInstance *aInstance, uint32_t aChannelMa
     Error     error    = kErrorNone;
     Instance &instance = AsCoreType(aInstance);
 
-    VerifyOrExit(instance.Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(instance.Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
 
     instance.Get<Mac::Mac>().SetSupportedChannelMask(Mac::ChannelMask(aChannelMask));
 
@@ -130,11 +130,11 @@ otError otLinkSetExtendedAddress(otInstance *aInstance, const otExtAddress *aExt
     Error     error    = kErrorNone;
     Instance &instance = AsCoreType(aInstance);
 
-    VerifyOrExit(instance.Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(instance.Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
 
     instance.Get<Mac::Mac>().SetExtAddress(AsCoreType(aExtAddress));
 
-    instance.Get<Mle::MleRouter>().UpdateLinkLocalAddress();
+    instance.Get<Mle::Mle>().UpdateLinkLocalAddress();
 
 exit:
     return error;
@@ -152,7 +152,7 @@ otError otLinkSetPanId(otInstance *aInstance, otPanId aPanId)
     Error     error    = kErrorNone;
     Instance &instance = AsCoreType(aInstance);
 
-    VerifyOrExit(instance.Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(instance.Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
 
     instance.Get<Mac::Mac>().SetPanId(aPanId);
     instance.Get<MeshCoP::ActiveDatasetManager>().Clear();
@@ -421,7 +421,7 @@ uint16_t otLinkGetCcaFailureRate(otInstance *aInstance)
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 bool otLinkIsCslEnabled(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().IsCslEnabled(); }
 
-bool otLinkIsCslSupported(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().IsCslSupported(); }
+bool otLinkIsCslSupported(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mle::Mle>().IsCslSupported(); }
 
 uint8_t otLinkGetCslChannel(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mac::Mac>().GetCslChannel(); }
 
@@ -464,17 +464,14 @@ exit:
     return error;
 }
 
-uint32_t otLinkGetCslTimeout(otInstance *aInstance)
-{
-    return AsCoreType(aInstance).Get<Mle::MleRouter>().GetCslTimeout();
-}
+uint32_t otLinkGetCslTimeout(otInstance *aInstance) { return AsCoreType(aInstance).Get<Mle::Mle>().GetCslTimeout(); }
 
 otError otLinkSetCslTimeout(otInstance *aInstance, uint32_t aTimeout)
 {
     Error error = kErrorNone;
 
     VerifyOrExit(kMaxCslTimeout >= aTimeout, error = kErrorInvalidArgs);
-    AsCoreType(aInstance).Get<Mle::MleRouter>().SetCslTimeout(aTimeout);
+    AsCoreType(aInstance).Get<Mle::Mle>().SetCslTimeout(aTimeout);
 
 exit:
     return error;

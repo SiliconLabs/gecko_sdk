@@ -7,10 +7,6 @@
 #ifndef POWERSTRIP_BUTTONS_H
 #define POWERSTRIP_BUTTONS_H
 
-#if defined(THUNDERBOARD)
-#include "PowerStrip_buttons_thunderboard.h"
-#else
 #include "PowerStrip_buttons_wstk.h"
-#endif
 
 #endif /* POWERSTRIP_BUTTONS_H */

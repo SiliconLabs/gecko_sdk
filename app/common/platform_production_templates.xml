@@ -13,6 +13,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_ws.slcw"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="app.common.example.tz_psa_attestation.tz_psa_attestation_s.slcp app.common.example.tz_psa_attestation.tz_psa_attestation_ns.tz_psa_attestation_ns.slcp"/>
   </descriptors>
@@ -29,6 +31,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_ws.slcw"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="app.common.example.tz_psa_crypto_ecdh.tz_psa_crypto_ecdh_s.slcp app.common.example.tz_psa_crypto_ecdh.tz_psa_crypto_ecdh_ns.tz_psa_crypto_ecdh_ns.slcp"/>
   </descriptors>
@@ -45,6 +49,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/blink_baremetal/blink_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="blink_kernel_freertos" label="Platform - Blink Kernel FreeRTOS" description="This example project shows how to blink an LED using a FreeRTOS kernel task. The blink task can be created using either dynamic or static memory allocation for the task stack and tcb.&#xA;">
@@ -60,6 +66,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/blink_kernel_freertos/blink_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="blink_kernel_micriumos" label="Platform - Blink Kernel Micrium OS" description="This example project shows how to blink an LED using a Micrium OS kernel task.&#xA;">
@@ -75,6 +83,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/blink_kernel_micriumos/blink_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="blink_pwm_baremetal" label="Platform - Blink PWM" description="This example project uses the PWM driver that uses a TIMER to gradually adjust the intensity of an LED up and down.&#xA;">
@@ -90,6 +100,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/blink_pwm_baremetal/blink_pwm_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="cli_baremetal" label="Platform - CLI Bare-metal" description="This example project demonstrates how to use the CLI driver in a bare-metal configuration.&#xA;">
@@ -105,6 +117,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cli_baremetal/cli_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="cli_kernel_freertos" label="Platform - CLI Kernel FreeRTOS" description="This example project demonstrates how to use the CLI driver using a FreeRTOS Kernel.&#xA;">
@@ -120,6 +134,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cli_kernel_freertos/cli_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="cli_kernel_micriumos" label="Platform - CLI Kernel Micrium OS" description="This example project demonstrates how to use the CLI driver using a Micrium OS Kernel.&#xA;">
@@ -135,6 +151,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cli_kernel_micriumos/cli_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="coulomb_baremetal" label="Platform - Coulomb Counter Bare-metal" description="This example project shows how to use coulomb counter in a bare-metal configuration.&#xA;">
@@ -150,6 +168,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/coulomb_baremetal/coulomb_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="coulomb_dcdc_baremetal" label="Platform - Coulomb Counter DCDC Bare-metal" description="This example project shows how to use the DCDC coulomb counter in a bare-metal configuration.&#xA;">
@@ -165,6 +185,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/coulomb_dcdc_baremetal/coulomb_dcdc_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="cpc_secondary_spi_security_device_recovery" label="Platform - CPC Secondary Device Recovery - SPI" description="This simple example project implements the function sl_cpc_security_on_unbind_request(), allowing the secondary device to be unbound from the host.&#xA;">
@@ -180,6 +202,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cpc_secondary_spi_security_device_recovery/cpc_secondary_spi_security_device_recovery.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="cpc_secondary_vcom_micriumos" label="Platform - CPC Secondary with Micrium OS" description="This simple example project shows how to open user endpoints in a Micrium OS task with security disabled. By connecting a host running a CPCd instance to the secondary's VCOM port, the user can send data to the user endpoints, and verify that it is echoed back.&#xA;">
@@ -195,6 +219,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_micriumos/cpc_secondary_vcom_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="cpc_secondary_vcom_security_device_recovery" label="Platform - CPC Secondary Device Recovery - VCOM" description="This simple example project implements the function sl_cpc_security_on_unbind_request(), allowing the secondary device to be unbound from the host.&#xA;">
@@ -210,6 +236,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_security_device_recovery/cpc_secondary_vcom_security_device_recovery.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="cpc_secondary_vcom_security_micriumos" label="Platform - CPC Secondary with Micrium OS and Security Enabled" description="This simple example project shows how to open user endpoints in a Micrium OS task with security enabled. By connecting a host running a CPCd instance to the secondary's VCOM port, the user can send data to the user endpoints, and verify that it is echoed back.&#xA;">
@@ -225,6 +253,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_security_micriumos/cpc_secondary_vcom_security_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="dci_swd_programming" label="Platform Security - SoC Series 2 DCI and SWD Programming" description="This example project demonstrates the DCI and SWD Programming on Series 2 devices.&#xA;">
@@ -240,6 +270,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/dci_swd_programming/dci_swd_programming.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="dmadrv_baremetal" label="Platform - DMADRV Bare-metal" description="This example project shows how to use DMADRV driver to transfer data between memory and a USART peripheral in a bare-metal configuration.&#xA;">
@@ -255,6 +287,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/dmadrv_baremetal/dmadrv_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="emode_baremetal" label="Platform - Emode Bare-metal" description="Demo for energy mode current consumption testing.&#xA;">
@@ -270,6 +304,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/emode_baremetal/emode_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="i2cspm_baremetal" label="Platform - I2C Simple Polled Master Bare-metal" description="This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a bare-metal configuration.&#xA;">
@@ -285,6 +321,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/i2cspm_baremetal/i2cspm_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="i2cspm_kernel_freertos" label="Platform - I2C Simple Polled Master on FreeRTOS Kernel" description="This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a FreeRTOS kernel task.&#xA;">
@@ -300,6 +338,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/i2cspm_kernel_freertos/i2cspm_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="i2cspm_kernel_micriumos" label="Platform - I2C Simple Polled Master on Micrium OS Kernel" description="This example project demonstrates how to use the I2C Simple Polled Master driver using the Si7021 Relative Humidity and Temperature Sensor in a Micrium OS kernel task.&#xA;">
@@ -315,6 +355,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/i2cspm_kernel_micriumos/i2cspm_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="iostream_eusart_baremetal" label="Platform - I/O Stream EUSART Bare-metal" description="This example project uses the I/O Stream service running in a bare-metal configuration  to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The  application will echo back any characters it receives over the serial connection. The  VCOM serial port can be used either over USB or by connecting to port 4902 if the kit  is connected via Ethernet. &#xA;">
@@ -330,6 +372,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/iostream_eusart_baremetal/iostream_eusart_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="iostream_eusart_kernel_micriumos" label="Platform - I/O Stream EUSART on Micrium OS kernel" description="This example project uses the I/O Stream service running in a Micrium OS kernel task to demonstrate the use of EUSART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet. &#xA;">
@@ -345,6 +389,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/iostream_eusart_kernel_micriumos/iostream_eusart_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="iostream_usart_baremetal" label="Platform - I/O Stream USART Bare-metal" description="This example project uses the I/O Stream service running in a bare-metal configuration  to demonstrate the use of UART communication over the virtual COM port (VCOM). The  application will echo back any characters it receives over the serial connection. The  VCOM serial port can be used either over USB or by connecting to port 4902 if the kit  is connected via Ethernet. &#xA;">
@@ -360,6 +406,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/iostream_usart_baremetal/iostream_usart_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="iostream_usart_kernel_micriumos" label="Platform - I/O Stream USART on Micrium OS kernel" description="This example project uses the I/O Stream service running in a Micrium OS kernel task to demonstrate the use of UART communication over the virtual COM port (VCOM). The application will echo back any characters it receives over the serial connection. The VCOM serial port can be used either over USB or by connecting to port 4902 if the kit is connected via Ethernet. &#xA;">
@@ -375,6 +423,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/iostream_usart_kernel_micriumos/iostream_usart_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="joystick_baremetal" label="Platform - Joystick Bare-metal" description="This example project uses the Joystick Driver running in a bare metal configuration to demonstrate the use of Joystick driver by printing joystick position after every finite interval over the virtual COM port (VCOM). The VCOM serial port can be used either over  USB or by connecting to port 4902 if the kit is connected via Internet.&#xA;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as  mainboard to mount and connect the compatible Radio Board.&#xA;">
@@ -390,6 +440,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/joystick_baremetal/joystick_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="joystick_kernel_freertos" label="Platform - Joystick on FreeRTOS kernel" description="This example project uses the Joystick driver running in a FreeRTOS kernel  task to demonstrate the use of Joystick driver by printing joystick position  after every finite interval over the virtual COM port (VCOM). The VCOM serial  port can be used either over USB or by connecting to port 4902 if the kit is  connected via Internet. &#xA;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as  mainboard to mount and connect the compatible Radio Board.&#xA;">
@@ -405,6 +457,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/joystick_kernel_freertos/joystick_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="joystick_kernel_micriumos" label="Platform - Joystick on Micrium OS kernel" description="This example project uses the Joystick driver running in a Micrium OS kernel  task to demonstrate the use of Joystick driver by printing joystick position  after every finite interval over the virtual COM port (VCOM). The VCOM serial  port can be used either over USB or by connecting to port 4902 if the kit is  connected via Internet. &#xA;Important Note: This application only works when Wireless Pro Kit (BRD4002A) is used as  mainboard to mount and connect the compatible Radio Board.&#xA;">
@@ -420,6 +474,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/joystick_kernel_micriumos/joystick_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="math_mvp_demo" label="Platform - Demonstrate the MVP math library" description="This example project shows how to use the MVP math library.&#xA;">
@@ -435,6 +491,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/math_mvp_demo/math_mvp_demo.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="mbedtls_aescrypt" label="Platform Security - SoC mbedTLS AES" description="This example uses hardware accelerators to accelerate the AES encryption and SHA hash functions of mbedTLS.&#xA;">
@@ -450,6 +508,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/mbedtls_aescrypt/mbedtls_aescrypt.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="mbedtls_ecdh" label="Platform Security - SoC mbedTLS ECDH" description="This example uses hardware accelerators of the supported devices to perform ECDH key generation with mbedTLS.&#xA;">
@@ -465,6 +525,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/mbedtls_ecdh/mbedtls_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="mbedtls_ecdsa" label="Platform Security - SoC mbedTLS ECDSA" description="This example uses hardware accelerators on the supported device to perform ECDSA digital signature with mbedTLS.&#xA;">
@@ -480,6 +542,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/mbedtls_ecdsa/mbedtls_ecdsa.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="memlcd_baremetal" label="Platform - MEMLCD Bare-metal" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a baremetal application, using Silicon Labs Graphics Library (glib).&#xA;">
@@ -495,6 +559,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/memlcd_baremetal/memlcd_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="memlcd_kernel_micriumos" label="Platform - MEMLCD Kernel on Micrium OS kernel" description="This example project demonstrates use of the Memory Liquid Crystal Display (LCD)  module in a Micrium OS kernel task, using Silicon Labs Graphics Library (glib).&#xA;">
@@ -510,6 +576,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/memlcd_kernel_micriumos/memlcd_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="ml_audio_classifier" label="Machine Learning - Audio Classifier" description="This application uses TensorFlow Lite for Microcontrollers to classify audio data recorded on the microphone in a Micrium OS kernel task. The classification is used to control a LED on the board.&#xA;">
@@ -525,6 +593,8 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/ml_audio_classifier/ml_audio_classifier.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="ml_blink" label="Machine Learning - Blink" description="This application demonstrates a model trained to replicate a sine function.  The model is continuously fed with values ranging from 0 to 2pi, and the  output of the model is used to control the intensity of an LED. &#xA;">
@@ -540,6 +610,8 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/ml_blink/ml_blink.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="ml_magic_wand" label="Machine Learning - Magic Wand" description="This application demonstrates a model trained to recognize various hand gestures with an accelerometer. The detected gestures are printed to the serial port.&#xA;">
@@ -555,6 +627,8 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/ml_magic_wand/ml_magic_wand.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="ml_model_profiler" label="Machine Learning - Model Profiler" description="This application profiles a ML model. The ML model is loaded as a byte array which is generated from a Tensorflow tflite model file. Profiling is performed by running one inference with the model.&#xA;">
@@ -570,6 +644,8 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/ml_model_profiler/ml_model_profiler.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="ml_voice_control_light" label="Machine Learning - Voice Control Light" description="This application uses TensorFlow Lite for Microcontrollers to detect the spoken words &quot;on&quot; and &quot;off&quot; from audio data recorded on the microphone in a Micrium OS kernel task. The detected keywords are used to control an LED on the board.&#xA;">
@@ -585,6 +661,8 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/ml_voice_control_light/ml_voice_control_light.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="mpu_simple_baremetal" label="Platform - MPU Simple" description="This example project demonstrates the use of the Simple MPU module. Its purpose is to block the execution of code from RAM in order to prevent code injection attacks. In this example,  some fake malicious executable code is copied to RAM and executed with the MPU disabled and  re-enabled to demonstrate its effectiveness. &#xA;">
@@ -600,6 +678,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/mpu_simple_baremetal/mpu_simple_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="nvm3_baremetal" label="Platform - NVM3 Bare-metal" description="This example project demonstrates use of the NVM3 interface. Using the command line interface, the user can write, read and delete NVM3 data objects through the serial connection. The number of writes and deletes are tracked in counter objects.&#xA;">
@@ -615,6 +695,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/nvm3_baremetal/nvm3_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="power_manager_baremetal" label="Platform - Power Manager Bare-metal" description="This example project demonstrates use of the Power Manager module in a bare metal application.&#xA;">
@@ -630,6 +712,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/power_manager_baremetal/power_manager_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="power_manager_kernel_micriumos" label="Platform - Power Manager Kernel with Micrium OS" description="This example project demonstrates use of the Power Manager module in a Micrium OS kernel task.&#xA;">
@@ -645,6 +729,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/power_manager_kernel_micriumos/power_manager_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="psa_crypto_aead" label="Platform Security - SoC PSA Crypto AEAD" description="This example uses the PSA Crypto API to perform Authenticated Encryption with Associated Data (AEAD) operations on the supported device.&#xA;">
@@ -660,6 +746,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_aead/psa_crypto_aead.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_asymmetric_key" label="Platform Security - SoC PSA Crypto Asymmetric Key" description="This example uses the PSA Crypto API to perform asymmetric key operations on the supported device.&#xA;">
@@ -675,6 +763,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_asymmetric_key/psa_crypto_asymmetric_key.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_cipher" label="Platform Security - SoC PSA Crypto Cipher" description="This example project demonstrates the unauthenticated cipher API for generic and built-in AES-128 keys.&#xA;">
@@ -690,6 +780,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_cipher/psa_crypto_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_dsa" label="Platform Security - SoC PSA Crypto DSA" description="This example project demonstrates the ECDSA and EdDSA digital signature API for generic and built-in ECC keys.&#xA;">
@@ -705,6 +797,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_dsa/psa_crypto_dsa.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_ecdh" label="Platform Security - SoC PSA Crypto ECDH" description="This example project demonstrates the ECDH key agreement API.&#xA;">
@@ -720,6 +814,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_ecdh/psa_crypto_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_hash" label="Platform Security - SoC PSA Crypto Hash" description="This example project demonstrates the hash API.&#xA;">
@@ -735,6 +831,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_hash/psa_crypto_hash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_kdf" label="Platform Security - SoC PSA Crypto KDF" description="This example project demonstrates the Key Derivation Function (KDF) API.&#xA;">
@@ -750,6 +848,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_kdf/psa_crypto_kdf.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_mac" label="Platform Security - SoC PSA Crypto MAC" description="This example project demonstrates the Message Authentication Code (MAC) API.&#xA;">
@@ -765,6 +865,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_mac/psa_crypto_mac.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_symmetric_key" label="Platform Security - SoC PSA Crypto Symmetric Key" description="This example project demonstrates the symmetric key API.&#xA;">
@@ -780,6 +882,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_symmetric_key/psa_crypto_symmetric_key.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="psa_crypto_x509" label="Platform Security - SoC PSA Crypto X.509" description="This example project uses opaque ECDSA keys to implement the X.509 standard for certificates in Mbed TLS.&#xA;">
@@ -795,6 +899,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/psa_crypto_x509/psa_crypto_x509.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_asymmetric_key_handling" label="Platform Security - SoC SE Manager Asymmetric Key Handling" description="This example project demonstrates the asymmetric key handling API of SE Manager.&#xA;">
@@ -810,6 +916,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_asymmetric_key_handling/se_manager_asymmetric_key_handling.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_attestation" label="Platform Security - SoC SE Manager Attestation" description="This example project demonstrates how to get attestation tokens using the SE Manager Attestation API and printing them in a human-readable format.&#xA;">
@@ -825,6 +933,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_attestation/se_manager_attestation.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_block_cipher" label="Platform Security - SoC SE Manager Block Cipher" description="This example project demonstrates the block cipher API of SE Manager.&#xA;">
@@ -840,6 +950,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_block_cipher/se_manager_block_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_ecdh" label="Platform Security - SoC SE Manager Key Agreement (ECDH)" description="This example project demonstrates the key agreement (ECDH) API of SE Manager.&#xA;">
@@ -855,6 +967,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_ecdh/se_manager_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_ecjpake" label="Platform Security - SoC SE Manager Key Agreement (ECJPAKE)" description="This example project demonstrates the key agreement (ECJPAKE) API of SE Manager.&#xA;">
@@ -870,6 +984,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_ecjpake/se_manager_ecjpake.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_hash" label="Platform Security - SoC SE Manager Hash" description="This example project demonstrates the Hash API of SE Manager.&#xA;">
@@ -885,6 +1001,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_hash/se_manager_hash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_host_firmware_upgrade" label="Platform Security - SoC SE Manager Host Firmware Upgrade and Debug Lock" description="This example project demonstrates the host firmware upgrade and debug lock API of SE Manager.&#xA;">
@@ -900,6 +1018,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_host_firmware_upgrade/se_manager_host_firmware_upgrade.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_kdf" label="Platform Security - SoC SE Manager Key Derivation (HKDF and PBKDF2)" description="This example project demonstrates the key derivation (HKDF and PBKDF2) API of SE Manager.&#xA;">
@@ -915,6 +1035,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_kdf/se_manager_kdf.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_key_provisioning" label="Platform Security - SoC SE Manager Key Provisioning" description="This example project demonstrates the key provisioning API of SE Manager.&#xA;">
@@ -930,6 +1052,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_key_provisioning/se_manager_key_provisioning.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_se_firmware_upgrade" label="Platform Security - SoC SE Manager SE Firmware Upgrade" description="This example project demonstrates the SE firmware upgrade API of SE Manager.&#xA;">
@@ -945,6 +1069,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_se_firmware_upgrade/se_manager_se_firmware_upgrade.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_secure_debug" label="Platform Security - SoC SE Manager Secure Debug" description="This example project demonstrates the secure debug API of SE Manager.&#xA;">
@@ -960,6 +1086,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_secure_debug/se_manager_secure_debug.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_secure_identity" label="Platform Security - SoC SE Manager Secure Identity" description="This example project demonstrates the secure identity of Secure Vault High device.&#xA;">
@@ -975,6 +1103,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_secure_identity/se_manager_secure_identity.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_signature" label="Platform Security - SoC SE Manager Digital Signature (ECDSA and EdDSA)" description="This example project demonstrates the digital signature (ECDSA and EdDSA) API of SE Manager.&#xA;">
@@ -990,6 +1120,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_signature/se_manager_signature.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_stream_cipher" label="Platform Security - SoC SE Manager Stream Cipher" description="This example project demonstrates the stream cipher API of SE Manager.&#xA;">
@@ -1005,6 +1137,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_stream_cipher/se_manager_stream_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_symmetric_key_handling" label="Platform Security - SoC SE Manager Symmetric Key Handling" description="This example project demonstrates the symmetric key handling API of SE Manager.&#xA;">
@@ -1020,6 +1154,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_symmetric_key_handling/se_manager_symmetric_key_handling.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_tamper" label="Platform Security - SoC SE Manager Tamper" description="This example project demonstrates the tamper feature of Secure Vault High device.&#xA;">
@@ -1035,6 +1171,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_tamper/se_manager_tamper.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="se_manager_user_data" label="Platform Security - SoC SE Manager User Data" description="This example project demonstrates the user data API of SE Manager.&#xA;">
@@ -1050,6 +1188,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/se_manager_user_data/se_manager_user_data.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="simple_button_baremetal" label="Platform - Simple Button Bare-metal" description="This example project shows how to toggle LEDs using buttons in a bare-metal environment.&#xA;">
@@ -1065,6 +1205,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/simple_button_baremetal/simple_button_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="simple_button_kernel_micriumos" label="Platform - Simple Button on Micrium OS kernel" description="This example project shows how to toggle LEDs using buttons in a Micrium OS kernel task.&#xA;">
@@ -1080,6 +1222,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/simple_button_kernel_micriumos/simple_button_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="sleeptimer_baremetal" label="Platform - Sleeptimer Bare-metal" description="This example project demonstrates periodic and one-shot timers using the low-frequency real-time clock peripheral. Timers can be stopped and restarted using the buttons. Timer status is reported on the virtual COM serial port.&#xA;">
@@ -1095,6 +1239,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/sleeptimer_baremetal/sleeptimer_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="sleeptimer_wallclock_baremetal" label="Platform - Sleeptimer Wallclock" description="This example project demonstrates the wallclock interface of the sleeptimer service. The user can get and set the date and time in different formats through the VCOM serial port.&#xA;">
@@ -1110,6 +1256,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/sleeptimer_wallclock_baremetal/sleeptimer_wallclock_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="spidrv_eusart_master_baremetal" label="Platform - SPIDRV Master Bare-metal using EUSART" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#xA;">
@@ -1125,6 +1273,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_master_baremetal/spidrv_eusart_master_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_eusart_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel using EUSART" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#xA;">
@@ -1140,6 +1290,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_master_kernel_micriumos/spidrv_eusart_master_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_eusart_slave_baremetal" label="Platform - SPIDRV Slave Bare-metal using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#xA;">
@@ -1155,6 +1307,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_slave_baremetal/spidrv_eusart_slave_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_eusart_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel using EUSART" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#xA;">
@@ -1170,6 +1324,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_slave_kernel_micriumos/spidrv_eusart_slave_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_master_baremetal" label="Platform - SPIDRV Master Bare-metal" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#xA;">
@@ -1185,6 +1341,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_master_baremetal/spidrv_master_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_master_kernel_micriumos" label="Platform - SPIDRV Master on Micrium OS kernel" description="This example project demonstrates how to use the master mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#xA;">
@@ -1200,6 +1358,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_master_kernel_micriumos/spidrv_master_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_slave_baremetal" label="Platform - SPIDRV Slave Bare-metal" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a bare-metal configuration.&#xA;">
@@ -1215,6 +1375,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_slave_baremetal/spidrv_slave_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="spidrv_slave_kernel_micriumos" label="Platform - SPIDRV Slave on Micrium OS kernel" description="This example project demonstrates how to use the slave mode of the Serial Peripheral Interface driver in a Micrium OS kernel task.&#xA;">
@@ -1230,6 +1392,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/spidrv_slave_kernel_micriumos/spidrv_slave_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="tempdrv_kernel_micriumos" label="Platform - TEMPDRV on Micrium OS kernel" description="This example project demonstrates how to use the internal temperature sensor in a Micrium OS kernel task.&#xA;">
@@ -1245,6 +1409,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tempdrv_kernel_micriumos/tempdrv_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
   <descriptors name="tz_psa_attestation_ns" label="Platform Security - SoC TrustZone PSA Attestation (Non-secure application)" description="The Non-secure part of the application demonstrates how to generate PSA attestation token and print them in a human-readable format. The Non-secure application needs to build with the Secure application on a workspace (tz_psa_attestation_ws).&#xA;">
@@ -1260,6 +1426,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_ns/tz_psa_attestation_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="tz_psa_attestation_s" label="Platform Security - SoC TrustZone PSA Attestation (Secure application)" description="The Secure part of the application provides the PSA Crypto and Attestation functionalities in the Secure world. The Secure application needs to build with the Non-secure application on a workspace (tz_psa_attestation_ws).&#xA;">
@@ -1275,6 +1443,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_s.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="tz_psa_crypto_ecdh_ns" label="Platform Security - SoC TrustZone PSA Crypto ECDH (Non-secure application)" description="The Non-secure part of the application demonstrates how to use the ECDH key agreement API. The Non-secure application needs to build with the Secure application on a workspace (tz_psa_crypto_ecdh_ws).&#xA;">
@@ -1290,6 +1460,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_ns/tz_psa_crypto_ecdh_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="tz_psa_crypto_ecdh_s" label="Platform Security - SoC TrustZone PSA Crypto ECDH (Secure application)" description="The Secure part of the application provides the PSA Crypto and Attestation functionalities in the Secure world. The Secure application needs to build with the Non-secure application on a workspace (tz_psa_crypto_ecdh_ws).&#xA;">
@@ -1305,6 +1477,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_s.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="uartdrv_baremetal" label="Platform - UARTDRV LEUART Bare-metal" description="This example project uses the UARTDRV driver running in a bare-metal configuration  to demonstrate the use of LEUART communication over the virtual COM port (VCOM). The  application will echo back any characters it receives over the serial connection.&#xA;">
@@ -1320,6 +1494,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/uartdrv_baremetal/uartdrv_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="uartdrv_kernel_micriumos" label="Platform - UARTDRV LEUART on Micrium OS kernel" description="This example project uses the UARTDRV driver running in a Micrium OS task to demonstrate the use of LEUART communication over the virtual COM port (VCOM). The  application will echo back any characters it receives over the serial connection.&#xA;">
@@ -1335,6 +1511,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/uartdrv_kernel_micriumos/uartdrv_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_cdc_acm_freertos" label="Platform - USB Device CDC ACM with FreeRTOS kernel" description="This example uses the USB stack with the FreeRTOS kernel to create a COM port on your PC.  Once connected on the port using a terminal tool, a menu is displayed and lets you echo any character you typed in.&#xA;">
@@ -1350,6 +1528,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_cdc_acm_freertos/usb_device_cdc_acm_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_cdc_acm_micriumos" label="Platform - USB Device CDC ACM with Micrium OS kernel" description="This example uses the USB stack with the Micrium OS kernel to create a COM port on your PC.  Once connected on the port using a terminal tool, a menu is displayed and lets you echo any character you typed in.&#xA;">
@@ -1365,6 +1545,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_cdc_acm_micriumos/usb_device_cdc_acm_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_composite_freertos" label="Platform - USB Composite Device with FreeRTOS kernel" description="This example uses the USB stack with the FreeRTOS kernel to create a composite device.&#xA;">
@@ -1380,6 +1562,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_composite_freertos/usb_device_composite_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_composite_micriumos" label="Platform - USB Composite Device with Micrium OS kernel" description="This example uses the USB stack with the Micrium OS kernel to create a composite device. &#xA;">
@@ -1395,6 +1579,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_composite_micriumos/usb_device_composite_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_hid_freertos" label="Platform - USB Device HID with FreeRTOS kernel" description="This example uses the USB stack HID Class with the FreeRTOS kernel to emulate a mouse. Once the usb device is connected to a computer, it will trigger continuous mouse movements.&#xA;">
@@ -1410,6 +1596,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_hid_freertos/usb_device_hid_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="usb_device_hid_micriumos" label="Platform - USB Device HID with Micrium OS kernel" description="This example uses the USB stack HID Class with the Micrium OS kernel to emulate a mouse. Once the usb device is connected to a computer, it will trigger continuous mouse movements.&#xA;">
@@ -1425,6 +1613,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/usb_device_hid_micriumos/usb_device_hid_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
   <descriptors name="wifi_commissioning_micriumos" label="Platform - Wi-Fi Commissioning on Micrium OS kernel" description="Demonstrates how to setup a Wi-Fi station using the WF200 Wi-Fi station/softAP combo feature. The application exposes a Wi-Fi access point and a web server to configure the station.&#xA;">
@@ -1440,6 +1630,8 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/common/example/wifi_commissioning_micriumos/wifi_commissioning_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
 </model:MDescriptors>

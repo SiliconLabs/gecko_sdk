@@ -163,6 +163,7 @@ Error Tcp::Endpoint::Connect(const SockAddr &aSockName, uint32_t aFlags)
         struct sockaddr_in6 sin6p;
 
         tp.t_flags &= ~TF_FASTOPEN;
+        ClearAllBytes(sin6p);
         memcpy(&sin6p.sin6_addr, &aSockName.mAddress, sizeof(sin6p.sin6_addr));
         sin6p.sin6_port = BigEndian::HostSwap16(aSockName.mPort);
         error           = BsdErrorToOtError(tcp6_usr_connect(&tp, &sin6p));
@@ -193,6 +194,7 @@ Error Tcp::Endpoint::SendByReference(otLinkedBuffer &aBuffer, uint32_t aFlags)
 
     if (IS_FASTOPEN(tp.t_flags))
     {
+        ClearAllBytes(sin6p);
         memcpy(&sin6p.sin6_addr, &tp.faddr, sizeof(sin6p.sin6_addr));
         sin6p.sin6_port = tp.fport;
         name            = &sin6p;
@@ -221,6 +223,7 @@ Error Tcp::Endpoint::SendByExtension(size_t aNumBytes, uint32_t aFlags)
 
     if (IS_FASTOPEN(tp.t_flags))
     {
+        ClearAllBytes(sin6p);
         memcpy(&sin6p.sin6_addr, &tp.faddr, sizeof(sin6p.sin6_addr));
         sin6p.sin6_port = tp.fport;
         name            = &sin6p;
@@ -1089,13 +1092,9 @@ void tcplp_sys_connection_lost(struct tcpcb *aTcb, uint8_t aErrNum)
 
 void tcplp_sys_on_state_change(struct tcpcb *aTcb, int aNewState)
 {
-    if (aNewState == TCP6S_CLOSED)
-    {
-        /* Re-initialize the TCB. */
-        cbuf_pop(&aTcb->recvbuf, cbuf_used_space(&aTcb->recvbuf));
-        aTcb->accepted_from = nullptr;
-        initialize_tcb(aTcb);
-    }
+    OT_UNUSED_VARIABLE(aTcb);
+    OT_UNUSED_VARIABLE(aNewState);
+
     /* Any adaptive changes to the sleep interval would go here. */
 }
 

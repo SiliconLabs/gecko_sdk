@@ -3,7 +3,7 @@ label: SerialAPI AppsHw
 category: Z-Wave|AppsHw
 description: >
   This component provides basic hardware mapping and hardware initialization for the SerialAPI
-  application. The component makes sure that both Series 1 and Series 2 devices have the right
+  application. The component makes sure that all Series 1 devices have the right
   USART pin configuration. Interrupt and deep sleep functionalities are also handled for the
   SerialAPI application.
 package: Z-Wave
@@ -13,10 +13,6 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/SerialAPI/config/s1/serial_api_config.h
     file_id: serial_api_config
     condition: [device_series_1]
-  # For series 2
-  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/SerialAPI/config/s2/serial_api_config.h
-    file_id: serial_api_config
-    condition: [device_series_2]
 source:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/SerialAPI/SerialAPI_hw.c"
 include:

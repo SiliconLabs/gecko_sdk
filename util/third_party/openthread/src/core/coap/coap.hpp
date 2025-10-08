@@ -720,18 +720,14 @@ public:
     void SetInterceptor(Interceptor aInterceptor, void *aContext) { mInterceptor.Set(aInterceptor, aContext); }
 
     /**
-     * Returns a reference to the request message list.
+     * Retrieves aggregated information about the CoAP request and cached response message queues.
      *
-     * @returns A reference to the request message list.
-     */
-    const MessageQueue &GetRequestMessages(void) const { return mPendingRequests; }
-
-    /**
-     * Returns a reference to the cached response list.
+     * Provides combined statistics, such as the total number of messages and data buffers currently used across all
+     * queues associated with CoAP requests and cached responses within this CoAP instance.
      *
-     * @returns A reference to the cached response list.
+     * @param[out] aQueueInfo     A `MessageQueue::Info` to populate with info about the queues.
      */
-    const MessageQueue &GetCachedResponses(void) const { return mResponsesQueue.GetResponses(); }
+    void GetRequestAndCachedResponsesQueueInfo(MessageQueue::Info &aQueueInfo) const;
 
 protected:
     /**
@@ -821,6 +817,7 @@ private:
     Message *InitMessage(Message *aMessage, Type aType, Uri aUri);
     Message *InitResponse(Message *aMessage, const Message &aRequest);
 
+    void        ScheduleRetransmissionTimer(void);
     static void HandleRetransmissionTimer(Timer &aTimer);
     void        HandleRetransmissionTimer(void);
 
@@ -935,6 +932,25 @@ private:
     static Error Send(CoapBase &aCoapBase, ot::Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
     Error        Send(ot::Message &aMessage, const Ip6::MessageInfo &aMessageInfo);
 };
+
+#if OPENTHREAD_CONFIG_COAP_API_ENABLE
+/**
+ * Represents an Application CoAP.
+ */
+class ApplicationCoap : public Coap
+{
+public:
+    /**
+     * Initializes the object.
+     *
+     * @param[in] aInstance      A reference to the OpenThread instance.
+     */
+    explicit ApplicationCoap(Instance &aInstance)
+        : Coap(aInstance)
+    {
+    }
+};
+#endif
 
 } // namespace Coap
 

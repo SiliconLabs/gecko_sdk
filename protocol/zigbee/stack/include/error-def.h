@@ -447,6 +447,50 @@ enum
  * @brief An attempt was made to transmit during the suspend period.
  */
   EMBER_TRANSMISSION_SUSPENDED = 0x77,
+/**
+ * @brief Node ID discovery failed.
+ */
+  EMBER_ID_DISCOVERY_FAILED = 0xC8,
+/**
+ * @brief Message was sent but no APS ACK received.
+ */
+  EMBER_NO_APS_ACK = 0xC9,
+/**
+ * @brief APS message was canceled.
+ */
+  EMBER_APS_MESSAGE_CANCELED = 0xCA,
+/**
+ * @brief Node ID discovery not enabled.
+ */
+  EMBER_ID_DISCOVERY_NOT_ENABLED = 0xCB,
+/**
+ * @brief Message was not sent, Node ID discovery is underway.
+ */
+  EMBER_ID_DISCOVERY_UNDERWAY = 0xCC,
+/**
+ * @brief The message was not sent because a route discovery is currently underway. There is no route to the target until the route discovery completes.
+ */
+  EMBER_SEND_UNICAST_ROUTE_DISCOVERY_UNDERWAY = 0xCD,
+/**
+ * @brief Radius is 0 or message has been dropped because route request failed or failed to submit message to tx queue.
+ */
+  EMBER_SEND_UNICAST_FAILURE = 0xCE,
+/**
+ * @brief No active route to the destination.
+ */
+  EMBER_SEND_UNICAST_NO_ROUTE = 0xCF,
+/**
+ * @brief Broadcast message timeout while waiting for sleepy children to poll.
+ */
+  EMBER_BROADCAST_TO_SLEEPY_CHILDREN_TIMEOUT = 0xD0,
+/**
+ * @brief Expected a neighbor to relay the message, but none did.
+ */
+  EMBER_BROADCAST_RELAY_FAILED = 0xD1,
+/**
+ * @brief Transmit is incomplete.
+ */
+  EMBER_TRANSMIT_INCOMPLETE = 0xD2,
 
 //@}
 //

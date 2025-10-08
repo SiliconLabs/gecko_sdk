@@ -1087,10 +1087,15 @@ cc_configuration_command_bulk_set(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   uint16_t updated_parameter_counter = 0;
   uint16_t first_parameter_number   = parameter_offset;
   bool status = cc_configuration_get_first_parameter(&parameter_buffer);
-  if(status == true)
+  if(status != true)
   {
-    first_parameter_number   += parameter_buffer.metadata->number;
+    // If IO interaction failed, return with error.
+    return RECEIVED_FRAME_STATUS_FAIL;
   }
+
+  // In older version of this command class specification mentions, that the parameter
+  // should start with 1. CC:0070.01.04.12.001, CC:0070.02.04.13.001CC
+  parameter_offset = parameter_buffer.metadata->number;
 
   uint8_t size_of_new_parameter_value = sizeof(new_parameter_value.as_int32); //sets the default size to 4 bytes
   switch(size)
@@ -1188,6 +1193,11 @@ cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   bool status = true;
   cc_config_parameter_buffer_t parameter_buffer;
   status = cc_configuration_get_first_parameter(&parameter_buffer);
+
+  if (false == status) {
+    return RECEIVED_FRAME_STATUS_FAIL;
+  }
+
   uint16_t first_parameter_number = parameter_buffer.metadata->number;
 
   /*
@@ -1214,7 +1224,12 @@ cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   cc_config_parameter_size_t first_parameter_size = CC_CONFIG_PARAMETER_SIZE_NOT_SPECIFIED;
 
   // Calculate parameter number for the first parameter to report.
-  uint16_t parameter_number = parameter_offset + first_parameter_number;
+  
+  // In older version of this command class specification mentions, that the parameter
+  // should start with 1. CC:0070.01.04.12.001, CC:0070.02.04.13.001CC.
+  uint16_t parameter_number = parameter_offset
+                              ? parameter_offset
+                              : first_parameter_number;
 
   /*
    * Calculate the number of consecutive parameters to be reported.
@@ -1254,8 +1269,10 @@ cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
   // Set the size
   *(p_frame + 6) |= ((uint8_t)parameter_size & 0x07);
 
-  // Calculate parameter number for the first parameter to report.
-  parameter_number = parameter_offset + first_parameter_number;
+  // Set the parameter back to the default
+  parameter_number = parameter_offset
+                     ? parameter_offset
+                     : first_parameter_number;
 
   const uint8_t REPORT_BASE_LENGTH = 7; // Report contains 7 bytes without any parameters.
 
@@ -1291,8 +1308,8 @@ cc_configuration_command_send_bulk_report( RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     // Get the parameter
     status = cc_configuration_get(parameter_number, &parameter_buffer);
 
-    if (false != status) {
-      // TODO: Handle this case.
+    if (false == status) {
+      return RECEIVED_FRAME_STATUS_FAIL;
     }
 
     /*

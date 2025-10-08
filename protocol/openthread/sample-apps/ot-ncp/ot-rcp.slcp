@@ -30,6 +30,9 @@ source:
 configuration:
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
+  # By default, OTBR is configured to work with 460800 baud rate on UART
+  - name: SL_UARTDRV_USART_VCOM_BAUDRATE
+    value: 460800
   - name: OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
     value: 0
   - name: OPENTHREAD_CONFIG_LOG_OUTPUT

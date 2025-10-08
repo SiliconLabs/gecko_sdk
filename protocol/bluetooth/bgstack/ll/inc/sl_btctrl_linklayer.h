@@ -259,6 +259,22 @@ void sl_btctrl_init_phy(void);
 
 void sl_btctrl_init_adv_ext(void);
 
+enum sl_btctrl_advertiser_config_flags {
+  SL_BTCTRL_CONFIG_FLAG_PRIMARY_EXT_PACKET_ADDRESS = 0x02,
+  SL_BTCTRL_CONFIG_FLAG_PRIMARY_EXT_PACKET_TX_POWER = 0x04,
+};
+
+struct sl_btctrl_adv_config {
+  enum sl_btctrl_advertiser_config_flags flags;
+};
+
+/**
+ * Set the advertiser address or tx power to be used for all advertisers
+ * @param adv_config The advertiser configuration.
+ * @return sl_status_ok, or an appropriate status.
+ */
+sl_status_t sl_btctrl_config_adv(struct sl_btctrl_adv_config *adv_config);
+
 void sl_btctrl_init_privacy(void);
 
 sl_status_t sl_btctrl_allocate_resolving_list_memory(uint8_t resolvingListSize);
@@ -303,5 +319,10 @@ void sl_btctrl_init_past_receiver(void);
  * all the transmitted packets, then it will send the Number Of Completed Packets HCI event to the host.
  */
 void sl_btctrl_configure_completed_packets_reporting(uint8_t packets, uint8_t events);
+
+/**
+ * @brief Initializes event info reporting vendor specific feature.
+ */
+void sl_btctrl_init_event_info_reporting(void);
 
 #endif

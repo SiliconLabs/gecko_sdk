@@ -544,14 +544,14 @@ static void handle_state_idle(RAIL_Handle_t rail_handle)
       if (ms_state == MS_INITED) {
         set_ms_state(MS_SENDING_MS_START_PACKET);
         if (!packet_sent) {
-          uint8_t i = 0;
-          for (i = 0; i < 20; i++) {
+          uint16_t i = 0;
+          for (i = 0; i < 20000; i++) {
             sl_power_manager_sleep();
             if (packet_sent) {
               break;
             }
           }
-          if (i > 15) {
+          if (i >= 20000) {
             app_log_info("Timeout happened\n");
           }
         }

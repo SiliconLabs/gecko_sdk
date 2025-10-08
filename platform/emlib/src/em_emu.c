@@ -152,11 +152,55 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #if defined(_SILICON_LABS_32B_SERIES_1)             \
   && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) \
   && !defined(ERRATA_FIX_EMU_E220_DECBOD_IGNORE)
-/* EMU_E220 DECBOD Errata fix. DECBOD Reset can occur
- * during voltage scaling after EM2/3 wakeup. */
+// EMU_E220 DECBOD Errata:
+// DECBOD Reset can occur during voltage scaling after EM2/3 wake-up.
+// Fix: Add a 14us delay coming back from EM2/3 sleep.
 #define ERRATA_FIX_EMU_E220_DECBOD_ENABLE
-#define EMU_PORBOD                   (*(volatile uint32_t *) (EMU_BASE + 0x14C))
-#define EMU_PORBOD_GMC_CALIB_DISABLE (0x1UL << 31)
+
+#if defined (__GNUC__) && (__CORTEX_M == 0)
+// Assembly code specific to ARM Cortex-M0 with armgcc compiler.
+
+// Number of core cycles for a 14us delay with:
+//   - Core Clock is on HFRCO at 19MHz coming from EM2/3 sleep
+//   - Assembly loop takes around 4 cycles
+#define EM2_WAKEUP_DELAY_CORE_CYCLE_NUMBER (19 * 14 / 4)
+
+// Assembly code for the delay
+#define ERRATA_FIX_EMU_E220_DELAY_CYCLES()                                \
+  __ASM volatile (                                                        \
+    "1: sub %0, %0, #1\n"               /* Subtract 1 */                  \
+    "   cmp %0, #0\n"                   /* Compare to 0 */                \
+    "   bne 1b\n"                       /* Branch if not equal to zero */ \
+    :                                   /* No output operands */          \
+    : "r" (EM2_WAKEUP_DELAY_CORE_CYCLE_NUMBER)                            \
+    : "cc"                              /* condition codes */             \
+    )
+#else
+// Assembly code specific to other ARM Cortex-M with armgcc compiler and
+// to all ARM cortex-M devices with IAR compiler
+
+// Number of core cycles for a 14us delay with:
+//   - Core Clock is on HFRCO at 19MHz coming from EM2/3 sleep
+//   - Assembly loop takes around 3-4 cycles depending on architecture and compiler
+#if (__CORTEX_M == 0)
+#define EM2_WAKEUP_DELAY_CORE_CYCLE_NUMBER (19 * 14 / 3)
+#else
+#define EM2_WAKEUP_DELAY_CORE_CYCLE_NUMBER (19 * 14 / 4)
+#endif
+
+// Assembly code for the delay
+#define ERRATA_FIX_EMU_E220_DELAY_CYCLES()                                \
+  __ASM volatile (                                                        \
+    "1: subs %0, %0, #1\n"              /* Subtract 1 and update flag */  \
+    "   bne 1b\n"                       /* Branch if not equal to zero */ \
+    :                                   /* No output operands */          \
+    : "r" (EM2_WAKEUP_DELAY_CORE_CYCLE_NUMBER)                            \
+    : "cc"                              /* condition codes */             \
+    )
+#endif
+
+// Hidden EMU Calibration Status flag to check
+#define EMU_STATUS_CALIBRATION  (0x1UL << 28)
 #endif
 
 /* Used to figure out if a memory address is inside or outside of a RAM block.
@@ -370,12 +414,10 @@ SL_RAMFUNC_DECLARATOR static void __attribute__ ((noinline)) ramWFI(void);
 SL_RAMFUNC_DEFINITION_BEGIN
 static void __attribute__ ((noinline)) ramWFI(void)
 {
-  /* Second part of EMU_E220 DECBOD Errata fix. Calibration needs to be disabled
-   * quickly when coming out of EM2/EM3. Ram execution is needed to meet timing.
-   * Calibration is re-enabled after voltage scaling completes. */
-  uint32_t temp = EMU_PORBOD | EMU_PORBOD_GMC_CALIB_DISABLE;
   __WFI();
-  EMU_PORBOD = temp;
+  ERRATA_FIX_EMU_E220_DELAY_CYCLES();
+  // If calibration is active, wait for it to finish
+  while (EMU->STATUS & EMU_STATUS_CALIBRATION) ;
 }
 SL_RAMFUNC_DEFINITION_END
 #endif
@@ -1066,11 +1108,6 @@ void EMU_EnterEM2(bool restore)
   else {
     vScaleAfterWakeup();
   }
-#if defined(ERRATA_FIX_EMU_E220_DECBOD_ENABLE)
-  /* Third part of EMU_E220 DECBOD Errata fix. Calibration needs to be enabled
-   * after voltage scaling completes. */
-  EMU_PORBOD &= ~(EMU_PORBOD_GMC_CALIB_DISABLE);
-#endif
 #endif
 #endif
 
@@ -1270,11 +1307,6 @@ void EMU_EnterEM3(bool restore)
   else {
     vScaleAfterWakeup();
   }
-#if defined(ERRATA_FIX_EMU_E220_DECBOD_ENABLE)
-  /* Third part of EMU_E220 DECBOD Errata fix. Calibration needs to be enabled
-   * after voltage scaling completes. */
-  EMU_PORBOD &= ~(EMU_PORBOD_GMC_CALIB_DISABLE);
-#endif
 #endif
 #endif
 
@@ -1429,10 +1461,14 @@ SL_WEAK void EMU_EFPEM4PresleepHook(void)
  * @brief
  *   Enter energy mode 4 (EM4).
  *
+ * @details
+ *   This function never returns. It waits after the EM4 entry request to make
+ *   sure the CPU is properly shutdown by calling WFI.
+ *
  * @note
  *   Only a power on reset or external reset pin can wake the device from EM4.
  ******************************************************************************/
-void EMU_EnterEM4(void)
+__NO_RETURN void EMU_EnterEM4(void)
 {
 #if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
   sli_metric_em4_wake_init();
@@ -1470,8 +1506,8 @@ void EMU_EnterEM4(void)
 #if defined(_DCDC_IF_EM4ERR_MASK)
   /* Make sure DCDC Mode is not modified, from this point forward,
    * by another code section. */
-  CORE_DECLARE_IRQ_STATE;
-  CORE_ENTER_CRITICAL();
+  // Make sure that we are not interrupted while we are entering em4
+  CORE_CRITICAL_IRQ_DISABLE();
 
   /* Workaround for bug that may cause a Hard Fault on EM4 entry */
   CMU_CLOCK_SELECT_SET(SYSCLK, FSRCO);
@@ -1552,8 +1588,14 @@ void EMU_EnterEM4(void)
 
 #if defined(_DCDC_IF_EM4ERR_MASK)
   EFM_ASSERT((DCDC->IF & _DCDC_IF_EM4ERR_MASK) == 0);
-  CORE_EXIT_CRITICAL();
 #endif
+
+  // Wait for EM4 entry using WFI.
+  __WFI();
+
+  for (;; ) {
+    // __NO_RETURN
+  }
 }
 
 /***************************************************************************//**
@@ -1561,8 +1603,8 @@ void EMU_EnterEM4(void)
  *   Enter energy mode 4 (EM4).
  *
  * @details
- *   This function waits after the EM4 entry request to make sure the CPU
- *   is properly shutdown or the EM4 entry failed.
+ *   This function never returns. It waits after the EM4 entry request to make
+ *   sure the CPU is properly shutdown by calling WFI.
  *
  * @note
  *   Only a power on reset or external reset pin can wake the device from EM4.
@@ -1570,18 +1612,16 @@ void EMU_EnterEM4(void)
 void EMU_EnterEM4Wait(void)
 {
   EMU_EnterEM4();
-
-  // The EM4 entry waiting loop should take 4 cycles by loop minimally (Compiler dependent).
-  // We would then wait for (EMU_EM4_ENTRY_WAIT_LOOPS * 4) clock cycles.
-  for (uint16_t i = 0; i < EMU_EM4_ENTRY_WAIT_LOOPS; i++) {
-    __NOP();
-  }
 }
 
 #if defined(_EMU_EM4CTRL_MASK)
 /***************************************************************************//**
  * @brief
  *   Enter energy mode 4 hibernate (EM4H).
+ *
+ * @details
+ *   This function never returns. It waits after the EM4 entry request to make
+ *   sure the CPU is properly shutdown by calling WFI.
  *
  * @note
  *   Retention of clocks and GPIO in EM4 can be configured using
@@ -1598,6 +1638,10 @@ void EMU_EnterEM4H(void)
 /***************************************************************************//**
  * @brief
  *   Enter energy mode 4 shutoff (EM4S).
+ *
+ * @details
+ *   This function never returns. It waits after the EM4 entry request to make
+ *   sure the CPU is properly shutdown by calling WFI.
  *
  * @note
  *   Retention of clocks and GPIO in EM4 can be configured using

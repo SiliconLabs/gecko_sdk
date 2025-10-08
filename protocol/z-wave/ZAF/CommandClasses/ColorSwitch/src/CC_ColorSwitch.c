@@ -61,13 +61,8 @@ static void init_and_reset(void)
   for (uint8_t i = 0; i < colorsSupportedCount; i++)
   {
     ZAF_Actuator_Init(&pColorComponents[i].obj, 0 , 0xFF, 20, durationDefault, &CC_ColorSwitch_ColorChanged_cb);
-    // Try to read the color switch data.
-    // If read fails it is the first initialization
-    // therefore persist the initial data
-    if(!cc_color_switch_read(i, &pColorComponents[i])) {
-      ZAF_Actuator_Set(&pColorComponents[i].obj, 0xFF, 0);
-      cc_color_switch_write((uint8_t) i, &pColorComponents[i]);
-    }
+    ZAF_Actuator_Set(&pColorComponents[i].obj, 0xFF, 0);
+    cc_color_switch_write((uint8_t) i, &pColorComponents[i]);
   }
 }
 

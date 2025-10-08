@@ -1668,7 +1668,7 @@ static void DWC_EP_OutProcess(void)
                               | DOEPTSIZ0_BIT_PKTCNT
                               | DOEPTSIZ0_XFRSIZ_MAX_64);
         USB_REG->DOEP0DMAADDR = (uint32_t)usbd_driver_data.EP_SetupBuf;
-        USB_REG->DOEP0CTL |= DxEPCTLx_BIT_CNAK | DxEPCTLx_BIT_EPENA;
+        USB_REG->DOEP0CTL |= DxEPCTLx_BIT_EPENA;
       }
     }
 

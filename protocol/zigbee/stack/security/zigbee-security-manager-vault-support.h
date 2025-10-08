@@ -21,7 +21,7 @@
 #define ZIGBEE_SECURITY_MANAGER_VAULT_SUPPORT_H
 
 #include "security_manager.h"
-
+#include "ember-multi-network.h"
 #define ZB_PSA_KEY_TYPE (PSA_KEY_TYPE_AES)
 #define ZB_PSA_ALG (PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4))
 #define ZB_PSA_KEY_USAGE (PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT | PSA_KEY_USAGE_EXPORT)
@@ -31,6 +31,7 @@
 // compatibility
 #define ZB_PSA_KEY_ID_MIN                             0x00030000
 #define ZB_PSA_KEY_ID_MAX                             0x0003FFFF
+
 // These keys with offsets are indexed keys. There are a variable number of
 // them. We reserve a maximum of 255 entries for them, each, but they are
 // ultimately sized by their respective EMBER*SIZE macros (see below)
@@ -38,19 +39,28 @@
 #define GREEN_POWER_PROXY_TABLE_OFFSET                0x00000200
 #define GREEN_POWER_SINK_TABLE_OFFSET                 0x00000300
 
-#define ZB_PSA_KEY_ID_ACTIVE_NWK_KEY                  (ZB_PSA_KEY_ID_MIN + 0)
-#define ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY               (ZB_PSA_KEY_ID_MIN + 1)
-#define ZB_PSA_KEY_ID_PRECONFIGURED_APS_KEY           (ZB_PSA_KEY_ID_MIN + 2)
-#define ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY                 (ZB_PSA_KEY_ID_MIN + 3)
-#define ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY          (ZB_PSA_KEY_ID_MIN + 4)
+#if defined(SL_ZIGBEE_MULTI_NETWORK_STRIPPED)
+#define ZB_PSA_KEY_ID_OFFSET 0
+#else
+// A multi-network device may have 4 networks, and each network
+// can have up to 16384 (0x4000) keys
+#define ZB_PSA_KEY_MAX_IDS_PER_NETWORK                0x00004000
+#define ZB_PSA_KEY_ID_OFFSET                          (uint32_t) (sli_zigbee_get_current_network_index() * ZB_PSA_KEY_MAX_IDS_PER_NETWORK)
+#endif // SL_ZIGBEE_MULTI_NETWORK_STRIPPED
+
+#define ZB_PSA_KEY_ID_ACTIVE_NWK_KEY                  (ZB_PSA_KEY_ID_MIN + 0 + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_ALTERNATE_NWK_KEY               (ZB_PSA_KEY_ID_MIN + 1 + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_PRECONFIGURED_APS_KEY           (ZB_PSA_KEY_ID_MIN + 2 + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_ZLL_ENCRYPT_KEY                 (ZB_PSA_KEY_ID_MIN + 3 + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_ZLL_PRE_CONFIGURED_KEY          (ZB_PSA_KEY_ID_MIN + 4 + ZB_PSA_KEY_ID_OFFSET)
 #define ZB_PSA_KEY_ID_SECURE_EZSP_KEY                 (ZB_PSA_KEY_ID_MIN + 5)  // Deprecated
 #define ZB_PSA_KEY_ID_VERSION_KEY                     (ZB_PSA_KEY_ID_MIN + 16)
-#define ZB_PSA_KEY_ID_LINK_KEY_TABLE_START            (ZB_PSA_KEY_ID_MIN + LINK_KEY_TABLE_OFFSET)
+#define ZB_PSA_KEY_ID_LINK_KEY_TABLE_START            (ZB_PSA_KEY_ID_MIN + LINK_KEY_TABLE_OFFSET + ZB_PSA_KEY_ID_OFFSET)
 #define ZB_PSA_KEY_ID_LINK_KEY_TABLE_END              (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_KEY_TABLE_SIZE)
-#define ZB_PSA_KEY_ID_GP_PROXY_TABLE_START            (ZB_PSA_KEY_ID_MIN + GREEN_POWER_PROXY_TABLE_OFFSET)
-#define ZB_PSA_KEY_ID_GP_PROXY_TABLE_END              (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_GP_PROXY_TABLE_SIZE)
-#define ZB_PSA_KEY_ID_GP_SINK_TABLE_START             (ZB_PSA_KEY_ID_MIN + GREEN_POWER_SINK_TABLE_OFFSET)
-#define ZB_PSA_KEY_ID_GP_SINK_TABLE_END               (ZB_PSA_KEY_ID_LINK_KEY_TABLE_START + EMBER_GP_SINK_TABLE_SIZE)
+#define ZB_PSA_KEY_ID_GP_PROXY_TABLE_START            (ZB_PSA_KEY_ID_MIN + GREEN_POWER_PROXY_TABLE_OFFSET + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_GP_PROXY_TABLE_END              (ZB_PSA_KEY_ID_GP_PROXY_TABLE_START + EMBER_GP_PROXY_TABLE_SIZE)
+#define ZB_PSA_KEY_ID_GP_SINK_TABLE_START             (ZB_PSA_KEY_ID_MIN + GREEN_POWER_SINK_TABLE_OFFSET + ZB_PSA_KEY_ID_OFFSET)
+#define ZB_PSA_KEY_ID_GP_SINK_TABLE_END               (ZB_PSA_KEY_ID_GP_SINK_TABLE_START + EMBER_GP_SINK_TABLE_SIZE)
 
 sl_status_t psa_to_sl_status(psa_status_t sec_man_error);
 

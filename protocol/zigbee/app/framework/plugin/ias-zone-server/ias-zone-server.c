@@ -842,7 +842,7 @@ void emberAfIasZoneClusterServerMessageSentCallback(
   // parameteres, and the original send request will handle populating the buffer.
   // Do not try to retransmit again if the maximum number of retries attempts
   // is reached, this is however discarded if configured for unlimited retries.
-  if ((status == EMBER_DELIVERY_FAILED)
+  if ((status != EMBER_SUCCESS)
       && (queueRetryParams.config.unlimitedRetries
           || (queueRetryParams.currentRetryCount < queueRetryParams.config.maxRetryAttempts))) {
     queueRetryParams.currentRetryCount++;

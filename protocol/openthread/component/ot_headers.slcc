@@ -298,6 +298,8 @@ include:
       - path: radio/trel_interface.hpp
       - path: radio/trel_link.hpp
       - path: radio/trel_packet.hpp
+      - path: radio/trel_peer.hpp
+      - path: radio/trel_peer_discoverer.hpp
       - path: thread/address_resolver.hpp
       - path: thread/announce_begin_server.hpp
       - path: thread/announce_sender.hpp
@@ -320,7 +322,6 @@ include:
       - path: thread/lowpan.hpp
       - path: thread/mesh_forwarder.hpp
       - path: thread/mle.hpp
-      - path: thread/mle_router.hpp
       - path: thread/mle_tlvs.hpp
       - path: thread/mle_types.hpp
       - path: thread/mlr_manager.hpp
@@ -342,6 +343,7 @@ include:
       - path: thread/router.hpp
       - path: thread/router_table.hpp
       - path: thread/src_match_controller.hpp
+      - path: thread/thread_link_info.hpp
       - path: thread/thread_netif.hpp
       - path: thread/thread_tlvs.hpp
       - path: thread/time_sync_service.hpp

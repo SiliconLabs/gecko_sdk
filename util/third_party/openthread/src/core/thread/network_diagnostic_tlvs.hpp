@@ -66,35 +66,37 @@ public:
      */
     enum Type : uint8_t
     {
-        kExtMacAddress       = OT_NETWORK_DIAGNOSTIC_TLV_EXT_ADDRESS,
-        kAddress16           = OT_NETWORK_DIAGNOSTIC_TLV_SHORT_ADDRESS,
-        kMode                = OT_NETWORK_DIAGNOSTIC_TLV_MODE,
-        kTimeout             = OT_NETWORK_DIAGNOSTIC_TLV_TIMEOUT,
-        kConnectivity        = OT_NETWORK_DIAGNOSTIC_TLV_CONNECTIVITY,
-        kRoute               = OT_NETWORK_DIAGNOSTIC_TLV_ROUTE,
-        kLeaderData          = OT_NETWORK_DIAGNOSTIC_TLV_LEADER_DATA,
-        kNetworkData         = OT_NETWORK_DIAGNOSTIC_TLV_NETWORK_DATA,
-        kIp6AddressList      = OT_NETWORK_DIAGNOSTIC_TLV_IP6_ADDR_LIST,
-        kMacCounters         = OT_NETWORK_DIAGNOSTIC_TLV_MAC_COUNTERS,
-        kBatteryLevel        = OT_NETWORK_DIAGNOSTIC_TLV_BATTERY_LEVEL,
-        kSupplyVoltage       = OT_NETWORK_DIAGNOSTIC_TLV_SUPPLY_VOLTAGE,
-        kChildTable          = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_TABLE,
-        kChannelPages        = OT_NETWORK_DIAGNOSTIC_TLV_CHANNEL_PAGES,
-        kTypeList            = OT_NETWORK_DIAGNOSTIC_TLV_TYPE_LIST,
-        kMaxChildTimeout     = OT_NETWORK_DIAGNOSTIC_TLV_MAX_CHILD_TIMEOUT,
-        kEui64               = OT_NETWORK_DIAGNOSTIC_TLV_EUI64,
-        kVersion             = OT_NETWORK_DIAGNOSTIC_TLV_VERSION,
-        kVendorName          = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_NAME,
-        kVendorModel         = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_MODEL,
-        kVendorSwVersion     = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_SW_VERSION,
-        kThreadStackVersion  = OT_NETWORK_DIAGNOSTIC_TLV_THREAD_STACK_VERSION,
-        kChild               = OT_NETWORK_DIAGNOSTIC_TLV_CHILD,
-        kChildIp6AddressList = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_IP6_ADDR_LIST,
-        kRouterNeighbor      = OT_NETWORK_DIAGNOSTIC_TLV_ROUTER_NEIGHBOR,
-        kAnswer              = OT_NETWORK_DIAGNOSTIC_TLV_ANSWER,
-        kQueryId             = OT_NETWORK_DIAGNOSTIC_TLV_QUERY_ID,
-        kMleCounters         = OT_NETWORK_DIAGNOSTIC_TLV_MLE_COUNTERS,
-        kVendorAppUrl        = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_APP_URL,
+        kExtMacAddress        = OT_NETWORK_DIAGNOSTIC_TLV_EXT_ADDRESS,
+        kAddress16            = OT_NETWORK_DIAGNOSTIC_TLV_SHORT_ADDRESS,
+        kMode                 = OT_NETWORK_DIAGNOSTIC_TLV_MODE,
+        kTimeout              = OT_NETWORK_DIAGNOSTIC_TLV_TIMEOUT,
+        kConnectivity         = OT_NETWORK_DIAGNOSTIC_TLV_CONNECTIVITY,
+        kRoute                = OT_NETWORK_DIAGNOSTIC_TLV_ROUTE,
+        kLeaderData           = OT_NETWORK_DIAGNOSTIC_TLV_LEADER_DATA,
+        kNetworkData          = OT_NETWORK_DIAGNOSTIC_TLV_NETWORK_DATA,
+        kIp6AddressList       = OT_NETWORK_DIAGNOSTIC_TLV_IP6_ADDR_LIST,
+        kMacCounters          = OT_NETWORK_DIAGNOSTIC_TLV_MAC_COUNTERS,
+        kBatteryLevel         = OT_NETWORK_DIAGNOSTIC_TLV_BATTERY_LEVEL,
+        kSupplyVoltage        = OT_NETWORK_DIAGNOSTIC_TLV_SUPPLY_VOLTAGE,
+        kChildTable           = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_TABLE,
+        kChannelPages         = OT_NETWORK_DIAGNOSTIC_TLV_CHANNEL_PAGES,
+        kTypeList             = OT_NETWORK_DIAGNOSTIC_TLV_TYPE_LIST,
+        kMaxChildTimeout      = OT_NETWORK_DIAGNOSTIC_TLV_MAX_CHILD_TIMEOUT,
+        kEui64                = OT_NETWORK_DIAGNOSTIC_TLV_EUI64,
+        kVersion              = OT_NETWORK_DIAGNOSTIC_TLV_VERSION,
+        kVendorName           = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_NAME,
+        kVendorModel          = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_MODEL,
+        kVendorSwVersion      = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_SW_VERSION,
+        kThreadStackVersion   = OT_NETWORK_DIAGNOSTIC_TLV_THREAD_STACK_VERSION,
+        kChild                = OT_NETWORK_DIAGNOSTIC_TLV_CHILD,
+        kChildIp6AddressList  = OT_NETWORK_DIAGNOSTIC_TLV_CHILD_IP6_ADDR_LIST,
+        kRouterNeighbor       = OT_NETWORK_DIAGNOSTIC_TLV_ROUTER_NEIGHBOR,
+        kAnswer               = OT_NETWORK_DIAGNOSTIC_TLV_ANSWER,
+        kQueryId              = OT_NETWORK_DIAGNOSTIC_TLV_QUERY_ID,
+        kMleCounters          = OT_NETWORK_DIAGNOSTIC_TLV_MLE_COUNTERS,
+        kVendorAppUrl         = OT_NETWORK_DIAGNOSTIC_TLV_VENDOR_APP_URL,
+        kNonPreferredChannels = OT_NETWORK_DIAGNOSTIC_TLV_NON_PREFERRED_CHANNELS,
+        kEnhancedRoute        = OT_NETWORK_DIAGNOSTIC_TLV_ENHANCED_ROUTE,
     };
 
     /**
@@ -953,6 +955,59 @@ private:
 } OT_TOOL_PACKED_END;
 
 #endif // OPENTHREAD_FTD
+
+/**
+ * Represents an Enhanced Route TLV Entry
+ */
+OT_TOOL_PACKED_BEGIN
+class EnhancedRouteTlvEntry
+{
+public:
+    typedef otNetworkDiagEnhRouteData ParseInfo; ///< Parse entry info
+
+    /**
+     * Initializes the entry as self (associated with device itself).
+     */
+    void InitAsSelf(void) { SetRouteData(kSelfFlag); }
+
+    /**
+     * Initializes the entry from given `router`.
+     *
+     * @param[in] aRouter  Router entry to use for initialization.
+     */
+    void InitFrom(const Router &aRouter);
+
+    /**
+     * Parses the entry and populate the information in given `ParseInfo` struct.
+     *
+     * @parma[out] aParseInfo   The `ParseInfo` structure to populate.
+     */
+    void Parse(ParseInfo &aParseInfo) const;
+
+private:
+    // Format:
+    //
+    //  15  14  13   12  11  10  9   8   7   6   5   4   3   2   1   0
+    // +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    // | S | L | LQOut | LQIn  |     NextHop (6-bit)   | NHCost(4 bits)|
+    // +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+    static constexpr uint16_t kSelfFlag             = 1 << 15;
+    static constexpr uint16_t kLinkFlag             = 1 << 14;
+    static constexpr uint8_t  kLinkQualityOutOffset = 12;
+    static constexpr uint8_t  kLinkQualityInOffset  = 10;
+    static constexpr uint8_t  kNextHopOffset        = 4;
+    static constexpr uint8_t  kNextHopCostOffset    = 0;
+
+    static constexpr uint16_t kLinkQualityMask = 0x3;
+    static constexpr uint16_t kNextHopMask     = 0x3f;
+    static constexpr uint16_t kCostMask        = 0xf;
+
+    uint16_t GetRouteData(void) const { return BigEndian::HostSwap16(mRouteData); }
+    void     SetRouteData(uint16_t aRouteData) { mRouteData = BigEndian::HostSwap16(aRouteData); }
+
+    uint16_t mRouteData;
+} OT_TOOL_PACKED_END;
 
 /**
  * Implements Answer TLV generation and parsing.

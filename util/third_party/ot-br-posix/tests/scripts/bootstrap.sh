@@ -32,8 +32,6 @@ set -euxo pipefail
 TOOLS_HOME="$HOME"/.cache/tools
 [[ -d $TOOLS_HOME ]] || mkdir -p "$TOOLS_HOME"
 
-MDNSRESPONDER_PATCH_PATH=$(realpath "$(dirname "$0")"/../../third_party/mDNSResponder)
-
 disable_install_recommends()
 {
     OTBR_APT_CONF_FILE=/etc/apt/apt.conf
@@ -57,9 +55,6 @@ install_common_dependencies()
         doxygen \
         expect \
         net-tools \
-        libboost-dev \
-        libboost-filesystem-dev \
-        libboost-system-dev \
         libavahi-common-dev \
         libavahi-client-dev \
         libreadline-dev \
@@ -68,8 +63,7 @@ install_common_dependencies()
         coreutils \
         git \
         libprotobuf-dev \
-        protobuf-compiler \
-        socat
+        protobuf-compiler
 }
 
 install_openthread_binraries()
@@ -82,8 +76,6 @@ install_openthread_binraries()
     cmake .. -GNinja -DOT_PLATFORM=simulation -DOT_FULL_LOGS=1 -DOT_COMMISSIONER=ON -DOT_JOINER=ON
     ninja
     sudo ninja install
-
-    sudo apt-get install --no-install-recommends -y socat
 }
 
 configure_network()
@@ -100,25 +92,21 @@ case "$(uname)" in
         install_common_dependencies
 
         if [ "$BUILD_TARGET" == script-check ] || [ "$BUILD_TARGET" == docker-check ]; then
+            sudo bash third_party/openthread/repo/script/install_socat
             install_openthread_binraries
             configure_network
-            exit 0
-        fi
-
-        if [ "$BUILD_TARGET" == otbr-dbus-check ]; then
-            install_openthread_binraries
-            configure_network
-            install_common_dependencies
             exit 0
         fi
 
         if [ "$BUILD_TARGET" == check ] || [ "$BUILD_TARGET" == meshcop ]; then
+            sudo bash third_party/openthread/repo/script/install_socat
             install_openthread_binraries
             sudo apt-get install --no-install-recommends -y avahi-daemon avahi-utils
             configure_network
         fi
 
         if [ "$BUILD_TARGET" == ncp_mode ]; then
+            sudo bash third_party/openthread/repo/script/install_socat
             sudo apt-get install --no-install-recommends -y avahi-daemon avahi-utils
         fi
 
@@ -133,16 +121,11 @@ case "$(uname)" in
         fi
 
         if [ "${OTBR_MDNS-}" == 'mDNSResponder' ]; then
-            SOURCE_NAME=mDNSResponder-1790.80.10
+            SOURCE_NAME=mDNSResponder-2600.100.147
             wget https://github.com/apple-oss-distributions/mDNSResponder/archive/refs/tags/$SOURCE_NAME.tar.gz \
                 && mkdir -p $SOURCE_NAME \
                 && tar xvf $SOURCE_NAME.tar.gz -C $SOURCE_NAME --strip-components=1 \
                 && cd "$SOURCE_NAME" \
-                && (
-                    for patch in "$MDNSRESPONDER_PATCH_PATH"/*.patch; do
-                        patch -p1 <"$patch"
-                    done
-                ) \
                 && cd mDNSPosix \
                 && make os=linux tls=no && sudo make install os=linux tls=no
         fi

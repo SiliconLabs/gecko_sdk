@@ -298,14 +298,6 @@ __STATIC_INLINE void CHIP_Init(void)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_1)             \
-  && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) \
-  && !defined(ERRATA_FIX_EMU_E220_DECBOD_IGNORE)
-  /* First part of the EMU_E220 DECBOD Errata fix. DECBOD Reset can occur
-   * during voltage scaling after EM2/3 wakeup. Second part is in em_emu.c */
-  *(volatile uint32_t *)(EMU_BASE + 0x1A4) |= 0x1f << 10;
-#endif
-
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   SYSTEM_ChipRevision_TypeDef chipRev;
   SYSTEM_ChipRevisionGet(&chipRev);

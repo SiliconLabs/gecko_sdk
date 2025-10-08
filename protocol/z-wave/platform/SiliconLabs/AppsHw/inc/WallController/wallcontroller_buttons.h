@@ -7,10 +7,6 @@
 #ifndef WALLCONTROLLER_BUTTONS_H
 #define WALLCONTROLLER_BUTTONS_H
 
-#if defined(THUNDERBOARD)
-#include "wallcontroller_buttons_thunderboard.h"
-#else
 #include "wallcontroller_buttons_wstk.h"
-#endif
 
 #endif /* WALLCONTROLLER_BUTTONS_H */

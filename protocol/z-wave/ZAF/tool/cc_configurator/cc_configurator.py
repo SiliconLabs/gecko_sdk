@@ -10,6 +10,8 @@ from ccs import cc_multilevel_sensor
 from typing import Any, List
 from os import walk
 
+class CCConfigGenerationError(Exception):
+    pass
 
 def handle_templates(configuration: Any) -> List[cc_data]:
     """Handle all the templates
@@ -59,12 +61,16 @@ def generate(input_dir: str) -> List[cc_data]:
         List[cc_data]: A list of Command Class data
     """
     ret = []
-    for file in glob.glob(os.path.join(input_dir, "*.cc_config")):
+    config_files = glob.glob(os.path.join(input_dir, "*.cc_config"))
+    for file in config_files:
         with open(file) as fd:
             configuration = yaml.load(fd, Loader=yaml.SafeLoader)
 
-        ret += handle_templates(configuration)
+        if configuration is not None:
+            ret += handle_templates(configuration)
 
+    if config_files and not ret:
+        raise CCConfigGenerationError("There are .cc_config files present, but no component was found!")
     return ret
 
 
@@ -129,6 +135,12 @@ if __name__ == "__main__":
     subparsers.add_parser('verify', help='Verify that the files generate match the templates')
     args = parser.parse_args()
 
-    files = generate(args.i)
-    ret = take_action(files, args.action, args.o)
+    ret = 0
+    try:
+        files = generate(args.i)
+        if files:
+            ret = take_action(files, args.action, args.o)
+    except (KeyError, CCConfigGenerationError) as e:
+        logging.error(f"{e.__class__.__name__}:{e} Please check the .cc_config files!")
+        ret = -1
     sys.exit(ret)

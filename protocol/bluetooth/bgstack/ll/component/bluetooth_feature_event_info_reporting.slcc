@@ -1,0 +1,15 @@
+id: bluetooth_feature_event_info_reporting
+label: LE Event Information Reporting
+package: Bluetooth
+description: >
+  Provides API to enable and configure Bluetooth LE procedure event reporting information
+category:  Bluetooth|Host Controller Interface (HCI)
+quality: production
+root_path: protocol/bluetooth/bgstack/ll
+
+provides:
+  - name: bluetooth_feature_event_info_reporting
+
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_event_info_reporting

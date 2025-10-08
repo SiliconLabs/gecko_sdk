@@ -143,6 +143,70 @@ exit:
     return error;
 }
 
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_MULTI_AIL_DETECTION_ENABLE
+
+template <> otError Br::Process<Cmd("multiail")>(Arg aArgs[])
+{
+    otError error = OT_ERROR_NONE;
+
+    /**
+     * @cli br multiail
+     * @code
+     * br multiail
+     * not detected
+     * @endcode
+     * @par api_copy
+     * #otBorderRoutingIsMultiAilDetected
+     */
+    if (aArgs[0].IsEmpty())
+    {
+        OutputLine("%sdetected", otBorderRoutingIsMultiAilDetected(GetInstancePtr()) ? "" : "not ");
+    }
+    /**
+     * @cli br multiail callback
+     * @code
+     * br multiail callback enable
+     * Done
+     * @endcode
+     * @cparam br multiail callback @ca{enable|disable}
+     * @par api_copy
+     * #otBorderRoutingSetMultiAilCallback
+     */
+    else if (aArgs[0] == "callback")
+    {
+        bool                            enable;
+        otBorderRoutingMultiAilCallback callback = nullptr;
+
+        SuccessOrExit(error = ParseEnableOrDisable(aArgs[1], enable));
+
+        if (enable)
+        {
+            callback = &HandleMultiAilDetected;
+        }
+
+        otBorderRoutingSetMultiAilCallback(GetInstancePtr(), callback, this);
+    }
+    else
+    {
+        error = OT_ERROR_INVALID_ARGS;
+    }
+
+exit:
+    return error;
+}
+
+void Br::HandleMultiAilDetected(bool aDetected, void *aContext)
+{
+    static_cast<Br *>(aContext)->HandleMultiAilDetected(aDetected);
+}
+
+void Br::HandleMultiAilDetected(bool aDetected)
+{
+    OutputLine("BR multi AIL callback: %s", aDetected ? "detected" : "cleared");
+}
+
+#endif // OPENTHREAD_CONFIG_BORDER_ROUTING_MULTI_AIL_DETECTION_ENABLE
+
 otError Br::ParsePrefixTypeArgs(Arg aArgs[], PrefixType &aFlags)
 {
     otError error = OT_ERROR_NONE;
@@ -169,6 +233,114 @@ otError Br::ParsePrefixTypeArgs(Arg aArgs[], PrefixType &aFlags)
     }
 
     VerifyOrExit(aArgs[1].IsEmpty(), error = OT_ERROR_INVALID_ARGS);
+
+exit:
+    return error;
+}
+
+template <> otError Br::Process<Cmd("omrconfig")>(Arg aArgs[])
+{
+    otError                  error = OT_ERROR_NONE;
+    otIp6Prefix              customPrefix;
+    otRoutePreference        preference;
+    otBorderRoutingOmrConfig omrConfig;
+
+    /**
+     * @cli br omrconfig
+     * @code
+     * br omrconfig
+     * auto
+     * Done
+     * @endcode
+     * @code
+     * br omrconfig
+     * custom (fd00:0:0:0::/64, prf:med)
+     * Done
+     * @endcode
+     * @par
+     * Outputs current OMR prefix configuration mode.
+     * @sa otBorderRoutingGetOmrConfig
+     */
+    if (aArgs[0].IsEmpty())
+    {
+        omrConfig = otBorderRoutingGetOmrConfig(GetInstancePtr(), &customPrefix, &preference);
+
+        switch (omrConfig)
+        {
+        case OT_BORDER_ROUTING_OMR_CONFIG_AUTO:
+            OutputLine("auto");
+            break;
+        case OT_BORDER_ROUTING_OMR_CONFIG_CUSTOM:
+            OutputFormat("custom (");
+            OutputIp6Prefix(customPrefix);
+            OutputLine(", prf:%s)", PreferenceToString(preference));
+            break;
+        case OT_BORDER_ROUTING_OMR_CONFIG_DISABLED:
+            OutputLine("disabled");
+            break;
+        }
+    }
+    else
+    {
+        ClearAllBytes(customPrefix);
+        preference = OT_ROUTE_PREFERENCE_MED;
+
+        /**
+         * @cli br omrconfig auto
+         * @code
+         * br omrconfig auto
+         * Done
+         * @endcode
+         * @par
+         * Sets OMR prefix configuration mode to `auto` In this mode, the Border Routing Manager automatically
+         * selects and manages the OMR prefix.
+         */
+        if (aArgs[0] == "auto")
+        {
+            omrConfig = OT_BORDER_ROUTING_OMR_CONFIG_AUTO;
+            VerifyOrExit(aArgs[1].IsEmpty(), error = OT_ERROR_INVALID_ARGS);
+        }
+        /**
+         * @cli br omrconfig custom
+         * @code
+         * br omrconfig custom fd00::/64 med
+         * Done
+         * @endcode
+         * @cparam br omrconfig custom @ca{prefix} [@ca{high}|@ca{med}|@ca{low}]
+         * @par
+         * Sets OMR prefix configuration mode to `custom`. In this mode, a custom OMR prefix and its associated
+         * preference are used.
+         */
+        else if (aArgs[0] == "custom")
+        {
+            omrConfig = OT_BORDER_ROUTING_OMR_CONFIG_CUSTOM;
+
+            SuccessOrExit(error = aArgs[1].ParseAsIp6Prefix(customPrefix));
+            SuccessOrExit(error = Interpreter::ParsePreference(aArgs[2], preference));
+            VerifyOrExit(aArgs[3].IsEmpty(), error = OT_ERROR_INVALID_ARGS);
+        }
+        /**
+         * @cli br omrconfig disable
+         * @code
+         * br omrconfig disable
+         * Done
+         * @endcode
+         * @cparam br omrconfig disable
+         * @par
+         * Sets OMR prefix configuration mode to `disable` which prevents the Border Routing Manager from adding any
+         * local or DHCPv6 PD OMR prefixes to the Network Data.
+         */
+        else if (aArgs[0] == "disable")
+        {
+            omrConfig = OT_BORDER_ROUTING_OMR_CONFIG_DISABLED;
+        }
+        else
+        {
+            ExitNow(error = OT_ERROR_INVALID_ARGS);
+        }
+
+        error = otBorderRoutingSetOmrConfig(GetInstancePtr(), omrConfig, &customPrefix, preference);
+    }
 
 exit:
     return error;
@@ -519,6 +691,51 @@ template <> otError Br::Process<Cmd("prefixtable")>(Arg aArgs[])
         }
 
         OutputFormat("router:");
+        OutputRouterInfo(entry.mRouter, kShortVersion);
+    }
+
+exit:
+    return error;
+}
+
+/**
+ * @cli br rdnsstable
+ * @code
+ * br rdnsstable
+ * fd00:1234:5678::1, lifetime:500, ms-since-rx:29526, router:ff02:0:0:0:0:0:0:1 (M:0 O:0 S:1)
+ * fd00:aaaa::2, lifetime:500, ms-since-rx:107, router:ff02:0:0:0:0:0:0:1 (M:0 O:0 S:1)
+ * Done
+ * @endcode
+ * @par
+ * Get the discovered Recursive DNS Server (RDNSS) address table by Border Routing Manager on the infrastructure link.
+ * Info per entry:
+ * - IPv6 address
+ * - Lifetime in seconds
+ * - Milliseconds since last received Router Advertisement containing this address
+ * - The router IPv6 address which advertised this prefix
+ * - Flags in received Router Advertisement header:
+ *   - M: Managed Address Config flag
+ *   - O: Other Config flag
+ *   - S: SNAC Router flag
+ * @sa otBorderRoutingGetNextRdnssAddrEntry
+ */
+template <> otError Br::Process<Cmd("rdnsstable")>(Arg aArgs[])
+{
+    otError                            error = OT_ERROR_NONE;
+    otBorderRoutingPrefixTableIterator iterator;
+    otBorderRoutingRdnssAddrEntry      entry;
+
+    VerifyOrExit(aArgs[0].IsEmpty(), error = OT_ERROR_INVALID_ARGS);
+
+    otBorderRoutingPrefixTableInitIterator(GetInstancePtr(), &iterator);
+
+    while (otBorderRoutingGetNextRdnssAddrEntry(GetInstancePtr(), &iterator, &entry) == OT_ERROR_NONE)
+    {
+        char string[OT_IP6_ADDRESS_STRING_SIZE];
+
+        otIp6AddressToString(&entry.mAddress, string, sizeof(string));
+        OutputFormat("%s, lifetime:%lu, ms-since-rx:%lu, router:", string, ToUlong(entry.mLifetime),
+                     ToUlong(entry.mMsecSinceLastUpdate));
         OutputRouterInfo(entry.mRouter, kShortVersion);
     }
 
@@ -877,9 +1094,13 @@ otError Br::Process(Arg aArgs[])
         CmdEntry("disable"),
         CmdEntry("enable"),
         CmdEntry("init"),
+#if OPENTHREAD_CONFIG_BORDER_ROUTING_MULTI_AIL_DETECTION_ENABLE
+        CmdEntry("multiail"),
+#endif
 #if OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
         CmdEntry("nat64prefix"),
 #endif
+        CmdEntry("omrconfig"),
         CmdEntry("omrprefix"),
         CmdEntry("onlinkprefix"),
 #if OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
@@ -890,6 +1111,7 @@ otError Br::Process(Arg aArgs[])
 #endif
         CmdEntry("prefixtable"),
         CmdEntry("raoptions"),
+        CmdEntry("rdnsstable"),
         CmdEntry("rioprf"),
         CmdEntry("routeprf"),
         CmdEntry("routers"),

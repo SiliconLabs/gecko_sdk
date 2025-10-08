@@ -13,6 +13,9 @@ recommends:
 root_path: util/third_party/openthread/src
 include:
   - path: .
+  - path: cli
+    file_list:
+      - path: cli_config.h
   - path: ncp
     file_list:
       - path: changed_props_set.hpp

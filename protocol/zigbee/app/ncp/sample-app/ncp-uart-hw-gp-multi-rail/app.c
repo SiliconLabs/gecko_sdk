@@ -434,7 +434,7 @@ static EmberGpTxQueueEntry* get_gp_stub_tx_queue(EmberGpAddress* addr)
                                          128) != EMBER_NULL_MESSAGE_BUFFER) {
     // Allocate a buffer and prepare a outgoing MAC header using gpd address in the sli_zigbee_gp_tx_queue
     EmberMessageBuffer header = sli_zigbee_gpdf_make_header(true, NULL, &(sli_zigbee_gp_tx_queue.addr));
-    if (header != EMBER_NULL_MESSAGE_BUFFER) {
+    if (header == EMBER_NULL_MESSAGE_BUFFER) {
       return NULL;
     }
 

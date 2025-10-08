@@ -3561,6 +3561,21 @@ enum
      */
     SPINEL_PROP_STREAM_LOG = SPINEL_PROP_STREAM__BEGIN + 4,
 
+    /// CLI Stream
+    /** Format: `U` - Set (Host to NCP) and Unsolicited Notifications (NCP to Host)
+     *
+     * This streaming property provides a bidirectional channel for interacting with the NCP's
+     * command-line interface (CLI).
+     *
+     * The host can send CLI commands to the NCP by setting this property. The NCP will then
+     * execute the commands. The NCP will send the output of the executed command (if any) back to
+     * the host via unsolicited notifications of this same property.
+     *
+     * Both the input command string (from host) and the output string (from NCP) are
+     * zero-terminated UTF-8 encoded strings.
+     */
+    SPINEL_PROP_STREAM_CLI = SPINEL_PROP_STREAM__BEGIN + 5,
+
     SPINEL_PROP_STREAM__END = 0x80,
 
     SPINEL_PROP_STREAM_EXT__BEGIN = 0x1700,
@@ -4883,6 +4898,54 @@ enum
     SPINEL_PROP_DNSSD_KEY_RECORD = SPINEL_PROP_DNSSD__BEGIN + 5,
 
     SPINEL_PROP_DNSSD__END = 0x950,
+
+    SPINEL_PROP_BORDER_AGENT__BEGIN = 0x950,
+
+    /// Border Agent MeshCoP service state.
+    /**
+     * Format: `bSD`: Get and Unsolicited notifications.
+     *
+     * `b`: Whether the border agent is running or not.
+     * `S`: The UDP port that is being used by the border agent. If the state is 'Stopped', the port MUST be 0.
+     * `D`: The encoded MeshCoP service TXT data (from Thread side).
+     */
+    SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE = SPINEL_PROP_BORDER_AGENT__BEGIN + 1,
+
+    SPINEL_PROP_BORDER_AGENT__END = 0x970,
+
+    SPINEL_PROP_BACKBONE_ROUTER__BEGIN = 0x970,
+
+    /// Backbone Router State
+    /**
+     * Format: `C` - Unsolicited notifications only
+     *
+     * `C`: The Backbone Router state. The value is the same as `otBackboneRouterState`.
+     *
+     * This property is used to notify the host the state of the Backbone Router.
+     */
+    SPINEL_PROP_BACKBONE_ROUTER_STATE = SPINEL_PROP_BACKBONE_ROUTER__BEGIN + 1,
+
+    /// Enablement/Disablement of Backbone Router function.
+    /**
+     * Format: `b` - Write-Only
+     *
+     * `b`: Whether to enable or disable the Backbone Router function.
+     *
+     * Host uses this property to enable or disable the Backbone Router function on NCP.
+     */
+    SPINEL_PROP_BACKBONE_ROUTER_ENABLE = SPINEL_PROP_BACKBONE_ROUTER__BEGIN + 2,
+
+    /// BackBone Router Multicast Listener.
+    /**
+     * Format: `6` - Inserted/Removed
+     *
+     * `6`: The multicast address that is subscribed by a multicast listener.
+     *
+     * NCP uses this property to subscribe or unsubscribe a multicast listener on the host.
+     */
+    SPINEL_PROP_BACKBONE_ROUTER_MULTICAST_LISTENER = SPINEL_PROP_BACKBONE_ROUTER__BEGIN + 3,
+
+    SPINEL_PROP_BACKBONE_ROUTER__END = 0x990,
 
     SPINEL_PROP_NEST__BEGIN = 0x3BC0,
 

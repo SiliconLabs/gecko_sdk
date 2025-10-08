@@ -134,6 +134,7 @@
 #define FLAG_WAITING_FOR_ACK 0x00000008
 #define FLAG_CURRENT_TX_USE_CSMA 0x00000010
 #define FLAG_SCHEDULED_RX_PENDING 0x00000020
+#define FLAG_SCHEDULED_TX_PENDING 0x00000040
 
 // Radio Events
 #define EVENT_TX_SUCCESS 0x00000100
@@ -149,7 +150,6 @@
 #define TX_WAITING_FOR_ACK 0x00
 #define TX_NO_ACK 0x01
 
-#define ONGOING_TX_FLAGS (FLAG_ONGOING_TX_DATA | FLAG_ONGOING_TX_ACK)
 #define RADIO_TX_EVENTS \
     (EVENT_TX_SUCCESS | EVENT_TX_CCA_FAILED | EVENT_TX_NO_ACK | EVENT_TX_SCHEDULER_ERROR | EVENT_TX_FAILED)
 
@@ -305,6 +305,13 @@ static otExtAddress sExtAddress[RADIO_EXT_ADDR_COUNT];
 static int8_t sMaxChannelPower[RADIO_INTERFACE_COUNT][SL_MAX_CHANNELS_SUPPORTED];
 static int8_t sDefaultTxPower[RADIO_INTERFACE_COUNT];
 
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+// Need higher than default rxToTx turnaround time for enhanced ACKs
+// Default is 192 us. (SL_RAIL_UTIL_PROTOCOL_IEEE802154_2P4GHZ_TIMING_RX_TO_TX_US)
+// (See below in default sRailIeee802154Config)
+#define IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US 256
+#endif
+
 // CSMA config: Should be globally scoped
 #define CSL_CSMA_BACKOFF_TIME_IN_US 150
 RAIL_CsmaConfig_t csmaConfig    = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
@@ -448,14 +455,10 @@ static const RAIL_IEEE802154_Config_t sRailIeee802154Config = {
         },
     .timings =
         {
-            .idleToRx = 100,
-            .txToRx   = 192 - 10,
-            .idleToTx = 100,
-#if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
-            .rxToTx = 256, // accommodate enhanced ACKs
-#else
-            .rxToTx = 192,
-#endif
+            .idleToRx            = 100,
+            .txToRx              = 192 - 10,
+            .idleToTx            = 100,
+            .rxToTx              = 192,
             .rxSearchTimeout     = 0,
             .txToRxSearchTimeout = 0,
             .txToTx              = 0,
@@ -1059,8 +1062,8 @@ static inline bool txWaitingForAck(void)
 
 static inline bool isRadioTransmittingOrScanning(void)
 {
-    return ((sEnergyScanStatus != ENERGY_SCAN_STATUS_IDLE) || getInternalFlag(ONGOING_TX_FLAGS)
-            || getInternalFlag(FLAG_ONGOING_TX_ACK));
+    return ((sEnergyScanStatus != ENERGY_SCAN_STATUS_IDLE) || getInternalFlag(FLAG_ONGOING_TX_DATA)
+            || getInternalFlag(RADIO_TX_EVENTS));
 }
 
 static bool txIsDataRequest(void)
@@ -1146,7 +1149,7 @@ static otError radioScheduleRx(uint8_t aChannel, uint32_t aStart, uint32_t aDura
                                      .startMode               = RAIL_TIME_ABSOLUTE,
                                      .end                     = aDuration,
                                      .endMode                 = RAIL_TIME_DELAY,
-                                     .rxTransitionEndSchedule = 1, // This lets us idle after a scheduled-rx
+                                     .rxTransitionEndSchedule = 0, // To stay in schedule Rx state after packet receive.
                                      .hardWindowEnd = 0}; // This lets us receive a packet near a window-end-event
 
     status = RAIL_ScheduleRx(gRailHandle, aChannel, &rxCfg, &bgRxSchedulerInfo);
@@ -1210,6 +1213,10 @@ static RAIL_Handle_t efr32RailInit(efr32CommonConfig *aCommonConfig)
     OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    // Need higher than default rxToTx turnaround time for enhanced ACKs
+    RAIL_TransitionTime_t rxToEnhAckTxUs = IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US;
+    RAIL_IEEE802154_SetRxToEnhAckTx(handle, &rxToEnhAckTxUs);
+
     // Enhanced Frame Pending
     status = RAIL_IEEE802154_EnableEarlyFramePending(handle, true);
     OT_ASSERT(status == RAIL_STATUS_NO_ERROR);
@@ -1704,22 +1711,24 @@ exit:
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, uint32_t aStart, uint32_t aDuration)
 {
-    otError       error = OT_ERROR_NONE;
-    RAIL_Status_t status;
-    int8_t        txPower = sli_get_max_tx_power_across_iids();
+    otError error   = OT_ERROR_NONE;
+    int8_t  txPower = sli_get_max_tx_power_across_iids();
 
     // We can only have one schedule request i.e. either Rx or Tx as they use the
     // same RAIL resources.
-    otEXPECT_ACTION(!getInternalFlag(EVENT_SCHEDULED_TX_STARTED), error = OT_ERROR_FAILED);
+    otEXPECT_ACTION(!getInternalFlag(FLAG_SCHEDULED_TX_PENDING | EVENT_SCHEDULED_TX_STARTED), error = OT_ERROR_FAILED);
 
     OT_UNUSED_VARIABLE(aInstance);
 
     error = efr32RadioLoadChannelConfig(aChannel, txPower);
     otEXPECT(error == OT_ERROR_NONE);
 
-    status = radioScheduleRx(aChannel, aStart, aDuration);
-    otEXPECT_ACTION(status == RAIL_STATUS_NO_ERROR, error = OT_ERROR_FAILED);
+    // Set the flag first and then schedule the Rx as the rail scheduler can trigger the events even before
+    // RAIL_ScheduleRx() API returns the status if start time is too close to the current time which could
+    // otherwise cause the race condition.
     setInternalFlag(FLAG_SCHEDULED_RX_PENDING, true);
+    error = radioScheduleRx(aChannel, aStart, aDuration);
+    otEXPECT_ACTION(error == OT_ERROR_NONE, setInternalFlag(FLAG_SCHEDULED_RX_PENDING, false));
 
     sReceive.frame.mChannel    = aChannel;
     sReceiveAck.frame.mChannel = aChannel;
@@ -1959,9 +1968,12 @@ void txCurrentPacket(void)
     }
 #endif
 
-    // We can only have one schedule request i.e. either Rx or Tx as they use the same RAIL resources.
-    // Reject the transmit request if there is scheduled Rx.
-    otEXPECT_ACTION(!getInternalFlag(FLAG_SCHEDULED_RX_PENDING), status = RAIL_STATUS_INVALID_STATE);
+    // Prioritize the Tx over schedule Rx to avoid missing data check-ins such as data polls.
+    if (getInternalFlag(FLAG_SCHEDULED_RX_PENDING))
+    {
+        RAIL_Idle(gRailHandle, RAIL_IDLE, true);
+        setInternalFlag(FLAG_SCHEDULED_RX_PENDING | EVENT_SCHEDULED_RX_STARTED, false);
+    }
 
     if (sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay == 0)
     {
@@ -2026,6 +2038,7 @@ void txCurrentPacket(void)
 
         if (status == RAIL_STATUS_NO_ERROR)
         {
+            setInternalFlag(FLAG_SCHEDULED_TX_PENDING, true);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
             railDebugCounters.mRailEventsScheduledTxTriggeredCount++;
 #endif
@@ -2034,7 +2047,6 @@ void txCurrentPacket(void)
 #endif
     }
 
-exit:
     if (status == RAIL_STATUS_NO_ERROR)
     {
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -2519,7 +2531,7 @@ static bool writeIeee802154EnhancedAck(RAIL_Handle_t        aRailHandle,
         if (iid == 0
             || iid == INVALID_INTERFACE_INDEX) // search all tables only if we cant find the iid based on dest panid
         {
-            for (uint8_t i = 1; i <= RADIO_CONFIG_SRC_MATCH_PANID_NUM; i++)
+            for (uint8_t i = 1; i < RADIO_CONFIG_SRC_MATCH_PANID_NUM; i++)
             {
                 setFramePending = (aSrcAddress.mType == OT_MAC_ADDRESS_TYPE_EXTENDED
                                        ? (utilsSoftSrcMatchExtFindEntry(i, &aSrcAddress.mAddress.mExtAddress) >= 0)
@@ -2681,7 +2693,7 @@ static void dataRequestCommandCallback(RAIL_Handle_t aRailHandle)
 #if _SILICON_LABS_32B_SERIES_1_CONFIG == 1 && OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
         if (iid == 0) // on MG1 the RAIL filter mask doesn't work so search all tables
         {
-            for (uint8_t i = 1; i <= RADIO_CONFIG_SRC_MATCH_PANID_NUM; i++)
+            for (uint8_t i = 1; i < RADIO_CONFIG_SRC_MATCH_PANID_NUM; i++)
             {
                 framePendingSet =
                     (sourceAddress.length == RAIL_IEEE802154_LongAddress
@@ -2961,16 +2973,21 @@ static void ackTimeoutCallback(void)
 
 static void schedulerEventCallback(RAIL_Handle_t aRailHandle)
 {
-    RAIL_SchedulerStatus_t status       = RAIL_GetSchedulerStatus(aRailHandle);
-    bool                   transmitBusy = getInternalFlag(FLAG_ONGOING_TX_DATA);
+    RAIL_SchedulerStatus_t status = RAIL_GetSchedulerStatus(aRailHandle);
 
-    OT_ASSERT(status != RAIL_SCHEDULER_STATUS_INTERNAL_ERROR);
-
-    if (status == RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL || status == RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL
-        || status == RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL
-        || (status == RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL && transmitBusy)
-        || (status == RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED && transmitBusy))
+    switch (status)
     {
+    case RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL:
+    case RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL:
+    case RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL:
+    case RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL:
+    case RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL:
+    case RAIL_SCHEDULER_STATUS_UNSUPPORTED:
+    case RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL:
+    case RAIL_SCHEDULER_STATUS_INTERNAL_ERROR:
+    case RAIL_SCHEDULER_STATUS_TASK_FAIL:
+    case RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED:
+        setInternalFlag(FLAG_SCHEDULED_RX_PENDING | FLAG_SCHEDULED_TX_PENDING | EVENT_SCHEDULED_TX_STARTED, false);
         if (getInternalFlag(FLAG_ONGOING_TX_ACK))
         {
             (void)handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED, (uint32_t)isReceivingFrame());
@@ -2982,32 +2999,18 @@ static void schedulerEventCallback(RAIL_Handle_t aRailHandle)
             (void)handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_TX_BLOCKED, (uint32_t)txWaitingForAck());
             txFailedCallback(false, EVENT_TX_CCA_FAILED);
         }
+        // We are waiting for an ACK: we will never get the ACK we were waiting for.
+        // We want to call ackTimeoutCallback() only if the PACKET_SENT event
+        // already fired (which would clear the FLAG_ONGOING_TX_DATA flag).
+        if (getInternalFlag(FLAG_WAITING_FOR_ACK))
+        {
+            ackTimeoutCallback();
+        }
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
         railDebugCounters.mRailEventSchedulerStatusError++;
 #endif
-    }
-    else if (status == RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL
-             || (status == RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL && sEnergyScanStatus == ENERGY_SCAN_STATUS_IN_PROGRESS))
-    {
-        energyScanComplete(OT_RADIO_RSSI_INVALID);
-    }
-}
-
-static void configUnscheduledCallback(void)
-{
-    // We are waiting for an ACK: we will never get the ACK we were waiting for.
-    // We want to call ackTimeoutCallback() only if the PACKET_SENT event
-    // already fired (which would clear the FLAG_ONGOING_TX_DATA flag).
-    if (getInternalFlag(FLAG_WAITING_FOR_ACK))
-    {
-        ackTimeoutCallback();
-    }
-
-    // We are about to send an ACK, which it won't happen.
-    if (getInternalFlag(FLAG_ONGOING_TX_ACK))
-    {
-        txFailedCallback(true, EVENT_TX_FAILED);
+        break;
     }
 }
 
@@ -3112,12 +3115,14 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
         if (aEvents & RAIL_EVENT_SCHEDULED_TX_STARTED)
         {
             setInternalFlag(EVENT_SCHEDULED_TX_STARTED, true);
+            setInternalFlag(FLAG_SCHEDULED_TX_PENDING, false);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
             railDebugCounters.mRailEventsScheduledTxStartedCount++;
 #endif
         }
         else if (aEvents & RAIL_EVENT_TX_SCHEDULED_TX_MISSED)
         {
+            setInternalFlag(FLAG_SCHEDULED_TX_PENDING, false);
             txFailedCallback(false, EVENT_TX_SCHEDULER_ERROR);
         }
     }
@@ -3172,7 +3177,6 @@ static void RAILCb_Generic(RAIL_Handle_t aRailHandle, RAIL_Events_t aEvents)
     if (aEvents & RAIL_EVENT_CONFIG_UNSCHEDULED)
     {
         (void)handlePhyStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_IDLED, 0U);
-        configUnscheduledCallback();
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
         railDebugCounters.mRailEventConfigUnScheduled++;
 #endif

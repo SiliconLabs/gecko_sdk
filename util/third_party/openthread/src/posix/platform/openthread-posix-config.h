@@ -141,10 +141,22 @@
 #endif
 
 /**
+ * @def OPENTHREAD_POSIX_CONFIG_NETIF_LINK_LOCAL_ROUTE_METRIC
+ *
+ * This setting configures the link-local route metric on the Thread network interface.
+ * Define as 0 to use the default prefix route metric.
+ *
+ * Note: The feature works on Linux kernel v4.18+.
+ */
+#ifndef OPENTHREAD_POSIX_CONFIG_NETIF_LINK_LOCAL_ROUTE_METRIC
+#define OPENTHREAD_POSIX_CONFIG_NETIF_LINK_LOCAL_ROUTE_METRIC 0
+#endif
+
+/**
  * @def OPENTHREAD_POSIX_CONFIG_NETIF_PREFIX_ROUTE_METRIC
  *
- * This setting configures the prefix route metric on the Thread network interface.
- * Define as 0 to use use the default prefix route metric.
+ * This setting configures the non-link-local prefix route metric on the Thread network interface.
+ * Define as 0 to use the default prefix route metric.
  *
  * Note: The feature works on Linux kernel v4.18+.
  */
@@ -256,6 +268,15 @@
 #define OPENTHREAD_POSIX_CONFIG_THREAD_NETIF_DEFAULT_NAME "wpan0"
 #endif
 
+/**
+ * @def OPENTHREAD_POSIX_VIRTUAL_TIME
+ *
+ * This setting configures whether to use virtual time.
+ */
+#ifndef OPENTHREAD_POSIX_VIRTUAL_TIME
+#define OPENTHREAD_POSIX_VIRTUAL_TIME 0
+#endif
+
 #ifdef __APPLE__
 
 /**
@@ -278,17 +299,6 @@
 #endif
 
 #endif // __APPLE__
-
-//---------------------------------------------------------------------------------------------------------------------
-// Removed or renamed POSIX specific configs.
-
-#ifdef OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME
-#error "OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME was removed (no longer applicable with TREL over DNS-SD)."
-#endif
-
-#ifdef OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET
-#error "OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET was removed (no longer applicable with TREL over DNS-SD)."
-#endif
 
 /**
  * @def OPENTHREAD_POSIX_CONFIG_TREL_UDP_PORT
@@ -433,6 +443,26 @@
  */
 #ifndef OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE
 #define OPENTHREAD_POSIX_CONFIG_TMP_STORAGE_ENABLE 1
+#endif
+
+/**
+ * @def OPENTHREAD_POSIX_CONFIG_RESOLV_CONF_ENABLED_INIT
+ *
+ * Define as 1 to enable reading from resolv.conf on initialization.
+ */
+#ifndef OPENTHREAD_POSIX_CONFIG_RESOLV_CONF_ENABLED_INIT
+#define OPENTHREAD_POSIX_CONFIG_RESOLV_CONF_ENABLED_INIT (!OPENTHREAD_POSIX_CONFIG_ANDROID_ENABLE)
+#endif
+
+//---------------------------------------------------------------------------------------------------------------------
+// Removed or renamed POSIX specific configs.
+
+#ifdef OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME
+#error "OPENTHREAD_CONFIG_POSIX_APP_TREL_INTERFACE_NAME was removed (no longer applicable with TREL over DNS-SD)."
+#endif
+
+#ifdef OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET
+#error "OPENTHREAD_CONFIG_POSIX_TREL_USE_NETLINK_SOCKET was removed (no longer applicable with TREL over DNS-SD)."
 #endif
 
 #endif // OPENTHREAD_PLATFORM_POSIX_CONFIG_H_

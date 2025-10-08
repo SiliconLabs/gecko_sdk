@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -67,7 +67,7 @@ jobs:
       COVERAGE: 1
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -77,7 +77,7 @@ jobs:
     - name: Bootstrap
       run: |
         sudo apt-get update
-        sudo apt-get --no-install-recommends install -y ninja-build lcov
+        sudo apt-get --no-install-recommends install -y ninja-build lcov libgtest-dev libgmock-dev
     - name: Build Simulation
       run: ./script/cmake-build simulation -DOT_BUILD_GTEST=ON -DOT_BORDER_ROUTING=ON -DOT_BORDER_ROUTING_DHCP6_PD=ON
     - name: Test Simulation
@@ -88,7 +88,7 @@ jobs:
       run: cd build/simulation && ninja test
     - name: Build NCP Simulation
       run: ./script/cmake-build simulation -DOT_BUILD_GTEST=OFF -DOT_MTD=OFF -DOT_RCP=OFF -DOT_APP_CLI=OFF -DOT_APP_RCP=OFF \
-               -DOT_BORDER_ROUTING=ON -DOT_NCP_INFRA_IF=ON -DOT_SRP_SERVER=ON -DOT_NCP_DNSSD=ON -DOT_PLATFORM_DNSSD=ON
+               -DOT_BORDER_ROUTING=ON -DOT_NCP_INFRA_IF=ON -DOT_SRP_SERVER=ON -DOT_NCP_DNSSD=ON -DOT_PLATFORM_DNSSD=ON -DOT_NCP_CLI_STREAM=ON
     - name: Test NCP Simulation
       run: cd build/simulation && ninja test
     - name: Build POSIX
@@ -98,7 +98,7 @@ jobs:
     - name: Generate Coverage
       run: |
         ./script/test generate_coverage gcc
-    - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+    - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
       with:
         name: cov-unit-tests
         path: tmp/coverage.info
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+      uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
 
@@ -128,7 +128,7 @@ jobs:
       run: |
         script/test combine_coverage
     - name: Upload Coverage
-      uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
+      uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5.4.2
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:

@@ -978,12 +978,17 @@ sl_status_t throughput_peripheral_disable(void)
     return SL_STATUS_INVALID_STATE;
   }
 
-  if (advertising_set_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+  if (advertising_set_handle != SL_BT_INVALID_ADVERTISING_SET_HANDLE) {
     sc = sl_bt_advertiser_stop(advertising_set_handle);
-  }
-
-  if (sc != SL_STATUS_OK) {
-    return sc;
+    if (sc != SL_STATUS_OK) {
+      return sc;
+    }
+    #ifdef SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
+    sc = sl_bt_advertiser_stop(coded_advertising_set_handle);
+    if (sc != SL_STATUS_OK) {
+      return sc;
+    }
+    #endif // SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT
   }
 
   if (peripheral_state.state != THROUGHPUT_STATE_DISCONNECTED) {

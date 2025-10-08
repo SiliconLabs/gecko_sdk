@@ -100,7 +100,7 @@ class Tls;
 /**
  * Represents a secure session.
  */
-class SecureSession : private LinkedListEntry<SecureSession>, private NonCopyable
+class SecureSession : public LinkedListEntry<SecureSession>, private NonCopyable
 {
     friend class LinkedListEntry<SecureSession>;
     friend class LinkedList<SecureSession>;
@@ -592,10 +592,13 @@ public:
     /**
      * Opens the transport.
      *
+     * @param[in] aNetifIdentifier A network interface identifier. If not explicitly provided, kNetifUnspecified will
+     *                             be used by default.
+     *
      * @retval kErrorNone     Successfully opened the socket.
      * @retval kErrorAlready  The connection is already open.
      */
-    Error Open(void);
+    Error Open(Ip6::NetifIdentifier aNetifIdentifier = Ip6::NetifIdentifier::kNetifUnspecified);
 
     /**
      * Sets the maximum number of allowed connection requests before socket is automatically closed.

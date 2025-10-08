@@ -34,22 +34,9 @@
 #elif defined(RADIO_BOARD_EFR32ZG14)
 #include "radio_board_efr32zg14.h"
 
-#elif defined(RADIO_BOARD_EFR32ZG23)
-#include "radio_board_efr32zg23.h"
-
-#elif defined(RADIO_BOARD_BRD2603A)
-#include "radio_board_brd2603a.h"
-
-#elif defined(RADIO_BOARD_BRD2705A)
-#include "radio_board_brd2705a.h"
-
 #elif defined(RADIO_NO_BOARD)
 #include "radio_no_board.h"
 
-#endif
-
-#if defined(RADIO_BOARD_BRD2603A) || defined(RADIO_BOARD_BRD2705A)
-#define THUNDERBOARD
 #endif
 
 #endif /* TARGET_BOARDS_H */

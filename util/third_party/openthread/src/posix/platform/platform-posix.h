@@ -57,15 +57,6 @@
 #include "lib/url/url.hpp"
 
 /**
- * @def OPENTHREAD_POSIX_VIRTUAL_TIME
- *
- * This setting configures whether to use virtual time.
- */
-#ifndef OPENTHREAD_POSIX_VIRTUAL_TIME
-#define OPENTHREAD_POSIX_VIRTUAL_TIME 0
-#endif
-
-/**
  * This is the socket name used by daemon mode.
  */
 #define OPENTHREAD_POSIX_DAEMON_SOCKET_NAME OPENTHREAD_POSIX_CONFIG_DAEMON_SOCKET_BASENAME ".sock"
@@ -352,20 +343,6 @@ void platformTrelUpdateFdSet(otSysMainloopContext *aContext);
 void platformTrelProcess(otInstance *aInstance, const otSysMainloopContext *aContext);
 
 /**
- * Creates a socket with SOCK_CLOEXEC flag set.
- *
- * @param[in]   aDomain       The communication domain.
- * @param[in]   aType         The semantics of communication.
- * @param[in]   aProtocol     The protocol to use.
- * @param[in]   aBlockOption  Whether to add nonblock flags.
- *
- * @returns The file descriptor of the created socket.
- *
- * @retval  -1  Failed to create socket.
- */
-int SocketWithCloseExec(int aDomain, int aType, int aProtocol, SocketBlockOption aBlockOption);
-
-/**
  * The name of Thread network interface.
  */
 extern char gNetifName[IFNAMSIZ];
@@ -422,6 +399,15 @@ void platformSpinelManagerUpdateFdSet(otSysMainloopContext *aContext);
 void platformResolverInit(void);
 
 /**
+ * Sets up platform resolver.
+ *
+ * @note This function is called after OpenThread instance is created.
+ *
+ * @param[in]   aInstance       A pointer to the OpenThread instance.
+ */
+void platformResolverSetUp(void);
+
+/**
  * Updates the file descriptor sets with file descriptors used by the resolver.
  *
  * @param[in]   aContext    A pointer to the mainloop context.
@@ -434,6 +420,13 @@ void platformResolverUpdateFdSet(otSysMainloopContext *aContext);
  * @param[in]  aContext  A pointer to the mainloop context.
  */
 void platformResolverProcess(const otSysMainloopContext *aContext);
+
+/**
+ * The callback for coprocessor reset failure.
+ *
+ * @param[in]  aContext  A pointer to the mainloop context.
+ */
+void platformCoprocessorResetFailed(void *aContext);
 
 #ifdef __cplusplus
 }

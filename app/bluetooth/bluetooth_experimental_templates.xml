@@ -13,6 +13,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap_tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="app.bluetooth.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp app.bluetooth.example.bt_soc_cbap.bt_soc_cbap_tz_ns.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
   </descriptors>
@@ -29,6 +31,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator_tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="app.bluetooth.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator_tz_ns.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
   </descriptors>
@@ -45,6 +49,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_ncp_initiator/bt_abr_ncp_initiator.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
   <descriptors name="bt_abr_soc_initiator" label="Bluetooth - SoC ABR initiator" description="ABR initiator for Bluetooth. The example connects to an ABR reflector and starts distance measurement. Results are printed on the display of the WSTK.&#xA;">
@@ -60,6 +66,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_soc_initiator/bt_abr_soc_initiator.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
   <descriptors name="bt_abr_soc_reflector" label="Bluetooth - SoC ABR reflector" description="ABR reflector for Bluetooth. The example sends measurement results to the initiator via GATT. The application starts advertising after boot and restarts advertising after a connection is closed. It also supports Over-the-Air Device Firmware Upgrade (OTA DFU).&#xA;">
@@ -75,6 +83,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_soc_reflector/bt_abr_soc_reflector.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
   <descriptors name="bt_soc_cbap" label="Bluetooth - SoC Certificate Based Authentication and Pairing (Secure Vault)&#xA;" description="Demonstrates Certificate Based Authentication and Pairing over BLE. This example utilizes Secure Vault for storing keys.&#xA;">
@@ -90,6 +100,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_cbap_tz_ns" label="Bluetooth - SoC Certificate Based Authentication and Pairing (TrustZone)&#xA;" description="Demonstrates Certificate Based Authentication and Pairing over BLE. This example utilizes TrustZone for storing keys.&#xA;">
@@ -105,6 +117,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap_tz_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_csr_generator" label="Bluetooth - SoC Certificate Signing Request Generator (Secure Vault)&#xA;" description="Certificate generating firmware example. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes Secure Vault for storing keys.&#xA;">
@@ -120,6 +134,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_csr_generator_tz_ns" label="Bluetooth - SoC Certificate Signing Request Generator (TrustZone)&#xA;" description="Certificate generating firmware example. Software is generating the device EC key pair, the signing request for the device certificate, and other related data. The generated data can be read out by the Central Authority. This example utilizes TrustZone for storing keys.&#xA;">
@@ -135,6 +151,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator_tz_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="bt_soc_tz_secure_application" label="Sample project for TrustZone Secure Key Library" description="This project can be used as a reference implementation for creating secure applications with TrustZone for bluetooth products.&#xA;This project makes a TrustZone secure library for running PSA libraries in the secure world.">
@@ -150,6 +168,8 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_tz_secure_application/bt_soc_tz_secure_application.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
 </model:MDescriptors>

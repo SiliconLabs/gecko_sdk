@@ -1537,17 +1537,34 @@ void emberAfPluginLevelControlCoupledColorTempChangeCallback(uint8_t endpoint)
 
 #endif // SUPPORT_COLOR_TEMPERATURE
 
-bool emberAfColorControlClusterStopMoveStepCallback(uint8_t optionsMask,
-                                                    uint8_t optionsOverride)
+bool emberAfColorControlClusterStopMoveStepCallback(EmberAfClusterCommand *cmd)
 {
-  // Received a stop command.  This is all we need to do.
   uint8_t endpoint = emberAfCurrentEndpoint();
+  sl_zcl_color_control_cluster_stop_move_step_command_t cmd_data;
+  uint8_t optionsMask;
+  uint8_t optionsOverride;
 
+  // Decode the command
+  if (zcl_decode_color_control_cluster_stop_move_step_command(cmd, &cmd_data)
+      != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_MALFORMED_COMMAND);
+    return true;
+  }
+
+  optionsMask = cmd_data.optionsMask;
+  optionsOverride = cmd_data.optionsOverride;
+
+  // Check if the command should execute when the device is off
   if (shouldExecuteIfOff(endpoint, optionsMask, optionsOverride)) {
     stopAllColorTransitions();
   }
 
+  // RemainingTime attribute SHALL be set to zero
+  writeRemainingTime(endpoint, 0);
+
+  // Send a default response
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+
   return true;
 }
 
@@ -2069,6 +2086,13 @@ uint32_t emberAfColorControlClusterServerCommandParse(sl_service_opcode_t opcode
         break;
       }
   #endif // SUPPORT_COLOR_TEMPERATURE
+  #if defined(SUPPORT_CIE_1931) || defined(SUPPORT_HUE_SATURATION)
+      case ZCL_STOP_MOVE_STEP_COMMAND_ID:
+      {
+        wasHandled = emberAfColorControlClusterStopMoveStepCallback(cmd);
+        break;
+      }
+  #endif // support for STOP_MOVE_STEP command
     }
   }
 

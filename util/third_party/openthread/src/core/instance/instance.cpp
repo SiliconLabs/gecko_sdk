@@ -40,6 +40,10 @@
 
 namespace ot {
 
+#if (OPENTHREAD_FTD + OPENTHREAD_MTD + OPENTHREAD_RADIO) != 1
+#error "Exactly one of {OPENTHREAD_FTD, OPENTHREAD_MTD, OPENTHREAD_RADIO} MUST be set"
+#endif
+
 #if !OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 
 // Define the raw storage used for OpenThread instance (in single-instance case).
@@ -142,7 +146,7 @@ Instance::Instance(void)
     , mLowpan(*this)
     , mMac(*this)
     , mMeshForwarder(*this)
-    , mMleRouter(*this)
+    , mMle(*this)
     , mDiscoverScanner(*this)
     , mAddressResolver(*this)
 #if OPENTHREAD_CONFIG_MULTI_RADIO
@@ -399,10 +403,14 @@ void Instance::AfterInit(void)
     // Restore datasets and network information
 
     Get<Settings>().Init();
-    Get<Mle::MleRouter>().Restore();
+    Get<Mle::Mle>().Restore();
 
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
     Get<Trel::Link>().AfterInit();
+#endif
+
+#if OPENTHREAD_CONFIG_MULTICAST_DNS_ENABLE
+    Get<Dns::Multicast::Core>().AfterInstanceInit();
 #endif
 
 #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
@@ -462,7 +470,7 @@ Error Instance::ErasePersistentInfo(void)
 {
     Error error = kErrorNone;
 
-    VerifyOrExit(Get<Mle::MleRouter>().IsDisabled(), error = kErrorInvalidState);
+    VerifyOrExit(Get<Mle::Mle>().IsDisabled(), error = kErrorInvalidState);
     Get<Settings>().Wipe();
 #if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
     Get<KeyManager>().DestroyTemporaryKeys();
@@ -481,27 +489,23 @@ void Instance::GetBufferInfo(BufferInfo &aInfo)
     aInfo.mFreeBuffers    = Get<MessagePool>().GetFreeBufferCount();
     aInfo.mMaxUsedBuffers = Get<MessagePool>().GetMaxUsedBufferCount();
 
-    Get<MeshForwarder>().GetSendQueue().GetInfo(aInfo.m6loSendQueue);
-    Get<MeshForwarder>().GetReassemblyQueue().GetInfo(aInfo.m6loReassemblyQueue);
-    Get<Ip6::Ip6>().GetSendQueue().GetInfo(aInfo.mIp6Queue);
+    Get<MeshForwarder>().GetQueueInfo(aInfo.m6loSendQueue, aInfo.m6loReassemblyQueue);
+    Get<Ip6::Ip6>().GetSendQueueInfo(aInfo.mIp6Queue);
 
 #if OPENTHREAD_FTD
-    Get<Ip6::Mpl>().GetBufferedMessageSet().GetInfo(aInfo.mMplQueue);
+    Get<Ip6::Mpl>().GetBufferedMessageSetInfo(aInfo.mMplQueue);
 #endif
 
-    Get<Mle::MleRouter>().GetMessageQueue().GetInfo(aInfo.mMleQueue);
+    Get<Mle::Mle>().GetMessageQueueInfo(aInfo.mMleQueue);
 
-    Get<Tmf::Agent>().GetRequestMessages().GetInfo(aInfo.mCoapQueue);
-    Get<Tmf::Agent>().GetCachedResponses().GetInfo(aInfo.mCoapQueue);
+    Get<Tmf::Agent>().GetRequestAndCachedResponsesQueueInfo(aInfo.mCoapQueue);
 
 #if OPENTHREAD_CONFIG_SECURE_TRANSPORT_ENABLE
-    Get<Tmf::SecureAgent>().GetRequestMessages().GetInfo(aInfo.mCoapSecureQueue);
-    Get<Tmf::SecureAgent>().GetCachedResponses().GetInfo(aInfo.mCoapSecureQueue);
+    Get<Tmf::SecureAgent>().GetRequestAndCachedResponsesQueueInfo(aInfo.mCoapSecureQueue);
 #endif
 
 #if OPENTHREAD_CONFIG_COAP_API_ENABLE
-    GetApplicationCoap().GetRequestMessages().GetInfo(aInfo.mApplicationCoapQueue);
-    GetApplicationCoap().GetCachedResponses().GetInfo(aInfo.mApplicationCoapQueue);
+    Get<Coap::ApplicationCoap>().GetRequestAndCachedResponsesQueueInfo(aInfo.mApplicationCoapQueue);
 #endif
 }
 

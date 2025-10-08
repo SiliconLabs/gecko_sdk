@@ -109,10 +109,6 @@ include:
         condition: [device_sdid_89]
       - path: "hal-config-board-700.h"
         condition: [device_sdid_95]
-      - path: "hal-config-board-800.h"
-        condition: [device_sdid_210]
-      - path: "hal-config-board-800.h"
-        condition: [device_sdid_235]
   - path: "platform/halconfig/inc/hal-config"
     file_list:
       - path: "hal-config-types.h"

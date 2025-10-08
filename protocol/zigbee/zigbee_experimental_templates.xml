@@ -13,6 +13,8 @@
     <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/zigbee/app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-spi.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
   <descriptors name="zigbee_ncp-ble_ncp-uart" label="Zigbee - NCP + Bluetooth - NCP zigbee_ncp-ble_ncp-uart" description="This dynamic multiprotocol (DMP) application runs the Zigbee NCP simultaneously with the Bluetooth NCP. Communication with Zigbee and Bluetooth host applications is enabled using the Co-Processor Communication Protocol, which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. The Zigbee NCP part of this application can be built as configured, or can optionally be augmented with customized extensions for initialization, main loop processing, event definition/handling, and messaging with the host.">
@@ -28,6 +30,8 @@
     <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/zigbee/app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-uart.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
 </model:MDescriptors>

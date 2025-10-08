@@ -10,14 +10,9 @@ include:
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/WallController
     file_list:
       - path: wallcontroller_buttons.h
-  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/WallController/config/Thunderboard
-    file_list:
-      - path: wallcontroller_buttons_thunderboard.h
-        condition: [thunderboard]
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/WallController/config/WSTK
     file_list:
       - path: wallcontroller_buttons_wstk.h
-        unless: [thunderboard]
 source:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/WallController/WallController_hw.c"
 provides:

@@ -457,6 +457,12 @@ protected:
     static void HandleParentResponseInfo(otThreadParentResponseInfo *aInfo, void *aContext);
     void        HandleParentResponseInfo(const otThreadParentResponseInfo &aInfo);
 #endif
+
+#if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
+    static void HandleBorderAgentMeshCoPServiceChanged(void *aContext);
+    void        HandleBorderAgentMeshCoPServiceChanged(void);
+#endif
+
 #endif
 
     static void HandleDatagramFromStack(otMessage *aMessage, void *aContext);
@@ -646,6 +652,11 @@ protected:
 #if OPENTHREAD_CONFIG_DIAG_ENABLE
     static void HandleDiagOutput_Jump(const char *aFormat, va_list aArguments, void *aContext);
     void        HandleDiagOutput(const char *aFormat, va_list aArguments);
+#endif
+
+#if OPENTHREAD_CONFIG_NCP_CLI_STREAM_ENABLE
+    static int HandleCliOutput(void *aContext, const char *aFormat, va_list aArguments);
+    int        HandleCliOutput(const char *aFormat, va_list aArguments);
 #endif
 
 #if OPENTHREAD_ENABLE_NCP_VENDOR_HOOK
@@ -872,6 +883,15 @@ protected:
 
     otPlatDnssdState mDnssdState;
 #endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
+
+#if OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE && OPENTHREAD_CONFIG_BACKBONE_ROUTER_MULTICAST_ROUTING_ENABLE
+    static void HandleBackboneRouterMulticastListenerEvent(void                                  *aContext,
+                                                           otBackboneRouterMulticastListenerEvent aEvent,
+                                                           const otIp6Address                    *aAddress);
+    void        HandleBackboneRouterMulticastListenerEvent(otBackboneRouterMulticastListenerEvent aEvent,
+                                                           const otIp6Address                    *aAddress);
+#endif
+
 #endif // OPENTHREAD_FTD
 
 #if OPENTHREAD_CONFIG_DIAG_ENABLE

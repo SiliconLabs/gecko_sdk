@@ -72,6 +72,10 @@ class cc_base():
         """
         ret = []
         for template in self.templates:
+            if self.component not in configuration.keys():
+                raise KeyError(f"Missing component in configuration: {self.component}.")
+            if self.variable not in configuration[self.component].keys():
+                raise KeyError(f"Missing variable in component {self.component}: {self.variable}.")
             ret.append(self._render_template(template, templates_dir, **{
                 self.variable: configuration[self.component][self.variable]
             }))

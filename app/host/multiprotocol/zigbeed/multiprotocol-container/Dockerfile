@@ -34,7 +34,7 @@ RUN systemctl disable bluetooth.service
 RUN pip3 install pybgapi
 
 # Remove "tail -f /var/log/syslog" from shell script
-RUN sed -i '/tail -f \/var\/log\/syslog/d' /app/etc/docker/docker_entrypoint.sh
+RUN sed -i '/tail -f \/var\/log\/syslog/d' /app/etc/docker/test/docker_entrypoint.sh
 # Fix 'pam_env' issue with unset locale
 RUN locale >/etc/default/locale
 

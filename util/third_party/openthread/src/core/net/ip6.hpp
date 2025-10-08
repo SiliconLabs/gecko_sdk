@@ -269,11 +269,11 @@ public:
     const Address *SelectSourceAddress(const Address &aDestination) const;
 
     /**
-     * Returns a reference to the send queue.
+     * Retrieves information about the IPv6 send queue.
      *
-     * @returns A reference to the send queue.
+     * @param[out] aQueueInfo     A `PriorityQueue::Info` to populate with info about the send queue.
      */
-    const PriorityQueue &GetSendQueue(void) const { return mSendQueue; }
+    void GetSendQueueInfo(PriorityQueue::Info &aQueueInfo) const { mSendQueue.GetInfo(aQueueInfo); }
 
     /**
      * Converts an IP protocol number to a string.
@@ -292,6 +292,13 @@ public:
      * @returns The string representation of @p aEcn.
      */
     static const char *EcnToString(Ecn aEcn);
+
+    /**
+     * Indicates whether the address is on the thread link or not.
+     *
+     * @returns TRUE if the address is on the thread link, FALSE otherwise.
+     */
+    bool IsOnLink(const Address &aAddress) const;
 
 #if OPENTHREAD_CONFIG_IP6_BR_COUNTERS_ENABLE
 
@@ -349,6 +356,11 @@ private:
 
     void  EnqueueDatagram(Message &aMessage);
     void  HandleSendQueue(void);
+    void  DetermineAction(const Message &aMessage,
+                          const Header  &aHeader,
+                          bool          &aForwardThread,
+                          bool          &aForwardHost,
+                          bool          &aReceive) const;
     Error PassToHost(OwnedPtr<Message> &aMessagePtr,
                      const Header      &aHeader,
                      uint8_t            aIpProto,
@@ -376,8 +388,6 @@ private:
                   OwnedPtr<Message> &aMessagePtr,
                   uint8_t            aIpProto,
                   Message::Ownership aMessageOwnership);
-    bool  IsOnLink(const Address &aAddress) const;
-    Error RouteLookup(const Address &aSource, const Address &aDestination) const;
 #if OPENTHREAD_CONFIG_IP6_BR_COUNTERS_ENABLE
     void UpdateBorderRoutingCounters(const Header &aHeader, uint16_t aMessageLength, bool aIsInbound);
 #endif

@@ -30,6 +30,27 @@
 // <i> Define the maximum number of queued advertisement reports. Additional advertisement reports are dropped.
 #define SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS     (10)
 
+// <h> Advertising Configuration
+// <e SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_TX_POWER> Include TX Power in the extended header of primary extended advertising packets
+// <i> This is default setting to all advertising sets unless it is specifically overridden by VS_SiliconLabs_Set_Advertising_Config_Bits.
+// <i> Default: 0
+// <i> Enabling this option takes effect only if permitted by Le_Set_Extended_Advertising_Parameters
+// <i> According to Link Layer specification, Vol 6, Part B, Table 2.4 and Table 2.5:
+// <i> Optional in 1M PHY when the advertiser is connectable or scannable, or with auxiliary pointer.
+// <i> In other cases, the Extended Advertising TX Power is always optional by settings.
+#define SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_TX_POWER     (0)
+// </e>
+// <e SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_ADDRESS> Include Advertiser Address in the header of primary extended advertising packets
+// <i> This is default setting to all advertising sets unless it is specifically overridden by VS_SiliconLabs_Set_Advertising_Config_Bits.
+// <i> Default: 0
+// <i> Enabling this option takes effect only if permitted by Le_Set_Extended_Advertising_Parameters
+// <i> According to Link Layer specification, Vol 6, Part B, Table 2.4 and Table 2.5:
+// <i> Optional in 1M PHY when the advertiser is non-connectable and non-scannable, with auxiliary pointer.
+// <i> Mandatory when the advertiser is non-connectable and non-scannable, without auxiliary pointer.
+// <i> Forbidden when the advertiser is connectable or scannable.
+#define SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_ADDRESS      (0)
+// </e>
+// </h> Advertising Configuration
 // </h> Bluetooth Controller Configuration
 
 // <<< end of configuration section >>>

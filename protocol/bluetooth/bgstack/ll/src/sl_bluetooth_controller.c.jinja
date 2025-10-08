@@ -101,6 +101,19 @@ void sl_bt_controller_init(void)
 
   sl_btctrl_init_basic(SL_BT_CONFIG_MAX_CONNECTIONS, SL_BT_CONFIG_USER_ADVERTISERS, SL_BT_CONFIG_ACCEPT_LIST_SIZE);
 
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT) || defined(SL_CATALOG_BLUETOOTH_FEATURE_EXTENDED_ADVERTISER_PRESENT)
+  struct sl_btctrl_adv_config adv_config = { 0 };
+
+#if SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_ADDRESS == 1
+  adv_config.flags |= SL_BTCTRL_CONFIG_FLAG_PRIMARY_EXT_PACKET_ADDRESS;
+#endif
+
+#if SL_BT_CONTROLLER_PRIMARY_EXT_PACKET_INCLUDE_TX_POWER == 1
+  adv_config.flags |= SL_BTCTRL_CONFIG_FLAG_PRIMARY_EXT_PACKET_TX_POWER;
+#endif
+  sl_btctrl_config_adv(&adv_config);
+#endif
+
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_RESOLVING_LIST_PRESENT)
   sl_btctrl_init_privacy();
   sl_status_t status = sl_btctrl_allocate_resolving_list_memory(SL_BT_CONFIG_RESOLVING_LIST_SIZE);
@@ -123,6 +136,10 @@ void sl_bt_controller_init(void)
 #if defined(SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT)
   sl_btctrl_configure_max_queued_adv_reports(SL_BT_CONFIG_MAX_QUEUED_ADV_REPORTS);
 #endif // SL_CATALOG_BLUETOOTH_FEATURE_SCANNER_PRESENT
+
+#if defined(SL_CATALOG_BLUETOOTH_FEATURE_EVENT_INFO_REPORTING_PRESENT)
+  sl_btctrl_init_event_info_reporting();
+#endif // SL_CATALOG_BLUETOOTH_FEATURE_EVENT_INFO_REPORTING_PRESENT
 }
 
 sl_status_t sl_bt_ll_deinit();

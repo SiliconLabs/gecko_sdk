@@ -371,7 +371,7 @@ uint16_t IndirectSender::PrepareDataFrame(Mac::TxFrame &aFrame, Child &aChild, M
 
     if (ip6Header.GetDestination().IsLinkLocalUnicast())
     {
-        Get<MeshForwarder>().GetMacDestinationAddress(ip6Header.GetDestination(), macAddrs.mDestination);
+        macAddrs.mDestination.SetExtendedFromIid(ip6Header.GetDestination().GetIid());
     }
     else
     {
@@ -516,17 +516,7 @@ void IndirectSender::HandleSentFrameToChild(const Mac::TxFrame &aFrame,
             Get<MeshForwarder>().LogMessage(MeshForwarder::kMessageTransmit, *message, txError, &macDest);
         }
 
-        if (message->GetType() == Message::kTypeIp6)
-        {
-            if (aChild.GetIndirectTxSuccess())
-            {
-                Get<MeshForwarder>().mIpCounters.mTxSuccess++;
-            }
-            else
-            {
-                Get<MeshForwarder>().mIpCounters.mTxFailure++;
-            }
-        }
+        Get<MeshForwarder>().mCounters.UpdateOnTxDone(*message, aChild.GetIndirectTxSuccess());
 
         if (message->GetIndirectTxChildMask().Has(childIndex))
         {

@@ -13,6 +13,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ble-dmp/ot-ble-dmp-no-buttons.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-ble-dmp" label="OpenThread BLE DMP - SoC FreeRTOS" description="This is a simple application to test DMP (Dynamic MultiProtocol) with OpenThread and Bluetooth running on FreeRTOS.&#xA;">
@@ -28,6 +30,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ble-dmp/ot-ble-dmp.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-cli-ftd" label="OpenThread - SoC CLI (FTD)" description="This is a very simple CLI application to test the OpenThread stack on a Full Thread Device. This is equivalent to the ot-cli-ftd application in the OpenThread GitHub repo.&#xA;">
@@ -43,6 +47,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/ot-cli-ftd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-cli-mtd" label="OpenThread - SoC CLI (MTD)" description="This is a very simple CLI application to test the OpenThread stack on a Minimal Thread Device. This is equivalent to the ot-cli-mtd application in the OpenThread GitHub repo.&#xA;">
@@ -58,6 +64,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/ot-cli-mtd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="ot-rcp" label="OpenThread - RCP" description="This is a simple OpenThread RCP application. This is equivalent to the ot-rcp application in the OpenThread GitHub repo.&#xA;">
@@ -73,6 +81,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/ot-rcp.slcp"/>
     <properties key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="rcp-spi-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (SPI)" description="This multiprotocol radio co-processor (RCP) application supports running OpenThread, Zigbee, and Bluetooth stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel, and dynamic multiprotocol (DMP) to run the Bluetooth Link Layer simultaneously. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *AN1333: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.&#xA;">
@@ -88,6 +98,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-spi-802154-blehci.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
   <descriptors name="rcp-spi-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (SPI)" description="This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a SPI link. Refer to *AN1333: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.&#xA;">
@@ -103,6 +115,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-spi-802154.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
   <descriptors name="rcp-uart-802154-blehci" label="Multiprotocol (OpenThread+Zigbee+BLE) - RCP (UART)" description="This multiprotocol radio co-processor (RCP) application supports running OpenThread, Zigbee, and Bluetooth stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel, and dynamic multiprotocol (DMP) to run the Bluetooth Link Layer simultaneously. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *AN1333: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.&#xA;">
@@ -118,6 +132,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-uart-802154-blehci.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
   <descriptors name="rcp-uart-802154" label="Multiprotocol (OpenThread+Zigbee) - RCP (UART)" description="This multiprotocol radio co-processor (RCP) application supports running OpenThread and Zigbee stacks simultaneously on a host processor. It uses concurrent multiprotocol (CMP) / multi-PAN functionality to run the 802.15.4 networks simultaneously on the same channel. The host stacks and the RCP communicate using the Co-Processor Communication protocol (CPC), which acts as a protocol multiplexer and serial transport layer. The host applications connect to the CPC daemon, which in turn connects to the EFR via a UART link. Refer to *AN1333: Running Zigbee, OpenThread, and Bluetooth Concurrently on a Linux Host with a Multiprotocol Co-processor* for more information on running the multiprotocol RCP with different host applications.&#xA;">
@@ -133,6 +149,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-uart-802154.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
   <descriptors name="sleepy-demo-ftd" label="OpenThread - SoC Sleepy Demo (FTD)" description="This is a sample application to start and form a Thread network on an FTD for the sleepy-demo.&#xA;">
@@ -148,6 +166,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-ftd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo (MTD)" description="This is a sample application to demonstrate Sleepy End Device (SED) behaviour with polling, using the EFR32's low power EM2 mode.&#xA;">
@@ -163,6 +183,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-mtd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
   <descriptors name="sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo (SSED)" description="This is a sample application to demonstrate Synchronous Sleepy End Device (SSED) behaviour with CSL, using the EFR32's low power EM2 mode.&#xA;">
@@ -178,6 +200,8 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-ssed.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
 </model:MDescriptors>

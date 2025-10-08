@@ -97,6 +97,10 @@ configuration:
     condition: [device_series_2]
   - name: configTIMER_QUEUE_LENGTH
     value: 8
+    unless: [device_sdid_95]
+  - name: configTIMER_QUEUE_LENGTH
+    value: 4
+    condition: [device_sdid_95]
   - name: SL_DEVICE_INIT_DCDC_BYPASS
     value: 1
   - name: SL_POWER_MANAGER_LOWEST_EM_ALLOWED
@@ -118,6 +122,13 @@ configuration:
     value: '"zniffer"'
   - name: SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT
     value: 0
+  # Note: This overrides the default value in FreeRTOSConfigTarget.h
+  - name: configTOTAL_HEAP_SIZE
+    value: 1024
+    condition: [device_sdid_95]
+  - name: configTOTAL_HEAP_SIZE
+    value: 8192
+    unless: [device_sdid_95]
 
 define:
   - name: APP_PROPERTIES_CONFIG_FILE

@@ -54,7 +54,7 @@ namespace Cli {
  * anycast
  * Done
  * @endcode
- * @cparam srp server addrmode [@ca{anycast}|@ca{unicast}]
+ * @cparam srp server addrmode [@ca{anycast}|@ca{unicast}|@ca{unicast-force-add}]
  * @par
  * Gets or sets the address mode used by the SRP server.
  * @par
@@ -78,6 +78,10 @@ template <> otError SrpServer::Process<Cmd("addrmode")>(Arg aArgs[])
         case OT_SRP_SERVER_ADDRESS_MODE_ANYCAST:
             OutputLine("anycast");
             break;
+
+        case OT_SRP_SERVER_ADDRESS_MODE_UNICAST_FORCE_ADD:
+            OutputLine("unicast-force-add");
+            break;
         }
 
         error = OT_ERROR_NONE;
@@ -89,6 +93,10 @@ template <> otError SrpServer::Process<Cmd("addrmode")>(Arg aArgs[])
     else if (aArgs[0] == "anycast")
     {
         error = otSrpServerSetAddressMode(GetInstancePtr(), OT_SRP_SERVER_ADDRESS_MODE_ANYCAST);
+    }
+    else if (aArgs[0] == "unicast-force-add")
+    {
+        error = otSrpServerSetAddressMode(GetInstancePtr(), OT_SRP_SERVER_ADDRESS_MODE_UNICAST_FORCE_ADD);
     }
 
     return error;
@@ -144,19 +152,64 @@ template <> otError SrpServer::Process<Cmd("auto")>(Arg aArgs[])
  */
 template <> otError SrpServer::Process<Cmd("domain")>(Arg aArgs[])
 {
+    return ProcessGetSet(aArgs, otSrpServerGetDomain, otSrpServerSetDomain);
+}
+
+#if OPENTHREAD_CONFIG_SRP_SERVER_FAST_START_MODE_ENABLE
+/**
+ * @cli srp server faststart (enable)
+ * @code
+ * srp server faststart enable
+ * Done
+ * @endcode
+ * @code
+ * srp server faststart
+ * Enabled
+ * Done
+ * @endcode
+ * @cparam srp server faststart [@ca{enable}]
+ * @par
+ * Enables the "Fast Start Mode" on the SRP server.
+ * @par
+ * The Fast Start Mode is designed for scenarios where a device, often a mobile device, needs to act as a provisional
+ * SRP server (e.g., functioning as a temporary Border Router). The SRP server function is enabled only if no other
+ * Border Routers (BRs) are already providing the SRP service within the Thread network. Importantly, Fast Start Mode
+ * allows the device to quickly start its SRP server functionality upon joining the network, allowing other Thread
+ * devices to quickly connect and register their services without the typical delays associated with standard Border
+ * Router initialization (and SRP server startup).
+ * @par
+ * The Fast Start Mode can be enabled when the device is in the detached or disabled state, the SRP server is currently
+ * disabled, and "auto-enable mode" is not in use.
+ * @par
+ * After successfully enabling Fast Start Mode, it can be disabled by a direct command to enable/disable the SRP
+ * server, using `srp server [enable/disable]`.
+ * @par
+ * This command requires that `OPENTHREAD_CONFIG_SRP_SERVER_FAST_START_MODE_ENABLE` be enabled.
+ * @moreinfo{@srp}.
+ * @sa otSrpServerIsFastStartModeEnabled
+ * @sa otSrpServerEnableFastStartMode
+ */
+template <> otError SrpServer::Process<Cmd("faststart")>(Arg aArgs[])
+{
     otError error = OT_ERROR_NONE;
 
     if (aArgs[0].IsEmpty())
     {
-        OutputLine("%s", otSrpServerGetDomain(GetInstancePtr()));
+        OutputEnabledDisabledStatus(otSrpServerIsFastStartModeEnabled(GetInstancePtr()));
+    }
+    else if (aArgs[0] == "enable")
+    {
+        error = otSrpServerEnableFastStartMode(GetInstancePtr());
     }
     else
     {
-        error = otSrpServerSetDomain(GetInstancePtr(), aArgs[0].GetCString());
+        error = OT_ERROR_INVALID_ARGS;
     }
 
     return error;
 }
+
+#endif // OPENTHREAD_CONFIG_SRP_SERVER_FAST_START_MODE_ENABLE
 
 /**
  * @cli srp server state
@@ -491,6 +544,18 @@ exit:
 }
 
 /**
+ * @cli srp server port (get)
+ * @code
+ * srp server port
+ * 53536
+ * Done
+ * @endcode
+ * @par api_copy
+ * #otSrpServerGetPort
+ */
+template <> otError SrpServer::Process<Cmd("port")>(Arg aArgs[]) { return ProcessGet(aArgs, otSrpServerGetPort); }
+
+/**
  * @cli srp server seqnum (get,set)
  * @code
  * srp server seqnum 20
@@ -511,22 +576,7 @@ exit:
  */
 template <> otError SrpServer::Process<Cmd("seqnum")>(Arg aArgs[])
 {
-    otError error = OT_ERROR_NONE;
-
-    if (aArgs[0].IsEmpty())
-    {
-        OutputLine("%u", otSrpServerGetAnycastModeSequenceNumber(GetInstancePtr()));
-    }
-    else
-    {
-        uint8_t sequenceNumber;
-
-        SuccessOrExit(error = aArgs[0].ParseAsUint8(sequenceNumber));
-        error = otSrpServerSetAnycastModeSequenceNumber(GetInstancePtr(), sequenceNumber);
-    }
-
-exit:
-    return error;
+    return ProcessGetSet(aArgs, otSrpServerGetAnycastModeSequenceNumber, otSrpServerSetAnycastModeSequenceNumber);
 }
 
 otError SrpServer::Process(Arg aArgs[])
@@ -544,8 +594,12 @@ otError SrpServer::Process(Arg aArgs[])
         CmdEntry("disable"),
         CmdEntry("domain"),
         CmdEntry("enable"),
+#if OPENTHREAD_CONFIG_SRP_SERVER_FAST_START_MODE_ENABLE
+        CmdEntry("faststart"),
+#endif
         CmdEntry("host"),
         CmdEntry("lease"),
+        CmdEntry("port"),
         CmdEntry("seqnum"),
         CmdEntry("service"),
         CmdEntry("state"),

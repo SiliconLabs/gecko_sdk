@@ -425,8 +425,16 @@ uint16_t emberAfFillCommandGreenPowerClusterGpPairingConfigurationSmart(uint8_t 
   }
 
   emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(deviceId));
-  emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(groupList, groupListCount));
-  charCount += sizeof(uint8_t) + groupListCount;
+  charCount += sizeof(uint8_t);
+
+  uint8_t gpPairingConfigCommunicationMode = (options
+                                              & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE)
+                                             >> EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_COMMUNICATION_MODE_OFFSET;
+  if (gpPairingConfigCommunicationMode == EMBER_GP_SINK_TYPE_GROUPCAST) {
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt8uInResp(groupListCount));
+    emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutBlockInResp(groupList, groupListCount * sizeof(EmberGpSinkGroup)));
+    charCount += sizeof(uint8_t) + groupListCount * sizeof(EmberGpSinkGroup);
+  }
 
   if (options & EMBER_AF_GP_PAIRING_CONFIGURATION_OPTION_ASSIGNED_ALIAS) {
     emberAfGreenPowerCheckReturnOfPutDataInResponse(emberAfPutInt16uInResp(gpdAssignedAlias));

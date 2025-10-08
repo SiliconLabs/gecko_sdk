@@ -38,9 +38,9 @@
 
 #include <mbedtls/build_info.h>
 
-#if (defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA256_C)) \
-  || (defined(MBEDTLS_SHA1_ALT) && defined(MBEDTLS_SHA1_C))    \
-  || (defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA512_C))
+#if (defined(MBEDTLS_SHA1_ALT) && defined(MBEDTLS_SHA1_C))                                     \
+  || (defined(MBEDTLS_SHA256_ALT) && (defined(MBEDTLS_SHA256_C) || defined(MBEDTLS_SHA224_C))) \
+  || (defined(MBEDTLS_SHA512_ALT) && (defined(MBEDTLS_SHA512_C) || defined(MBEDTLS_SHA384_C)))
 
 #include "em_device.h"
 
@@ -81,14 +81,14 @@
 #define SHA1_VALIDATE(cond)  MBEDTLS_INTERNAL_VALIDATE(cond)
 #endif /* SHA1 acceleration active */
 
-#if defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA256_C)
+#if defined(MBEDTLS_SHA256_ALT) && (defined(MBEDTLS_SHA256_C) || defined(MBEDTLS_SHA224_C))
 #include "mbedtls/sha256.h"
 #define SHA256_VALIDATE_RET(cond) \
   MBEDTLS_INTERNAL_VALIDATE_RET(cond, MBEDTLS_ERR_SHA256_BAD_INPUT_DATA)
 #define SHA256_VALIDATE(cond)  MBEDTLS_INTERNAL_VALIDATE(cond)
 #endif /* SHA256 acceleration active */
 
-#if defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA512_C)
+#if defined(MBEDTLS_SHA512_ALT) && (defined(MBEDTLS_SHA384_C) || defined(MBEDTLS_SHA512_C))
 #include "mbedtls/sha512.h"
 #define SHA512_VALIDATE_RET(cond) \
   MBEDTLS_INTERNAL_VALIDATE_RET(cond, MBEDTLS_ERR_SHA512_BAD_INPUT_DATA)
@@ -111,9 +111,17 @@ static int psa_status_to_mbedtls(psa_status_t status, psa_algorithm_t alg)
         case PSA_ALG_SHA_1:
           return MBEDTLS_ERR_SHA1_BAD_INPUT_DATA;
 #endif
+#if defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA224_C)
+        case PSA_ALG_SHA_224:
+          return MBEDTLS_ERR_SHA256_BAD_INPUT_DATA;
+#endif
 #if defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA256_C)
         case PSA_ALG_SHA_256:
           return MBEDTLS_ERR_SHA256_BAD_INPUT_DATA;
+#endif
+#if defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA384_C)
+        case PSA_ALG_SHA_384:
+          return MBEDTLS_ERR_SHA512_BAD_INPUT_DATA;
 #endif
 #if defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA512_C)
         case PSA_ALG_SHA_512:

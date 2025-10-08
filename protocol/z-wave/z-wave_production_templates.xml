@@ -13,6 +13,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_ncp_serial_api_controller_otw.slcw"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp protocol.z-wave.UCBootLoader.series1.bootloader-uart-xmodem_otw.slcp"/>
   </descriptors>
@@ -29,6 +31,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_ncp_serial_api_end_device_otw.slcw"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp protocol.z-wave.UCBootLoader.series1.bootloader-uart-xmodem_otw.slcp"/>
   </descriptors>
@@ -45,6 +49,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_door_lock_keypad_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -61,6 +67,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_led_bulb_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -77,6 +85,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_multilevel_sensor_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -93,6 +103,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_power_strip_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -109,6 +121,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_sensor_pir_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -125,6 +139,8 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_switch_on_off_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
@@ -141,184 +157,10 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_wall_controller_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_wall_controller.zwave_soc_wall_controller.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_NCP_SerialAPI_Controller_Solution" label="ZWave_NCP_SerialAPI_Controller_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader.  The Serial Applications Programming Interface (Serial API) allows a host to communicate with  a Z-Wave chip. The host may be a PC or a less powerful embedded host CPU, such as in a  remote control or in a gateway device, and so on.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_ncp_serial_api_controller_otw.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_ncp_serial_api_controller_otw.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp protocol.z-wave.UCBootLoader.series2.bootloader-uart-xmodem_otw.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_NCP_SerialAPI_EndDevice_Solution" label="ZWave_NCP_SerialAPI_EndDevice_Solution" description="Demonstrates Serial Applications Programming Interface (Serial API) combined with OTW bootloader.  The Serial API End Device allows the user to create a product with a host application with  different capabilites than the Z-Wave device, such as drive a high performance display,  but does not require the Z-Wave Controller role.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_ncp_serial_api_end_device_otw.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_ncp_serial_api_end_device_otw.slcw"/>
-    <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp protocol.z-wave.UCBootLoader.series2.bootloader-uart-xmodem_otw.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_DoorLockKeypad_Solution" label="ZWave_SoC_DoorLockKeypad_Solution" description="Demonstrates Door Lock application combined with OTA bootloader.  The Z-Wave certified Door Lock application shows a lock implementation.  It will support user codes to open a door and thereby eliminate the  need for traditional keys. It is possible to both lock and unlock the  door remotely through the Z-Wave protocol.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_door_lock_keypad_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_door_lock_keypad_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
-    <properties key="boardCompatibility" value="brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_LEDBulb_Solution" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader.  The Z-Wave LED Bulb application shows an implementation  of a remotely controlled color switch. An example is an LED bulb  or any other color-capable device. The app supports dimming of an RGB LED.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_led_bulb_explorer_kit_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_led_bulb_explorer_kit_ota.slcw"/>
-    <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
-    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb_explorer_kit.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_LEDBulb_Solution" label="ZWave_SoC_LEDBulb_Solution" description="Demonstrates LED Bulb application combined with OTA bootloader.  The Z-Wave LED Bulb application shows an implementation  of a remotely controlled color switch. An example is an LED bulb  or any other color-capable device. The app supports dimming of an RGB LED.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_led_bulb_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_led_bulb_ota.slcw"/>
-    <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
-    <properties key="boardCompatibility" value="brd4205a brd4205b com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_MultilevelSensor_Solution" label="ZWave_SoC_MultilevelSensor_Solution" description="Demonstrates Switch Multilevel Sensor application combined with OTA bootloader.  The Z-Wave Switch Multilevel Sensor application shows the ability to advertize  numerical sensor readings, such as temperature and humidity, and so on.  Multiple parameters can be set for the minimum and maximum values, and a  notification will be sent if the measured temperature value is out of the range.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_multilevel_sensor_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_multilevel_sensor_ota.slcw"/>
-    <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_PowerStrip_Solution" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader.  The Z-Wave certified Power Strip application shows an extension  block implementation used to turn on several devices that are connected  to power. Examples include lights, appliances, etc.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_power_strip_explorer_kit_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_power_strip_explorer_kit_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
-    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip_explorer_kit.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_PowerStrip_Solution" label="ZWave_SoC_PowerStrip_Solution" description="Demonstrates Power Strip application combined with OTA bootloader.  The Z-Wave certified Power Strip application shows an extension  block implementation used to turn on several devices that are connected  to power. Examples include lights, appliances, etc.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_power_strip_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_power_strip_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4205a brd4205b com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_SensorPIR_Solution" label="ZWave_SoC_SensorPIR_Solution" description="Demonstrates passive infrared (PIR) sensor application combined with OTA bootloader.  The Z-Wave certified passive infrared (PIR) sensor application shows  a presence/movement detector implementation for controlling other devices  and for sending notifications.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_sensor_pir_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_sensor_pir_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_SwitchOnOff_Solution" label="ZWave_SoC_SwitchOnOff_Solution" description="Demonstrates Switch On/Off application combined with OTA bootloader.  The Z-Wave certified Switch On/Off application shows a switch  implementation that turns on any device that is connected to power.  Examples include lights, appliances, and so on.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_switch_on_off_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_switch_on_off_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-  </descriptors>
-  <descriptors name="ZWave_SoC_WallController_Solution" label="ZWave_SoC_WallController_Solution" description="Demonstrates Wall Controller application combined with OTA bootloader. The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted  on a wall. Examples include scene and zone controllers and wall-mounted AV controllers.&#xA;">
-    <properties key="namespace" value="template.solution.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.workspaces.series2.zwave_soc_wall_controller_ota.slcw"/>
-    <properties key="projectFilePaths" value="workspaces/series2/zwave_soc_wall_controller_ota.slcw"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
-    <properties key="boardCompatibility" value="brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-    <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_wall_controller.zwave_soc_wall_controller.slcp protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
   </descriptors>
   <descriptors name="zwave_ncp_serial_api_controller" label="Z-Wave - NCP Serial API Controller" description="The Serial Applications Programming Interface (Serial API) allows a host to communicate with a Z-Wave chip. The host may be a PC or a less powerful embedded host CPU, such as in a remote control or in a gateway device, and so on.&#xA;">
     <properties key="namespace" value="template.uc"/>
@@ -326,13 +168,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_controller.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4201a brd4202a brd4206a brd4207a brd4208a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_controller.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_ncp_serial_api_end_device" label="Z-Wave - NCP Serial API End Device" description="The Serial Application Programming Interface (Serial API) allows a host to communicate with a Z-Wave chip. The host may be PC or a less powerful embedded host CPU, e.g., in a remote control or in a gateway device.&#xA;The Serial API End Device allows the user to create a product with a host application with different capabilites than the Z-Wave device, such as drive a high performance display, but does not require the Z-Wave Controller role.&#xA;">
@@ -341,13 +185,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_ncp_zniffer" label="Z-Wave - NCP Zniffer Beta" description="The Z-Wave Zniffer Application">
@@ -356,13 +202,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_zniffer.zwave_ncp_zniffer.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_zniffer/zwave_ncp_zniffer.slcp"/>
     <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_zniffer/zwave_ncp_zniffer.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_ncp_zniffer_pti" label="Z-Wave - NCP Zniffer PTI" description="The Z-Wave Zniffer Packet Trace Interface application helps with analyzing the communication between devices and debugging the application. It is possible to log and filter datagrams in any supported region. The log can be saved for later analysis.&#xA;">
@@ -371,13 +219,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_ncp_zniffer_pti.zwave_ncp_zniffer_pti.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4206a brd4207a brd4208a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4201a brd4201c brd4201d brd4202a brd4203a brd4206a brd4207a brd4208a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar segger"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_door_lock_keypad" label="Z-Wave - SoC Door Lock Keypad" description="The Z-Wave certified Door Lock application shows a lock implementation. It will support user codes to open a door and thereby eliminate the need for traditional keys. It is possible to both lock and unlock the door remotely through the Z-Wave protocol.&#xA;">
@@ -386,13 +236,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_power_strip" label="Z-Wave - SoC Power Strip" description="The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.&#xA;Endpoint 1 device type - generic type switch binary and specific type on/off power switch.&#xA;Endpoint 2 device type - generic type light dimmer switch and specific type light dimmer switch.&#xA;">
@@ -401,28 +253,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_power_strip/zwave_soc_power_strip.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-  </descriptors>
-  <descriptors name="zwave_soc_power_strip" label="Z-Wave - SoC Power Strip" description="The Z-Wave certified Power Strip application shows an extension block implementation used to turn on several devices that are connected to power. Examples include lights, appliances, etc.&#xA;Endpoint 1 device type - generic type switch binary and specific type on/off power switch.&#xA;Endpoint 2 device type - generic type light dimmer switch and specific type light dimmer switch.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip_explorer_kit.slcp"/>
-    <properties key="projectFilePaths" value="Apps/zwave_soc_power_strip/zwave_soc_power_strip_explorer_kit.slcp"/>
-    <properties key="readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
-    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_power_strip/zwave_soc_power_strip.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_sensor_pir" label="Z-Wave - SoC Sensor PIR" description="The Z-Wave certified passive infrared (PIR) sensor application shows a presence/movement detector implementation for controlling other devices and for sending notifications.&#xA;">
@@ -431,13 +270,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_sensor_pir/zwave_soc_sensor_pir.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_sensor_pir/zwave_soc_sensor_pir.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_switch_on_off" label="Z-Wave - SoC Switch On/Off" description="[RECOMMENDED STARTER PROJECT] The Z-Wave certified Switch On/Off application shows a switch implementation that turns on any device that is connected to power. Examples include lights, appliances, and so on.&#xA;">
@@ -446,13 +287,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_switch_on_off/zwave_soc_switch_on_off.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_switch_on_off/zwave_soc_switch_on_off.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_wall_controller" label="Z-Wave - SoC Wall Controller" description="The Z-Wave certified Wall Controller application shows a push-button switch panel implementation to control devices in the Z-Wave network from push buttons (physical or virtual) on a device that is meant to be mounted on a wall. Examples include scene and zone controllers and wall-mounted AV controllers.&#xA;">
@@ -461,13 +304,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.Apps.zwave_soc_wall_controller.zwave_soc_wall_controller.slcp"/>
     <properties key="projectFilePaths" value="Apps/zwave_soc_wall_controller/zwave_soc_wall_controller.slcp"/>
     <properties key="readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_wall_controller/zwave_soc_wall_controller.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_led_bulb" label="Z-Wave - SoC LED Bulb" description="The Z-Wave LED Bulb application shows an implementation of a remotely controlled color switch. An example is an LED bulb or any other color-capable device. The app supports dimming of an RGB LED.&#xA;">
@@ -476,28 +321,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb.slcp"/>
     <properties key="projectFilePaths" value="NonCertifiableApps/zwave_soc_led_bulb/zwave_soc_led_bulb.slcp"/>
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
-    <properties key="boardCompatibility" value="brd4200a brd4202a brd4205a brd4205b brd4207a brd4209a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
-  </descriptors>
-  <descriptors name="zwave_soc_led_bulb" label="Z-Wave - SoC LED Bulb" description="The Z-Wave LED Bulb application shows an implementation of a remotely controlled color switch. An example is an LED bulb or any other color-capable device. The app supports dimming of an RGB LED.&#xA;This is the EFR32xG28 Explorer Kit specific version of the application.&#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb_explorer_kit.slcp"/>
-    <properties key="projectFilePaths" value="NonCertifiableApps/zwave_soc_led_bulb/zwave_soc_led_bulb_explorer_kit.slcp"/>
-    <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
-    <properties key="boardCompatibility" value="brd2705a com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
-    <properties key="toolchainCompatibility" value="gcc"/>
-    <properties key="category" value="Z-Wave|Apps"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/NonCertifiableApps/zwave_soc_led_bulb/zwave_soc_led_bulb.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="zwave_soc_multilevel_sensor" label="Z-Wave - SoC Multilevel Sensor" description="The Z-Wave Switch Multilevel Sensor application shows the ability to advertize numerical sensor readings, such as temperature and humidity, and so on. Multiple parameters can be set for the minimum and maximum values, and a notification will be sent if the measured temperature value is out of the range.&#xA;">
@@ -506,13 +338,15 @@
     <properties key="solutionReferenceId" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp"/>
     <properties key="projectFilePaths" value="NonCertifiableApps/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor.slcp"/>
     <properties key="readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4200a brd4202a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4207a brd4209a brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*efr32zg23.* .*efr32zg28.* .*zgm13.* .*zgm23.*"/>
+    <properties key="boardCompatibility" value="brd4200a brd4202a brd4207a brd4209a com.silabs.board.none"/>
+    <properties key="partCompatibility" value=".*efr32zg13l.* .*efr32zg13p.* .*efr32zg13s.* .*efr32zg14p.* .*zgm13.*"/>
     <properties key="ideCompatibility" value="makefile-ide simplicity-ide visual-studio-code visual-studio-code-cmake generic-template"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/NonCertifiableApps/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="bootloader-storage-internal-single-zwave" label="Bootloader - SoC Internal Storage (For Z-Wave Applications)" description="This sample configuration of the Gecko bootloader configures the bootloader  to use the internal main flash to store firmware update images. The storage  configuration is set up to store a single firmware update image at a time,  in a single storage slot.  &#xA;">
@@ -528,6 +362,8 @@
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/UCBootLoader/series1/bootloader-storage-internal-single-512k_ota.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
   <descriptors name="bootloader-uart-xmodem-zwave" label="Bootloader - NCP UART XMODEM (For Z-Wave Applications)" description="Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu, where an XMODEM transfer can be started by sending ASCII '1', or the application can be started by sending ASCII '2'. This is the recommended UART bootloader for the EmberZNet and Connect protocol stacks.&#xA;">
@@ -543,36 +379,8 @@
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
-  </descriptors>
-  <descriptors name="bootloader-storage-internal-single-zwave" label="Bootloader - SoC Internal Storage (For Z-Wave Applications)" description="This sample configuration of the Gecko bootloader configures the bootloader  to use the internal main flash to store firmware update images. The storage  configuration is set up to store a single firmware update image at a time,  in a single storage slot.  &#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.UCBootLoader.series2.bootloader-storage-internal-single-512k_ota.slcp"/>
-    <properties key="projectFilePaths" value="UCBootLoader/series2/bootloader-storage-internal-single-512k_ota.slcp"/>
-    <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Bootloaders"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
-  </descriptors>
-  <descriptors name="bootloader-uart-xmodem-zwave" label="Bootloader - NCP UART XMODEM (For Z-Wave Applications)" description="Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu, where an XMODEM transfer can be started by sending ASCII '1', or the application can be started by sending ASCII '2'. This is the recommended UART bootloader for the EmberZNet and Connect protocol stacks.&#xA;">
-    <properties key="namespace" value="template.uc"/>
-    <properties key="keywords" value="universal\ configurator"/>
-    <properties key="solutionReferenceId" value="protocol.z-wave.UCBootLoader.series2.bootloader-uart-xmodem_otw.slcp"/>
-    <properties key="projectFilePaths" value="UCBootLoader/series2/bootloader-uart-xmodem_otw.slcp"/>
-    <properties key="readmeFiles" value=""/>
-    <properties key="boardCompatibility" value="brd2603a brd2705a brd4204a brd4204b brd4204c brd4204d brd4205a brd4205b brd4210a brd4400b brd4400c brd4401b brd4401c com.silabs.board.none"/>
-    <properties key="partCompatibility" value=".*efr32zg23.* .*efr32zg28.* .*zgm23.*"/>
-    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
-    <properties key="toolchainCompatibility" value="gcc iar segger"/>
-    <properties key="category" value="Z-Wave|Bootloaders"/>
-    <properties key="quality" value="PRODUCTION"/>
-    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="protocol/z-wave/UCBootLoader/series1/bootloader-uart-xmodem_otw.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
 </model:MDescriptors>

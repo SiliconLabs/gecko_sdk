@@ -103,7 +103,19 @@ void sl_high_datarate_phy_config_csma_params(RAIL_CsmaConfig_t *csma_params);
  * followed
  */
 void sl_high_datarate_phy_config_radio_priorities(EmberMultiprotocolPriorities *priorities);
-
+/**
+ * Force transmission after failed HDR PHY CCA.
+ *
+ * @param[in] hdr_csma_attempts Number of attempts to force TX after failed HDR PHY CCA.
+ * @param[in] min_bo_period_us  Minimum backoff period in microseconds.
+ * @param[in] max_bo_period_us  Maximum backoff period in microseconds.
+ * @return sl_status_t          Status code indicating success or failure.
+ *
+ * CAUTION: Do not call this function from any other RTOS task context except Zigbee.
+ * This function manipulates stack values and might cause unpredictable errors if this rule is not
+ * followed.
+ */
+sl_status_t sl_high_datarate_phy_force_tx_after_failed_hdr_phy_cca(uint8_t hdr_csma_attempts, uint32_t min_bo_period_us, uint32_t max_bo_period_us);
 /**
  * Default receive callback function for High-BW-phy packets
  *              packet[0] packet[1] : 2 byte Length (packet[1] << 8 + packet[0])

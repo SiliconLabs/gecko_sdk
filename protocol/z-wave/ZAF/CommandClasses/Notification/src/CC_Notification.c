@@ -561,6 +561,15 @@ JOB_STATUS CmdClassNotificationReport(
     uint8_t evParLen,
     void(*pCallback)(TRANSMISSION_RESULT * pTransmissionResult))
 {
+  /**
+   * Variable to hold the current AGI profile while the frame awaits transmission
+   * in the ZAF transport queue.
+   */
+  static agi_profile_t profile = {
+    .profile_MS = 0x00,
+    .profile_LS = 0x00
+  };
+
   ZW_NOTIFICATION_REPORT_1BYTE_V4_FRAME frame = {
     .cmdClass = COMMAND_CLASS_NOTIFICATION_V4,
     .cmd = NOTIFICATION_REPORT_V4,
@@ -583,7 +592,7 @@ JOB_STATUS CmdClassNotificationReport(
     dataLength -= (uint8_t)sizeof(uint8_t);
   }
   
-  const agi_profile_t profile = cc_notification_get_agi_profile(notification_index);
+  profile = cc_notification_get_agi_profile(notification_index);
 
   return cc_engine_multicast_request(&profile,
       cc_notification_get_endpoint(notification_index),

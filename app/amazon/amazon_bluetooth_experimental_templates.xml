@@ -13,6 +13,8 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_demos/amazon_aws_soc_gatt_server.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="amazon_aws_soc_mqtt_over_ble" label="Amazon AWS - SoC MQTT over Bluetooth Low Energy" description="This application demonstrates how to use the MQTT over Bluetooth Low Energy service.">
@@ -28,6 +30,8 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_demos/amazon_aws_soc_mqtt_over_ble.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
   <descriptors name="amazon_aws_soc_bt_tests" label="Amazon AWS - SoC Bluetooth Tests" description="Project to run AWS Tests including BLE tests on Silicon Labs boards.">
@@ -43,6 +47,8 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_tests/amazon_aws_soc_bt_tests.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
 </model:MDescriptors>

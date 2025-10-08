@@ -1,6 +1,0 @@
-[
-  {
-    "name": "deniedProperties",
-    "value": ["deviceType", "deviceProfile"]
-  }
-]

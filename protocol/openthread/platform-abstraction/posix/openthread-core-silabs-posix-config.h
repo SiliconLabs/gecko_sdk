@@ -1,38 +1,35 @@
-/*
- *  Copyright (c) 2017, The OpenThread Authors.
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *  1. Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *  3. Neither the name of the copyright holder nor the
- *     names of its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- */
-
-/**
+/*******************************************************************************
  * @file
- *   This file includes all compile-time configuration constants used by SiLabs POSIX builds.
+ * @brief This file includes all compile-time configuration constants used by SiLabs POSIX builds.
  *
  *   To use this configuration in your POSIX builds, copy this file into the following folder:
  *   <openthread_location>/src/posix/platform/
- */
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
 
 #ifndef OPENTHREAD_CORE_SILABS_POSIX_CONFIG_H_
 #define OPENTHREAD_CORE_SILABS_POSIX_CONFIG_H_
@@ -47,11 +44,10 @@
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=1 DNS64=1 \
-     ./script/bootstrap
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=1 ./script/bootstrap
 
 sudo INFRA_IF_NAME=eth0 \
-     RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
+     RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON \
@@ -64,14 +60,15 @@ sudo INFRA_IF_NAME=eth0 \
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=1 DNS64=1 \
-     ./script/bootstrap
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=1 ./script/bootstrap
 
 sudo INFRA_IF_NAME=eth0 \
-     RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
+     RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_MULTIPAN_RCP=ON \
                    -DCPCD_SOURCE_DIR=$GSDK_DIR/platform/service/cpc/daemon \
+                   -DOT_POSIX_RCP_HDLC_BUS=ON \
+                   -DOT_POSIX_RCP_SPI_BUS=ON \
                    -DOT_POSIX_RCP_VENDOR_BUS=ON \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_rcp.cmake \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/cpc_interface.cpp \
@@ -87,11 +84,11 @@ sudo INFRA_IF_NAME=eth0 \
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=1 DNS64=1 \
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=1 \
      ./script/bootstrap
 
 sudo INFRA_IF_NAME=eth0 \
-     RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
+     RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.3 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=ON -DOTBR_SRP_ADVERTISING_PROXY=ON \
@@ -104,14 +101,16 @@ sudo INFRA_IF_NAME=eth0 \
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=1 DNS64=1 \
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=1 \
      ./script/bootstrap
 
 sudo INFRA_IF_NAME=eth0 \
-     RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 DNS64=1 \
+     RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=1 NAT64=1 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.3 \
                    -DOT_MULTIPAN_RCP=ON \
                    -DCPCD_SOURCE_DIR=$GSDK_DIR/platform/service/cpc/daemon \
+                   -DOT_POSIX_RCP_HDLC_BUS=ON \
+                   -DOT_POSIX_RCP_SPI_BUS=ON \
                    -DOT_POSIX_RCP_VENDOR_BUS=ON \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_rcp.cmake \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/cpc_interface.cpp \
@@ -127,10 +126,10 @@ sudo INFRA_IF_NAME=eth0 \
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=0 DNS64=0 \
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=0 \
      ./script/bootstrap
 
-sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 DNS64=0 \
+sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.2 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DUA_ROUTING=ON -DOTBR_DNSSD_DISCOVERY_PROXY=OFF -DOTBR_SRP_ADVERTISING_PROXY=OFF" \
@@ -142,13 +141,15 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
  ****************************/
 
 /*
-sudo RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 NAT64=0 DNS64=0 \
+sudo RELEASE=1 BACKBONE_ROUTER=1 NAT64=0 \
      ./script/bootstrap
 
-sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 DNS64=0 \
+sudo INFRA_IF_NAME=eth0 RELEASE=1 BACKBONE_ROUTER=1 BORDER_ROUTING=0 NAT64=0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.2 \
                    -DOT_MULTIPAN_RCP=ON \
                    -DCPCD_SOURCE_DIR=$GSDK_DIR/platform/service/cpc/daemon \
+                   -DOT_POSIX_RCP_HDLC_BUS=ON \
+                   -DOT_POSIX_RCP_SPI_BUS=ON \
                    -DOT_POSIX_RCP_VENDOR_BUS=ON \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_DEPS_PACKAGE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/posix_vendor_rcp.cmake \
                    -DOT_POSIX_CONFIG_RCP_VENDOR_INTERFACE=$GSDK_DIR/protocol/openthread/platform-abstraction/posix/cpc_interface.cpp \
@@ -182,9 +183,10 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
  * Unfortunately this file is included prior to OPENTHREAD_POSIX_CONFIG_SPINEL_VENDOR_INTERFACE_ENABLE
  * being defined so we can't check here.
  */
-#define OT_VENDOR_RADIO_URL_HELP_BUS                                 \
-    "    spinel+cpc://cpcd_0?${Parameters} for connecting to cpcd\n" \
-    "Parameters:\n"                                                  \
+#define OT_VENDOR_RADIO_URL_HELP_BUS                                                               \
+    "Protocol=[spinel+cpc*]            Specify the Spinel interface as the Spinel CPC interface\n" \
+    "    spinel+cpc://cpcd_0?${Parameters} for connecting to cpcd\n"                               \
+    "Parameters:\n"                                                                                \
     "    cpc-bus-speed[=speed]         CPC bus speed used for communicating with RCP.\n"
 
 /******************************************************************************
@@ -478,6 +480,13 @@ sudo INFRA_IF_NAME=eth0 RELEASE=1 REFERENCE_DEVICE=1 BACKBONE_ROUTER=1 BORDER_RO
  */
 #undef OPENTHREAD_CONFIG_LOG_CLI
 #define OPENTHREAD_CONFIG_LOG_CLI 0
+
+/**
+ * Define to 1 if you want to enable radio coexistence implemented in platform.
+ *
+ */
+#undef OPENTHREAD_CONFIG_PLATFORM_RADIO_COEX_ENABLE
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_COEX_ENABLE 1
 
 /******************************************************************************
  * Include OpenThread project's POSIX defaults

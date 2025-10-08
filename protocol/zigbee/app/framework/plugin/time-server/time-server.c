@@ -36,6 +36,11 @@
 #define MASTER_ZONE_DST
 #endif
 
+// Time Status fields (4 bits in total)
+#define MASTER_BIT          BIT(0)
+#define SYNCHRONIZED_BIT    BIT(1)
+#define MASTER_ZONE_DST_BIT BIT(2)
+#define SUPERSEDING_BIT     BIT(3)
 #define INVALID_ENDPOINT 0xFF
 
 static EmberAfStatus readTime(uint8_t endpoint, uint32_t *time);
@@ -78,14 +83,14 @@ void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
   // The first bit of TimeStatus indicates whether the real time clock
   // corresponding to the Time attribute is internally set to the time
   // standard.
-  timeStatus |= BIT(0);
+  timeStatus |= MASTER_BIT;
 #elif defined(SYNCHRONIZED)
   // The Synchronized bit specifies whether Time has been set over the ZigBee
   // network to synchronize it (as close as may be practical) to the time standard
   // bit must be explicitly written to indicate this - i.e. it is not set
   // automatically on writing to the Time attribute. If the Master bit is 1, the value of
   // this bit is 0.
-  timeStatus |= BIT(1);
+  timeStatus |= SYNCHRONIZED_BIT;
 #endif
 
 #ifdef MASTER_ZONE_DST
@@ -96,14 +101,14 @@ void emberAfTimeClusterServerInitCallback(uint8_t endpoint)
       && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_START_ATTRIBUTE_ID)
       && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_END_ATTRIBUTE_ID)
       && sli_zigbee_af_contains_time_server_attribute(endpoint, ZCL_DST_SHIFT_ATTRIBUTE_ID)) {
-    timeStatus |= BIT(2);
+    timeStatus |= MASTER_ZONE_DST_BIT;
   }
 #endif // MASTER_ZONE_DST
 
 #ifdef SUPERSEDING
   // Indicates that the time server should be considered as a more authoritative
   // time server.
-  timeStatus |= BIT(3);
+  timeStatus |= SUPERSEDING_BIT;
 #endif // SUPERSEDING
 
   status = emberAfWriteAttribute(endpoint,
@@ -154,23 +159,38 @@ EmberAfStatus emberAfTimeClusterServerPreAttributeChangedCallback(
     return status;
   }
 
+  uint8_t timeStatus = 0;
+  status = emberAfReadAttribute(endpoint,
+                                ZCL_TIME_CLUSTER_ID,
+                                ZCL_TIME_STATUS_ATTRIBUTE_ID,
+                                CLUSTER_MASK_SERVER,
+                                (uint8_t *)&timeStatus,
+                                sizeof(timeStatus),
+                                NULL); // data type
+  if (EMBER_ZCL_STATUS_SUCCESS != status) {
+    return status;
+  }
+
   switch (attributeId) {
+    // Only allow Time to be written if not master, per ZCL spec.
     case ZCL_TIME_ATTRIBUTE_ID:
     {
-      // Only allow time to be written if not master, per ZCL spec.
-      uint8_t timeStatus = 0;
-      status = emberAfReadAttribute(endpoint,
-                                    ZCL_TIME_CLUSTER_ID,
-                                    ZCL_TIME_STATUS_ATTRIBUTE_ID,
-                                    CLUSTER_MASK_SERVER,
-                                    (uint8_t *)&timeStatus,
-                                    sizeof(timeStatus),
-                                    NULL); // data type
-      if (EMBER_ZCL_STATUS_SUCCESS == status) {
-        if (timeStatus & BIT(0)) {
-          // Master bit is set in TimeStatus, disallow write.
-          status = EMBER_ZCL_STATUS_READ_ONLY;
-        }
+      if (timeStatus & MASTER_BIT) {
+        // Master bit is set in TimeStatus, disallow write.
+        status = EMBER_ZCL_STATUS_READ_ONLY;
+      }
+    }
+    break;
+
+    // Only allow Time zone, DST start, DST end, DST shift to be written if not master, per ZCL spec.
+    case ZCL_TIME_ZONE_ATTRIBUTE_ID:
+    case ZCL_DST_START_ATTRIBUTE_ID:
+    case ZCL_DST_END_ATTRIBUTE_ID:
+    case ZCL_DST_SHIFT_ATTRIBUTE_ID:
+    {
+      if (timeStatus & MASTER_ZONE_DST_BIT) {
+        // MasterZoneDst bit is set in TimeStatus, disallow write.
+        status = EMBER_ZCL_STATUS_READ_ONLY;
       }
     }
     break;

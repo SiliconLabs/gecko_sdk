@@ -75,6 +75,10 @@ typedef struct otPlatMdnsAddressInfo
  *
  * While enabled, all received messages MUST be reported back using `otPlatMdnsHandleReceive()` callback.
  *
+ * When enabled, the platform MUST also monitor and report all IPv4 and IPv6 addresses assigned to the network
+ * interface using the `otPlatMdnsHandleHostAddressEvent()` callback function. Refer to the documentation of this
+ * callback for detailed information on the callback's usage and parameters.
+ *
  * @param[in] aInstance        The OpernThread instance.
  * @param[in] aEnable          Indicate whether to enable or disable.
  * @param[in] aInfraInfIndex   The infrastructure network interface index.
@@ -153,6 +157,64 @@ extern void otPlatMdnsHandleReceive(otInstance                  *aInstance,
                                     otMessage                   *aMessage,
                                     bool                         aIsUnicast,
                                     const otPlatMdnsAddressInfo *aAddress);
+
+/**
+ * Callback to notify OpenThread mDNS module of host address changes.
+ *
+ * When `otPlatMdnsSetListeningEnabled()` enables mDNS listening on an `aInfraIfIndex`, the platform MUST monitor and
+ * report ALL IPv4 and IPv6 addresses assigned to this network interface.
+ *
+ * When mDNS is enabled:
+ * - The platform MUST retrieve ALL currently assigned IPv4 and IPv6 addresses on the specified interface.
+ * - For each retrieved address, the platform MUST call `otPlatMdnsHandleHostAddressEvent()` to add the address.
+ * - The IPv4 addresses are represented using IPv4-mapped IPv6 format.
+ *
+ * Ongoing monitoring (while enabled):
+ * - The platform MUST continuously monitor the specified interface for address changes.
+ * - When the address list changes, the platform MUST notify the OpenThread stack of the change using one of the
+ *   following methods:
+ *   A. Call this callback for each affected address, indicating the change (addition or removal using @p aAdded).
+ *   B. Alternatively, call the `otPlatMdnsHandleHostAddressRemoveAll()` callback once, immediately followed by
+ *      invoking this callback for every currently assigned IPv4 and IPv6 address on the interface adding them
+ *      (@p aAdded set to `TRUE`), providing the completed updated address list.
+ * - These two approaches offer flexibility for platforms with varying capabilities, such as different operating
+ *   systems and network stacks. Some network stacks may provide mechanisms to identify the added or removed
+ *   addresses, while others may only provide the new list upon a change.
+ *
+ *  When mDNS is disabled:
+ * - The platform MUST cease monitoring for address changes on the interface.
+ * - The platform does NOT need to explicitly signal the removal of addresses upon disable. The OpenThread stack
+ *   automatically clears its internal address list.
+ * - If address monitoring is re-enabled later, the platform MUST repeat the "enable" steps again, retrieving and
+ *   reporting ALL current addresses.
+ *
+ * The OpenThread stack maintains an internal list of host addresses. It updates this list automatically upon receiving
+ * calls to `otPlatMdnsHandleHostAddressEvent()`.
+ * - OpenThread's mDNS implementation uses a short guard time (4 msec) before taking action (e.g., announcing new
+ *   addresses). This allows multiple changes to be grouped and announced together.
+ * - OpenThread's mDNS implementation also handles transient changes, e.g., an address is removed and then quickly
+ *   re-added. It ensures that announcements are only made when there is a change to the list (from what was
+ *   announced before). This simplifies the platform's responsibility as it can simply report all observed changes.
+ *
+ * @param[in] aInstance     The OpenThread instance.
+ * @param[in] aAddress      IP Address. IPv4-mapped IPv6 format is used to represent an IPv4 address.
+ * @param[in] aAdded        Boolean to indicate whether the address added (`TRUE`) or removed (`FALSE`).
+ * @param[in] aInfraIfIndex The interface index.
+ */
+extern void otPlatMdnsHandleHostAddressEvent(otInstance         *aInstance,
+                                             const otIp6Address *aAddress,
+                                             bool                aAdded,
+                                             uint32_t            aInfraIfIndex);
+
+/**
+ * Callback to notify OpenThread mDNS module to remove all previously added host IPv4 and IPv6 addresses.
+ *
+ * See documentation of `otPlatMdnsHandleHostAddressEvent()` for how this callback MUST be used.
+ *
+ * @param[in] aInstance     The OpenThread instance.
+ * @param[in] aInfraIfIndex The interface index.
+ */
+extern void otPlatMdnsHandleHostAddressRemoveAll(otInstance *aInstance, uint32_t aInfraIfIndex);
 
 /**
  * @}

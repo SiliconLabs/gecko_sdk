@@ -207,11 +207,11 @@
  * If the sleepy child does not hear from its parent within the specified timeout interval, it initiates the re-attach
  * process (MLE Child Update Request/Response exchange with its parent).
  *
- * Setting to zero by default as this is an optional feature that can lead to unexpected detach behavior.
+ * Using the stack default value of 190 seconds.
  *
  */
 #ifndef OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT
-#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT 0
+#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_CHECK_TIMEOUT 190
 #endif
 
 /**
@@ -231,8 +231,12 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD
+#if RADIO_CONFIG_DMP_SUPPORT
+#define OPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD 1000
+#else
 #define OPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD 600
 #endif
+#endif // OPENTHREAD_CONFIG_CSL_RECEIVE_TIME_AHEAD
 
 /**
  * @def OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD

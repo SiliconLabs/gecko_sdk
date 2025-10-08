@@ -3189,11 +3189,15 @@ typedef struct {
   uint8_t lqi_for_median[3];
 } sli_zigbee_neighbor_table_entry_t;
 
+#define SLI_ZIGBEE_RETRY_FLAG_NONE          0x00
+#define SLI_ZIGBEE_RETRY_FLAG_LOCAL_ORIGIN  0x01
 typedef struct {
   PacketHeader header;
   uint8_t attempts;  // Top/bottom nibble is successful/remaining attempts.
   uint16_t timer;
   uint16_t startTime;
+  EmberStatus tx_status;
+  uint8_t flags;
 } sli_zigbee_retry_queue_entry_t;
 
 typedef struct storeAndForwardEntryS {
@@ -3217,6 +3221,7 @@ typedef struct {
   uint8_t mode;                   // One of the EMBER_OUTGOING_... values.
   uint8_t status;                 // See below.
   uint8_t addressIndex;           // Index into the address or binding tables.
+  EmberStatus tx_status;          // Tx status of APS message
 } sli_zigbee_aps_unicast_message_data_t;
 
 typedef struct {

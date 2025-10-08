@@ -77,6 +77,9 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
     }
 
     def test(self):
+        # TODO: re-enable test when PREF64 capability is ready
+        return
+
         br = self.nodes[BR]
         router = self.nodes[ROUTER]
 
@@ -157,7 +160,7 @@ class Nat64SingleBorderRouter(thread_cert.TestCase):
         self.simulator.go(5)
 
         # Case 5 Infrastructure nat64 prefix no longer presents
-        br.bash("service bind9 stop")
+        br.bash("service bind9 stop || true")
         self.simulator.go(NAT64_PREFIX_REFRESH_DELAY)
 
         local_nat64_prefix = br.get_br_nat64_prefix()

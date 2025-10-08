@@ -9,10 +9,6 @@ config_file:
   - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/Zniffer/config/s1/zniffer_config.h
     file_id: zniffer_config
     condition: [device_series_1]
-  # For series 2
-  - path: protocol/z-wave/platform/SiliconLabs/AppsHw/inc/Zniffer/config/s2/zniffer_config.h
-    file_id: zniffer_config
-    condition: [device_series_2]
 source:
   - path: "protocol/z-wave/platform/SiliconLabs/AppsHw/src/Zniffer/Zniffer_hw.c"
 include:
