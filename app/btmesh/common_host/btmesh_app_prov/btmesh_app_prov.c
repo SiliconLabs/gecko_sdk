@@ -419,6 +419,7 @@ void handle_provision(void)
 {
   static bd_addr mac = { 0 };
   static uint16_t netkey_index = APP_NETKEY_IDX;
+  bool cbp_capability = false;
 
   switch (command_state) {
     case START: {
@@ -430,7 +431,7 @@ void handle_provision(void)
         if (app_prov_mode == PROV_UI_MODE) {
           btmesh_db_node_t* node = btmesh_db_node_get_by_uuid(command_uuid);
           if (node != NULL) {
-            bool cbp_capability = node->prov.oob_capabilities & BTMESH_OOB_FLAG_CBP_CAPABLE;
+            cbp_capability = node->prov.oob_capabilities & BTMESH_OOB_FLAG_CBP_CAPABLE;
             btmesh_app_prov_set_cbp_capability(cbp_capability);
           }
         }
@@ -472,7 +473,13 @@ void handle_provision(void)
       // MAC address is unknown here, but the database requires a bd_addr struct
       // so we use a 0 here.
       // Note: this won't affect provisioning as only UUID is used there
-      btmesh_app_prov_handle_cbp(netkey_index, command_uuid, mac, HOST_PROV_PB_ADV);
+      if (true == cbp_capability) {
+        btmesh_app_prov_handle_cbp(netkey_index, command_uuid, mac, HOST_PROV_PB_ADV);
+      } else if (prov_started == false) {
+        sl_status_t sc = btmesh_prov_provision_adv_device(netkey_index, command_uuid, mac, HOST_PROV_PB_ADV, 0);
+        app_assert_status_f(sc, "Provisioning failed" APP_LOG_NEW_LINE);
+        prov_started = true;
+      }
       break;
     case FINISHED:
       prov_started = false;
@@ -856,13 +863,10 @@ SL_WEAK void btmesh_app_prov_handle_cbp(uint16_t netkey_index,
                                         bd_addr mac_address,
                                         uint8_t bearer_type)
 {
-  // If CBP is not present, provisioning of the selected device must be started
-  // at this point
-  if (prov_started == false) {
-    sl_status_t sc = btmesh_prov_provision_adv_device(netkey_index, uuid, mac_address, bearer_type, 0);
-    app_assert_status_f(sc, "Provisioning failed" APP_LOG_NEW_LINE);
-    prov_started = true;
-  }
+  (void)netkey_index;
+  (void)uuid;
+  (void)mac_address;
+  (void)bearer_type;
 }
 
 SL_WEAK void btmesh_app_prov_set_cbp_capability(bool capability)

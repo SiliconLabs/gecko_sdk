@@ -84,9 +84,22 @@ bool emberAfSimpleMeteringClusterGetProfileResponseCallback(EmberAfClusterComman
 {
   sl_zcl_simple_metering_cluster_get_profile_response_command_t cmd_data;
   uint8_t i;
+  uint16_t intervalsOffset;
+  uint16_t intervalsAvail;
+  uint8_t maxPeriodsInPayload;
+  uint32_t intervalVal;
 
   if (zcl_decode_simple_metering_cluster_get_profile_response_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
+    return false;
+  }
+
+  intervalsOffset = (uint16_t)(cmd_data.intervals - cmd->buffer);
+  intervalsAvail = (cmd->bufLen > intervalsOffset)
+                   ? (cmd->bufLen - intervalsOffset) : 0;
+  maxPeriodsInPayload = (uint8_t)(intervalsAvail / 3u);
+
+  if (cmd_data.numberOfPeriodsDelivered > maxPeriodsInPayload) {
     return false;
   }
 
@@ -99,9 +112,11 @@ bool emberAfSimpleMeteringClusterGetProfileResponseCallback(EmberAfClusterComman
     cmd_data.numberOfPeriodsDelivered = EMBER_AF_PLUGIN_SIMPLE_METERING_CLIENT_NUMBER_OF_INTERVALS_SUPPORTED;
   }
   for (i = 0; i < cmd_data.numberOfPeriodsDelivered; i++) {
-    emberAfSimpleMeteringClusterPrint(" [0x%4x]",
-                                      emberAfGetInt24u(cmd_data.intervals + i * 3, 0, 3));
-    profileIntervals[i] = emberAfGetInt24u(cmd_data.intervals + i * 3, 0, 3);
+    intervalVal = emberAfGetInt24u(cmd->buffer,
+                                   intervalsOffset + ((uint16_t)i * 3u),
+                                   cmd->bufLen);
+    emberAfSimpleMeteringClusterPrint(" [0x%4x]", intervalVal);
+    profileIntervals[i] = intervalVal;
   }
   emberAfSimpleMeteringClusterPrintln("");
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);

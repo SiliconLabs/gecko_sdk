@@ -2,12 +2,12 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2304.4.2
+ *   Radio Configurator Version: 2604.1.0rc4
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -47,7 +47,7 @@ extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_38M4Hz_modemConfig
 extern const uint32_t sl_rail_ieee802154_phy_2G4Hz_fem_38M4Hz_modemConfig[];
 
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_38M4HZ_PHY_IEEE802154_2P4GHZ_PROD
-#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_38M4HZ_PROFILE_BASE
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_38M4HZ_PROFILE_IEEE802154OQPSK
 extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_38M4Hz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_38M4Hz_channels[];
 
@@ -57,17 +57,17 @@ extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_fast_switch_38M4H
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_fast_switch_38M4Hz_channels[];
 
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_38M4HZ_PHY_IEEE802154_2P4GHZ_DIVERSITY_PROD
-#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_38M4HZ_PROFILE_BASE
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_38M4HZ_PROFILE_IEEE802154OQPSK
 extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_38M4Hz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_38M4Hz_channels[];
 
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_FEM_38M4HZ_PHY_IEEE802154_2P4GHZ_DIVERSITY_FEM_PROD
-#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_FEM_38M4HZ_PROFILE_BASE
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_ANTDIV_FEM_38M4HZ_PROFILE_IEEE802154OQPSK
 extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_38M4Hz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_antdiv_fem_38M4Hz_channels[];
 
 #define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_FEM_38M4HZ_PHY_IEEE802154_2P4GHZ_FEM_PROD
-#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_FEM_38M4HZ_PROFILE_BASE
+#define RAIL0_SL_RAIL_IEEE802154_PHY_2G4HZ_FEM_38M4HZ_PROFILE_IEEE802154OQPSK
 extern const RAIL_ChannelConfig_t sl_rail_ieee802154_phy_2G4Hz_fem_38M4Hz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ieee802154_phy_2G4Hz_fem_38M4Hz_channels[];
 

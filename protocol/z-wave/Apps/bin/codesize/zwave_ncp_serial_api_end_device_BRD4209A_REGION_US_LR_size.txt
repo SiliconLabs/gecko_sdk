@@ -30,9 +30,9 @@ text_application_ram                0x0   0x2000bb84
 .debug_rnglists                  0x2dde          0x0
 .debug_line                     0x56241          0x0
 .debug_str                      0x823ea          0x0
-.debug_loc                      0x2d283          0x0
+.debug_loc                      0x2d294          0x0
 .debug_ranges                    0x4b88          0x0
-Total                          0x53dc3a
+Total                          0x53dc4b
 
 The calculated FLASH and SRAM usage summary:
 ============================================

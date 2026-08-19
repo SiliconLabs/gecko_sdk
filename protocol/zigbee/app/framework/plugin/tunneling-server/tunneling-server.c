@@ -18,6 +18,9 @@
 #include "../../include/af.h"
 #include "../../util/common.h"
 #include "tunneling-server.h"
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+#include "tunneling-server-tokens.h"
+#endif
 #include "app/framework/plugin/address-table/address-table.h"
 
 #include "zap-cluster-command-parser.h"
@@ -73,6 +76,10 @@ static EmberAfStatus serverFindTunnel(uint16_t tunnelIndex,
                                       uint8_t serverEndpoint,
                                       sli_zigbee_af_tunneling_server_tunnel **tunnel);
 static void closeInactiveTunnels(uint8_t endpoint);
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+static void persistTunnelToToken(uint8_t index, const sli_zigbee_af_tunneling_server_tunnel *tunnel);
+static void clearTunnelInToken(uint8_t index);
+#endif
 
 void emberAfTunnelingClusterServerInitCallback(uint8_t endpoint)
 {
@@ -84,6 +91,32 @@ void emberAfTunnelingClusterServerInitCallback(uint8_t endpoint)
     tunnels[i].addressIndex = EMBER_NULL_ADDRESS_TABLE_INDEX;
     tunnels[i].clientEndpoint = UNUSED_ENDPOINT_ID;
   }
+
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+  // Restore opened tunnels from token
+  for (i = 0; i < EMBER_AF_PLUGIN_TUNNELING_SERVER_TUNNEL_LIMIT; i++) {
+    EmberAfPluginTunnelingServerStoredTunnelEntry stored;
+    halCommonGetIndexedToken(&stored, TOKEN_PLUGIN_TUNNELING_SERVER_TUNNELS, i);
+    if (stored.clientEndpoint != TUNNELING_SERVER_TOKEN_UNUSED_ENDPOINT) {
+      EmberEUI64 eui64;
+      memcpy(eui64, stored.eui64, EUI64_SIZE);
+      uint8_t idx = emberAfPluginAddressTableAddEntry(eui64);
+      if (idx != EMBER_NULL_ADDRESS_TABLE_INDEX) {
+        tunnels[i].addressIndex = idx;
+        tunnels[i].clientEndpoint = stored.clientEndpoint;
+        tunnels[i].serverEndpoint = stored.serverEndpoint;
+        tunnels[i].protocolId = stored.protocolId;
+        tunnels[i].manufacturerCode = stored.manufacturerCode;
+        tunnels[i].flowControlSupport = (bool)stored.flowControlSupport;
+        tunnels[i].lastActive = emberAfGetCurrentTime();
+      } else {
+        clearTunnelInToken(i);
+      }
+    }
+  }
+#endif
+
+  closeInactiveTunnels(endpoint);
 
   status = emberAfWriteServerAttribute(endpoint,
                                        ZCL_TUNNELING_CLUSTER_ID,
@@ -174,6 +207,9 @@ bool emberAfTunnelingClusterRequestTunnelCallback(EmberAfClusterCommand *cmd)
         tunnels[i].flowControlSupport = cmd_data.flowControlSupport;
         // Reset the timer so that it ticks from now.
         tunnels[i].lastActive = emberAfGetCurrentTime();
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+        persistTunnelToToken(i, &tunnels[i]);
+#endif
         status = EMBER_ZCL_TUNNELING_TUNNEL_STATUS_SUCCESS;
         // This will reschedule the tick that will timeout tunnels.
         closeInactiveTunnels(cmd->apsFrame->destinationEndpoint);
@@ -200,6 +236,9 @@ bool emberAfTunnelingClusterRequestTunnelCallback(EmberAfClusterCommand *cmd)
               tunnels[i].manufacturerCode = cmd_data.manufacturerCode;
               tunnels[i].flowControlSupport = cmd_data.flowControlSupport;
               tunnels[i].lastActive = emberAfGetCurrentTime();
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+              persistTunnelToToken(i, &tunnels[i]);
+#endif
               status = EMBER_ZCL_TUNNELING_TUNNEL_STATUS_SUCCESS;
               // This will reschedule the tick that will timeout tunnels.
               closeInactiveTunnels(cmd->apsFrame->destinationEndpoint);
@@ -256,6 +295,9 @@ bool emberAfTunnelingClusterCloseTunnelCallback(EmberAfClusterCommand *cmd)
     // table entry.  The delay before cleaning up the address table is to give
     // the stack some time to continue using it for sending the response to the
     // server.
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+    clearTunnelInToken(cmd_data.tunnelId);
+#endif
     tunnel->clientEndpoint = UNUSED_ENDPOINT_ID;
     sl_zigbee_zcl_schedule_server_tick(cmd->apsFrame->destinationEndpoint,
                                        ZCL_TUNNELING_CLUSTER_ID,
@@ -381,6 +423,9 @@ EmberAfStatus emberAfPluginTunnelingServerTransferData(uint16_t tunnelIndex,
 void emberAfPluginTunnelingServerCleanup(uint8_t tunnelId)
 {
   if (tunnels[tunnelId].clientEndpoint != UNUSED_ENDPOINT_ID) {
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+    clearTunnelInToken(tunnelId);
+#endif
     tunnels[tunnelId].clientEndpoint = UNUSED_ENDPOINT_ID;
     emberAfPluginTunnelingServerTunnelClosedCallback(tunnelId, CLOSE_INITIATED_BY_SERVER);
   }
@@ -389,6 +434,32 @@ void emberAfPluginTunnelingServerCleanup(uint8_t tunnelId)
     tunnels[tunnelId].addressIndex = EMBER_NULL_ADDRESS_TABLE_INDEX;
   }
 }
+
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+static void persistTunnelToToken(uint8_t index, const sli_zigbee_af_tunneling_server_tunnel *tunnel)
+{
+  EmberEUI64 eui64;
+  if (emberAfPluginAddressTableLookupByIndex(tunnel->addressIndex, eui64) != EMBER_SUCCESS) {
+    return;
+  }
+  EmberAfPluginTunnelingServerStoredTunnelEntry stored;
+  memcpy(stored.eui64, eui64, 8);
+  stored.clientEndpoint = tunnel->clientEndpoint;
+  stored.serverEndpoint = tunnel->serverEndpoint;
+  stored.protocolId = tunnel->protocolId;
+  stored.manufacturerCode = tunnel->manufacturerCode;
+  stored.flowControlSupport = (uint8_t)tunnel->flowControlSupport;
+  halCommonSetIndexedToken(TOKEN_PLUGIN_TUNNELING_SERVER_TUNNELS, index, &stored);
+}
+
+static void clearTunnelInToken(uint8_t index)
+{
+  EmberAfPluginTunnelingServerStoredTunnelEntry stored;
+  memset(&stored, 0, sizeof(stored));
+  stored.clientEndpoint = TUNNELING_SERVER_TOKEN_UNUSED_ENDPOINT;
+  halCommonSetIndexedToken(TOKEN_PLUGIN_TUNNELING_SERVER_TUNNELS, index, &stored);
+}
+#endif
 
 static EmberAfStatus serverFindTunnel(uint16_t tunnelIndex,
                                       uint8_t addressIndex,
@@ -461,6 +532,9 @@ static void closeInactiveTunnels(uint8_t endpoint)
           emberAfPluginAddressTableRemoveEntryByIndex(tunnels[i].addressIndex);
           tunnels[i].addressIndex = EMBER_NULL_ADDRESS_TABLE_INDEX;
 #endif
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+          clearTunnelInToken(i);
+#endif
           tunnels[i].clientEndpoint = UNUSED_ENDPOINT_ID;
           emberAfPluginTunnelingServerTunnelClosedCallback(i,
                                                            CLOSE_INITIATED_BY_SERVER);
@@ -471,6 +545,9 @@ static void closeInactiveTunnels(uint8_t endpoint)
           }
         }
       } else if (tunnels[i].addressIndex != EMBER_NULL_ADDRESS_TABLE_INDEX) {
+#if (EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN == 1)
+        clearTunnelInToken(i);
+#endif
         emberAfPluginAddressTableRemoveEntryByIndex(tunnels[i].addressIndex);
         tunnels[i].addressIndex = EMBER_NULL_ADDRESS_TABLE_INDEX;
       }

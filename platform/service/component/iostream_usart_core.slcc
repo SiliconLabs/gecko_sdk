@@ -22,11 +22,29 @@ template_file:
     condition: [iostream_usart]
   - path: init/sl_iostream_init_usart_instances.h.jinja
     condition: [iostream_usart]
+  - path: init/sl_iostream_init_usart_family.h.jinja
+    condition: [iostream_usart, device_family_efm32gg11b]
+  - path: init/sl_iostream_init_usart_family.h.jinja
+    condition: [iostream_usart, device_family_efm32gg12b]
+  - path: init/sl_iostream_init_usart_family.h.jinja
+    condition: [iostream_usart, device_family_efm32tg11b]
 template_contribution:
   - name: component_catalog
     value: iostream_usart
   - name: iostream_usart_shared_irq
     value: irq
+    condition:
+      - device_family_efm32tg11b
+  - name: iostream_usart_mixed_family
+    value: true
+    condition:
+      - device_family_efm32gg11b
+  - name: iostream_usart_mixed_family
+    value: true
+    condition:
+      - device_family_efm32gg12b
+  - name: iostream_usart_mixed_family
+    value: true
     condition:
       - device_family_efm32tg11b
 requires:

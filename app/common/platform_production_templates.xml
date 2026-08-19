@@ -13,7 +13,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_ws.slcw"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="app.common.example.tz_psa_attestation.tz_psa_attestation_s.slcp app.common.example.tz_psa_attestation.tz_psa_attestation_ns.tz_psa_attestation_ns.slcp"/>
@@ -31,7 +31,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_ws.slcw"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="app.common.example.tz_psa_crypto_ecdh.tz_psa_crypto_ecdh_s.slcp app.common.example.tz_psa_crypto_ecdh.tz_psa_crypto_ecdh_ns.tz_psa_crypto_ecdh_ns.slcp"/>
@@ -49,7 +49,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/blink_baremetal/blink_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -66,7 +66,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/blink_kernel_freertos/blink_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -83,7 +83,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/blink_kernel_micriumos/blink_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -100,7 +100,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/blink_pwm_baremetal/blink_pwm_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -117,7 +117,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cli_baremetal/cli_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -134,7 +134,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cli_kernel_freertos/cli_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -151,7 +151,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cli_kernel_micriumos/cli_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -168,7 +168,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/coulomb_baremetal/coulomb_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -185,7 +185,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/coulomb_dcdc_baremetal/coulomb_dcdc_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -202,7 +202,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cpc_secondary_spi_security_device_recovery/cpc_secondary_spi_security_device_recovery.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -219,7 +219,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_micriumos/cpc_secondary_vcom_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -236,7 +236,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_security_device_recovery/cpc_secondary_vcom_security_device_recovery.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -253,7 +253,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/cpc_secondary_vcom_security_micriumos/cpc_secondary_vcom_security_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -270,7 +270,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/dci_swd_programming/dci_swd_programming.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -287,7 +287,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/dmadrv_baremetal/dmadrv_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -304,7 +304,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/emode_baremetal/emode_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -321,7 +321,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/i2cspm_baremetal/i2cspm_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -338,7 +338,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/i2cspm_kernel_freertos/i2cspm_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -355,7 +355,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/i2cspm_kernel_micriumos/i2cspm_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -372,7 +372,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/iostream_eusart_baremetal/iostream_eusart_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -389,7 +389,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/iostream_eusart_kernel_micriumos/iostream_eusart_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -406,7 +406,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/iostream_usart_baremetal/iostream_usart_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -423,7 +423,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/iostream_usart_kernel_micriumos/iostream_usart_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -440,7 +440,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/joystick_baremetal/joystick_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -457,7 +457,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/joystick_kernel_freertos/joystick_kernel_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -474,7 +474,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/joystick_kernel_micriumos/joystick_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -491,7 +491,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/math_mvp_demo/math_mvp_demo.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -508,7 +508,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/mbedtls_aescrypt/mbedtls_aescrypt.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -525,7 +525,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/mbedtls_ecdh/mbedtls_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -542,7 +542,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/mbedtls_ecdsa/mbedtls_ecdsa.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -559,7 +559,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/memlcd_baremetal/memlcd_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -576,7 +576,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/memlcd_kernel_micriumos/memlcd_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -593,7 +593,7 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/ml_audio_classifier/ml_audio_classifier.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -610,7 +610,7 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/ml_blink/ml_blink.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -627,7 +627,7 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/ml_magic_wand/ml_magic_wand.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -644,7 +644,7 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/ml_model_profiler/ml_model_profiler.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -661,7 +661,7 @@
     <properties key="category" value="Example|Machine Learning"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/ml_voice_control_light/ml_voice_control_light.slcp"/>
     <properties key="filters" value="Capability|Machine\ Learning Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -678,7 +678,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/mpu_simple_baremetal/mpu_simple_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -695,7 +695,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/nvm3_baremetal/nvm3_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -712,7 +712,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/power_manager_baremetal/power_manager_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -729,7 +729,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/power_manager_kernel_micriumos/power_manager_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -746,7 +746,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_aead/psa_crypto_aead.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -763,7 +763,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_asymmetric_key/psa_crypto_asymmetric_key.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -780,7 +780,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_cipher/psa_crypto_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -797,7 +797,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_dsa/psa_crypto_dsa.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -814,7 +814,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_ecdh/psa_crypto_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -831,7 +831,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_hash/psa_crypto_hash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -848,7 +848,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_kdf/psa_crypto_kdf.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -865,7 +865,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_mac/psa_crypto_mac.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -882,7 +882,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_symmetric_key/psa_crypto_symmetric_key.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -899,7 +899,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/psa_crypto_x509/psa_crypto_x509.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -916,7 +916,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_asymmetric_key_handling/se_manager_asymmetric_key_handling.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -933,7 +933,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_attestation/se_manager_attestation.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -950,7 +950,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_block_cipher/se_manager_block_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -967,7 +967,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_ecdh/se_manager_ecdh.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -984,7 +984,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_ecjpake/se_manager_ecjpake.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1001,7 +1001,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_hash/se_manager_hash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1018,7 +1018,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_host_firmware_upgrade/se_manager_host_firmware_upgrade.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1035,7 +1035,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_kdf/se_manager_kdf.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1052,7 +1052,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_key_provisioning/se_manager_key_provisioning.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1069,7 +1069,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_se_firmware_upgrade/se_manager_se_firmware_upgrade.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1086,7 +1086,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_secure_debug/se_manager_secure_debug.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1103,7 +1103,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_secure_identity/se_manager_secure_identity.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1120,7 +1120,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_signature/se_manager_signature.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1137,7 +1137,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_stream_cipher/se_manager_stream_cipher.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1154,7 +1154,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_symmetric_key_handling/se_manager_symmetric_key_handling.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1171,7 +1171,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_tamper/se_manager_tamper.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1188,7 +1188,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/se_manager_user_data/se_manager_user_data.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1205,7 +1205,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/simple_button_baremetal/simple_button_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -1222,7 +1222,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/simple_button_kernel_micriumos/simple_button_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -1239,7 +1239,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/sleeptimer_baremetal/sleeptimer_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -1256,7 +1256,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/sleeptimer_wallclock_baremetal/sleeptimer_wallclock_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -1273,7 +1273,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_master_baremetal/spidrv_eusart_master_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1290,7 +1290,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_master_kernel_micriumos/spidrv_eusart_master_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1307,7 +1307,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_slave_baremetal/spidrv_eusart_slave_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1324,7 +1324,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_eusart_slave_kernel_micriumos/spidrv_eusart_slave_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1341,7 +1341,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_master_baremetal/spidrv_master_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1358,7 +1358,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_master_kernel_micriumos/spidrv_master_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1375,7 +1375,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_slave_baremetal/spidrv_slave_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1392,7 +1392,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/spidrv_slave_kernel_micriumos/spidrv_slave_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1409,7 +1409,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tempdrv_kernel_micriumos/tempdrv_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
@@ -1426,7 +1426,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_ns/tz_psa_attestation_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1443,7 +1443,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_attestation/tz_psa_attestation_s.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1460,7 +1460,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_ns/tz_psa_crypto_ecdh_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1477,7 +1477,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/tz_psa_crypto_ecdh/tz_psa_crypto_ecdh_s.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1494,7 +1494,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/uartdrv_baremetal/uartdrv_baremetal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1511,7 +1511,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/uartdrv_kernel_micriumos/uartdrv_kernel_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1528,7 +1528,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_cdc_acm_freertos/usb_device_cdc_acm_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1545,7 +1545,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_cdc_acm_micriumos/usb_device_cdc_acm_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1562,7 +1562,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_composite_freertos/usb_device_composite_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1579,7 +1579,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_composite_micriumos/usb_device_composite_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1596,7 +1596,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_hid_freertos/usb_device_hid_freertos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1613,7 +1613,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/usb_device_hid_micriumos/usb_device_hid_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -1630,7 +1630,7 @@
     <properties key="category" value="Example|Platform"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/common/example/wifi_commissioning_micriumos/wifi_commissioning_micriumos.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Advanced"/>
   </descriptors>

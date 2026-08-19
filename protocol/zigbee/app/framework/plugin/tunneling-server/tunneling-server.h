@@ -15,7 +15,22 @@
  *
  ******************************************************************************/
 
+#ifndef SILABS_TUNNELING_SERVER_H
+#define SILABS_TUNNELING_SERVER_H
+
 #include "tunneling-server-config.h"
+
+// Persisted tunnel entry (token storage). Unused: clientEndpoint == 0xFF.
+typedef struct {
+  uint8_t  eui64[EUI64_SIZE];
+  uint8_t  clientEndpoint;
+  uint16_t manufacturerCode;
+  uint8_t  serverEndpoint;
+  uint8_t  protocolId;
+  uint8_t  flowControlSupport;
+} EmberAfPluginTunnelingServerStoredTunnelEntry;
+
+#define TUNNELING_SERVER_TOKEN_UNUSED_ENDPOINT    0xFF
 
 /**
  * @defgroup tunneling-server Tunneling Server
@@ -190,3 +205,5 @@ void emberAfPluginTunnelingServerTunnelClosedCallback(uint16_t tunnelIndex,
 /** @} */ // end of tunneling-server
 
 void sli_zigbee_af_tunneling_server_print(void);
+
+#endif // SILABS_TUNNELING_SERVER_H

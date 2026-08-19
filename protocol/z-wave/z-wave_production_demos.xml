@@ -6,7 +6,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4201a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -19,7 +19,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -32,7 +32,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4206a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -45,7 +45,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -58,7 +58,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p731f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4208a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -71,7 +71,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4201a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -84,7 +84,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -97,7 +97,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4206a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -110,7 +110,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -123,7 +123,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p731f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4208a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -136,7 +136,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4201a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4201a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -149,7 +149,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -162,7 +162,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4206a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4206a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -175,7 +175,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -188,7 +188,7 @@
     <property key="demos.blurb" value="Z-Wave - NCP Serial API Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p731f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4208a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_controller/zwave_ncp_serial_api_controller-brd4208a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_serial_api/README.md"/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -202,7 +202,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -216,7 +216,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -230,7 +230,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -244,7 +244,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -258,7 +258,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -272,7 +272,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -286,7 +286,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Serial API End Device (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_serial_api_end_device/zwave_ncp_serial_api_end_device-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -298,7 +298,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer Beta (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4201a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4201a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4201a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -310,7 +310,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer Beta (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p231f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4206a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4206a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4206a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -322,7 +322,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer Beta (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg14p731f256gm32.*"/>
     <property key="core.boardCompatibility" value="brd4208a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4208a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer/zwave_ncp_zniffer-brd4208a-us_lr.hex"/>
     <property key="core.readmeFiles" value=""/>
     <property key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -335,7 +335,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -348,7 +348,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -361,7 +361,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -374,7 +374,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -387,7 +387,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -400,7 +400,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -413,7 +413,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - NCP Zniffer PTI (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_ncp_zniffer_pti/README.md"/>
     <property key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -426,7 +426,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -439,7 +439,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -452,7 +452,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -465,7 +465,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -478,7 +478,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -491,7 +491,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -504,7 +504,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Door Lock Keypad (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_door_lock_keypad/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -517,7 +517,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -530,7 +530,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -543,7 +543,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -556,7 +556,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -569,7 +569,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -582,7 +582,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -595,7 +595,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC LED Bulb (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_led_bulb/zwave_soc_led_bulb-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_led_bulb/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -608,7 +608,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -621,7 +621,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -634,7 +634,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -647,7 +647,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -660,7 +660,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -673,7 +673,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -686,7 +686,7 @@ The Serial API End Device allows the user to create a product with a host applic
     <property key="demos.blurb" value="Z-Wave - SoC Multilevel Sensor (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="NonCertifiableApps/zwave_soc_multilevel_sensor/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -701,7 +701,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -716,7 +716,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -731,7 +731,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -746,7 +746,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -761,7 +761,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -776,7 +776,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -791,7 +791,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Power Strip (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_power_strip/zwave_soc_power_strip-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_power_strip/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -804,7 +804,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -817,7 +817,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -830,7 +830,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -843,7 +843,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -856,7 +856,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -869,7 +869,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -882,7 +882,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Sensor PIR (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_sensor_pir/zwave_soc_sensor_pir-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_sensor_pir/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -895,7 +895,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -908,7 +908,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -921,7 +921,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -934,7 +934,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -947,7 +947,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -960,7 +960,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -973,7 +973,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Switch On/Off (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_switch_on_off/zwave_soc_switch_on_off-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_switch_on_off/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -986,7 +986,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -999,7 +999,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (EU Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-eu.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-eu.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -1012,7 +1012,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -1025,7 +1025,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (US Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-us.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-us.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -1038,7 +1038,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4202a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4202a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -1051,7 +1051,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*zgm130s037hgn.*"/>
     <property key="core.boardCompatibility" value="brd4207a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4207a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>
@@ -1064,7 +1064,7 @@ Endpoint 2 device type - generic type light dimmer switch and specific type ligh
     <property key="demos.blurb" value="Z-Wave - SoC Wall Controller (US_LR Region)"/>
     <property key="core.partCompatibility" value=".*efr32zg13p531f512gm48.*"/>
     <property key="core.boardCompatibility" value="brd4209a"/>
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.0/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4209a-us_lr.hex"/>
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.super_4.5.1/protocol/z-wave/demos/zwave_soc_wall_controller/zwave_soc_wall_controller-brd4209a-us_lr.hex"/>
     <property key="core.readmeFiles" value="Apps/zwave_soc_wall_controller/README.md"/>
     <property key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <property key="core.quality" value="PRODUCTION"/>

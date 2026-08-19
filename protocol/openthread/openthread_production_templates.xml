@@ -13,7 +13,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ble-dmp/ot-ble-dmp-no-buttons.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
   </descriptors>
@@ -30,7 +30,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ble-dmp/ot-ble-dmp.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread"/>
   </descriptors>
@@ -47,7 +47,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/ot-cli-ftd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
   </descriptors>
@@ -64,7 +64,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-cli/ot-cli-mtd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Thread"/>
   </descriptors>
@@ -81,7 +81,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/ot-rcp.slcp"/>
     <properties key="filters" value="Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
@@ -98,7 +98,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-spi-802154-blehci.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
@@ -115,7 +115,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-spi-802154.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
@@ -132,7 +132,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-uart-802154-blehci.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
@@ -149,7 +149,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/ot-ncp/rcp-uart-802154.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee"/>
   </descriptors>
@@ -166,7 +166,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-ftd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
@@ -183,7 +183,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-mtd.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>
@@ -200,7 +200,7 @@
     <properties key="category" value="OpenThread Examples"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/openthread/sample-apps/sleepy-demo/sleepy-demo-ssed.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread"/>
   </descriptors>

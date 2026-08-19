@@ -276,10 +276,14 @@ extern const RAIL_ChannelConfig_t *const RAIL_BLE_PhyQuuppa;
 RAIL_ENUM(RAIL_BLE_SignalIdentifierMode_t) {
   /* Disable signal detection mode. */
   RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE = 0,
-  /* BLE 1Mbps (GFSK) detection mode. */
+  /* BLE 1Mbps (GFSK) detection mode with SI block reset on GPIO falling edge (via PRS). */
   RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS,
-  /* BLE 2Mbps (GFSK) detection mode. */
-  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS
+  /* BLE 2Mbps (GFSK) detection mode with SI block reset on GPIO falling edge (via PRS). */
+  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS,
+  /* BLE 1Mbps (GFSK) detection mode with SI block reset on AGC negative step. */
+  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS_WITH_AGC_RESET,
+  /* BLE 2Mbps (GFSK) detection mode with SI block reset on AGC negative step. */
+  RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS_WITH_AGC_RESET
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -287,6 +291,8 @@ RAIL_ENUM(RAIL_BLE_SignalIdentifierMode_t) {
 #define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_DISABLE)
 #define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS)
 #define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS)
+#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS_WITH_AGC_RESET   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_1MBPS_WITH_AGC_RESET)
+#define RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS_WITH_AGC_RESET   ((RAIL_BLE_SignalIdentifierMode_t)RAIL_BLE_SIGNAL_IDENTIFIER_MODE_2MBPS_WITH_AGC_RESET)
 #endif
 
 /**

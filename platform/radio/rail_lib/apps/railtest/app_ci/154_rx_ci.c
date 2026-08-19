@@ -1287,11 +1287,13 @@ void enable802154SignalIdentifier(sl_cli_command_arg_t *args)
 {
 #if RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
   RAIL_Status_t status;
-  bool enable = sl_cli_get_argument_uint8(args, 0);
+  RAIL_IEEE802154_SignalIdentifierMode_t siMode = (RAIL_IEEE802154_SignalIdentifierMode_t)sl_cli_get_argument_uint8(args, 0);
+  bool enable = (siMode != RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_DISABLE);
+
   if (RAIL_IEEE802154_IsEnabled(railHandle)) {
     RAIL_IEEE802154_PtiRadioConfig_t radioConfig = RAIL_IEEE802154_GetPtiRadioConfig(railHandle);
     if (radioConfig < RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868) {
-      status = RAIL_IEEE802154_ConfigSignalIdentifier(railHandle, (RAIL_IEEE802154_SignalIdentifierMode_t)enable);
+      status = RAIL_IEEE802154_ConfigSignalIdentifier(railHandle, siMode);
       if (status == RAIL_STATUS_NO_ERROR) {
         status = RAIL_IEEE802154_EnableSignalDetection(railHandle, enable);
       }

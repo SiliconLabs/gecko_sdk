@@ -1,2 +1,2 @@
-Flex SDK 3.7.7
-- RAIL targeted quality improvements and bug fixes.
+Flex SDK 3.7.8
+- Underlying platform changes only.

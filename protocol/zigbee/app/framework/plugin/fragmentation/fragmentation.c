@@ -332,13 +332,13 @@ static uint16_t retryTimeoutMs(EmberNodeId nodeId)
 
 #ifdef SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
   if (EMBER_SLEEPY_END_DEVICE <= sli_zigbee_af_current_zigbee_pro_network->nodeType) {
-    retryTimeoutMs += emberMacIndirectTimeout;
+    retryTimeoutMs += emberSleepyTargetMacTimeoutIncrease;
   }
 #endif //SL_CATALOG_ZIGBEE_ZCL_FRAMEWORK_CORE_PRESENT
 
   if (emberLookupEui64ByNodeId(nodeId, eui64) == EMBER_SUCCESS
       && emberGetExtendedTimeout(eui64)) {
-    retryTimeoutMs += emberMacIndirectTimeout;
+    retryTimeoutMs += emberSleepyTargetMacTimeoutIncrease;
   }
   return retryTimeoutMs;
 }

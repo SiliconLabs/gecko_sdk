@@ -1,6 +1,5 @@
-Zigbee EmberZNet SDK 7.5.0 Revision 1
-Zigbee:
-   - Limited support of GCC LTO.
-   - Targeted quality improvements and bug fixes.
-Multiprotocol
-   - Targeted quality improvements and bug fixes.
+Zigbee EmberZNet SDK 7.5.0 Revision 2
+ - Zigbee:
+  - Targeted quality improvements and bug fixes.
+- Multiprotocol:
+  - Targeted quality improvements and bug fixes.

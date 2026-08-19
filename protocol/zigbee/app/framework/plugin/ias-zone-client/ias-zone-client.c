@@ -279,10 +279,11 @@ static uint8_t findIasZoneServerByNodeId(EmberNodeId nodeId)
     i = findIasZoneServerByIeee(eui64);
     if (i != NO_INDEX) {
       setServerNodeId(i, nodeId);
+      return i;
     }
   }
 
-  return i;
+  return NO_INDEX;
 }
 
 //----------------------------

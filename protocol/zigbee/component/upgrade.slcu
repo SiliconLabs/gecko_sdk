@@ -91,3 +91,12 @@ upgrade:
         remove:
           - zigbee_packet_validate
 
+  - sdk:
+      id: gecko_sdk
+      version: 4.5.1
+    configuration:
+      - script: protocol/zigbee/component/scripts/upgrade_zigbee_tunneling_server_configuration.lua
+        description: >
+          Introduced a new configuration parameter EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN
+          that optionally persists opened tunnels to NVM/token as part of the tunneling server component.
+

@@ -321,6 +321,39 @@ EmberStatus emberSetRadioPower(int8_t power);
  */
 int8_t emberGetRadioPower(void);
 
+/** @brief Set the default radio idle mode for the current logical network.
+ *
+ * This sets the MAC radio idle receive state for the current logical network.
+ * It controls whether the radio receiver stays on while the node is idle:
+ * - ::EMBER_RADIO_POWER_MODE_RX_ON keeps the receiver on.
+ * - ::EMBER_RADIO_POWER_MODE_OFF turns the receiver off while idle.
+ *
+ * This does not change Zigbee node type (for example, a sleepy end device
+ * remains a sleepy end device at the network layer). To change rx-on-when-idle
+ * node type, use ::emberFindAndRejoinNetworkWithNodeType().
+ *
+ * @param mode  Desired radio idle mode (::EMBER_RADIO_POWER_MODE_RX_ON or
+ *              ::EMBER_RADIO_POWER_MODE_OFF).
+ * @note This function is only supported for SoC, not for host applications.
+ */
+void emberSetRadioIdleMode(EmberRadioPowerMode mode);
+
+/** @brief Get the current default radio idle mode for the current logical network.
+ *
+ * Returns the MAC radio idle power mode as reported by the stack. The value
+ * is an ::EmberRadioPowerMode (typedef uint8_t). Typical return values are:
+ * - ::EMBER_RADIO_POWER_MODE_RX_ON — receiver on when idle.
+ * - ::EMBER_RADIO_POWER_MODE_OFF — receiver off when idle.
+ * - ::EMBER_RADIO_POWER_MODE_DC_RX — MAC is duty-cycling (getter only;
+ *   ::emberSetRadioIdleMode() does not set this mode).
+ *
+ * This reflects MAC radio idle state only, not Zigbee node type.
+ *
+ * @return An ::EmberRadioPowerMode value for the current radio idle mode.
+ * @note This function is only supported for SoC, not for host applications.
+ */
+EmberRadioPowerMode emberGetRadioIdleMode(void);
+
 /** @brief Return the RAIL level handle required to make RAIL API calls. Will
  * return NULL if RAIL is not in use.
  *

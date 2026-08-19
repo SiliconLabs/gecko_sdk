@@ -1,6 +1,5 @@
-Silicon Labs OpenThread SDK 2.4.7
+Silicon Labs OpenThread SDK 2.4.8
 - Thread
-  - Thread 1.4 compliance for Border Router
-  - Targeted quality improvements and bug fixes
+  - Targeted quality improvements and bug fixes 
 - Multiprotocol
-  - Targeted quality improvements and bug fixes
+  - Targeted quality improvements and bug fixes. 

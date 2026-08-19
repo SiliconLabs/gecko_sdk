@@ -343,9 +343,12 @@ enum {
   EZSP_VALUE_KEY_STORAGE_VERSION                = 0x44,
   // Return activation state about TC Delayed Join on an NCP.  A return value of
   // 0 indicates that the feature is not activated.
-  EZSP_VALUE_DELAYED_JOIN_ACTIVATION            = 0x45
+  EZSP_VALUE_DELAYED_JOIN_ACTIVATION            = 0x45,
+  // The extra milliseconds added to the APS retry and Fragmentation retry
+  // timeout for known sleepy destinations.
+  EZSP_CONFIG_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE = 0x50
 };
-#define EZSP_VALUE_ID_MAX  0x45
+#define EZSP_VALUE_ID_MAX  0x50
 
 //------------------------------------------------------------------------------
 // Identifies a value based on specified characteristics. Each set of

@@ -72,9 +72,9 @@ EmberAfStatus zcl_decode_{{as_underscore_lowercase clusterName}}_cluster_{{as_un
 {{!--Not a fixed length command and command argument always present--}}
             
 {{#if_command_not_fixed_length_command_argument_always_present parent.id this}}
-  if (cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u)" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u)" default=""}}
+  if ({{zcl_string_type_return type short_string="payloadOffset >= cmd->bufLen || " long_string="cmd->bufLen <= payloadOffset + 1u || " default=""}}cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u)" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u)" default=""}}
 {{#unless (is_zcl_string type)}}
-{{as_underlying_zcl_type type array="" one_byte="1" two_byte="2" three_byte="3" four_byte="4" short_string="" long_string="" ten_byte="10" eleven_byte="11" twelve_byte="12" thirten_byte="13" fourteen_byte="14" fifteen_byte="15" sixteen_byte="16" struct="0" defaul="0" zclCharFormatter="true"}}u)
+{{as_underlying_zcl_type type array="" one_byte="1" two_byte="2" three_byte="3" four_byte="4" short_string="" long_string="" ten_byte="10" eleven_byte="11" twelve_byte="12" thirten_byte="13" fourteen_byte="14" fifteen_byte="15" sixteen_byte="16" struct="0" default="0" zclCharFormatter="true"}}u)
 {{/unless}} 
   {
     return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
@@ -85,7 +85,7 @@ EmberAfStatus zcl_decode_{{as_underscore_lowercase clusterName}}_cluster_{{as_un
 {{!--Not a fixed length command, command argument introduced in a specific zcl spec version but no present if conditions for the command argument--}}
 {{#if_command_arg_not_always_present_no_presentif this}}
   // - Argument is not present in all versions.
-  if (cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u)" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u)" default=""}}
+  if ({{zcl_string_type_return type short_string="payloadOffset >= cmd->bufLen || " long_string="cmd->bufLen <= payloadOffset + 1u || " default=""}}cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u)" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u)" default=""}}
 {{#unless (is_zcl_string type)}}
 {{as_underlying_zcl_type type array="" one_byte="1" two_byte="2" three_byte="3" four_byte="4" short_string="" long_string="" ten_byte="10" eleven_byte="11" twelve_byte="12" thirten_byte="13" fourteen_byte="14" fifteen_byte="15" sixteen_byte="16" struct="0" default="0" zclCharFormatter="true"}}u)
 {{/unless}} 
@@ -103,7 +103,7 @@ EmberAfStatus zcl_decode_{{as_underscore_lowercase clusterName}}_cluster_{{as_un
 {{#if_command_arg_not_always_present_with_presentif this}}
     // - Argument is conditionally present based on expression: {{add_prefix_to_all_strings presentIf "cmd_struct->"}}
     // - Argument is not present in all versions
-    if (cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u ||" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u ||" default=""}}
+    if ({{zcl_string_type_return type short_string="payloadOffset >= cmd->bufLen || " long_string="cmd->bufLen <= payloadOffset + 1u || " default=""}}cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u ||" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u ||" default=""}}
 {{#unless (is_zcl_string type)}}
 {{as_underlying_zcl_type type array="" one_byte="1" two_byte="2" three_byte="3" four_byte="4" short_string="" long_string="" ten_byte="10" eleven_byte="11" twelve_byte="12" thirten_byte="13" fourteen_byte="14" fifteen_byte="15" sixteen_byte="16" struct="0" default="0" zclCharFormatter="true"}}u ||
 {{/unless}} !({{add_prefix_to_all_strings presentIf "cmd_struct->"}})) 
@@ -128,6 +128,13 @@ EmberAfStatus zcl_decode_{{as_underscore_lowercase clusterName}}_cluster_{{as_un
         memset(cmd_struct->{{as_symbol label}}, 0, {{typeSize}});
         {{/if_compare}}
       } else {
+        if ({{zcl_string_type_return type short_string="payloadOffset >= cmd->bufLen || " long_string="cmd->bufLen <= payloadOffset + 1u || " default=""}}cmd->bufLen < payloadOffset + {{zcl_string_type_return type short_string="emberAfStringLength(cmd->buffer + payloadOffset) + 1u)" long_string="emberAfGetLongString(cmd->buffer + payloadOffset) + 2u)" default=""}}
+{{#unless (is_zcl_string type)}}
+{{as_underlying_zcl_type type array="" one_byte="1" two_byte="2" three_byte="3" four_byte="4" short_string="" long_string="" ten_byte="10" eleven_byte="11" twelve_byte="12" thirten_byte="13" fourteen_byte="14" fifteen_byte="15" sixteen_byte="16" struct="0" default="0" zclCharFormatter="true"}}u)
+{{/unless}}
+        {
+          return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+        }
 {{/if_command_arg_always_present_with_presentif}}
 {{!--Close: Not a fixed length command, command argument present in all zcl specifications and present if conditions are present for the command argument--}}
         {{#if_compare typeSize 4 operator='<='}}
@@ -166,6 +173,11 @@ EmberAfStatus zcl_decode_{{as_underscore_lowercase clusterName}}_cluster_{{as_un
 {{#if ./presentIf}}
   if ( {{add_prefix_to_all_strings presentIf "cmd_struct->"}} ) {
     // Array is conditionally present based on expression: {{add_prefix_to_all_strings presentIf "cmd_struct->"}}
+{{/if}}
+{{#if ./countArg}}
+    if (cmd->bufLen < payloadOffset + {{add_prefix_to_all_strings ./countArg "cmd_struct->"}} * sizeof({{as_underlying_type type}})) {
+      return EMBER_ZCL_STATUS_MALFORMED_COMMAND;
+    }
 {{/if}}
     cmd_struct->{{as_symbol label}} = cmd->buffer + payloadOffset;
 {{#if ./countArg}}

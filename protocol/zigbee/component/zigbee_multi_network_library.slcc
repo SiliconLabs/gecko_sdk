@@ -17,6 +17,15 @@ requires:
   - name: zigbee_multi_network
 
 library:
+  - path: protocol/zigbee/build/gcc/starfish-sdk-x86_64-ca9v1-toolchain-10.0.0/zigbee-multi-network/release/libzigbee-multi-network.a
+    condition:
+      - toolchain_gcc
+      - starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+      - zigbee_stack_unix
+      - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+    unless:
+      - zigbee_i386
   - path: protocol/zigbee/build/gcc/arm32v7/zigbee-multi-network/release/libzigbee-multi-network.a
     condition:
       - toolchain_gcc
@@ -34,6 +43,7 @@ library:
       - zigbee_multi_network
       - linux_arch_64
     unless:
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-multi-network/release/libzigbee-multi-network.a
     condition:

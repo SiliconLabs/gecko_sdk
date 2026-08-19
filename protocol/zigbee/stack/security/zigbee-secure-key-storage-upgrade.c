@@ -198,6 +198,14 @@ sl_status_t zb_sec_man_upgrade_nwk_key(uint8_t key_index)
     }
     MEMMOVE(&plaintext_key.key, tok.networkKey, EMBER_ENCRYPTION_KEY_SIZE);
 
+    sl_zb_sec_man_key_t uninitialized_key = { { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                                                0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
+
+    //Don't continue with the upgrade if the current key value isn't valid.
+    if (!memcmp(&plaintext_key.key, &uninitialized_key.key, EMBER_ENCRYPTION_KEY_SIZE)) {
+      return SL_STATUS_OK;
+    }
+
     vault_import_status = sl_zb_sec_man_import_key(&context, &plaintext_key);
     // exit with error if we couldn't import the key
     if (vault_import_status != SL_STATUS_OK) {

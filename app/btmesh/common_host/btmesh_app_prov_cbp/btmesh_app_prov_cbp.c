@@ -389,15 +389,6 @@ void btmesh_app_prov_handle_cbp(uint16_t netkey_index,
       default:
         break;
     }
-  } else if (bearer_type != HOST_PROV_PB_REMOTE) {
-    // If CBP is not requested, provisioning of the selected device must be started
-    // at this point. If remote provisioning is ongoing, then this is handled.
-    static bool prov_started = false;
-    if (prov_started == false) {
-      sl_status_t sc = btmesh_prov_provision_adv_device(netkey_index, uuid, mac_address, bearer_type, 0);
-      app_assert_status_f(sc, "Provisioning failed" APP_LOG_NEW_LINE);
-      prov_started = true;
-    }
   }
 }
 

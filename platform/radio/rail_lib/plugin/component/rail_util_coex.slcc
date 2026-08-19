@@ -42,19 +42,19 @@ config_file:
     condition:
       - device_series_1
       - device_sdid_80
-    file_id: rail_util_coex_config
+    file_id: sl_rail_util_coex_config
   - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg1x/sl_rail_util_coex_config.h
     condition:
       - device_series_1
     unless:
       - device_sdid_80
-    file_id: rail_util_coex_config
+    file_id: sl_rail_util_coex_config
   - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg2x/sl_rail_util_coex_config.h
     condition:
       - device_series_2
-    file_id: rail_util_coex_config
+    file_id: sl_rail_util_coex_config
   - path: platform/radio/rail_lib/plugin/coexistence/config/sl_rail_util_coex_common_config.h
-    file_id: rail_util_coex_common_config
+    file_id: sl_rail_util_coex_common_config
 include:
   - path: platform/radio/rail_lib/plugin
   - path: platform/radio/rail_lib/plugin/coexistence/common

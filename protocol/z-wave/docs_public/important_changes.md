@@ -3,6 +3,10 @@
 The changes described in this file will possibly break the build and/or functionality of an
 existing application. The description serves the purpose of helping to fix the failing build.
 
+# 7.21.8 {#section-7-21-8}
+
+No breaking changes.
+
 # 7.21.7 {#section-7-21-7}
 
 ## 800 Series Hardware Support
@@ -13,12 +17,14 @@ Please use the Simplicity SDK to develop applications for EFR32ZG23, EFR32ZG28 a
 Default long range output power is set to 20dBm. During startup, this value is limited by the capability of the chip (if APP_MAX_TX_POWER_LR is set to 20dBm, it will be overwite at startup on 14dBm capable chip).
 
 # 7.21.6 {#section-7-21-6}
+
 ## Restore NVM handler after backup/restore operations
 To avoid NVM acces by the stack or the application during backup/restore operations, the NVM3 handler is closed by the SAPI command NVMBackupRestoreOperationOpen. However it was never restored.
 The NVM3 handler of the stack is restored by the SAPI command NVMBackupRestoreOperationClose. It should no longer be required to reset the controller after a backup operation. The controller must always be restarted after a restore operation.
 The SAPI command NVM backup close now send an answer with the result of the operation (as specified). In case of error when restoring the NVM3 handler, the controller wil answer an error. In this case, the controller should be reset.
 
 # 7.21.5 {#section-7-21-5}
+
 ## RF Configuration in Apps
 prior to this release, RF configuration was stored in two different files, depending on whether or not the chip supported the  20dBm TX level. These files have now been merged. The range for APP_MAX_TX_POWER_LR & APP_MAX_TX_POWER values now has a high value of 200 for all chips. It needs to be increased to allow 20dBm transmission on supported chips.
 

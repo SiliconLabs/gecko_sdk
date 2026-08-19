@@ -329,6 +329,17 @@
   #error "Indirect transmission timeout too large."
 #endif
 
+/** @brief The extra milliseconds added to the APS ACK timeout when APS retry is enabled for
+ * extended-timeout (sleepy) destinations.
+ */
+#ifndef EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE
+#if (EMBER_STACK_PROFILE == 2)
+  #define EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE 7680
+#else
+  #define EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE 3000
+#endif
+#endif
+
 /** @brief Define the behavior for the address that the multicasts are sent to.
  *    The normal address is RxOnWhenIdle=true (0xFFFD). However, setting this
  *    to true can change locally generated multicasts to be sent to the sleepy

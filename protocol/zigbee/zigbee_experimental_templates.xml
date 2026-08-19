@@ -13,7 +13,7 @@
     <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/zigbee/app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-spi.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>
@@ -30,7 +30,7 @@
     <properties key="category" value="Zigbee + Bluetooth NCP Application"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/zigbee/app/ncp/sample-app/ncp-dmp/zigbee_ncp-ble_ncp-uart.slcp"/>
     <properties key="filters" value="Capability|Multiprotocol Device\ Type|NCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Zigbee"/>
   </descriptors>

@@ -789,6 +789,10 @@ uint32_t emberAfGetInt24u(const uint8_t* message, uint16_t currentIndex, uint16_
  */
 uint16_t emberAfGetInt16u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
 /**
+ * @brief Extract an 8-bit integer from the message buffer.
+ */
+uint8_t emberAfGetInt8u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
+/**
  * @brief Extract a ZCL string from the message buffer.
  */
 uint8_t* emberAfGetString(uint8_t* message, uint16_t currentIndex, uint16_t msgLen);
@@ -801,11 +805,6 @@ uint8_t* emberAfGetLongString(uint8_t* message, uint16_t currentIndex, uint16_t 
  * in the given destination. Returns the number of bytes copied.
  */
 uint8_t emberAfGetDate(uint8_t* message, uint16_t currentIndex, uint16_t msgLen, EmberAfDate *destination);
-
-/**
- * @brief Extract a single byte out of the message.
- */
-#define emberAfGetInt8u(message, currentIndex, msgLen) message[currentIndex]
 
 /**
  * @brief Copy a uint8_t from variable into buffer.

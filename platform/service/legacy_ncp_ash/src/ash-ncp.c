@@ -774,6 +774,14 @@ static EzspStatus ashReadFrame(void)
       } else {
         if (rxLen == RX_BUFFER_LEN + 1) {  // need the first linked buffer?
           if (rxFirstDataBufferFree) {
+            if (rxFirstDataBuffer == sli_legacy_buffer_manager_buffer_queue_head(&reTxQueue)) {
+              // If there is still buffer may need to retransmit
+              // and that buffer has same ID with rxFirstDataBuffer
+              // we should allocate a different one and copy the data over
+              EmberMessageBuffer reTxBuffer = sli_legacy_buffer_manager_really_allocate_buffer(emberMessageBufferLength(rxFirstDataBuffer), false);
+              sli_legacy_packet_buffer_queue_remove_head(&reTxQueue);
+              sli_legacy_packet_buffer_queue_add(&reTxQueue, reTxBuffer);  // in retx queue
+            }
             rxFirstDataBufferFree = false;
             rxDataBuffer = rxFirstDataBuffer;
             emberSetMessageBufferLength(rxDataBuffer, RX_BUFFER_LEN - 1);

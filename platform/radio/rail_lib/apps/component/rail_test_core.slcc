@@ -2632,7 +2632,7 @@ template_contribution:
       help: " Enable Signal Identifier 2.4Ghz 802.15.4 signal detection"
       argument:
         - type: uint8
-          help: "0=Disable 1=Enable"
+          help: "0=Disable\\n                            1=Enable(SI block reset on PRS)\\n                            2=Enable(SI block reset on AGC negative step)"
 
   - name: cli_command
     value:
@@ -2641,7 +2641,7 @@ template_contribution:
       help: " Enable Signal Identifier for BLE signal detection"
       argument:
         - type: uint8
-          help: "Mode 0=Disable 1=BLE1Mbps 2=BLE2Mbps"
+          help: "0=Disable\\n                            1=BLE1Mbps(SI block reset on PRS)\\n                            2=BLE2Mbps(SI block reset on PRS)\\n                            3=BLE1Mbps(SI block reset on AGC negative step)\\n                            4=BLE2Mbps(SI block reset on AGC negative step)"
 
   - name: cli_command
     value:

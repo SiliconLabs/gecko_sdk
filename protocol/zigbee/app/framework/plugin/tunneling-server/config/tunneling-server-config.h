@@ -43,6 +43,11 @@
 // <i> This enables support in the plugin for Closure Notification Messages. Since the client still needs to re-open, you may not want to support this optional message.
 #define EMBER_AF_PLUGIN_TUNNELING_SERVER_CLOSURE_NOTIFICATION_SUPPORT   0
 
+// <q EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN> Persist opened tunnels to token
+// <i> Default: FALSE
+// <i> When enabled, opened tunnels are stored in NVM/token and restored after reboot. Disable to keep previous behavior (tunnels only in RAM).
+#define EMBER_AF_PLUGIN_TUNNELING_SERVER_PERSIST_TUNNELS_TO_TOKEN   0
+
 // </h>
 
 // <<< end of configuration section >>>

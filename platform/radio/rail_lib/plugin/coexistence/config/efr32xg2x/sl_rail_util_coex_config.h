@@ -39,15 +39,23 @@
 // <q SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED> Enable coexistence IEEE802.15.4 signal identifier
 // <i> Default: 0
 #define SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED 0
+// <o SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_MODE> IEEE802.15.4 signal identifier mode
+//    <1=> 15.4 with PRS reset
+//    <2=> 15.4 with AGC reset
+// <i> 1: Signal identifier detects 15.4 signals with reset on GPIO falling edge 2: Signal identifier detects 15.4 signals with reset on AGC drop
+// <i> Default: 1
+#define SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_MODE 1
 // </h>
 // <h> BLE only Configuration
 // <q SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED> Enable coexistence BLE signal identifier
 // <i> Default: 0
 #define SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_ENABLED 0
 // <o SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_MODE> BLE signal identifier mode
-//    <1=> BLE 1Mbps
-//    <2=> BLE 2Mbps
-// <i> 1: Signal identifier detects BLE 1Mbps signals 2: Signal identifier detects BLE 2Mbps signals
+//    <1=> BLE 1Mbps with PRS reset
+//    <2=> BLE 2Mbps with PRS reset
+//    <3=> BLE 1 Mbps with AGC reset
+//    <4=> BLE 2 Mbps with AGC reset
+// <i> 1: Signal identifier detects BLE 1Mbps signals with reset on GPIO falling edge 2: Signal identifier detects BLE 2Mbps signals with reset on GPIO falling edge 3: Signal identifier detects BLE 1Mbps signals with reset on AGC drop 4: Signal identifier detects BLE 2Mbps signals with reset on AGC drop
 // <i> Default: 1
 #define SL_RAIL_UTIL_COEX_BLE_SIGNAL_IDENTIFIER_MODE 1
 // <o SL_RAIL_UTIL_COEX_BLE_MIN_TIME_FOR_HOPPING> Minimum number of microseconds that should be available in the scanning window for hopping to next channel when signal identifier is enabled

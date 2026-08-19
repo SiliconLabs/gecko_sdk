@@ -178,7 +178,7 @@ bool emberAfDoorLockClusterGetWeekdayScheduleCallback(EmberAfClusterCommand *cmd
     return false;
   }
 
-  zclStatus = ((cmd_data.scheduleId > EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
+  zclStatus = ((cmd_data.scheduleId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
                ? EMBER_ZCL_STATUS_INVALID_FIELD
                : EMBER_ZCL_STATUS_SUCCESS);
   entry = &weekdayScheduleTable[0];
@@ -228,7 +228,7 @@ bool emberAfDoorLockClusterClearWeekdayScheduleCallback(EmberAfClusterCommand *c
     return false;
   }
 
-  zclStatus = ((cmd_data.scheduleId > EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
+  zclStatus = ((cmd_data.scheduleId >= EMBER_AF_PLUGIN_DOOR_LOCK_SERVER_WEEKDAY_SCHEDULE_TABLE_SIZE)
                ? EMBER_ZCL_STATUS_INVALID_FIELD
                : EMBER_ZCL_STATUS_SUCCESS);
   if (zclStatus == EMBER_ZCL_STATUS_SUCCESS) {

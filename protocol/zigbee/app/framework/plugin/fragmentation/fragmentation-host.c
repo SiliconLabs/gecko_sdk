@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 // Globals
 
-uint16_t emberMacIndirectTimeout = 0;
+uint16_t emberSleepyTargetMacTimeoutIncrease = 0;
 uint16_t emberApsAckTimeoutMs    = 0;
 uint8_t  emberFragmentWindowSize = EMBER_AF_PLUGIN_FRAGMENTATION_RX_WINDOW_SIZE;
 
@@ -33,8 +33,8 @@ void emberAfPluginFragmentationNcpInitCallback(uint8_t init_level)
 {
   (void)init_level;
 
-  ezspGetConfigurationValue(EZSP_CONFIG_INDIRECT_TRANSMISSION_TIMEOUT,
-                            &emberMacIndirectTimeout);
+  ezspGetConfigurationValue(EZSP_CONFIG_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE,
+                            &emberSleepyTargetMacTimeoutIncrease);
   ezspGetConfigurationValue(EZSP_CONFIG_APS_ACK_TIMEOUT, &emberApsAckTimeoutMs);
   emberAfSetEzspConfigValue(EZSP_CONFIG_FRAGMENT_WINDOW_SIZE,
                             emberFragmentWindowSize,

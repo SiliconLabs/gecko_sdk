@@ -2470,7 +2470,7 @@ EmberAfStatus sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_comman
     // 3.3.4.8.2
     // If the GPM address for security or pairing is different from 0xffff
     // or if any involve GPM in pairing bit is set
-    // the default response status should be set to INVALID_VALUE
+    // the default response status should be set to INVALID_FIELD
     if ( gpmAddrForSecurity != 0xffff
          || gpmAddrForPairing  != 0xffff
          || (options
@@ -2479,7 +2479,7 @@ EmberAfStatus sli_zigbee_af_green_power_server_gp_sink_commissioning_mode_comman
       //these SHALL be 0 for now
       //TODO also check involve-TC
       commissioningState.inCommissioningMode = false;
-      return EMBER_ZCL_STATUS_INVALID_VALUE;
+      return EMBER_ZCL_STATUS_INVALID_FIELD;
     }
     // default 180s of GP specification
     commissioningWindow = EMBER_AF_ZCL_CLUSTER_GP_GPS_COMMISSIONING_WINDOWS_DEFAULT_TIME_S;

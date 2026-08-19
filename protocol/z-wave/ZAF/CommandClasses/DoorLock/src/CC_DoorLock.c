@@ -102,6 +102,7 @@ SaveStatus(void)
 {
   bool status;
 
+  door_lock_data.mode = getCurrentMode();
   door_lock_data.condition = operation_report_condition_get();
   status = cc_door_lock_write(&door_lock_data);
   ASSERT(status);
@@ -453,11 +454,13 @@ static void reset(void)
   door_lock_data.lockTimeoutSec = DOOR_LOCK_OPERATION_SET_TIMEOUT_NOT_SUPPORTED;
   door_lock_data.outsideDoorHandleState = 0; /* Handles not being pressed */
   door_lock_data.insideDoorHandleState = 0; /* Handles not being pressed */
-  door_lock_data.condition = 0;
+  door_lock_data.mode = DOOR_MODE_UNSECURE;
 
-  cc_door_lock_bolt_set(false);
-  cc_door_lock_handle_set(false);
-  cc_door_lock_latch_set(false);
+  /* Apply default HW state first, then persist a condition that matches it. */
+  cc_door_lock_bolt_set(false);   /* unlocked */
+  cc_door_lock_handle_set(false); /* released */
+  cc_door_lock_latch_set(false);  /* closed */
+  door_lock_data.condition = operation_report_condition_get();
 
   status = cc_door_lock_write(&door_lock_data);
   ASSERT(status);
@@ -488,6 +491,7 @@ static void init(void)
     // Always set latch to closed and handle to released
     cc_door_lock_latch_set(false);
     cc_door_lock_handle_set(false);
+    door_lock_data.mode = getCurrentMode();
   } else {
     reset();
   }

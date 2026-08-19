@@ -1,0 +1,57 @@
+/***************************************************************************//**
+ * @file
+ * @brief IOSTREAM_USART peripheral family resolution.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
+#ifndef SL_IOSTREAM_INIT_USART_FAMILY_H
+#define SL_IOSTREAM_INIT_USART_FAMILY_H
+
+// Include instance config {# Include instance config #}
+{% for instance in iostream_usart_instances %}#include "sl_iostream_usart_{{ instance }}_config.h"
+{% endfor %}
+// Map pin tool generated peripheral tokens to 1 or 0 for use in #if expressions.
+#define SL_IOSTREAM_USART_PERIPHERAL_IS_UART_(p)  _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_##p
+#define SL_IOSTREAM_USART_PERIPHERAL_IS_UART(p)   SL_IOSTREAM_USART_PERIPHERAL_IS_UART_(p)
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_UART0   1
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_UART1   1
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART0  0
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART1  0
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART2  0
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART3  0
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART4  0
+#define _SL_IOSTREAM_USART_PERIPHERAL_IS_UART_USART5  0
+
+{% for instance in iostream_usart_instances %}
+#if SL_IOSTREAM_USART_PERIPHERAL_IS_UART(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL)
+#define SL_IOSTREAM_USART_{{ instance | upper }}_IS_UART   1
+#else
+#define SL_IOSTREAM_USART_{{ instance | upper }}_IS_UART   0
+#endif
+{% endfor %}
+
+#endif // SL_IOSTREAM_INIT_USART_FAMILY_H

@@ -43,9 +43,9 @@ void sli_zigbee_af_door_lock_server_init_events(uint8_t init_level)
                        emberAfPluginDoorLockServerRelockEventHandler);
 }
 
-bool sli_zigbee_af_door_lock_server_check_for_sufficient_space(uint8_t spaceReq, uint8_t spaceAvail)
+bool sli_zigbee_af_door_lock_server_check_for_sufficient_space(uint16_t spaceReq, uint16_t spaceAvail)
 {
-  if (spaceReq > spaceAvail) {
+  if (spaceReq >= spaceAvail) {
     emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INSUFFICIENT_SPACE);
     return false;
   }

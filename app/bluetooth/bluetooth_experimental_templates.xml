@@ -13,7 +13,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap_tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="app.bluetooth.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp app.bluetooth.example.bt_soc_cbap.bt_soc_cbap_tz_ns.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
@@ -31,7 +31,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator_tz.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="app.bluetooth.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp app.bluetooth.example.bt_soc_csr_generator.bt_soc_csr_generator_tz_ns.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
@@ -49,7 +49,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_ncp_initiator/bt_abr_ncp_initiator.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
@@ -66,7 +66,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_soc_initiator/bt_abr_soc_initiator.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
@@ -83,7 +83,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_abr_soc_reflector/bt_abr_soc_reflector.slcp"/>
     <properties key="filters" value=""/>
   </descriptors>
@@ -100,7 +100,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -117,7 +117,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_cbap/bt_soc_cbap_tz_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -134,7 +134,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -151,7 +151,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_csr_generator/bt_soc_csr_generator_tz_ns.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -168,7 +168,7 @@
     <properties key="category" value="Bluetooth Examples"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/bluetooth/example/bt_soc_tz_secure_application/bt_soc_tz_secure_application.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>

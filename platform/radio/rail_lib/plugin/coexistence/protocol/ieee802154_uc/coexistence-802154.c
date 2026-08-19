@@ -570,7 +570,8 @@ static void stackEventTickInit(void)
                                       SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD);
 #endif
 #if SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_ENABLED
-    RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle, RAIL_IEEE802154_SIGNAL_IDENTIFIER_MODE_154);
+    RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle,
+                                           (RAIL_IEEE802154_SignalIdentifierMode_t)SL_RAIL_UTIL_COEX_IEEE802154_SIGNAL_IDENTIFIER_MODE);
 #endif
     stackEventTickInitialized = true;
   }

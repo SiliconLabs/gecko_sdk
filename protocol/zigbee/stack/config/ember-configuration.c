@@ -414,6 +414,7 @@ uint8_t sli_zigbee_default_security_level = EMBER_SECURITY_LEVEL;
 uint8_t sli_zigbee_max_end_device_children = EMBER_MAX_END_DEVICE_CHILDREN;
 uint8_t sli_zigbee_max_hops = EMBER_MAX_HOPS;
 uint16_t emberMacIndirectTimeout = EMBER_INDIRECT_TRANSMISSION_TIMEOUT;
+uint16_t emberSleepyTargetMacTimeoutIncrease = EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE;
 uint8_t emberEndDevicekeepAliveSupportMode = EMBER_END_DEVICE_KEEP_ALIVE_SUPPORT_MODE;
 uint8_t emberEndDevicePollTimeout = EMBER_END_DEVICE_POLL_TIMEOUT;
 //STATIC_ASSERT(EMBER_END_DEVICE_POLL_TIMEOUT <= MINUTES_16384, "End device timeout out of range");

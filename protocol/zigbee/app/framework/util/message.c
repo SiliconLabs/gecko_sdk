@@ -175,6 +175,11 @@ uint16_t emberAfGetInt16u(const uint8_t* message, uint16_t currentIndex, uint16_
   return (uint16_t)emberAfGetInt(message, currentIndex, msgLen, 2);
 }
 
+uint8_t emberAfGetInt8u(const uint8_t* message, uint16_t currentIndex, uint16_t msgLen)
+{
+  return (uint8_t)emberAfGetInt(message, currentIndex, msgLen, 1);
+}
+
 uint8_t* emberAfGetString(uint8_t* message, uint16_t currentIndex, uint16_t msgLen)
 {
   // Strings must contain at least one byte for the length.
@@ -246,7 +251,7 @@ uint8_t emberAfGetDate(uint8_t* message,
 
 uint8_t sli_decode_parse_one_byte(EmberAfClusterCommand *cmd, uint16_t payloadOffset)
 {
-  return (cmd->buffer)[payloadOffset];
+  return emberAfGetInt8u(cmd->buffer, payloadOffset, cmd->bufLen);
 }
 
 uint16_t sli_decode_parse_two_bytes(EmberAfClusterCommand * cmd, uint16_t payloadOffset)

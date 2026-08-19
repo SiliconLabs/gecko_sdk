@@ -108,6 +108,14 @@ uint8_t sli_802154phy_get_channel_page_in_use(void);
  */
 #define SL_NUM_802_15_4_CHANNELS \
   (SL_MAX_802_15_4_CHANNEL_NUMBER - SL_MIN_802_15_4_CHANNEL_NUMBER + 1)
+
+// High datarate PHY RAIL channel = 802.15.4 channel + 16 (see lower-mac HDR TX).
+#define SL_HDR_PHY_CHANNEL_OFFSET        16u
+#define SL_MIN_HDR_PHY_CHANNEL_NUMBER    (SL_MAX_802_15_4_CHANNEL_NUMBER + 1u)
+#define SL_MAX_HDR_PHY_CHANNEL_NUMBER    (SL_MAX_802_15_4_CHANNEL_NUMBER + SL_HDR_PHY_CHANNEL_OFFSET)
+
+#define SLI_MAC_IS_HDR_PHY_CHANNEL(ch) \
+  ((ch) >= SL_MIN_HDR_PHY_CHANNEL_NUMBER && (ch) <= SL_MAX_HDR_PHY_CHANNEL_NUMBER)
 //-------zigbee stack calls
 void sli_802154phy_radio_init(RadioPowerMode initialRadioPowerMode);
 void sli_802154phy_radio_seed_random(void);

@@ -4,6 +4,9 @@
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
+{% if iostream_usart_mixed_family is defined %}
+#include "sl_iostream_init_usart_family.h"
+{% endif %}
 #include "em_device.h"
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
@@ -15,27 +18,51 @@
 // Include instance config {# Include instance config #}
 {% for instance in iostream_usart_instances %} #include "sl_iostream_usart_{{ instance }}_config.h"
 {% endfor %}
+{% if iostream_usart_mixed_family is not defined %}
+{% for instance in iostream_usart_instances %}
+// This device exposes the peripheral only as USARTn.
+#define SL_IOSTREAM_USART_{{ instance | upper }}_IS_UART   0
+{% endfor %}
+{% endif %}
+
 // MACROs for generating name and IRQ handler function  {# MACROs for generating name and IRQ handler function #}
-#define SL_IOSTREAM_USART_CONCAT_PASTER(first, second, third)        first ##  second ## third
-{# Set IRQ suffixes #} {% if iostream_usart_shared_irq is defined %}
-{% set irq_number_suffix = '_IRQn' %}
-{% set irq_handler_suffix = '_IRQHandler' %}
-#define SL_IOSTREAM_USART_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ irq_number_suffix }})        {# Create IRQ number #}
-#define SL_IOSTREAM_USART_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ irq_number_suffix }})        {# Create IRQ number #}
-#define SL_IOSTREAM_USART_IRQ_HANDLER(periph_nbr)       SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ irq_handler_suffix }})       {# Create IRQ Handler function name#}
-{% else -%}
+#define SL_IOSTREAM_USART_CONCAT_PASTER(first, second, third)        first ## second ## third
+{# Set IRQ suffixes #}
 {% set tx_irq_number_suffix = '_TX_IRQn' %}
 {% set tx_irq_handler_suffix = '_TX_IRQHandler' %}
 {% set rx_irq_number_suffix = '_RX_IRQn' %}
 {% set rx_irq_handler_suffix = '_RX_IRQHandler' %}
-#define SL_IOSTREAM_USART_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ tx_irq_number_suffix }})        {# Create IRQ number #}
-#define SL_IOSTREAM_USART_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ rx_irq_number_suffix }})        {# Create IRQ number #}
-#define SL_IOSTREAM_USART_TX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ tx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
-#define SL_IOSTREAM_USART_RX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ rx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
-{% endif %}
-#define SL_IOSTREAM_USART_RX_DMA_SIGNAL(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(dmadrvPeripheralSignal_USART, periph_nbr, _RXDATAV)  {# Create DMA RX Signal name#}
 
-#define SL_IOSTREAM_USART_CLOCK_REF(periph_nbr)         SL_IOSTREAM_USART_CONCAT_PASTER(cmuClock_, USART, periph_nbr)       {# Create clock reference #}
+{% for instance in iostream_usart_instances %}
+#if SL_IOSTREAM_USART_{{ instance | upper }}_IS_UART
+{% if iostream_usart_shared_irq is defined %}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, _IRQn)        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, _IRQn)        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_IRQ_HANDLER(periph_nbr)       SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, _IRQHandler)  {# Create IRQ Handler function name#}
+{% else -%}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, {{ tx_irq_number_suffix }})        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, {{ rx_irq_number_suffix }})        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, {{ tx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(UART, periph_nbr, {{ rx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
+{% endif %}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_DMA_SIGNAL(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(dmadrvPeripheralSignal_UART, periph_nbr, _RXDATAV)  {# Create DMA RX Signal name#}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_CLOCK_REF(periph_nbr)         SL_IOSTREAM_USART_CONCAT_PASTER(cmuClock_, UART, periph_nbr)       {# Create clock reference #}
+#else
+{% if iostream_usart_shared_irq is defined %}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, _IRQn)        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, _IRQn)        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_IRQ_HANDLER(periph_nbr)       SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, _IRQHandler)  {# Create IRQ Handler function name#}
+{% else -%}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ tx_irq_number_suffix }})        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_NUMBER(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ rx_irq_number_suffix }})        {# Create IRQ number #}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ tx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_HANDLER(periph_nbr)    SL_IOSTREAM_USART_CONCAT_PASTER(USART, periph_nbr, {{ rx_irq_handler_suffix }})  {# Create IRQ Handler function name#}
+{% endif %}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_RX_DMA_SIGNAL(periph_nbr)     SL_IOSTREAM_USART_CONCAT_PASTER(dmadrvPeripheralSignal_USART, periph_nbr, _RXDATAV)  {# Create DMA RX Signal name#}
+#define SL_IOSTREAM_USART_{{ instance | upper }}_CLOCK_REF(periph_nbr)         SL_IOSTREAM_USART_CONCAT_PASTER(cmuClock_, USART, periph_nbr)       {# Create clock reference #}
+#endif
+{% endfor %}
+
 // EM Events
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) 
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -90,7 +117,7 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
 #endif
   sl_iostream_usart_config_t config_{{ instance }} = { {# create init struct #}
     .usart = SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL,
-    .clock = SL_IOSTREAM_USART_CLOCK_REF(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
+    .clock = SL_IOSTREAM_USART_{{ instance | upper }}_CLOCK_REF(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
     .tx_port = SL_IOSTREAM_USART_{{ instance | upper }}_TX_PORT,
     .tx_pin = SL_IOSTREAM_USART_{{ instance | upper }}_TX_PIN,
     .rx_port = SL_IOSTREAM_USART_{{ instance | upper }}_RX_PORT,
@@ -122,14 +149,14 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
   };
 
   sl_iostream_dma_config_t dma_config_{{ instance }} = {.src = (uint8_t *)&SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL->RXDATA,
-                                                        .peripheral_signal = SL_IOSTREAM_USART_RX_DMA_SIGNAL(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)};
+                                                        .peripheral_signal = SL_IOSTREAM_USART_{{ instance | upper }}_RX_DMA_SIGNAL(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)};
 
   sl_iostream_uart_config_t uart_config_{{ instance }} = {
     .dma_cfg = dma_config_{{ instance }},
     .rx_buffer = rx_buffer_{{ instance }},
     .rx_buffer_length = SL_IOSTREAM_USART_{{ instance | upper}}_RX_BUFFER_SIZE,
-    .tx_irq_number = SL_IOSTREAM_USART_TX_IRQ_NUMBER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
-    .rx_irq_number = SL_IOSTREAM_USART_RX_IRQ_NUMBER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
+    .tx_irq_number = SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_NUMBER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
+    .rx_irq_number = SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_NUMBER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO),
     .lf_to_crlf = SL_IOSTREAM_USART_{{ instance | upper }}_CONVERT_BY_DEFAULT_LF_TO_CRLF,
     .rx_when_sleeping = SL_IOSTREAM_USART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
   };
@@ -195,17 +222,17 @@ void sl_iostream_usart_init_instances(void)
 {% for instance in iostream_usart_instances %} {# Create IRQ Handler(s) #}
 // {{ instance | upper }} IRQ Handler
 {% if iostream_usart_shared_irq is defined -%}
-void SL_IOSTREAM_USART_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
+void SL_IOSTREAM_USART_{{ instance | upper }}_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
 {
   sl_iostream_usart_irq_handler(&sl_iostream_{{ instance }});
 }
 {% else -%}
-void SL_IOSTREAM_USART_TX_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
+void SL_IOSTREAM_USART_{{ instance | upper }}_TX_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
 {
   sl_iostream_usart_irq_handler(&sl_iostream_{{ instance }});
 }
 
-void SL_IOSTREAM_USART_RX_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
+void SL_IOSTREAM_USART_{{ instance | upper }}_RX_IRQ_HANDLER(SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL_NO)(void)
 {
   sl_iostream_usart_irq_handler(&sl_iostream_{{ instance }});
 }

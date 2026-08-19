@@ -20,6 +20,7 @@ include:
   - path: protocol/zigbee/app/framework/plugin/tunneling-server
     file_list:
       - path: tunneling-server.h
+      - path: tunneling-server-tokens.h
 template_contribution:
   - name: component_catalog
     value: zigbee_tunneling_server
@@ -73,6 +74,8 @@ template_contribution:
       cluster_id: 0x704
       cluster_type: server
       attribute_changed_function: emberAfTunnelingClusterServerAttributeChangedCallback
+  - name: token_header
+    value: app/framework/plugin/tunneling-server/tunneling-server-tokens.h
 
 documentation:
   docset: zigbee

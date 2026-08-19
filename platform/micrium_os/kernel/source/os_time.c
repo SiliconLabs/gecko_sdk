@@ -150,21 +150,40 @@ void OSTimeDly(OS_TICK  dly,
     tick_os_temp = (uint64_t)((uint64_t)tick_ctr * (uint64_t)OSCfg_TickRate_Hz) / OS_SleeptimerFrequency_Hz;
 
     if (OSTCBCurPtr->IsTickCtrPrevValid) {
-      CPU_INT32S diff;
-
       OSTCBCurPtr->TickCtrPrev += dly;
 
-      diff        = OSTCBCurPtr->TickCtrPrev - tick_os_temp;
-      delay_ticks = (diff > 0) ? (CPU_INT32U)diff : 0u;
+      if (OSDelayMaxTick != 0 && OSTCBCurPtr->TickCtrPrev >= OSDelayMaxTick) {
+        CPU_INT32U forward;
+
+        OSTCBCurPtr->TickCtrPrev -= OSDelayMaxTick;
+
+        // After the wrap adjustment above, TickCtrPrev and tick_os_temp may
+        // sit on opposite sides of the epoch boundary (one near 0, the other
+        // near OSDelayMaxTick-1).  A plain subtraction would give the wrong
+        // sign, so compute the unsigned forward distance on the circular
+        // number line [0 .. OSDelayMaxTick) instead.
+        //
+        // If that distance is less than half an epoch the deadline is still
+        // ahead -> sleep for 'forward' ticks.  Otherwise the deadline was
+        // already missed -> set delay to 0 for periodic catch-up.
+        if (OSTCBCurPtr->TickCtrPrev >= tick_os_temp) {
+          forward = OSTCBCurPtr->TickCtrPrev - tick_os_temp;
+        } else {
+          forward = (OSDelayMaxTick - tick_os_temp) + OSTCBCurPtr->TickCtrPrev;
+        }
+        delay_ticks = (forward < OSDelayMaxTick / 2u) ? forward : 0u;
+      } else {
+        CPU_INT32S diff;
+
+        diff        = OSTCBCurPtr->TickCtrPrev - tick_os_temp;
+        delay_ticks = (diff > 0) ? (CPU_INT32U)diff : 0u;
+      }
     } else {
       delay_ticks                     = dly;
       OSTCBCurPtr->TickCtrPrev        = tick_os_temp + dly;     // ... first time we load .TickCtrPrev
       OSTCBCurPtr->IsTickCtrPrevValid = DEF_YES;
     }
 
-    if (OSDelayMaxTick != 0 && OSTCBCurPtr->TickCtrPrev >= OSDelayMaxTick) {
-      OSTCBCurPtr->TickCtrPrev -= OSDelayMaxTick;               // Adjust in case of sleep timer overflow
-    }
   }
 
   if (delay_ticks > 0u) {

@@ -17,6 +17,26 @@ requires:
   - name: zigbee_pro_stack_mac_test_cmds
 
 library:
+  - path: protocol/zigbee/build/gcc/starfish-sdk-x86_64-ca9v1-toolchain-10.0.0/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+      - zigbee_stack_unix
+      - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+      - zigbee_mac_test_commands_support
+    unless:
+      - zigbee_i386
+  - path: protocol/zigbee/build/gcc/starfish-sdk-x86_64-ca9v1-toolchain-10.0.0/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
+    condition:
+      - toolchain_gcc
+      - starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+      - zigbee_stack_unix
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+      - zigbee_mac_test_commands_support
+    unless:
+      - zigbee_multi_network
+      - zigbee_i386
   - path: protocol/zigbee/build/gcc/arm32v7/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:
       - toolchain_gcc
@@ -46,6 +66,7 @@ library:
       - linux_arch_64
       - zigbee_mac_test_commands_support
     unless:
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/arm64v8/zigbee-pro-stack-mac-test-cmds/release_singlenetwork/libzigbee-pro-stack-mac-test-cmds.a
     condition:
@@ -56,6 +77,7 @@ library:
       - zigbee_mac_test_commands_support
     unless:
       - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/cortex-m33/zigbee-pro-stack-mac-test-cmds/release/libzigbee-pro-stack-mac-test-cmds.a
     condition:

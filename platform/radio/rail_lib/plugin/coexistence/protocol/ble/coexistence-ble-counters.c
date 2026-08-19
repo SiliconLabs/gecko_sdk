@@ -64,17 +64,12 @@ void sli_bt_coex_counter_increment_denied(void)
   incrementCounter(coexCounterLowPriorityDenied);
 }
 
-void sli_bt_coex_counter_grant_update(bool grant)
+void sli_bt_coex_counter_tx_aborted(void)
 {
   if (!coex_counter.requested) {
     return;
   }
-
-  if (!grant) {
-    if (RAIL_GetRadioState(RAIL_EFR32_HANDLE) == RAIL_RF_STATE_TX_ACTIVE) {
-      incrementCounter(coexCounterLowPriorityTxAborted);
-    }
-  }
+  incrementCounter(coexCounterLowPriorityTxAborted);
 }
 
 bool sl_bt_get_coex_counters(const void **ptr, uint8_t *size)

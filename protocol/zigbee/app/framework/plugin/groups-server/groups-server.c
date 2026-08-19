@@ -212,16 +212,32 @@ bool emberAfGroupsClusterGetGroupMembershipCallback(EmberAfClusterCommand * cmd)
   uint8_t count = 0;
   uint8_t list[EMBER_BINDING_TABLE_SIZE << 1];
   uint8_t listLen = 0;
+  uint16_t groupListOffset;
+  uint16_t groupListAvail;
+  uint8_t maxGroupsInPayload;
 
   if (zcl_decode_groups_cluster_get_group_membership_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
     return false;
   }
 
+  if (cmd_data.groupCount != 0) {
+    groupListOffset = (uint16_t)(cmd_data.groupList - cmd->buffer);
+    groupListAvail = (cmd->bufLen > groupListOffset)
+                     ? (cmd->bufLen - groupListOffset) : 0;
+    maxGroupsInPayload = (uint8_t)(groupListAvail / 2u);
+
+    if (cmd_data.groupCount > maxGroupsInPayload) {
+      return false;
+    }
+  }
+
   emberAfGroupsClusterPrint("RX: GetGroupMembership 0x%x,", cmd_data.groupCount);
   for (i = 0; i < cmd_data.groupCount; i++) {
     emberAfGroupsClusterPrint(" [0x%2x]",
-                              emberAfGetInt16u(cmd_data.groupList + (i << 1), 0, 2));
+                              emberAfGetInt16u(cmd->buffer,
+                                               (uint16_t)(groupListOffset + ((uint16_t)i << 1)),
+                                               cmd->bufLen));
   }
   emberAfGroupsClusterPrintln("");
 
@@ -245,7 +261,9 @@ bool emberAfGroupsClusterGetGroupMembershipCallback(EmberAfClusterCommand * cmd)
     }
   } else {
     for (i = 0; i < cmd_data.groupCount; i++) {
-      uint16_t groupId = emberAfGetInt16u(cmd_data.groupList + (i << 1), 0, 2);
+      uint16_t groupId = emberAfGetInt16u(cmd->buffer,
+                                          (uint16_t)(groupListOffset + ((uint16_t)i << 1)),
+                                          cmd->bufLen);
       for (j = 0; j < EMBER_BINDING_TABLE_SIZE; j++) {
         EmberBindingTableEntry entry;
         status = emberGetBinding(j, &entry);

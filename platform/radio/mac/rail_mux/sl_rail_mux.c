@@ -37,6 +37,7 @@
 
 #include "sl_rail_mux.h"
 #include "mac-flat-header.h"
+#include "mac-phy.h"
 #include "buffer_manager/buffer-management.h"
 #include "buffer_manager/buffer-queue.h"
 
@@ -1650,8 +1651,8 @@ RAIL_Status_t sl_rail_mux_IEEE802154_SetRxToEnhAckTx(RAIL_Handle_t railHandle,
   return RAIL_IEEE802154_SetRxToEnhAckTx(mux_rail_handle, pRxToEnhAckTx);
 }
 #ifdef HIGH_DATARATE_PHY
-#define not_high_datarate_packet() (packet_details.channel <= 26)
-#define high_datarate_packet() (packet_details.channel > 26)
+#define not_high_datarate_packet() (!SLI_MAC_IS_HDR_PHY_CHANNEL(packet_details.channel))
+#define high_datarate_packet() (SLI_MAC_IS_HDR_PHY_CHANNEL(packet_details.channel))
 static uint8_t high_datarate_phy_index = 0xFF;
 void sl_rail_mux_set_high_datarate_phy_index(RAIL_Handle_t railHandle)
 {

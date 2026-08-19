@@ -33,7 +33,7 @@
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h>USART settings
+// <h>USART/UART settings
 
 // <o SL_IOSTREAM_USART_INSTANCE_BAUDRATE> Baud rate
 // <i> Default: 115200

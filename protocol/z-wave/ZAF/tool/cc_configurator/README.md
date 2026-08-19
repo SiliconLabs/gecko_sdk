@@ -214,12 +214,12 @@ zw_cc_central_scene:
     scenes:
       - scene: <Integer 0 - number_of_scenes>
         attributes:
-          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_PRESSED_1_TIME_V2
-          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_PRESSED_1_TIME_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
           ...
       - scene: <Integer 0-127 First scene is mandatory. The rest of scenes are mandatory if and only if scenes are not identical>
         attributes:
-          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
-          - attribute: CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_HELD_DOWN_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_RELEASED_V2
+          - CENTRAL_SCENE_NOTIFICATION_KEY_ATTRIBUTES_KEY_HELD_DOWN_V2
           ...
 ```

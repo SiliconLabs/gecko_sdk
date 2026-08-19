@@ -184,27 +184,13 @@ exporter:
         disabled: []
       cmse:
         enabled:
-          - tool: makefile.arm.gcc.compiler
-            option: misc
-            action: append
-            value: "-mcmse"
-          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
-            option: com.silabs.gnu.c.compiler.option.misc.otherlist
-            action: append
-            value: "-mcmse"
-          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
-            option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
-            action: append
-            value: "-mcmse"
-          - tool: iar.ewp.arm.compiler
-            option: IExtraOptions
-            action: append
-            value: "--cmse"
-          - tool: iar.arm.toolchain.compiler.v5.4.1
-            option: iar.arm.toolchain.compiler.option.additionalUserOptions
-            action: append
-            value: "--cmse"
-        disabled: []
+          - tool: compiler
+            option: secure_code
+            value: true
+        disabled:
+          - tool: compiler
+            option: secure_code
+            value: false
       nano_c_libs:
         enabled:
           - tool: makefile.arm.gcc.compiler

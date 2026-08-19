@@ -13,7 +13,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-apploader/bootloader-apploader.slcw"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-apploader.bootloader-apploader-nonsecure.slcp"/>
@@ -31,7 +31,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-spi-ezsp/bootloader-spi-ezsp.slcw"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="platform.bootloader.sample-apps.workspaces.bootloader-spi-ezsp.bootloader-spi-ezsp-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-spi-ezsp.bootloader-spi-ezsp-nonsecure.slcp"/>
@@ -49,7 +49,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-bgapi/bootloader-uart-bgapi.slcw"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="platform.bootloader.sample-apps.workspaces.bootloader-uart-bgapi.bootloader-uart-bgapi-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-uart-bgapi.bootloader-uart-bgapi-nonsecure.slcp"/>
@@ -67,7 +67,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-xmodem/bootloader-uart-xmodem.slcw"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
     <properties key="solutionProjects" value="platform.bootloader.sample-apps.workspaces.bootloader-uart-xmodem.bootloader-uart-xmodem-secure.slcp platform.bootloader.sample-apps.workspaces.bootloader-uart-xmodem.bootloader-uart-xmodem-nonsecure.slcp"/>
@@ -85,7 +85,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-spi-ezsp/bootloader-spi-ezsp.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -102,7 +102,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-ble/bootloader-storage-internal-ble.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -119,7 +119,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-1536k/bootloader-storage-internal-single-1536k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -136,7 +136,7 @@
     <properties key="category" value=""/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-1920k/bootloader-storage-internal-single-1920k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -153,7 +153,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-2048k/bootloader-storage-internal-single-2048k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -170,7 +170,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -187,7 +187,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-512k/bootloader-storage-internal-single-512k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -204,7 +204,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-768k/bootloader-storage-internal-single-768k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -221,7 +221,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single-lzma/bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -238,7 +238,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -255,7 +255,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-internal/bootloader-storage-internal.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -272,7 +272,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-spiflash-sfdp-single/bootloader-storage-spiflash-sfdp-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -289,7 +289,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -306,7 +306,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-spiflash-single/bootloader-storage-spiflash-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -323,7 +323,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-storage-spiflash/bootloader-storage-spiflash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -340,7 +340,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-uart-bgapi/bootloader-uart-bgapi.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -357,7 +357,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-1/bootloader-uart-xmodem/bootloader-uart-xmodem.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -374,7 +374,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-apploader/bootloader-apploader.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -391,7 +391,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-spi-ezsp/bootloader-spi-ezsp.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -408,7 +408,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-1536k/bootloader-storage-internal-single-1536k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -425,7 +425,7 @@
     <properties key="category" value=""/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-1920k/bootloader-storage-internal-single-1920k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -442,7 +442,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-352k/bootloader-storage-internal-single-352k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -459,7 +459,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-512k/bootloader-storage-internal-single-512k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -476,7 +476,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-768k/bootloader-storage-internal-single-768k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -493,7 +493,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single-lzma/bootloader-storage-internal-single-lzma.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -510,7 +510,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -527,7 +527,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-spiflash-sfdp-single/bootloader-storage-spiflash-sfdp-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -544,7 +544,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-spiflash-single-1024k/bootloader-storage-spiflash-single-1024k.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -561,7 +561,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-spiflash-single/bootloader-storage-spiflash-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -578,7 +578,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-storage-spiflash/bootloader-storage-spiflash.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -595,7 +595,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-uart-bgapi/bootloader-uart-bgapi.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -612,7 +612,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/Series-2/bootloader-uart-xmodem/bootloader-uart-xmodem.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -629,7 +629,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/Series-1/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -646,7 +646,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/Series-2/bootloader-storage-internal-single/bootloader-storage-internal-single.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -663,7 +663,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-apploader/bootloader-apploader-nonsecure.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -680,7 +680,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-apploader/bootloader-apploader-secure.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -697,7 +697,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-spi-ezsp/bootloader-spi-ezsp-nonsecure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -714,7 +714,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-spi-ezsp/bootloader-spi-ezsp-secure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -731,7 +731,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-bgapi/bootloader-uart-bgapi-nonsecure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -748,7 +748,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-bgapi/bootloader-uart-bgapi-secure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -765,7 +765,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-xmodem/bootloader-uart-xmodem-nonsecure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>
@@ -782,7 +782,7 @@
     <properties key="category" value="Example|Bootloader"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="platform/bootloader/sample-apps/workspaces/bootloader-uart-xmodem/bootloader-uart-xmodem-secure.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced"/>
   </descriptors>

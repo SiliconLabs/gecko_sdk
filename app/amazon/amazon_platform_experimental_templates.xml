@@ -13,7 +13,7 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_tests/amazon_aws_tests.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon MCU|Operating\ Systems Project\ Difficulty|Advanced"/>
   </descriptors>

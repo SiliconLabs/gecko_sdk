@@ -596,4 +596,18 @@ void LOWER_MAC_DEBUG_PRINT_ACTIONS_FROM_TOKEN(void)
 }
 #endif // LOWER_MAC_DEBUG
 
+#if defined(LOWER_MAC_DEBUG)
+  #define LOWER_MAC_EXPECT_OR_DROP(cond)  LOWER_MAC_ASSERT(cond)
+#else
+  #define LOWER_MAC_EXPECT_OR_DROP(cond)                                       \
+  do {                                                                         \
+    if (!(cond)) {                                                             \
+      LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_ASSERT, __LINE__);     \
+      (void) onPtaStackEvent(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED, \
+                             (uint32_t) isReceivingFrame());                   \
+      return;                                                                  \
+    }                                                                          \
+  } while (0)
+#endif
+
 #endif // LOWER_MAC_DEBUG_H

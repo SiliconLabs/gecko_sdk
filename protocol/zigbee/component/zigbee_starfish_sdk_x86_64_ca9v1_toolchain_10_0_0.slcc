@@ -1,0 +1,24 @@
+id: zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+label: Zigbee webOS Starfish ARM32
+package: Zigbee
+category: Zigbee
+quality: production
+description: This plugin contains defines to build Zigbee apps against webOS Starfish ARM32.
+
+provides:
+  - name: starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+  - name: zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+
+requires:
+  - name: linux_arch_32
+
+template_contribution:
+  - name: component_catalog
+    value: zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+metadata:
+  sbom:
+    license: MSLA

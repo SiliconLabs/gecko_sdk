@@ -17,6 +17,24 @@ requires:
   - name: zigbee_pro_stack
 
 library:
+  - path: protocol/zigbee/build/gcc/starfish-sdk-x86_64-ca9v1-toolchain-10.0.0/zigbee-pro-stack/release/libzigbee-pro-stack.a
+    condition:
+      - toolchain_gcc
+      - starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+      - zigbee_stack_unix
+      - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+    unless:
+      - zigbee_i386
+  - path: protocol/zigbee/build/gcc/starfish-sdk-x86_64-ca9v1-toolchain-10.0.0/zigbee-pro-stack/release_singlenetwork/libzigbee-pro-stack.a
+    condition:
+      - toolchain_gcc
+      - starfish-sdk-x86_64-ca9v1-toolchain-10.0.0
+      - zigbee_stack_unix
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
+    unless:
+      - zigbee_multi_network
+      - zigbee_i386
   - path: protocol/zigbee/build/gcc/arm32v7/ncp-pro-library/release/libncp-pro-library.a
     condition:
       - toolchain_gcc
@@ -68,6 +86,7 @@ library:
       - zigbee_multi_network
       - linux_arch_64
     unless:
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/arm64v8/ncp-pro-library/release_singlenetwork/libncp-pro-library.a
     condition:
@@ -78,6 +97,7 @@ library:
       - linux_arch_64
     unless:
       - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
   - path: protocol/zigbee/build/gcc/arm64v8/zigbee-pro-stack/release/libzigbee-pro-stack.a
     condition:
@@ -87,6 +107,7 @@ library:
       - zigbee_multi_network
       - linux_arch_64
     unless:
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
       - zigbee_high_datarate_phy
       - rail_mux
@@ -98,6 +119,7 @@ library:
       - linux_arch_64
     unless:
       - zigbee_multi_network
+      - zigbee_starfish_sdk_x86_64_ca9v1_toolchain_10_0_0
       - zigbee_x86_64
       - zigbee_high_datarate_phy
       - rail_mux

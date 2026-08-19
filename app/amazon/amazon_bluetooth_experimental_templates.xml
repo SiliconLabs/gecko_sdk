@@ -13,7 +13,7 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_demos/amazon_aws_soc_gatt_server.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -30,7 +30,7 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_demos/amazon_aws_soc_mqtt_over_ble.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -47,7 +47,7 @@
     <properties key="category" value="Example|AWS IoT"/>
     <properties key="quality" value="EXPERIMENTAL"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="app/amazon/example/amazon_aws_tests/amazon_aws_soc_bt_tests.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Ecosystem|Amazon Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>

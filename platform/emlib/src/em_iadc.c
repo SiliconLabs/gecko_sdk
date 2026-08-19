@@ -443,7 +443,12 @@ void IADC_init(IADC_TypeDef *iadc,
 #if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
       case iadcCfgModeHighAccuracy:
         // Get reference voltage in volts
-        refVoltage = IADC_getReferenceVoltage(allConfigs->configs[config].reference) / 1000.0f;
+        if (allConfigs->configs[config].reference == iadcCfgReferenceInt1V2) {
+          // Internal reference voltage (VBGR) depends on the chip revision.
+          refVoltage = IADC_getReferenceVoltage(allConfigs->configs[config].reference) / 1000.0f;
+        } else {
+          refVoltage = allConfigs->configs[config].vRef / 1000.0f;
+        }
 
         // Get OSR from config register
         osrValue = (iadc->CFG[config].CFG & _IADC_CFG_OSRHA_MASK) >> _IADC_CFG_OSRHA_SHIFT;
@@ -470,15 +475,15 @@ void IADC_init(IADC_TypeDef *iadc,
         IADC0->CFG[config].SCALE |= ((uint32_t)anaGainRound & 0x1FFF) << _IADC_SCALE_GAIN13LSB_SHIFT;
 
         // Get offset value for high accuracy mode from DEVINFO
-        offsetAna1HiAccInt = (uint16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_MASK)
-                             >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_SHIFT;
+        offsetAna1HiAccInt = (uint16_t)((DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_MASK)
+                                        >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_SHIFT);
 
         // 2. OSR adjustment
         // Get offset from DEVINFO
-        offsetAnaBase = (int16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
-                        >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT;
+        offsetAnaBase = (int16_t)((DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
+                                  >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT);
         // 1 << osrValue is the same as pow(2, osrValue)
-        offsetAna = offsetAnaBase + (offsetAna1HiAccInt) / (1 << osrValue);
+        offsetAna = offsetAnaBase + (float)offsetAna1HiAccInt / (float)(1 << osrValue);
 
         // 3. Reference voltage adjustment
         offsetAna = (offsetAna) * (1.25f / refVoltage);

@@ -621,9 +621,9 @@ limitations under the License.
       <arg name="switchInformationLength" type="INT8U" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x10)"/>
       <arg name="switchConfiguration" type="INT8U" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x10)"/>
       <arg name="currentContactStatus" type="INT8U" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x10)"/>
-      <arg name="totalNumberOfReports" type="INT8U" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x20)"/>
-      <arg name="numberOfReports" type="INT8U" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x20)"/>
-      <arg name="reportDescriptor" type="INT8U" array="true" presentIf="(options &amp; 0x0400) &amp;&amp; (applicationInformation &amp; 0x20)"/>
+      <arg name="totalNumberOfReports" type="INT8U" presentIf="(actions &amp; 0x07) == 0x05"/>
+      <arg name="numberOfReports" type="INT8U" presentIf="(actions &amp; 0x07) == 0x05"/>
+      <arg name="reportDescriptor" type="INT8U" array="true" presentIf="(actions &amp; 0x07) == 0x05"/>
     </command>
     <command source="client" code="0x0a" name="GpSinkTableRequest" optional="true" disableDefaultResponse="true">
       <description>

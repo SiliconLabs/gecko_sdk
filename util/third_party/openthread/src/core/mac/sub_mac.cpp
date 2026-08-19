@@ -1041,11 +1041,17 @@ void SubMac::RadioSample(void)
     if (!RadioSupportsReceiveTiming())
     {
         UpdateRadioSampleState();
+        ExitNow();
     }
 
-#if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
-exit:
+#if !OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
+    if (!RadioSupportsRxOnWhenIdle())
+    {
+        IgnoreError(Get<Radio>().Sleep());
+    }
 #endif
+
+exit:
     return;
 }
 

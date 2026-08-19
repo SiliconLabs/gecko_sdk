@@ -177,7 +177,7 @@ bool sl_bt_get_coex_counters(const void **ptr, uint8_t *size);
  *
  */
 void sli_bt_coex_counter_request(bool request, bool priority);
-void sli_bt_coex_counter_grant_update(bool state);
+void sli_bt_coex_counter_tx_aborted(void);
 void sli_bt_coex_counter_increment_denied(void);
 
 #ifdef __cplusplus

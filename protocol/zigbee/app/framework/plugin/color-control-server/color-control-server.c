@@ -162,15 +162,19 @@ static uint8_t readColorMode(uint8_t endpoint)
 static uint16_t readColorTemperature(uint8_t endpoint)
 {
   uint16_t colorTemperature;
-
-  assert(EMBER_ZCL_STATUS_SUCCESS
-         == emberAfReadServerAttribute(endpoint,
-                                       ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                       ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
-                                       (uint8_t *)&colorTemperature,
-                                       sizeof(uint16_t)));
-
-  return colorTemperature;
+  EmberAfStatus status = emberAfReadServerAttribute(endpoint,
+                                                    ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                                    ZCL_COLOR_CONTROL_COLOR_TEMPERATURE_ATTRIBUTE_ID,
+                                                    (uint8_t *)&colorTemperature,
+                                                    sizeof(uint16_t));
+  #ifdef SL_ZIGBEE_TEST
+  assert(status == EMBER_ZCL_STATUS_SUCCESS);
+  #else
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfColorControlClusterPrintln("ERR: reading color temperature %02X", status);
+  }
+  #endif
+  return status == EMBER_ZCL_STATUS_SUCCESS ? colorTemperature : MIN_TEMPERATURE_VALUE;
 }
 
 static uint16_t readColorTemperatureMin(uint8_t endpoint)
@@ -929,32 +933,40 @@ static void initHueSat(uint8_t endpoint)
 static uint8_t readHue(uint8_t endpoint)
 {
   uint8_t hue;
-
-  assert(EMBER_ZCL_STATUS_SUCCESS
-         == emberAfReadServerAttribute(endpoint,
-                                       ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                       ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
-                                       (uint8_t *)&hue,
-                                       sizeof(uint8_t)));
-
-  return hue;
+  EmberAfStatus status = emberAfReadServerAttribute(endpoint,
+                                                    ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                                    ZCL_COLOR_CONTROL_CURRENT_HUE_ATTRIBUTE_ID,
+                                                    (uint8_t *)&hue,
+                                                    sizeof(uint8_t));
+  #ifdef SL_ZIGBEE_TEST
+  assert(status == EMBER_ZCL_STATUS_SUCCESS);
+  #else
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfColorControlClusterPrintln("ERR: reading current hue %02X", status);
+  }
+  #endif
+  return status == EMBER_ZCL_STATUS_SUCCESS ? hue : MIN_HUE_VALUE;
 }
 
 static uint8_t readSaturation(uint8_t endpoint)
 {
   uint8_t saturation;
-
-  assert(EMBER_ZCL_STATUS_SUCCESS
-         == emberAfReadServerAttribute(endpoint,
-                                       ZCL_COLOR_CONTROL_CLUSTER_ID,
-                                       ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
-                                       (uint8_t *)&saturation,
-                                       sizeof(uint8_t)));
-
-  return saturation;
+  EmberAfStatus status = emberAfReadServerAttribute(endpoint,
+                                                    ZCL_COLOR_CONTROL_CLUSTER_ID,
+                                                    ZCL_COLOR_CONTROL_CURRENT_SATURATION_ATTRIBUTE_ID,
+                                                    (uint8_t *)&saturation,
+                                                    sizeof(uint8_t));
+  #ifdef SL_ZIGBEE_TEST
+  assert(status == EMBER_ZCL_STATUS_SUCCESS);
+  #else
+  if (status != EMBER_ZCL_STATUS_SUCCESS) {
+    emberAfColorControlClusterPrintln("ERR: reading current saturation %02X", status);
+  }
+  #endif
+  return status == EMBER_ZCL_STATUS_SUCCESS ? saturation : MIN_SATURATION_VALUE;
 }
 
-#endif  // SUPPORT_HUE_SATURATION
+#endif // SUPPORT_HUE_SATURATION
 
 #ifdef SUPPORT_CIE_1931
 
@@ -1228,7 +1240,7 @@ static uint16_t readColorY(uint8_t endpoint)
   return colorY;
 }
 
-#endif  // SUPPORT_CIE_1931
+#endif // SUPPORT_CIE_1931
 
 #ifdef SUPPORT_COLOR_TEMPERATURE
 

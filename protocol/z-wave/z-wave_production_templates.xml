@@ -13,7 +13,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_ncp_serial_api_controller_otw.slcw"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_controller.slcp protocol.z-wave.UCBootLoader.series1.bootloader-uart-xmodem_otw.slcp"/>
@@ -31,7 +31,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_ncp_serial_api_end_device_otw.slcw"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_ncp_serial_api.zwave_ncp_serial_api_end_device.slcp protocol.z-wave.UCBootLoader.series1.bootloader-uart-xmodem_otw.slcp"/>
@@ -49,7 +49,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_door_lock_keypad_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_door_lock_keypad.zwave_soc_door_lock_keypad.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -67,7 +67,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_led_bulb_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_led_bulb.zwave_soc_led_bulb.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -85,7 +85,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_multilevel_sensor_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.NonCertifiableApps.zwave_soc_multilevel_sensor.zwave_soc_multilevel_sensor.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -103,7 +103,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_power_strip_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_power_strip.zwave_soc_power_strip.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -121,7 +121,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_sensor_pir_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_sensor_pir.zwave_soc_sensor_pir.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -139,7 +139,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_switch_on_off_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_switch_on_off.zwave_soc_switch_on_off.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -157,7 +157,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/workspaces/series1/zwave_soc_wall_controller_ota.slcw"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
     <properties key="solutionProjects" value="protocol.z-wave.Apps.zwave_soc_wall_controller.zwave_soc_wall_controller.slcp protocol.z-wave.UCBootLoader.series1.bootloader-storage-internal-single-512k_ota.slcp"/>
@@ -175,7 +175,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_controller.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -192,7 +192,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_serial_api/zwave_ncp_serial_api_end_device.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -209,7 +209,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_zniffer/zwave_ncp_zniffer.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -226,7 +226,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_ncp_zniffer_pti/zwave_ncp_zniffer_pti.slcp"/>
     <properties key="filters" value="Device\ Type|NCP Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -243,7 +243,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_door_lock_keypad/zwave_soc_door_lock_keypad.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -260,7 +260,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_power_strip/zwave_soc_power_strip.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -277,7 +277,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_sensor_pir/zwave_soc_sensor_pir.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -294,7 +294,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_switch_on_off/zwave_soc_switch_on_off.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -311,7 +311,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/Apps/zwave_soc_wall_controller/zwave_soc_wall_controller.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -328,7 +328,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/NonCertifiableApps/zwave_soc_led_bulb/zwave_soc_led_bulb.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -345,7 +345,7 @@
     <properties key="category" value="Z-Wave|Apps"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/NonCertifiableApps/zwave_soc_multilevel_sensor/zwave_soc_multilevel_sensor.slcp"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Beginner Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -362,7 +362,7 @@
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/UCBootLoader/series1/bootloader-storage-internal-single-512k_ota.slcp"/>
     <properties key="filters" value="Device\ Type|SoC MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>
@@ -379,7 +379,7 @@
     <properties key="category" value="Z-Wave|Bootloaders"/>
     <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
-    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.0&quot;}"/>
+    <properties key="sltPackageIds" value="{&quot;gecko_sdk&quot;:&quot;~4.5.1&quot;}"/>
     <properties key="sltPackagePath" value="protocol/z-wave/UCBootLoader/series1/bootloader-uart-xmodem_otw.slcp"/>
     <properties key="filters" value="Device\ Type|NCP MCU|Bootloader Project\ Difficulty|Advanced Wireless\ Technology|Z-Wave"/>
   </descriptors>

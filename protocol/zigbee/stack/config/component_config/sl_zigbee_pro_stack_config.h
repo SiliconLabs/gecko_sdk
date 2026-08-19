@@ -101,6 +101,12 @@
 // <i> The number of entries that the Address Table can hold.
 #define EMBER_ADDRESS_TABLE_SIZE   12
 
+// <o EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE> Sleepy-target APS retry extra wait (ms) <0-30000>
+// <i> Default: 7680 - equal to the MAC indirect transmission timeout (7680 ms on Pro).
+// <i> Extra milliseconds added to the APS ACK timeout and Fragmentation retry timeout for
+// <i> sleepy destinations.
+#define EMBER_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE  7680
+
 // </h>
 
 // <<< end of configuration section >>>

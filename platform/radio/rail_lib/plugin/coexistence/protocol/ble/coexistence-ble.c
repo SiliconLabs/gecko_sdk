@@ -306,11 +306,16 @@ static void coexHandleTimerEvent(struct RAIL_MultiTimer *tmr,
 
 static void coexUpdateGrant(bool abortTx)
 {
+  if (ll_coex.handle == NULL) {
+    return;
+  }
   bool grant = sl_bt_coex_tx_allowed();
-  sli_bt_coex_counter_grant_update(grant);
   RAIL_EnableTxHoldOff(ll_coex.handle, !grant);
 
   if (abortTx && !grant) {
+    if (RAIL_GetRadioState(ll_coex.handle) == RAIL_RF_STATE_TX_ACTIVE) {
+      sli_bt_coex_counter_tx_aborted();
+    }
     EFM_ASSERT(ll_coex.abortTx);
     ll_coex.abortTx();
     //Clear ll_coex.syncDetectReqState in case
@@ -585,7 +590,6 @@ SL_WEAK void sli_bt_coex_counter_request(bool request, bool priority)
   (void)priority;
 }
 
-SL_WEAK void sli_bt_coex_counter_grant_update(bool state)
+SL_WEAK void sli_bt_coex_counter_tx_aborted(void)
 {
-  (void)state;
 }

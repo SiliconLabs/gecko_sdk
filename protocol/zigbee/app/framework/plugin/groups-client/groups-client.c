@@ -72,15 +72,27 @@ bool emberAfGroupsClusterViewGroupResponseCallback(EmberAfClusterCommand *cmd)
 
 bool emberAfGroupsClusterGetGroupMembershipResponseCallback(EmberAfClusterCommand *cmd)
 {
-  (void)cmd;
-
 #ifdef SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
   sl_zcl_groups_cluster_get_group_membership_response_command_t cmd_data;
   uint8_t i;
+  uint16_t groupListOffset;
+  uint16_t groupListAvail;
+  uint8_t maxGroupsInPayload;
 
   if (zcl_decode_groups_cluster_get_group_membership_response_command(cmd, &cmd_data)
       != EMBER_ZCL_STATUS_SUCCESS) {
     return false;
+  }
+
+  if (cmd_data.groupCount != 0) {
+    groupListOffset = (uint16_t)(cmd_data.groupList - cmd->buffer);
+    groupListAvail = (cmd->bufLen > groupListOffset)
+                     ? (cmd->bufLen - groupListOffset) : 0;
+    maxGroupsInPayload = (uint8_t)(groupListAvail / 2u);
+
+    if (cmd_data.groupCount > maxGroupsInPayload) {
+      return false;
+    }
   }
 
   emberAfGroupsClusterPrint("RX: GetGroupMembershipResponse 0x%x, 0x%x,",
@@ -88,9 +100,13 @@ bool emberAfGroupsClusterGetGroupMembershipResponseCallback(EmberAfClusterComman
                             cmd_data.groupCount);
   for (i = 0; i < cmd_data.groupCount; i++) {
     emberAfGroupsClusterPrint(" [0x%2x]",
-                              emberAfGetInt16u(cmd_data.groupList + (i << 1), 0, 2));
+                              emberAfGetInt16u(cmd->buffer,
+                                               (uint16_t)(groupListOffset + ((uint16_t)i << 1)),
+                                               cmd->bufLen));
   }
   emberAfGroupsClusterPrintln("");
+#else
+  (void)cmd;
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 
   emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
